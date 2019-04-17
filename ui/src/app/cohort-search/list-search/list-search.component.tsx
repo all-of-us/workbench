@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -18,13 +19,14 @@ const styles = reactStyles({
   searchInput: {
     width: '85%',
     height: '1rem',
-    marginLeft: '0.5rem',
-    padding: '0 0.5rem',
+    marginLeft: '0.25rem',
+    padding: '0',
     background: 'transparent',
     border: 0,
+    outline: 'none',
   },
   selectIcon: {
-    marginRight: '0.4rem',
+    margin: '2px 0.5rem 2px 2px',
     color: 'rgb(98, 164, 32)',
     cursor: 'pointer'
   },
@@ -35,10 +37,12 @@ const styles = reactStyles({
     cursor: 'not-allowed'
   },
   table: {
+    width: '100%',
     margin: '1rem 0',
     fontSize: '12px',
     textAlign: 'left',
-    border: '1px solid #c8c8c8'
+    border: '1px solid #c8c8c8',
+    borderRadius: '3px',
   },
   columnHeader: {
     padding: '10px',
@@ -58,8 +62,17 @@ const styles = reactStyles({
     textAlign: 'left',
     border: 0,
     borderBottom: '1px solid #c8c8c8',
+    lineHeight: '0.8rem',
+  },
+  selectDiv: {
+    width: '6%',
+    float: 'left',
     lineHeight: '0.6rem',
   },
+  nameDiv: {
+    width: '94%',
+    float: 'left',
+  }
 });
 
 interface ListSearchProps {
@@ -69,20 +82,21 @@ interface ListSearchProps {
 }
 
 export const ListSearch = withCurrentWorkspace()(
-  class extends React.Component<ListSearchProps, {data: any, selections: Array<string>}> {
+  class extends React.Component<ListSearchProps, {data: any, loading: boolean}> {
     constructor(props: any) {
       super(props);
-      this.state = {data: null, selections: selectionsStore.getValue()};
+      this.state = {data: null, loading: false};
     }
 
     handleInput = (event) => {
       if (event.key === 'Enter') {
+        this.setState({data: null, loading: true});
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
         cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
           +cdrVersionId, domain, event.target.value, true
         ).then(resp => {
           const data = resp.items.length ? resp.items : null;
-          this.setState({data});
+          this.setState({data, loading: false});
         });
       }
     }
@@ -111,39 +125,42 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     render() {
-      const {data} = this.state;
+      const {data, loading} = this.state;
       return <div>
         <div style={styles.searchBar}>
-          <ClrIcon shape='search'/>
+          <ClrIcon shape='search' size='18'/>
           <TextInput style={styles.searchInput} onKeyPress={this.handleInput} />
         </div>
         {data && <table className='p-datatable' style={styles.table}>
           <thead className='p-datatable-thead'>
             <tr>
               <th style={styles.columnHeader}>Name</th>
-              <th style={styles.columnHeader}>Vocab</th>
-              <th style={styles.columnHeader}>Count</th>
+              <th style={{...styles.columnHeader, width: '15%'}}>Vocab</th>
+              <th style={{...styles.columnHeader, width: '15%'}}>Count</th>
             </tr>
           </thead>
           <tbody className='p-datatable-tbody'>
             {data.map((row, r) => {
               return <tr key={r}>
                 <td style={styles.columnBody}>
-                  {this.isSelected(row) &&
-                    <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
-                  {!this.isSelected(row) &&
-                    <ClrIcon style={styles.selectIcon}
-                      shape='plus-circle' size='16'
-                      onClick={() => this.selectItem(row)}
-                    />}
-                  <div style={{display: 'inline-block'}}>{row.name}</div>
+                  <div style={{...styles.selectDiv}}>
+                    {this.isSelected(row) &&
+                      <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
+                    {!this.isSelected(row) &&
+                      <ClrIcon style={styles.selectIcon}
+                        shape='plus-circle' size='16'
+                        onClick={() => this.selectItem(row)}
+                      />}
+                  </div>
+                  <div style={{...styles.nameDiv}}>{row.name}</div>
                 </td>
                 <td style={styles.columnBody}>{row.type}</td>
-                <td style={styles.columnBody}>{row.count}</td>
+                <td style={styles.columnBody}>{row.count.toLocaleString()}</td>
               </tr>;
             })}
           </tbody>
         </table>}
+        {loading && <SpinnerOverlay />}
       </div>;
     }
   }

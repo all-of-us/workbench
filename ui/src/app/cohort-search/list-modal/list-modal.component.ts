@@ -195,9 +195,8 @@ export class ListModalComponent implements OnInit, OnDestroy {
   }
 
   cancel() {
-    this.selections = {};
+    this.clearState();
     this.open = false;
-    this.actions.cancelWizard(this.ctype, 0);
   }
 
   back() {
@@ -213,6 +212,11 @@ export class ListModalComponent implements OnInit, OnDestroy {
     this.selections = {};
     this.open = false;
     this.actions.finishWizard();
+  }
+
+  clearState() {
+    wizardStore.next(undefined);
+    selectionsStore.next([]);
   }
 
   /* Used to bootstrap the criteria tree */
