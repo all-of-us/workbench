@@ -71,6 +71,7 @@ echo "ds_linking - inserting conditions data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
+    ('SENTINEL_PLACEHOLDER_VALUE', 'SENTINEL_PLACEHOLDER_VALUE', 'from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` c_occurrence', 'Condition'),
     ('PERSON_ID', 'c_occurrence.PERSON_ID', 'from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` c_occurrence', 'Condition'),
     ('CONDITION_CONCEPT_ID', 'c_occurrence.CONDITION_CONCEPT_ID', 'from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` c_occurrence', 'Condition'),
     ('STANDARD_CONCEPT_NAME', 'c_standard_concept.concept_name as STANDARD_CONCEPT_NAME', 'left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c_standard_concept on c_occurrence.CONDITION_CONCEPT_ID = c_standard_concept.CONCEPT_ID', 'Condition'),
@@ -97,6 +98,7 @@ echo "ds_linking - inserting drug exposure data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
+    ('SENTINEL_PLACEHOLDER_VALUE', 'SENTINEL_PLACEHOLDER_VALUE', 'from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` d_exposure', 'Drug'),
     ('PERSON_ID', 'd_exposure.PERSON_ID', 'from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` d_exposure', 'Drug'),
     ('DRUG_CONCEPT_ID', 'd_exposure.DRUG_CONCEPT_ID', 'from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` d_exposure', 'Drug'),
     ('STANDARD_CONCEPT_NAME', 'd_standard_concept.concept_name as STANDARD_CONCEPT_NAME', 'left join \`$BQ_PROJECT.$BQ_DATASET.concept\` d_standard_concept on d_exposure.DRUG_CONCEPT_ID = d_standard_concept.CONCEPT_ID', 'Drug'),
@@ -130,6 +132,7 @@ echo "ds_linking - inserting measurement data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
+    ('SENTINEL_PLACEHOLDER_VALUE', 'SENTINEL_PLACEHOLDER_VALUE', 'from \`$BQ_PROJECT.$BQ_DATASET.measurement\` measurement', 'Measurement'),
     ('PERSON_ID', 'measurement.PERSON_ID', 'from \`$BQ_PROJECT.$BQ_DATASET.measurement\` measurement', 'Measurement'),
     ('MEASUREMENT_CONCEPT_ID', 'measurement.MEASUREMENT_CONCEPT_ID', 'from \`$BQ_PROJECT.$BQ_DATASET.measurement\` measurement', 'Measurement'),
     ('STANDARD_CONCEPT_NAME', 'm_standard_concept.concept_name as STANDARD_CONCEPT_NAME', 'left join \`$BQ_PROJECT.$BQ_DATASET.concept\` m_standard_concept on measurement.measurement_concept_id = m_standard_concept.concept_id', 'Measurement'),
@@ -162,6 +165,7 @@ echo "ds_linking - inserting observation data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
+    ('SENTINEL_PLACEHOLDER_VALUE', 'SENTINEL_PLACEHOLDER_VALUE', 'from \`$BQ_PROJECT.$BQ_DATASET.ds_observation\` observation', 'Observation'),
     ('PERSON_ID', 'observation.PERSON_ID', 'from \`$BQ_PROJECT.$BQ_DATASET.ds_observation\` observation', 'Observation'),
     ('OBSERVATION_CONCEPT_ID', 'observation.OBSERVATION_CONCEPT_ID', 'from \`$BQ_PROJECT.$BQ_DATASET.ds_observation\` observation', 'Observation'),
     ('STANDARD_CONCEPT_NAME', 'o_standard_concept.concept_name as STANDARD_CONCEPT_NAME', 'LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` o_standard_concept on observation.OBSERVATION_CONCEPT_ID = o_standard_concept.CONCEPT_ID', 'Observation'),
@@ -197,6 +201,7 @@ echo "ds_linking - inserting person data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
+    ('SENTINEL_PLACEHOLDER_VALUE', 'SENTINEL_PLACEHOLDER_VALUE', 'FROM \`$BQ_PROJECT.$BQ_DATASET.person\` person', 'Person'),
     ('PERSON_ID', 'person.PERSON_ID', 'FROM \`$BQ_PROJECT.$BQ_DATASET.person\` person', 'Person'),
     ('GENDER_CONCEPT_ID', 'person.GENDER_CONCEPT_ID', 'FROM \`$BQ_PROJECT.$BQ_DATASET.person\` person', 'Person'),
     ('GENDER', 'p_gender_concept.concept_name as GENDER', 'LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` p_gender_concept on person.gender_concept_id = p_gender_concept.CONCEPT_ID', 'Person'),
@@ -211,6 +216,7 @@ echo "ds_linking - inserting procedure data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
+    ('SENTINEL_PLACEHOLDER_VALUE', 'SENTINEL_PLACEHOLDER_VALUE', 'from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` procedure', 'Procedure'),
     ('PERSON_ID', 'procedure.PERSON_ID', 'from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` procedure', 'Procedure'),
     ('PROCEDURE_CONCEPT_ID', 'procedure.PROCEDURE_CONCEPT_ID', 'from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` procedure', 'Procedure'),
     ('STANDARD_CONCEPT_NAME', 'p_standard_concept.concept_name as STANDARD_CONCEPT_NAME', 'LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` p_standard_concept on procedure.PROCEDURE_CONCEPT_ID = p_standard_concept.CONCEPT_ID', 'Procedure'),
@@ -236,6 +242,7 @@ echo "ds_linking - inserting survey data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
+    ('SENTINEL_PLACEHOLDER_VALUE', 'SENTINEL_PLACEHOLDER_VALUE', 'FROM(SELECT person_id, observation_datetime as survey_datetime, observation_source_concept_id as question_concept_id, case when observation_source_concept_id = 1585747 then CAST(value_as_number as STRING) else concept_name end as answer, value_as_concept_id as answer_concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_as_concept_id = b.concept_id WHERE a.observation_source_concept_id in (SELECT concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = \`PPI\` and is_group = 0 and is_selectable = 1 )) answer', 'Survey'),
     ('PERSON_ID', 'answer.person_id', 'FROM(SELECT person_id, observation_datetime as survey_datetime, observation_source_concept_id as question_concept_id, case when observation_source_concept_id = 1585747 then CAST(value_as_number as STRING) else concept_name end as answer, value_as_concept_id as answer_concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_as_concept_id = b.concept_id WHERE a.observation_source_concept_id in (SELECT concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = \`PPI\` and is_group = 0 and is_selectable = 1 )) answer', 'Survey'),
     ('SURVEY_DATETIME', 'answer.survey_datetime', 'FROM(SELECT person_id, observation_datetime as survey_datetime, observation_source_concept_id as question_concept_id, case when observation_source_concept_id = 1585747 then CAST(value_as_number as STRING) else concept_name end as answer, value_as_concept_id as answer_concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_as_concept_id = b.concept_id WHERE a.observation_source_concept_id in (SELECT concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = \`PPI\` and is_group = 0 and is_selectable = 1 )) answer', 'Survey'),
     ('SURVEY', 'question.survey', 'JOIN (select b.name as survey, c.concept_id as question_concept_id, c.name as question FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor_count\` a LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.criteria\` b on a.ancestor_id = b.id LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.criteria\` c on a.descendant_id = c.id where ancestor_id in (SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = \'PPI\' and parent_id = 0)) question on answer.question_concept_id = question.question_concept_id', 'Procedure'),
@@ -249,6 +256,7 @@ echo "ds_linking - inserting visit data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
+    ('SENTINEL_PLACEHOLDER_VALUE', 'SENTINEL_PLACEHOLDER_VALUE', 'from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` visit', 'Visit'),
     ('PERSON_ID', 'visit.PERSON_ID', 'from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` visit', 'Visit'),
     ('VISIT_CONCEPT_ID', 'visit.VISIT_CONCEPT_ID', 'from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` visit', 'Visit'),
     ('STANDARD_CONCEPT_NAME', 'v_standard_concept.concept_name as STANDARD_CONCEPT_NAME', 'LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` v_standard_concept on visit.VISIT_CONCEPT_ID = v_standard_concept.CONCEPT_ID', 'Visit'),

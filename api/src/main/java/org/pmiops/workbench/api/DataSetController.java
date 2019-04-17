@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
@@ -9,7 +8,6 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -57,7 +55,6 @@ class ValuesLinkingPair {
 
 @RestController
 public class DataSetController implements DataSetApiDelegate {
-
   private BigQueryService bigQueryService;
 
   private CohortDao cohortDao;
@@ -147,7 +144,7 @@ public class DataSetController implements DataSetApiDelegate {
     List<String> values = valueSet
         .getValues().getItems().stream()
         .map(domainValue -> domainValue.getValue()).collect(Collectors.toList());
-
+    values.add(0, "SENTINEL_PLACEHOLDER_VALUE");
     String domainAsName = d.toString().charAt(0) + d.toString().substring(1).toLowerCase();
 
     String valuesQuery = "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
@@ -166,21 +163,12 @@ public class DataSetController implements DataSetApiDelegate {
 
     List<String> valueJoins = new ArrayList<>();
     List<String> valueSelects = new ArrayList<>();
-
-    boolean doesNotContainFrom = true;
-
-    for (Iterator<FieldValueList> i = valuesLinking.getValues().iterator(); i.hasNext(); ) {
-      FieldValueList value = i.next();
+    valuesLinking.getValues().forEach((value) -> {
       valueJoins.add(value.get("JOIN_VALUE").getStringValue());
-      if (value.get("JOIN_VALUE").getStringValue().contains(" from ")) {
-        doesNotContainFrom = false;
+      if (!value.get("OMOP_SQL").getStringValue().equals("SENTINEL_PLACEHOLDER_VALUE")) {
+        valueSelects.add(value.get("OMOP_SQL").getStringValue());
       }
-      valueSelects.add(value.get("OMOP_SQL").getStringValue());
-    }
-
-    if (doesNotContainFrom) {
-      throw new BadRequestException("You must include at least one value from the parent table");
-    }
+    });
 
     return new ValuesLinkingPair(valueSelects, valueJoins);
   }
