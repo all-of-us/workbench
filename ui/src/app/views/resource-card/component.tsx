@@ -294,6 +294,21 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     }
   }
 
+  copyResource(): void {
+    switch (this.resourceType) {
+      case ResourceType.NOTEBOOK: {
+        workspacesApi().cloneNotebook(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.notebook.name)
+          .then(() => {
+            this.props.onUpdate();
+          });
+        break;
+      }
+    }
+  }
+
   receiveDelete(): void {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
@@ -413,6 +428,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
             <ResourceCardMenu disabled={this.actionsDisabled}
                               resourceType={this.resourceType}
                               onCloneResource={() => this.cloneResource()}
+                              onCopyResource={() => this.copyResource()}
                               onDeleteResource={() => this.openConfirmDelete()}
                               onRenameNotebook={() => this.renameNotebook()}
                               onRenameCohort={() => this.renameCohort()}
