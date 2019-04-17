@@ -36,7 +36,7 @@ export class ConceptSetDetailsComponent implements OnInit, OnDestroy {
   removing = false;
   removeSubmitting = false;
   confirmDeleting = false;
-  selectedConcepts: Concept[];
+  selectedConcepts: Concept[] = [];
 
   constructor(
     private conceptSetsService: ConceptSetsService,
@@ -44,6 +44,7 @@ export class ConceptSetDetailsComponent implements OnInit, OnDestroy {
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
     this.removeFab = this.removeFab.bind(this);
+    this.onSelectConcepts = this.onSelectConcepts.bind(this);
   }
 
   ngOnInit() {
