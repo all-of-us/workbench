@@ -15,6 +15,7 @@ import {CodeDropdownComponent} from './code-dropdown/code-dropdown.component';
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {DemographicsComponent} from './demographics/demographics.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
+import {ListAttributesPageComponent} from './list-attributes-page/list-attributes-page.component'
 import {ListModalComponent} from './list-modal/list-modal.component';
 import {ListSearchComponent} from './list-search/list-search.component';
 import {ListSelectionInfoComponent} from './list-selection-info/list-selection-info.component';
@@ -71,6 +72,7 @@ const routes: Routes = [{
     CodeDropdownComponent,
     DemographicsComponent,
     GenderChartComponent,
+    ListAttributesPageComponent,
     ListModalComponent,
     ListSearchComponent,
     ListSelectionInfoComponent,
