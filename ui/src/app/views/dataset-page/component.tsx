@@ -7,7 +7,12 @@ import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {ResourceListItem} from 'app/components/resources';
 import {Spinner} from 'app/components/spinners';
-import {cohortsApi, conceptsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {
+  cohortsApi,
+  conceptsApi,
+  conceptSetsApi,
+  dataSetApi
+} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
@@ -436,7 +441,8 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
             <div>Preview Dataset</div>
             <div style={{marginLeft: '1rem', color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
-            <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}} onClick={() => {this.generateCode();}}>
+            <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}}
+                    onClick={() => {this.generateCode();}}>
               GENERATE CODE
             </Button>
             {/* Button disabled until this functionality added*/}
