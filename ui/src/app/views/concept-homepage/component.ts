@@ -89,6 +89,7 @@ export class ConceptHomepageComponent implements OnInit {
     this.closeAddModal = this.closeAddModal.bind(this);
     this.afterConceptsSaved = this.afterConceptsSaved.bind(this);
     this.openAddModal = this.openAddModal.bind(this);
+    this.selectConcept = this.selectConcept.bind(this);
   }
 
   ngOnInit(): void {
@@ -186,13 +187,14 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   searchConcepts() {
+    this.concepts = [];
+    this.searchLoading = true;
     if (this.conceptTable) {
       this.conceptTable.selectedConcepts = [];
       this.conceptsToAdd = [];
       this.rebuildSelectedConceptDomainMap();
     }
     this.searching = true;
-    this.searchLoading = true;
     this.placeholderValue = this.noConceptsConstant;
     let standardConceptFilter: StandardConceptFilter;
     if (this.standardConceptsOnly) {

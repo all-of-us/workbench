@@ -27,10 +27,16 @@ import {ConceptSet as FetchConceptSet} from 'generated/fetch';
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+
+import {
+  findElements,
+  simulateClick as simulateClickReact,
+  simulateClickNthElement
+} from 'testing/react-testing-utility';
+
 import {
   setupModals,
   simulateClick,
-  simulateClickReact,
   simulateInput,
   updateAndTick
 } from 'testing/test-helpers';
@@ -228,17 +234,18 @@ describe('ConceptSetDetailsComponent', () => {
     });
 
     const de = fixture.debugElement;
-    const checkboxes = de.queryAll(
-      By.css('app-concept-table .datagrid-body input[type="checkbox"]'));
-    simulateClick(fixture, checkboxes[0]);
-    simulateClick(fixture, checkboxes[2]);
+    simulateClickNthElement(fixture, 'span.p-checkbox-icon.p-clickable', 1);
+    updateAndTick(fixture);
+    simulateClickNthElement(fixture, 'span.p-checkbox-icon.p-clickable', 3);
     simulateClickReact(fixture, '[data-test-id="sliding-button"]');
     simulateClick(fixture, de.query(By.css('.confirm-remove-btn')));
     updateAndTick(fixture);
-
-    expect(de.queryAll(By.css('app-concept-table .datagrid-body .datagrid-row')).length).toEqual(1);
+    const tableRows = findElements(fixture, 'tr');
+    // This includes the header and the row itseld
+    expect(tableRows.length).toEqual(2);
     // Just the middle concept should remain.
     const wantConcepts = [origConcepts[1]];
-    expect(conceptSetsStub.conceptSets[0].concepts).toEqual(wantConcepts);
+    expect(tableRows[1].childNodes[2].textContent).toEqual(
+      wantConcepts[0].conceptSynonyms.join(', '));
   }));
 });
