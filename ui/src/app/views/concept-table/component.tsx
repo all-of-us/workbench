@@ -19,7 +19,8 @@ const styles = reactStyles({
 
 
 export class ConceptTable extends React.Component<{concepts: Concept[];
-  loading: boolean; placeholderValue: string, onSelectedChanged: Function; },
+  loading: boolean; placeholderValue: string, getSelectedConcepts: Function,
+  setSelectedConcepts: Function; },
   {selectedConcepts: Concept[]; selectedVocabularies: string[]; }> {
 
   private dt: DataTable;
@@ -40,7 +41,9 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
 
   updateSelectedConceptList(selectedConcepts) {
     this.setState({selectedConcepts : selectedConcepts});
-    this.props.onSelectedChanged(selectedConcepts);
+    // This will be removed once concept set list has a better way to access selected concepts
+    this.props.setSelectedConcepts(selectedConcepts);
+    this.props.getSelectedConcepts(selectedConcepts);
   }
 
   distinctVocabulary() {
@@ -123,12 +126,12 @@ export class ConceptTableComponent extends ReactWrapperBase {
   selectedConcepts: Array<any> = [];
 
   constructor() {
-    super(ConceptTable, ['concepts', 'loading', 'placeholderValue', 'onSelectedChanged']);
-    this.onSelectedChanged = this.onSelectedChanged.bind(this);
+    super(ConceptTable, ['concepts', 'loading', 'placeholderValue', 'getSelectedConcepts',
+      'setSelectedConcepts']);
+    this.setSelectedConcepts = this.setSelectedConcepts.bind(this);
   }
 
-  onSelectedChanged(selectedConcepts: Concept[]) {
+  setSelectedConcepts(selectedConcepts: Concept[]) {
     this.selectedConcepts = selectedConcepts;
-    this.getSelectedConcepts(selectedConcepts);
   }
 }

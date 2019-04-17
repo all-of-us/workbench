@@ -89,6 +89,7 @@ export class ConceptHomepageComponent implements OnInit {
     this.closeAddModal = this.closeAddModal.bind(this);
     this.afterConceptsSaved = this.afterConceptsSaved.bind(this);
     this.openAddModal = this.openAddModal.bind(this);
+    this.selectConcept = this.selectConcept.bind(this);
   }
 
   ngOnInit(): void {
