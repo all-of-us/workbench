@@ -2,9 +2,7 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-
-
-import {AlertDanger} from 'app/components/alert';
+import {AlertClose, AlertDanger} from 'app/components/alert';
 import {Clickable} from 'app/components/buttons';
 import {WorkspaceCardBase} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
@@ -13,6 +11,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {ConceptTable} from 'app/views/concept-table/component';
 import {
   Concept,
   Domain,
@@ -37,13 +36,18 @@ const styles = reactStyles({
     fontSize: '18px',
     lineHeight: '22px'
   },
+  domainBoxLink: {
+    color: '#2691D0', lineHeight: '18px', fontWeight: 600,
+    letterSpacing: '0.05rem'
+  },
   conceptText: {
     marginTop: '0.3rem',
     fontSize: '14px',
     fontWeight: 400,
     color: '#4A4A4A',
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    marginBottom: '0.3rem'
   }
 });
 
@@ -57,7 +61,7 @@ const DomainBox: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
         <div style={styles.conceptText}>
           <span style={{fontSize: '30px'}}>{conceptCount}</span> concepts in this domain. <p/>
           <b>{conceptDomainInfo.participantCount}</b> participants in domain.</div>
-        <Clickable>Browse Domain</Clickable>
+        <Clickable style={styles.domainBoxLink}>Browse Domain</Clickable>
       </WorkspaceCardBase>;
     };
 
@@ -65,7 +69,7 @@ const DomainBox: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
 export const ConceptWrapper = withCurrentWorkspace()(
   class extends React.Component<{workspace: WorkspaceData},
       {loadingDomains: boolean, currentSearchString: string, standardConceptsOnly: boolean,
-        searching: boolean, showSearchError: boolean, selectedDomain: DomainCount,
+        searching: boolean, searchLoading: boolean, showSearchError: boolean, selectedDomain: DomainCount,
         conceptDomainList: Array<DomainInfo>, conceptDomainCounts: Array<DomainCount>,
         concepts: Array<ConceptInfo>, conceptsCache: Array<ConceptCacheSet>,
         selectedConceptDomainMap: Map<String, number>}> {
@@ -77,6 +81,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
         currentSearchString: '',
         standardConceptsOnly: true,
         searching: false,
+        searchLoading: false,
         showSearchError: false,
         selectedDomain: {
           name: '',
@@ -131,7 +136,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
         if (searchTermLength < 3) {
           this.setState({showSearchError: true});
         } else {
-          this.setState({currentSearchString: e.target.value});
+          this.setState({currentSearchString: e.target.value, searching: true});
           this.searchConcepts();
         }
       }
@@ -150,7 +155,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
     }
 
     searchConcepts() {
-      // TODO
+      this.setState({concepts: [], searchLoading: true});
     }
 
     filterList() {
@@ -174,32 +179,51 @@ export const ConceptWrapper = withCurrentWorkspace()(
       this.searchConcepts();
     }
 
+    get noConceptsConstant() {
+      return 'No concepts found for domain \'' + this.state.selectedDomain.name + '\' this search.';
+    }
+
     render() {
-      const {loadingDomains, conceptDomainList, standardConceptsOnly, showSearchError} = this.state;
+      const {loadingDomains, conceptDomainList, standardConceptsOnly, showSearchError,
+        searching, concepts, searchLoading} = this.state;
       return <React.Fragment>
-        <div style={{display: 'flex', alignItems: 'center', marginTop: '1.5%', marginBottom: '6%'}}>
-          <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
-            fill: '#216FB4', left: 'calc(1rem + 4.5%)'}}/>
-          <TextInput style={styles.searchBar}
-                     placeholder='Search concepts in domain'
-                     onKeyDown={e => {this.searchButton(e); }}/>
-          <CheckBox checked={standardConceptsOnly}
-                    style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
-                    onChange={() => this.setState({standardConceptsOnly: !standardConceptsOnly})}/>
-          <label style={{marginLeft: '0.2rem'}}>
-            Standard concepts only
-          </label>
+        <div style={{marginBottom: '6%', marginTop: '1.5%'}}>
+          <div style={{display: 'flex', alignItems: 'center'}}>
+            <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
+              fill: '#216FB4', left: 'calc(1rem + 4.5%)'}}/>
+            <TextInput style={styles.searchBar}
+                       placeholder='Search concepts in domain'
+                       onKeyDown={e => {this.searchButton(e); }}/>
+            <CheckBox checked={standardConceptsOnly}
+                      style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
+                      onChange={() => this.setState({standardConceptsOnly: !standardConceptsOnly})}/>
+            <label style={{marginLeft: '0.2rem'}}>
+              Standard concepts only
+            </label>
+          </div>
+          {showSearchError &&
+          <AlertDanger style={{width: '64.3%', marginLeft: '1%', justifyContent: 'space-between'}}>
+              Minimum concept search length is three characters.
+              <AlertClose style={{width: 'unset'}}
+                          onClick={() => this.setState({showSearchError: false})}/>
+          </AlertDanger>}
         </div>
-        {showSearchError && <AlertDanger style={{width: '64.3%', marginLeft: '1%'}}>
-          Minimum concept search length is three characters.
-        </AlertDanger>}
+
         {loadingDomains ? <SpinnerOverlay/> :
-          (<div style={{display: 'flex', flexDirection: 'row', width: '94.3%'}}>
-            {conceptDomainList.map((domain) => {
-              return <DomainBox conceptDomainInfo={domain}
-                                standardConceptsOnly={standardConceptsOnly}/>;
-            })}
-          </div>)
+          searching ?
+            <div>
+              <ConceptTable concepts={concepts}
+                            loading={searchLoading}
+                            getSelectedConcepts={() => this.selectConcept}
+                            placeholderValue={this.noConceptsConstant}
+                            setSelectedConcepts={() => {}}/>
+            </div> :
+            <div style={{display: 'flex', flexDirection: 'row', width: '94.3%', flexWrap: 'wrap'}}>
+              {conceptDomainList.map((domain) => {
+                return <DomainBox conceptDomainInfo={domain}
+                                  standardConceptsOnly={standardConceptsOnly}/>;
+              })}
+          </div>
         }
       </React.Fragment>;
     }
