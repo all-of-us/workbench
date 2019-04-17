@@ -1,8 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, tick} from '@angular/core/testing';
 
-import * as ReactTestUtils from 'react-dom/test-utils';
-
 /** Modal usage requires the existence of a global div. */
 export function setupModals<C>(fixture: ComponentFixture<C>) {
   const popupRoot = document.createElement('div');
@@ -36,31 +34,4 @@ export function simulateClick<C>(
   fixture: ComponentFixture<C>,
   element: DebugElement) {
   simulateEvent(fixture, element, 'click');
-}
-
-export function simulateInputReact<C>(
-  fixture: ComponentFixture<C>,
-  selector: string,
-  text: string
-) {
-  const el = fixture.debugElement.nativeElement.querySelector(selector);
-  el.value = text;
-  ReactTestUtils.Simulate.change(el);
-  updateAndTick(fixture);
-}
-
-export function simulateClickReact<C>(
-  fixture: ComponentFixture<C>,
-  selector: string
-) {
-  const el = fixture.debugElement.nativeElement.querySelector(selector);
-  ReactTestUtils.Simulate.click(el);
-  updateAndTick(fixture);
-}
-
-export function findElementsReact<C>(
-  fixture: ComponentFixture<C>,
-  selector: string
-) {
-  return [].slice.call(fixture.debugElement.nativeElement.querySelectorAll(selector));
 }

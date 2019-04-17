@@ -24,6 +24,12 @@ import {
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptsServiceStub, DomainStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+
+import {
+  findElements,
+  simulateClickNthElement
+} from 'testing/react-testing-utility';
+
 import {
   setupModals,
   simulateClick,
@@ -119,15 +125,14 @@ describe('ConceptHomepageComponent', () => {
     expect(spy).toHaveBeenCalledTimes(DomainStubVariables.STUB_DOMAINS.length);
 
     // Tests that it switches to the datagrid view.
-    expect(fixture.debugElement.query(By.css('clr-datagrid'))).toBeTruthy();
-    expect(fixture.debugElement.queryAll(By.css('.concept-row')).length).toBe(1);
-    const firstDomainRowName =
-      fixture.debugElement.queryAll(By.css('.concept-name'))[0].nativeNode.textContent;
+    expect(findElements(fixture, '[data-test-id="conceptTable"]')).toBeTruthy();
+    expect(findElements(fixture, 'tr').length).toBe(2);
+    const firstDomainRowName = findElements(fixture, 'td')[1].textContent;
 
     // Tests that it changes the table when a new domain is selected.
     simulateClick(fixture, fixture.debugElement.queryAll(By.css('.domain-selector-button'))[1]);
     updateAndTick(fixture);
-    expect(fixture.debugElement.queryAll(By.css('.concept-name'))[0].nativeNode.textContent)
+    expect(findElements(fixture, 'td')[1].textContent)
       .not.toBe(firstDomainRowName);
   }));
 
@@ -162,7 +167,8 @@ describe('ConceptHomepageComponent', () => {
     });
 
     // Test that it pulls back more concepts when all concepts allowed.
-    expect(fixture.debugElement.queryAll(By.css('.concept-row')).length).toBe(2);
+    // Rows contains header as well
+    expect(findElements(fixture, 'tr').length).toBe(3);
   }));
 
   it('should display the selected concepts on header', fakeAsync(() => {
@@ -176,10 +182,7 @@ describe('ConceptHomepageComponent', () => {
     simulateEvent(fixture,
       fixture.debugElement.query(By.css('#concept-search-input')), 'keydown.enter');
     updateAndTick(fixture);
-    const dataRow = fixture.debugElement.queryAll(By.css('.concept-row'));
-    const checkBox = dataRow[0].queryAll(By.css('.datagrid-select'))[0]
-        .query(By.css('.checkbox')).children;
-    simulateClick(fixture, checkBox[0]);
+    simulateClickNthElement(fixture, 'span.p-checkbox-icon.p-clickable', 1);
     updateAndTick(fixture);
     const pillValue = fixture.debugElement.query(By.css('.pill')).childNodes[0]
         .nativeNode.nodeValue.trim();
@@ -201,10 +204,7 @@ describe('ConceptHomepageComponent', () => {
     let buttonText = fixture.componentInstance.addToSetText;
     // Default value to be Add to set
     expect(buttonText).toBe('Add to set');
-    const dataRow = fixture.debugElement.queryAll(By.css('.concept-row'));
-    const checkBox = dataRow[0].queryAll(By.css('.datagrid-select'))[0]
-        .query(By.css('.checkbox')).children;
-    simulateClick(fixture, checkBox[0]);
+    simulateClickNthElement(fixture, 'span.p-checkbox-icon.p-clickable', 1);
     updateAndTick(fixture);
     buttonText = fixture.componentInstance.addToSetText;
 

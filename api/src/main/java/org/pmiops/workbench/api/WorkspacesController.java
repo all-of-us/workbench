@@ -24,6 +24,7 @@ import javax.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -54,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {
+
   private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
 
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
@@ -69,6 +71,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
   private final CohortDao cohortDao;
+  private final CohortFactory cohortFactory;
   private final ConceptSetDao conceptSetDao;
   private final UserDao userDao;
   private Provider<User> userProvider;
@@ -83,6 +86,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
+      CohortFactory cohortFactory,
       ConceptSetDao conceptSetDao,
       UserDao userDao,
       Provider<User> userProvider,
@@ -94,6 +98,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
+    this.cohortFactory = cohortFactory;
     this.conceptSetDao = conceptSetDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -108,8 +113,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public void setUserProvider(Provider<User> userProvider) {
     this.userProvider = userProvider;
   }
+
   // This does not populate the list of underserved research groups.
-  private static final Workspace constructListWorkspaceFromDb(org.pmiops.workbench.db.model.Workspace workspace,
+  private static final Workspace constructListWorkspaceFromDb(
+      org.pmiops.workbench.db.model.Workspace workspace,
       ResearchPurpose researchPurpose) {
     FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
     Workspace result = new Workspace()
@@ -129,8 +136,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
 
-
-    result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(TO_CLIENT_USER_ROLE).collect(Collectors.toList()));
+    result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(TO_CLIENT_USER_ROLE)
+        .collect(Collectors.toList()));
     return result;
   }
 
@@ -146,7 +153,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         }
       };
 
-  private static final ResearchPurpose createResearchPurpose(org.pmiops.workbench.db.model.Workspace workspace) {
+  private static final ResearchPurpose createResearchPurpose(
+      org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose = new ResearchPurpose()
         .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
         .diseaseOfFocus(workspace.getDiseaseOfFocus())
@@ -161,14 +169,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .reviewRequested(workspace.getReviewRequested())
         .approved(workspace.getApproved())
         .containsUnderservedPopulation(workspace.getContainsUnderservedPopulation());
-    if(workspace.getTimeRequested() != null){
+    if (workspace.getTimeRequested() != null) {
       researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
     }
     return researchPurpose;
   }
 
   // This does not populate the list of underserved research groups.
-  private static final Workspace constructListWorkspaceFromFCAndDb(org.pmiops.workbench.db.model.Workspace workspace,
+  private static final Workspace constructListWorkspaceFromFCAndDb(
+      org.pmiops.workbench.db.model.Workspace workspace,
       org.pmiops.workbench.firecloud.model.Workspace fcWorkspace, ResearchPurpose researchPurpose) {
     Workspace result = new Workspace()
         .etag(Etags.fromVersion(workspace.getVersion()))
@@ -188,8 +197,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
 
-
-    result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(TO_CLIENT_USER_ROLE).collect(Collectors.toList()));
+    result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(TO_CLIENT_USER_ROLE)
+        .collect(Collectors.toList()));
 
     return result;
   }
@@ -205,7 +214,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             researchPurpose.setUnderservedPopulationDetails(
                 new ArrayList<>(workspace.getUnderservedPopulationsEnum()));
           }
-          Workspace result = constructListWorkspaceFromFCAndDb(workspace, fcWorkspace, researchPurpose);
+          Workspace result = constructListWorkspaceFromFCAndDb(workspace, fcWorkspace,
+              researchPurpose);
           return result;
         }
       };
@@ -257,7 +267,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return sb.toString();
   }
 
-  private CdrVersion setCdrVersionId(org.pmiops.workbench.db.model.Workspace dbWorkspace, String cdrVersionId) {
+  private CdrVersion setCdrVersionId(org.pmiops.workbench.db.model.Workspace dbWorkspace,
+      String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
     }
@@ -291,7 +302,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setAdditionalNotes(purpose.getAdditionalNotes());
     dbWorkspace.setContainsUnderservedPopulation(purpose.getContainsUnderservedPopulation());
     if (purpose.getContainsUnderservedPopulation()) {
-      dbWorkspace.setUnderservedPopulationsEnum(new HashSet<>(purpose.getUnderservedPopulationDetails()));
+      dbWorkspace
+          .setUnderservedPopulationsEnum(new HashSet<>(purpose.getUnderservedPopulationDetails()));
     }
   }
 
@@ -306,7 +318,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private org.pmiops.workbench.firecloud.model.Workspace
-      attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
+  attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
     fireCloudService.createWorkspace(workspaceId.getWorkspaceNamespace(),
         workspaceId.getWorkspaceName());
     return fireCloudService.getWorkspace(workspaceId.getWorkspaceNamespace(),
@@ -389,32 +401,25 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     permissions.setUser(user);
 
     dbWorkspace.addWorkspaceUserRole(permissions);
-
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-    List<JSONObject> demoCohorts = cloudStorageService.readAllDemoCohorts();
-    for (JSONObject cohort: demoCohorts) {
-      // TODO: Make this a service method to avoid duplication with CohortsController
-      Cohort dbCohort = new Cohort();
-      dbCohort.setName(cohort.getString("name"));
-      dbCohort.setDescription(cohort.getString("description"));
-      dbCohort.setCriteria(cohort.get("criteria").toString());
-      dbCohort.setType(cohort.getString("type"));
-      dbCohort.setCreator(userProvider.get());
-      dbCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
-      dbCohort.setCreationTime(now);
-      dbCohort.setLastModifiedTime(now);
-      dbCohort.setVersion(1);
+
+    org.pmiops.workbench.db.model.Workspace finalDbWorkspace = dbWorkspace;
+    cloudStorageService.readAllDemoCohorts().stream()
+        .map(apiCohort -> cohortFactory
+            .createCohort(apiCohort, userProvider.get(), finalDbWorkspace.getWorkspaceId())
+        ).forEach(dbCohort -> {
       try {
         dbCohort = cohortDao.save(dbCohort);
       } catch (DataIntegrityViolationException e) {
-        throw new ServerErrorException(String.format(
+        throw new BadRequestException(String.format(
             "Cohort \"/%s/%s/%d\" already exists.",
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbCohort.getCohortId()));
+            finalDbWorkspace.getWorkspaceNamespace(), finalDbWorkspace.getWorkspaceId(),
+            dbCohort.getCohortId()));
       }
-    }
+    });
 
     List<JSONObject> demoConceptSets = cloudStorageService.readAllDemoConceptSets();
-    for (JSONObject conceptSet: demoConceptSets) {
+    for (JSONObject conceptSet : demoConceptSets) {
       ConceptSet dbConceptSet = new ConceptSet();
 
       dbConceptSet.setName(conceptSet.getString("name"));
@@ -425,18 +430,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbConceptSet.setLastModifiedTime(now);
       dbConceptSet.setVersion(1);
       dbConceptSet.setParticipantCount(conceptSet.getInt("participant_count"));
-      dbConceptSet.setDomain(CommonStorageEnums.domainToStorage(Domain.fromValue(conceptSet.getString("domain"))));
+      dbConceptSet.setDomain(
+          CommonStorageEnums.domainToStorage(Domain.fromValue(conceptSet.getString("domain"))));
       try {
         List<Object> conceptIdsJSON = conceptSet.getJSONArray("concept_ids").toList();
         Set<Long> conceptIds = conceptIdsJSON
-                .stream()
-                .map(Object::toString)
-                .map(Long::valueOf)
-                .collect(Collectors.toSet());
+            .stream()
+            .map(Object::toString)
+            .map(Long::valueOf)
+            .collect(Collectors.toSet());
         dbConceptSet.getConceptIds().addAll(conceptIds);
       } catch (JSONException e) {
         throw new ServerErrorException(String.format(
-           "concept_ids cannot be read from %s", conceptSet.getString("name")
+            "concept_ids cannot be read from %s", conceptSet.getString("name")
         ));
       }
 
@@ -444,15 +450,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         dbConceptSet = conceptSetDao.save(dbConceptSet);
       } catch (DataIntegrityViolationException e) {
         throw new ServerErrorException(String.format(
-                "Concept Set \"/%s/%s/%d\" already exists.",
-                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbConceptSet.getConceptSetId()));
+            "Concept Set \"/%s/%s/%d\" already exists.",
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(),
+            dbConceptSet.getConceptSetId()));
       }
     }
-    return ResponseEntity.ok(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
+    return ResponseEntity
+        .ok(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteWorkspace(String workspaceNamespace, String workspaceId) {
+  public ResponseEntity<EmptyResponse> deleteWorkspace(String workspaceNamespace,
+      String workspaceId) {
     //general note. When you delete a workspace the related rows in the following tables will also be deleted
     //Cohort, cohort review, cohort annotation definition, cohort annotation enum value,
     //participant cohort annotations, participant cohort status. Please see liquibase/db for more
@@ -486,7 +495,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<WorkspaceResponse> getWorkspace(String workspaceNamespace, String workspaceId) {
+  public ResponseEntity<WorkspaceResponse> getWorkspace(String workspaceNamespace,
+      String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
@@ -508,7 +518,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    response.setWorkspace(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
+    response
+        .setWorkspace(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
     return ResponseEntity.ok(response);
   }
 
@@ -525,7 +536,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 fcWorkspace -> fcWorkspace));
 
     List<org.pmiops.workbench.db.model.Workspace> dbWorkspaces =
-        workspaceService.getDao().findAllByFirecloudUuidIn(fcUuidWorkspaceMap.keySet().stream().collect(Collectors.toList()));
+        workspaceService.getDao().findAllByFirecloudUuidIn(
+            fcUuidWorkspaceMap.keySet().stream().collect(Collectors.toList()));
 
     List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
 
@@ -540,7 +552,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
         currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
       } else {
-        currentWorkspace.setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
+        currentWorkspace
+            .setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
       }
       responseList.add(currentWorkspace);
     }
@@ -570,8 +583,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated workspace version");
     }
-    if(workspace.getDataAccessLevel() != null &&
-        !dbWorkspace.getDataAccessLevelEnum().equals(workspace.getDataAccessLevel())){
+    if (workspace.getDataAccessLevel() != null &&
+        !dbWorkspace.getDataAccessLevelEnum().equals(workspace.getDataAccessLevel())) {
       throw new BadRequestException("Attempted to change data access level");
     }
     if (workspace.getDescription() != null) {
@@ -592,7 +605,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    return ResponseEntity.ok(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
+    return ResponseEntity
+        .ok(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
   }
 
   @Override
@@ -615,8 +629,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Retrieving the workspace is done first, which acts as an access check.
     String fromBucket = fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
-          .getWorkspace()
-          .getBucketName();
+        .getWorkspace()
+        .getBucketName();
 
     org.pmiops.workbench.db.model.Workspace fromWorkspace =
         workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
@@ -642,10 +656,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       if (!NOTEBOOK_PATTERN.matcher(b.getName()).matches()) {
         continue;
       }
-      if (b.getSize() != null && b.getSize()/1e6 > MAX_NOTEBOOK_SIZE_MB) {
+      if (b.getSize() != null && b.getSize() / 1e6 > MAX_NOTEBOOK_SIZE_MB) {
         throw new FailedPreconditionException(String.format(
             "workspace %s/%s contains a notebook larger than %dMB: '%s'; cannot clone - please " +
-            "remove this notebook, reduce its size, or contact the workspace owner",
+                "remove this notebook, reduce its size, or contact the workspace owner",
             workspaceNamespace, workspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
       }
       cloudStorageService.copyBlob(
@@ -724,7 +738,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ShareWorkspaceResponse> shareWorkspace(String workspaceNamespace, String workspaceId,
+  public ResponseEntity<ShareWorkspaceResponse> shareWorkspace(String workspaceNamespace,
+      String workspaceId,
       ShareWorkspaceRequest request) {
     if (Strings.isNullOrEmpty(request.getWorkspaceEtag())) {
       throw new BadRequestException("Missing required update field 'workspaceEtag'");
@@ -764,13 +779,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .familyName(r.getUser().getFamilyName())
             .role(r.getRoleEnum()))
         // Reverse sorting arranges the role list in a logical order - owners first, then by email.
-        .sorted(Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
+        .sorted(
+            Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
         .collect(Collectors.toList());
     resp.setItems(updatedUserRoles);
     return ResponseEntity.ok(resp);
   }
 
-  /** Record approval or rejection of research purpose. */
+  /**
+   * Record approval or rejection of research purpose.
+   */
   @Override
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<EmptyResponse> reviewWorkspace(
@@ -802,30 +820,35 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<FileDetail> renameNotebook(String workspace, String workspaceName, NotebookRename rename) {
+  public ResponseEntity<FileDetail> renameNotebook(String workspace, String workspaceName,
+      NotebookRename rename) {
     String newName = rename.getNewName();
     if (!newName.matches("^.+\\.ipynb")) {
       newName = newName + ".ipynb";
     }
-    FileDetail fileDetail = notebookCloneOperation(workspace, workspaceName, rename.getName(), newName);
+    FileDetail fileDetail = notebookCloneOperation(workspace, workspaceName, rename.getName(),
+        newName);
     notebookDeleteOperation(workspace, workspaceName, rename.getName());
     return ResponseEntity.ok(fileDetail);
   }
 
   @Override
-  public ResponseEntity<FileDetail> cloneNotebook(String workspace, String workspaceName, String notebookName) {
+  public ResponseEntity<FileDetail> cloneNotebook(String workspace, String workspaceName,
+      String notebookName) {
     String newName = notebookName.replaceAll("\\.ipynb", " ") + "Clone.ipynb";
     FileDetail fileDetail = notebookCloneOperation(workspace, workspaceName, notebookName, newName);
     return ResponseEntity.ok(fileDetail);
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteNotebook(String workspace, String workspaceName, String notebookName) {
+  public ResponseEntity<EmptyResponse> deleteNotebook(String workspace, String workspaceName,
+      String notebookName) {
     notebookDeleteOperation(workspace, workspaceName, notebookName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
-  private FileDetail notebookCloneOperation(String workspace, String workspaceName, String notebookName, String newName) {
+  private FileDetail notebookCloneOperation(String workspace, String workspaceName,
+      String notebookName, String newName) {
     NotebookOpSetup opDto = new NotebookOpSetup(workspace, workspaceName, notebookName, newName);
     FileDetail fileDetail = new FileDetail();
     cloudStorageService.copyBlob(opDto.blobId, opDto.newBlobId);
@@ -833,27 +856,31 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     fileDetail.setPath(opDto.fullPath);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     fileDetail.setLastModifiedTime(now.getTime());
-    userRecentResourceService.updateNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath, now);
+    userRecentResourceService
+        .updateNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath, now);
     return fileDetail;
- }
+  }
 
-  private void notebookDeleteOperation(String workspace, String workspaceName, String notebookName) {
+  private void notebookDeleteOperation(String workspace, String workspaceName,
+      String notebookName) {
     NotebookOpSetup opDto = new NotebookOpSetup(workspace, workspaceName, notebookName, "");
     cloudStorageService.deleteBlob(opDto.blobId);
     userRecentResourceService.deleteNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath);
   }
 
   private class NotebookOpSetup {
+
     private BlobId blobId;
     private BlobId newBlobId;
     private String fullPath;
     private long userId;
     private long workspaceId;
 
-    public NotebookOpSetup(String workspace, String workspaceName, String notebookName, String newName) {
+    public NotebookOpSetup(String workspace, String workspaceName, String notebookName,
+        String newName) {
       String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
-        .getWorkspace()
-        .getBucketName();
+          .getWorkspace()
+          .getBucketName();
       String origBlobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
       String newBlobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName;
       String pathStart = "gs://" + bucket + "/";
@@ -870,11 +897,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   /**
    * Returns List of python fileDetails from notebooks folder
-   * @param bucketName
+   *
    * @return list of FileDetail
-   * @throws org.pmiops.workbench.firecloud.ApiException
    */
-  private List<FileDetail> getFilesFromNotebooks(String bucketName) throws org.pmiops.workbench.firecloud.ApiException {
+  private List<FileDetail> getFilesFromNotebooks(String bucketName)
+      throws org.pmiops.workbench.firecloud.ApiException {
     List<Blob> blobList = new ArrayList<>();
     blobList = cloudStorageService.getBlobList(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY);
     blobList = blobList.stream()
@@ -886,8 +913,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   /**
    * Convers Blob to FileDetail
-   * @param blobList
-   * @param bucketName
+   *
    * @return List of FileDetail
    */
   private List<FileDetail> convertBlobToFileDetail(List<Blob> blobList, String bucketName) {
@@ -895,7 +921,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     blobList.forEach(blob -> {
       String[] parts = blob.getName().split("/");
       FileDetail fileDetail = new FileDetail();
-      fileDetail.setName(parts[parts.length-1]);
+      fileDetail.setName(parts[parts.length - 1]);
       fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
       fileDetail.setLastModifiedTime(blob.getUpdateTime());
       fileList.add(fileDetail);

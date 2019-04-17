@@ -8,28 +8,45 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONObject;
+import org.pmiops.workbench.model.Cohort;
 
 /**
- * Encapsulate Googe APIs for interfacing with Google Cloud Storage.
+ * Encapsulate Google APIs for interfacing with Google Cloud Storage.
  */
 public interface CloudStorageService {
 
-  public String readInvitationKey();
-  public String readMandrillApiKey();
-  public String getImageUrl(String image_name);
-  public void copyAllDemoNotebooks(String workspaceBucket);
-  public List<JSONObject> readAllDemoCohorts();
-  public List<JSONObject> readAllDemoConceptSets();
-  public List<Blob> getBlobList(String bucketName, String directory);
-  public Set<BlobId> blobsExist(List<BlobId> id);
-  public void writeFile(String bucketName, String fileName, byte[] bytes);
-  public void copyBlob(BlobId from, BlobId to);
-  public JSONObject getJiraCredentials();
-  public JSONObject getElasticCredentials();
-  public GoogleCredential getGSuiteAdminCredentials() throws IOException;
-  public GoogleCredential getFireCloudAdminCredentials() throws IOException;
-  public GoogleCredential getDefaultServiceAccountCredentials() throws IOException;
+  String readInvitationKey();
 
-  public void deleteBlob(BlobId blobId);
-  public String getMoodleApiKey();
+  String readMandrillApiKey();
+
+  String getImageUrl(String image_name);
+
+  void copyAllDemoNotebooks(String workspaceBucket);
+
+  List<Cohort> readAllDemoCohorts();
+
+  List<JSONObject> readAllDemoConceptSets();
+
+  List<Blob> getBlobList(String bucketName, String directory);
+
+  Set<BlobId> blobsExist(List<BlobId> id);
+
+  void writeFile(String bucketName, String fileName, byte[] bytes);
+
+  void copyBlob(BlobId from, BlobId to);
+
+  JSONObject getJiraCredentials();
+
+  JSONObject getElasticCredentials();
+
+  GoogleCredential getGSuiteAdminCredentials() throws IOException;
+
+  GoogleCredential getFireCloudAdminCredentials() throws IOException;
+
+  GoogleCredential getDefaultServiceAccountCredentials() throws IOException;
+
+  void deleteBlob(BlobId blobId);
+
+  String getMoodleApiKey();
+
 }
