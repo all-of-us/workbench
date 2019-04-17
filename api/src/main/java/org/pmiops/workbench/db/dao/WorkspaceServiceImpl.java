@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
@@ -25,7 +27,10 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,13 +63,54 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public WorkspaceDao getDao() {
     return workspaceDao;
   }
+
   @Override
   public FireCloudService getFireCloudService() {
     return fireCloudService;
   }
+
   @Override
   public Workspace get(String ns, String firecloudName) {
     return workspaceDao.findByWorkspaceNamespaceAndFirecloudName(ns, firecloudName);
+  }
+
+  @Override
+  public List<Workspace> getWorkspaces(WorkspaceAccessLevel accessLevel) {
+    List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces = fireCloudService.getWorkspaces();
+
+    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcUuidWorkspaceMap =
+        fcWorkspaces.stream().collect(
+            Collectors.toMap(
+                fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
+                fcWorkspace -> fcWorkspace));
+
+    List<org.pmiops.workbench.db.model.Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(
+        fcUuidWorkspaceMap.keySet().stream().collect(Collectors.toList()));
+
+    List<WorkspaceResponse> responseList = new ArrayList<>();
+
+    for (org.pmiops.workbench.db.model.Workspace dbWorkspace : dbWorkspaces) {
+      org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace =
+          fcUuidWorkspaceMap.get(dbWorkspace.getFirecloudUuid());
+      if (!(fcUuidWorkspaceMap.containsKey(dbWorkspace.getFirecloudUuid()))) {
+        continue;
+      }
+
+      WorkspaceResponse currentWorkspace = new WorkspaceResponse();
+      currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
+      if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+        currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
+      } else {
+        currentWorkspace
+            .setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
+      }
+      responseList.add(currentWorkspace);
+    }
+
+    WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
+    response.setItems(responseList);
+
+    return Collections.emptyList();
   }
 
   @Override

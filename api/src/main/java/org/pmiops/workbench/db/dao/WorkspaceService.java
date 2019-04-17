@@ -9,24 +9,25 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 public interface WorkspaceService {
 
-  public static final String PROJECT_OWNER_ACCESS_LEVEL = "PROJECT_OWNER";
+  String PROJECT_OWNER_ACCESS_LEVEL = "PROJECT_OWNER";
 
-  public WorkspaceDao getDao();
-  public Workspace findByWorkspaceId(long workspaceId);
-  public FireCloudService getFireCloudService();
-  public Workspace get(String ns, String firecloudName);
-  public Workspace getByName(String ns, String name);
-  public Workspace getRequired(String ns, String firecloudName);
-  public Workspace getRequiredWithCohorts(String ns, String firecloudName);
-  public Workspace saveWithLastModified(Workspace workspace);
-  public List<Workspace> findForReview();
-  public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
-  public Workspace updateUserRoles(Workspace workspace, Set<WorkspaceUserRole> userRoleSet);
-  public Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to);
-  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId);
-  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(String workspaceNamespace,
+  WorkspaceDao getDao();
+  Workspace findByWorkspaceId(long workspaceId);
+  FireCloudService getFireCloudService();
+  Workspace get(String ns, String firecloudName);
+  List<Workspace> getWorkspaces(WorkspaceAccessLevel accessLevel);
+  Workspace getByName(String ns, String name);
+  Workspace getRequired(String ns, String firecloudName);
+  Workspace getRequiredWithCohorts(String ns, String firecloudName);
+  Workspace saveWithLastModified(Workspace workspace);
+  List<Workspace> findForReview();
+  void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
+  Workspace updateUserRoles(Workspace workspace, Set<WorkspaceUserRole> userRoleSet);
+  Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to);
+  WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId);
+  WorkspaceAccessLevel enforceWorkspaceAccessLevel(String workspaceNamespace,
       String workspaceId, WorkspaceAccessLevel requiredAccess);
-  public Workspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(String workspaceNamespace,
+  Workspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(String workspaceNamespace,
       String workspaceId, WorkspaceAccessLevel workspaceAccessLevel);
 
 }

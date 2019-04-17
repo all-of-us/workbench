@@ -525,8 +525,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
-    User user = userProvider.get();
-
     List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
         fireCloudService.getWorkspaces();
     Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcUuidWorkspaceMap =
@@ -537,6 +535,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     List<org.pmiops.workbench.db.model.Workspace> dbWorkspaces =
         workspaceService.getDao().findAllByFirecloudUuidIn(
+
             fcUuidWorkspaceMap.keySet().stream().collect(Collectors.toList()));
 
     List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
