@@ -1632,12 +1632,6 @@ def deploy(cmd_name, args)
     "Deploy, but do not yet serve traffic from this version - DB migrations are still applied"
   )
   op.add_validator ->(opts) { raise ArgumentError if opts.promote.nil?}
-  # TODO(RW-1975): Remove flag entirely.
-  op.add_option(
-    "--skip-public-api",
-    ->(opts, _) { opts.skip_public_api = true},
-    "Deprecated - public-api is never pushed"
-  )
 
   gcc = GcloudContextV2.new(op)
   op.parse.validate
