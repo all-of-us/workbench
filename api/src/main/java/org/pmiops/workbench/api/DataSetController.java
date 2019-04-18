@@ -24,7 +24,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetQuery;
-import org.pmiops.workbench.model.DataSetQueryResponse;
+import org.pmiops.workbench.model.DataSetQueryList;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.NamedParameterEntry;
 import org.pmiops.workbench.model.NamedParameterValue;
@@ -35,6 +35,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+/*
+ * A subclass to store the associated set of selects and joins for values for the data set builder.
+ *
+ * This is used to store the data pulled out of the linking table in bigquery.
+ */
 class ValuesLinkingPair {
   private List<String> selects;
   private List<String> joins;
@@ -79,8 +84,8 @@ public class DataSetController implements DataSetApiDelegate {
     this.workspaceService = workspaceService;
   }
 
-  public ResponseEntity<DataSetQueryResponse> getQueryFromDataSet(String ns, String wsid, DataSet dataSet) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(ns, wsid, WorkspaceAccessLevel.READER);
+  public ResponseEntity<DataSetQueryList> generateQuery(String workspaceNamespace, String workspaceId, DataSet dataSet) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     List<Cohort> cohortsSelected = this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds());
     List<ConceptSet> conceptSetsSelected = this.conceptSetDao.findAllByConceptSetIdIn(dataSet.getConceptSetIds());
@@ -91,7 +96,12 @@ public class DataSetController implements DataSetApiDelegate {
     Map<String, QueryParameterValue> cohortParameters = new HashMap<>();
     // Below constructs the union of all cohort queries
     String cohortQueries = cohortsSelected.stream().map(c -> {
-      SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(c), SearchRequest.class);
+      String cohortDefinition = c.getCriteria();
+      if (cohortDefinition == null) {
+        throw new NotFoundException(
+            String.format("Not Found: No Cohort definition matching cohortId: %s", c.getCohortId()));
+      }
+      SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
       QueryJobConfiguration participantIdQuery = participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
       QueryJobConfiguration participantQueryConfig = bigQueryService.filterBigQueryConfig(participantIdQuery);
       AtomicReference<String> participantQuery = new AtomicReference<>(participantQueryConfig.getQuery());
@@ -104,7 +114,6 @@ public class DataSetController implements DataSetApiDelegate {
       return participantQuery.get();
     }).collect(Collectors.joining(" OR PERSON_ID IN "));
 
-    DataSetQueryResponse resp = new DataSetQueryResponse();
     ArrayList<DataSetQuery> respQueryList = new ArrayList<>();
 
     for (Domain d: domainList) {
@@ -135,8 +144,7 @@ public class DataSetController implements DataSetApiDelegate {
       respQueryList.add(new DataSetQuery().domain(d).query(query).namedParameters(parameters));
     }
 
-    resp.setQueryList(respQueryList);
-    return ResponseEntity.ok(new DataSetQueryResponse().queryList(respQueryList));
+    return ResponseEntity.ok(new DataSetQueryList().queryList(respQueryList));
   }
 
   @VisibleForTesting
@@ -190,22 +198,5 @@ public class DataSetController implements DataSetApiDelegate {
     } else {
       throw new ServerErrorException("Unsupported query parameter type in query generation: " + value.getType().toString());
     }
-  }
-
-
-  /**
-   * Helper to method that consolidates access to Cohort Definition. Will throw a
-   * {@link NotFoundException} if {@link Cohort#getCriteria()} return null.
-   *
-   * @param cohort
-   * @return
-   */
-  private String getCohortDefinition(Cohort cohort) {
-    String definition = cohort.getCriteria();
-    if (definition == null) {
-      throw new NotFoundException(
-          String.format("Not Found: No Cohort definition matching cohortId: %s", cohort.getCohortId()));
-    }
-    return definition;
   }
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -134,12 +135,14 @@ public class UserService {
     boolean isInGroup = this.fireCloudService.
             isUserMemberOfGroup(user.getEmail(), configProvider.get().firecloud.registeredDomainName);
     if (shouldBeRegistered) {
+      log.log(Level.WARNING, "SHOULD BE REGISTERED");
       if (!isInGroup) {
         this.fireCloudService.addUserToGroup(user.getEmail(),
             configProvider.get().firecloud.registeredDomainName);
       }
       user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
     } else {
+      log.log(Level.WARNING, "SHOULD NOT BE REGISTERED");
       if (isInGroup) {
         this.fireCloudService.removeUserFromGroup(user.getEmail(),
             configProvider.get().firecloud.registeredDomainName);

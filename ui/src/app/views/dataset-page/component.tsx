@@ -300,7 +300,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       cohortIds: this.state.selectedCohortIds,
       values: valuesByDomain,
     };
-    const sqlQueries = await dataSetApi().getQueryFromDataSet(namespace, id, dataSet);
+    const sqlQueries = await dataSetApi().generateQuery(namespace, id, dataSet);
     this.setState({queries: sqlQueries.queryList});
   }
 

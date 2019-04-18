@@ -15,7 +15,6 @@ import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
-import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -100,63 +99,62 @@ public class DataSetControllerTest {
   SearchRequest searchRequest;
 
   @Autowired
-  CdrVersionDao cdrVersionDao;
-
-  @Autowired
   BigQueryService bigQueryService;
 
-  @Mock
-  Provider<User> userProvider;
-
   @Autowired
-  CohortDao cohortDao;
-
-  @Autowired
-  ConceptSetDao conceptSetDao;
-
-  @Autowired
-  ParticipantCounter participantCounter;
-
-  @Autowired
-  WorkspaceService workspaceService;
-
-  @Autowired
-  FireCloudService fireCloudService;
-
-  @Autowired
-  UserDao userDao;
-
-  @Autowired
-  CloudStorageService cloudStorageService;
-
-  @Autowired
-  UserService userService;
-
-  @Autowired
-  UserRecentResourceService userRecentResourceService;
-
-  @Autowired
-  CohortReviewDao cohortReviewDao;
-
-  @Autowired
-  CohortMaterializationService cohortMaterializationService;
+  CdrVersionDao cdrVersionDao;
 
   @Autowired
   CdrVersionService cdrVersionService;
 
   @Autowired
-  ConceptDao conceptDao;
+  CloudStorageService cloudStorageService;
+
+  @Autowired
+  CohortDao cohortDao;
+
+  @Autowired
+  CohortMaterializationService cohortMaterializationService;
+
+  @Autowired
+  CohortReviewDao cohortReviewDao;
 
   @Autowired
   ConceptBigQueryService conceptBigQueryService;
 
+  @Autowired
+  ConceptDao conceptDao;
+
+  @Autowired
+  ConceptSetDao conceptSetDao;
+
+  @Autowired
+  FireCloudService fireCloudService;
+
+  @Autowired
+  ParticipantCounter participantCounter;
+
+  @Autowired
+  UserDao userDao;
+
+  @Mock
+  Provider<User> userProvider;
+
+  @Autowired
+  UserRecentResourceService userRecentResourceService;
+
+  @Autowired
+  UserService userService;
+
+  @Autowired
+  WorkspaceService workspaceService;
+
   @TestConfiguration
-  @Import({WorkspaceServiceImpl.class, CohortService.class,
-      UserService.class, WorkspacesController.class, ConceptSetService.class})
-  @MockBean({BigQueryService.class, CdrVersionService.class, CohortMaterializationService.class,
-      ConceptBigQueryService.class, FireCloudService.class,
-      CloudStorageService.class, ConceptSetService.class, UserRecentResourceService.class,
-      ComplianceService.class, ParticipantCounter.class})
+  @Import({UserService.class, WorkspacesController.class, WorkspaceServiceImpl.class})
+  @MockBean({BigQueryService.class, CdrVersionService.class, CloudStorageService.class,
+      CohortMaterializationService.class, ConceptBigQueryService.class,
+      FireCloudService.class, ParticipantCounter.class,
+      UserRecentResourceService.class})
   static class Configuration {
     @Bean
     Clock clock() {
@@ -209,15 +207,17 @@ public class DataSetControllerTest {
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
-    workspacesController.setUserProvider(userProvider);
+//    workspacesController.setUserProvider(userProvider);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
     workspacesController.createWorkspace(workspace);
 
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
-    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
-        .thenReturn(fcResponse);
+//
+//
+//    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+//        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+//    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
+//    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+//        .thenReturn(fcResponse);
 
     searchRequest = SearchRequests.males();
     cohortCriteria = new Gson().toJson(searchRequest);
@@ -278,6 +278,29 @@ public class DataSetControllerTest {
         QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person").build());
     when(bigQueryService.filterBigQueryConfig(any())).thenReturn(
         QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person").build());
+  }
+
+  private DataSet buildEmptyDataSet() {
+    return new DataSet()
+        .conceptSetIds(new ArrayList<>())
+        .cohortIds(new ArrayList<>())
+        .values(new ArrayList<>());
+  }
+
+  private void stubGetWorkspace(String ns, String name, String creator,
+                                WorkspaceAccessLevel access) throws Exception {
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
+        new org.pmiops.workbench.firecloud.model.Workspace();
+    fcWorkspace.setNamespace(ns);
+    fcWorkspace.setName(name);
+    fcWorkspace.setCreatedBy(creator);
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setWorkspace(fcWorkspace);
+    fcResponse.setAccessLevel(access.toString());
+    when(fireCloudService.getWorkspace(ns, name)).thenReturn(
+        fcResponse
+    );
   }
 
 
@@ -393,27 +416,6 @@ public class DataSetControllerTest {
     assertThat(response.getQueryList().get(0).getQuery()).matches("SELECT(.*)WHERE CONDITION_CONCEPT_ID IN \\((.*)\\)(.*)PERSON_ID IN \\(SELECT(.*)OR PERSON_ID IN(.*)");
   }
 
-  private DataSet buildEmptyDataSet() {
-    return new DataSet()
-        .conceptSetIds(new ArrayList<>())
-        .cohortIds(new ArrayList<>())
-        .values(new ArrayList<>());
-  }
 
-  private void stubGetWorkspace(String ns, String name, String creator,
-                                WorkspaceAccessLevel access) throws Exception {
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        new org.pmiops.workbench.firecloud.model.Workspace();
-    fcWorkspace.setNamespace(ns);
-    fcWorkspace.setName(name);
-    fcWorkspace.setCreatedBy(creator);
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(access.toString());
-    when(fireCloudService.getWorkspace(ns, name)).thenReturn(
-        fcResponse
-    );
-  }
 
 }
