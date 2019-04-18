@@ -101,11 +101,14 @@ export class ListModalComponent implements OnInit, OnDestroy {
       .filter(wizard => !!wizard)
       .subscribe(wizard => {
         // reset to default each time the modal is opened
-        this.mode = 'tree';
-        this.title = wizard.domain;
         this.wizard = wizard;
         this.selectionList = wizard.item.searchParameters;
-        this.open = true;
+        this.noSelection = this.selectionList.length === 0;
+        if (!this.open) {
+          this.title = wizard.domain;
+          this.mode = 'tree';
+          this.open = true;
+        }
       });
 
     this.subscription.add(selectionsStore.subscribe(list => this.selectionIds = list));
@@ -129,7 +132,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
     this.subscription.add(this.selection$
       .subscribe(selections => {
         this.selections = {};
-        this.noSelection = selections.size === 0;
+        // this.noSelection = selections.size === 0;
         selections.forEach(selection => {
           if (this.isCondOrProc) {
             this.conceptType = selection.get('type') === TreeType[TreeType.SNOMED]
