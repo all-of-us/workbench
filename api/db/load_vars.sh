@@ -1,3 +1,5 @@
+#!/bin/bash
+
 for line in $(awk '!/^ *#/ && NF' $WORKBENCH_DIR/api/db/vars.env); do
   IFS='=' read -r var val <<< "$line"
 
