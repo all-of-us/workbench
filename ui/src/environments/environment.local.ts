@@ -10,7 +10,6 @@ export const environment: Environment = {
   tcellapikey: 'AQEBBAEkx4iE2KxNyI7Wx08EwU1ycTM7E4FMSmaibbMUQxNU6uQvuAJt7fyABAtFYSYfgEE',
   trainingUrl: 'https://aoudev.nnlm.gov',
   leoApiUrl: 'https://leonardo.dsde-dev.broadinstitute.org',
-  publicApiUrl: 'http://localhost:8083',
   publicUiUrl: 'http://localhost:4201',
   debug: true,
   gaId: 'UA-112406425-5',
