@@ -21,16 +21,17 @@ import {
   WorkspacesService,
 } from 'generated';
 
+import {
+  findElements,
+  simulateClick,
+  simulateInput
+} from 'testing/react-testing-utility';
+
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptsServiceStub} from 'testing/stubs/concepts-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
-import {
-  findElementsReact,
-  setupModals,
-  simulateClickReact,
-  simulateInputReact,
-  updateAndTick
-} from 'testing/test-helpers';
+
+import {setupModals, updateAndTick} from 'testing/test-helpers';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {ToolTipComponent} from 'app/views/tooltip/component';
@@ -90,33 +91,33 @@ describe('ConceptSetListComponent', () => {
   }));
 
   it('displays correct concept sets', fakeAsync(() => {
-    const conceptCards = findElementsReact(fixture, '[data-test-id="card-name"]')
+    const conceptCards = findElements(fixture, '[data-test-id="card-name"]')
         .map(el => el.innerText);
     expect(conceptCards.length).toEqual(3);
     expect(conceptCards[0]).toMatch('Mock Concept Set');
   }));
 
   it('displays correct information when concept set renamed', fakeAsync(() => {
-    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
+    simulateClick(fixture, '[data-test-id="resource-menu"]');
     tick();
-    simulateClickReact(fixture, '[data-test-id="pencil"]');
+    simulateClick(fixture, '[data-test-id="pencil"]');
     updateAndTick(fixture);
-    simulateInputReact(fixture, '[data-test-id="edit-name"]', 'testMockConcept');
-    simulateClickReact(fixture, '[data-test-id="save-edit"]');
+    simulateInput(fixture, '[data-test-id="edit-name"]', 'testMockConcept');
+    simulateClick(fixture, '[data-test-id="save-edit"]');
     tick(1000);
     updateAndTick(fixture);
-    const conceptCards = findElementsReact(fixture, '[data-test-id="card-name"]')
+    const conceptCards = findElements(fixture, '[data-test-id="card-name"]')
         .map(el => el.innerText);
     expect(conceptCards[0]).toMatch('testMockConcept');
   }));
 
   it('displays correct information when concept set deleted', fakeAsync(() => {
-    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
-    simulateClickReact(fixture, '[data-test-id="trash"]');
+    simulateClick(fixture, '[data-test-id="resource-menu"]');
+    simulateClick(fixture, '[data-test-id="trash"]');
     updateAndTick(fixture);
-    simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
+    simulateClick(fixture, '[data-test-id="confirm-delete"]');
     updateAndTick(fixture);
-    const conceptCards = findElementsReact(fixture, '[data-test-id="card-name"]');
+    const conceptCards = findElements(fixture, '[data-test-id="card-name"]');
     expect(conceptCards.length).toBe(2);
   }));
 });
