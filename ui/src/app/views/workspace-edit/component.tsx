@@ -348,7 +348,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               await workspacesApi().createWorkspace(this.state.workspace);
         } else if (this.isMode(WorkspaceEditMode.Clone)) {
           const cloneWorkspace = await workspacesApi().cloneWorkspace(
-            this.state.workspace.namespace, this.state.workspace.id,
+            this.props.workspace.namespace, this.props.workspace.id,
             {
               includeUserRoles: this.state.cloneUserRole,
               workspace: this.state.workspace
