@@ -24,3 +24,6 @@ for line in File.read("db/vars.env").split("\n").reject { |c| c.empty? }
 end
 
 File.write("src/main/webapp/WEB-INF/appengine-web.xml", xml)
+
+puts "Generated appengine-web.xml"
+puts xml
