@@ -46,7 +46,17 @@ const styles = reactStyles({
   },
   domainHeaderLink: {
     fontSize: '12px', fontWeight: 300, display: 'flex', flexDirection: 'column',
-    justifyContent: 'center', padding: '0.5rem', color: '#2691D0', lineHeight: '18px'
+    justifyContent: 'center', padding: '0.1rem 1rem', color: '#2691D0',
+    lineHeight: '18px'
+  },
+  domainHeaderSelected: {
+    height: '2.5px', width: '100%', backgroundColor: '#2691D0', border: 'none'
+  },
+  conceptCounts: {
+    backgroundColor: '#fff', height: '2rem', border: '1px solid #CCCCCC',
+    marginTop: '-1px', paddingLeft: '0.5rem', display: 'flex',
+    justifyContent: 'flex-start', lineHeight: '15px', fontWeight: 600, fontSize: '14px',
+    color: '#262262', alignItems: 'center'
   }
 });
 
@@ -155,8 +165,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
         if (searchTermLength < 3) {
           this.setState({showSearchError: true});
         } else {
-          this.setState({currentSearchString: e.target.value});
-          this.searchConcepts();
+          this.setState({currentSearchString: e.target.value}, this.searchConcepts);
         }
       }
     }
@@ -205,8 +214,6 @@ export const ConceptWrapper = withCurrentWorkspace()(
         completedDomainSearches.push(conceptDomain.domain);
         conceptDomain.items = this.convertToConceptInfo(resp.items);
         conceptDomain.vocabularyList = resp.vocabularyCounts;
-        // console.log(this.state.conceptsCache);
-
         if (activeTabSearch) {
           this.setState({
             searchLoading: false,
@@ -218,10 +225,6 @@ export const ConceptWrapper = withCurrentWorkspace()(
 
       });
 
-    }
-
-    filterList() {
-      // TODO
     }
 
     selectConcept(concepts: ConceptInfo[]) {
@@ -286,7 +289,9 @@ export const ConceptWrapper = withCurrentWorkspace()(
                        onKeyDown={e => {this.searchButton(e); }}/>
             <CheckBox checked={standardConceptsOnly}
                       style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
-                      onChange={() => this.setState({standardConceptsOnly: !standardConceptsOnly})}/>
+                      onChange={() => this.setState({
+                        standardConceptsOnly: !standardConceptsOnly
+                      })}/>
             <label style={{marginLeft: '0.2rem'}}>
               Standard concepts only
             </label>
@@ -304,17 +309,21 @@ export const ConceptWrapper = withCurrentWorkspace()(
             <FadeBox>
               <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
                 {conceptDomainCounts.map((domain) => {
-                  return <Clickable style={domain === selectedDomain ?
-                    {fontWeight: 600, ...styles.domainHeaderLink} : styles.domainHeaderLink}
-                                    onClick={() => this.selectDomain(domain)}
-                                    disabled={this.domainLoading(domain)}>
+                  return <div style={{display: 'flex', flexDirection: 'column'}}>
+                    <Clickable style={domain === selectedDomain ?
+                      {fontWeight: 600, ...styles.domainHeaderLink} : styles.domainHeaderLink}
+                               onClick={() => this.selectDomain(domain)}
+                               disabled={this.domainLoading(domain)}>
                     <div style={{fontSize: '16px'}}>{domain.name}</div>
                     <div>{domain.conceptCount}</div>
-                    {domain === selectedDomain && <div>selected</div>}
-                  </Clickable>;
+                  </Clickable>
+                  {domain === selectedDomain && <hr style={styles.domainHeaderSelected}/>}
+                  </div>;
                 })}
               </div>
-
+              <div style={styles.conceptCounts}>
+                Showing top {concepts.length} of {selectedDomain.conceptCount} {selectedDomain.name}
+              </div>
               <ConceptTable concepts={concepts}
                             loading={searchLoading}
                             getSelectedConcepts={() => this.selectConcept}
