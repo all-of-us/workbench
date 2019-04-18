@@ -173,7 +173,6 @@ def dev_up()
     docker-compose run update-config
     -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
   }
-
   run_api()
 end
 
@@ -182,35 +181,6 @@ Common.register_command({
   :description => "Brings up the development environment, including db migrations and config " \
      "update. (You can use run-api instead if database and config are up-to-date.)",
   :fn => ->() { dev_up() }
-})
-
-def start_api_reqs()
-  common = Common.new
-  common.status "Starting database..."
-  common.run_inline %W{docker-compose up -d db}
-  common.status "Starting elastic..."
-  common.run_inline %W{docker-compose up -d elastic}
-end
-
-Common.register_command({
-  :invocation => "start-api-reqs",
-  :description => "Starts up the services required for the API server" \
-     "(assumes database and config are already up-to-date.)",
-  :fn => Proc.new { start_api_reqs() }
-})
-
-def stop_api_reqs()
-  common = Common.new
-  common.status "Stopping database..."
-  common.run_inline %W{docker-compose stop db}
-  common.status "Stopping elastic..."
-  common.run_inline %W{docker-compose stop elastic}
-end
-
-Common.register_command({
-  :invocation => "stop-api-reqs",
-  :description => "Stops the services required for the API server",
-  :fn => Proc.new { stop_api_reqs() }
 })
 
 def setup_local_environment()
@@ -250,7 +220,6 @@ def start_local_api()
   setup_local_environment
   common = Common.new
   common.status "Starting API server..."
-  ENV["OVERWRITE_WORKBENCH_DB_HOST"] = "true"
   common.run_inline %W{gradle appengineStart}
 end
 
