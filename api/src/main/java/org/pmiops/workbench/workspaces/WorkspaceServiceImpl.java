@@ -81,7 +81,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces = getFirecloudWorkspaces();
     List<org.pmiops.workbench.db.model.Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
-    dbWorkspaces.stream()
+    return dbWorkspaces.stream()
         .filter(dbWorkspace -> fcWorkspaces.containsKey(dbWorkspace.getFirecloudUuid())) // is this needed?
         .map(dbWorkspace -> {
           String fcWorkspaceAccessLevel = fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
@@ -91,8 +91,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
           return currentWorkspace;
         }).filter(workspaceResponse -> workspaceResponse.getAccessLevel().compareTo(requiredAccessLevel) >= 0)
         .collect(Collectors.toList());
-
-    return Collections.emptyList();
   }
 
   private Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> getFirecloudWorkspaces() {

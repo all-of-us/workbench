@@ -357,10 +357,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces(WorkspaceAccessLevel requiredAccessLevel) {
-    if (requiredAccessLevel == null) {
+  public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces(String requiredAccessLevelStr) {
+    WorkspaceAccessLevel requiredAccessLevel;
+    if (requiredAccessLevelStr == null) {
       // This was the default behavior of getWorkspaces before access levels were introduced
       requiredAccessLevel = WorkspaceAccessLevel.READER;
+    } else {
+      // Refactor (Swagger 3) - If/when we upgrade to Swagger 3, we can have it parse the string into WorkspaceAccessLevel for us
+      requiredAccessLevel = WorkspaceAccessLevel.fromValue(requiredAccessLevelStr);
+      if (requiredAccessLevel == null) {
+        throw new BadRequestException("Invalid required WorkspaceAccessLevel: " + requiredAccessLevelStr);
+      }
     }
 
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
