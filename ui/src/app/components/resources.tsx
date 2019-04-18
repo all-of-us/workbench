@@ -29,7 +29,6 @@ export const ResourceCardMenu: React.FunctionComponent<{
           return <React.Fragment>
             <MenuItem icon='pencil' onClick={onRenameNotebook}>Rename</MenuItem>
             <MenuItem icon='copy' onClick={onCloneResource}>Duplicate</MenuItem>
-            <MenuItem icon='copy' onClick={onCopyResource}>Copy to another workspace</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
             {
               environment.enableJupyterLab &&
