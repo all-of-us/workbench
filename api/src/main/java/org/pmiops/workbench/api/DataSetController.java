@@ -173,7 +173,7 @@ public class DataSetController implements DataSetApiDelegate {
     List<String> valueSelects = new ArrayList<>();
     valuesLinking.getValues().forEach((value) -> {
       valueJoins.add(value.get("JOIN_VALUE").getStringValue());
-      if (!value.get("OMOP_SQL").getStringValue().equals("SENTINEL_PLACEHOLDER_VALUE")) {
+      if (!value.get("OMOP_SQL").getStringValue().equals("CORE_TABLE_FOR_DOMAIN")) {
         valueSelects.add(value.get("OMOP_SQL").getStringValue());
       }
     });
