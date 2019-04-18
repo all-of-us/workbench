@@ -104,10 +104,13 @@ All commands should be run from `workbench/api`
 
 ##### Setup
 * Install Java 8
-* Add following to `~/.bash_profile`. Note: Your Java8 library directory may be different
-    * ```Shell
+* Add following to `~/.bash_profile`. Note: 
+    * Your Java8 library directory may be different.  
+      YOUR_WORKBENCH_DIRECTORY_PATH is the pathname to your workbench git repo.
+      ```Shell
       export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home
-      export OVERWRITE_WORKBENCH_DB_HOST=true
+      export WORKBENCH_DIR=[YOUR_WORKBENCH_DIRECTORY_PATH]
+      source $WORKBENCH_DIR/api/db/load_vars.sh
       ```
     * Source your bash profile or open a new terminal
       ```Shell
