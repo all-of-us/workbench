@@ -15,6 +15,7 @@ import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -32,7 +33,7 @@ import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetQueryResponse;
+import org.pmiops.workbench.model.DataSetQueryList;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuesResponse;
@@ -152,9 +153,9 @@ public class DataSetControllerTest {
   @TestConfiguration
   @Import({UserService.class, WorkspacesController.class, WorkspaceServiceImpl.class})
   @MockBean({BigQueryService.class, CdrVersionService.class, CloudStorageService.class,
-      CohortMaterializationService.class, ConceptBigQueryService.class,
-      FireCloudService.class, ParticipantCounter.class,
-      UserRecentResourceService.class})
+      CohortMaterializationService.class, CohortService.class, ComplianceService.class,
+      ConceptBigQueryService.class, ConceptSetService.class, FireCloudService.class,
+      ParticipantCounter.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
     Clock clock() {
@@ -310,7 +311,7 @@ public class DataSetControllerTest {
     DataSet dataSet = buildEmptyDataSet();
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
-    dataSetController.getQueryFromDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
+    dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
   }
 
   @Test(expected = BadRequestException.class)
@@ -318,7 +319,7 @@ public class DataSetControllerTest {
     DataSet dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
 
-    dataSetController.getQueryFromDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
+    dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
   }
 
   @Test
@@ -327,7 +328,7 @@ public class DataSetControllerTest {
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
-    DataSetQueryResponse response = dataSetController.getQueryFromDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
+    DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList()).isEmpty();
   }
 
@@ -350,10 +351,11 @@ public class DataSetControllerTest {
     dataSetController = spy(dataSetController);
     doReturn(new ValuesLinkingPair(selectStrings, joinStrings)).when(dataSetController).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
 
-    DataSetQueryResponse response = dataSetController.getQueryFromDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
+    DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList().size()).isEqualTo(1);
     verify(dataSetController, times(1)).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
-    assertThat(response.getQueryList().get(0).getQuery()).matches("SELECT(.*)WHERE CONDITION_CONCEPT_ID IN \\((.*)\\)(.*)PERSON_ID IN \\(SELECT(.*)");
+    System.err.println(response.getQueryList().get(0).getQuery());
+    assertThat(response.getQueryList().get(0).getQuery()).matches("SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence WHERE (CONDITION_CONCEPT_ID IN () OR CONDITION_SOURCE_CONCEPT_ID IN ()) AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
   }
 
   @Test
@@ -384,7 +386,7 @@ public class DataSetControllerTest {
     doReturn(new ValuesLinkingPair(selectConditionStrings, joinConditionStrings)).when(dataSetController).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
     doReturn(new ValuesLinkingPair(selectDrugStrings, joinDrugStrings)).when(dataSetController).getValueSelectsAndJoins(valueSetTwo, Domain.DRUG);
 
-    DataSetQueryResponse response = dataSetController.getQueryFromDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
+    DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList()).isNotEmpty();
     verify(dataSetController, times(2)).getValueSelectsAndJoins(any(), any());
     assertThat(response.getQueryList().size()).isEqualTo(2);
@@ -410,10 +412,10 @@ public class DataSetControllerTest {
     dataSetController = spy(dataSetController);
     doReturn(new ValuesLinkingPair(selectStrings, joinStrings)).when(dataSetController).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
 
-    DataSetQueryResponse response = dataSetController.getQueryFromDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
+    DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList().size()).isEqualTo(1);
     verify(dataSetController, times(1)).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
-    assertThat(response.getQueryList().get(0).getQuery()).matches("SELECT(.*)WHERE CONDITION_CONCEPT_ID IN \\((.*)\\)(.*)PERSON_ID IN \\(SELECT(.*)OR PERSON_ID IN(.*)");
+    assertThat(response.getQueryList().get(0).getQuery()).contains("UNION PERSON_ID IN");
   }
 
 

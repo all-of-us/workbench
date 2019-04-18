@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -58,9 +61,38 @@ class ValuesLinkingPair {
   }
 }
 
+/*
+ * A subclass used to store a source and a standard concept ID column name.
+ */
+class DomainConceptIds {
+  private String sourceConceptIdColumn;
+  private String standardConceptIdColumn;
+
+  DomainConceptIds(String sourceConceptIdColumn, String standardConceptIdColumn) {
+    this.sourceConceptIdColumn = sourceConceptIdColumn;
+    this.standardConceptIdColumn = standardConceptIdColumn;
+  }
+
+  public String getSourceConceptIdColumn() {
+    return this.sourceConceptIdColumn;
+  }
+  public String getStandardConceptIdColumn() {
+    return this.standardConceptIdColumn;
+  }
+}
+
 @RestController
 public class DataSetController implements DataSetApiDelegate {
+  private final Map<Domain, DomainConceptIds> conceptIdMap = new ImmutableMap.Builder<Domain, DomainConceptIds>()
+      .put(Domain.CONDITION, new DomainConceptIds("CONDITION_SOURCE_CONCEPT_ID", "CONDITION_CONCEPT_ID"))
+      .put(Domain.DRUG, new DomainConceptIds("DRUG_SOURCE_CONCEPT_ID", "DRUG_CONCEPT_ID"))
+      .put(Domain.MEASUREMENT, new DomainConceptIds("MEASUREMENT_SOURCE_CONCEPT_ID", "MEASUREMENT_CONCEPT_ID"))
+      .put(Domain.PROCEDURE, new DomainConceptIds("PROCEDURE_SOURCE_CONCEPT_ID", "PROCEDURE_CONCEPT_ID"))
+      .build();
+
   private BigQueryService bigQueryService;
+
+  private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
 
   private CohortDao cohortDao;
 
@@ -70,14 +102,17 @@ public class DataSetController implements DataSetApiDelegate {
 
   private WorkspaceService workspaceService;
 
+
   @Autowired
   DataSetController(
       BigQueryService bigQueryService,
+      CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
       ParticipantCounter participantCounter,
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
+    this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
     this.participantCounter = participantCounter;
@@ -85,6 +120,10 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   public ResponseEntity<DataSetQueryList> generateQuery(String workspaceNamespace, String workspaceId, DataSet dataSet) {
+
+    CdrBigQuerySchemaConfig bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
+
+
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     List<Cohort> cohortsSelected = this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds());
@@ -138,8 +177,23 @@ public class DataSetController implements DataSetApiDelegate {
       String conceptSetQueries = conceptSetsSelected.stream().filter(cs -> d == cs.getDomainEnum())
           .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
           .collect(Collectors.joining(", "));
-      query = query.concat(" WHERE " + d.toString() + "_CONCEPT_ID IN (" + conceptSetQueries + ")");
-      query = query.concat(" AND (PERSON_ID IN (" + cohortQueries + "))");
+      String conceptSetListQuery = " IN (" + conceptSetQueries + ")";
+
+      String standardColumnConceptIdName;
+      String sourceColumnConceptIdName;
+
+      Optional<DomainConceptIds> domainConceptIds = bigQuerySchemaConfig.cohortTables.values().stream().filter(config -> d.toString().equals(config.domain))
+          .map(tableConfig -> new DomainConceptIds(getColumnName(tableConfig, "source"), getColumnName(tableConfig, "standard")))
+          .findFirst();
+      if (!domainConceptIds.isPresent()) {
+        throw new ServerErrorException("Couldn't find source and standard columns for domain: " + d.toString());
+      }
+      DomainConceptIds columnNames = domainConceptIds.get();
+
+      // This adds the where clauses for cohorts and concept sets.
+      query = query.concat(" WHERE (" + columnNames.getStandardConceptIdColumn() + conceptSetListQuery
+          + " OR " + columnNames.getSourceConceptIdColumn() + conceptSetListQuery + ") AND (PERSON_ID IN ("
+          + cohortQueries + "))");
 
       respQueryList.add(new DataSetQuery().domain(d).query(query).namedParameters(parameters));
     }
@@ -179,6 +233,16 @@ public class DataSetController implements DataSetApiDelegate {
     });
 
     return new ValuesLinkingPair(valueSelects, valueJoins);
+  }
+
+  private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {
+    Optional<CdrBigQuerySchemaConfig.ColumnConfig> conceptColumn = config.columns
+        .stream().filter(column -> type.equals(column.domainConcept))
+        .findFirst();
+    if (!conceptColumn.isPresent()) {
+      throw new ServerErrorException("Domain not supported");
+    }
+    return conceptColumn.get().name;
   }
 
   private NamedParameterEntry generateResponseFromQueryParameter(String key, QueryParameterValue value) {
