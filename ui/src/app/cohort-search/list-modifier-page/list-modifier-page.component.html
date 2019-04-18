@@ -3,7 +3,7 @@
     <div class="modifier-header">
       The following modifiers are optional and apply to all selected criteria
     </div>
-    <div *ngIf="preview.get('error')" class="alert alert-danger alert-sm">
+    <div *ngIf="preview.error" class="alert alert-danger alert-sm">
       <div class="alert-items">
         <div class="alert-item static">
           <div class="alert-text">
@@ -107,21 +107,21 @@
     <div class="col-lg-3">
       <button type="button"
         class="btn calculate-btn"
-        [clrLoading]="preview.get('requesting')"
+        [clrLoading]="preview.requesting"
         (click)="requestPreview()"
         [disabled]="disableCalculate || !formChanges">
         Calculate
       </button>
     </div>
-    <ng-container *ngIf="!preview.get('requesting')">
-      <div class="col-lg-8 text-padding" *ngIf="preview.get('count') >= 0">
+    <ng-container *ngIf="!preview.requesting">
+      <div class="col-lg-8 text-padding" *ngIf="preview.count >= 0">
         <div class="result-text">
           Results
         </div>
         <div>
           Number Participants:
-          <span class="text-bold" *ngIf="!preview.get('requesting')">
-         {{ preview.get('count', 0) | number }}
+          <span class="text-bold" *ngIf="!preview.requesting">
+         {{ preview.count | number }}
         </span>
         </div>
       </div>

@@ -1,26 +1,11 @@
-import {select} from '@angular-redux/store';
-import {
-  AfterContentChecked,
-  ChangeDetectorRef,
-  Component,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  OnInit,
-} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
-import {
-  activeCriteriaType,
-  activeModifierList,
-  CohortSearchActions,
-  previewStatus,
-} from 'app/cohort-search/redux';
+import {wizardStore} from 'app/cohort-search/search-state.service';
 import {dateValidator, integerAndRangeValidator} from 'app/cohort-search/validators';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderService, ModifierType, Operator, TreeType} from 'generated';
-import {fromJS, List, Map} from 'immutable';
+import {List} from 'immutable';
 import * as moment from 'moment';
-import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 @Component({
@@ -28,15 +13,13 @@ import {Subscription} from 'rxjs/Subscription';
   templateUrl: './list-modifier-page.component.html',
   styleUrls: ['./list-modifier-page.component.css']
 })
-export class ListModifierPageComponent implements OnInit, OnDestroy, AfterContentChecked {
-  @select(activeCriteriaType) ctype$;
-  @select(activeModifierList) modifiers$;
-  @select(previewStatus) preview$;
+export class ListModifierPageComponent implements OnInit, OnDestroy {
   @Input() disabled: Function;
+  @Input() wizard: any;
   formChanges = false;
-  ctype: string;
+  domain: string;
   existing = List();
-  preview = Map();
+  preview: any = {count: -1};
   dateObjs = [null , null];
   subscription: Subscription;
   dropdownOption = {
@@ -124,134 +107,54 @@ export class ListModifierPageComponent implements OnInit, OnDestroy, AfterConten
   dateA = new FormControl();
   dateB = new FormControl();
   errors = new Set();
-  constructor(
-    private actions: CohortSearchActions,
-    private api: CohortBuilderService,
-    private cdref: ChangeDetectorRef,
-  ) {}
+  constructor(private api: CohortBuilderService) {}
 
   ngOnInit() {
+    console.log(this.wizard);
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    this.subscription = this.modifiers$.subscribe(mods => this.existing = mods);
-    this.subscription.add(this.ctype$
-      .filter(ctype => !! ctype)
-      .subscribe(ctype => {
-        this.ctype = ctype;
-        if (this.addEncounters) {
-          this.modifiers.push({
-            name: 'encounters',
-            label: 'During Visit Type',
-            inputType: null,
-            min: null,
-            max: null,
-            maxLength: null,
-            modType: ModifierType.ENCOUNTERS,
-            operators: [{
-              name: 'Any',
-              value: undefined,
-            }]
-          });
-          this.form.addControl('encounters',
-            new FormGroup({operator: new FormControl(),
-              encounterType: new FormControl()}));
-          this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
-            .filter(response => !!response)
-            .subscribe(response => {
-              this.visitCounts = {};
-              response.items.forEach(option => {
-                if (option.parentId === 0 && option.count > 0) {
-                  this.modifiers[3].operators.push({
-                    name: option.name,
-                    value: option.conceptId.toString()
-                  });
-                  this.visitCounts[option.conceptId] = option.count;
-                }
-              });
-            });
-        }
-      })
-    );
-
-    this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
-
-    // This reseeds the form with existing data if we're editing an existing group
-    this.subscription.add(this.modifiers$.first().subscribe(mods => {
-      mods.forEach(mod => {
-        const meta = this.modifiers.find(_mod => mod.get('name') === _mod.modType);
-        if (meta) {
-          if (meta.modType === ModifierType.ENCOUNTERS) {
-            let selected;
-            // make sure the encounters options are loaded before setting the value
-            Observable.interval(100)
-              .takeWhile((val, index) => !selected && index < 30)
-              .subscribe(i => {
-                selected = meta.operators.find(
-                  operator => operator.value
-                    && operator.value.toString() === mod.getIn(['operands', 0])
-                );
-                if (selected) {
-                  this.dropdownOption.selected[3] = selected.name;
-                  this.form.get(meta.name).patchValue({
-                    operator: mod.getIn(['operands', 0]),
-                    encounterType: mod.get('encounterType')
-                  }, {emitEvent: false});
-                }
-              });
-          } else {
-            const selected = meta.operators.find(
-              operator => operator.value === mod.get('operator')
-            );
-            const index = this.modifiers.indexOf(meta);
-            this.dropdownOption.selected[index] = selected.name;
-            this.ngAfterContentChecked();
-            if (meta.modType === ModifierType.EVENTDATE) {
-              this.dateObjs = [
-                new Date(mod.getIn(['operands', 0]) + 'T08:00:00'),
-                new Date(mod.getIn(['operands', 1]) + 'T08:00:00')
-              ];
-            }
-            this.form.get(meta.name).patchValue({
-              operator: mod.get('operator'),
-              valueA: mod.getIn(['operands', 0]),
-              valueB: mod.getIn(['operands', 1]),
-            }, {emitEvent: false});
-          }
-        }
+    this.domain = this.wizard.domain;
+    if (this.addEncounters) {
+      this.modifiers.push({
+        name: 'encounters',
+        label: 'During Visit Type',
+        inputType: null,
+        min: null,
+        max: null,
+        maxLength: null,
+        modType: ModifierType.ENCOUNTERS,
+        operators: [{
+          name: 'Any',
+          value: undefined,
+        }]
       });
-    }));
+      this.form.addControl('encounters',
+        new FormGroup({operator: new FormControl(),
+          encounterType: new FormControl()}));
+      this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
+        .filter(response => !!response)
+        .subscribe(response => {
+          this.visitCounts = {};
+          response.items.forEach(option => {
+            if (option.parentId === 0 && option.count > 0) {
+              this.modifiers[3].operators.push({
+                name: option.name,
+                value: option.conceptId.toString()
+              });
+              this.visitCounts[option.conceptId] = option.count;
+            }
+          });
+          this.getExisting();
+        });
+    } else {
+      this.getExisting();
+    }
 
-    this.subscription.add(this.form.valueChanges
-      .do(console.log)
-      .map(vals => this.currentMods(vals))
+    this.subscription = this.form.valueChanges
+      .map(this.currentMods)
       .subscribe(newMods => {
-        /*
-         * NOTE: the way this process works is basically as follows: 1) compute
-         * a modifier per modifier category 2) merge those with the existing
-         * modifiers 3) check for any existing modifiers that no longer exist
-         * and remove them 4) iterate through the new mods and add them
-         *
-         * This is a "good enough for now" kind of thing.  If it gets too slow,
-         * then the faster way would be to have an "update mods" action" and
-         * move all the work into the reducer, effectively ending the story at
-         * step two.  Leaving it this way, though, gives us some flexibility
-         * with individual modifiers if we need it.
-         */
-        this.existing
-          .filter(mod => !newMods.includes(mod))
-          .forEach(mod => this.actions.removeModifier(mod));
-
-        // dispatch the new
-        newMods
-          .filter(mod => !!mod)
-          .filter(mod => !this.existing.includes(mod))
-          .forEach(mod => this.actions.addModifier(mod));
-
-        // update the calculate button
-        this.formChanges = !newMods.every(element => element === undefined);
-        // clear preview/counts
-        this.preview = Map();
-      })
-    );
+        this.wizard.item.modifiers = newMods.filter(mod => !!mod);
+        wizardStore.next(this.wizard);
+      });
 
     this.subscription.add(this.dateA.valueChanges.subscribe(value => {
       const formatted = moment(value).format('YYYY-MM-DD');
@@ -264,8 +167,43 @@ export class ListModifierPageComponent implements OnInit, OnDestroy, AfterConten
     }));
   }
 
-  ngAfterContentChecked() {
-    this.cdref.detectChanges();
+  getExisting() {
+    // This reseeds the form with existing data if we're editing an existing group
+    this.wizard.item.modifiers.forEach(mod => {
+      const meta = this.modifiers.find(_mod => mod.name === _mod.modType);
+      if (meta) {
+        if (meta.modType === ModifierType.ENCOUNTERS) {
+          const selected = meta.operators.find(
+            operator => operator.value
+              && operator.value.toString() === mod.operands[0]
+          );
+          if (selected) {
+            this.dropdownOption.selected[3] = selected.name;
+            this.form.get(meta.name).patchValue({
+              operator: mod.operands[0],
+              encounterType: mod.encounterType
+            }, {emitEvent: false});
+          }
+        } else {
+          const selected = meta.operators.find(
+            operator => operator.value === mod.operator
+          );
+          const index = this.modifiers.indexOf(meta);
+          this.dropdownOption.selected[index] = selected.name;
+          if (meta.modType === ModifierType.EVENTDATE) {
+            this.dateObjs = [
+              new Date(mod.operands[0] + 'T08:00:00'),
+              new Date(mod.operands[1] + 'T08:00:00')
+            ];
+          }
+          this.form.get(meta.name).patchValue({
+            operator: mod.operator,
+            valueA: mod.operands[0],
+            valueB: mod.operands[1],
+          }, {emitEvent: false});
+        }
+      }
+    });
   }
 
   showCount(modName: string, optName: string) {
@@ -277,12 +215,12 @@ export class ListModifierPageComponent implements OnInit, OnDestroy, AfterConten
     const modForm = <FormArray>this.form.controls[mod.name];
     const valueForm = <FormArray>modForm;
     if (mod.name === 'encounters') {
-      valueForm.get('encounterType').patchValue(opt.name);
+      valueForm.get('encounterType').patchValue(opt.name, {emitEvent: false});
     } else {
       if (opt.name === 'Any') {
         this.form.get([mod.name, 'valueA']).clearValidators();
         this.form.get([mod.name, 'valueB']).clearValidators();
-        this.form.get(mod.name).reset();
+        this.form.get(mod.name).reset({}, {emitEvent: false});
       } else {
         const validators = [Validators.required];
         if (mod.modType === ModifierType.EVENTDATE) {
@@ -296,15 +234,14 @@ export class ListModifierPageComponent implements OnInit, OnDestroy, AfterConten
           this.form.get([mod.name, 'valueB']).setValidators(validators);
         } else {
           this.form.get([mod.name, 'valueB']).clearValidators();
-          this.form.get([mod.name, 'valueB']).reset();
+          this.form.get([mod.name, 'valueB']).reset(null, {emitEvent: false});
         }
       }
     }
     valueForm.get('operator').patchValue(opt.value);
   }
 
-  currentMods(vals) {
-    this.ngAfterContentChecked();
+  currentMods = (vals) => {
     this.errors = new Set();
     return this.modifiers.map(mod => {
       const {name, inputType, maxLength, modType} = mod;
@@ -312,9 +249,9 @@ export class ListModifierPageComponent implements OnInit, OnDestroy, AfterConten
         if (!vals[name].operator) {
           return;
         }
-        return fromJS({name: modType, operator: 'IN',
+        return {name: modType, operator: 'IN',
           encounterType: vals[name].encounterType.toString(),
-          operands: [vals[name].operator.toString()]});
+          operands: [vals[name].operator.toString()]};
       } else {
         const {operator, valueA, valueB} = vals[name];
         const between = operator === 'BETWEEN';
@@ -332,7 +269,7 @@ export class ListModifierPageComponent implements OnInit, OnDestroy, AfterConten
           if (between && dateValueB) {
             operands.push(dateValueB);
           }
-          return fromJS({name: modType, operator, operands});
+          return {name: modType, operator, operands};
         } else {
           const operands = [valueA];
           if (between) {
@@ -345,19 +282,19 @@ export class ListModifierPageComponent implements OnInit, OnDestroy, AfterConten
               this.form.get([name, input]).setValue(value, {emitEvent: false});
             }
           });
-          return fromJS({name: modType, operator, operands});
+          return {name: modType, operator, operands};
         }
       }
     });
   }
 
   get addEncounters() {
-    return [TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(TreeType[this.ctype]) === -1
+    return [TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(TreeType[this.domain]) === -1
       && !this.modifiers.find(modifier => modifier.modType === ModifierType.ENCOUNTERS);
   }
 
   requestPreview() {
-    this.actions.requestPreview();
+    // TODO calculate count when new api call is ready
   }
 
   ngOnDestroy() {
@@ -370,7 +307,7 @@ export class ListModifierPageComponent implements OnInit, OnDestroy, AfterConten
   }
 
   get disableCalculate() {
-    const disable = !!this.preview.get('requesting') || !!this.errors.size || this.form.invalid;
+    const disable = !!this.preview.requesting || !!this.errors.size || this.form.invalid;
     this.disabled(disable);
     return disable;
   }
