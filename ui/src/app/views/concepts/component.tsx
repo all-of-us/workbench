@@ -3,8 +3,9 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {AlertClose, AlertDanger} from 'app/components/alert';
-import {Clickable, Link} from 'app/components/buttons';
+import {Clickable} from 'app/components/buttons';
 import {WorkspaceCardBase} from 'app/components/card';
+import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -12,8 +13,7 @@ import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {ConceptTable} from 'app/views/concept-table/component';
-import {Concept, Domain, DomainCount, DomainInfo, StandardConceptFilter, VocabularyCount,} from 'generated/fetch';
-import {FadeBox} from "app/components/containers";
+import {Concept, Domain, DomainCount, DomainInfo, StandardConceptFilter, VocabularyCount, } from 'generated/fetch';
 
 const styles = reactStyles({
   searchBar: {
@@ -45,8 +45,8 @@ const styles = reactStyles({
     marginBottom: '0.3rem'
   },
   domainHeaderLink: {
-    fontSize: '16px', fontWeight: 600, display: 'flex', flexDirection: 'column',
-    justifyContent: 'center', padding: '0.1rem', color: '#2691D0'
+    fontSize: '12px', fontWeight: 300, display: 'flex', flexDirection: 'column',
+    justifyContent: 'center', padding: '0.5rem', color: '#2691D0', lineHeight: '18px'
   }
 });
 
@@ -163,10 +163,10 @@ export const ConceptWrapper = withCurrentWorkspace()(
 
     selectDomain(domainCount: DomainCount) {
       if (!this.state.selectedConceptDomainMap[domainCount.domain]) {
-        this.setState(fp.update(['selectedConceptDomainMap', domainCount.domain], fp.pull(0)));
+        this.setState(fp.set(['selectedConceptDomainMap', domainCount.domain], 0));
       }
-      this.setState({selectedDomain: domainCount});
-      this.setConceptsAndVocabularies();
+      this.setState({selectedDomain: domainCount},
+        this.setConceptsAndVocabularies);
     }
 
     setConceptsAndVocabularies() {
@@ -205,7 +205,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
         completedDomainSearches.push(conceptDomain.domain);
         conceptDomain.items = this.convertToConceptInfo(resp.items);
         conceptDomain.vocabularyList = resp.vocabularyCounts;
-        console.log(this.state.conceptsCache);
+        // console.log(this.state.conceptsCache);
 
         if (activeTabSearch) {
           this.setState({
@@ -225,7 +225,12 @@ export const ConceptWrapper = withCurrentWorkspace()(
     }
 
     selectConcept(concepts: ConceptInfo[]) {
-      // TODO
+      const {selectedDomain} = this.state;
+      this.setState({conceptsToAdd: concepts});
+      this.setState(fp.set(['selectedConceptDomain', selectedDomain.domain],
+        concepts.filter(concept => {
+        return concept.domainId.toLowerCase() === selectedDomain.domain.toString().toLowerCase();
+      }).length));
     }
 
     convertToConceptInfo(concepts: Concept[]): ConceptInfo[] {
@@ -259,10 +264,10 @@ export const ConceptWrapper = withCurrentWorkspace()(
       this.searchConcepts();
     }
 
-    // domainLoading(domain) {
-    //   return this.state.searchLoading || !this.state.completedDomainSearches
-    //     .includes(domain.domain);
-    // }
+    domainLoading(domain) {
+      return this.state.searchLoading || !this.state.completedDomainSearches
+        .includes(domain.domain);
+    }
 
     get noConceptsConstant() {
       return 'No concepts found for domain \'' + this.state.selectedDomain.name + '\' this search.';
@@ -270,7 +275,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
 
     render() {
       const {loadingDomains, conceptDomainList, standardConceptsOnly, showSearchError,
-        searching, concepts, searchLoading, conceptDomainCounts} = this.state;
+        searching, concepts, searchLoading, conceptDomainCounts, selectedDomain} = this.state;
       return <React.Fragment>
         <div style={{marginBottom: '6%', marginTop: '1.5%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
@@ -299,9 +304,13 @@ export const ConceptWrapper = withCurrentWorkspace()(
             <FadeBox>
               <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
                 {conceptDomainCounts.map((domain) => {
-                  return <Clickable style={styles.domainHeaderLink}>
-                    <div>{domain.name}</div>
+                  return <Clickable style={domain === selectedDomain ?
+                    {fontWeight: 600, ...styles.domainHeaderLink} : styles.domainHeaderLink}
+                                    onClick={() => this.selectDomain(domain)}
+                                    disabled={this.domainLoading(domain)}>
+                    <div style={{fontSize: '16px'}}>{domain.name}</div>
                     <div>{domain.conceptCount}</div>
+                    {domain === selectedDomain && <div>selected</div>}
                   </Clickable>;
                 })}
               </div>
