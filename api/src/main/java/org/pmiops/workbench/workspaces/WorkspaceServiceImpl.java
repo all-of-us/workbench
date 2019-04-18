@@ -49,13 +49,28 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
-  @Autowired private CohortCloningService cohortCloningService;
-  @Autowired private ConceptSetService conceptSetService;
-  @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private WorkspaceMapper workspaceMapper;
+  private CohortCloningService cohortCloningService;
+  private ConceptSetService conceptSetService;
+  private WorkspaceDao workspaceDao;
+  private WorkspaceMapper workspaceMapper;
 
-  @Autowired private FireCloudService fireCloudService;
-  @Autowired private Clock clock;
+  private FireCloudService fireCloudService;
+  private Clock clock;
+
+  @Autowired
+  public WorkspaceServiceImpl(Clock clock,
+      CohortCloningService cohortCloningService,
+      ConceptSetService conceptSetService,
+      FireCloudService fireCloudService,
+      WorkspaceDao workspaceDao,
+      WorkspaceMapper workspaceMapper) {
+    this.clock = clock;
+    this.cohortCloningService = cohortCloningService;
+    this.conceptSetService = conceptSetService;
+    this.fireCloudService = fireCloudService;
+    this.workspaceDao = workspaceDao;
+    this.workspaceMapper = workspaceMapper;
+  }
 
   /**
    * Clients wishing to use the auto-generated methods from the DAO interface may directly access
