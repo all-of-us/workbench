@@ -12,8 +12,17 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {ConceptAddModal} from 'app/views/concept-add-modal/component';
 import {ConceptTable} from 'app/views/concept-table/component';
-import {Concept, Domain, DomainCount, DomainInfo, StandardConceptFilter, VocabularyCount, } from 'generated/fetch';
+import {SlidingFabReact} from 'app/views/sliding-fab/component';
+import {
+  Concept,
+  Domain,
+  DomainCount,
+  DomainInfo,
+  StandardConceptFilter,
+  VocabularyCount
+} from 'generated/fetch';
 
 const styles = reactStyles({
   searchBar: {
@@ -97,17 +106,20 @@ export const ConceptWrapper = withCurrentWorkspace()(
         conceptDomainCounts: Array<DomainCount>, concepts: Array<ConceptInfo>,
         conceptsCache: Array<ConceptCacheSet>, selectedConceptDomainMap: Map<String, number>,
         completedDomainSearches: Array<Domain>, conceptsToAdd: Concept[],
-        vocabularies: Array<VocabularyCountSelected>}> {
+        vocabularies: Array<VocabularyCountSelected>, conceptAddModalOpen: boolean,
+        conceptsSavedText: string}> {
 
     private MAX_CONCEPT_FETCH = 100;
     constructor(props) {
       super(props);
       this.state = {
         completedDomainSearches: [],
+        conceptAddModalOpen: false,
         conceptDomainCounts: [],
         conceptDomainList: [],
         concepts: [],
         conceptsCache: [],
+        conceptsSavedText: '',
         conceptsToAdd: [],
         currentSearchString: '',
         loadingDomains: true,
@@ -276,9 +288,45 @@ export const ConceptWrapper = withCurrentWorkspace()(
       return 'No concepts found for domain \'' + this.state.selectedDomain.name + '\' this search.';
     }
 
+    get activeSelectedConceptCount(): number {
+      const {selectedDomain, selectedConceptDomainMap} = this.state;
+      if (!selectedDomain
+        || !selectedDomain.domain
+        || !selectedConceptDomainMap[selectedDomain.domain]
+        || selectedConceptDomainMap[selectedDomain.domain] === 0) {
+        return 0;
+      }
+      return selectedConceptDomainMap[selectedDomain.domain];
+    }
+
+    get addToSetText(): string {
+      const count = this.activeSelectedConceptCount;
+      return count === 0 ? 'Add to set' : 'Add (' + count + ') to set';
+    }
+
+    afterConceptsSaved() {
+      const {selectedConceptDomainMap, selectedDomain} = this.state;
+      this.setConceptsSaveText();
+      // Once concepts are saved clear the selection from concept homepage for active Domain
+      selectedConceptDomainMap[selectedDomain.domain] = 0;
+      // this.cloneCacheConcepts();
+      this.setState({conceptAddModalOpen: false});
+    }
+
+    setConceptsSaveText() {
+      const {selectedConceptDomainMap, selectedDomain} = this.state;
+      const conceptsCount = selectedConceptDomainMap[selectedDomain.domain];
+      this.setState({conceptsSavedText: conceptsCount + ' ' + selectedDomain.name +
+        (conceptsCount > 1 ? ' concepts ' : ' concept ') + 'have been added '});
+      setTimeout(() => {
+        this.setState({conceptsSavedText: ''});
+      }, 5000);
+    }
+
     render() {
       const {loadingDomains, conceptDomainList, standardConceptsOnly, showSearchError,
-        searching, concepts, searchLoading, conceptDomainCounts, selectedDomain} = this.state;
+        searching, concepts, searchLoading, conceptDomainCounts, selectedDomain,
+        conceptAddModalOpen, conceptsToAdd} = this.state;
       return <React.Fragment>
         <div style={{marginBottom: '6%', marginTop: '1.5%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
@@ -329,6 +377,10 @@ export const ConceptWrapper = withCurrentWorkspace()(
                             getSelectedConcepts={() => this.selectConcept}
                             placeholderValue={this.noConceptsConstant}
                             setSelectedConcepts={() => {}}/>
+              <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
+                               iconShape='plus'
+                               expanded={this.addToSetText}
+                               disable={this.activeSelectedConceptCount === 0}/>
             </FadeBox> :
             <div style={{display: 'flex', flexDirection: 'row', width: '94.3%', flexWrap: 'wrap'}}>
               {conceptDomainList.map((domain) => {
@@ -337,6 +389,11 @@ export const ConceptWrapper = withCurrentWorkspace()(
               })}
           </div>
         }
+        {conceptAddModalOpen &&
+          <ConceptAddModal selectedDomain={selectedDomain}
+                           selectedConcepts={conceptsToAdd}
+                           onSave={() => this.afterConceptsSaved()}
+                           onClose={() => this.setState({conceptAddModalOpen: false})}/>}
       </React.Fragment>;
     }
   }
