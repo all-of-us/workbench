@@ -79,7 +79,7 @@ export class SearchGroupSelectComponent implements AfterViewInit {
       timeFrame: '',
       isRequesting: false,
       status: 'active'
-    } as SearchGroup;
+    };
   }
 
   initItem(id: string, type: string) {
@@ -92,7 +92,7 @@ export class SearchGroupSelectComponent implements AfterViewInit {
       temporalGroup: 0,
       isRequesting: false,
       status: 'active'
-    } as SearchGroupItem;
+    };
   }
 
   setMenuPosition() {
