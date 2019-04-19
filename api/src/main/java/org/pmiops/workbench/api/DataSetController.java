@@ -1,68 +1,61 @@
 package org.pmiops.workbench.api;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Streams;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.dao.WorkspaceService;
-import org.pmiops.workbench.db.model.DataSetValues;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.model.ConceptSet;
-import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetResponse;
-import org.pmiops.workbench.model.DomainValuePair;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Provider;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
+
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
+import com.google.common.collect.Streams;
 import com.google.gson.Gson;
+
+import java.sql.Timestamp;
+import java.time.Clock;
+
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.List;
+
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import javax.inject.Provider;
+
+import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DataSetValues;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetResponse;
 import org.pmiops.workbench.model.DataSetQuery;
 import org.pmiops.workbench.model.DataSetQueryList;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.NamedParameterEntry;
 import org.pmiops.workbench.model.NamedParameterValue;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.ValueSet;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
 
 /*
  * A subclass used to store a source and a standard concept ID column name.
@@ -111,52 +104,47 @@ class ValuesLinkingPair {
 @RestController
 public class DataSetController implements DataSetApiDelegate {
 
+  private BigQueryService bigQueryService;
+  private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
+  private final Clock clock;
+  private DataSetService dataSetService;
+  private ParticipantCounter participantCounter;
+
   private Provider<User> userProvider;
   private final WorkspaceService workspaceService;
 
-  private DataSetService dataSetService;
-
-  private final Clock clock;
 
   @Autowired
-  private ConceptSetDao conceptSetDao;
+  private final CohortDao cohortDao;
 
   @Autowired
   private ConceptDao conceptDao;
 
   @Autowired
-  private final CohortDao cohortDao;
-
-  private BigQueryService bigQueryService;
-
-  private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-
-  private ParticipantCounter participantCounter;
-
-
+  private ConceptSetDao conceptSetDao;
 
   @Autowired
   DataSetController(
-      DataSetService dataSetService, Provider<User> userProvider,
-      Clock clock,
-      WorkspaceService workspaceService,
-      ConceptSetDao conceptSetDao,
-      ConceptDao conceptDao,
-      CohortDao cohortDao,
       BigQueryService bigQueryService,
       CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
-      ParticipantCounter participantCounter) {
-    this.dataSetService = dataSetService;
-    this.userProvider = userProvider;
-    this.clock = clock;
-    this.workspaceService = workspaceService;
-    this.conceptSetDao = conceptSetDao;
-    this.conceptDao = conceptDao;
-    this.cohortDao = cohortDao;
+      Clock clock,
+      CohortDao cohortDao,
+      ConceptSetDao conceptSetDao,
+      ConceptDao conceptDao,
+      DataSetService dataSetService,
+      ParticipantCounter participantCounter,
+      Provider<User> userProvider,
+      WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
+    this.clock = clock;
+    this.cohortDao = cohortDao;
+    this.conceptDao = conceptDao;
     this.conceptSetDao = conceptSetDao;
+    this.dataSetService = dataSetService;
     this.participantCounter = participantCounter;
+    this.userProvider = userProvider;
+    this.workspaceService = workspaceService;
   }
 
 
@@ -222,7 +210,7 @@ public class DataSetController implements DataSetApiDelegate {
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts =
           conceptDao.findAll(conceptSet.getConceptIds());
       result.setConcepts(Streams.stream(concepts)
-         .map(ConceptsController.TO_CLIENT_CONCEPT)
+          .map(ConceptsController.TO_CLIENT_CONCEPT)
           .collect(Collectors.toList()));
 
     }
@@ -236,7 +224,7 @@ public class DataSetController implements DataSetApiDelegate {
           DomainValuePair domainValuePair = new DomainValuePair();
           domainValuePair.setValue(dataSetValue.getValue());
           domainValuePair.setDomain(dataSetValue.getDomainEnum());
-          return  domainValuePair;
+          return domainValuePair;
         }
       };
 
