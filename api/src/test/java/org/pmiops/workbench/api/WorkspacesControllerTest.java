@@ -169,8 +169,6 @@ public class WorkspacesControllerTest {
   private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired
   private WorkspacesController workspacesController;
-  @Autowired
-  private WorkspaceMapper workspaceMapper;
   @Mock
   WorkspaceService workspaceService;
 
