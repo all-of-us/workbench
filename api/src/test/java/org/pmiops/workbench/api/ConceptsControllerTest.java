@@ -26,6 +26,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -208,7 +209,8 @@ public class ConceptsControllerTest {
 
   @TestConfiguration
   @Import({
-      WorkspaceServiceImpl.class
+      WorkspaceServiceImpl.class,
+      WorkspaceMapper.class
   })
   @MockBean({
       BigQueryService.class,

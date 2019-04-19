@@ -92,7 +92,7 @@ public class WorkspaceServiceTest {
     doReturn(firecloudUuid).when(workspace).getFirecloudUuid();
     return workspace;
   }
-  
+
   @Test
   public void getWorkspaces() {
     assertThat(workspaceService.getWorkspaces()).hasSize(3);
