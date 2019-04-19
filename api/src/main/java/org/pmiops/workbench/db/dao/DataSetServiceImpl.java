@@ -22,7 +22,7 @@ public class DataSetServiceImpl implements DataSetService {
     dataSetDb.setName(name);
     dataSetDb.setDescription(description);
     dataSetDb.setWorkspaceId(workspaceId);
-    dataSetDb.setInvalid(true);
+    dataSetDb.setInvalid(false);
     dataSetDb.setCreatorId(creatorId);
     dataSetDb.setCreationTime(creationTime);
     dataSetDb.setCohortSetId(cohortIdList);

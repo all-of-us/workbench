@@ -55,7 +55,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @VisibleForTesting
   int maxConceptsPerSet;
 
-  private static final Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet> TO_CLIENT_CONCEPT_SET =
+  static final Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet> TO_CLIENT_CONCEPT_SET =
       new Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>() {
         @Override
         public ConceptSet apply(org.pmiops.workbench.db.model.ConceptSet conceptSet) {

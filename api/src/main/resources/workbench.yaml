@@ -1365,7 +1365,7 @@ paths:
         200:
           description: Data set has been created successfully
           schema:
-            $ref: "#/definitions/DataSet"
+            $ref: "#/definitions/DataSetResponse"
         400:
           description: Invalid data set request
           schema:
@@ -2065,6 +2065,36 @@ definitions:
         $ref: "#/definitions/Domain"
       value:
         type: string
+
+  DataSetResponse:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      workspaceId:
+        type: integer
+        format: int64
+      conceptSets:
+        type: array
+        description: >
+          All concept sets in the data set
+        items:
+          $ref: '#/definitions/ConceptSet'
+      cohorts:
+        type: array
+        description: >
+          All cohorts in the data set
+        items:
+          $ref: "#/definitions/Cohort"
+      values:
+        type: array
+        description: >
+          All the selected values in the data set
+        items:
+          $ref: "#/definitions/DomainValuePair"
+
 
   DomainInfoResponse:
     type: object

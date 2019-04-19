@@ -1,8 +1,11 @@
 package org.pmiops.workbench.db.model;
 
+import org.pmiops.workbench.model.Domain;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Embeddable
 @Table(name = "data_set_cohort_id")
@@ -29,6 +32,14 @@ public class DataSetValues {
     this.domainId = domainId;
   }
 
+  @Transient
+  public Domain getDomainEnum() {
+    return CommonStorageEnums.domainFromStorage(Short.parseShort(domainId));
+  }
+
+  public void setDomainEnum(Domain domain) {
+    this.domainId = CommonStorageEnums.domainToStorage(domain).toString();
+  }
 
   @Column(name = "value")
   public String getValue() {

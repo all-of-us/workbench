@@ -5,7 +5,7 @@ import * as React from 'react';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 
 import {AlertDanger} from 'app/components/alert';
-import {TextInput} from 'app/components/inputs';
+import {TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 
 import {Button} from 'app/components/buttons';
@@ -16,6 +16,7 @@ import {Spinner} from 'app/components/spinners';
 import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace} from 'app/utils';
+import {summarizeErrors} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
@@ -31,6 +32,7 @@ import {
   RecentResource,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
+import {validate} from 'validate.js';
 
 export const styles = {
   selectBoxHeader: {
@@ -85,8 +87,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     conceptSetList: ConceptSet[], cohortList: Cohort[], loadingResources: boolean,
     confirmDeleting: boolean, editing: boolean, resource: RecentResource,
     rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[],
-    valueSets: ValueSet[], selectedValues: DomainValuePair[], save: boolean, nameRequired: boolean,
-    conflictDataSetName: boolean, missingDataSetInfo: boolean
+    valueSets: ValueSet[], selectedValues: DomainValuePair[], openSaveModal: boolean, nameRequired: boolean,
+    conflictDataSetName: boolean, missingDataSetInfo: boolean, nameTouched: boolean
   }> {
 
   constructor(props) {
@@ -106,10 +108,11 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       selectedCohortIds: [],
       valueSets: [],
       selectedValues: [],
-      save: false,
+      openSaveModal: false,
       nameRequired: false,
       conflictDataSetName: false,
-      missingDataSetInfo: false
+      missingDataSetInfo: false,
+      nameTouched: false
     };
   }
 
@@ -284,12 +287,12 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
   }
 
   async saveDataSet() {
+    this.setState({nameTouched: true});
     if (!this.state.name) {
-      this.setState({nameRequired: true});
       return;
     }
-    this.setState({nameRequired: false, conflictDataSetName: false, missingDataSetInfo: false });
-    const req = {
+    this.setState({conflictDataSetName: false, missingDataSetInfo: false });
+    const request = {
       name: this.state.name,
       description: '',
       conceptSetIds: this.state.selectedConceptSetIds,
@@ -298,8 +301,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     };
     try {
       await dataSetApi().createDataSet(
-        this.props.workspace.namespace, this.props.workspace.id, req);
-      this.setState({save: false});
+        this.props.workspace.namespace, this.props.workspace.id, request);
+      this.setState({openSaveModal: false});
     } catch (e) {
       if (e.status === 409) {
         this.setState({conflictDataSetName: true});
@@ -309,9 +312,16 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
+  disableSave() {
+    return !this.state.selectedConceptSetIds || this.state.selectedConceptSetIds.length === 0 ||
+        !this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0 ||
+        !this.state.selectedValues || this.state.selectedValues.length === 0;
+  }
+
   render() {
     const {namespace, id} = this.props.workspace;
     const {
+      name,
       creatingConceptSet,
       conceptDomainList,
       conceptSetList,
@@ -319,9 +329,17 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       resource,
       rType,
       selectedValues,
-      valueSets
+      valueSets,
+      openSaveModal,
+      nameTouched,
+      conflictDataSetName
     } = this.state;
     const currentResource = this.getCurrentResource();
+    const errors = validate({name}, {
+      name: {
+        presence: {allowEmpty: false}
+      }
+    });
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
         <h2 style={{marginTop: 0}}>Datasets</h2>
@@ -428,8 +446,9 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
               of your data table based on the variable and value you selected above</div>
             {/* Button disabled until this functionality added*/}
             <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
-                    onClick ={() => this.setState({save: true, nameRequired: false,
-                      conflictDataSetName: false, missingDataSetInfo: false})}>
+                    onClick ={() => this.setState({openSaveModal: true, nameRequired: false,
+                      conflictDataSetName: false, missingDataSetInfo: false})}
+                    disabled={this.disableSave()}>
               SAVE DATASET
             </Button>
           </div>
@@ -455,24 +474,27 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       <EditModal resource={resource}
                  onEdit={e => this.receiveEdit(e)}
                  onCancel={() => this.closeEditModal()}/>}
-      {this.state.save && <Modal>
+      {openSaveModal && <Modal>
         <ModalTitle>Save Dataset</ModalTitle>
         <ModalBody>
           <div>
-            {this.state.nameRequired && <AlertDanger> Name is required </AlertDanger>}
-            {this.state.conflictDataSetName &&
-            <AlertDanger> Data state with name {this.state.name} already exist</AlertDanger>
+             <ValidationError>
+              {summarizeErrors(nameTouched && errors && errors.name)}
+            </ValidationError>
+            {conflictDataSetName &&
+            <AlertDanger>DataSet with same name exist</AlertDanger>
             }
             {this.state.missingDataSetInfo &&
             <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
             }
             <TextInput type='text' autoFocus placeholder='Dataset Name'
                        value = {this.state.name}
-                       onChange={v => this.setState({name: v})}/>
+                       onChange={v => this.setState({name: v, nameTouched: true,
+                         conflictDataSetName: false})}/>
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button onClick = {() => this.setState({save: false})}
+          <Button onClick = {() => this.setState({openSaveModal: false})}
                   type='secondary' style={{marginRight: '2rem'}}>
             Cancel
           </Button>
