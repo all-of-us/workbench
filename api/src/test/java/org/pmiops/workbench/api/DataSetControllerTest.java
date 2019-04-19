@@ -479,7 +479,7 @@ public class DataSetControllerTest {
 
 
     expectedException.expect(BadRequestException.class);
-    expectedException.expectMessage("Missing concept set ids");
+    expectedException.expectMessage("Missing cohort ids");
 
     dataSetController.createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
 
