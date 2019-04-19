@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import {Clickable} from 'app/components/buttons';
 import {CheckBox} from 'app/components/inputs';
 import {PopupTrigger} from 'app/components/popups';
+import colors from 'app/styles/colors';
 import {ReactWrapperBase, toggleIncludes} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {Concept} from 'generated/fetch/api';
@@ -70,6 +71,17 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
     }
   }
 
+  rowExpansionTemplate(data) {
+    return (<div style={{display: 'flex'}}>
+      <div style={{minWidth: '170px', maxWidth: '170px',
+        fontStyle: 'italic',
+        color: colors.gray[2]}}>
+        Also Known As:
+      </div>
+      <div>{data.conceptSynonyms}</div>
+    </div>);
+  }
+
   render() {
     const {selectedConcepts, selectedVocabularies} = this.state;
     const {concepts, placeholderValue, loading} = this.props;
@@ -95,6 +107,8 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
       <DataTable emptyMessage={loading ? '' : placeholderValue} ref={(el) => this.dt = el}
                  value={concepts} paginator={true} rows={50} scrollable={true} loading={loading}
                  selection={selectedConcepts}
+                 expandedRows={this.props.concepts}
+                 rowExpansionTemplate={this.rowExpansionTemplate}
                  onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
       <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
               selectionMode='multiple' />
