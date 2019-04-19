@@ -24,7 +24,7 @@ import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
 import {DataPageComponent} from 'app/views/data-page/component';
-import {DataSetComponent} from 'app/views/dataset/component';
+import {DataSetPageComponent} from 'app/views/dataset-page/component';
 import {environment} from 'environments/environment';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 import {CohortActionsComponent} from './views/cohort-actions/cohort-actions.component';
@@ -176,7 +176,7 @@ const routes: Routes = [
                   },
                   {
                     path: 'datasets',
-                    component: DataSetComponent,
+                    component: DataSetPageComponent,
                     data: {
                       title: 'Dataset Page',
                       breadcrumb: BreadcrumbType.Dataset

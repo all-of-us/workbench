@@ -313,6 +313,7 @@
   },
   "cohortTables": {
     "condition_occurrence": {
+      "domain": "CONDITION",
       "columns": [
         {
           "type": "integer",
@@ -416,6 +417,7 @@
       ]
     },
     "death": {
+      "domain": "DEATH",
       "columns": [
         {
           "type": "integer",
@@ -468,6 +470,7 @@
       ]
     },
     "device_exposure": {
+      "domain": "DEVICE",
       "columns": [
         {
           "type": "integer",
@@ -563,6 +566,7 @@
       ]
     },
     "drug_exposure": {
+      "domain": "DRUG",
       "columns": [
         {
           "type": "integer",
@@ -709,6 +713,7 @@
       ]
     },
     "measurement": {
+      "domain": "MEASUREMENT",
       "columns": [
         {
           "type": "integer",
@@ -833,6 +838,7 @@
       ]
     },
     "observation": {
+      "domain": "OBSERVATION",
       "columns": [
         {
           "type": "integer",
@@ -1092,6 +1098,7 @@
       ]
     },
     "procedure_occurrence": {
+      "domain": "PROCEDURE",
       "columns": [
         {
           "type": "integer",
@@ -1183,6 +1190,7 @@
       ]
     },
     "visit_occurrence": {
+      "domain": "VISIT",
       "columns": [
         {
           "type": "integer",
