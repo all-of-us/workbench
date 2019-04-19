@@ -229,17 +229,8 @@ public class DataSetControllerTest {
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
-//    workspacesController.setUserProvider(userProvider);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
     workspacesController.createWorkspace(workspace);
-
-//
-//
-//    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-//        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-//    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
-//    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
-//        .thenReturn(fcResponse);
 
     searchRequest = SearchRequests.males();
     cohortCriteria = new Gson().toJson(searchRequest);
