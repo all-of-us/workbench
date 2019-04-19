@@ -240,12 +240,11 @@ describe('ConceptSetDetailsComponent', () => {
     simulateClickReact(fixture, '[data-test-id="sliding-button"]');
     simulateClick(fixture, de.query(By.css('.confirm-remove-btn')));
     updateAndTick(fixture);
-    const tableRows = findElements(fixture, 'tr');
-    // This includes the header and the row itseld
-    expect(tableRows.length).toEqual(2);
+    const tableRows = findElements(fixture, 'tr.p-datatable-row');
+    expect(tableRows.length).toEqual(1);
     // Just the middle concept should remain.
     const wantConcepts = [origConcepts[1]];
-    expect(tableRows[1].childNodes[2].textContent).toEqual(
-      wantConcepts[0].conceptSynonyms.join(', '));
+    expect(tableRows[0].childNodes[1].textContent).toEqual(
+      wantConcepts[0].conceptName);
   }));
 });
