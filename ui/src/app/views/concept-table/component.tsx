@@ -19,8 +19,8 @@ const styles = reactStyles({
 
 
 export class ConceptTable extends React.Component<{concepts: Concept[];
-  loading: boolean; placeholderValue: string, getSelectedConcepts: Function,
-  setSelectedConcepts: Function; },
+  loading: boolean; placeholderValue: string, onSelectConcepts: Function,
+  selectedConcepts: Concept[]; },
   {selectedConcepts: Concept[]; selectedVocabularies: string[]; }> {
 
   private dt: DataTable;
@@ -29,10 +29,17 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
   constructor(props) {
     super(props);
     this.state = {
-      selectedConcepts: [],
+      selectedConcepts: props.selectedConcepts,
       selectedVocabularies: []
     };
     this.filterImageSrc = 'filter';
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.state.selectedConcepts !== this.props.selectedConcepts) {
+      // when parent has updated a set with selected concepts, unselect them from table
+      this.setState({selectedConcepts: this.props.selectedConcepts});
+    }
   }
 
   conceptSynonymColTemplate(rowData) {
@@ -41,9 +48,7 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
 
   updateSelectedConceptList(selectedConcepts) {
     this.setState({selectedConcepts : selectedConcepts});
-    // This will be removed once concept set list has a better way to access selected concepts
-    this.props.setSelectedConcepts(selectedConcepts);
-    this.props.getSelectedConcepts(selectedConcepts);
+    this.props.onSelectConcepts(selectedConcepts);
   }
 
   distinctVocabulary() {
@@ -118,20 +123,14 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
 })
 export class ConceptTableComponent extends ReactWrapperBase {
   @Input() concepts: Object[];
-  @Input() getSelectedConcepts;
+  @Input() onSelectConcepts;
   @Input() loading = false;
   @Input() searchTerm = '';
   @Input() placeholderValue = '';
-
-  selectedConcepts: Array<any> = [];
+  @Input() selectedConcepts: Array<any> = [];
 
   constructor() {
-    super(ConceptTable, ['concepts', 'loading', 'placeholderValue', 'getSelectedConcepts',
-      'setSelectedConcepts']);
-    this.setSelectedConcepts = this.setSelectedConcepts.bind(this);
-  }
-
-  setSelectedConcepts(selectedConcepts: Concept[]) {
-    this.selectedConcepts = selectedConcepts;
+    super(ConceptTable, ['concepts', 'loading', 'placeholderValue', 'onSelectConcepts',
+      'selectedConcepts']);
   }
 }

@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {AlertClose, AlertDanger} from 'app/components/alert';
@@ -26,32 +25,19 @@ import {
 
 const styles = reactStyles({
   searchBar: {
-    marginLeft: '1%',
-    boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)',
-    height: '3rem',
-    width: '64.3%',
-    backgroundColor: '#A3D3F232',
-    fontSize: '16px',
-    lineHeight: '19px',
-    paddingLeft: '2rem'
+    marginLeft: '1%', boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)',
+    height: '3rem', width: '64.3%', backgroundColor: '#A3D3F232', fontSize: '16px',
+    lineHeight: '19px', paddingLeft: '2rem'
   },
   domainBoxHeader: {
-    color: '#2691D0',
-    fontSize: '18px',
-    lineHeight: '22px'
+    color: '#2691D0', fontSize: '18px', lineHeight: '22px'
   },
   domainBoxLink: {
-    color: '#2691D0', lineHeight: '18px', fontWeight: 600,
-    letterSpacing: '0.05rem'
+    color: '#2691D0', lineHeight: '18px', fontWeight: 600, letterSpacing: '0.05rem'
   },
   conceptText: {
-    marginTop: '0.3rem',
-    fontSize: '14px',
-    fontWeight: 400,
-    color: '#4A4A4A',
-    display: 'flex',
-    flexDirection: 'column',
-    marginBottom: '0.3rem'
+    marginTop: '0.3rem', fontSize: '14px', fontWeight: 400, color: '#4A4A4A',
+    display: 'flex', flexDirection: 'column', marginBottom: '0.3rem'
   },
   domainHeaderLink: {
     fontSize: '12px', fontWeight: 300, display: 'flex', flexDirection: 'column',
@@ -66,6 +52,10 @@ const styles = reactStyles({
     marginTop: '-1px', paddingLeft: '0.5rem', display: 'flex',
     justifyContent: 'flex-start', lineHeight: '15px', fontWeight: 600, fontSize: '14px',
     color: '#262262', alignItems: 'center'
+  },
+  selectedConceptsCount: {
+    backgroundColor: '#2691D0', color: '#fff', borderRadius: '20px',
+    textAlign: 'center', height: '1.5em', padding: '0 5px'
   }
 });
 
@@ -183,9 +173,6 @@ export const ConceptWrapper = withCurrentWorkspace()(
     }
 
     selectDomain(domainCount: DomainCount) {
-      if (!this.state.selectedConceptDomainMap[domainCount.domain]) {
-        this.setState(fp.set(['selectedConceptDomainMap', domainCount.domain], 0));
-      }
       this.setState({selectedDomain: domainCount},
         this.setConceptsAndVocabularies);
     }
@@ -195,7 +182,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
         .find(conceptDomain => conceptDomain.domain === this.state.selectedDomain.domain);
       this.setState({concepts: cacheItem.items});
       this.setState({
-        conceptsToAdd: this.state.concepts.filter((c) => c.selected),
+        // conceptsToAdd: this.state.concepts.filter((c) => c.selected),
         vocabularies: cacheItem.vocabularyList.map((vocabulary) => {
           return {
             ...vocabulary,
@@ -240,12 +227,11 @@ export const ConceptWrapper = withCurrentWorkspace()(
     }
 
     selectConcept(concepts: ConceptInfo[]) {
-      const {selectedDomain} = this.state;
-      this.setState({conceptsToAdd: concepts});
-      this.setState(fp.set(['selectedConceptDomain', selectedDomain.domain],
-        concepts.filter(concept => {
+      const {selectedDomain, selectedConceptDomainMap} = this.state;
+      selectedConceptDomainMap[selectedDomain.domain] = concepts.filter(concept => {
         return concept.domainId.toLowerCase() === selectedDomain.domain.toString().toLowerCase();
-      }).length));
+      }).length;
+      this.setState({selectedConceptDomainMap: selectedConceptDomainMap, conceptsToAdd: concepts});
     }
 
     convertToConceptInfo(concepts: Concept[]): ConceptInfo[] {
@@ -305,12 +291,13 @@ export const ConceptWrapper = withCurrentWorkspace()(
     }
 
     afterConceptsSaved() {
-      const {selectedConceptDomainMap, selectedDomain} = this.state;
+      const {selectedConceptDomainMap, selectedDomain, conceptsToAdd} = this.state;
       this.setConceptsSaveText();
       // Once concepts are saved clear the selection from concept homepage for active Domain
       selectedConceptDomainMap[selectedDomain.domain] = 0;
-      // this.cloneCacheConcepts();
-      this.setState({conceptAddModalOpen: false});
+      const remainingConcepts = conceptsToAdd.filter((c) =>
+        c.domainId.toLowerCase() !== selectedDomain.domain.toString().toLowerCase());
+      this.setState({conceptAddModalOpen: false, conceptsToAdd: remainingConcepts});
     }
 
     setConceptsSaveText() {
@@ -326,7 +313,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
     render() {
       const {loadingDomains, conceptDomainList, standardConceptsOnly, showSearchError,
         searching, concepts, searchLoading, conceptDomainCounts, selectedDomain,
-        conceptAddModalOpen, conceptsToAdd} = this.state;
+        conceptAddModalOpen, conceptsToAdd, selectedConceptDomainMap} = this.state;
       return <React.Fragment>
         <div style={{marginBottom: '6%', marginTop: '1.5%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
@@ -363,7 +350,14 @@ export const ConceptWrapper = withCurrentWorkspace()(
                                onClick={() => this.selectDomain(domain)}
                                disabled={this.domainLoading(domain)}>
                     <div style={{fontSize: '16px'}}>{domain.name}</div>
-                    <div>{domain.conceptCount}</div>
+                      <div style={{display: 'flex', flexDirection: 'row',
+                        justifyContent: 'space-between'}}>
+                        <div>{domain.conceptCount}</div>
+                        {(selectedConceptDomainMap[domain.domain] > 0) &&
+                        <div style={styles.selectedConceptsCount}>
+                          {selectedConceptDomainMap[domain.domain]}
+                        </div>}
+                      </div>
                   </Clickable>
                   {domain === selectedDomain && <hr style={styles.domainHeaderSelected}/>}
                   </div>;
@@ -374,9 +368,9 @@ export const ConceptWrapper = withCurrentWorkspace()(
               </div>
               <ConceptTable concepts={concepts}
                             loading={searchLoading}
-                            getSelectedConcepts={() => this.selectConcept}
+                            onSelectConcepts={this.selectConcept.bind(this)}
                             placeholderValue={this.noConceptsConstant}
-                            setSelectedConcepts={() => {}}/>
+                            selectedConcepts={conceptsToAdd}/>
               <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
                                iconShape='plus'
                                expanded={this.addToSetText}
