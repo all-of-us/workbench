@@ -16,6 +16,17 @@ const styles = reactStyles({
   colStyle: {
     lineHeight: '0.5rem',
     textAlign: 'center'
+  },
+  akaText: {
+    minWidth: '170px',
+    maxWidth: '170px',
+    fontStyle: 'italic',
+    color: colors.gray[2]
+  },
+  akaIcon: {
+    marginLeft: 10,
+    verticalAlign: 'middle',
+    color: colors.blue[2]
   }
 });
 
@@ -35,10 +46,9 @@ export class SynonymsObject extends React.Component<{},
   }
 
   render() {
+    const {seeMore, willOverflow} = this.state;
     return <div style={{display: 'flex'}}>
-      <div style={{minWidth: '170px', maxWidth: '170px',
-        fontStyle: 'italic',
-        color: colors.gray[2]}}>
+      <div style={styles.akaText}>
         Also Known As:
         <TooltipTrigger
           side='top'
@@ -48,22 +58,23 @@ export class SynonymsObject extends React.Component<{},
           <ClrIcon
             shape='info-standard'
             className='is-solid'
-            style={{marginLeft: 10, verticalAlign: 'middle', color: colors.blue[2]}}
+            style={styles.akaIcon}
           />
         </TooltipTrigger>
       </div>
       <div style={{
-        textOverflow: this.state.seeMore ? 'auto' : 'hidden',
+        textOverflow: seeMore ? 'auto' : 'hidden',
         minWidth: '810px',
         maxWidth: '810px',
-        height: this.state.seeMore ? 'auto' : '1rem',
-        overflow: this.state.seeMore ? 'auto' : 'hidden'
+        fontSize: '12px',
+        height: seeMore ? 'auto' : '1rem',
+        overflow: seeMore ? 'auto' : 'hidden'
       }} ref={el => this.domElement = el}>
         {this.props.children}
       </div>
-      {this.state.willOverflow ?
-        <Link onClick={() => this.setState({seeMore: !this.state.seeMore})}>
-          {this.state.seeMore ? 'See Less' : 'See More...'}
+      {willOverflow ?
+        <Link onClick={() => this.setState({seeMore: !seeMore})}>
+          {seeMore ? 'See Less' : 'See More...'}
         </Link> : null}
     </div>;
   }
