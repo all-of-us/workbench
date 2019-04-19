@@ -10,12 +10,16 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohorts.CohortFactory;
+import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
-import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -47,6 +51,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -62,6 +67,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Provider;
 
+import java.io.FileReader;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -103,6 +109,9 @@ public class DataSetControllerTest {
   BigQueryService bigQueryService;
 
   @Autowired
+  CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
+
+  @Autowired
   CdrVersionDao cdrVersionDao;
 
   @Autowired
@@ -113,6 +122,9 @@ public class DataSetControllerTest {
 
   @Autowired
   CohortDao cohortDao;
+
+  @Autowired
+  CohortFactory cohortFactory;
 
   @Autowired
   CohortMaterializationService cohortMaterializationService;
@@ -136,6 +148,9 @@ public class DataSetControllerTest {
   ParticipantCounter participantCounter;
 
   @Autowired
+  TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
+
+  @Autowired
   UserDao userDao;
 
   @Mock
@@ -151,9 +166,10 @@ public class DataSetControllerTest {
   WorkspaceService workspaceService;
 
   @TestConfiguration
-  @Import({UserService.class, WorkspacesController.class, WorkspaceServiceImpl.class})
-  @MockBean({BigQueryService.class, CdrVersionService.class, CloudStorageService.class,
-      CohortMaterializationService.class, CohortService.class, ComplianceService.class,
+  @Import({CohortFactoryImpl.class, TestBigQueryCdrSchemaConfig.class, UserService.class, WorkspacesController.class, WorkspaceServiceImpl.class})
+  @MockBean({BigQueryService.class, CdrBigQuerySchemaConfigService.class, CdrVersionService.class,
+      CloudStorageService.class, CohortCloningService.class,
+      CohortMaterializationService.class, ComplianceService.class,
       ConceptBigQueryService.class, ConceptSetService.class, FireCloudService.class,
       ParticipantCounter.class, UserRecentResourceService.class})
   static class Configuration {
@@ -173,18 +189,23 @@ public class DataSetControllerTest {
   @Before
   public void setUp() throws Exception {
 
-    dataSetController = new DataSetController(bigQueryService, cohortDao,
-        conceptSetDao, participantCounter, workspaceService);
+    dataSetController = new DataSetController(bigQueryService, cdrBigQuerySchemaConfigService,
+        cohortDao, conceptSetDao, participantCounter, workspaceService);
     WorkspacesController workspacesController =
-        new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, conceptSetDao, userDao,
+        new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
             userProvider, fireCloudService, cloudStorageService, CLOCK, userService,
             userRecentResourceService);
-    CohortsController cohortsController = new CohortsController(workspaceService, cohortDao, cdrVersionDao,
+    CohortsController cohortsController = new CohortsController(workspaceService, cohortDao, cdrVersionDao, cohortFactory,
         cohortReviewDao, conceptSetDao, cohortMaterializationService, userProvider, CLOCK,
         cdrVersionService, userRecentResourceService);
-
     ConceptSetsController conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao,
         conceptDao, conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
+
+    Gson gson = new Gson();
+    CdrBigQuerySchemaConfig cdrBigQuerySchemaConfig =  gson.fromJson(new FileReader("config/cdm/cdm_5_2.json"),
+        CdrBigQuerySchemaConfig.class);
+
+    when(cdrBigQuerySchemaConfigService.getConfig()).thenReturn(cdrBigQuerySchemaConfig);
 
     User user = new User();
     user.setEmail(USER_EMAIL);
@@ -355,7 +376,7 @@ public class DataSetControllerTest {
     assertThat(response.getQueryList().size()).isEqualTo(1);
     verify(dataSetController, times(1)).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
     System.err.println(response.getQueryList().get(0).getQuery());
-    assertThat(response.getQueryList().get(0).getQuery()).matches("SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence WHERE (CONDITION_CONCEPT_ID IN () OR CONDITION_SOURCE_CONCEPT_ID IN ()) AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
+    assertThat(response.getQueryList().get(0).getQuery()).isEqualTo("SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence WHERE (condition_concept_id IN () OR condition_source_concept_id IN ()) AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
   }
 
   @Test
@@ -415,7 +436,7 @@ public class DataSetControllerTest {
     DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList().size()).isEqualTo(1);
     verify(dataSetController, times(1)).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
-    assertThat(response.getQueryList().get(0).getQuery()).contains("UNION PERSON_ID IN");
+    assertThat(response.getQueryList().get(0).getQuery()).contains("OR PERSON_ID IN");
   }
 
 
