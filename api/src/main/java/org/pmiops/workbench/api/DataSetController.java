@@ -83,13 +83,6 @@ class DomainConceptIds {
 
 @RestController
 public class DataSetController implements DataSetApiDelegate {
-  private final Map<Domain, DomainConceptIds> conceptIdMap = new ImmutableMap.Builder<Domain, DomainConceptIds>()
-      .put(Domain.CONDITION, new DomainConceptIds("CONDITION_SOURCE_CONCEPT_ID", "CONDITION_CONCEPT_ID"))
-      .put(Domain.DRUG, new DomainConceptIds("DRUG_SOURCE_CONCEPT_ID", "DRUG_CONCEPT_ID"))
-      .put(Domain.MEASUREMENT, new DomainConceptIds("MEASUREMENT_SOURCE_CONCEPT_ID", "MEASUREMENT_CONCEPT_ID"))
-      .put(Domain.PROCEDURE, new DomainConceptIds("PROCEDURE_SOURCE_CONCEPT_ID", "PROCEDURE_CONCEPT_ID"))
-      .build();
-
   private BigQueryService bigQueryService;
 
   private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
@@ -178,9 +171,6 @@ public class DataSetController implements DataSetApiDelegate {
           .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
           .collect(Collectors.joining(", "));
       String conceptSetListQuery = " IN (" + conceptSetQueries + ")";
-
-      String standardColumnConceptIdName;
-      String sourceColumnConceptIdName;
 
       Optional<DomainConceptIds> domainConceptIds = bigQuerySchemaConfig.cohortTables.values().stream().filter(config -> d.toString().equals(config.domain))
           .map(tableConfig -> new DomainConceptIds(getColumnName(tableConfig, "source"), getColumnName(tableConfig, "standard")))
