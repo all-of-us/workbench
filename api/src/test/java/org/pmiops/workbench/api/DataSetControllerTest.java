@@ -366,7 +366,6 @@ public class DataSetControllerTest {
     DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList().size()).isEqualTo(1);
     verify(dataSetController, times(1)).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
-    System.err.println(response.getQueryList().get(0).getQuery());
     assertThat(response.getQueryList().get(0).getQuery()).isEqualTo("SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence WHERE (condition_concept_id IN () OR condition_source_concept_id IN ()) AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
   }
 
@@ -426,10 +425,6 @@ public class DataSetControllerTest {
 
     DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList().size()).isEqualTo(1);
-    verify(dataSetController, times(1)).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
     assertThat(response.getQueryList().get(0).getQuery()).contains("OR PERSON_ID IN");
   }
-
-
-
 }
