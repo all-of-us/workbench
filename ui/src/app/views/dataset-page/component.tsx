@@ -2,8 +2,6 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {dataSetApi} from 'app/services/swagger-fetch-clients';
-
 import {AlertDanger} from 'app/components/alert';
 import {TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -13,7 +11,12 @@ import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {ResourceListItem} from 'app/components/resources';
 import {Spinner} from 'app/components/spinners';
-import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import {
+  cohortsApi,
+  conceptsApi,
+  conceptSetsApi,
+  dataSetApi
+} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace} from 'app/utils';
 import {summarizeErrors} from 'app/utils';
@@ -25,11 +28,15 @@ import {EditModal} from 'app/views/edit-modal/component';
 import {
   Cohort,
   ConceptSet,
+  DataSet,
+  DataSetQuery,
   Domain,
   DomainInfo,
   DomainValue,
   DomainValuesResponse,
+  NamedParameterEntry,
   RecentResource,
+  ValueSet,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 import {validate} from 'validate.js';
@@ -60,11 +67,6 @@ export const styles = {
   }
 };
 
-interface ValueSet {
-  domain: Domain;
-  values: DomainValue[];
-}
-
 interface DomainValuePair {
   domain: Domain;
   value: string;
@@ -81,14 +83,15 @@ export const ValueListItem: React.FunctionComponent <
     </div>;
   };
 
-export const DataSet = withCurrentWorkspace()(class extends React.Component<
+export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {name: string, creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
     conceptSetList: ConceptSet[], cohortList: Cohort[], loadingResources: boolean,
     confirmDeleting: boolean, editing: boolean, resource: RecentResource,
     rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[],
-    valueSets: ValueSet[], selectedValues: DomainValuePair[], openSaveModal: boolean, nameRequired: boolean,
-    conflictDataSetName: boolean, missingDataSetInfo: boolean, nameTouched: boolean
+    valueSets: ValueSet[], selectedValues: DomainValuePair[], openSaveModal: boolean,
+    nameRequired: boolean, conflictDataSetName: boolean, missingDataSetInfo: boolean,
+    nameTouched: boolean, queries: Array<DataSetQuery>
   }> {
 
   constructor(props) {
@@ -112,7 +115,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       nameRequired: false,
       conflictDataSetName: false,
       missingDataSetInfo: false,
-      nameTouched: false
+      nameTouched: false,
+      queries: []
     };
   }
 
@@ -230,7 +234,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
   async getValuesList(domains: Domain[]): Promise<ValueSet[]> {
     const {namespace, id} = this.props.workspace;
     const valueSets = fp.zipWith((domain: Domain, valueSet: DomainValuesResponse) =>
-        ({domain: domain, values: valueSet.items}),
+        ({domain: domain, values: valueSet}),
       domains,
       await Promise.all(domains.map((domain) =>
         conceptsApi().getValuesFromDomain(namespace, id, domain.toString()))));
@@ -274,7 +278,9 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     const origSelected = this.state.selectedValues;
     const selectObj = {domain: domain, value: domainValue.value};
     if (fp.some(selectObj, origSelected)) {
-      this.setState({selectedValues: fp.remove((dv) => dv === selectObj, origSelected)});
+      this.setState({selectedValues:
+        fp.remove((dv) => dv.domain === selectObj.domain
+        && dv.value === selectObj.value, origSelected)});
     } else {
       this.setState({selectedValues: (origSelected).concat(selectObj)});
     }
@@ -318,6 +324,47 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
         !this.state.selectedValues || this.state.selectedValues.length === 0;
   }
 
+  async generateCode() {
+    const {namespace, id} = this.props.workspace;
+    const valuesByDomain: ValueSet[] = [];
+    this.state.selectedValues.forEach((value) => {
+      const domainSetFound =
+        fp.find(domainSet => domainSet.domain === value.domain, valuesByDomain);
+      if (domainSetFound === undefined) {
+        valuesByDomain.push({domain: value.domain, values: {items: [{value: value.value}]}});
+      } else {
+        domainSetFound.values.items.push({value: value.value});
+      }
+    });
+    const dataSet: DataSet = {
+      name: '',
+      conceptSetIds: this.state.selectedConceptSetIds,
+      cohortIds: this.state.selectedCohortIds,
+      values: valuesByDomain,
+    };
+    const sqlQueries = await dataSetApi().generateQuery(namespace, id, dataSet);
+    this.setState({queries: sqlQueries.queryList});
+  }
+
+  buildQueryConfig(np: NamedParameterEntry) {
+    if (np.value) {
+      return <div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{'{'}
+        {'\'name\': "' + np.value.name + '"'},
+        {'\'parameterType\': {\'type\': "' + np.value.parameterType + '"' +
+          (np.value.parameterValue instanceof Object ?
+            ',\'arrayType\': {\'type\': "' + np.value.arrayType + '"},' :
+            '') + '}'},
+        {'\'parameterValue\': {'}{((np.value.parameterValue instanceof Object) ?
+          '\'arrayValues\': [' + np.value.parameterValue.map(
+            npv => '{\'value\': ' + npv.parameterValue + '}') + ']' :
+          '\'value\': "' + np.value.parameterValue + '"')}{'}},'}
+      </div>;
+    } else {
+      return;
+    }
+  }
+
   render() {
     const {namespace, id} = this.props.workspace;
     const {
@@ -326,6 +373,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       conceptDomainList,
       conceptSetList,
       loadingResources,
+      queries,
       resource,
       rType,
       selectedValues,
@@ -424,7 +472,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                       <div style={{fontSize: '13px', fontWeight: 600, color: 'black'}}>
                         {fp.capitalize(valueSet.domain.toString())}
                       </div>
-                      {valueSet.values.map(domainValue =>
+                      {valueSet.values.items.map(domainValue =>
                         <ValueListItem key={domainValue.value} domainValue={domainValue} onSelect={
                           () => this.selectDomainValue(valueSet.domain, domainValue)}
                           checked={fp.some({domain: valueSet.domain, value: domainValue.value},
@@ -444,6 +492,12 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
             <div>Preview Dataset</div>
             <div style={{marginLeft: '1rem', color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
+            <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}}
+                    onClick={() => {
+                      this.generateCode();
+                    }}>
+              GENERATE CODE
+            </Button>
             {/* Button disabled until this functionality added*/}
             <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
                     onClick ={() => this.setState({openSaveModal: true, nameRequired: false,
@@ -453,7 +507,29 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
             </Button>
           </div>
           {/*TODO: Display dataset preview*/}
-          <div style={{height: '8rem'}}/>
+          <div style={{height: '8rem'}}>
+            {queries.map(query =>
+              <React.Fragment>
+                <div>sql={'"' + query.query + '"'}</div>
+                <div>
+                  query_config = {'{'} <br />
+                  &nbsp;&nbsp;{'\''}query{'\''}: {'{'} <br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;{'\''}parameterMode{'\''}: {'\''}NAMED{'\''}, <br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;{'\''}queryParameters{'\''}: [
+                {query.namedParameters.map((np) => {
+                  return this.buildQueryConfig(np);
+                }
+                )
+                }
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+                  {'}'}
+                  {'}'}
+                </div>
+                <div>
+                  df = pandas.read_gbq(sql, dialect="standard", configuration=query_config)
+                </div>
+              </React.Fragment>)}
+          </div>
         </div>
       </FadeBox>
       {creatingConceptSet &&
@@ -504,13 +580,14 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     </React.Fragment>;
   }
 
+
 });
 
 @Component({
   template: '<div #root></div>'
 })
-export class DataSetComponent extends ReactWrapperBase {
+export class DataSetPageComponent extends ReactWrapperBase {
   constructor() {
-    super(DataSet, []);
+    super(DataSetPage, []);
   }
 }

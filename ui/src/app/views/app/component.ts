@@ -16,7 +16,6 @@ import {environment} from 'environments/environment';
 import outdatedBrowserRework from 'outdated-browser-rework';
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
-export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
 
 @Component({
@@ -31,7 +30,6 @@ export class AppComponent implements OnInit {
   cookiesEnabled = true;
   overriddenUrl: string = null;
   private baseTitle: string;
-  overriddenPublicUrl: string = null;
 
   constructor(
     @Inject(DOCUMENT) private doc: any,
@@ -48,7 +46,6 @@ export class AppComponent implements OnInit {
     if (this.cookiesEnabled) {
       try {
         this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
-        this.overriddenPublicUrl = localStorage.getItem(overriddenPublicUrlKey);
         window['setAllOfUsApiUrl'] = (url: string) => {
           if (url) {
             if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
@@ -62,22 +59,8 @@ export class AppComponent implements OnInit {
           }
           window.location.reload();
         };
-        window['setPublicApiUrl'] = (url: string) => {
-          if (url) {
-            if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
-              throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
-            }
-            this.overriddenPublicUrl = url;
-            localStorage.setItem(overriddenPublicUrlKey, url);
-          } else {
-            this.overriddenPublicUrl = null;
-            localStorage.removeItem(overriddenPublicUrlKey);
-          }
-          window.location.reload();
-        };
         console.log('To override the API URLs, try:\n' +
-          'setAllOfUsApiUrl(\'https://host.example.com:1234\')\n' +
-          'setPublicApiUrl(\'https://host.example.com:5678\')');
+          'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
       } catch (err) {
         console.log('Error setting urls: ' + err);
       }

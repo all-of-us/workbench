@@ -90,15 +90,11 @@
       </div>
       <div class="filter-options">
         <div class="showing-count">Showing top {{concepts.length}} of {{selectedDomain.conceptCount}} {{selectedDomain.name}}</div>
-        Filter by vocabulary:
-        <clr-checkbox class="filter-checkbox" *ngFor="let vocabulary of vocabularies" (click)="filterList($event)" [(clrChecked)]="vocabulary.selected">
-          {{vocabulary.vocabularyId}} ({{vocabulary.conceptCount}})
-        </clr-checkbox>
       </div>
       <app-concept-table [concepts]="concepts"
                          [loading]="searchLoading" [searchTerm]="currentSearchString"
-                         [placeholderValue]="placeholderValue"
-                         (getSelectedConcepts)="selectConcept($event)">
+                         [placeholderValue]="noConceptsConstant"
+                         [getSelectedConcepts]="selectConcept">
       </app-concept-table>
       <app-sliding-fab [expanded]=addToSetText [submitFunction]="openAddModal"
                        [disable]="activeSelectedConceptCount === 0" [iconShape]="'plus'">

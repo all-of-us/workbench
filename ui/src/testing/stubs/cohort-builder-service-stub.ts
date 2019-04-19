@@ -18,8 +18,8 @@ export const cohortStub = {
 const criteriaStub = {
   id: 1,
   parentId: 0,
-  type: TreeType.ICD9,
-  subtype: TreeSubType.CM,
+  type: TreeType[TreeType.ICD9],
+  subtype: TreeSubType[TreeSubType.CM],
   code: '123',
   name: 'Test',
   count: 1,

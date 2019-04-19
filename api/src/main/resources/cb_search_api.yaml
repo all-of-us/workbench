@@ -39,6 +39,43 @@ security:
 paths:
 
   # Cohort Builder #######################################################################
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/{term}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: >
+        Returns a collection of criteria per search term
+      operationId: "findCriteriaByDomainAndSearchTerm"
+      parameters:
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: the specific type of domain
+        - in: path
+          name: term
+          type: string
+          required: true
+          description: the term to search for
+        - in: query
+          name: isStandard
+          type: boolean
+          required: true
+          description: specifies if search is standard or source
+        - in: query
+          name: limit
+          type: integer
+          format: int64
+          required: false
+          description: number of criteria matches to return
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
   /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
@@ -281,11 +318,15 @@ definitions:
         type: integer
         format: int64
       type:
-        description: The tree type of this criteria, see TreeType.
-        $ref: "#/definitions/TreeType"
+        description: >
+          The tree type of this criteria, see TreeType. This will need to change to CriteriaType
+          with the new implementation(change type below to ref CriteriaType)
+        type: string
       subtype:
-        description: The tree subtype of this criteria, see TreeSubType.
-        $ref: "#/definitions/TreeSubType"
+        description: >
+          The subtype of this criteria, see TreeSubType. This will need to change to CriteriaSubType
+          with the new implementation(change type below to ref CriteriaSubType)
+        type: string
       code:
         description: >
           Code that identifies this criteria. In some vocabularies such as ICD9
@@ -342,13 +383,27 @@ definitions:
         description: >
           Whether this criteria has associated attributes which can be filtered
           by value during a search, for example a blood pressure measurement
-          critieria might have an associated measurement value attribute.
+          criteria might have an associated measurement value attribute.
         type: boolean
       path:
         description: >
           A "." delimited path of all parent criteria IDs. Does not include the
           id for this criteria; root criteria nodes have a null path.
         type: string
+      value:
+        description: >
+          A helper property to fully describe PPI/AGE data. Age holds the value of
+          the age and for PPI it holds value as number or value as concept id.
+        type: string
+      hasHierarchy:
+        description: Whether criteria is linked to a tree.
+        type: boolean
+      hasAncestorData:
+        description: Whether criteria needs lookup in the criteria_ancestor table.
+        type: boolean
+      isStandard:
+        description: Reveals if this criteria is standard or source.
+        type: boolean
 
   CriteriaAttributeListResponse:
     type: object
@@ -672,11 +727,22 @@ definitions:
     description: possible types of modifiers
     enum: [AGE_AT_EVENT, NUM_OF_OCCURRENCES, EVENT_DATE, ENCOUNTERS]
 
+  CriteriaType:
+    type: string
+    description: possible criteria types
+    enum: [AGE, ATC, BRAND, CPT4, DECEASED, ETHNICITY, GENDER, HCPCS, ICD10CM, ICD10PCS, ICD9CM, ICD9Proc, LOINC, PPI, RACE, RXNORM, SNOMED, VISIT]
+
+  CriteriaSubType:
+    type: string
+    description: possible criteria types
+    enum: [BASICS, BMI, BP, CLIN, HC, HEIGHT, HR, HR-DETAIL, HR-IRR, HR-NOIRR, LAB, LIFESTYLE, OVERALLHEALTH, PREG, WC, WEIGHT, WHEEL]
+
+  # TODO:Remove freemabd
   TreeType:
     type: string
     description: possible types of trees
     enum: [ICD9, ICD10, CPT, DEMO, VISIT, PM, DRUG, MEAS, CONDITION, PROCEDURE, PPI, SNOMED]
-
+  # TODO:Remove freemabd
   TreeSubType:
       type: string
       description: possible subtypes of trees

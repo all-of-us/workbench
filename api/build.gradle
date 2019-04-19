@@ -1,5 +1,6 @@
 import io.swagger.codegen.config.CodegenConfigurator
 import io.swagger.codegen.DefaultGenerator
+import org.gradle.api.tasks.JavaExec
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
@@ -470,6 +471,15 @@ incrementalHotSwap.dependsOn compileJava
 task listProjectAPIs(type: GenerateAPIListingTask, dependsOn: generateMergedSwagger)
 
 
+//
+// COMMAND-LINE TOOLS
+//
+// All tasks below represent scripts meant to be run via Gradle command-line invocations.
+//
+// This gives us a natural place to put one-off scripts, deployment tasks, or any other
+// code that should be run outside the context of a HTTP request or a cron job.
+
+
 // Define database-related Spring Boot properties required for running
 // command-line tools. These are set up elsewhere for the main App Engine
 // runtime.
@@ -491,7 +501,7 @@ def commandLineSpringProperties = [
   'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
 ]
 
-// See api/project.rb backfill-gsuite-user-data
+// See project.rb command: backfill-gsuite-user-data
 task backfillGSuiteUserData(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.BackfillGSuiteUserData"
@@ -501,7 +511,7 @@ task backfillGSuiteUserData(type: JavaExec) {
   }
 }
 
-// See api/project.rb load-es-index
+// See project.rb command: load-es-index
 task elasticSearchIndexer(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.elastic.ElasticSearchIndexer"
@@ -511,10 +521,57 @@ task elasticSearchIndexer(type: JavaExec) {
   }
 }
 
-// See api/project.rb fetch-firecloud-user-profiles
+// See project.rb command: fetch-firecloud-user-profiles
 task fetchFireCloudUserProfile(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.FetchFireCloudUserProfile"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// This task is called from a few different places:
+// - devstart.rb > load_config (used by "deploy" and "update_cloud_config" commands)
+// - directly via gradlew (used by "run-local-migrations" command)
+// - docker-compose.yaml#updateConfig (used by "dev-up" command)
+task loadConfig(type: JavaExec) {
+  classpath sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.ConfigLoader"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("config_key") && project.hasProperty("config_file")) {
+    args config_key, config_file
+  }
+}
+
+// Called by devs from the command-line:
+// - devstart.rb > list_clusters
+task manageClusters(type: JavaExec) {
+  classpath sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.ManageClusters"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// Called by devs from the command-line:
+// - devstart.rb > set_authority
+task setAuthority(type: JavaExec) {
+  classpath sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.SetAuthority"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// This task is called from:
+// - docker-compose.yaml#update-cdr-versions
+// - devstart.rb > update_cdr_versions_for_project (called by run-local-migrations)
+task updateCdrVersions(type: JavaExec) {
+  classpath sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.UpdateCdrVersions"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
