@@ -12,6 +12,7 @@ public class CdrBigQuerySchemaConfig {
   public Map<String, TableConfig> cohortTables;
 
   public static class TableConfig {
+    public String domain;
     public List<ColumnConfig> columns;
   }
 

@@ -1344,6 +1344,31 @@ paths:
             schema:
               $ref: "#/definitions/DomainValuesResponse"
 
+# Data Sets ###############################################################################
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/dataSet/generateQuery:
+      post:
+        tags:
+          - dataSet
+        description: >
+          Given a Data Set, return the SQL query built from it.
+        operationId: "generateQuery"
+        parameters:
+          - $ref: '#/parameters/workspaceNamespace'
+          - $ref: '#/parameters/workspaceId'
+          - in: body
+            name: dataSet
+            required: true
+            schema:
+              $ref: "#/definitions/DataSet"
+        responses:
+          200:
+            description: >
+              A SQL query for each domain in the Data Set
+            schema:
+              $ref: "#/definitions/DataSetQueryList"
+
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -2017,6 +2042,70 @@ definitions:
         items:
           $ref: "#/definitions/ValueSet"
 
+  DataSetQueryList:
+    type: object
+    properties:
+      queryList:
+        type: array
+        items:
+          $ref: "#/definitions/DataSetQuery"
+
+  DataSetQuery:
+    type: object
+    required:
+      - domain
+      - query
+    properties:
+      domain:
+        description: >
+          Domain corresponding to an OMOP table that can contain rows for the concepts in this
+          concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed
+          here; it makes sense to specify concepts in these domains in cohort criteria, but
+          there isn't much value in having concept sets defined for them.
+        $ref: "#/definitions/Domain"
+      query:
+        type: string
+        description: >
+          The parameterized BigQuery SQL string to fetch the domain-specific subset of the data set from the CDR.
+      namedParameters:
+        type: array
+        description: >
+          The set of named parameters to use for the SQL query.
+        items:
+          $ref: "#/definitions/NamedParameterEntry"
+
+  NamedParameterEntry:
+    type: object
+    required:
+      - key
+      - value
+    properties:
+      key:
+        type: string
+      value:
+        $ref: "#/definitions/NamedParameterValue"
+
+  NamedParameterValue:
+    type: object
+    required:
+      - name
+      - parameterType
+      - parameterValue
+    properties:
+      name:
+        type: string
+      parameterType:
+        description: >
+          Should be any parameter allowed by bigquery, with the exception of struct. The list of
+          parameter types can be found here: https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types
+        type: string
+      arrayType:
+        type: string
+      parameterValue:
+        type: object
+        description: Can be any value
+
+
   DomainInfoResponse:
     type: object
     required:
@@ -2032,10 +2121,7 @@ definitions:
     properties:
       domain:
         description: >
-          Domain corresponding to an OMOP table that can contain rows for the concepts in this
-          concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed
-          here; it makes sense to specify concepts in these domains in cohort criteria, but
-          there isn't much value in having concept sets defined for them.
+          Domain corresponding to an OMOP table.
         $ref: "#/definitions/Domain"
       values:
         $ref: "#/definitions/DomainValuesResponse"
