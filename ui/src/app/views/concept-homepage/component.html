@@ -91,10 +91,11 @@
       <div class="filter-options">
         <div class="showing-count">Showing top {{concepts.length}} of {{selectedDomain.conceptCount}} {{selectedDomain.name}}</div>
       </div>
-      <app-concept-table [concepts]="concepts"
-                         [loading]="searchLoading" [searchTerm]="currentSearchString"
-                         [placeholderValue]="noConceptsConstant"
-                         [getSelectedConcepts]="selectConcept">
+      <!--TODO: When we move to react, don't pass 'reactKey' as a prop, instead use the built in 'key' prop-->
+      <app-concept-table [concepts]="concepts" [getSelectedConcepts]="selectConcept"
+                         [loading]="searchLoading" [placeholderValue]="noConceptsConstant"
+                         [reactKey]="selectedDomain.name"
+                         [searchTerm]="currentSearchString">
       </app-concept-table>
       <app-sliding-fab [expanded]=addToSetText [submitFunction]="openAddModal"
                        [disable]="activeSelectedConceptCount === 0" [iconShape]="'plus'">
