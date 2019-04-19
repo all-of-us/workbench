@@ -297,7 +297,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   copyResource(): void {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
-        workspacesApi().getWorkspaces(WorkspaceAccessLevel.WRITER.toString())
+        workspacesApi().getWorkspaces()
         .then((data) => {
           console.log(data);
         });

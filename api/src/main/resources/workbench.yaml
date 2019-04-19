@@ -1610,7 +1610,6 @@ definitions:
   WorkspaceAccessLevel:
     type: string
     description: levels of access to workspace, NO ACCESS is akin to removing a user from a workspace ACL.
-    # The access power MUST flow from left to right and we assume that any access level contains the access power of everything to its left
     enum: [NO ACCESS, READER, WRITER, OWNER]
 
   ResearchPurpose:

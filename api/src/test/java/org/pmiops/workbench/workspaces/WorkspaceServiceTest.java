@@ -92,19 +92,7 @@ public class WorkspaceServiceTest {
     doReturn(firecloudUuid).when(workspace).getFirecloudUuid();
     return workspace;
   }
-
-  // This test is set up to fail when a new WorkspaceAccessLevel is added.
-  // When fixing the test, make sure you place the new access level in the correct order according to
-  // access power as we rely on that ordering within our application.
-  @Test
-  public void ensureWorkspaceAccessLevelsComparison() {
-    assertThat(WorkspaceAccessLevel.values().length).isEqualTo(4);
-    assertThat(WorkspaceAccessLevel.NO_ACCESS.compareTo(WorkspaceAccessLevel.READER)).isLessThan(0);
-    assertThat(WorkspaceAccessLevel.READER.compareTo(WorkspaceAccessLevel.WRITER)).isLessThan(0);
-    assertThat(WorkspaceAccessLevel.WRITER.compareTo(WorkspaceAccessLevel.OWNER)).isLessThan(0);
-    assertThat(WorkspaceAccessLevel.OWNER.compareTo(WorkspaceAccessLevel.NO_ACCESS)).isGreaterThan(1);
-  }
-
+  
   @Test
   public void getWorkspaces() {
     assertThat(workspaceService.getWorkspaces()).hasSize(3);
