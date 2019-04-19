@@ -135,14 +135,12 @@ public class UserService {
     boolean isInGroup = this.fireCloudService.
             isUserMemberOfGroup(user.getEmail(), configProvider.get().firecloud.registeredDomainName);
     if (shouldBeRegistered) {
-      log.log(Level.WARNING, "SHOULD BE REGISTERED");
       if (!isInGroup) {
         this.fireCloudService.addUserToGroup(user.getEmail(),
             configProvider.get().firecloud.registeredDomainName);
       }
       user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
     } else {
-      log.log(Level.WARNING, "SHOULD NOT BE REGISTERED");
       if (isInGroup) {
         this.fireCloudService.removeUserFromGroup(user.getEmail(),
             configProvider.get().firecloud.registeredDomainName);

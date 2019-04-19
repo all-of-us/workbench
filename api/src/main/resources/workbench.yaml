@@ -1347,9 +1347,6 @@ paths:
 # Data Sets ###############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/dataSet/generateQuery:
-      # Ideally this would be a get, but we need to pass up a request body for
-      # use in this method, and HTTP standard doesn't have a request type that
-      # does what we want this to do here.
       post:
         tags:
           - dataSet
