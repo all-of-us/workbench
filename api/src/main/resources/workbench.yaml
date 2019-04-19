@@ -588,21 +588,11 @@ paths:
         - workspaces
       description: Returns all workspaces that a user has access to
       operationId: getWorkspaces
-      parameters:
-        - in: query
-          required: false
-          name: requiredAccessLevel
-          description: Return workspaces where the requesting user has the requiredAccessLevel or higher
-          type: string
       responses:
         200:
           description: A list of workspace definitions.
           schema:
             $ref: "#/definitions/WorkspaceResponseListResponse"
-        400:
-          description: Invalid access level given
-          schema:
-            $ref: '#/definitions/ErrorResponse'
     post:
       tags:
         - workspaces

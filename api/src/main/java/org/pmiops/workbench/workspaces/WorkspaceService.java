@@ -17,7 +17,7 @@ public interface WorkspaceService {
   Workspace findByWorkspaceId(long workspaceId);
   FireCloudService getFireCloudService();
   Workspace get(String ns, String firecloudName);
-  List<WorkspaceResponse> getWorkspacesWithAccessLevel(WorkspaceAccessLevel requiredAccessLevel);
+  List<WorkspaceResponse> getWorkspaces();
   Workspace getByName(String ns, String name);
   Workspace getRequired(String ns, String firecloudName);
   Workspace getRequiredWithCohorts(String ns, String firecloudName);

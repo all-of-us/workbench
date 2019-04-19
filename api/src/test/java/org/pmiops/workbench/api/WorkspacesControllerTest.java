@@ -431,18 +431,9 @@ public class WorkspacesControllerTest {
 
   @Test
   public void getWorkspaces() {
-    Workspace workspace = createAndStubDefaultWorkspace(WorkspaceAccessLevel.WRITER);
+    Workspace workspace = createAndStubDefaultWorkspace(WorkspaceAccessLevel.READER);
     workspacesController.createWorkspace(workspace);
-    assertThat(workspacesController.getWorkspaces(null).getBody().getItems().size()).isEqualTo(1);
-    assertThat(workspacesController.getWorkspaces("READER").getBody().getItems().size()).isEqualTo(1);
-    assertThat(workspacesController.getWorkspaces("WRITER").getBody().getItems().size()).isEqualTo(1);
-    assertThat(workspacesController.getWorkspaces("NO ACCESS").getBody().getItems().size()).isEqualTo(1);
-    assertThat(workspacesController.getWorkspaces("OWNER").getBody().getItems().size()).isEqualTo(0);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void getWorkspaces_exception() {
-    workspacesController.getWorkspaces("BLABLA");
+    assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
   }
 
   @Test
@@ -1624,7 +1615,7 @@ public class WorkspacesControllerTest {
   public void testEmptyFireCloudWorkspaces() throws Exception {
     when(fireCloudService.getWorkspaces()).thenReturn(new ArrayList<org.pmiops.workbench.firecloud.model.WorkspaceResponse>());
     try {
-      ResponseEntity<org.pmiops.workbench.model.WorkspaceResponseListResponse> response = workspacesController.getWorkspaces(WorkspaceAccessLevel.READER.toString());
+      ResponseEntity<org.pmiops.workbench.model.WorkspaceResponseListResponse> response = workspacesController.getWorkspaces();
       assertThat(response.getBody().getItems()).isEmpty();
     } catch (Exception ex) {
       fail();

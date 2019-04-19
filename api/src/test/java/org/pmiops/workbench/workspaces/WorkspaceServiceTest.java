@@ -9,7 +9,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
@@ -107,29 +106,7 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void getWorkspacesWithAccessLevel_reader() {
-    Set<String> workspaceIds = workspaceService.getWorkspacesWithAccessLevel(WorkspaceAccessLevel.READER)
-        .stream().map(workspaceResponse -> workspaceResponse.getWorkspace().getName())
-        .collect(Collectors.toSet());
-
-    assertThat(workspaceIds).containsExactlyInAnyOrder("reader", "writer", "owner");
-  }
-
-  @Test
-  public void getWorkspacesWithAccessLevel_writer() {
-    Set<String> workspaceIds = workspaceService.getWorkspacesWithAccessLevel(WorkspaceAccessLevel.WRITER)
-        .stream().map(workspaceResponse -> workspaceResponse.getWorkspace().getName())
-        .collect(Collectors.toSet());
-
-    assertThat(workspaceIds).containsExactlyInAnyOrder("writer", "owner");
-  }
-
-  @Test
-  public void getWorkspacesWithAccessLevel_owner() {
-    Set<String> workspaceIds = workspaceService.getWorkspacesWithAccessLevel(WorkspaceAccessLevel.OWNER)
-        .stream().map(workspaceResponse -> workspaceResponse.getWorkspace().getName())
-        .collect(Collectors.toSet());
-
-    assertThat(workspaceIds).containsExactlyInAnyOrder("owner");
+  public void getWorkspaces() {
+    assertThat(workspaceService.getWorkspaces()).hasSize(3);
   }
 }

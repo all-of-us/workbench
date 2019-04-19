@@ -12,7 +12,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -357,21 +356,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces(String requiredAccessLevelStr) {
-    WorkspaceAccessLevel requiredAccessLevel;
-    if (requiredAccessLevelStr == null) {
-      // This was the default behavior of getWorkspaces before access levels were introduced
-      requiredAccessLevel = WorkspaceAccessLevel.READER;
-    } else {
-      // Refactor (Swagger 3) - If/when we upgrade to Swagger 3, we can have it parse the string into WorkspaceAccessLevel for us
-      requiredAccessLevel = WorkspaceAccessLevel.fromValue(requiredAccessLevelStr);
-      if (requiredAccessLevel == null) {
-        throw new BadRequestException("Invalid required WorkspaceAccessLevel: " + requiredAccessLevelStr);
-      }
-    }
-
+  public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
-    response.setItems(workspaceService.getWorkspacesWithAccessLevel(requiredAccessLevel));
+    response.setItems(workspaceService.getWorkspaces());
     return ResponseEntity.ok(response);
   }
 
