@@ -14,7 +14,7 @@ import {
   subtreeSelected,
   wizardOpen,
 } from 'app/cohort-search/redux';
-import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {stripHtml, subtypeToTitle, typeToTitle} from 'app/cohort-search/utils';
 import {TreeSubType, TreeType} from 'generated';
 import {DomainType} from 'generated/fetch';
@@ -222,8 +222,9 @@ export class ListModalComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  cancel() {
-    this.clearState();
+  close() {
+    wizardStore.next(undefined);
+    selectionsStore.next([]);
     this.open = false;
   }
 
@@ -238,14 +239,13 @@ export class ListModalComponent implements OnInit, OnDestroy {
   }
 
   finish() {
-    this.selections = {};
-    this.open = false;
-    this.actions.finishWizard();
-  }
-
-  clearState() {
-    wizardStore.next(undefined);
-    selectionsStore.next([]);
+    const {groupId, item, role} = this.wizard;
+    const searchRequest = searchRequestStore.getValue();
+    const index = searchRequest[role].findIndex(grp => grp.id === groupId);
+    searchRequest[role][index].items.push(item);
+    searchRequestStore.next(searchRequest);
+    this.close();
+    // this.actions.finishWizard();
   }
 
   /* Used to bootstrap the criteria tree */

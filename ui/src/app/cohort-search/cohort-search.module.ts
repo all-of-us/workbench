@@ -19,6 +19,7 @@ import {ListAttributesPageComponent} from './list-attributes-page/list-attribute
 import {ListModalComponent} from './list-modal/list-modal.component';
 import {ListModifierPageComponent} from './list-modifier-page/list-modifier-page.component';
 import {ListSearchComponent} from './list-search/list-search.component';
+import {ListSearchGroupListComponent} from './list-search-group-list/list-search-group-list.component';
 import {ListSelectionInfoComponent} from './list-selection-info/list-selection-info.component';
 import {ModalComponent} from './modal/modal.component';
 import {ModifierPageComponent} from './modifier-page/modifier-page.component';
@@ -77,6 +78,7 @@ const routes: Routes = [{
     ListModalComponent,
     ListModifierPageComponent,
     ListSearchComponent,
+    ListSearchGroupListComponent,
     ListSelectionInfoComponent,
     ModalComponent,
     ModifierPageComponent,
