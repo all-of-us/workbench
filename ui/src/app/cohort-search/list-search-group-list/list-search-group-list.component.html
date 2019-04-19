@@ -3,11 +3,11 @@
     <h2 class="participant-header">{{ title | titlecase }}</h2>
   </div>
 
-  <div *ngFor="let group of (groups$ | async); let i = index;">
-    <app-search-group [group]="group" [index]="i + index"
-                      [role]="role"
+  <div *ngFor="let group of groups; let i = index;">
+    <app-list-search-group [group]="group" [index]="i + index"
+                      [updated]="group.items" [role]="role"
                       (temporalLength)="getTemporalLength($event)">
-    </app-search-group>
+    </app-list-search-group>
     <div class="circle-wrapper">
       <div class="and-circle">AND</div>
     </div>

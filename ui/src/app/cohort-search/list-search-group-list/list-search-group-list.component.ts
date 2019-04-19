@@ -1,10 +1,7 @@
-import {select} from '@angular-redux/store';
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
-import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
-
 import {SearchRequest} from 'generated';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-list-search-group-list',
@@ -17,9 +14,9 @@ export class ListSearchGroupListComponent implements OnInit {
   @Input() role: keyof SearchRequest;
   @Output() tempLength = new EventEmitter<boolean>();
 
-  @select(s => s.get('initShowChart', true)) initShowChart$: Observable<boolean>;
   groups: any;
   index = 0;
+  updated = 0;
   subscription: Subscription;
 
   ngOnInit(): void {
@@ -27,6 +24,8 @@ export class ListSearchGroupListComponent implements OnInit {
       .filter(sr => !!sr)
       .subscribe(searchRequest => {
         console.log(searchRequest);
+        this.updated = this.updated + 1;
+        console.log(this.updated);
         this.groups = searchRequest[this.role];
         if (this.role === 'excludes') {
           this.index = searchRequest.includes.length + 1;
