@@ -126,7 +126,7 @@ describe('ConceptHomepageComponent', () => {
 
     // Tests that it switches to the datagrid view.
     expect(findElements(fixture, '[data-test-id="conceptTable"]')).toBeTruthy();
-    expect(findElements(fixture, 'tr').length).toBe(2);
+    expect(findElements(fixture, 'tr.p-datatable-row').length).toBe(1);
     const firstDomainRowName = findElements(fixture, 'td')[1].textContent;
 
     // Tests that it changes the table when a new domain is selected.
@@ -167,8 +167,7 @@ describe('ConceptHomepageComponent', () => {
     });
 
     // Test that it pulls back more concepts when all concepts allowed.
-    // Rows contains header as well
-    expect(findElements(fixture, 'tr').length).toBe(3);
+    expect(findElements(fixture, 'tr.p-datatable-row').length).toBe(2);
   }));
 
   it('should display the selected concepts on header', fakeAsync(() => {
