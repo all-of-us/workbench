@@ -129,8 +129,8 @@ public class DataSetController implements DataSetApiDelegate {
       CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
       Clock clock,
       CohortDao cohortDao,
-      ConceptSetDao conceptSetDao,
       ConceptDao conceptDao,
+      ConceptSetDao conceptSetDao,
       DataSetService dataSetService,
       ParticipantCounter participantCounter,
       Provider<User> userProvider,
@@ -191,7 +191,7 @@ public class DataSetController implements DataSetApiDelegate {
           result.setConceptSets(Streams.stream(conceptSets)
               .map(conceptSet -> toClientConceptSet(conceptSet)).collect(Collectors.toList()));
 
-          Iterable<org.pmiops.workbench.db.model.Cohort> cohorts = cohortDao.findAll(dataSet.getCohortSetId());
+          Iterable<Cohort> cohorts = cohortDao.findAll(dataSet.getCohortSetId());
           result.setCohorts(Streams.stream(cohorts)
                 .map(CohortsController.TO_CLIENT_COHORT)
                 .collect(Collectors.toList()));

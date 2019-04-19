@@ -69,19 +69,14 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.inject.Provider;
 
 import java.io.FileReader;
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -198,9 +193,8 @@ public class DataSetControllerTest {
 
   @Before
   public void setUp() throws Exception {
-
-    dataSetController = new DataSetController(dataSetService, userProvider, CLOCK, workspaceService, conceptSetDao, conceptDao,
-        cohortDao, bigQueryService, cdrBigQuerySchemaConfigService, participantCounter );
+    dataSetController = new DataSetController(bigQueryService, cdrBigQuerySchemaConfigService, CLOCK,
+        cohortDao, conceptDao, conceptSetDao, dataSetService,participantCounter, userProvider, workspaceService);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
             userProvider, fireCloudService, cloudStorageService, CLOCK, userService,
