@@ -3,7 +3,6 @@ package org.pmiops.workbench.workspaces;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;

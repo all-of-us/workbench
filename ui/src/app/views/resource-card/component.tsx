@@ -13,7 +13,7 @@ import {ResourceType} from 'app/utils/resourceActions';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
 import {RenameModal} from 'app/views/rename-modal/component';
-import {Domain, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
+import {Domain, RecentResource} from 'generated/fetch';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
@@ -298,9 +298,9 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         workspacesApi().getWorkspaces()
-        .then((data) => {
-          console.log(data);
-        });
+          .then((data) => {
+            console.log(data);
+          });
         workspacesApi().cloneNotebook(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
