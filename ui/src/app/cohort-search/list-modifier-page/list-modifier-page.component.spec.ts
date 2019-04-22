@@ -6,10 +6,13 @@ import {ClarityModule} from '@clr/angular';
 
 import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
 import {activeModifierList, CohortSearchActions, previewStatus} from 'app/cohort-search/redux';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortBuilderService, WorkspaceAccessLevel} from 'generated';
+import {DomainType, WorkspaceAccessLevel} from 'generated';
+import {CohortBuilderApi} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
+import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {ListModifierPageComponent} from './list-modifier-page.component';
 
@@ -24,6 +27,7 @@ describe('ListModifierPageComponent', () => {
   let mockReduxInst;
 
   beforeEach(async(() => {
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     mockReduxInst = MockNgRedux.getInstance();
     const _old = mockReduxInst.getState;
     const _wrapped = () => fromJS(_old());
@@ -41,7 +45,6 @@ describe('ListModifierPageComponent', () => {
       ],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
-        {provide: CohortBuilderService, useValue: {}},
         {provide: CohortSearchActions, useValue: new MockActions()},
       ],
     })
@@ -55,6 +58,8 @@ describe('ListModifierPageComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ListModifierPageComponent);
     component = fixture.componentInstance;
+    component.disabled = () => {};
+    component.wizard = {domain: DomainType.MEASUREMENT};
     fixture.detectChanges();
   });
 

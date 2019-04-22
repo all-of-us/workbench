@@ -3,17 +3,15 @@ import {
   Component,
   EventEmitter,
   Input,
-  OnDestroy,
   OnInit,
   Output,
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
+import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {CohortSearchActions} from 'app/cohort-search/redux';
 import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
 import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated';
-import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-list-search-group',
@@ -23,7 +21,7 @@ import {Subscription} from 'rxjs/Subscription';
     '../../styles/buttons.css',
   ]
 })
-export class ListSearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
+export class ListSearchGroupComponent implements AfterViewInit, OnInit {
   @Input() group;
   @Input() index;
   @Input() role: keyof SearchRequest;
@@ -38,10 +36,8 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit, OnDestro
     TemporalTime.XDAYSBEFORE,
     TemporalTime.WITHINXDAYSOF];
   name = this.whichMention[0];
-  subscription: Subscription;
-  itemSubscription: Subscription;
-  readonly domainTypes = DOMAIN_TYPES;
-  readonly programTypes = PROGRAM_TYPES;
+  readonly domainTypes = LIST_DOMAIN_TYPES;
+  readonly programTypes = LIST_PROGRAM_TYPES;
   itemId: any;
   treeType = [];
   timeForm = new FormGroup({
@@ -84,11 +80,6 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit, OnDestro
       });
       demoItem.addEventListener('mouseleave', () => this.demoOpen = false);
     }
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-    this.itemSubscription.unsubscribe();
   }
 
   get items() {
