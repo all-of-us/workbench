@@ -318,7 +318,7 @@ export class ListAttributesPageComponent implements OnInit {
   }
 
   requestPreview() {
-    const param = this.paramWithAttributes;
+    // const param = this.paramWithAttributes;
     // TODO make api call for count (call doesn't exist yet)
   }
 
