@@ -2,8 +2,9 @@ import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {dateValidator, integerAndRangeValidator} from 'app/cohort-search/validators';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortBuilderService, ModifierType, Operator, TreeType} from 'generated';
+import {ModifierType, Operator, TreeType} from 'generated';
 import {List} from 'immutable';
 import * as moment from 'moment';
 import {Subscription} from 'rxjs/Subscription';
@@ -107,7 +108,6 @@ export class ListModifierPageComponent implements OnInit, OnDestroy {
   dateA = new FormControl();
   dateB = new FormControl();
   errors = new Set();
-  constructor(private api: CohortBuilderService) {}
 
   ngOnInit() {
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
@@ -129,9 +129,8 @@ export class ListModifierPageComponent implements OnInit, OnDestroy {
       this.form.addControl('encounters',
         new FormGroup({operator: new FormControl(),
           encounterType: new FormControl()}));
-      this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
-        .filter(response => !!response)
-        .subscribe(response => {
+      cohortBuilderApi().getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
+        .then(response => {
           this.visitCounts = {};
           response.items.forEach(option => {
             if (option.parentId === 0 && option.count > 0) {

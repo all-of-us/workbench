@@ -362,7 +362,7 @@ export class ListAttributesPageComponent implements OnInit {
   get showCalc() {
     let notAny = true;
     if (this.isPM) {
-      notAny = this.attrs.NUM[0].operator !== AttrName.ANY;
+      notAny = this.attrs.NUM && this.attrs.NUM[0].operator !== AttrName.ANY;
     }
     return !this.attrs.EXISTS && notAny;
   }

@@ -49,7 +49,7 @@ describe('ListAttributesPageComponent', () => {
     fixture = TestBed.createComponent(ListAttributesPageComponent);
     component = fixture.componentInstance;
     component.attrs = {EXISTS: false, NUM: [{operator: 'ANY', operands: []}], CAT: []};
-    component.node = fromJS({
+    component.criterion = {
       code: '',
       conceptId: 903133,
       count: 0,
@@ -62,7 +62,7 @@ describe('ListAttributesPageComponent', () => {
       selectable: true,
       subtype: 'HEIGHT',
       type: 'PM'
-    });
+    };
     component.form = new FormGroup({
       NUM: new FormGroup({
         num0: new FormGroup({

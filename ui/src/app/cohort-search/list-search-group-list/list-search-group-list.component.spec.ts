@@ -1,9 +1,7 @@
 import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ClarityModule} from '@clr/angular';
-import {List} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-import {Observable} from 'rxjs/Observable';
 
 import {ListSearchGroupListComponent} from './list-search-group-list.component';
 
@@ -32,7 +30,7 @@ describe('ListSearchGroupListComponent', () => {
 
     // Default Inputs for tests
     component.role = 'includes';
-    component.groups$ = Observable.of(List());
+    component.groups = [];
 
     fixture.detectChanges();
   });
