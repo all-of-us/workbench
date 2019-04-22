@@ -39,7 +39,7 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
-import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DataSetQueryList;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
@@ -297,8 +297,8 @@ public class DataSetControllerTest {
         QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person").build());
   }
 
-  private DataSet buildEmptyDataSet() {
-    return new DataSet()
+  private DataSetRequest buildEmptyDataSet() {
+    return new DataSetRequest()
         .conceptSetIds(new ArrayList<>())
         .cohortIds(new ArrayList<>())
         .values(new ArrayList<>());
@@ -324,7 +324,7 @@ public class DataSetControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoCohort() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
     dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
@@ -332,7 +332,7 @@ public class DataSetControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoConceptSet() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
 
     dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
@@ -340,7 +340,7 @@ public class DataSetControllerTest {
 
   @Test
   public void testGetQueryDropsQueriesWithNoValue() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
@@ -359,7 +359,7 @@ public class DataSetControllerTest {
 
   @Test
   public void testGetQuery() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
     List<DomainValuePair> domainValues = mockDomainValuePair();
@@ -381,7 +381,7 @@ public class DataSetControllerTest {
 
   @Test
   public void testGetQueryTwoDomains() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_TWO_ID);
@@ -418,7 +418,7 @@ public class DataSetControllerTest {
 
   @Test
   public void testGetQueryTwoCohorts() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addCohortIdsItem(COHORT_TWO_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
@@ -444,7 +444,7 @@ public class DataSetControllerTest {
 
   @Test
   public void createDataSetMissingArguments() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
 
     List<Long> cohortIds = new ArrayList<>();
     cohortIds.add(1l);
