@@ -110,7 +110,6 @@ export class ListModifierPageComponent implements OnInit, OnDestroy {
   constructor(private api: CohortBuilderService) {}
 
   ngOnInit() {
-    console.log(this.wizard);
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
     this.domain = this.wizard.domain;
     if (this.addEncounters) {

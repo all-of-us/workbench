@@ -41,11 +41,12 @@
   </div>
 
   <div *ngFor="let item of items" class="card-block search-item">
-    <app-search-group-item
+    <app-list-search-group-item
       [role]="role"
       [groupId]="groupId"
-      [itemId]="item.id">
-    </app-search-group-item>
+      [item]="item"
+      [delete]="deleteItem">
+    </app-list-search-group-item>
     <div *ngIf="status === 'active'" class="item-or">OR</div>
   </div>
 
@@ -115,7 +116,7 @@
 
   <app-validator-errors [form]="timeForm"></app-validator-errors>
   <ng-container *ngIf="temporalFlag">
-    <div class="temporal-sub-card-header" *ngIf="temporalFlag">
+    <div class="temporal-sub-card-header">
       <clr-dropdown>
         <button type="button" class="btn time-selection-button" clrDropdownTrigger>
           <span>{{formatStatus(time)}}</span>
@@ -142,16 +143,16 @@
       </form>
     </div>
     <div *ngFor="let item of temporalItems" class="card-block search-item">
-      <app-search-group-item
+      <app-list-search-group-item
         class="test"
-        (temporalGroupValue)="getTemporalGroup($event)"
         [role]="role"
         [groupId]="groupId"
-        [itemId]="item.id">
-      </app-search-group-item>
+        [item]="item"
+        [delete]="deleteItem">
+      </app-list-search-group-item>
       <div *ngIf="status === 'active'" class="item-or">OR</div>
     </div>
-    <div class="temporal-sub-card-header" *ngIf="temporalFlag">
+    <div class="temporal-sub-card-header">
       <clr-dropdown>
         <button type="button" class="btn selection-button" clrDropdownTrigger>
           Add Criteria <clr-icon shape="caret down"></clr-icon>
@@ -190,7 +191,7 @@
       Loading...
       </span>
         <ng-container [ngSwitch]="true">
-            <span *ngIf="!isRequesting">
+          <span *ngIf="!isRequesting">
             <ng-container *ngSwitchCase="(group.count !== null || temporalFlag) &&  group.count !== -1">
               {{ group.count | number }}
             </ng-container>
@@ -206,15 +207,15 @@
               </clr-tooltip>
             </ng-container>
           </span>
-              <span *ngSwitchCase="group.error && !temporalFlag">
+          <span *ngSwitchCase="group.error && !temporalFlag">
             <clr-icon
               [popper]="errorPopper"
               [popperTrigger]="'hover'"
               shape="error-standard"
               size="18"></clr-icon>
           </span>
-              <span *ngSwitchCase="(!isRequesting && temporalFlag && warningFlag)">
-          --
+          <span *ngSwitchCase="(!isRequesting && temporalFlag && warningFlag)">
+            --
             <clr-icon
               [popper]="errorPopper"
               [popperTrigger]="'hover'"

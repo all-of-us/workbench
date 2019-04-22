@@ -3,11 +3,9 @@ import {
   Component,
   EventEmitter,
   Input,
-  OnChanges,
   OnDestroy,
   OnInit,
   Output,
-  SimpleChanges
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
@@ -25,9 +23,8 @@ import {Subscription} from 'rxjs/Subscription';
     '../../styles/buttons.css',
   ]
 })
-export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnInit, OnDestroy {
+export class ListSearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() group;
-  @Input() updated !: number;
   @Input() index;
   @Input() role: keyof SearchRequest;
   @Output() temporalLength = new EventEmitter<any>();
@@ -63,10 +60,6 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
       tempLength: false,
       flag: false}
     );
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes);
   }
 
   ngAfterViewInit() {
@@ -140,9 +133,6 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
       this.removeGroup();
     }, 10000);
     this.setGroupProperty('timeout', timeoutId);
-    // For some reason Angular will delete the timeout id from scope if the inputs change, so we
-    // have to keep in the redux store
-    // this.actions.setTimeoutId('groups', this.groupId, timeoutId);
   }
 
   hide(status: string) {
@@ -237,6 +227,11 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
       isRequesting: false,
       status: 'active'
     };
+  }
+
+  deleteItem = (itemId: string) => {
+    const items = this.group.items.filter(it => it.id !== itemId);
+    this.setGroupProperty('items', items);
   }
 
   setGroupProperty(property: string, value: any) {
