@@ -63,9 +63,7 @@ const styles = reactStyles({
 
 interface ConceptCacheSet {
   domain: Domain;
-
   vocabularyList: Array<VocabularyCount>;
-
   items: Array<ConceptInfo>;
 }
 interface VocabularyCountSelected extends VocabularyCount {
@@ -81,7 +79,8 @@ const DomainBox: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
       const conceptCount = standardConceptsOnly ?
           conceptDomainInfo.standardConceptCount : conceptDomainInfo.allConceptCount;
       return <WorkspaceCardBase style={{minWidth: '11rem'}} data-test-id='domain-box'>
-        <div style={styles.domainBoxHeader}>{conceptDomainInfo.name}</div>
+        <div style={styles.domainBoxHeader}
+             data-test-id='domain-box-name'>{conceptDomainInfo.name}</div>
         <div style={styles.conceptText}>
           <span style={{fontSize: '30px'}}>{conceptCount}</span> concepts in this domain. <p/>
           <b>{conceptDomainInfo.participantCount}</b> participants in domain.</div>
@@ -226,9 +225,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
               .find(domainCount => domainCount.domain === conceptDomain.domain)});
           this.setConceptsAndVocabularies();
         }
-
       });
-
     }
 
     selectConcept(concepts: ConceptInfo[]) {
@@ -325,7 +322,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
           <div style={{display: 'flex', alignItems: 'center'}}>
             <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
               fill: '#216FB4', left: 'calc(1rem + 4.5%)'}}/>
-            <TextInput style={styles.searchBar}
+            <TextInput style={styles.searchBar} data-test-id='concept-search-input'
                        placeholder='Search concepts in domain'
                        onKeyDown={e => {this.searchButton(e); }}/>
             {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()}>
@@ -357,8 +354,9 @@ export const ConceptWrapper = withCurrentWorkspace()(
                   return <div style={{display: 'flex', flexDirection: 'column'}}>
                     <Clickable style={styles.domainHeaderLink}
                                onClick={() => this.selectDomain(domain)}
-                               disabled={this.domainLoading(domain)}>
-                    <div style={{fontSize: '16px'}}>{domain.name}</div>
+                               disabled={this.domainLoading(domain)}
+                               data-test-id='domain-header'>
+                    <div style={{fontSize: '16px'}} data-test-id='domain-name'>{domain.name}</div>
                     {this.domainLoading(domain) ?
                       <Spinner style={{height: '15px', width: '15px'}}/> :
                       <div style={{display: 'flex', flexDirection: 'row',
@@ -371,7 +369,8 @@ export const ConceptWrapper = withCurrentWorkspace()(
                       </div>
                     }
                   </Clickable>
-                  {domain === selectedDomain && <hr style={styles.domainHeaderSelected}/>}
+                  {domain === selectedDomain && <hr data-test-id='active-domain'
+                                                    style={styles.domainHeaderSelected}/>}
                   </div>;
                 })}
               </div>
@@ -396,7 +395,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
                                     this.browseDomain(domain);
                                     this.setState({searching: true});
                                   }}
-                                  key={i}/>;
+                                  key={i} data-test-id='domain-box'/>;
               })}
           </div>
         }
