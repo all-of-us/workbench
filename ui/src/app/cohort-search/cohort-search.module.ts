@@ -18,6 +18,7 @@ import {GenderChartComponent} from './gender-chart/gender-chart.component';
 import {ListAttributesPageComponent} from './list-attributes-page/list-attributes-page.component';
 import {ListModalComponent} from './list-modal/list-modal.component';
 import {ListModifierPageComponent} from './list-modifier-page/list-modifier-page.component';
+import {ListSearchGroupItemComponent} from './list-search-group-item/list-search-group-item.component';
 import {ListSearchGroupListComponent} from './list-search-group-list/list-search-group-list.component';
 import {ListSearchGroupComponent} from './list-search-group/list-search-group.component';
 import {ListSearchComponent} from './list-search/list-search.component';
@@ -78,6 +79,7 @@ const routes: Routes = [{
     ListAttributesPageComponent,
     ListModalComponent,
     ListModifierPageComponent,
+    ListSearchGroupItemComponent,
     ListSearchGroupListComponent,
     ListSearchGroupComponent,
     ListSearchComponent,

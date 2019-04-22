@@ -6,7 +6,6 @@ import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.se
 import {environment} from 'environments/environment';
 
 import {SearchRequest} from 'generated';
-import {SearchGroup, SearchGroupItem} from 'generated/fetch';
 
 @Component({
   selector: 'app-search-group-select',
@@ -53,7 +52,7 @@ export class SearchGroupSelectComponent implements AfterViewInit {
       const {domain, type} = criteria;
       const searchRequest = searchRequestStore.getValue();
       const group = this.initGroup(groupId);
-      const item = this.initItem(itemId, criteria.type);
+      const item = this.initItem(itemId, criteria.domain);
       searchRequest[this.role].push(group);
       searchRequestStore.next(searchRequest);
       context = {item, domain, type, role, groupId, itemId, fullTree, codes};

@@ -55,7 +55,6 @@ export class ListModalComponent implements OnInit, OnDestroy {
   selections = {};
   selectionIds: Array<string>;
   selectionList: Array<any>;
-  objectKeys = Object.keys;
   open = false;
   noSelection = true;
   title = '';
@@ -73,30 +72,6 @@ export class ListModalComponent implements OnInit, OnDestroy {
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    // TODO below code is only for dev purposes, remove before merging
-    // this.open = true;
-    // this.attributesCrit = {
-    //   code: '1920-8',
-    //   conceptId: 3013721,
-    //   count: 388001,
-    //   domainId: 'MEASUREMENT',
-    //   group: false,
-    //   hasAncestorData: false,
-    //   hasAttributes: true,
-    //   hasHierarchy: true,
-    //   id: 2989256,
-    //   isStandard: true,
-    //   name: 'Aspartate aminotransferase serum/plasma',
-    //   parentId: 2987428,
-    //   path: '2985909.2985939.2985979.2986335.2987428.2989256',
-    //   selectable: true,
-    //   subtype: 'LAB',
-    //   type: 'LOINC',
-    //   value: ''
-    // };
-    // this.mode = 'attributes';
-    // TODO end of dev code
-
     this.subscription = wizardStore
       .filter(wizard => !!wizard)
       .subscribe(wizard => {
@@ -241,8 +216,13 @@ export class ListModalComponent implements OnInit, OnDestroy {
   finish() {
     const {groupId, item, role} = this.wizard;
     const searchRequest = searchRequestStore.getValue();
-    const index = searchRequest[role].findIndex(grp => grp.id === groupId);
-    searchRequest[role][index].items.push(item);
+    const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
+    const itemIndex = searchRequest[role][groupIndex].items.findIndex(it => it.id === item.id);
+    if (itemIndex > -1) {
+      searchRequest[role][groupIndex][itemIndex] = item;
+    } else {
+      searchRequest[role][groupIndex].items.push(item);
+    }
     searchRequestStore.next(searchRequest);
     this.close();
     // this.actions.finishWizard();

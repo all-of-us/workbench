@@ -2,7 +2,6 @@ import {DomainType, TreeSubType, TreeType} from 'generated';
 import {List} from 'immutable';
 import {DOMAIN_TYPES} from './constant';
 
-
 export function typeDisplay(parameter): string {
   const subtype = parameter.get('subtype', '');
   const _type = parameter.get('type', '');
@@ -19,6 +18,22 @@ export function typeDisplay(parameter): string {
   }
 }
 
+export function listTypeDisplay(parameter): string {
+  const subtype = parameter.subtype;
+  const _type = parameter.type;
+  if (_type.match(/^DEMO.*/i)) {
+    return {
+      'GEN': 'Gender',
+      'RACE': 'Race',
+      'ETH': 'Ethnicity',
+      'AGE': 'Age',
+      'DEC': 'Deceased'
+    }[subtype] || '';
+  } else if (!_type.match(/^SNOMED.*/i)) {
+    return parameter.code;
+  }
+}
+
 export function nameDisplay(parameter): string {
   const subtype = parameter.get('subtype', '');
   const _type = parameter.get('type', '');
@@ -29,9 +44,18 @@ export function nameDisplay(parameter): string {
   }
 }
 
+export function listNameDisplay(parameter): string {
+  const subtype = parameter.subtype;
+  const _type = parameter.type;
+  if (_type.match(/^DEMO.*/i) && subtype.match(/AGE|DEC/i)) {
+    return '';
+  } else {
+    return stripHtml(parameter.name);
+  }
+}
+
 export function attributeDisplay(parameter): string {
   const attrs = parameter.get('attributes', '');
-
   const kind = `${parameter.get('type', '')}${parameter.get('subtype', '')}`;
   if (kind.match(/^DEMO.*AGE/i)) {
     const display = [];
@@ -51,6 +75,59 @@ export function attributeDisplay(parameter): string {
   } else {
     return '';
   }
+}
+
+export function listAttributeDisplay(parameter): string {
+  const attrs = parameter.attributes;
+  const kind = `${parameter.type}${parameter.subtype}`;
+  if (kind.match(/^DEMO.*AGE/i)) {
+    const display = [];
+    attrs.forEach(attr => {
+      const op = {
+        'BETWEEN': 'In Range',
+        'EQUAL': 'Equal To',
+        'GREATER_THAN': 'Greater Than',
+        'LESS_THAN': 'Less Than',
+        'GREATER_THAN_OR_EQUAL_TO': 'Greater Than or Equal To',
+        'LESS_THAN_OR_EQUAL_TO': 'Less Than or Equal To',
+      }[attr.operator];
+      const args = attr.operands.join(', ');
+      display.push(`${op} ${args}`);
+    });
+    return display.join(' ');
+  } else {
+    return '';
+  }
+}
+
+export function domainToTitle(domain: string): string {
+  switch (domain) {
+    case DomainType[DomainType.PERSON]:
+      domain = 'Demographics';
+      break;
+    case DomainType[DomainType.MEASUREMENT]:
+      domain = 'Measurements';
+      break;
+    case DomainType[DomainType.PHYSICALMEASUREMENT]:
+      domain = 'Physical Measurements';
+      break;
+    case DomainType[DomainType.VISIT]:
+      domain = 'Visit';
+      break;
+    case DomainType[DomainType.DRUG]:
+      domain = 'Drugs';
+      break;
+    case DomainType[DomainType.CONDITION]:
+      domain = 'Conditions';
+      break;
+    case DomainType[DomainType.PROCEDURE]:
+      domain = 'Procedures';
+      break;
+    case DomainType[DomainType.LAB]:
+      domain = 'Labs';
+      break;
+  }
+  return domain;
 }
 
 export function typeToTitle(_type: string): string {

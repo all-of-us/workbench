@@ -16,16 +16,12 @@ export class ListSearchGroupListComponent implements OnInit {
 
   groups: any;
   index = 0;
-  updated = 0;
   subscription: Subscription;
 
   ngOnInit(): void {
     this.subscription = searchRequestStore
       .filter(sr => !!sr)
       .subscribe(searchRequest => {
-        console.log(searchRequest);
-        this.updated = this.updated + 1;
-        console.log(this.updated);
         this.groups = searchRequest[this.role];
         if (this.role === 'excludes') {
           this.index = searchRequest.includes.length + 1;
