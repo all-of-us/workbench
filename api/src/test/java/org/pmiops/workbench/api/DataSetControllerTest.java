@@ -25,8 +25,6 @@ import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.WorkspaceService;
-import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -52,6 +50,9 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
+import org.pmiops.workbench.workspaces.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -165,8 +166,16 @@ public class DataSetControllerTest {
   @Autowired
   WorkspaceService workspaceService;
 
+  @Autowired
+  WorkspaceMapper workspaceMapper;
+
   @TestConfiguration
-  @Import({CohortFactoryImpl.class, TestBigQueryCdrSchemaConfig.class, UserService.class, WorkspacesController.class, WorkspaceServiceImpl.class})
+  @Import({CohortFactoryImpl.class,
+      TestBigQueryCdrSchemaConfig.class,
+      UserService.class,
+      WorkspacesController.class,
+      WorkspaceMapper.class,
+      WorkspaceServiceImpl.class})
   @MockBean({BigQueryService.class, CdrBigQuerySchemaConfigService.class, CdrVersionService.class,
       CloudStorageService.class, CohortCloningService.class,
       CohortMaterializationService.class, ComplianceService.class,
@@ -192,7 +201,7 @@ public class DataSetControllerTest {
     dataSetController = new DataSetController(bigQueryService, cdrBigQuerySchemaConfigService,
         cohortDao, conceptSetDao, participantCounter, workspaceService);
     WorkspacesController workspacesController =
-        new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
+        new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
             userProvider, fireCloudService, cloudStorageService, CLOCK, userService,
             userRecentResourceService);
     CohortsController cohortsController = new CohortsController(workspaceService, cohortDao, cdrVersionDao, cohortFactory,
