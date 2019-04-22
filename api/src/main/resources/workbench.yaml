@@ -1360,12 +1360,12 @@ paths:
           name: dataSetRequest
           required: true
           schema:
-            $ref: "#/definitions/DataSet"
+            $ref: "#/definitions/DataSetRequest"
       responses:
         200:
           description: Data set has been created successfully
           schema:
-            $ref: "#/definitions/DataSetResponse"
+            $ref: "#/definitions/DataSet"
         400:
           description: Invalid data set request
           schema:
@@ -1389,7 +1389,7 @@ paths:
             name: dataSet
             required: true
             schema:
-              $ref: "#/definitions/DataSet"
+              $ref: "#/definitions/DataSetRequest"
         responses:
           200:
             description: >
@@ -2043,7 +2043,7 @@ definitions:
           type: integer
           format: int64
 
-  DataSet:
+  DataSetRequest:
     type: object
     required:
       - name
@@ -2086,7 +2086,7 @@ definitions:
       value:
         type: string
 
-  DataSetResponse:
+  DataSet:
     type: object
     properties:
       name:

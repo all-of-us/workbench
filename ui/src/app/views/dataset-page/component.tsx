@@ -28,8 +28,8 @@ import {EditModal} from 'app/views/edit-modal/component';
 import {
   Cohort,
   ConceptSet,
-  DataSet,
   DataSetQuery,
+  DataSetRequest,
   Domain,
   DomainInfo,
   DomainValue,
@@ -336,7 +336,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
         domainSetFound.values.items.push({value: value.value});
       }
     });
-    const dataSet: DataSet = {
+    const dataSet: DataSetRequest = {
       name: '',
       conceptSetIds: this.state.selectedConceptSetIds,
       cohortIds: this.state.selectedCohortIds,

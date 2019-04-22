@@ -42,7 +42,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSet;
-import org.pmiops.workbench.model.DataSetResponse;
+import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DataSetQuery;
 import org.pmiops.workbench.model.DataSetQueryList;
 import org.pmiops.workbench.model.Domain;
@@ -149,8 +149,8 @@ public class DataSetController implements DataSetApiDelegate {
 
 
   @Override
-  public ResponseEntity<DataSetResponse> createDataSet(String workspaceNamespace, String workspaceId,
-      DataSet dataSetRequest) {
+  public ResponseEntity<DataSet> createDataSet(String workspaceNamespace, String workspaceId,
+      DataSetRequest dataSetRequest) {
     if (Strings.isNullOrEmpty(dataSetRequest.getName())) {
       throw new BadRequestException("Missing name");
     } else if (dataSetRequest.getConceptSetIds() == null || dataSetRequest.getConceptSetIds().size() == 0) {
@@ -180,11 +180,11 @@ public class DataSetController implements DataSetApiDelegate {
     }
   }
 
-  private final Function<org.pmiops.workbench.db.model.DataSet, DataSetResponse> TO_CLIENT_DATA_SET =
-      new Function<org.pmiops.workbench.db.model.DataSet, DataSetResponse>() {
+  private final Function<org.pmiops.workbench.db.model.DataSet, DataSet> TO_CLIENT_DATA_SET =
+      new Function<org.pmiops.workbench.db.model.DataSet, DataSet>() {
         @Override
-        public DataSetResponse apply(org.pmiops.workbench.db.model.DataSet dataSet) {
-          DataSetResponse result = new DataSetResponse();
+        public DataSet apply(org.pmiops.workbench.db.model.DataSet dataSet) {
+          DataSet result = new DataSet();
           result.setName(dataSet.getName());
           Iterable<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
               conceptSetDao.findAll(dataSet.getConceptSetId());
@@ -229,7 +229,7 @@ public class DataSetController implements DataSetApiDelegate {
       };
 
 
-  public ResponseEntity<DataSetQueryList> generateQuery(String workspaceNamespace, String workspaceId, DataSet dataSet) {
+  public ResponseEntity<DataSetQueryList> generateQuery(String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
 
     CdrBigQuerySchemaConfig bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
 
