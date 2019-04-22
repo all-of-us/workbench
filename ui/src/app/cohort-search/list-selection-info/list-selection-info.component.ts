@@ -1,8 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {CohortSearchActions} from 'app/cohort-search/redux';
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
-import {TreeType} from 'generated';
 import {DomainType} from 'generated/fetch';
 
 @Component({
@@ -14,7 +11,7 @@ export class ListSelectionInfoComponent {
   @Input() parameter;
   @Input() indexes;
 
-  constructor(private actions: CohortSearchActions) {}
+  constructor() {}
 
   remove(): void {
     const {paramId} = this.parameter;
