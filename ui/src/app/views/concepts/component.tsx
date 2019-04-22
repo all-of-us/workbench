@@ -7,7 +7,7 @@ import {WorkspaceCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
-import {SpinnerOverlay} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -40,7 +40,6 @@ const styles = reactStyles({
     display: 'flex', flexDirection: 'column', marginBottom: '0.3rem'
   },
   domainHeaderLink: {
-    fontSize: '12px', fontWeight: 300, display: 'flex', flexDirection: 'column',
     justifyContent: 'center', padding: '0.1rem 1rem', color: '#2691D0',
     lineHeight: '18px'
   },
@@ -56,6 +55,9 @@ const styles = reactStyles({
   selectedConceptsCount: {
     backgroundColor: '#2691D0', color: '#fff', borderRadius: '20px',
     textAlign: 'center', height: '1.5em', padding: '0 5px'
+  },
+  clearSearchIcon: {
+    fill: '#2691D0', transform: 'translate(-1.5rem)', height: '1rem', width: '1rem'
   }
 });
 
@@ -74,8 +76,8 @@ interface ConceptInfo extends Concept {
 }
 
 const DomainBox: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
-  standardConceptsOnly: boolean}> =
-    ({conceptDomainInfo, standardConceptsOnly}) => {
+  standardConceptsOnly: boolean, browseInDomain: Function}> =
+    ({conceptDomainInfo, standardConceptsOnly, browseInDomain}) => {
       const conceptCount = standardConceptsOnly ?
           conceptDomainInfo.standardConceptCount : conceptDomainInfo.allConceptCount;
       return <WorkspaceCardBase style={{minWidth: '11rem'}} data-test-id='domain-box'>
@@ -83,7 +85,8 @@ const DomainBox: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
         <div style={styles.conceptText}>
           <span style={{fontSize: '30px'}}>{conceptCount}</span> concepts in this domain. <p/>
           <b>{conceptDomainInfo.participantCount}</b> participants in domain.</div>
-        <Clickable style={styles.domainBoxLink}>Browse Domain</Clickable>
+        <Clickable style={styles.domainBoxLink}
+                   onClick={browseInDomain}>Browse Domain</Clickable>
       </WorkspaceCardBase>;
     };
 
@@ -154,9 +157,11 @@ export const ConceptWrapper = withCurrentWorkspace()(
           conceptsCache: conceptsCache,
           conceptDomainCounts: conceptDomainCounts,
           selectedDomain: conceptDomainCounts[0],
-          loadingDomains: false});
+        });
       } catch (e) {
         console.error(e);
+      } finally {
+        this.setState({loadingDomains: false});
       }
     }
 
@@ -182,7 +187,6 @@ export const ConceptWrapper = withCurrentWorkspace()(
         .find(conceptDomain => conceptDomain.domain === this.state.selectedDomain.domain);
       this.setState({concepts: cacheItem.items});
       this.setState({
-        // conceptsToAdd: this.state.concepts.filter((c) => c.selected),
         vocabularies: cacheItem.vocabularyList.map((vocabulary) => {
           return {
             ...vocabulary,
@@ -196,7 +200,8 @@ export const ConceptWrapper = withCurrentWorkspace()(
       const {standardConceptsOnly, currentSearchString, conceptsCache,
         selectedDomain, completedDomainSearches} = this.state;
       const {namespace, id} = this.props.workspace;
-      this.setState({concepts: [], searchLoading: true, searching: true, conceptsToAdd: []});
+      this.setState({concepts: [], searchLoading: true, searching: true, conceptsToAdd: [],
+        selectedConceptDomainMap: new Map<string, number>()});
       const standardConceptFilter = standardConceptsOnly ?
         StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
 
@@ -261,8 +266,8 @@ export const ConceptWrapper = withCurrentWorkspace()(
       const {conceptDomainCounts} = this.state;
       this.setState({currentSearchString: '',
         selectedDomain: conceptDomainCounts
-          .find(domainCount => domainCount.domain === domain.domain)});
-      this.searchConcepts();
+          .find(domainCount => domainCount.domain === domain.domain)},
+        this.searchConcepts);
     }
 
     domainLoading(domain) {
@@ -303,8 +308,8 @@ export const ConceptWrapper = withCurrentWorkspace()(
     setConceptsSaveText() {
       const {selectedConceptDomainMap, selectedDomain} = this.state;
       const conceptsCount = selectedConceptDomainMap[selectedDomain.domain];
-      this.setState({conceptsSavedText: conceptsCount + ' ' + selectedDomain.name +
-        (conceptsCount > 1 ? ' concepts ' : ' concept ') + 'have been added '});
+      this.setState({conceptsSavedText: conceptsCount + ' ' + selectedDomain.name.toLowerCase() +
+        (conceptsCount > 1 ? ' concepts have ' : ' concept has ') + 'been added to set.'});
       setTimeout(() => {
         this.setState({conceptsSavedText: ''});
       }, 5000);
@@ -313,7 +318,8 @@ export const ConceptWrapper = withCurrentWorkspace()(
     render() {
       const {loadingDomains, conceptDomainList, standardConceptsOnly, showSearchError,
         searching, concepts, searchLoading, conceptDomainCounts, selectedDomain,
-        conceptAddModalOpen, conceptsToAdd, selectedConceptDomainMap} = this.state;
+        conceptAddModalOpen, conceptsToAdd, selectedConceptDomainMap,
+        currentSearchString, conceptsSavedText} = this.state;
       return <React.Fragment>
         <div style={{marginBottom: '6%', marginTop: '1.5%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
@@ -322,6 +328,9 @@ export const ConceptWrapper = withCurrentWorkspace()(
             <TextInput style={styles.searchBar}
                        placeholder='Search concepts in domain'
                        onKeyDown={e => {this.searchButton(e); }}/>
+            {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()}>
+                <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
+            </Clickable>}
             <CheckBox checked={standardConceptsOnly}
                       style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
                       onChange={() => this.setState({
@@ -337,6 +346,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
               <AlertClose style={{width: 'unset'}}
                           onClick={() => this.setState({showSearchError: false})}/>
           </AlertDanger>}
+          <div style={{marginTop: '0.5rem'}}>{conceptsSavedText}</div>
         </div>
 
         {loadingDomains ? <SpinnerOverlay/> :
@@ -345,11 +355,12 @@ export const ConceptWrapper = withCurrentWorkspace()(
               <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
                 {conceptDomainCounts.map((domain) => {
                   return <div style={{display: 'flex', flexDirection: 'column'}}>
-                    <Clickable style={domain === selectedDomain ?
-                      {fontWeight: 600, ...styles.domainHeaderLink} : styles.domainHeaderLink}
+                    <Clickable style={styles.domainHeaderLink}
                                onClick={() => this.selectDomain(domain)}
                                disabled={this.domainLoading(domain)}>
                     <div style={{fontSize: '16px'}}>{domain.name}</div>
+                    {this.domainLoading(domain) ?
+                      <Spinner style={{height: '15px', width: '15px'}}/> :
                       <div style={{display: 'flex', flexDirection: 'row',
                         justifyContent: 'space-between'}}>
                         <div>{domain.conceptCount}</div>
@@ -358,6 +369,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
                           {selectedConceptDomainMap[domain.domain]}
                         </div>}
                       </div>
+                    }
                   </Clickable>
                   {domain === selectedDomain && <hr style={styles.domainHeaderSelected}/>}
                   </div>;
@@ -377,9 +389,14 @@ export const ConceptWrapper = withCurrentWorkspace()(
                                disable={this.activeSelectedConceptCount === 0}/>
             </FadeBox> :
             <div style={{display: 'flex', flexDirection: 'row', width: '94.3%', flexWrap: 'wrap'}}>
-              {conceptDomainList.map((domain) => {
+              {conceptDomainList.map((domain, i) => {
                 return <DomainBox conceptDomainInfo={domain}
-                                  standardConceptsOnly={standardConceptsOnly}/>;
+                                  standardConceptsOnly={standardConceptsOnly}
+                                  browseInDomain={() => {
+                                    this.browseDomain(domain);
+                                    this.setState({searching: true});
+                                  }}
+                                  key={i}/>;
               })}
           </div>
         }
