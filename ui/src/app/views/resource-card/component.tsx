@@ -13,9 +13,11 @@ import {ResourceType} from 'app/utils/resourceActions';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
 import {RenameModal} from 'app/views/rename-modal/component';
-import {Domain, RecentResource} from 'generated/fetch';
+import {Domain, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import { WorkspacePermissions } from 'app/utils/workspace-permissions';
+import { CopyNotebookModal } from '../copy-notebook-modal/component';
 
 
 @Component({
@@ -113,6 +115,7 @@ export interface ResourceCardState {
   showErrorModal: boolean;
   errorModalTitle: string;
   errorModalBody: string;
+  showCopyNotebookModal: boolean;
 }
 
 export class ResourceCard extends React.Component<ResourceCardProps, ResourceCardState> {
@@ -131,7 +134,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         props.resourceCard.conceptSet),
       showErrorModal: false,
       errorModalTitle: 'Error Title',
-      errorModalBody: 'Error Body'
+      errorModalBody: 'Error Body',
+      showCopyNotebookModal: false,
     };
   }
 
@@ -297,17 +301,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   copyResource(): void {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
-        workspacesApi().getWorkspaces()
-          .then((data) => {
-            console.log(data);
-          });
-        workspacesApi().cloneNotebook(
-          this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName,
-          this.props.resourceCard.notebook.name)
-          .then(() => {
-            this.props.onUpdate();
-          });
+        console.log(this.props.resourceCard.workspaceFirecloudName);
+        this.setState({ showCopyNotebookModal: true });
         break;
       }
     }
@@ -424,6 +419,11 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           title={this.state.errorModalTitle}
           body={this.state.errorModalBody}
           onConfirm={() => this.setState({showErrorModal: false})}/>
+      }
+      {this.state.showCopyNotebookModal &&
+        <CopyNotebookModal
+          originalNotebook={this.props.resourceCard.notebook}
+          onClose={() => this.setState({ showCopyNotebookModal: false })}/>
       }
       <ResourceCardBase style={{...styles.card, marginTop: marginTop}}
                         data-test-id='card'>
