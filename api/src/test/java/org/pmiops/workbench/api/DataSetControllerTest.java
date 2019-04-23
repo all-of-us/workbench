@@ -3,7 +3,9 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.gson.Gson;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -22,6 +24,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.ConceptSetService;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -34,14 +37,12 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
-import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DataSetQueryList;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainValue;
-import org.pmiops.workbench.model.DomainValuesResponse;
+import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.ValueSet;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -77,7 +78,6 @@ import java.util.List;
 import java.util.Random;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -143,6 +143,9 @@ public class DataSetControllerTest {
   ConceptSetDao conceptSetDao;
 
   @Autowired
+  DataSetService dataSetService;
+
+  @Autowired
   FireCloudService fireCloudService;
 
   @Autowired
@@ -179,7 +182,8 @@ public class DataSetControllerTest {
   @MockBean({BigQueryService.class, CdrBigQuerySchemaConfigService.class, CdrVersionService.class,
       CloudStorageService.class, CohortCloningService.class,
       CohortMaterializationService.class, ComplianceService.class,
-      ConceptBigQueryService.class, ConceptSetService.class, FireCloudService.class,
+      ConceptBigQueryService.class, ConceptSetService.class, DataSetService.class,
+      FireCloudService.class,
       ParticipantCounter.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
@@ -197,9 +201,8 @@ public class DataSetControllerTest {
 
   @Before
   public void setUp() throws Exception {
-
-    dataSetController = new DataSetController(bigQueryService, cdrBigQuerySchemaConfigService,
-        cohortDao, conceptSetDao, participantCounter, workspaceService);
+    dataSetController = new DataSetController(bigQueryService, cdrBigQuerySchemaConfigService, CLOCK,
+        cohortDao, conceptDao, conceptSetDao, dataSetService,participantCounter, userProvider, workspaceService);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
             userProvider, fireCloudService, cloudStorageService, CLOCK, userService,
@@ -302,8 +305,8 @@ public class DataSetControllerTest {
         QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person").build());
   }
 
-  private DataSet buildEmptyDataSet() {
-    return new DataSet()
+  private DataSetRequest buildEmptyDataSet() {
+    return new DataSetRequest()
         .conceptSetIds(new ArrayList<>())
         .cohortIds(new ArrayList<>())
         .values(new ArrayList<>());
@@ -329,7 +332,7 @@ public class DataSetControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoCohort() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
     dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
@@ -337,7 +340,7 @@ public class DataSetControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoConceptSet() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
 
     dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
@@ -345,7 +348,7 @@ public class DataSetControllerTest {
 
   @Test
   public void testGetQueryDropsQueriesWithNoValue() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
@@ -353,16 +356,22 @@ public class DataSetControllerTest {
     assertThat(response.getQueryList()).isEmpty();
   }
 
+  private List<DomainValuePair> mockDomainValuePair() {
+    List<DomainValuePair> domainValues = new ArrayList<>();
+    DomainValuePair domainValuePair = new DomainValuePair();
+    domainValuePair.setDomain(Domain.CONDITION);
+    domainValuePair.setValue("PERSON_ID");
+    domainValues.add(domainValuePair);
+    return domainValues;
+  }
+
   @Test
   public void testGetQuery() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValue> domainValues = new ArrayList<>();
-    domainValues.add(new DomainValue().value("PERSON_ID"));
-    ValueSet valueSet = new ValueSet().domain(Domain.CONDITION).values(new DomainValuesResponse().items(domainValues));
-    dataSet.addValuesItem(valueSet);
-
+    List<DomainValuePair> domainValues = mockDomainValuePair();
+    dataSet.setValues(domainValues);
 
     List<String> selectStrings = new ArrayList<>();
     selectStrings.add("PERSON_ID");
@@ -370,27 +379,30 @@ public class DataSetControllerTest {
     joinStrings.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
 
     dataSetController = spy(dataSetController);
-    doReturn(new ValuesLinkingPair(selectStrings, joinStrings)).when(dataSetController).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
+    doReturn(new ValuesLinkingPair(selectStrings, joinStrings)).when(dataSetController).getValueSelectsAndJoins(domainValues, Domain.CONDITION);
 
     DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList().size()).isEqualTo(1);
-    verify(dataSetController, times(1)).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
+    verify(dataSetController, times(1)).getValueSelectsAndJoins(domainValues, Domain.CONDITION);
     assertThat(response.getQueryList().get(0).getQuery()).isEqualTo("SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence WHERE (condition_concept_id IN () OR condition_source_concept_id IN ()) AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
   }
 
   @Test
   public void testGetQueryTwoDomains() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_TWO_ID);
-    List<DomainValue> domainValues = new ArrayList<>();
-    domainValues.add(new DomainValue().value("PERSON_ID"));
-    ValueSet valueSet = new ValueSet().domain(Domain.CONDITION).values(new DomainValuesResponse().items(domainValues));
-    dataSet.addValuesItem(valueSet);
-    ValueSet valueSetTwo = new ValueSet().domain(Domain.DRUG).values(new DomainValuesResponse().items(domainValues));
-    dataSet.addValuesItem(valueSetTwo);
+    List<DomainValuePair> domainValues = new ArrayList<>();
+    domainValues.addAll(mockDomainValuePair());
 
+    DomainValuePair drugDomainValue = new DomainValuePair();
+    drugDomainValue.setDomain(Domain.DRUG);
+    domainValues.add(drugDomainValue);
+    dataSet.setValues(domainValues);
+
+    List<DomainValuePair> valueSet2 = new ArrayList<>();
+    valueSet2.add(drugDomainValue);
 
     List<String> selectConditionStrings = new ArrayList<>();
     selectConditionStrings.add("PERSON_ID");
@@ -403,8 +415,8 @@ public class DataSetControllerTest {
     joinDrugStrings.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.drug_exposure` d_exposure");
 
     dataSetController = spy(dataSetController);
-    doReturn(new ValuesLinkingPair(selectConditionStrings, joinConditionStrings)).when(dataSetController).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
-    doReturn(new ValuesLinkingPair(selectDrugStrings, joinDrugStrings)).when(dataSetController).getValueSelectsAndJoins(valueSetTwo, Domain.DRUG);
+    doReturn(new ValuesLinkingPair(selectConditionStrings, joinConditionStrings)).when(dataSetController).getValueSelectsAndJoins(mockDomainValuePair(), Domain.CONDITION);
+    doReturn(new ValuesLinkingPair(selectDrugStrings, joinDrugStrings)).when(dataSetController).getValueSelectsAndJoins(valueSet2, Domain.DRUG);
 
     DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList()).isNotEmpty();
@@ -414,14 +426,12 @@ public class DataSetControllerTest {
 
   @Test
   public void testGetQueryTwoCohorts() {
-    DataSet dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addCohortIdsItem(COHORT_TWO_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValue> domainValues = new ArrayList<>();
-    domainValues.add(new DomainValue().value("PERSON_ID"));
-    ValueSet valueSet = new ValueSet().domain(Domain.CONDITION).values(new DomainValuesResponse().items(domainValues));
-    dataSet.addValuesItem(valueSet);
+    List<DomainValuePair> domainValuePairList = mockDomainValuePair();
+    dataSet.setValues(domainValuePairList);
 
 
     List<String> selectStrings = new ArrayList<>();
@@ -430,10 +440,66 @@ public class DataSetControllerTest {
     joinStrings.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
 
     dataSetController = spy(dataSetController);
-    doReturn(new ValuesLinkingPair(selectStrings, joinStrings)).when(dataSetController).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
+    doReturn(new ValuesLinkingPair(selectStrings, joinStrings)).when(dataSetController).getValueSelectsAndJoins(domainValuePairList, Domain.CONDITION);
 
     DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList().size()).isEqualTo(1);
     assertThat(response.getQueryList().get(0).getQuery()).contains("OR PERSON_ID IN");
+  }
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
+  @Test
+  public void createDataSetMissingArguments() {
+    DataSetRequest dataSet = buildEmptyDataSet();
+
+    List<Long> cohortIds = new ArrayList<>();
+    cohortIds.add(1l);
+
+    List<Long> conceptIds = new ArrayList<>();
+    conceptIds.add(1l);
+
+    List<DomainValuePair> valuePairList = new ArrayList<>();
+    DomainValuePair domainValue = new DomainValuePair();
+    domainValue.setDomain(Domain.DRUG);
+    domainValue.setValue("DRUGS_VALUE");
+
+    valuePairList.add(domainValue);
+
+    dataSet.setValues(valuePairList);
+    dataSet.setConceptSetIds(conceptIds);
+    dataSet.setCohortIds(cohortIds);
+
+    expectedException.expect(BadRequestException.class);
+    expectedException.expectMessage("Missing name");
+
+    dataSetController.createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
+
+    dataSet.setName("dataSet");
+    dataSet.setCohortIds(null);
+
+
+    expectedException.expect(BadRequestException.class);
+    expectedException.expectMessage("Missing cohort ids");
+
+    dataSetController.createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
+
+    dataSet.setCohortIds(cohortIds);
+    dataSet.setConceptSetIds(null);
+
+    expectedException.expect(BadRequestException.class);
+    expectedException.expectMessage("Missing concept set ids");
+
+    dataSetController.createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
+
+
+    dataSet.setConceptSetIds(conceptIds);
+    dataSet.setValues(null);
+
+    expectedException.expect(BadRequestException.class);
+    expectedException.expectMessage("Missing values");
+
+    dataSetController.createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
   }
 }
