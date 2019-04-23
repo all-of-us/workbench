@@ -2,16 +2,16 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {RegistrationPage, RegistrationPageProps} from 'app/views/registration-page/component';
+import {RegistrationDashboard, RegistrationDashboardProps} from 'app/views/registration-dashboard/component';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
-describe('RegistrationPage', () => {
-  let props: RegistrationPageProps;
+describe('RegistrationDashboard', () => {
+  let props: RegistrationDashboardProps;
 
   const component = () => {
-    return mount<RegistrationPage, RegistrationPageProps, {trainingWarningOpen: boolean}>
-    (<RegistrationPage {...props}/>);
+    return mount<RegistrationDashboard, RegistrationDashboardProps, {trainingWarningOpen: boolean}>
+    (<RegistrationDashboard {...props}/>);
   };
 
   beforeEach(() => {

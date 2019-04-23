@@ -17,13 +17,13 @@ import {configApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWork} from 'app/views/recent-work/component';
-import {RegistrationPage} from 'app/views/registration-page/component';
+import {RegistrationDashboard} from 'app/views/registration-dashboard/component';
 import {
   BillingProjectStatus,
   Profile,
 } from 'generated/fetch';
 
-export const homepageStyles = reactStyles({
+export const styles = reactStyles({
   mainHeader: {
     color: '#FFFFFF', fontSize: 28, fontWeight: 400,
     display: 'flex', letterSpacing: 'normal'
@@ -280,20 +280,20 @@ export const Homepage = withUserProfile()(class extends React.Component<
       }];
 
     return <React.Fragment>
-      <div style={homepageStyles.backgroundImage}>
+      <div style={styles.backgroundImage}>
         <div style={{display: 'flex', justifyContent: 'center'}}>
-          <div style={homepageStyles.singleCard}>
+          <div style={styles.singleCard}>
             {accessTasksLoaded ?
               (accessTasksRemaining ?
-                (<RegistrationPage eraCommonsLinked={eraCommonsLinked}
-                                   eraCommonsError={eraCommonsError}
-                                   trainingCompleted={trainingCompleted}
-                                   firstVisitTraining={firstVisitTraining}
-                                   betaAccessGranted={betaAccessGranted}/>
+                (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
+                                        eraCommonsError={eraCommonsError}
+                                        trainingCompleted={trainingCompleted}
+                                        firstVisitTraining={firstVisitTraining}
+                                        betaAccessGranted={betaAccessGranted}/>
                 ) : (
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
-                    <div style={homepageStyles.contentWrapperLeft}>
-                      <div style={homepageStyles.mainHeader}>Researcher Workbench</div>
+                    <div style={styles.contentWrapperLeft}>
+                      <div style={styles.mainHeader}>Researcher Workbench</div>
                       <TooltipTrigger content={<div>Your Firecloud billing project is still being
                         initialized. Workspace creation will be available in a few minutes.</div>}
                                       disabled={billingProjectInitialized}>
@@ -305,7 +305,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                         </CardButton>
                       </TooltipTrigger>
                     </div>
-                    <div style={homepageStyles.contentWrapperRight}>
+                    <div style={styles.contentWrapperRight}>
                       <a onClick={() => navigate(['workspaces'])}
                          style={{fontSize: '14px', color: '#FFFFFF'}}>
                         See All Workspaces</a>
@@ -322,8 +322,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
           </div>
         </div>
         <div>
-          <div style={homepageStyles.quickRow}>
-            <div style={homepageStyles.quickTourLabel}>Quick Tour & Videos</div>
+          <div style={styles.quickRow}>
+            <div style={styles.quickTourLabel}>Quick Tour & Videos</div>
             {quickTourResources.map((thumbnail, i) => {
               return <React.Fragment key={i}>
                 <Clickable onClick={thumbnail.onClick}
@@ -335,9 +335,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
             })}
           </div>
           <div>
-            <div style={homepageStyles.footer}>
-              <div style={homepageStyles.footerInner}>
-                <div style={homepageStyles.footerTitle}>
+            <div style={styles.footer}>
+              <div style={styles.footerInner}>
+                <div style={styles.footerTitle}>
                   How to Use the All of Us Researcher Workbench</div>
                 <div style={{display: 'flex', justifyContent: 'flex-end'}}>
                   <TooltipTrigger content='Coming Soon' side='left'>
@@ -348,8 +348,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
                   width: '87.34%', justifyContent: 'space-between'}}>
                   {footerLinks.map((col, i) => {
                     return <React.Fragment key={i}>
-                      <div style={homepageStyles.linksBlock}>
-                        <div style={homepageStyles.footerText}>
+                      <div style={styles.linksBlock}>
+                        <div style={styles.footerText}>
                           <div style={{color: 'white', marginTop: '2%'}}>{col.title}</div>
                           <ul style={{color: '#83C3EC'}}>
                             {col.links.map((link, ii) => {
@@ -365,12 +365,12 @@ export const Homepage = withUserProfile()(class extends React.Component<
                 </div>
               </div>
             </div>
-            <div style={homepageStyles.bottomBanner}>
-              <div style={homepageStyles.logo}>
+            <div style={styles.bottomBanner}>
+              <div style={styles.logo}>
                 <img src='/assets/images/all-of-us-logo-footer.svg'/>
               </div>
-              <div style={homepageStyles.bottomLinks}>Privacy Policy</div>
-              <div style={homepageStyles.bottomLinks}>Terms of Service</div>
+              <div style={styles.bottomLinks}>Privacy Policy</div>
+              <div style={styles.bottomLinks}>Terms of Service</div>
             </div>
           </div>
         </div>

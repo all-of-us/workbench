@@ -46,7 +46,7 @@ const styles = reactStyles({
   }
 });
 
-export interface RegistrationPageProps {
+export interface RegistrationDashboardProps {
   betaAccessGranted: boolean;
   eraCommonsLinked: boolean;
   eraCommonsError: string;
@@ -54,11 +54,11 @@ export interface RegistrationPageProps {
   firstVisitTraining: boolean;
 }
 
-export class RegistrationPage extends
-    React.Component<RegistrationPageProps,
+export class RegistrationDashboard extends
+    React.Component<RegistrationDashboardProps,
       {trainingWarningOpen: boolean, taskCompletionMap: Map<number, boolean>}> {
 
-  constructor(props: RegistrationPageProps) {
+  constructor(props: RegistrationDashboardProps) {
     super(props);
     this.state = {
       trainingWarningOpen: !props.firstVisitTraining,
@@ -75,14 +75,14 @@ export class RegistrationPage extends
         'training courses hosted at the NNLM\'s Moodle installation',
       buttonText: 'Complete training',
       completedText: 'Completed',
-      onClick: RegistrationPage.redirectToTraining
+      onClick: RegistrationDashboard.redirectToTraining
     }, {
       title: 'Login to ERA Commons',
       description: 'Researchers must maintain up-to-date completion of compliance' +
         ' training courses hosted at the NNLM’s Moodle installation',
       buttonText: 'Login',
       completedText: 'Linked',
-      onClick: RegistrationPage.redirectToNiH
+      onClick: RegistrationDashboard.redirectToNiH
     }
   ];
 
@@ -100,15 +100,10 @@ export class RegistrationPage extends
 
   isEnabled(i: number): boolean {
     const {taskCompletionMap} = this.state;
-    if (i < this.registrationTasks.length) {
-      if (i === 0) {
-        return !taskCompletionMap.get(i) && !taskCompletionMap.get(i + 1);
-      } else {
-        return !taskCompletionMap.get(i) && !taskCompletionMap.get(i + 1) &&
-          taskCompletionMap.get(i - 1);
-      }
-    } else {
+    if (i === 0) {
       return !taskCompletionMap.get(i);
+    } else {
+      return !taskCompletionMap.get(i) && !this.isEnabled(i - 1);
     }
   }
 
@@ -131,10 +126,10 @@ export class RegistrationPage extends
                                   style={{...baseStyles.card, ...styles.warningModal}}>
         <ClrIcon shape='warning-standard' class='is-solid'
                  style={styles.warningIcon}/>
-        You have not been granted beta access. Please contact help@research-aou.org.
+        You have not been granted beta access. Please contact support@researchallofus.org.
       </div>}
 
-      <div style={{display: 'flex', flexDirection: 'row', margin: '3%'}}>
+      <div style={{display: 'flex', flexDirection: 'row'}}>
         {this.registrationTasks.map((card, i) => {
           return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
             style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
@@ -147,11 +142,12 @@ export class RegistrationPage extends
             {!this.allTasksCompleted() &&
             <div style={styles.cardDescription}>{card.description}</div>}
             {taskCompletionMap.get(i) ?
-              <Button disabled={true} style={{backgroundColor: '#8BC990', width: 'max-content'}}
-                      data-test-id='completed-button'>
+              <Button disabled={true} data-test-id='completed-button'
+                      style={{backgroundColor: '#8BC990', width: 'max-content', cursor: 'default'}}>
                 <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{card.completedText}
               </Button> :
-            <Button type='darklingSecondary' style={{width: 'max-content'}} onClick={card.onClick}
+            <Button type='darklingSecondary' onClick={card.onClick} style={{width: 'max-content',
+              cursor: this.isEnabled(i) ? 'pointer' : 'default'}}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
               {card.buttonText}
             </Button>}
