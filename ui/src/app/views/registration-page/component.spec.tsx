@@ -22,7 +22,7 @@ describe('RegistrationPage', () => {
       trainingCompleted: false,
       firstVisitTraining: true,
       betaAccessGranted: true
-    }
+    };
   });
 
   it('should render', () => {
@@ -36,6 +36,38 @@ describe('RegistrationPage', () => {
     const wrapper = component();
     expect(wrapper.find('[data-test-id="era-commons-error"]').first().text())
       .toContain(errorMessage);
+  });
+
+  it('should sequentially enable tasks', () => {
+    let wrapper = component();
+
+    // initially, first tile should be enabled and second tile should be disabled
+    expect(wrapper.find('[data-test-id="registration-task-0"]')
+      .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
+    expect(wrapper.find('[data-test-id="registration-task-1"]')
+      .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeTruthy();
+
+    props.trainingCompleted = true;
+    wrapper = component();
+    // now, first tile should be disabled but completed and second tile should be enabled
+    expect(wrapper.find('[data-test-id="registration-task-0"]')
+      .find('[data-test-id="completed-button"]').length).toBeGreaterThanOrEqual(1);
+    expect(wrapper.find('[data-test-id="registration-task-1"]')
+      .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
+
+  });
+
+  it('should display a warning when beta access has not been granted', () => {
+    props.betaAccessGranted = false;
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(1);
+  });
+
+  it('should display a success message when all tasks have been completed', () => {
+    props.eraCommonsLinked = true;
+    props.trainingCompleted = true;
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
   });
 
 });

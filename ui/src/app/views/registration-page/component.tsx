@@ -120,14 +120,15 @@ export class RegistrationPage extends
     const {taskCompletionMap, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
     return <div style={styles.registrationPage}
-                data-test-id='access-tasks'>
+                data-test-id='registration-dashboard'>
       <div style={styles.mainHeader}>Researcher Workbench</div>
       <div style={{...styles.mainHeader, fontSize: '18px', marginBottom: '1rem'}}>
         <ClrIcon shape='warning-standard' class='is-solid'
                  style={{color: '#fff', marginRight: '0.3rem'}}/>
         In order to get access to data and tools please complete the following steps:
       </div>
-      {!betaAccessGranted && <div style={{...baseStyles.card, ...styles.warningModal}}>
+      {!betaAccessGranted && <div data-test-id='beta-access-warning'
+                                  style={{...baseStyles.card, ...styles.warningModal}}>
         <ClrIcon shape='warning-standard' class='is-solid'
                  style={styles.warningIcon}/>
         You have not been granted beta access. Please contact help@research-aou.org.
@@ -135,8 +136,7 @@ export class RegistrationPage extends
 
       <div style={{display: 'flex', flexDirection: 'row', margin: '3%'}}>
         {this.registrationTasks.map((card, i) => {
-          console.log(this.isEnabled(i));
-          return <ResourceCardBase key={i}
+          return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
             style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
               opacity: '0.6', maxHeight: this.allTasksCompleted() ? '160px' : '305px',
               minHeight: this.allTasksCompleted() ? '160px' : '305px'}}>
@@ -147,13 +147,12 @@ export class RegistrationPage extends
             {!this.allTasksCompleted() &&
             <div style={styles.cardDescription}>{card.description}</div>}
             {taskCompletionMap.get(i) ?
-              <Button disabled={true} style={{backgroundColor: '#8BC990', width: '80%'}}>
+              <Button disabled={true} style={{backgroundColor: '#8BC990', width: '80%'}}
+                      data-test-id='completed-button'>
                 <ClrIcon shape='check'/>{card.completedText}
               </Button> :
-            <Button type='darklingSecondary'
-                    style={{width: '80%'}}
-                    onClick={card.onClick}
-                    disabled={!this.isEnabled(i)}>
+            <Button type='darklingSecondary' style={{width: '80%'}} onClick={card.onClick}
+                    disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
               {card.buttonText}
             </Button>}
           </ResourceCardBase>;
@@ -174,7 +173,7 @@ export class RegistrationPage extends
         <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
       </AlertWarning>}
       {(this.allTasksCompleted() && betaAccessGranted) &&
-      <div style={{...baseStyles.card, ...styles.warningModal}}>
+      <div style={{...baseStyles.card, ...styles.warningModal}} data-test-id='success-message'>
         You successfully completed all the required steps to access the Research Workbench.
         <Button style={{marginLeft: '0.5rem'}}
                 onClick={() => window.location.reload()}>Get Started</Button>

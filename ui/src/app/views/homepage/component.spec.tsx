@@ -83,9 +83,7 @@ describe('HomepageComponent', () => {
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="complete-training"]')
-        .first().text()).toEqual('Complete Training');
-    expect(wrapper.find('[data-test-id="login"]').first().text()).toEqual('Login');
+    expect(wrapper.find('[data-test-id="registration-dashboard"]').length).toBeGreaterThanOrEqual(1);
   });
 
   it('should not display the quick tour if registration dashboard is open', async () => {
