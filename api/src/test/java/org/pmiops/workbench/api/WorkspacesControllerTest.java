@@ -9,9 +9,11 @@ import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
@@ -64,6 +66,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.model.CopyNotebookRequest;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -197,7 +200,8 @@ public class WorkspacesControllerTest {
           ParticipantCounter.class,
           UserService.class,
           UserRecentResourceService.class,
-          ConceptService.class
+          ConceptService.class,
+          WorkspaceDao.class
   })
   static class Configuration {
     @Bean
@@ -342,6 +346,7 @@ public class WorkspacesControllerTest {
     List<WorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
     workspaceResponses.add(fcResponse);
     when(fireCloudService.getWorkspaces()).thenReturn(workspaceResponses);
+
   }
 
   private void stubBigQueryCohortCalls() {
@@ -1621,7 +1626,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testRenameNotebookinWorkspace() throws Exception {
+  public void testRenameNotebookInWorkspace() throws Exception {
     Workspace workspace = createAndStubDefaultWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
@@ -1664,6 +1669,63 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
     verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
+  }
+
+  @Test
+  public void copyNotebook() {
+    Workspace fromWorkspace = createAndStubDefaultWorkspace();
+    String fromNotebookName = "origin";
+    doReturn(mock(org.pmiops.workbench.db.model.Workspace.class))
+        .when(workspaceDao).findByWorkspaceNamespaceAndFirecloudName(fromWorkspace.getNamespace(), fromWorkspace.getId());
+
+    Workspace toWorkspace = createAndStubDefaultWorkspace();
+    String newNotebookName = "new";
+    doReturn(mock(org.pmiops.workbench.db.model.Workspace.class))
+        .when(workspaceDao).findByWorkspaceNamespaceAndFirecloudName(fromWorkspace.getNamespace(), fromWorkspace.getId());
+
+    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
+    copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
+    copyNotebookRequest.setToWorkspaceNamespace(toWorkspace.getNamespace());
+    copyNotebookRequest.setNewName(newNotebookName);
+
+    workspacesController.copyNotebook(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        fromNotebookName,
+        copyNotebookRequest);
+
+    verify(cloudStorageService).copyBlob(
+        BlobId.of(BUCKET_NAME, "notebooks/" + fromNotebookName),
+        BlobId.of(BUCKET_NAME, "notebooks/" + newNotebookName));
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void copyNotebook_alreadyExists() {
+    Workspace fromWorkspace = createAndStubDefaultWorkspace();
+    String fromNotebookName = "origin";
+    doReturn(mock(org.pmiops.workbench.db.model.Workspace.class))
+        .when(workspaceDao).findByWorkspaceNamespaceAndFirecloudName(fromWorkspace.getNamespace(), fromWorkspace.getId());
+
+    Workspace toWorkspace = createAndStubDefaultWorkspace();
+    String newNotebookName = "new";
+    doReturn(mock(org.pmiops.workbench.db.model.Workspace.class))
+        .when(workspaceDao).findByWorkspaceNamespaceAndFirecloudName(fromWorkspace.getNamespace(), fromWorkspace.getId());
+
+    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
+    copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
+    copyNotebookRequest.setToWorkspaceNamespace(toWorkspace.getNamespace());
+    copyNotebookRequest.setNewName(newNotebookName);
+
+    BlobId newBlobId = BlobId.of(BUCKET_NAME, "notebooks/" + newNotebookName);
+
+    doReturn(Collections.singleton(newBlobId))
+        .when(cloudStorageService).blobsExist(Collections.singletonList(newBlobId));
+
+    workspacesController.copyNotebook(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        fromNotebookName,
+        copyNotebookRequest);
   }
 
   @Test
