@@ -525,7 +525,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   @Override
   public ResponseEntity<VocabularyListResponse> getVocabularies(String workspaceNamespace, String workspaceId, Long cohortId, Long cdrVersionId) {
-    validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
+    validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
     TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
       reviewQueryBuilder.buildVocabularyDataQuery()));
