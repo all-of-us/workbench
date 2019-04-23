@@ -1,4 +1,5 @@
 import { AttrName, Operator, TreeSubType, TreeType } from 'generated';
+import {DomainType} from 'generated/fetch';
 
 export const PROGRAM_TYPES = [
   { name: 'Surveys', type: TreeType.PPI, subtype: null },
@@ -30,6 +31,12 @@ export const DOMAIN_TYPES = [
   {name: 'Drugs', type: TreeType.DRUG, subtype: null},
   {name: 'Measurements', type: TreeType.MEAS, subtype: null},
   {name: 'Visits', type: TreeType.VISIT, fullTree: true, subtype: null}
+];
+
+export const LIST_PROGRAM_TYPES = [];
+
+export const LIST_DOMAIN_TYPES = [
+  {name: 'Measurements', domain: DomainType.MEASUREMENT, type: null},
 ];
 
 export const PM_UNITS = {

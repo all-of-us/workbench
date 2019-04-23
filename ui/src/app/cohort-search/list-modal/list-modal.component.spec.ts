@@ -1,0 +1,96 @@
+import {dispatch, NgRedux} from '@angular-redux/store';
+import {MockNgRedux} from '@angular-redux/store/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {ClarityModule} from '@clr/angular';
+import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
+import {CodeDropdownComponent} from 'app/cohort-search/code-dropdown/code-dropdown.component';
+import {DemographicsComponent} from 'app/cohort-search/demographics/demographics.component';
+import {ListAttributesPageComponent} from 'app/cohort-search/list-attributes-page/list-attributes-page.component';
+import {ListModifierPageComponent} from 'app/cohort-search/list-modifier-page/list-modifier-page.component';
+import {ListSearchComponent} from 'app/cohort-search/list-search/list-search.component';
+import {ListSelectionInfoComponent} from 'app/cohort-search/list-selection-info/list-selection-info.component';
+import {MultiSelectComponent} from 'app/cohort-search/multi-select/multi-select.component';
+import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
+import {NodeComponent} from 'app/cohort-search/node/node.component';
+import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.component';
+import {
+activeCriteriaTreeType,
+activeCriteriaType,
+activeParameterList,
+CohortSearchActions,
+nodeAttributes,
+wizardOpen
+} from 'app/cohort-search/redux';
+import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
+import {SearchBarComponent} from 'app/cohort-search/search-bar/search-bar.component';
+import {TreeComponent} from 'app/cohort-search/tree/tree.component';
+import {fromJS, Map} from 'immutable';
+import {NouisliderModule} from 'ng2-nouislider';
+import {NgxPopperModule} from 'ngx-popper';
+import {ListModalComponent} from './list-modal.component';
+
+class MockActions {
+  @dispatch() activeCriteriaType = activeCriteriaType;
+  @dispatch() activeCriteriaTreeType = activeCriteriaTreeType;
+  @dispatch() activeParameterList = activeParameterList;
+  @dispatch() attributesPage = nodeAttributes;
+  @dispatch() wizardOpen = wizardOpen;
+}
+
+describe('ListModalComponent', () => {
+  let component: ListModalComponent;
+  let fixture: ComponentFixture<ListModalComponent>;
+  let mockReduxInst;
+
+  beforeEach(async(() => {
+    mockReduxInst = MockNgRedux.getInstance();
+    const _old = mockReduxInst.getState;
+    const _wrapped = () => fromJS(_old());
+    mockReduxInst.getState = _wrapped;
+
+    TestBed.configureTestingModule({
+      declarations: [
+        CodeDropdownComponent,
+        DemographicsComponent,
+        ListAttributesPageComponent,
+        ListModalComponent,
+        ListModifierPageComponent,
+        ListSearchComponent,
+        ListSelectionInfoComponent,
+        MultiSelectComponent,
+        NodeComponent,
+        NodeInfoComponent,
+        OptionInfoComponent,
+        SafeHtmlPipe,
+        SearchBarComponent,
+        TreeComponent,
+        ValidatorErrorsComponent,
+      ],
+      imports: [
+        ClarityModule,
+        FormsModule,
+        NgxPopperModule,
+        NouisliderModule,
+        ReactiveFormsModule,
+      ],
+      providers: [
+        {provide: NgRedux, useValue: mockReduxInst},
+        {provide: CohortSearchActions, useValue: new MockActions()},
+      ],
+    })
+      .compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(ListModalComponent);
+    component = fixture.componentInstance;
+    component.attributesNode = Map();
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+});

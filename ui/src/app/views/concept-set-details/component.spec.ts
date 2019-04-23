@@ -249,4 +249,5 @@ describe('ConceptSetDetailsComponent', () => {
   //   expect(tableRows[1].childNodes[2].textContent).toEqual(
   //     wantConcepts[0].conceptSynonyms.join(', '));
   // }));
+
 });

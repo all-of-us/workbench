@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.logging.Logger;

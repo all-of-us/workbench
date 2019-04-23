@@ -7,7 +7,7 @@ import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {SelectionInfoComponent} from './selection-info.component';
 
-describe('SelectionInfoComponent', () => {
+describe('ListSelectionInfoComponent', () => {
   let component: SelectionInfoComponent;
   let fixture: ComponentFixture<SelectionInfoComponent>;
   let mockReduxInst;

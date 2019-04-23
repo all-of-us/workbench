@@ -29,12 +29,8 @@ export interface Environment {
   // API endpoint to use for Leonardo (notebook proxy) API calls.
   // Example value: 'https://notebooks.firecloud.org'
   leoApiUrl: string;
-  // The URL to use when making requests to the "public" API (e.g. non-signed-in
-  // endpoints.
-  // Example value: 'https://public-api-dot-all-of-us-rw-stable.appspot.com'
-  publicApiUrl: string;
   // The URL to forward users to for the public UI (aka Data Browser).
-  // Example value: 'https://public-ui-dot-all-of-us-rw-stable.appspot.com'
+  // Example value: 'https://aou-db-stable.appspot.com'
   publicUiUrl: string;
   // The Shibboleth URL for linking ERA Commons accounts
   shibbolethUrl: string;

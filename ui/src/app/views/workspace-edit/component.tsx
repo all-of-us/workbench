@@ -280,7 +280,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       if (!this.isMode(WorkspaceEditMode.Create)) {
         this.setState({workspace : this.props.workspace});
         if (this.isMode(WorkspaceEditMode.Clone)) {
-          this.setState(fp.set(['workspace', 'name'], 'Duplicate of ' + this.props.workspace.name));
+          this.setState({workspace: {
+            ...this.props.workspace,
+            // These are the only fields which are not automatically handled/differentiated
+            // on the API level.
+            name: 'Duplicate of ' + this.props.workspace.name,
+            namespace: userProfileStore.getValue().profile.freeTierBillingProjectName
+          }});
         }
       }
       this.setCdrVersions();
@@ -342,7 +348,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               await workspacesApi().createWorkspace(this.state.workspace);
         } else if (this.isMode(WorkspaceEditMode.Clone)) {
           const cloneWorkspace = await workspacesApi().cloneWorkspace(
-            this.state.workspace.namespace, this.state.workspace.id,
+            this.props.workspace.namespace, this.props.workspace.id,
             {
               includeUserRoles: this.state.cloneUserRole,
               workspace: this.state.workspace

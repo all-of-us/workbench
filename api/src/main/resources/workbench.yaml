@@ -1344,6 +1344,60 @@ paths:
             schema:
               $ref: "#/definitions/DomainValuesResponse"
 
+### Data set ############################################
+
+  /v1/data-set/{workspaceNamespace}/{workspaceId}/create:
+    post:
+      tags:
+        - dataSet
+      description: >
+        Creates Data Set
+      operationId: "createDataSet"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: body
+          name: dataSetRequest
+          required: true
+          schema:
+            $ref: "#/definitions/DataSetRequest"
+      responses:
+        200:
+          description: Data set has been created successfully
+          schema:
+            $ref: "#/definitions/DataSet"
+        400:
+          description: Invalid data set request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        409:
+          description: Data set with same name exist
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/dataSet/generateQuery:
+      post:
+        tags:
+          - dataSet
+        description: >
+          Given a Data Set, return the SQL query built from it.
+        operationId: "generateQuery"
+        parameters:
+          - $ref: '#/parameters/workspaceNamespace'
+          - $ref: '#/parameters/workspaceId'
+          - in: body
+            name: dataSet
+            required: true
+            schema:
+              $ref: "#/definitions/DataSetRequest"
+        responses:
+          200:
+            description: >
+              A SQL query for each domain in the Data Set
+            schema:
+              $ref: "#/definitions/DataSetQueryList"
+
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -1989,13 +2043,18 @@ definitions:
           type: integer
           format: int64
 
-  DataSet:
+  DataSetRequest:
     type: object
     required:
       - name
     properties:
       name:
         type: string
+      description:
+        type: string
+      workspaceId:
+        type: integer
+        format: int64
       conceptSetIds:
         type: array
         description: >
@@ -2015,7 +2074,111 @@ definitions:
         description: >
           All the selected values in the data set
         items:
-          $ref: "#/definitions/ValueSet"
+          $ref: "#/definitions/DomainValuePair"
+
+  DomainValuePair:
+    type: object
+    properties:
+      domain:
+        description: >
+          Domain corresponding to an OMOP table.
+        $ref: "#/definitions/Domain"
+      value:
+        type: string
+
+  DataSet:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      workspaceId:
+        type: integer
+        format: int64
+      conceptSets:
+        type: array
+        description: >
+          All concept sets in the data set
+        items:
+          $ref: '#/definitions/ConceptSet'
+      cohorts:
+        type: array
+        description: >
+          All cohorts in the data set
+        items:
+          $ref: "#/definitions/Cohort"
+      values:
+        type: array
+        description: >
+          All the selected values in the data set
+        items:
+          $ref: "#/definitions/DomainValuePair"
+
+
+  DataSetQueryList:
+    type: object
+    properties:
+      queryList:
+        type: array
+        items:
+          $ref: "#/definitions/DataSetQuery"
+
+  DataSetQuery:
+    type: object
+    required:
+      - domain
+      - query
+    properties:
+      domain:
+        description: >
+          Domain corresponding to an OMOP table that can contain rows for the concepts in this
+          concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed
+          here; it makes sense to specify concepts in these domains in cohort criteria, but
+          there isn't much value in having concept sets defined for them.
+        $ref: "#/definitions/Domain"
+      query:
+        type: string
+        description: >
+          The parameterized BigQuery SQL string to fetch the domain-specific subset of the data set from the CDR.
+      namedParameters:
+        type: array
+        description: >
+          The set of named parameters to use for the SQL query.
+        items:
+          $ref: "#/definitions/NamedParameterEntry"
+
+  NamedParameterEntry:
+    type: object
+    required:
+      - key
+      - value
+    properties:
+      key:
+        type: string
+      value:
+        $ref: "#/definitions/NamedParameterValue"
+
+  NamedParameterValue:
+    type: object
+    required:
+      - name
+      - parameterType
+      - parameterValue
+    properties:
+      name:
+        type: string
+      parameterType:
+        description: >
+          Should be any parameter allowed by bigquery, with the exception of struct. The list of
+          parameter types can be found here: https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types
+        type: string
+      arrayType:
+        type: string
+      parameterValue:
+        type: object
+        description: Can be any value
+
 
   DomainInfoResponse:
     type: object
@@ -2032,10 +2195,7 @@ definitions:
     properties:
       domain:
         description: >
-          Domain corresponding to an OMOP table that can contain rows for the concepts in this
-          concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed
-          here; it makes sense to specify concepts in these domains in cohort criteria, but
-          there isn't much value in having concept sets defined for them.
+          Domain corresponding to an OMOP table.
         $ref: "#/definitions/Domain"
       values:
         $ref: "#/definitions/DomainValuesResponse"
