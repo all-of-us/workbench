@@ -31,6 +31,7 @@ export class ListAttributesPageComponent implements OnInit {
   };
   preview: any = {count: -1};
   loading: boolean;
+  error: boolean;
   selectedCode: any;
   options = [
     {
