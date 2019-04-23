@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
+//TODO:Remove freemabd Remove once universal search is completed
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
