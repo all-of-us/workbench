@@ -2,6 +2,10 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {AlertDanger} from 'app/components/alert';
+import {TextInput, ValidationError} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
@@ -15,6 +19,7 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace} from 'app/utils';
+import {summarizeErrors} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
@@ -23,8 +28,8 @@ import {EditModal} from 'app/views/edit-modal/component';
 import {
   Cohort,
   ConceptSet,
-  DataSet,
   DataSetQuery,
+  DataSetRequest,
   Domain,
   DomainInfo,
   DomainValue,
@@ -34,6 +39,7 @@ import {
   ValueSet,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
+import {validate} from 'validate.js';
 
 export const styles = {
   selectBoxHeader: {
@@ -79,16 +85,19 @@ export const ValueListItem: React.FunctionComponent <
 
 export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
-  {creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
+  {name: string, creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
     conceptSetList: ConceptSet[], cohortList: Cohort[], loadingResources: boolean,
     confirmDeleting: boolean, editing: boolean, resource: RecentResource,
     rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[],
-    valueSets: ValueSet[], selectedValues: DomainValuePair[], queries: DataSetQuery[]
+    valueSets: ValueSet[], selectedValues: DomainValuePair[], openSaveModal: boolean,
+    nameRequired: boolean, conflictDataSetName: boolean, missingDataSetInfo: boolean,
+    nameTouched: boolean, queries: Array<DataSetQuery>
   }> {
 
   constructor(props) {
     super(props);
     this.state = {
+      name: '',
       creatingConceptSet: false,
       conceptDomainList: undefined,
       conceptSetList: [],
@@ -102,7 +111,12 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       selectedCohortIds: [],
       valueSets: [],
       selectedValues: [],
-      queries: [],
+      openSaveModal: false,
+      nameRequired: false,
+      conflictDataSetName: false,
+      missingDataSetInfo: false,
+      nameTouched: false,
+      queries: []
     };
   }
 
@@ -278,6 +292,38 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
+  async saveDataSet() {
+    this.setState({nameTouched: true});
+    if (!this.state.name) {
+      return;
+    }
+    this.setState({conflictDataSetName: false, missingDataSetInfo: false });
+    const request = {
+      name: this.state.name,
+      description: '',
+      conceptSetIds: this.state.selectedConceptSetIds,
+      cohortIds: this.state.selectedCohortIds,
+      values: this.state.selectedValues
+    };
+    try {
+      await dataSetApi().createDataSet(
+        this.props.workspace.namespace, this.props.workspace.id, request);
+      this.setState({openSaveModal: false});
+    } catch (e) {
+      if (e.status === 409) {
+        this.setState({conflictDataSetName: true});
+      } else if (e.status === 400) {
+        this.setState({missingDataSetInfo: true});
+      }
+    }
+  }
+
+  disableSave() {
+    return !this.state.selectedConceptSetIds || this.state.selectedConceptSetIds.length === 0 ||
+        !this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0 ||
+        !this.state.selectedValues || this.state.selectedValues.length === 0;
+  }
+
   async generateCode() {
     const {namespace, id} = this.props.workspace;
     const valuesByDomain: ValueSet[] = [];
@@ -290,7 +336,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
         domainSetFound.values.items.push({value: value.value});
       }
     });
-    const dataSet: DataSet = {
+    const dataSet: DataSetRequest = {
       name: '',
       conceptSetIds: this.state.selectedConceptSetIds,
       cohortIds: this.state.selectedCohortIds,
@@ -322,6 +368,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
   render() {
     const {namespace, id} = this.props.workspace;
     const {
+      name,
       creatingConceptSet,
       conceptDomainList,
       conceptSetList,
@@ -330,9 +377,17 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       resource,
       rType,
       selectedValues,
-      valueSets
+      valueSets,
+      openSaveModal,
+      nameTouched,
+      conflictDataSetName
     } = this.state;
     const currentResource = this.getCurrentResource();
+    const errors = validate({name}, {
+      name: {
+        presence: {allowEmpty: false}
+      }
+    });
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
         <h2 style={{marginTop: 0}}>Datasets</h2>
@@ -444,7 +499,10 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
               GENERATE CODE
             </Button>
             {/* Button disabled until this functionality added*/}
-            <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}} disabled={true}>
+            <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
+                    onClick ={() => this.setState({openSaveModal: true, nameRequired: false,
+                      conflictDataSetName: false, missingDataSetInfo: false})}
+                    disabled={this.disableSave()}>
               SAVE DATASET
             </Button>
           </div>
@@ -492,6 +550,33 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       <EditModal resource={resource}
                  onEdit={e => this.receiveEdit(e)}
                  onCancel={() => this.closeEditModal()}/>}
+      {openSaveModal && <Modal>
+        <ModalTitle>Save Dataset</ModalTitle>
+        <ModalBody>
+          <div>
+             <ValidationError>
+              {summarizeErrors(nameTouched && errors && errors.name)}
+            </ValidationError>
+            {conflictDataSetName &&
+            <AlertDanger>DataSet with same name exist</AlertDanger>
+            }
+            {this.state.missingDataSetInfo &&
+            <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
+            }
+            <TextInput type='text' autoFocus placeholder='Dataset Name'
+                       value = {this.state.name}
+                       onChange={v => this.setState({name: v, nameTouched: true,
+                         conflictDataSetName: false})}/>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick = {() => this.setState({openSaveModal: false})}
+                  type='secondary' style={{marginRight: '2rem'}}>
+            Cancel
+          </Button>
+          <Button type='primary' onClick={() => this.saveDataSet()}>SAVE</Button>
+        </ModalFooter>
+      </Modal>}
     </React.Fragment>;
   }
 

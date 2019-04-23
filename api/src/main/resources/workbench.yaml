@@ -1369,7 +1369,36 @@ paths:
             schema:
               $ref: "#/definitions/DomainValuesResponse"
 
-# Data Sets ###############################################################################
+### Data set ############################################
+
+  /v1/data-set/{workspaceNamespace}/{workspaceId}/create:
+    post:
+      tags:
+        - dataSet
+      description: >
+        Creates Data Set
+      operationId: "createDataSet"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: body
+          name: dataSetRequest
+          required: true
+          schema:
+            $ref: "#/definitions/DataSetRequest"
+      responses:
+        200:
+          description: Data set has been created successfully
+          schema:
+            $ref: "#/definitions/DataSet"
+        400:
+          description: Invalid data set request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        409:
+          description: Data set with same name exist
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/dataSet/generateQuery:
       post:
@@ -1385,7 +1414,7 @@ paths:
             name: dataSet
             required: true
             schema:
-              $ref: "#/definitions/DataSet"
+              $ref: "#/definitions/DataSetRequest"
         responses:
           200:
             description: >
@@ -2053,13 +2082,18 @@ definitions:
           type: integer
           format: int64
 
-  DataSet:
+  DataSetRequest:
     type: object
     required:
       - name
     properties:
       name:
         type: string
+      description:
+        type: string
+      workspaceId:
+        type: integer
+        format: int64
       conceptSetIds:
         type: array
         description: >
@@ -2079,7 +2113,47 @@ definitions:
         description: >
           All the selected values in the data set
         items:
-          $ref: "#/definitions/ValueSet"
+          $ref: "#/definitions/DomainValuePair"
+
+  DomainValuePair:
+    type: object
+    properties:
+      domain:
+        description: >
+          Domain corresponding to an OMOP table.
+        $ref: "#/definitions/Domain"
+      value:
+        type: string
+
+  DataSet:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      workspaceId:
+        type: integer
+        format: int64
+      conceptSets:
+        type: array
+        description: >
+          All concept sets in the data set
+        items:
+          $ref: '#/definitions/ConceptSet'
+      cohorts:
+        type: array
+        description: >
+          All cohorts in the data set
+        items:
+          $ref: "#/definitions/Cohort"
+      values:
+        type: array
+        description: >
+          All the selected values in the data set
+        items:
+          $ref: "#/definitions/DomainValuePair"
+
 
   DataSetQueryList:
     type: object
