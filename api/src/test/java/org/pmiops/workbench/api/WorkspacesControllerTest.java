@@ -1697,6 +1697,10 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService).copyBlob(
         BlobId.of(BUCKET_NAME, "notebooks/" + fromNotebookName),
         BlobId.of(BUCKET_NAME, "notebooks/" + newNotebookName));
+    
+    verify(userRecentResourceService).updateNotebookEntry(
+        0l, 1l, "gs://workspace-bucket/notebooks/" + newNotebookName, Timestamp.from(NOW)
+    );
   }
 
   @Test(expected = BadRequestException.class)
