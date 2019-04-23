@@ -41,7 +41,6 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.firecloud.model.JWTWrapper;
-import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -63,7 +62,7 @@ import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.UserListResponse;
 import org.pmiops.workbench.moodle.ApiException;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.notebooks.LeonoardoNotebooksClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -125,7 +124,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final FireCloudService fireCloudService;
   private final DirectoryService directoryService;
   private final CloudStorageService cloudStorageService;
-  private final NotebooksService notebooksService;
+  private final LeonoardoNotebooksClient leonoardoNotebooksClient;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
@@ -137,7 +136,7 @@ public class ProfileController implements ProfileApiDelegate {
       Clock clock, UserService userService, FireCloudService fireCloudService,
       DirectoryService directoryService,
       CloudStorageService cloudStorageService,
-      NotebooksService notebooksService,
+      LeonoardoNotebooksClient leonoardoNotebooksClient,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment,
       Provider<MailService> mailServiceProvider) {
@@ -150,7 +149,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.fireCloudService = fireCloudService;
     this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
-    this.notebooksService = notebooksService;
+    this.leonoardoNotebooksClient = leonoardoNotebooksClient;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
     this.mailServiceProvider = mailServiceProvider;
@@ -363,13 +362,13 @@ public class ProfileController implements ProfileApiDelegate {
     log.log(Level.INFO, "free tier project initialized and BigQuery role granted");
 
     try {
-      this.notebooksService.createCluster(
-          user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME);
+      this.leonoardoNotebooksClient.createCluster(
+          user.getFreeTierBillingProjectName(), LeonoardoNotebooksClient.DEFAULT_CLUSTER_NAME);
       log.log(Level.INFO, String.format("created cluster %s/%s",
-          user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME));
+          user.getFreeTierBillingProjectName(), LeonoardoNotebooksClient.DEFAULT_CLUSTER_NAME));
     } catch (ConflictException e) {
       log.log(Level.INFO, String.format("Cluster %s/%s already exists",
-          user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME));
+          user.getFreeTierBillingProjectName(), LeonoardoNotebooksClient.DEFAULT_CLUSTER_NAME));
     } catch (GatewayTimeoutException e) {
       log.log(Level.WARNING, "Socket Timeout creating cluster.");
     }

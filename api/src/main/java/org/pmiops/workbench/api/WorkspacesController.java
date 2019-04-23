@@ -30,6 +30,8 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.ConceptSet;
@@ -77,6 +79,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final FireCloudService fireCloudService;
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
+  private final NotebooksService notebooksService;
   private final UserService userService;
   private final UserRecentResourceService userRecentResourceService;
 
@@ -93,6 +96,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Clock clock,
+      NotebooksService notebooksService,
       UserService userService,
       UserRecentResourceService userRecentResourceService) {
     this.workspaceService = workspaceService;
@@ -106,6 +110,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.fireCloudService = fireCloudService;
     this.cloudStorageService = cloudStorageService;
     this.clock = clock;
+    this.notebooksService = notebooksService;
     this.userService = userService;
     this.userRecentResourceService = userRecentResourceService;
   }
@@ -635,7 +640,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String fromNotebookName, CopyNotebookRequest copyNotebookRequest) {
     FileDetail fileDetail;
     try {
-      fileDetail = copyNotebook(fromWorkspaceNamespace, fromWorkspaceId,
+      fileDetail = notebooksService.copyNotebook(fromWorkspaceNamespace, fromWorkspaceId,
           fromNotebookName,
           copyNotebookRequest.getToWorkspaceNamespace(), copyNotebookRequest.getToWorkspaceName(),
           copyNotebookRequest.getNewName());
@@ -645,6 +650,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     return ResponseEntity.ok(fileDetail);
   }
+
 
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(String workspace, String workspaceName,
@@ -672,29 +678,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     fileDetail.setLastModifiedTime(now.getTime());
     userRecentResourceService
         .updateNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath, now);
-    return fileDetail;
-  }
-
-  private class BlobAlreadyExistsException extends RuntimeException { }
-
-  // TODO eric: this is awful
-  private FileDetail copyNotebook(String fromWorkspace, String fromWorkspaceName, String fromNotebookName,
-      String toWorkspace, String toWorkspaceName, String toNotebookName) {
-    NotebookOpSetup fromOp = new NotebookOpSetup(fromWorkspace, fromWorkspaceName, fromNotebookName, "");
-    NotebookOpSetup toOp = new NotebookOpSetup(toWorkspace, toWorkspaceName, toNotebookName, "");
-
-    if (!cloudStorageService.blobsExist(Collections.singletonList(toOp.blobId)).isEmpty()) {
-      throw new BlobAlreadyExistsException();
-    }
-
-    FileDetail fileDetail = new FileDetail();
-    cloudStorageService.copyBlob(fromOp.blobId, toOp.blobId);
-    fileDetail.setName(toNotebookName);
-    fileDetail.setPath(toOp.fullPath);
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    fileDetail.setLastModifiedTime(now.getTime());
-    userRecentResourceService
-        .updateNotebookEntry(toOp.workspaceId, toOp.userId, toOp.fullPath, now);
     return fileDetail;
   }
 
@@ -730,6 +713,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       this.userId = userProvider.get().getUserId();
       this.workspaceId = workspaceService.getRequired(workspace, workspaceName).getWorkspaceId();
     }
+  }
+
+  private class NotebookCloudConfig {
+    public final BlobId blobId;
+    public final String fullPath;
+
+    public NotebookCloudConfig(BlobId blobId, String fullPath) {
+      this.blobId = blobId;
+      this.fullPath = fullPath;
+    }
+  }
+
+  private NotebookCloudConfig getNotebookCloudConfig(String workspaceNamespace, String workspaceName, String notebookName) {
+    String bucket = fireCloudService.getWorkspace(workspaceNamespace, workspaceName)
+        .getWorkspace()
+        .getBucketName();
+    String blobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
+    String pathStart = "gs://" + bucket + "/";
+    String fullPath = pathStart + blobPath;
+    BlobId blobId = BlobId.of(bucket, fullPath);
+    return new NotebookCloudConfig(blobId, fullPath);
   }
 
   /**

@@ -4,10 +4,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -47,6 +49,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.auth.UserProvider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -67,6 +70,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.CopyNotebookRequest;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -172,12 +176,11 @@ public class WorkspacesControllerTest {
   private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired
   private WorkspacesController workspacesController;
-  @Mock
-  WorkspaceService workspaceService;
 
   @TestConfiguration
   @Import({
     CdrVersionService.class,
+    NotebooksServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     WorkspaceMapper.class,
@@ -198,10 +201,10 @@ public class WorkspacesControllerTest {
           CloudStorageService.class,
           BigQueryService.class,
           ParticipantCounter.class,
+          UserProvider.class,
           UserService.class,
           UserRecentResourceService.class,
-          ConceptService.class,
-          WorkspaceDao.class
+          ConceptService.class
   })
   static class Configuration {
     @Bean
@@ -243,6 +246,8 @@ public class WorkspacesControllerTest {
   @Mock
   Provider<User> userProvider;
   @Autowired
+  UserProvider userProviderWrapper;
+  @Autowired
   CohortsController cohortsController;
   @Autowired
   ConceptSetsController conceptSetsController;
@@ -259,6 +264,7 @@ public class WorkspacesControllerTest {
   @Before
   public void setUp() {
     User user = createUser(LOGGED_IN_USER_EMAIL);
+    doReturn(user).when(userProviderWrapper).get();
     when(userProvider.get()).thenReturn(user);
     workspacesController.setUserProvider(userProvider);
     cohortsController.setUserProvider(userProvider);
@@ -283,6 +289,8 @@ public class WorkspacesControllerTest {
     when(cloudStorageService.readAllDemoCohorts()).thenReturn(Collections.singletonList(cohort));
 
     doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
+
+    // doAnswer(returnsFirstArg()).when(workspaceDao).save(any(org.pmiops.workbench.db.model.Workspace.class));
 
     CLOCK.setInstant(NOW);
   }
@@ -328,25 +336,6 @@ public class WorkspacesControllerTest {
     when(fireCloudService.updateWorkspaceACL(
         anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(
             new WorkspaceACLUpdateResponseList());
-  }
-
-  private void stubGetWorkspace(String ns, String name, String creator,
-      WorkspaceAccessLevel access) {
-    stubGetWorkspace(createFcWorkspace(ns, name, creator), access);
-  }
-
-  private void stubGetWorkspace(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
-      WorkspaceAccessLevel access) {
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(access.toString());
-    when(fireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))
-        .thenReturn(fcResponse);
-    List<WorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
-    workspaceResponses.add(fcResponse);
-    when(fireCloudService.getWorkspaces()).thenReturn(workspaceResponses);
-
   }
 
   private void stubBigQueryCohortCalls() {
@@ -409,7 +398,6 @@ public class WorkspacesControllerTest {
     workspace.setUserRoles(new ArrayList<UserRole>());
     workspace.setCdrVersionId(cdrVersionId);
     workspace.setGoogleBucketName(BUCKET_NAME);
-    stubGetWorkspace("namespace", "name", LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     return workspace;
   }
 
@@ -424,6 +412,26 @@ public class WorkspacesControllerTest {
     stubGetWorkspace("namespace", "name", LOGGED_IN_USER_EMAIL, accessLevel);
     return workspace;
   }
+
+  private void stubGetWorkspace(String ns, String name, String creator,
+      WorkspaceAccessLevel access) {
+    stubGetWorkspace(createFcWorkspace(ns, name, creator), access);
+  }
+
+  private void stubGetWorkspace(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+      WorkspaceAccessLevel access) {
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setWorkspace(fcWorkspace);
+    fcResponse.setAccessLevel(access.toString());
+    when(fireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))
+        .thenReturn(fcResponse);
+    List<WorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
+    workspaceResponses.add(fcResponse);
+    when(fireCloudService.getWorkspaces()).thenReturn(workspaceResponses);
+
+  }
+
 
   public Cohort createDefaultCohort(String name) {
     Cohort cohort = new Cohort();
@@ -1674,14 +1682,16 @@ public class WorkspacesControllerTest {
   @Test
   public void copyNotebook() {
     Workspace fromWorkspace = createAndStubDefaultWorkspace();
+    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
-    doReturn(mock(org.pmiops.workbench.db.model.Workspace.class))
-        .when(workspaceDao).findByWorkspaceNamespaceAndFirecloudName(fromWorkspace.getNamespace(), fromWorkspace.getId());
 
-    Workspace toWorkspace = createAndStubDefaultWorkspace();
+    Workspace toWorkspace = createDefaultWorkspace();
+    toWorkspace.setNamespace("toWorkspaceNs");
+    toWorkspace.setName("toworkspace");
+    toWorkspace.setId("toworkspace");
+    stubGetWorkspace("toWorkspaceNs", "toworkspace", LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new";
-    doReturn(mock(org.pmiops.workbench.db.model.Workspace.class))
-        .when(workspaceDao).findByWorkspaceNamespaceAndFirecloudName(fromWorkspace.getNamespace(), fromWorkspace.getId());
 
     CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
     copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
@@ -1699,21 +1709,23 @@ public class WorkspacesControllerTest {
         BlobId.of(BUCKET_NAME, "notebooks/" + newNotebookName));
     
     verify(userRecentResourceService).updateNotebookEntry(
-        0l, 1l, "gs://workspace-bucket/notebooks/" + newNotebookName, Timestamp.from(NOW)
+        2l, 1l, "gs://workspace-bucket/notebooks/" + newNotebookName, Timestamp.from(NOW)
     );
   }
 
   @Test(expected = BadRequestException.class)
   public void copyNotebook_alreadyExists() {
     Workspace fromWorkspace = createAndStubDefaultWorkspace();
+    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
-    doReturn(mock(org.pmiops.workbench.db.model.Workspace.class))
-        .when(workspaceDao).findByWorkspaceNamespaceAndFirecloudName(fromWorkspace.getNamespace(), fromWorkspace.getId());
 
-    Workspace toWorkspace = createAndStubDefaultWorkspace();
+    Workspace toWorkspace = createDefaultWorkspace();
+    toWorkspace.setNamespace("toWorkspaceNs");
+    toWorkspace.setName("toworkspace");
+    toWorkspace.setId("toworkspace");
+    stubGetWorkspace("toWorkspaceNs", "toworkspace", LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new";
-    doReturn(mock(org.pmiops.workbench.db.model.Workspace.class))
-        .when(workspaceDao).findByWorkspaceNamespaceAndFirecloudName(fromWorkspace.getNamespace(), fromWorkspace.getId());
 
     CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
     copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
