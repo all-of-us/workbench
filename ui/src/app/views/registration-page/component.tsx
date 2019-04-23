@@ -2,11 +2,11 @@ import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
+import {baseStyles} from 'app/components/card';
+import {ClrIcon} from 'app/components/icons';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
 import {environment} from 'environments/environment';
-import {baseStyles} from 'app/components/card';
-import {ClrIcon} from "../../components/icons";
 
 const styles = reactStyles({
   mainHeader: {
@@ -16,7 +16,7 @@ const styles = reactStyles({
   cardStyle: {
     boxShadow: '0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12)',
     padding: '0.75rem', minHeight: '305px', maxHeight: '305px', maxWidth: '250px',
-    minWidth: '250px', justifyContent: 'space-between'
+    minWidth: '250px', justifyContent: 'space-between', backgroundColor: '#fff'
   },
   cardHeader: {
     color: '#262262', fontSize: '16px', lineHeight: '19px', fontWeight: 600,
@@ -48,11 +48,17 @@ export interface WorkbenchAccessTasksProps {
 }
 
 export class WorkbenchAccessTasks extends
-    React.Component<WorkbenchAccessTasksProps, {trainingWarningOpen: boolean}> {
+    React.Component<WorkbenchAccessTasksProps,
+      {trainingWarningOpen: boolean, taskCompletionMap: Map<number, boolean>}> {
 
   constructor(props: WorkbenchAccessTasksProps) {
     super(props);
-    this.state = {trainingWarningOpen: !props.firstVisitTraining};
+    this.state = {
+      trainingWarningOpen: !props.firstVisitTraining,
+      taskCompletionMap: new Map<number, boolean>()
+    };
+    this.state.taskCompletionMap.set(0, props.trainingCompleted);
+    this.state.taskCompletionMap.set(1, props.eraCommonsLinked);
   }
 
   private registrationTasks = [
@@ -62,14 +68,14 @@ export class WorkbenchAccessTasks extends
         'training courses hosted at the NNLM\'s Moodle installation',
       buttonText: 'Complete training',
       completedText: 'Completed',
-      onClick: WorkbenchAccessTasks.redirectToTraining
+      onClick: () => WorkbenchAccessTasks.redirectToTraining()
     }, {
       title: 'Login to ERA Commons',
       description: 'Researchers must maintain up-to-date completion of compliance' +
         ' training courses hosted at the NNLM’s Moodle installation',
       buttonText: 'Login',
       completedText: 'Linked',
-      onClick: WorkbenchAccessTasks.redirectToNiH
+      onClick: () => WorkbenchAccessTasks.redirectToNiH()
     }
   ];
 
@@ -85,9 +91,23 @@ export class WorkbenchAccessTasks extends
     window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
   }
 
+  isEnabled(i: number): boolean {
+    const {taskCompletionMap} = this.state;
+    // console.log(taskCompletionMap);
+    if (i < this.registrationTasks.length) {
+      return !taskCompletionMap.get(i) && taskCompletionMap.get(i + 1);
+    } else {
+      return !taskCompletionMap.get(i);
+    }
+  }
+
+  allTasksCompleted(): boolean {
+    return Array.from(this.state.taskCompletionMap.values()).reduce((acc, val) => acc && val);
+  }
+
   render() {
-    const {trainingWarningOpen} = this.state;
-    const {eraCommonsLinked, eraCommonsError, trainingCompleted, betaAccessGranted} = this.props;
+    const {trainingWarningOpen, taskCompletionMap} = this.state;
+    const {betaAccessGranted} = this.props;
     return <div style={{display: 'flex', flexDirection: 'column', paddingTop: '3%', paddingLeft: '3%'}}
                 data-test-id='access-tasks'>
       <div style={styles.mainHeader}>Researcher Workbench</div>
@@ -99,19 +119,31 @@ export class WorkbenchAccessTasks extends
 
       <div style={{display: 'flex', flexDirection: 'row', margin: '3%'}}>
         {this.registrationTasks.map((card, i) => {
-          return <ResourceCardBase style={styles.cardStyle}>
+          console.log(this.isEnabled(i));
+          return <ResourceCardBase
+            style={this.isEnabled(i) ? styles.cardStyle : {opacity: '0.6', ...styles.cardStyle}}>
             <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
               <div style={styles.cardHeader}>STEP {i + 1}</div>
               <div style={styles.cardHeader}>{card.title}</div>
             </div>
             <div style={styles.cardDescription}>{card.description}</div>
+            {taskCompletionMap.get(i) ?
+              <Button disabled={true} style={{backgroundColor: '#8BC990'}}>
+                <ClrIcon shape='check'/>{card.completedText}
+              </Button> :
             <Button type='darklingSecondary'
-                    onClick={() => card.onClick}>
+                    style={{opacity: '1'}}
+                    onClick={() => card.onClick}
+                    disabled={!this.isEnabled(i)}>
               {card.buttonText}
-            </Button>
+            </Button>}
           </ResourceCardBase>;
         })}
       </div>
+      {(this.allTasksCompleted() && betaAccessGranted) &&
+      <div style={{...baseStyles.card, ...styles.warningModal}}>
+        You successfully completed all the required steps to access the Research Workbench.
+      </div>}
     </div>;
   }
 }
