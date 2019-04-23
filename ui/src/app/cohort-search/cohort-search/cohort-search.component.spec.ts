@@ -11,6 +11,14 @@ import {AttributesPageComponent} from 'app/cohort-search/attributes-page/attribu
 import {CodeDropdownComponent} from 'app/cohort-search/code-dropdown/code-dropdown.component';
 import {DemographicsComponent} from 'app/cohort-search/demographics/demographics.component';
 import {GenderChartComponent} from 'app/cohort-search/gender-chart/gender-chart.component';
+import {ListAttributesPageComponent} from 'app/cohort-search/list-attributes-page/list-attributes-page.component';
+import {ListModalComponent} from 'app/cohort-search/list-modal/list-modal.component';
+import {ListModifierPageComponent} from 'app/cohort-search/list-modifier-page/list-modifier-page.component';
+import {ListSearchGroupItemComponent} from 'app/cohort-search/list-search-group-item/list-search-group-item.component';
+import {ListSearchGroupListComponent} from 'app/cohort-search/list-search-group-list/list-search-group-list.component';
+import {ListSearchGroupComponent} from 'app/cohort-search/list-search-group/list-search-group.component';
+import {ListSearchComponent} from 'app/cohort-search/list-search/list-search.component';
+import {ListSelectionInfoComponent} from 'app/cohort-search/list-selection-info/list-selection-info.component';
 import {ModalComponent} from 'app/cohort-search/modal/modal.component';
 import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {MultiSelectComponent} from 'app/cohort-search/multi-select/multi-select.component';
@@ -71,6 +79,14 @@ describe('CohortSearchComponent', () => {
         ConfirmDeleteModalComponent,
         DemographicsComponent,
         GenderChartComponent,
+        ListAttributesPageComponent,
+        ListModalComponent,
+        ListModifierPageComponent,
+        ListSearchGroupItemComponent,
+        ListSearchGroupListComponent,
+        ListSearchGroupComponent,
+        ListSearchComponent,
+        ListSelectionInfoComponent,
         ModalComponent,
         ModifierPageComponent,
         MultiSelectComponent,
@@ -124,6 +140,7 @@ describe('CohortSearchComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CohortSearchComponent);
     component = fixture.componentInstance;
+    component.listSearch = false;
     activatedRoute = new ActivatedRoute();
     fixture.detectChanges();
   });
