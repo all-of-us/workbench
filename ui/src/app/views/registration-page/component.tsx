@@ -147,11 +147,11 @@ export class RegistrationPage extends
             {!this.allTasksCompleted() &&
             <div style={styles.cardDescription}>{card.description}</div>}
             {taskCompletionMap.get(i) ?
-              <Button disabled={true} style={{backgroundColor: '#8BC990', width: '80%'}}
+              <Button disabled={true} style={{backgroundColor: '#8BC990', width: 'max-content'}}
                       data-test-id='completed-button'>
-                <ClrIcon shape='check'/>{card.completedText}
+                <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{card.completedText}
               </Button> :
-            <Button type='darklingSecondary' style={{width: '80%'}} onClick={card.onClick}
+            <Button type='darklingSecondary' style={{width: 'max-content'}} onClick={card.onClick}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
               {card.buttonText}
             </Button>}
