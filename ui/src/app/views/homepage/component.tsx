@@ -17,7 +17,7 @@ import {configApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWork} from 'app/views/recent-work/component';
-import {WorkbenchAccessTasks} from 'app/views/registration-page/component';
+import {RegistrationPage} from 'app/views/registration-page/component';
 import {
   BillingProjectStatus,
   Profile,
@@ -285,11 +285,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
           <div style={homepageStyles.singleCard}>
             {accessTasksLoaded ?
               (accessTasksRemaining ?
-                (<WorkbenchAccessTasks eraCommonsLinked={eraCommonsLinked}
-                                       eraCommonsError={eraCommonsError}
-                                       trainingCompleted={trainingCompleted}
-                                       firstVisitTraining={firstVisitTraining}
-                                       betaAccessGranted={betaAccessGranted}/>
+                (<RegistrationPage eraCommonsLinked={eraCommonsLinked}
+                                   eraCommonsError={eraCommonsError}
+                                   trainingCompleted={trainingCompleted}
+                                   firstVisitTraining={firstVisitTraining}
+                                   betaAccessGranted={betaAccessGranted}/>
                 ) : (
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                     <div style={homepageStyles.contentWrapperLeft}>

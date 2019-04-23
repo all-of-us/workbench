@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import {AlertClose, AlertDanger, AlertWarning} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {baseStyles} from 'app/components/card';
@@ -9,9 +10,12 @@ import {reactStyles} from 'app/utils';
 import {environment} from 'environments/environment';
 
 const styles = reactStyles({
+  registrationPage: {
+    display: 'flex', flexDirection: 'column', paddingTop: '3%', paddingLeft: '3%'
+  },
   mainHeader: {
     color: '#FFFFFF', fontSize: 28, fontWeight: 400,
-    letterSpacing: 'normal', marginBottom: '1rem'
+    letterSpacing: 'normal', marginBottom: '0.2rem'
   },
   cardStyle: {
     boxShadow: '0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12)',
@@ -36,10 +40,13 @@ const styles = reactStyles({
   warningModal: {
     color: '#262262', fontSize: '18px', lineHeight: '28px', flexDirection: 'row',
     boxShadow: 'none', fontWeight: 600, display: 'flex', justifyContent: 'center'
+  },
+  closeableWarning: {
+    margin: '0px 1rem 1rem 0px', display: 'flex', justifyContent: 'space-between'
   }
 });
 
-export interface WorkbenchAccessTasksProps {
+export interface RegistrationPageProps {
   betaAccessGranted: boolean;
   eraCommonsLinked: boolean;
   eraCommonsError: string;
@@ -47,11 +54,11 @@ export interface WorkbenchAccessTasksProps {
   firstVisitTraining: boolean;
 }
 
-export class WorkbenchAccessTasks extends
-    React.Component<WorkbenchAccessTasksProps,
+export class RegistrationPage extends
+    React.Component<RegistrationPageProps,
       {trainingWarningOpen: boolean, taskCompletionMap: Map<number, boolean>}> {
 
-  constructor(props: WorkbenchAccessTasksProps) {
+  constructor(props: RegistrationPageProps) {
     super(props);
     this.state = {
       trainingWarningOpen: !props.firstVisitTraining,
@@ -68,14 +75,14 @@ export class WorkbenchAccessTasks extends
         'training courses hosted at the NNLM\'s Moodle installation',
       buttonText: 'Complete training',
       completedText: 'Completed',
-      onClick: () => WorkbenchAccessTasks.redirectToTraining()
+      onClick: RegistrationPage.redirectToTraining
     }, {
       title: 'Login to ERA Commons',
       description: 'Researchers must maintain up-to-date completion of compliance' +
         ' training courses hosted at the NNLM’s Moodle installation',
       buttonText: 'Login',
       completedText: 'Linked',
-      onClick: () => WorkbenchAccessTasks.redirectToNiH()
+      onClick: RegistrationPage.redirectToNiH
     }
   ];
 
@@ -93,9 +100,13 @@ export class WorkbenchAccessTasks extends
 
   isEnabled(i: number): boolean {
     const {taskCompletionMap} = this.state;
-    // console.log(taskCompletionMap);
     if (i < this.registrationTasks.length) {
-      return !taskCompletionMap.get(i) && taskCompletionMap.get(i + 1);
+      if (i === 0) {
+        return !taskCompletionMap.get(i) && !taskCompletionMap.get(i + 1);
+      } else {
+        return !taskCompletionMap.get(i) && !taskCompletionMap.get(i + 1) &&
+          taskCompletionMap.get(i - 1);
+      }
     } else {
       return !taskCompletionMap.get(i);
     }
@@ -106,11 +117,16 @@ export class WorkbenchAccessTasks extends
   }
 
   render() {
-    const {trainingWarningOpen, taskCompletionMap} = this.state;
-    const {betaAccessGranted} = this.props;
-    return <div style={{display: 'flex', flexDirection: 'column', paddingTop: '3%', paddingLeft: '3%'}}
+    const {taskCompletionMap, trainingWarningOpen} = this.state;
+    const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
+    return <div style={styles.registrationPage}
                 data-test-id='access-tasks'>
       <div style={styles.mainHeader}>Researcher Workbench</div>
+      <div style={{...styles.mainHeader, fontSize: '18px', marginBottom: '1rem'}}>
+        <ClrIcon shape='warning-standard' class='is-solid'
+                 style={{color: '#fff', marginRight: '0.3rem'}}/>
+        In order to get access to data and tools please complete the following steps:
+      </div>
       {!betaAccessGranted && <div style={{...baseStyles.card, ...styles.warningModal}}>
         <ClrIcon shape='warning-standard' class='is-solid'
                  style={styles.warningIcon}/>
@@ -120,29 +136,48 @@ export class WorkbenchAccessTasks extends
       <div style={{display: 'flex', flexDirection: 'row', margin: '3%'}}>
         {this.registrationTasks.map((card, i) => {
           console.log(this.isEnabled(i));
-          return <ResourceCardBase
-            style={this.isEnabled(i) ? styles.cardStyle : {opacity: '0.6', ...styles.cardStyle}}>
+          return <ResourceCardBase key={i}
+            style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
+              opacity: '0.6', maxHeight: this.allTasksCompleted() ? '160px' : '305px',
+              minHeight: this.allTasksCompleted() ? '160px' : '305px'}}>
             <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
               <div style={styles.cardHeader}>STEP {i + 1}</div>
               <div style={styles.cardHeader}>{card.title}</div>
             </div>
-            <div style={styles.cardDescription}>{card.description}</div>
+            {!this.allTasksCompleted() &&
+            <div style={styles.cardDescription}>{card.description}</div>}
             {taskCompletionMap.get(i) ?
-              <Button disabled={true} style={{backgroundColor: '#8BC990'}}>
+              <Button disabled={true} style={{backgroundColor: '#8BC990', width: '80%'}}>
                 <ClrIcon shape='check'/>{card.completedText}
               </Button> :
             <Button type='darklingSecondary'
-                    style={{opacity: '1'}}
-                    onClick={() => card.onClick}
+                    style={{width: '80%'}}
+                    onClick={card.onClick}
                     disabled={!this.isEnabled(i)}>
               {card.buttonText}
             </Button>}
           </ResourceCardBase>;
         })}
       </div>
+      {eraCommonsError && <AlertDanger data-test-id='era-commons-error'
+                                        style={{margin: '0px 1rem 1rem 0px'}}>
+          <ClrIcon shape='exclamation-triangle' class='is-solid'/>
+          Error Linking NIH Username: {eraCommonsError} Please try again!
+      </AlertDanger>}
+      {trainingWarningOpen && !trainingCompleted &&
+      <AlertWarning style={styles.closeableWarning}>
+        <div style={{display: 'flex'}}>
+          <ClrIcon shape='exclamation-triangle' class='is-solid'/>
+          <div>It may take several minutes for Moodle to update your Online Training
+            status once you have completed compliance training.</div>
+        </div>
+        <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
+      </AlertWarning>}
       {(this.allTasksCompleted() && betaAccessGranted) &&
       <div style={{...baseStyles.card, ...styles.warningModal}}>
         You successfully completed all the required steps to access the Research Workbench.
+        <Button style={{marginLeft: '0.5rem'}}
+                onClick={() => window.location.reload()}>Get Started</Button>
       </div>}
     </div>;
   }
