@@ -41,6 +41,11 @@ const styles = reactStyles({
     opacity: 0.4,
     cursor: 'not-allowed'
   },
+  treeIcon: {
+    color: '#0086C1',
+    cursor: 'pointer',
+    fontSize: '1rem'
+  },
   table: {
     width: '100%',
     margin: '1rem 0',
@@ -123,6 +128,10 @@ export const ListSearch = withCurrentWorkspace()(
       this.props.addAttributes(row);
     }
 
+    showHierarchy = (row: any) => {
+      // TODO send to parent component to show hierarchy view
+    }
+
     isSelected = (row: any) => {
       const {selections} = this.props;
       const paramId = this.getParamId(row);
@@ -146,6 +155,9 @@ export const ListSearch = withCurrentWorkspace()(
               <th style={styles.columnHeader}>Name</th>
               <th style={{...styles.columnHeader, width: '15%'}}>Vocab</th>
               <th style={{...styles.columnHeader, width: '15%'}}>Count</th>
+              <th style={{...styles.columnHeader, padding: '0.2rem 0.5rem', width: '10%'}}>
+                More Info
+              </th>
             </tr>
           </thead>
           <tbody className='p-datatable-tbody'>
@@ -171,6 +183,13 @@ export const ListSearch = withCurrentWorkspace()(
                 </td>
                 <td style={styles.columnBody}>{row.type}</td>
                 <td style={styles.columnBody}>{row.count.toLocaleString()}</td>
+                <td style={styles.columnBody}>
+                  {row.hasHierarchy &&
+                    <i className='pi pi-sitemap'
+                      style={styles.treeIcon}
+                      onClick={this.showHierarchy}/>
+                  }
+                </td>
               </tr>;
             })}
           </tbody>

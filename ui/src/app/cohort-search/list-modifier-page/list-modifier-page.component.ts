@@ -129,7 +129,7 @@ export class ListModifierPageComponent implements OnInit, OnDestroy {
       this.form.addControl('encounters',
         new FormGroup({operator: new FormControl(),
           encounterType: new FormControl()}));
-      cohortBuilderApi().getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
+      cohortBuilderApi().getCriteriaBy(cdrid, TreeType[TreeType.VISIT])
         .then(response => {
           this.visitCounts = {};
           response.items.forEach(option => {
