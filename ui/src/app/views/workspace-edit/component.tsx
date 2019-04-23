@@ -415,9 +415,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
         {this.isMode(WorkspaceEditMode.Clone) &&
         <div style={{display: 'flex', flexDirection: 'row'}}>
-          <CheckBox
-                 style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '1.2rem'}}
-          onChange={v => this.setState({cloneUserRole: v.value})}/>
+          <CheckBox style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '1.2rem'}}
+          onChange={v => this.setState({cloneUserRole: v})}/>
           <WorkspaceEditSection header='Copy Original workspace Collaborators'
             text='Share cloned workspace with same collaborators'/>
         </div>
