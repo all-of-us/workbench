@@ -8,6 +8,7 @@ import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -630,6 +631,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
+  public ResponseEntity<FileDetail> copyNotebook(String fromWorkspaceNamespace, String fromWorkspaceId,
+      String fromNotebookName, CopyNotebookRequest copyNotebookRequest) {
+    FileDetail fileDetail;
+    try {
+      fileDetail = copyNotebook(fromWorkspaceNamespace, fromWorkspaceId,
+          fromNotebookName,
+          copyNotebookRequest.getToWorkspaceNamespace(), copyNotebookRequest.getToWorkspaceName(),
+          copyNotebookRequest.getNewName());
+    } catch (BlobAlreadyExistsException e) {
+      throw new BadRequestException("File already exists at copy destination");
+    }
+
+    return ResponseEntity.ok(fileDetail);
+  }
+
+  @Override
   public ResponseEntity<FileDetail> cloneNotebook(String workspace, String workspaceName,
       String notebookName) {
     String newName = notebookName.replaceAll("\\.ipynb", " ") + "Clone.ipynb";
@@ -655,6 +672,29 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     fileDetail.setLastModifiedTime(now.getTime());
     userRecentResourceService
         .updateNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath, now);
+    return fileDetail;
+  }
+
+  private class BlobAlreadyExistsException extends RuntimeException { }
+
+  // TODO eric: this is awful
+  private FileDetail copyNotebook(String fromWorkspace, String fromWorkspaceName, String fromNotebookName,
+      String toWorkspace, String toWorkspaceName, String toNotebookName) {
+    NotebookOpSetup fromOp = new NotebookOpSetup(fromWorkspace, fromWorkspaceName, fromNotebookName, "");
+    NotebookOpSetup toOp = new NotebookOpSetup(toWorkspace, toWorkspaceName, toNotebookName, "");
+
+    if (!cloudStorageService.blobsExist(Collections.singletonList(toOp.blobId)).isEmpty()) {
+      throw new BlobAlreadyExistsException();
+    }
+
+    FileDetail fileDetail = new FileDetail();
+    cloudStorageService.copyBlob(fromOp.blobId, toOp.blobId);
+    fileDetail.setName(toNotebookName);
+    fileDetail.setPath(toOp.fullPath);
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    fileDetail.setLastModifiedTime(now.getTime());
+    userRecentResourceService
+        .updateNotebookEntry(toOp.workspaceId, toOp.userId, toOp.fullPath, now);
     return fileDetail;
   }
 

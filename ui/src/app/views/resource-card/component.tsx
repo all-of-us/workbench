@@ -301,7 +301,6 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   copyResource(): void {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
-        console.log(this.props.resourceCard.workspaceFirecloudName);
         this.setState({ showCopyNotebookModal: true });
         break;
       }
@@ -422,8 +421,11 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       }
       {this.state.showCopyNotebookModal &&
         <CopyNotebookModal
-          originalNotebook={this.props.resourceCard.notebook}
-          onClose={() => this.setState({ showCopyNotebookModal: false })}/>
+          fromWorkspaceNamespace={this.props.resourceCard.workspaceNamespace}
+          fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
+          fromNotebook={this.props.resourceCard.notebook}
+          onClose={() => this.setState({ showCopyNotebookModal: false })}
+          onCopy={() => this.props.onUpdate() }/>
       }
       <ResourceCardBase style={{...styles.card, marginTop: marginTop}}
                         data-test-id='card'>
