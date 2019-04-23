@@ -18,11 +18,13 @@ import {GenderChartComponent} from './gender-chart/gender-chart.component';
 import {ListAttributesPageComponent} from './list-attributes-page/list-attributes-page.component';
 import {ListModalComponent} from './list-modal/list-modal.component';
 import {ListModifierPageComponent} from './list-modifier-page/list-modifier-page.component';
+import {ListNodeComponent} from './list-node/list-node.component';
 import {ListSearchGroupItemComponent} from './list-search-group-item/list-search-group-item.component';
 import {ListSearchGroupListComponent} from './list-search-group-list/list-search-group-list.component';
 import {ListSearchGroupComponent} from './list-search-group/list-search-group.component';
 import {ListSearchComponent} from './list-search/list-search.component';
 import {ListSelectionInfoComponent} from './list-selection-info/list-selection-info.component';
+import {ListTreeComponent} from './list-tree/list-tree.component';
 import {ModalComponent} from './modal/modal.component';
 import {ModifierPageComponent} from './modifier-page/modifier-page.component';
 import {MultiSelectComponent} from './multi-select/multi-select.component';
@@ -79,11 +81,13 @@ const routes: Routes = [{
     ListAttributesPageComponent,
     ListModalComponent,
     ListModifierPageComponent,
+    ListNodeComponent,
     ListSearchGroupItemComponent,
     ListSearchGroupListComponent,
     ListSearchGroupComponent,
     ListSearchComponent,
     ListSelectionInfoComponent,
+    ListTreeComponent,
     ModalComponent,
     ModifierPageComponent,
     MultiSelectComponent,

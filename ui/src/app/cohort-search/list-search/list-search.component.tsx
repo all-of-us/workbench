@@ -87,9 +87,10 @@ const styles = reactStyles({
 
 interface ListSearchProps {
   addAttributes: Function;
+  hierarchy: Function;
   selections: Array<string>;
-  workspace: WorkspaceData;
   wizard: any;
+  workspace: WorkspaceData;
 }
 
 export const ListSearch = withCurrentWorkspace()(
@@ -129,7 +130,28 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     showHierarchy = (row: any) => {
-      // TODO send to parent component to show hierarchy view
+      // this.props.hierarchy(row);
+      // temp data until new api exists
+      const tempRow = {
+        code: 'LP15426-7',
+        conceptId: 40785861,
+        count: 388001,
+        domainId: '',
+        group: true,
+        hasAncestorData: null,
+        hasAttributes: false,
+        hasHierarchy: null,
+        id: 379527,
+        isStandard: null,
+        name: 'Aspartate aminotransferase',
+        parentId: 379173,
+        path: '379101.379103.379133.379173',
+        selectable: false,
+        subtype: 'LAB',
+        type: 'MEAS',
+        value: null
+      };
+      this.props.hierarchy(tempRow);
     }
 
     isSelected = (row: any) => {
@@ -187,7 +209,7 @@ export const ListSearch = withCurrentWorkspace()(
                   {row.hasHierarchy &&
                     <i className='pi pi-sitemap'
                       style={styles.treeIcon}
-                      onClick={this.showHierarchy}/>
+                      onClick={() => this.showHierarchy(row)}/>
                   }
                 </td>
               </tr>;
@@ -206,9 +228,10 @@ export const ListSearch = withCurrentWorkspace()(
 })
 export class ListSearchComponent extends ReactWrapperBase {
   @Input('addAttributes') addAttributes: ListSearchProps['addAttributes'];
+  @Input('hierarchy') hierarchy: ListSearchProps['hierarchy'];
   @Input('selections') selections: ListSearchProps['selections'];
   @Input('wizard') wizard: ListSearchProps['wizard'];
   constructor() {
-    super(ListSearch, ['addAttributes', 'selections', 'wizard']);
+    super(ListSearch, ['addAttributes', 'hierarchy', 'selections', 'wizard']);
   }
 }
