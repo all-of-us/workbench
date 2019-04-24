@@ -219,8 +219,7 @@ public class ConceptSetsControllerTest {
         conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao,
-                userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService,
-                userRecentResourceService);
+                userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
 
     User user = new User();
     user.setEmail(USER_EMAIL);

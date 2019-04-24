@@ -211,8 +211,7 @@ public class DataSetControllerTest {
         cohortDao, conceptDao, conceptSetDao, dataSetService,participantCounter, userProvider, workspaceService);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
-            userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService,
-            userRecentResourceService);
+            userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
     CohortsController cohortsController = new CohortsController(workspaceService, cohortDao, cdrVersionDao, cohortFactory,
         cohortReviewDao, conceptSetDao, cohortMaterializationService, userProvider, CLOCK,
         cdrVersionService, userRecentResourceService);
