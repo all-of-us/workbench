@@ -36,7 +36,8 @@ export class ListTreeComponent extends ListNodeComponent implements OnInit, OnCh
   }
 
   get showDropDown() {
-    return !this.isEmpty && this.node.type !== TreeType[TreeType.SNOMED];
+    return false;
+    // return !this.isEmpty && this.node.type !== TreeType[TreeType.SNOMED];
   }
 
   get isEmpty() {

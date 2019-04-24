@@ -185,7 +185,7 @@ export const ListSearch = withCurrentWorkspace()(
             {data.map((row, r) => {
               return <tr key={r}>
                 <td style={styles.columnBody}>
-                  <div style={{...styles.selectDiv}}>
+                  {row.selectable && <div style={{...styles.selectDiv}}>
                     {row.hasAttributes &&
                       <ClrIcon style={styles.attrIcon}
                         shape='slider' dir='right' size='20'
@@ -199,7 +199,7 @@ export const ListSearch = withCurrentWorkspace()(
                         shape='plus-circle' size='16'
                         onClick={() => this.selectItem(row)}/>
                     }
-                  </div>
+                  </div>}
                   <div style={{...styles.nameDiv}}>{row.name}</div>
                 </td>
                 <td style={styles.columnBody}>{row.type}</td>
