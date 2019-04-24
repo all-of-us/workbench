@@ -26,7 +26,28 @@ public class WorkspaceMapper {
 
   public Workspace toApiWorkspace(org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
-    Workspace result = constructListWorkspaceFromDb(workspace, researchPurpose);
+    FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
+
+    Workspace result = new Workspace()
+        .etag(Etags.fromVersion(workspace.getVersion()))
+        .lastModifiedTime(workspace.getLastModifiedTime().getTime())
+        .creationTime(workspace.getCreationTime().getTime())
+        .dataAccessLevel(workspace.getDataAccessLevelEnum())
+        .name(workspace.getName())
+        .id(workspaceId.getWorkspaceName())
+        .namespace(workspaceId.getWorkspaceNamespace())
+        .description(workspace.getDescription())
+        .researchPurpose(researchPurpose);
+    if (workspace.getCreator() != null) {
+      result.setCreator(workspace.getCreator().getEmail());
+    }
+    if (workspace.getCdrVersion() != null) {
+      result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
+    }
+
+    result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(this::toApiUserRole)
+        .collect(Collectors.toList()));
+
     return result;
   }
 
@@ -36,8 +57,28 @@ public class WorkspaceMapper {
       researchPurpose.setUnderservedPopulationDetails(
           new ArrayList<>(workspace.getUnderservedPopulationsEnum()));
     }
-    Workspace result = constructListWorkspaceFromFCAndDb(workspace, fcWorkspace,
-        researchPurpose);
+
+    Workspace result = new Workspace()
+        .etag(Etags.fromVersion(workspace.getVersion()))
+        .lastModifiedTime(workspace.getLastModifiedTime().getTime())
+        .creationTime(workspace.getCreationTime().getTime())
+        .dataAccessLevel(workspace.getDataAccessLevelEnum())
+        .name(workspace.getName())
+        .id(fcWorkspace.getName())
+        .namespace(fcWorkspace.getNamespace())
+        .description(workspace.getDescription())
+        .researchPurpose(researchPurpose)
+        .googleBucketName(fcWorkspace.getBucketName());
+    if (fcWorkspace.getCreatedBy() != null) {
+      result.setCreator(fcWorkspace.getCreatedBy());
+    }
+    if (workspace.getCdrVersion() != null) {
+      result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
+    }
+
+    result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(this::toApiUserRole)
+        .collect(Collectors.toList()));
+
     return result;
   }
 
@@ -94,61 +135,6 @@ public class WorkspaceMapper {
       dbWorkspace
           .setUnderservedPopulationsEnum(new HashSet<>(purpose.getUnderservedPopulationDetails()));
     }
-  }
-
-  // This does not populate the list of underserved research groups.
-  private final Workspace constructListWorkspaceFromDb(
-      org.pmiops.workbench.db.model.Workspace workspace,
-      ResearchPurpose researchPurpose) {
-    FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
-    Workspace result = new Workspace()
-        .etag(Etags.fromVersion(workspace.getVersion()))
-        .lastModifiedTime(workspace.getLastModifiedTime().getTime())
-        .creationTime(workspace.getCreationTime().getTime())
-        .dataAccessLevel(workspace.getDataAccessLevelEnum())
-        .name(workspace.getName())
-        .id(workspaceId.getWorkspaceName())
-        .namespace(workspaceId.getWorkspaceNamespace())
-        .description(workspace.getDescription())
-        .researchPurpose(researchPurpose);
-    if (workspace.getCreator() != null) {
-      result.setCreator(workspace.getCreator().getEmail());
-    }
-    if (workspace.getCdrVersion() != null) {
-      result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
-    }
-
-    result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(this::toApiUserRole)
-        .collect(Collectors.toList()));
-    return result;
-  }
-
-  // This does not populate the list of underserved research groups.
-  private final Workspace constructListWorkspaceFromFCAndDb(
-      org.pmiops.workbench.db.model.Workspace workspace,
-      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace, ResearchPurpose researchPurpose) {
-    Workspace result = new Workspace()
-        .etag(Etags.fromVersion(workspace.getVersion()))
-        .lastModifiedTime(workspace.getLastModifiedTime().getTime())
-        .creationTime(workspace.getCreationTime().getTime())
-        .dataAccessLevel(workspace.getDataAccessLevelEnum())
-        .name(workspace.getName())
-        .id(fcWorkspace.getName())
-        .namespace(fcWorkspace.getNamespace())
-        .description(workspace.getDescription())
-        .researchPurpose(researchPurpose)
-        .googleBucketName(fcWorkspace.getBucketName());
-    if (fcWorkspace.getCreatedBy() != null) {
-      result.setCreator(fcWorkspace.getCreatedBy());
-    }
-    if (workspace.getCdrVersion() != null) {
-      result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
-    }
-
-    result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(this::toApiUserRole)
-        .collect(Collectors.toList()));
-
-    return result;
   }
 
   private final ResearchPurpose createResearchPurpose(
