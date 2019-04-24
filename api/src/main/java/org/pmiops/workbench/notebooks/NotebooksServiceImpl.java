@@ -21,8 +21,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotebooksServiceImpl implements NotebooksService {
 
-  private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
-  private static final Pattern NOTEBOOK_PATTERN =
+  public static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
+  public static final Pattern NOTEBOOK_PATTERN =
       Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 
   private final Clock clock;

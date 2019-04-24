@@ -7,8 +7,6 @@ import com.google.common.base.Strings;
 
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -28,10 +26,10 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.ConceptSet;
@@ -64,9 +62,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   // If we later decide to tune this value, consider moving to the WorkbenchConfig.
   private static final int MAX_NOTEBOOK_SIZE_MB = 100;
   // "directory" for notebooks, within the workspace cloud storage bucket.
-  private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
-  private static final Pattern NOTEBOOK_PATTERN =
-      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
+  private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = NotebooksServiceImpl.NOTEBOOKS_WORKSPACE_DIRECTORY;
+  private static final Pattern NOTEBOOK_PATTERN = NotebooksServiceImpl.NOTEBOOK_PATTERN;
 
   private final WorkspaceService workspaceService;
   private final WorkspaceMapper workspaceMapper;
@@ -81,7 +78,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final NotebooksService notebooksService;
   private final UserService userService;
-  private final UserRecentResourceService userRecentResourceService;
 
   @Autowired
   WorkspacesController(
@@ -97,8 +93,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       CloudStorageService cloudStorageService,
       Clock clock,
       NotebooksService notebooksService,
-      UserService userService,
-      UserRecentResourceService userRecentResourceService) {
+      UserService userService) {
     this.workspaceService = workspaceService;
     this.workspaceMapper = workspaceMapper;
     this.cdrVersionDao = cdrVersionDao;
@@ -112,7 +107,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.clock = clock;
     this.notebooksService = notebooksService;
     this.userService = userService;
-    this.userRecentResourceService = userRecentResourceService;
   }
 
   @VisibleForTesting
