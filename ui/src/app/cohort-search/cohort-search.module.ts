@@ -15,6 +15,14 @@ import {CodeDropdownComponent} from './code-dropdown/code-dropdown.component';
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {DemographicsComponent} from './demographics/demographics.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
+import {ListAttributesPageComponent} from './list-attributes-page/list-attributes-page.component';
+import {ListModalComponent} from './list-modal/list-modal.component';
+import {ListModifierPageComponent} from './list-modifier-page/list-modifier-page.component';
+import {ListSearchGroupItemComponent} from './list-search-group-item/list-search-group-item.component';
+import {ListSearchGroupListComponent} from './list-search-group-list/list-search-group-list.component';
+import {ListSearchGroupComponent} from './list-search-group/list-search-group.component';
+import {ListSearchComponent} from './list-search/list-search.component';
+import {ListSelectionInfoComponent} from './list-selection-info/list-selection-info.component';
 import {ModalComponent} from './modal/modal.component';
 import {ModifierPageComponent} from './modifier-page/modifier-page.component';
 import {MultiSelectComponent} from './multi-select/multi-select.component';
@@ -68,6 +76,14 @@ const routes: Routes = [{
     CodeDropdownComponent,
     DemographicsComponent,
     GenderChartComponent,
+    ListAttributesPageComponent,
+    ListModalComponent,
+    ListModifierPageComponent,
+    ListSearchGroupItemComponent,
+    ListSearchGroupListComponent,
+    ListSearchGroupComponent,
+    ListSearchComponent,
+    ListSelectionInfoComponent,
     ModalComponent,
     ModifierPageComponent,
     MultiSelectComponent,

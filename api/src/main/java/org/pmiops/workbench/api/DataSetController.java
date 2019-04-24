@@ -147,7 +147,6 @@ public class DataSetController implements DataSetApiDelegate {
     this.workspaceService = workspaceService;
   }
 
-
   @Override
   public ResponseEntity<DataSet> createDataSet(String workspaceNamespace, String workspaceId,
       DataSetRequest dataSetRequest) {
@@ -312,7 +311,7 @@ public class DataSetController implements DataSetApiDelegate {
   ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> valueSetList, Domain d) {
     List<String> values = valueSetList.stream().map(valueSet -> valueSet.getValue())
         .collect(Collectors.toList());
-    values.add(0, "SENTINEL_PLACEHOLDER_VALUE");
+    values.add(0, "CORE_TABLE_FOR_DOMAIN");
     String domainAsName = d.toString().charAt(0) + d.toString().substring(1).toLowerCase();
 
     String valuesQuery = "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";

@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
+//TODO:Remove freemabd Remove once universal search is completed
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
@@ -44,14 +45,7 @@ public class CriteriaDaoTest {
     jdbcTemplate.execute("delete from criteria");
   }
 
-  @Test
-  public void findCriteriaByTypeAndId() throws Exception {
-    Criteria icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, false, null);
-    criteriaDao.save(icd9Criteria1);
-    Criteria criteria = criteriaDao.findCriteriaByTypeAndConceptIdAndSelectable(icd9Criteria1.getType(), icd9Criteria1.getConceptId(), false);
-    assertEquals(icd9Criteria1, criteria);
-  }
-
+  //TODO:Remove freemabd
   @Test
   public void findCriteriaByParentId() throws Exception {
     Criteria icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
@@ -89,16 +83,7 @@ public class CriteriaDaoTest {
     assertEquals(pmCriteria, pmList.get(0));
   }
 
-  @Test
-  public void getPPICriteriaParent() throws Exception {
-    Criteria ppiCriteriaParent = createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), "", "Race", 3272493, true, false, "3272493").conceptId("1586140");
-    criteriaDao.save(ppiCriteriaParent);
-    Criteria ppiCriteriaChild = createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), "1586146", "White Alone", ppiCriteriaParent.getId(), false, true, ppiCriteriaParent.getPath() + "." + ppiCriteriaParent.getId()).conceptId("1586140");
-    criteriaDao.save(ppiCriteriaChild);
-    Criteria criteria = criteriaDao.findCriteriaByTypeAndConceptIdAndSelectable(ppiCriteriaChild.getType(), ppiCriteriaChild.getConceptId(), false);
-    assertEquals(ppiCriteriaParent, criteria);
-  }
-
+  //TODO:Remove freemabd
   @Test
   public void findCriteriaByTypeAndSubtypeAndParentIdOrderByIdAsc() throws Exception {
     Criteria drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
@@ -112,6 +97,7 @@ public class CriteriaDaoTest {
     assertEquals(drugCriteriaIngredient1, drugList.get(1));
   }
 
+  //TODO:Remove freemabd
   @Test
   public void findCriteriaChildrenByTypeAndParentId() throws Exception {
     Criteria drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
@@ -125,6 +111,7 @@ public class CriteriaDaoTest {
     assertEquals(drugCriteriaIngredient1, drugList.get(1));
   }
 
+  //TODO:Remove freemabd
   @Test
   public void findCriteriaByType() throws Exception {
     Criteria icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
@@ -136,6 +123,7 @@ public class CriteriaDaoTest {
     assertEquals(1, typeList.size());
   }
 
+  //TODO:Remove freemabd
   @Test
   public void findCriteriaByTypeForCodeOrName() throws Exception {
     Criteria labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "xxx", "mysearchname", 0, false, false, "0.12345").conceptId("123").synonyms("LP123");
@@ -150,6 +138,7 @@ public class CriteriaDaoTest {
     assertEquals(labCriteria, labs.get(1));
   }
 
+  //TODO:Remove freemabd
   @Test
   public void findCriteriaByTypeAndSubtypeForCodeOrName() throws Exception {
     Criteria icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
@@ -169,6 +158,7 @@ public class CriteriaDaoTest {
     assertEquals(icd9Criteria1, conditions.get(0));
   }
 
+  //TODO:Remove freemabd
   @Test
   public void findCriteriaByTypeAndSubtypeForName() throws Exception {
     //match on code
@@ -180,6 +170,7 @@ public class CriteriaDaoTest {
     assertEquals(icd9Criteria2, conditions.get(0));
   }
 
+  //TODO:Remove freemabd
   @Test
   public void findCriteriaByTypeAndSubtypeOrderByIdAsc() throws Exception {
     Criteria parentDemo = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "Race/Ethnicity", "Race/Ethnicity", 0, true, true, null);
@@ -197,6 +188,7 @@ public class CriteriaDaoTest {
     assertEquals(demoCriteria1a, demoList.get(2));
   }
 
+  //TODO:Remove freemabd
   @Test
   public void findDrugBrandOrIngredientByName() throws Exception {
     Criteria drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");

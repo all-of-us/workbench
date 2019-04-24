@@ -326,21 +326,11 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
 
   async generateCode() {
     const {namespace, id} = this.props.workspace;
-    const valuesByDomain: ValueSet[] = [];
-    this.state.selectedValues.forEach((value) => {
-      const domainSetFound =
-        fp.find(domainSet => domainSet.domain === value.domain, valuesByDomain);
-      if (domainSetFound === undefined) {
-        valuesByDomain.push({domain: value.domain, values: {items: [{value: value.value}]}});
-      } else {
-        domainSetFound.values.items.push({value: value.value});
-      }
-    });
     const dataSet: DataSetRequest = {
       name: '',
       conceptSetIds: this.state.selectedConceptSetIds,
       cohortIds: this.state.selectedCohortIds,
-      values: valuesByDomain,
+      values: this.state.selectedValues,
     };
     const sqlQueries = await dataSetApi().generateQuery(namespace, id, dataSet);
     this.setState({queries: sqlQueries.queryList});
