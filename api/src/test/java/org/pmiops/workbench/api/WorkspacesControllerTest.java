@@ -369,10 +369,6 @@ public class WorkspacesControllerTest {
   }
 
   // TODO(calbach): Clean up this test file to make better use of chained builders.
-  private Workspace createWorkspace() {
-    return createWorkspace("namespace", "name");
-  }
-
   private Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     ResearchPurpose researchPurpose = new ResearchPurpose();
     researchPurpose.setDiseaseFocusedResearch(true);
