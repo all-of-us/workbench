@@ -7,8 +7,8 @@ public interface NotebooksService {
 
   List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName);
 
-  FileDetail copyNotebook(String fromWorkspace, String fromWorkspaceName, String fromNotebookName,
-      String toWorkspace, String toWorkspaceName, String toNotebookName);
+  FileDetail copyNotebook(String fromWorkspaceNamespace, String fromWorkspaceName, String fromNotebookName,
+      String toWorkspaceNamespace, String toWorkspaceName, String newNotebookName);
 
   FileDetail cloneNotebook(String workspaceNamespace, String workspaceName, String notebookName);
 
