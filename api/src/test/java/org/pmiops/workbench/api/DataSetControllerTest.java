@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.auth.UserProvider;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -181,6 +182,7 @@ public class DataSetControllerTest {
   @Import({CohortFactoryImpl.class,
       NotebooksServiceImpl.class,
       TestBigQueryCdrSchemaConfig.class,
+      UserProvider.class,
       UserService.class,
       WorkspacesController.class,
       WorkspaceMapper.class,
