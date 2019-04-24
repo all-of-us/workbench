@@ -10,6 +10,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.Providers;
@@ -57,10 +58,14 @@ public class UserServiceTest {
   private FireCloudService fireCloudService;
   @Mock
   private ComplianceService complianceService;
+  @Mock
+  private DirectoryService directoryService;
 
   private UserService userService;
 
   private User testUser;
+  private com.google.api.services.admin.directory.model.User googleUser;
+
 
   @Before
   public void setUp() {
@@ -68,7 +73,13 @@ public class UserServiceTest {
     testUser = insertUser(EMAIL_ADDRESS);
 
     userService = new UserService(Providers.of(testUser), userDao, adminActionHistoryDao, CLOCK,
-        new Random(), fireCloudService, configProvider, complianceService);
+        new Random(), fireCloudService, configProvider, complianceService, directoryService);
+
+    googleUser = new com.google.api.services.admin.directory.model.User();
+    googleUser.setPrimaryEmail(PRIMARY_EMAIL);
+    googleUser.setChangePasswordAtNextLogin(true);
+    googleUser.setPassword("testPassword");
+    googleUser.setIsEnrolledIn2Sv(true);
   }
 
   private User insertUser(String email) {
@@ -165,6 +176,15 @@ public class UserServiceTest {
 
     User user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getEraCommonsCompletionTime()).isNull();
+  }
+
+  @Test
+  public void testSyncTwoFactorAuthStatus() throws Exception {
+    when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
+    userService.syncTwoFactorAuthStatus();
+    // 2FA completion time should now be set
+    user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    assertThat(user.getTwoFactorAuthCompletionTime()).isNotNull();
   }
 
 }
