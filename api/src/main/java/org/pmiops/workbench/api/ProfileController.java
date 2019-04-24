@@ -264,15 +264,17 @@ public class ProfileController implements ProfileApiDelegate {
   private User initializeUserIfNeeded() {
     UserAuthentication userAuthentication = userAuthenticationProvider.get();
     User user = userAuthentication.getUser();
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     if (userAuthentication.getUserType() == UserType.SERVICE_ACCOUNT) {
       // Service accounts don't need further initialization.
       return user;
     }
 
-    Boolean twoFactorEnabled = Optional.ofNullable(user.getTwoFactorEnabled()).orElse(false);
-    if (!twoFactorEnabled) {
-      user.setTwoFactorEnabled(directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv());
-      user = saveUserWithConflictHandling(user);
+    if (user.getTwoFactorAuthCompletionTime() == null) {
+      if (directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv()) {
+        user.setTwoFactorAuthCompletionTime(now);
+        user = saveUserWithConflictHandling(user);
+      }
     }
 
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
@@ -497,6 +499,11 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> syncEraCommonsStatus() {
     userService.syncEraCommonsStatus();
+    return getProfileResponse(userProvider.get());
+  }
+
+  public ResponseEntity<Profile> syncTwoFactorAuthStatus() {
+    userService.syncTwoFactorAuthStatus();
     return getProfileResponse(userProvider.get());
   }
 

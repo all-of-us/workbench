@@ -24,6 +24,7 @@ import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -57,6 +58,7 @@ public class UserService {
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
+  private final DirectoryService directoryService;
   private static final Logger log = Logger.getLogger(UserService.class.getName());
 
   @Autowired
@@ -67,7 +69,8 @@ public class UserService {
       Random random,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> configProvider,
-      ComplianceService complianceService) {
+      ComplianceService complianceService,
+      DirectoryService directoryService) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -76,6 +79,7 @@ public class UserService {
     this.fireCloudService = fireCloudService;
     this.configProvider = configProvider;
     this.complianceService = complianceService;
+    this.directoryService = directoryService;
   }
 
   /**
@@ -485,4 +489,24 @@ public class UserService {
       }
     }
   }
+
+  /**
+   * Syncs the 2FA status for the current user.
+   */
+  public void syncTwoFactorAuthStatus() {
+    this.syncTwoFactorAuthStatus(userProvider.get());
+  }
+
+  /**
+   * Syncs the 2FA status for an arbitrary user.
+   */
+  public void syncTwoFactorAuthStatus(User user) {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    if (directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv()) {
+      user.setTwoFactorAuthCompletionTime(now);
+    } else {
+      user.setTwoFactorAuthCompletionTime(null);
+    }
+  }
+
 }

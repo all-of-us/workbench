@@ -76,7 +76,6 @@ public class User {
   private List<InstitutionalAffiliation> institutionalAffiliations = new ArrayList<>();
   private String aboutYou;
   private String areaOfResearch;
-  private Boolean twoFactorEnabled = false;
   private Integer clusterCreateRetries;
   private Integer billingProjectRetries;
   private Integer moodleId;
@@ -408,15 +407,6 @@ public class User {
 
   public void setAreaOfResearch(String areaOfResearch) {
     this.areaOfResearch = areaOfResearch;
-  }
-
-  @Column(name = "two_factor_enabled")
-  public Boolean getTwoFactorEnabled() {
-    return twoFactorEnabled;
-  }
-
-  public void setTwoFactorEnabled(Boolean twoFactorEnabled) {
-    this.twoFactorEnabled = twoFactorEnabled;
   }
 
   @Column(name = "cluster_create_retries")
