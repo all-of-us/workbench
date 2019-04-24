@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.auth.UserProvider;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -45,6 +46,7 @@ import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -181,7 +183,7 @@ public class CohortsControllerTest {
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortCloningService.class, CohortFactoryImpl.class,
-      UserService.class, WorkspaceMapper.class, WorkspacesController.class,
+      NotebooksServiceImpl.class, UserProvider.class, UserService.class, WorkspaceMapper.class, WorkspacesController.class,
       CohortsController.class, ConceptSetsController.class})
   @MockBean({ConceptBigQueryService.class, FireCloudService.class, LeonoardoNotebooksClient.class,
       CloudStorageService.class, ConceptSetService.class, UserRecentResourceService.class,
