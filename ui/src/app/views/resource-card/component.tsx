@@ -13,11 +13,10 @@ import {ResourceType} from 'app/utils/resourceActions';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
 import {RenameModal} from 'app/views/rename-modal/component';
-import {Domain, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
+import {Domain, RecentResource} from 'generated/fetch';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import { WorkspacePermissions } from 'app/utils/workspace-permissions';
-import { CopyNotebookModal } from '../copy-notebook-modal/component';
+import { CopyNotebookModal } from 'app/views/copy-notebook-modal/component';
 
 
 @Component({

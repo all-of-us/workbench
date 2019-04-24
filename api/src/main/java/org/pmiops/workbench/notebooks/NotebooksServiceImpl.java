@@ -70,8 +70,8 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public FileDetail copyNotebook(String fromWorkspaceNamespace, String fromWorkspaceName, String fromNotebookName,
       String toWorkspaceNamespace, String toWorkspaceName, String newNotebookName) {
-    GoogleCloudLocators fromNotebookLocators = getNotebookGoogleCloudLocators(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
-    GoogleCloudLocators newNotebookLocators = getNotebookGoogleCloudLocators(toWorkspaceNamespace, toWorkspaceName, newNotebookName);
+    GoogleCloudLocators fromNotebookLocators = getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
+    GoogleCloudLocators newNotebookLocators = getNotebookLocators(toWorkspaceNamespace, toWorkspaceName, newNotebookName);
 
     if (!cloudStorageService.blobsExist(Collections.singletonList(newNotebookLocators.blobId)).isEmpty()) {
       throw new BlobAlreadyExistsException();
@@ -105,12 +105,12 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public void deleteNotebook(String workspaceNamespace, String workspaceName,
       String notebookName) {
-    GoogleCloudLocators config = getNotebookGoogleCloudLocators(workspaceNamespace, workspaceName, notebookName);
-    cloudStorageService.deleteBlob(config.blobId);
+    GoogleCloudLocators notebookLocators = getNotebookLocators(workspaceNamespace, workspaceName, notebookName);
+    cloudStorageService.deleteBlob(notebookLocators.blobId);
     userRecentResourceService.deleteNotebookEntry(
         workspaceService.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
-        config.fullPath
+        notebookLocators.fullPath
     );
   }
 
@@ -137,7 +137,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     }
   }
 
-  private GoogleCloudLocators getNotebookGoogleCloudLocators(String workspaceNamespace, String workspaceName, String notebookName) {
+  private GoogleCloudLocators getNotebookLocators(String workspaceNamespace, String workspaceName, String notebookName) {
     String bucket = fireCloudService.getWorkspace(workspaceNamespace, workspaceName)
         .getWorkspace()
         .getBucketName();

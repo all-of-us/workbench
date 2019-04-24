@@ -8,7 +8,7 @@ import {
 
 import * as fp from 'lodash/fp';
 
-import {EmptyResponse} from 'generated';
+import {EmptyResponse, CopyNotebookRequest} from 'generated';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
@@ -100,6 +100,13 @@ export class WorkspacesApiStub extends WorkspacesApi {
         'path': 'gs://bucket/notebooks/' + cloneName,
         'lastModifiedTime': 100
       });
+      resolve({});
+    });
+  }
+
+  copyNotebook(fromWorkspaceNamespace: string, fromWorkspaceId: string, fromNotebookName: String,
+    copyNotebookRequest: CopyNotebookRequest): Promise<any> {
+    return new Promise<any>(resolve => {
       resolve({});
     });
   }
