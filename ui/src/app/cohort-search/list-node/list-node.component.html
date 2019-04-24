@@ -1,7 +1,6 @@
 <clr-tree-node *ngIf="!secondLevel">
   <div [id]="nodeId" class="clr-treenode-link container" (click)="toggleExpanded()">
-    {{node.name}}
-    <!--<crit-node-info [node]="node"></crit-node-info>-->
+    <crit-list-node-info [node]="node"></crit-list-node-info>
   </div>
 
   <ng-template *ngIf="node.group"

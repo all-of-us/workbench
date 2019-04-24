@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {attributesStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -86,7 +86,6 @@ const styles = reactStyles({
 });
 
 interface ListSearchProps {
-  addAttributes: Function;
   hierarchy: Function;
   selections: Array<string>;
   wizard: any;
@@ -126,7 +125,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     launchAttributes = (row: any) => {
-      this.props.addAttributes(row);
+      attributesStore.next(row);
     }
 
     showHierarchy = (row: any) => {
@@ -227,11 +226,10 @@ export const ListSearch = withCurrentWorkspace()(
   template: '<div #root></div>'
 })
 export class ListSearchComponent extends ReactWrapperBase {
-  @Input('addAttributes') addAttributes: ListSearchProps['addAttributes'];
   @Input('hierarchy') hierarchy: ListSearchProps['hierarchy'];
   @Input('selections') selections: ListSearchProps['selections'];
   @Input('wizard') wizard: ListSearchProps['wizard'];
   constructor() {
-    super(ListSearch, ['addAttributes', 'hierarchy', 'selections', 'wizard']);
+    super(ListSearch, ['hierarchy', 'selections', 'wizard']);
   }
 }
