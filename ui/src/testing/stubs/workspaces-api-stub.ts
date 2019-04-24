@@ -8,7 +8,7 @@ import {
 
 import * as fp from 'lodash/fp';
 
-import {EmptyResponse, CopyNotebookRequest} from 'generated';
+import {CopyNotebookRequest, EmptyResponse} from 'generated';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';

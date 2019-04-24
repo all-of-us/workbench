@@ -33,7 +33,8 @@ const boldStyle = {
   fontWeight: 700
 };
 
-export class CopyNotebookModal extends React.Component<CopyNotebookModalProps, CopyNotebookModalState> {
+export class CopyNotebookModal extends React.Component<CopyNotebookModalProps,
+CopyNotebookModalState> {
   constructor(props: CopyNotebookModalProps) {
     super(props);
 
@@ -75,7 +76,6 @@ export class CopyNotebookModal extends React.Component<CopyNotebookModalProps, C
         this.setState({ state: State.SUCCESS, loading: false });
         this.props.onCopy(response);
       }).catch((response) => {
-        console.log(response);
         const errorMsg = response.status === 400 ?
           'Notebook with the same name already exists in the targeted workspace.' :
           'An error occurred while copying. Please try again.';
