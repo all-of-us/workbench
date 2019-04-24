@@ -1,6 +1,6 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {scrollStore, selectedStore, selectedPathStore} from 'app/cohort-search/search-state.service';
+import {scrollStore, selectedPathStore, selectedStore} from 'app/cohort-search/search-state.service';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderService, TreeSubType, TreeType} from 'generated';
 import {fromJS} from 'immutable';
@@ -177,14 +177,15 @@ export class ListNodeComponent implements OnInit, OnDestroy {
 
   loadChildren(event) {
     if (!event) { return ; }
+    this.loading = true;
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
     const _type = this.node.type;
     const parentId = this.node.id;
     this.api.getCriteriaBy(cdrid, _type, null, parentId)
       .toPromise()
       .then(resp => {
-        console.log(resp);
         this.children = resp.items;
+        this.loading = false;
       });
     /* Criteria are cached, so this will result in an API call only the first
      * time this function is called.  Subsequent calls are no-ops

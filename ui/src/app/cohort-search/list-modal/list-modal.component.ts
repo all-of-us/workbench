@@ -14,7 +14,15 @@ import {
   subtreeSelected,
   wizardOpen,
 } from 'app/cohort-search/redux';
-import {scrollStore, searchRequestStore, selectedPathStore, selectedStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {
+  attributesStore,
+  scrollStore,
+  searchRequestStore,
+  selectedPathStore,
+  selectedStore,
+  selectionsStore,
+  wizardStore
+} from 'app/cohort-search/search-state.service';
 import {stripHtml, subtypeToTitle, typeToTitle} from 'app/cohort-search/utils';
 import {TreeSubType, TreeType} from 'generated';
 import {DomainType} from 'generated/fetch';
@@ -58,7 +66,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
   open = false;
   noSelection = true;
   title = '';
-  mode: 'tree' | 'list' | 'modifiers' | 'attributes' | 'snomed' = 'list';
+  mode = 'list';
   backMode: string;
   count = 0;
   originalNode: any;
@@ -90,6 +98,14 @@ export class ListModalComponent implements OnInit, OnDestroy {
     this.subscription.add(selectionsStore.subscribe(list => this.selectionIds = list));
 
     this.subscription.add(scrollStore.filter(id => !!id).subscribe(id => this.setScroll(id)));
+
+    this.subscription.add(attributesStore
+      .filter(crit => !!crit)
+      .subscribe(criterion => {
+        this.backMode = this.mode;
+        this.attributesCrit = criterion;
+        this.mode = 'attributes';
+      }));
 
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
@@ -207,9 +223,9 @@ export class ListModalComponent implements OnInit, OnDestroy {
     this.open = false;
   }
 
-  back() {
+  back = () => {
     if (this.attributesCrit) {
-      this.mode = 'tree';
+      this.mode = this.backMode;
       this.attributesCrit = undefined;
     }
     if (this.mode === 'snomed') {
@@ -311,6 +327,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
   }
 
   launchAttributes = (criterion: any) => {
+    console.log(criterion);
     this.attributesCrit = criterion;
     this.mode = 'attributes';
   }
