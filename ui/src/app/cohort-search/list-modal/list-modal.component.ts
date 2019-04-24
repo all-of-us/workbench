@@ -16,6 +16,7 @@ import {
 } from 'app/cohort-search/redux';
 import {
   attributesStore,
+  autocompleteStore,
   scrollStore,
   searchRequestStore,
   selectedPathStore,
@@ -29,6 +30,7 @@ import {DomainType} from 'generated/fetch';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
+import {cr} from '@angular/core/src/render3';
 
 
 @Component({
@@ -208,7 +210,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
     const nodeId = `node${id}`;
     const node = document.getElementById(nodeId);
     if (node) {
-      setTimeout(() => node.scrollIntoView({behavior: 'smooth'}), 200);
+      setTimeout(() => node.scrollIntoView({behavior: 'smooth', block: 'center'}), 200);
     }
     this.disableCursor = false;
   }
@@ -326,13 +328,8 @@ export class ListModalComponent implements OnInit, OnDestroy {
     this.mode = mode;
   }
 
-  launchAttributes = (criterion: any) => {
-    console.log(criterion);
-    this.attributesCrit = criterion;
-    this.mode = 'attributes';
-  }
-
   showHierarchy = (criterion: any) => {
+    autocompleteStore.next(criterion.name);
     selectedPathStore.next(criterion.path.split('.'));
     selectedStore.next(criterion.id);
     this.hierarchyCrit = {
