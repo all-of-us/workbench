@@ -389,7 +389,7 @@ paths:
         500:
           description: Internal Error
           schema:
-            $ref: '#definitions/ErrorResponse'
+            $ref: '#/definitions/ErrorResponse'
 
   # TODO: add demographic survey response data
   /v1/account/submit-demographic-survey:

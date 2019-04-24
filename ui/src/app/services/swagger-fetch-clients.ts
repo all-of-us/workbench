@@ -37,7 +37,7 @@ import {
   CronApi,
   DataSetApi,
   FetchAPI,
-  OfflineClusterApi, OfflineUserApi,
+  OfflineClusterApi,
   ProfileApi,
   StatusApi,
   UserApi,
