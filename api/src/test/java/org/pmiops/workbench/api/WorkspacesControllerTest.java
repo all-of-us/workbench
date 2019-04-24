@@ -1708,6 +1708,28 @@ public class WorkspacesControllerTest {
     );
   }
 
+  @Test(expected = ForbiddenException.class)
+  public void copyNotebook_permissions() {
+    Workspace fromWorkspace = createStubbedWorkspace();
+    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+    String fromNotebookName = "origin";
+
+    Workspace toWorkspace = createStubbedWorkspace("toWorkspaceNs", "toworkspace", WorkspaceAccessLevel.READER);
+    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+    String newNotebookName = "new";
+
+    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
+    copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
+    copyNotebookRequest.setToWorkspaceNamespace(toWorkspace.getNamespace());
+    copyNotebookRequest.setNewName(newNotebookName);
+
+    workspacesController.copyNotebook(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        fromNotebookName,
+        copyNotebookRequest);
+  }
+
   @Test(expected = BadRequestException.class)
   public void copyNotebook_alreadyExists() {
     Workspace fromWorkspace = createStubbedWorkspace();
