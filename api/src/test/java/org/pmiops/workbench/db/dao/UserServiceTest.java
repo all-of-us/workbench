@@ -76,7 +76,7 @@ public class UserServiceTest {
         new Random(), fireCloudService, configProvider, complianceService, directoryService);
 
     googleUser = new com.google.api.services.admin.directory.model.User();
-    googleUser.setPrimaryEmail(PRIMARY_EMAIL);
+    googleUser.setPrimaryEmail(EMAIL_ADDRESS);
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
     googleUser.setIsEnrolledIn2Sv(true);
@@ -180,7 +180,7 @@ public class UserServiceTest {
 
   @Test
   public void testSyncTwoFactorAuthStatus() throws Exception {
-    when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
+    when(directoryService.getUser(EMAIL_ADDRESS)).thenReturn(googleUser);
     userService.syncTwoFactorAuthStatus();
     // 2FA completion time should now be set
     user = userDao.findUserByEmail(EMAIL_ADDRESS);

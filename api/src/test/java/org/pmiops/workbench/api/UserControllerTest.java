@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
@@ -67,6 +68,8 @@ public class UserControllerTest {
   private FireCloudService fireCloudService;
   @Mock
   private ComplianceService complianceService;
+  @Mock
+  private DirectoryService directoryService;
   private UserService userService;
 
   private UserController userController;
@@ -84,7 +87,7 @@ public class UserControllerTest {
     config.firecloud.enforceRegistered = false;
     configProvider = Providers.of(config);
     this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock(),
-        new Random(), fireCloudService, configProvider, complianceService);
+        new Random(), fireCloudService, configProvider, complianceService, directoryService);
     this.userController = new UserController(userService);
     saveFamily();
   }
