@@ -37,8 +37,10 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
+import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
@@ -174,9 +176,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                       String subtype,
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    if (configProvider.get().cohortbuilder.enableListSearch) {
-      log.info("List search is on: " + configProvider.get().cohortbuilder.enableListSearch);
-    }
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
     String matchExp = modifyKeywordMatch(value, type);
     List<Criteria> criteriaList;
@@ -300,42 +299,68 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListResponse> getCriteriaBy(Long cdrVersionId,
+                                                            String domain,
                                                             String type,
-                                                            String subtype,
-                                                            Long parentId,
-                                                            Boolean allChildren) {
-    Optional.ofNullable(type)
-      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria type. %s is not valid.", type )));
-    Arrays
-      .stream(TreeType.values())
-      .filter(treeType -> treeType.name().equalsIgnoreCase(type))
-      .findFirst()
-      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria type. %s is not valid.", type )));
-    Optional.ofNullable(subtype)
-      .ifPresent(st -> Arrays
-      .stream(TreeSubType.values())
-      .filter(treeSubType -> treeSubType.name().equalsIgnoreCase(st))
-      .findFirst()
-      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria subtype. %s is not valid.", st ))));
-
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    List<Criteria> criteriaList;
-    if (parentId != null) {
-      if (subtype != null) {
-        criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeAndParentIdOrderByIdAsc(type, subtype, parentId);
-      } else if (allChildren != null) {
-        criteriaList = criteriaDao.findCriteriaChildrenByTypeAndParentId(type, parentId);
-      } else {
-        criteriaList = criteriaDao.findCriteriaByTypeAndParentIdOrderByIdAsc(type, parentId);
-      }
-    } else if (subtype != null) {
-      criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeOrderByIdAsc(type, subtype);
-    } else {
-      criteriaList = criteriaDao.findCriteriaByType(type);
-    }
-
+                                                            Long parentId) {
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      String domainMessage = "Bad Request: Please provide a valid criteria domain. %s is not valid.";
+      String typeMessage = "Bad Request: Please provide a valid criteria type. %s is not valid.";
+      Optional
+        .ofNullable(domain)
+        .orElseThrow(() -> new BadRequestException(String.format(domainMessage, domain)));
+      Arrays
+        .stream(DomainType.values())
+        .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
+        .findFirst()
+        .orElseThrow(() -> new BadRequestException(String.format(domainMessage, domain)));
+      Optional.ofNullable(type)
+        .ifPresent(t -> Arrays
+          .stream(CriteriaType.values())
+          .filter(critType -> critType.toString().equalsIgnoreCase(t))
+          .findFirst()
+          .orElseThrow(() -> new BadRequestException(String.format(typeMessage, t))));
+
+      List<CBCriteria> criteriaList;
+      if (parentId != null) {
+        criteriaList = cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(domain, type, parentId);
+      } else {
+        criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeOrderByIdAsc(domain, type);
+      }
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
+    } else {
+      //TODO:Remove freemabd
+      Optional.ofNullable(domain)
+        .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria type. %s is not valid.", domain)));
+      Arrays
+        .stream(TreeType.values())
+        .filter(treeType -> treeType.name().equalsIgnoreCase(domain))
+        .findFirst()
+        .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria type. %s is not valid.", domain)));
+      Optional.ofNullable(type)
+        .ifPresent(st -> Arrays
+          .stream(TreeSubType.values())
+          .filter(treeSubType -> treeSubType.name().equalsIgnoreCase(st))
+          .findFirst()
+          .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria subtype. %s is not valid.", st))));
+
+      List<Criteria> criteriaList;
+      if (parentId != null) {
+        if (type != null) {
+          criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeAndParentIdOrderByIdAsc(domain, type, parentId);
+        } else {
+          criteriaList = criteriaDao.findCriteriaByTypeAndParentIdOrderByIdAsc(domain, parentId);
+        }
+      } else if (type != null) {
+        criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeOrderByIdAsc(domain, type);
+      } else {
+        criteriaList = criteriaDao.findCriteriaByType(domain);
+      }
+
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+    }
 
     return ResponseEntity.ok(criteriaResponse);
   }
