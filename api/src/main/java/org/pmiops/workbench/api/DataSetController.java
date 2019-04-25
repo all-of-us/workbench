@@ -194,7 +194,7 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceId, DataSetRequest dataSet) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
-    Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.dataSetQuery(dataSet);
+    Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
     int noOfValues = dataSet.getValues().size();
 
     bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
