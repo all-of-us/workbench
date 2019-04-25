@@ -91,14 +91,6 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.node.selectable;
   }
 
-  get displayName() {
-    return this.node.name;
-  }
-
-  get popperName() {
-    return stripHtml(this.displayName);
-  }
-
   get displayCode() {
     if ((this.isDrug && this.node.group) || this.isPM || this.isPPI || this.isSNOMED) {
       return '';
