@@ -264,7 +264,6 @@ public class ProfileController implements ProfileApiDelegate {
   private User initializeUserIfNeeded() {
     UserAuthentication userAuthentication = userAuthenticationProvider.get();
     User user = userAuthentication.getUser();
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     if (userAuthentication.getUserType() == UserType.SERVICE_ACCOUNT) {
       // Service accounts don't need further initialization.
       return user;
