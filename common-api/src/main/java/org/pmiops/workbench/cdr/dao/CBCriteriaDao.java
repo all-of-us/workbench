@@ -10,19 +10,14 @@ import java.util.List;
 
 public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
-  List<CBCriteria> findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(@Param("domainId") String domainId,
+  @Query(value = "select * from cb_criteria where domain_id=:domain and type=:type and parent_id=:parentId and has_hierarchy = 1", nativeQuery = true)
+  List<CBCriteria> findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(@Param("domain") String domain,
                                                                         @Param("type") String type,
                                                                         @Param("parentId") Long parentId);
 
   @Query(value = "select c from CBCriteria c where domainId=:domain and type=:type order by id asc")
   List<CBCriteria> findCriteriaByDomainAndTypeOrderByIdAsc(@Param("domain") String domain,
                                                            @Param("type") String type);
-
-  @Query(value = "select * from cb_criteria where domain_id=:domain and type=:type and (path like concat('%.',:parentId) or path like concat('%.',:parentId, '.%')) " +
-    "and is_group = 0 and is_selectable = 1", nativeQuery = true)
-  List<CBCriteria> findCriteriaChildrenByDomainAndTypeAndParentId(@Param("domain") String domain,
-                                                                  @Param("type") String type,
-                                                                  @Param("parentId") Long parentId);
 
   @Query(value = "select c from CBCriteria c where domainId=:domain and standard=:standard and match(synonyms, :term) > 0 order by c.count desc")
   List<CBCriteria> findCriteriaByDomainAndSearchTerm(@Param("domain") String domain,

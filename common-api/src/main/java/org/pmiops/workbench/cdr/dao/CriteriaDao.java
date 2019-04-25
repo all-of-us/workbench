@@ -52,16 +52,6 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and is_selectable = 1")
   List<Criteria> findCriteriaLeavesByType(String type, String subtype);
 
-  @Query(value = "select * " +
-    "from criteria " +
-    "where type = :type " +
-    "and (path like concat('%.',:parentId) or path like concat('%.',:parentId, '.%')) " +
-    "and is_group = 0 " +
-    "and is_selectable = 1", nativeQuery = true)
-  //TODO:Remove freemabd
-  List<Criteria> findCriteriaChildrenByTypeAndParentId(@Param("type") String type,
-                                                       @Param("parentId") Long parentId);
-
   //TODO:Remove freemabd
   List<Criteria> findCriteriaByTypeAndSubtypeAndParentIdOrderByIdAsc(@Param("type") String type,
                                                                      @Param("subtype") String subtype,

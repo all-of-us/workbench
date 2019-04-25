@@ -60,10 +60,12 @@ public class CBCriteriaDaoTest {
     CBCriteria criteriaIcd9 = new CBCriteria()
       .domainId(domainId)
       .type(icd9Type)
+      .hierarchy(true)
       .parentId(0);
     CBCriteria criteriaIcd10 = new CBCriteria()
       .domainId(domainId)
       .type(icd10Type)
+      .hierarchy(true)
       .parentId(0);
     cbCriteriaDao.save(criteriaIcd9);
     cbCriteriaDao.save(criteriaIcd10);
@@ -106,32 +108,6 @@ public class CBCriteriaDaoTest {
     assertEquals(raceParent, demoList.get(0));
     assertEquals(raceChild1, demoList.get(1));
     assertEquals(raceChild2, demoList.get(2));
-  }
-
-  @Test
-  public void findCriteriaChildrenByDomainAndTypeAndParentId() throws Exception {
-    String domainId = DomainType.DRUG.toString();
-    String type = CriteriaType.ATC.toString();
-    CBCriteria drug1 = new CBCriteria()
-      .domainId(domainId)
-      .type(type)
-      .group(false)
-      .selectable(true)
-      .path("1.2.3.4");
-    CBCriteria drug2 = new CBCriteria()
-      .domainId(domainId)
-      .type(type)
-      .group(false)
-      .selectable(true)
-      .path("1.2.3.4");
-    cbCriteriaDao.save(drug1);
-    cbCriteriaDao.save(drug2);
-
-    final List<CBCriteria> drugList =
-      cbCriteriaDao.findCriteriaChildrenByDomainAndTypeAndParentId(domainId, type, 2L);
-    assertEquals(2, drugList.size());
-    assertEquals(drug1, drugList.get(0));
-    assertEquals(drug2, drugList.get(1));
   }
 
   @Test
