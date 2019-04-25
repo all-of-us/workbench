@@ -35,6 +35,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
@@ -175,7 +176,7 @@ public class DataSetControllerTest {
       CloudStorageService.class, CohortCloningService.class,
       CohortMaterializationService.class, ComplianceService.class,
       ConceptBigQueryService.class, ConceptSetService.class, DataSetService.class,
-      FireCloudService.class,
+      FireCloudService.class, DirectoryService.class,
       ParticipantCounter.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean

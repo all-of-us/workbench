@@ -35,6 +35,7 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -129,6 +130,8 @@ public class ClusterControllerTest {
   @Autowired
   WorkspaceService workspaceService;
   @Mock
+  DirectoryService directoryService;
+  @Mock
   Provider<User> userProvider;
   @Mock
   ComplianceService complianceService;
@@ -162,7 +165,7 @@ public class ClusterControllerTest {
 
     UserService userService = new UserService(
         userProvider, userDao, adminActionHistoryDao, CLOCK, new FakeLongRandom(123),
-        fireCloudService, Providers.of(config), complianceService);
+        fireCloudService, Providers.of(config), complianceService, directoryService);
     clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();

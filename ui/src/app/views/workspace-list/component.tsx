@@ -281,7 +281,8 @@ export const WorkspaceList = withUserProfile()
   checkTwoFactorAuth() {
     const {profileState: {profile}} = this.props;
     this.setState({
-      twoFactorEnabled: profile.twoFactorEnabled,
+      // TODO [RW-2454] Remove 2FA check from workspace list
+      twoFactorEnabled: !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime,
       firstSignIn: new Date(profile.firstSignInTime)
     });
   }
