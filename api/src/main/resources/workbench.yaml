@@ -1346,7 +1346,7 @@ paths:
 
 ### Data set ############################################
 
-  /v1/data-set/{workspaceNamespace}/{workspaceId}/create:
+  /v1/{workspaceNamespace}/{workspaceId}/data-set/create:
     post:
       tags:
         - dataSet
@@ -1375,29 +1375,50 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/dataSet/generateQuery:
-      post:
-        tags:
-          - dataSet
-        description: >
-          Given a Data Set, return the SQL query built from it.
-        operationId: "generateQuery"
-        parameters:
-          - $ref: '#/parameters/workspaceNamespace'
-          - $ref: '#/parameters/workspaceId'
-          - in: body
-            name: dataSet
-            required: true
-            schema:
-              $ref: "#/definitions/DataSetRequest"
-        responses:
-          200:
-            description: >
-              A SQL query for each domain in the Data Set
-            schema:
-              $ref: "#/definitions/DataSetQueryList"
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateQuery:
+    post:
+      tags:
+        - dataSet
+      description: >
+        Given a Data Set, return the SQL query built from it.
+      operationId: "generateQuery"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: body
+          name: dataSet
+          required: true
+          schema:
+            $ref: "#/definitions/DataSetRequest"
+      responses:
+        200:
+          description: >
+            A SQL query for each domain in the Data Set
+          schema:
+            $ref: "#/definitions/DataSetQueryList"
 
-
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/preview:
+    post:
+      tags:
+        - dataSet
+      description: >
+        Preview data set
+      operationId: "previewQuery"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: body
+          name: dataSet
+          required: true
+          schema:
+            $ref: "#/definitions/DataSetRequest"
+      responses:
+        200:
+          description: >
+            A SQL query for each domain in the Data Set
+          schema:
+            $ref: "#/definitions/DataSetPreviewResponse"
+            
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -2179,6 +2200,34 @@ definitions:
         type: object
         description: Can be any value
 
+  DataSetPreviewResponse:
+    type: object
+    properties:
+      domainValue:
+        type: "array"
+        items:
+          $ref: "#/definitions/DataSetPreviewList"
+
+  DataSetPreviewList:
+    type: object
+    properties:
+      domain:
+        type: string
+      values:
+        type: "array"
+        items:
+          $ref: "#/definitions/DataSetPreviewValueList"
+
+  DataSetPreviewValueList:
+    type: object
+    properties:
+      value:
+        type: string
+        description: Value selected by user which will act as column header in preview table
+      queryValue:
+        type: "array"
+        items:
+          type: string
 
   DomainInfoResponse:
     type: object
