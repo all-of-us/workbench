@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.auth.UserProvider;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -20,10 +19,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class NotebooksServiceImpl implements NotebooksService {
-
-  public static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
-  public static final Pattern NOTEBOOK_PATTERN =
-      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 
   private final Clock clock;
   private final CloudStorageService cloudStorageService;

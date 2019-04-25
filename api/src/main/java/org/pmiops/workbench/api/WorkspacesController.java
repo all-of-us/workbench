@@ -62,8 +62,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   // If we later decide to tune this value, consider moving to the WorkbenchConfig.
   private static final int MAX_NOTEBOOK_SIZE_MB = 100;
   // "directory" for notebooks, within the workspace cloud storage bucket.
-  private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = NotebooksServiceImpl.NOTEBOOKS_WORKSPACE_DIRECTORY;
-  private static final Pattern NOTEBOOK_PATTERN = NotebooksServiceImpl.NOTEBOOK_PATTERN;
+  private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY;
+  private static final Pattern NOTEBOOK_PATTERN = NotebooksService.NOTEBOOK_PATTERN;
 
   private final WorkspaceService workspaceService;
   private final WorkspaceMapper workspaceMapper;

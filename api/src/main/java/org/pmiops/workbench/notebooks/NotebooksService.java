@@ -1,9 +1,13 @@
 package org.pmiops.workbench.notebooks;
 
 import java.util.List;
+import java.util.regex.Pattern;
 import org.pmiops.workbench.model.FileDetail;
 
 public interface NotebooksService {
+
+  String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
+  Pattern NOTEBOOK_PATTERN = Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 
   List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName);
 
