@@ -7,8 +7,9 @@ import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.auth.UserProvider;
+import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.FileDetail;
@@ -23,7 +24,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   private final Clock clock;
   private final CloudStorageService cloudStorageService;
   private final FireCloudService fireCloudService;
-  private final UserProvider userProvider;
+  private final Provider<User> userProvider;
   private final UserRecentResourceService userRecentResourceService;
   private final WorkspaceService workspaceService;
 
@@ -31,7 +32,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public NotebooksServiceImpl(Clock clock,
       CloudStorageService cloudStorageService,
       FireCloudService fireCloudService,
-      UserProvider userProvider,
+      Provider<User> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceService workspaceService) {
     this.clock = clock;

@@ -39,14 +39,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.pmiops.workbench.auth.UserProvider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -119,6 +116,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -197,7 +195,6 @@ public class WorkspacesControllerTest {
           CloudStorageService.class,
           BigQueryService.class,
           ParticipantCounter.class,
-          UserProvider.class,
           UserService.class,
           UserRecentResourceService.class,
           ConceptService.class
@@ -218,12 +215,13 @@ public class WorkspacesControllerTest {
     }
 
     @Bean
+    @Scope("prototype")
     User user() {
-      // Allows for wiring of the initial Provider<User>; actual mocking of the
-      // user is achieved via setUserProvider().
-      return null;
+      return currentUser;
     }
   }
+
+  private static User currentUser;
 
   @Autowired
   FireCloudService fireCloudService;
@@ -239,10 +237,6 @@ public class WorkspacesControllerTest {
   ConceptDao conceptDao;
   @Autowired
   CdrVersionDao cdrVersionDao;
-  @Mock
-  Provider<User> userProvider;
-  @Autowired
-  UserProvider userProviderWrapper;
   @Autowired
   CohortsController cohortsController;
   @Autowired
@@ -260,12 +254,7 @@ public class WorkspacesControllerTest {
   @Before
   public void setUp() {
     User user = createUser(LOGGED_IN_USER_EMAIL);
-    doReturn(user).when(userProviderWrapper).get();
-    when(userProvider.get()).thenReturn(user);
-    workspacesController.setUserProvider(userProvider);
-    cohortsController.setUserProvider(userProvider);
-    cohortReviewController.setUserProvider(userProvider);
-    conceptSetsController.setUserProvider(userProvider);
+    currentUser = user;
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
     //set the db name to be empty since test cases currently
@@ -1151,7 +1140,7 @@ public class WorkspacesControllerTest {
     cloner.setFreeTierBillingProjectName("TestBillingProject1");
     cloner.setDisabled(false);
     cloner = userDao.save(cloner);
-    when(userProvider.get()).thenReturn(cloner);
+    currentUser = cloner;
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.READER);
@@ -1239,7 +1228,7 @@ public class WorkspacesControllerTest {
               new UserRole().email(reader.getEmail()).role(WorkspaceAccessLevel.READER),
               new UserRole().email(writer.getEmail()).role(WorkspaceAccessLevel.WRITER))));
 
-    when(userProvider.get()).thenReturn(cloner);
+    currentUser = cloner;
 
     Workspace modWorkspace = new Workspace()
       .namespace("cloned-ns")
@@ -1294,7 +1283,7 @@ public class WorkspacesControllerTest {
     cloner.setFreeTierBillingProjectName("TestBillingProject1");
     cloner.setDisabled(false);
     cloner = userDao.save(cloner);
-    when(userProvider.get()).thenReturn(cloner);
+    currentUser = cloner;
 
     // Permission denied manifests as a 404 in Firecloud.
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
