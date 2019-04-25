@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
@@ -86,6 +87,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private CriteriaAttributeDao criteriaAttributeDao;
 
   @Autowired
+  private CBCriteriaAttributeDao cbCriteriaAttributeDao;
+
+  @Autowired
   private TestWorkbenchConfig testWorkbenchConfig;
 
   @Mock
@@ -121,8 +125,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     ElasticSearchService elasticSearchService =
         new ElasticSearchService(criteriaDao, cloudStorageService, configProvider);
 
-    controller = new CohortBuilderController(bigQueryService,
-      participantCounter, criteriaDao, cbCriteriaDao, criteriaAttributeDao,
+    controller = new CohortBuilderController(bigQueryService, participantCounter,
+      criteriaDao, cbCriteriaDao, criteriaAttributeDao, cbCriteriaAttributeDao,
       cdrVersionDao, genderRaceEthnicityConceptProvider, cdrVersionService,
       elasticSearchService, configProvider);
 
