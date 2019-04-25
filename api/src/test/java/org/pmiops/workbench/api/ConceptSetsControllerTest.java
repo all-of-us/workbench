@@ -44,6 +44,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
@@ -191,7 +192,8 @@ public class ConceptSetsControllerTest {
   @Import({WorkspaceServiceImpl.class, CohortCloningService.class, CohortFactoryImpl.class,
       UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptSetService.class})
   @MockBean({ConceptBigQueryService.class, FireCloudService.class, CloudStorageService.class,
-      ConceptSetService.class, UserRecentResourceService.class, ComplianceService.class})
+      ConceptSetService.class, UserRecentResourceService.class, ComplianceService.class,
+      DirectoryService.class})
   static class Configuration {
     @Bean
     Clock clock() {

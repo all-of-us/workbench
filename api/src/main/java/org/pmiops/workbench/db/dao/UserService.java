@@ -490,16 +490,10 @@ public class UserService {
     }
   }
 
-  /**
-   * Syncs the 2FA status for the current user.
-   */
   public void syncTwoFactorAuthStatus() {
-    this.syncTwoFactorAuthStatus(userProvider.get());
+    syncTwoFactorAuthStatus(userProvider.get());
   }
 
-  /**
-   * Syncs the 2FA status for an arbitrary user.
-   */
   public void syncTwoFactorAuthStatus(User user) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     if (directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv()) {

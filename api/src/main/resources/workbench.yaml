@@ -377,7 +377,7 @@ paths:
       tags:
         - profile
       summary: Sync two factor auth status
-      description: checks google admin to see if a user has set up 2FA
+      description: Syncs a user's 2FA status from google
       operationId: syncTwoFactorAuthStatus
       responses:
         200:

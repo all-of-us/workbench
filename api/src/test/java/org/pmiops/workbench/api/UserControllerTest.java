@@ -101,7 +101,7 @@ public class UserControllerTest {
   public void testEnforceRegistered() {
     configProvider.get().firecloud.enforceRegistered = true;
     this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock(),
-        new Random(), fireCloudService, configProvider, complianceService);
+        new Random(), fireCloudService, configProvider, complianceService, directoryService);
     this.userController = new UserController(userService);
     User john = userDao.findUserByEmail("john@lis.org");
 

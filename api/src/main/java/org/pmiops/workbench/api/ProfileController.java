@@ -502,6 +502,7 @@ public class ProfileController implements ProfileApiDelegate {
     return getProfileResponse(userProvider.get());
   }
 
+  @Override
   public ResponseEntity<Profile> syncTwoFactorAuthStatus() {
     userService.syncTwoFactorAuthStatus();
     return getProfileResponse(userProvider.get());
