@@ -64,8 +64,6 @@ public class UserServiceTest {
   private UserService userService;
 
   private User testUser;
-  private com.google.api.services.admin.directory.model.User googleUser;
-
 
   @Before
   public void setUp() {
@@ -174,7 +172,7 @@ public class UserServiceTest {
 
   @Test
   public void testSyncTwoFactorAuthStatus() throws Exception {
-    googleUser = new com.google.api.services.admin.directory.model.User();
+    com.google.api.services.admin.directory.model.User googleUser = new com.google.api.services.admin.directory.model.User();
     googleUser.setPrimaryEmail(EMAIL_ADDRESS);
     googleUser.setIsEnrolledIn2Sv(true);
 

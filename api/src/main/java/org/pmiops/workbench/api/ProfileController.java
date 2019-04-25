@@ -270,11 +270,10 @@ public class ProfileController implements ProfileApiDelegate {
       return user;
     }
 
-    if (user.getTwoFactorAuthCompletionTime() == null) {
-      if (directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv()) {
-        user.setTwoFactorAuthCompletionTime(now);
-        user = saveUserWithConflictHandling(user);
-      }
+    if (user.getTwoFactorAuthCompletionTime() == null &&
+            directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv()) {
+      user.setTwoFactorAuthCompletionTime(now);
+      user = saveUserWithConflictHandling(user);
     }
 
     // On first sign-in, create a FC user, billing project, and set the first sign in time.

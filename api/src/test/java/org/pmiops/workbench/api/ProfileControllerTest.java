@@ -168,6 +168,7 @@ public class ProfileControllerTest {
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");
+    googleUser.setIsEnrolledIn2Sv(true);
 
     clock = new FakeClock(NOW);
 
