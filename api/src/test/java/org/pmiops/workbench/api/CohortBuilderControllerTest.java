@@ -54,8 +54,6 @@ import static org.mockito.Mockito.when;
 @Transactional
 public class CohortBuilderControllerTest {
 
-  private static final String SUBTYPE_NONE = null;
-  private static final String SUBTYPE_AGE = "AGE";
   private static final String SUBTYPE_LAB = "LAB";
   private static final String SUBTYPE_ATC = "ATC";
   private static final String SUBTYPE_BRAND = "BRAND";
@@ -98,9 +96,11 @@ public class CohortBuilderControllerTest {
   @Mock
   private Provider<WorkbenchConfig> configProvider;
 
+  private WorkbenchConfig testConfig;
+
   @Before
   public void setUp() {
-    WorkbenchConfig testConfig = new WorkbenchConfig();
+    testConfig = new WorkbenchConfig();
     testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
     testConfig.cohortbuilder.enableListSearch = false;
     when(configProvider.get()).thenReturn(testConfig);
@@ -117,26 +117,35 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaByTypeAndParentId() throws Exception {
-    Criteria icd9CriteriaParent = criteriaDao.save(
-      createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, 0L, "001", "name", DomainType.CONDITION.name(), null, true, true)
-    );
-    Criteria icd9CriteriaChild = criteriaDao.save(
-      createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, icd9CriteriaParent.getId(), "001.1", "name", DomainType.CONDITION.name(), null, false, true)
-    );
+  public void getCriteriaBy() throws Exception {
+    testConfig.cohortbuilder.enableListSearch = true;
+    CBCriteria icd9CriteriaParent = new CBCriteria()
+      .domainId(DomainType.CONDITION.toString())
+      .type(CriteriaType.ICD9CM.toString())
+      .count("0")
+      .hierarchy(true)
+      .parentId(0L);
+    cbCriteriaDao.save(icd9CriteriaParent);
+    CBCriteria icd9Criteria = new CBCriteria()
+      .domainId(DomainType.CONDITION.toString())
+      .type(CriteriaType.ICD9CM.toString())
+      .count("0")
+      .hierarchy(true)
+      .parentId(icd9CriteriaParent.getId());
+    cbCriteriaDao.save(icd9Criteria);
 
     assertEquals(
       createResponseCriteria(icd9CriteriaParent),
       controller
-        .getCriteriaBy(1L, TreeType.ICD9.name(), null,  0L, null)
+        .getCriteriaBy(1L, DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(),  0L)
         .getBody()
         .getItems()
         .get(0)
     );
     assertEquals(
-      createResponseCriteria(icd9CriteriaChild),
+      createResponseCriteria(icd9Criteria),
       controller
-        .getCriteriaBy(1L, TreeType.ICD9.name(), null, icd9CriteriaParent.getId(), null)
+        .getCriteriaBy(1L, DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), icd9CriteriaParent.getId())
         .getBody()
         .getItems()
         .get(0)
@@ -145,77 +154,49 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void getCriteriaByExceptions() throws Exception {
+    testConfig.cohortbuilder.enableListSearch = true;
     try {
       controller
-        .getCriteriaBy(1L, null, null,  null, null);
+        .getCriteriaBy(1L, null, null,  null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
-      assertEquals("Bad Request: Please provide a valid criteria type. null is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid criteria domain. null is not valid.", bre.getMessage());
     }
 
     try {
       controller
-        .getCriteriaBy(1L, "blah", null,  null, null);
+        .getCriteriaBy(1L, "blah", null,  null);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //success
+      assertEquals("Bad Request: Please provide a valid criteria domain. blah is not valid.", bre.getMessage());
+    }
+
+    try {
+      controller
+        .getCriteriaBy(1L, DomainType.CONDITION.toString(), "blah",  null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
       assertEquals("Bad Request: Please provide a valid criteria type. blah is not valid.", bre.getMessage());
     }
-
-    try {
-      controller
-        .getCriteriaBy(1L, TreeType.ICD9.name(), "blah",  null, null);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      //success
-      assertEquals("Bad Request: Please provide a valid criteria subtype. blah is not valid.", bre.getMessage());
-    }
   }
 
   @Test
-  public void getCriteriaByTypeAndSubtypeAndParentId() throws Exception {
-    jdbcTemplate.execute("delete from criteria where subtype = 'ATC'");
-    Criteria drugATCCriteria = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true, true)
-    );
-
-    assertEquals(
-      createResponseCriteria(drugATCCriteria),
-      controller
-        .getCriteriaBy(1L, TreeType.DRUG.name(), SUBTYPE_ATC, 0L, null)
-        .getBody()
-        .getItems()
-        .get(0)
-    );
-  }
-
-  @Test
-  public void getCriteriaChildrenByTypeAndParentId() throws Exception {
-    Criteria drugATCCriteriaChild = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false, true).synonyms("+drugN*")
-    );
-
-    assertEquals(
-      createResponseCriteria(drugATCCriteriaChild),
-      controller
-        .getCriteriaBy(1L, TreeType.DRUG.name(), null, 2L, true)
-        .getBody()
-        .getItems()
-        .get(0)
-    );
-  }
-
-  @Test
-  public void getCriteriaByTypeAndSubtype() throws Exception {
-    Criteria demoCriteria = criteriaDao.save(
-      createCriteria(TreeType.DEMO.name(), SUBTYPE_AGE, 0L, null, "age", null, null, true, true)
-    );
+  public void getCriteriaByDemo() throws Exception {
+    testConfig.cohortbuilder.enableListSearch = true;
+    CBCriteria demoCriteria = new CBCriteria()
+      .domainId(DomainType.PERSON.toString())
+      .type(CriteriaType.AGE.toString())
+      .count("0")
+      .parentId(0L);
+    cbCriteriaDao.save(demoCriteria);
 
     assertEquals(
       createResponseCriteria(demoCriteria),
       controller
-        .getCriteriaBy(1L, TreeType.DEMO.name(), TreeSubType.AGE.name(), null, null)
+        .getCriteriaBy(1L, DomainType.PERSON.toString(), CriteriaType.AGE.toString(), null)
         .getBody()
         .getItems()
         .get(0)
@@ -355,22 +336,6 @@ public class CohortBuilderControllerTest {
     );
 
     jdbcTemplate.execute("drop table criteria_relationship");
-  }
-
-  @Test
-  public void getCriteriaByType() throws Exception {
-    Criteria drugATCCriteria = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true, true)
-    );
-
-    assertEquals(
-      createResponseCriteria(drugATCCriteria),
-      controller
-        .getCriteriaBy(1L, drugATCCriteria.getType(), null, null, null)
-        .getBody()
-        .getItems()
-        .get(0)
-    );
   }
 
   @Test

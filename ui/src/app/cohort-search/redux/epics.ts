@@ -12,7 +12,6 @@ import {
   BEGIN_DRUG_CRITERIA_REQUEST,
   BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
-  BEGIN_CHILDREN_REQUEST,
   CANCEL_CRITERIA_REQUEST,
   CANCEL_AUTOCOMPLETE_REQUEST,
 
@@ -51,8 +50,6 @@ import {
 
   loadIngredients,
 
-  loadAndSelectChildren,
-
   loadAttributes,
   attributeRequestError,
 } from './actions/creators';
@@ -68,7 +65,6 @@ type CritSubRequestAction = ActionTypes[typeof BEGIN_SUBTYPE_CRITERIA_REQUEST];
 type DrugCritRequestAction = ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST];
 type AutocompleteRequestAction = ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST];
 type IngredientRequestAction = ActionTypes[typeof BEGIN_INGREDIENT_REQUEST];
-type ChildrenRequestAction = ActionTypes[typeof BEGIN_CHILDREN_REQUEST];
 type CountRequestAction = ActionTypes[typeof BEGIN_COUNT_REQUEST];
 type ChartRequestAction = ActionTypes[typeof BEGIN_CHARTS_REQUEST];
 type PreviewRequestAction = ActionTypes[typeof BEGIN_ATTR_PREVIEW_REQUEST];
@@ -179,16 +175,6 @@ export class CohortSearchEpics {
             .ofType(CANCEL_AUTOCOMPLETE_REQUEST)
             .first())
           .catch(e => Observable.of(autocompleteRequestError(e)));
-      }
-    )
-  )
-
-  fetchAllChildren: CSEpic = (action$) => (
-    action$.ofType(BEGIN_CHILDREN_REQUEST).mergeMap(
-      ({cdrVersionId, kind, parentId}: ChildrenRequestAction) => {
-        return this.service.getCriteriaBy(cdrVersionId, kind, null, parentId, true)
-          .map(result => loadAndSelectChildren(parentId, result.items))
-          .catch(e => Observable.of(criteriaRequestError(kind, parentId, e)));
       }
     )
   )
