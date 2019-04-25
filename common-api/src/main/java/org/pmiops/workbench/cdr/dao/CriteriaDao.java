@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+//TODO:Remove freemabd
 public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
   //TODO:Remove freemabd
