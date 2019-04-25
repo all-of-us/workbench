@@ -496,16 +496,16 @@ public class UserService {
 
   public void syncTwoFactorAuthStatus(User targetUser) {
     updateUserWithRetries(user -> {
-      if (user.getTwoFactorAuthCompletionTime() == null &&
-              directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv()) {
-        user.setTwoFactorAuthCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
+      boolean isEnrolledIn2FA = directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv();
+      if (isEnrolledIn2FA) {
+        if (user.getTwoFactorAuthCompletionTime() == null) {
+          user.setTwoFactorAuthCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
+        }
       } else {
         user.setTwoFactorAuthCompletionTime(null);
       }
       return user;
     }, targetUser);
-
-
   }
 
 }

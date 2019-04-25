@@ -178,13 +178,19 @@ public class UserServiceTest {
 
     when(directoryService.getUser(EMAIL_ADDRESS)).thenReturn(googleUser);
     userService.syncTwoFactorAuthStatus();
-    // 2FA completion time should now be set
+    // twoFactorAuthCompletionTime should now be set
     User user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNotNull();
 
+    // twoFactorAuthCompletionTime should not change when already set
+    Timestamp twoFactorAuthCompletionTime = user.getTwoFactorAuthCompletionTime();
+    userService.syncTwoFactorAuthStatus();
+    user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    assertThat(user.getTwoFactorAuthCompletionTime()).isEqualTo(twoFactorAuthCompletionTime);
+
+    // unset 2FA in google and check that twoFactorAuthCompletionTime is set to null
     googleUser.setIsEnrolledIn2Sv(false);
     userService.syncTwoFactorAuthStatus();
-    // 2FA completion time should now be null
     user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNull();
   }
