@@ -23,6 +23,9 @@
 </div>
 
 <div class="tree-container" [class.ingredients]="ingredients.length > 0">
+  <div class="tree-header">
+    <button class="btn btn-link">Return to list</button>
+  </div>
   <crit-list-node *ngFor="let item of children" [node]="item"></crit-list-node>
 </div>
 
