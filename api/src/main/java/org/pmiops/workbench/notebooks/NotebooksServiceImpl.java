@@ -66,6 +66,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public FileDetail copyNotebook(String fromWorkspaceNamespace, String fromWorkspaceName, String fromNotebookName,
       String toWorkspaceNamespace, String toWorkspaceName, String newNotebookName) {
+    newNotebookName = appendSuffixIfNeeded(newNotebookName);
     GoogleCloudLocators fromNotebookLocators = getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
     GoogleCloudLocators newNotebookLocators = getNotebookLocators(toWorkspaceNamespace, toWorkspaceName, newNotebookName);
 
@@ -113,14 +114,19 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public FileDetail renameNotebook(String workspaceNamespace, String workspaceName,
       String originalName, String newName) {
-    if (!newName.matches("^.+\\.ipynb")) {
-      newName = newName + ".ipynb";
-    }
     FileDetail fileDetail = copyNotebook(workspaceNamespace, workspaceName, originalName,
-        workspaceNamespace, workspaceName, newName);
+        workspaceNamespace, workspaceName, appendSuffixIfNeeded(newName));
     deleteNotebook(workspaceNamespace, workspaceName, originalName);
 
     return fileDetail;
+  }
+
+  private String appendSuffixIfNeeded(String filename) {
+    if (!filename.matches("^.+\\.ipynb")) {
+      return filename + ".ipynb";
+    }
+
+    return filename;
   }
 
   private class GoogleCloudLocators {

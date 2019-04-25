@@ -1671,6 +1671,37 @@ public class WorkspacesControllerTest {
     Workspace toWorkspace = createStubbedWorkspace("toWorkspaceNs", "toworkspace", WorkspaceAccessLevel.OWNER);
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new";
+    String expectedNotebookName = newNotebookName + ".ipynb";
+
+    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
+    copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
+    copyNotebookRequest.setToWorkspaceNamespace(toWorkspace.getNamespace());
+    copyNotebookRequest.setNewName(newNotebookName);
+
+    workspacesController.copyNotebook(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        fromNotebookName,
+        copyNotebookRequest);
+
+    verify(cloudStorageService).copyBlob(
+        BlobId.of(BUCKET_NAME, "notebooks/" + fromNotebookName),
+        BlobId.of(BUCKET_NAME, "notebooks/" + expectedNotebookName));
+
+    verify(userRecentResourceService).updateNotebookEntry(
+        2l, 1l, "gs://workspace-bucket/notebooks/" + expectedNotebookName, Timestamp.from(NOW)
+    );
+  }
+
+  @Test
+  public void copyNotebook_onlyAppendsSuffixIfNeeded() {
+    Workspace fromWorkspace = createStubbedWorkspace();
+    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+    String fromNotebookName = "origin";
+
+    Workspace toWorkspace = createStubbedWorkspace("toWorkspaceNs", "toworkspace", WorkspaceAccessLevel.OWNER);
+    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+    String newNotebookName = "new.ipynb";
 
     CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
     copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
@@ -1686,10 +1717,6 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService).copyBlob(
         BlobId.of(BUCKET_NAME, "notebooks/" + fromNotebookName),
         BlobId.of(BUCKET_NAME, "notebooks/" + newNotebookName));
-    
-    verify(userRecentResourceService).updateNotebookEntry(
-        2l, 1l, "gs://workspace-bucket/notebooks/" + newNotebookName, Timestamp.from(NOW)
-    );
   }
 
   @Test(expected = ForbiddenException.class)

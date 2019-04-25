@@ -40,12 +40,28 @@ CopyNotebookModalState> {
 
     this.state = {
       writeableWorkspaces: [],
-      newName: props.fromNotebook.name,
+      newName: this.dropFileSuffix(props.fromNotebook.name),
       destination: null,
       requestState: RequestState.UNSENT,
       errorMsg: '',
       loading: true
     };
+  }
+
+  dropFileSuffix(filename: string) {
+    if (filename.endsWith(".ipynb")) {
+      filename = filename.substring(0, filename.length - 6);
+    }
+
+    return filename;
+  }
+
+  appendFileSuffix(filename: string) {
+    if (!filename.endsWith(".ipynb")) {
+      filename = filename + ".ipynb";
+    }
+
+    return filename;
   }
 
   componentDidMount() {
@@ -70,7 +86,7 @@ CopyNotebookModalState> {
       {
         toWorkspaceName: this.state.destination.id,
         toWorkspaceNamespace: this.state.destination.namespace,
-        newName: this.state.newName
+        newName: this.appendFileSuffix(this.state.newName)
       }
       ).then((response) => {
         this.setState({ requestState: RequestState.SUCCESS, loading: false });
