@@ -497,7 +497,8 @@ public class UserService {
   public void syncTwoFactorAuthStatus(User targetUser) {
     updateUserWithRetries(user -> {
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-      if (directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv()) {
+      if (user.getTwoFactorAuthCompletionTime() == null &&
+              directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv()) {
         user.setTwoFactorAuthCompletionTime(now);
       } else {
         user.setTwoFactorAuthCompletionTime(null);
