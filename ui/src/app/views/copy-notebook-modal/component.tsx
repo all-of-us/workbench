@@ -10,7 +10,7 @@ import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
-enum State { FORM, ERROR, SUCCESS }
+enum RequestState { UNSENT, ERROR, SUCCESS }
 
 export interface CopyNotebookModalProps {
   fromWorkspaceNamespace: string;
@@ -24,13 +24,13 @@ export interface CopyNotebookModalState {
   writeableWorkspaces: Array<Workspace>;
   destination: Workspace;
   newName: string;
-  state: State;
+  requestState: RequestState;
   errorMsg: string;
   loading: boolean;
 }
 
 const boldStyle = {
-  fontWeight: 700
+  fontWeight: 600
 };
 
 export class CopyNotebookModal extends React.Component<CopyNotebookModalProps,
@@ -42,7 +42,7 @@ CopyNotebookModalState> {
       writeableWorkspaces: [],
       newName: props.fromNotebook.name,
       destination: null,
-      state: State.FORM,
+      requestState: RequestState.UNSENT,
       errorMsg: '',
       loading: true
     };
@@ -73,7 +73,7 @@ CopyNotebookModalState> {
         newName: this.state.newName
       }
       ).then((response) => {
-        this.setState({ state: State.SUCCESS, loading: false });
+        this.setState({ requestState: RequestState.SUCCESS, loading: false });
         this.props.onCopy(response);
       }).catch((response) => {
         const errorMsg = response.status === 400 ?
@@ -82,7 +82,7 @@ CopyNotebookModalState> {
 
         this.setState({
           errorMsg: errorMsg,
-          state: State.ERROR,
+          requestState: RequestState.ERROR,
           loading: false
         });
       });
@@ -103,9 +103,9 @@ CopyNotebookModalState> {
           { this.state.loading ?
             <ModalBody style={{ textAlign: 'center' }}><Spinner /></ModalBody> :
             <ModalBody>
-                {this.state.state === State.FORM && this.renderFormBody()}
-                {this.state.state === State.ERROR && this.renderErrorBody()}
-                {this.state.state === State.SUCCESS && this.renderSuccessBody()}
+                {this.state.requestState === RequestState.UNSENT && this.renderFormBody()}
+                {this.state.requestState === RequestState.ERROR && this.renderErrorBody()}
+                {this.state.requestState === RequestState.SUCCESS && this.renderSuccessBody()}
             </ModalBody>
         }
         <ModalFooter>
@@ -119,27 +119,28 @@ CopyNotebookModalState> {
   }
 
   getCloseButtonText() {
-    if (this.state.state === State.FORM) {
+    if (this.state.requestState === RequestState.UNSENT) {
       return 'Cancel';
-    } else if (this.state.state === State.ERROR) {
+    } else if (this.state.requestState === RequestState.ERROR) {
       return 'Close';
-    } else if (this.state.state === State.SUCCESS) {
+    } else if (this.state.requestState === RequestState.SUCCESS) {
       return 'Stay Here';
     }
   }
 
   renderActionButton() {
-    if (this.state.state === State.FORM) {
+    if (this.state.requestState === RequestState.UNSENT) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
           disabled={this.state.destination === null}
-          onClick={() => this.save()}>
+          onClick={() => this.save()}
+          data-test-id='copy-notebook-button'>
           Copy Notebook
         </Button>
       );
-    } else if (this.state.state === State.ERROR) {
+    } else if (this.state.requestState === RequestState.ERROR) {
       return null;
-    } else if (this.state.state === State.SUCCESS) {
+    } else if (this.state.requestState === RequestState.SUCCESS) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
           onClick={this.goToDestinationWorkspace}>

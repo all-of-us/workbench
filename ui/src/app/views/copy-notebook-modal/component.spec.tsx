@@ -8,6 +8,7 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 import { CopyNotebookModal, CopyNotebookModalProps, CopyNotebookModalState } from './component';
+import { TextInput } from 'app/components/inputs';
 
 describe('CopyNotebookModal', () => {
   let props: CopyNotebookModalProps;
@@ -79,31 +80,28 @@ describe('CopyNotebookModal', () => {
     expect(options).toEqual([workspaces[0].name, workspaces[2].name]);
   });
 
-  it('should set destination state upon clicking an option', async() => {
+  it('should call correct copyNotebook() call after selecting an option and entering a name', async() => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
+    // Open Select options. Simulating a click doesn't work for some reason
     let select = wrapper.find(Select);
     select.instance().setState({menuIsOpen: true});
     wrapper.update();
 
+    // Select an option
     wrapper.find(Select).find({role: 'option'})
       .findWhere(e => e.text() === workspaces[2].name)
       .first()
       .simulate('click');
 
-    expect(wrapper.instance().state.destination).toEqual(workspaces[2]);
-  });
-
-  it('should call correct copyNotebook() call on clicking copy ', async() => {
-    const wrapper = component();
-    wrapper.instance().setState({
-      destination: workspaces[2],
-      newName: "Freeblast"
-    });
+    // Type out new name
+    wrapper.find(TextInput).simulate('change', {target: {value: 'Freeblast'}});
 
     const spy = jest.spyOn(workspacesApi(), 'copyNotebook');
-    wrapper.instance().save();
+    // Click copy button
+    wrapper.find('[data-test-id="copy-notebook-button"]').first().simulate('click');
+
     expect(spy).toHaveBeenCalledWith(
       props.fromWorkspaceNamespace,
       props.fromWorkspaceName,
@@ -116,4 +114,17 @@ describe('CopyNotebookModal', () => {
     );
   });
 
+  it('should disable copy button if option is not selected', async() => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const spy = jest.spyOn(workspacesApi(), 'copyNotebook');
+
+    // Click copy button
+    const copyButton = wrapper.find('[data-test-id="copy-notebook-button"]').first();
+    copyButton.simulate('click');
+
+    expect(copyButton.prop('disabled')).toBe(true);
+    expect(spy).toHaveBeenCalledTimes(0);
+  });
 });
