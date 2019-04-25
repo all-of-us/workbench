@@ -494,13 +494,18 @@ public class UserService {
     syncTwoFactorAuthStatus(userProvider.get());
   }
 
-  public void syncTwoFactorAuthStatus(User user) {
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    if (directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv()) {
-      user.setTwoFactorAuthCompletionTime(now);
-    } else {
-      user.setTwoFactorAuthCompletionTime(null);
-    }
+  public void syncTwoFactorAuthStatus(User targetUser) {
+    updateUserWithRetries(user -> {
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      if (directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv()) {
+        user.setTwoFactorAuthCompletionTime(now);
+      } else {
+        user.setTwoFactorAuthCompletionTime(null);
+      }
+      return user;
+    }, targetUser);
+
+
   }
 
 }
