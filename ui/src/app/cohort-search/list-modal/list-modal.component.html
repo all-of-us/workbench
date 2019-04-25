@@ -71,7 +71,8 @@
                   <div class="panel-left" [class.show]="mode === 'tree'">
                     <crit-list-tree *ngIf="hierarchyCrit" [node]="hierarchyCrit"
                       [selections]="selectionIds"
-                      [wizard]="wizard"></crit-list-tree>
+                      [wizard]="wizard"
+                      [back]="back"></crit-list-tree>
                   </div>
                   <!-- List View -->
                   <div class="panel-left" [class.show]="mode === 'list'">
