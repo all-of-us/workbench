@@ -9,6 +9,13 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import * as React from 'react';
 
 const styles = reactStyles({
+  searchContainer: {
+    position: 'absolute',
+    width: '95%',
+    padding: '0.4rem 0',
+    background: '#ffffff',
+    zIndex: 10,
+  },
   searchBar: {
     height: '40px',
     width: '100%',
@@ -44,15 +51,16 @@ const styles = reactStyles({
   treeIcon: {
     color: '#0086C1',
     cursor: 'pointer',
-    fontSize: '1rem'
+    fontSize: '1.15rem'
   },
   table: {
-    width: '100%',
-    margin: '1rem 0',
+    width: '99%',
+    margin: '3rem 0 1rem',
     fontSize: '12px',
     textAlign: 'left',
     border: '1px solid #c8c8c8',
     borderRadius: '3px',
+    tableLayout: 'fixed',
   },
   columnHeader: {
     padding: '10px',
@@ -82,6 +90,9 @@ const styles = reactStyles({
   nameDiv: {
     width: '94%',
     float: 'left',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
   }
 });
 
@@ -165,10 +176,12 @@ export const ListSearch = withCurrentWorkspace()(
 
     render() {
       const {data, loading} = this.state;
-      return <div>
-        <div style={styles.searchBar}>
-          <ClrIcon shape='search' size='18'/>
-          <TextInput style={styles.searchInput} onKeyPress={this.handleInput} />
+      return <div style={{overflow: 'auto'}}>
+        <div style={styles.searchContainer}>
+          <div style={styles.searchBar}>
+            <ClrIcon shape='search' size='18'/>
+            <TextInput style={styles.searchInput} onKeyPress={this.handleInput} />
+          </div>
         </div>
         {data && <table className='p-datatable' style={styles.table}>
           <thead className='p-datatable-thead'>
@@ -204,7 +217,7 @@ export const ListSearch = withCurrentWorkspace()(
                 </td>
                 <td style={styles.columnBody}>{row.type}</td>
                 <td style={styles.columnBody}>{row.count.toLocaleString()}</td>
-                <td style={styles.columnBody}>
+                <td style={{...styles.columnBody, padding: '0.2rem'}}>
                   {row.hasHierarchy &&
                     <i className='pi pi-sitemap'
                       style={styles.treeIcon}

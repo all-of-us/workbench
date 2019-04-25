@@ -30,7 +30,6 @@ import {DomainType} from 'generated/fetch';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {cr} from '@angular/core/src/render3';
 
 
 @Component({
@@ -220,6 +219,14 @@ export class ListModalComponent implements OnInit, OnDestroy {
   }
 
   close() {
+    const {groupId, role} = this.wizard;
+    const sr = searchRequestStore.getValue();
+    const group = sr[role].find(grp => grp.id === groupId);
+    // TODO change condition to check for total count instead of items when api call is ready
+    if (group.items.length === 0) {
+      sr[role] = sr[role].filter(grp => grp.id !== groupId);
+      searchRequestStore.next(sr);
+    }
     wizardStore.next(undefined);
     selectionsStore.next([]);
     this.open = false;

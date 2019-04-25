@@ -19,6 +19,7 @@ import {
   isRequstingTotal,
   totalCount,
 } from 'app/cohort-search/redux';
+import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 
 const pixel = (n: number) => `${n}px`;
@@ -68,9 +69,16 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
           });
       }
     });
-    this.subscription.add(
-      this.includeGroups$.subscribe(groups => this.includeSize = groups.size + 1)
-    );
+
+    if (this.listSearch) {
+      this.subscription.add(searchRequestStore.subscribe(
+        sr => this.includeSize = sr.includes.length
+      ));
+    } else {
+      this.subscription.add(
+        this.includeGroups$.subscribe(groups => this.includeSize = groups.size + 1)
+      );
+    }
     this.updateWrapperDimensions();
   }
 

@@ -19,7 +19,7 @@
 
   <!-- NAME -->
   <div #name
-    [popper]="popperName"
+    [popper]="node.name"
     [popperTrigger]="'hover'"
     [popperModifiers]="{preventOverflow: {boundariesElement: 'viewport'}}"
     [popperDisabled]="!isTruncated"
