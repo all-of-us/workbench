@@ -12,7 +12,6 @@ import {
   BEGIN_DRUG_CRITERIA_REQUEST,
   BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
-  BEGIN_CHILDREN_REQUEST,
   CANCEL_CRITERIA_REQUEST,
   CANCEL_AUTOCOMPLETE_REQUEST,
 
@@ -50,8 +49,6 @@ import {
   autocompleteRequestError,
 
   loadIngredients,
-
-  loadAndSelectChildren,
 
   loadAttributes,
   attributeRequestError,
