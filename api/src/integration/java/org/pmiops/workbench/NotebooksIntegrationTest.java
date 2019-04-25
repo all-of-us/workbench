@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
-import org.pmiops.workbench.notebooks.LeonoardoNotebooksClient;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
@@ -28,7 +28,7 @@ public class NotebooksIntegrationTest {
   @Mock
   private NotebooksApi notebooksApi;
 
-  private final LeonoardoNotebooksClient leonoardoNotebooksClient = new LeonardoNotebooksClientImpl(
+  private final LeonardoNotebooksClient leonardoNotebooksClient = new LeonardoNotebooksClientImpl(
       Providers.of(clusterApi),
       Providers.of(notebooksApi),
       Providers.of(createConfig()),
@@ -37,7 +37,7 @@ public class NotebooksIntegrationTest {
 
   @Test
   public void testStatus() {
-    assertThat(leonoardoNotebooksClient.getNotebooksStatus()).isTrue();
+    assertThat(leonardoNotebooksClient.getNotebooksStatus()).isTrue();
   }
 
   private static WorkbenchConfig createConfig() {

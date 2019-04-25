@@ -46,7 +46,7 @@ import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.LeonoardoNotebooksClient;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.Providers;
@@ -88,7 +88,7 @@ public class ClusterControllerTest {
   })
   @MockBean({
     FireCloudService.class,
-    LeonoardoNotebooksClient.class,
+    LeonardoNotebooksClient.class,
     WorkspaceService.class,
     UserService.class,
     UserRecentResourceService.class
@@ -119,7 +119,7 @@ public class ClusterControllerTest {
   private ArgumentCaptor<Map<String, String>> mapCaptor;
 
   @Autowired
-  LeonoardoNotebooksClient notebookService;
+  LeonardoNotebooksClient notebookService;
   @Mock
   private AdminActionHistoryDao adminActionHistoryDao;
   @Autowired

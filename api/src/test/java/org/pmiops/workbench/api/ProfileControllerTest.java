@@ -59,7 +59,7 @@ import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
-import org.pmiops.workbench.notebooks.LeonoardoNotebooksClient;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.Providers;
@@ -107,7 +107,7 @@ public class ProfileControllerTest {
   @Mock
   private FireCloudService fireCloudService;
   @Mock
-  private LeonoardoNotebooksClient leonoardoNotebooksClient;
+  private LeonardoNotebooksClient leonardoNotebooksClient;
   @Mock
   private DirectoryService directoryService;
   @Mock
@@ -175,11 +175,11 @@ public class ProfileControllerTest {
     ProfileService profileService = new ProfileService(userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, leonoardoNotebooksClient, Providers.of(config), environment,
+        cloudStorageService, leonardoNotebooksClient, Providers.of(config), environment,
         Providers.of(mailService));
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, leonoardoNotebooksClient, Providers.of(config), cloudEnvironment,
+        cloudStorageService, leonardoNotebooksClient, Providers.of(config), cloudEnvironment,
         Providers.of(mailService));
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }

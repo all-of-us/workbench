@@ -1693,12 +1693,34 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void copyNotebook_permissions() {
+  public void copyNotebook_hasWritePermissions() {
     Workspace fromWorkspace = createStubbedWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
     Workspace toWorkspace = createStubbedWorkspace("toWorkspaceNs", "toworkspace", WorkspaceAccessLevel.READER);
+    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+    String newNotebookName = "new";
+
+    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
+    copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
+    copyNotebookRequest.setToWorkspaceNamespace(toWorkspace.getNamespace());
+    copyNotebookRequest.setNewName(newNotebookName);
+
+    workspacesController.copyNotebook(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        fromNotebookName,
+        copyNotebookRequest);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void copyNotebook_hasReadPermissions() {
+    Workspace fromWorkspace = createStubbedWorkspace("fromWorkspaceNs", "fromworkspae", WorkspaceAccessLevel.NO_ACCESS);
+    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+    String fromNotebookName = "origin";
+
+    Workspace toWorkspace = createStubbedWorkspace("toWorkspaceNs", "toworkspace", WorkspaceAccessLevel.WRITER);
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new";
 

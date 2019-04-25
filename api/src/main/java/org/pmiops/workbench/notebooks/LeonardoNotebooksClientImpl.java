@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LeonardoNotebooksClientImpl implements LeonoardoNotebooksClient {
+public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final String CLUSTER_LABEL_AOU = "all-of-us";
   private static final String CLUSTER_LABEL_CREATED_BY = "created-by";
 

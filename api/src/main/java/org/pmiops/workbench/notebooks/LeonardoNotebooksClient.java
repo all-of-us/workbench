@@ -9,7 +9,7 @@ import org.pmiops.workbench.notebooks.model.Cluster;
  * Encapsulate Leonardo's Notebooks API interaction details and provide a simple/mockable interface
  * for internal use.
  */
-public interface LeonoardoNotebooksClient {
+public interface LeonardoNotebooksClient {
   String DEFAULT_CLUSTER_NAME = "all-of-us";
 
   /**

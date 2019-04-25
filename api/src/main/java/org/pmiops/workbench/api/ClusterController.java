@@ -38,7 +38,7 @@ import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
-import org.pmiops.workbench.notebooks.LeonoardoNotebooksClient;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.ClusterError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -85,7 +85,7 @@ public class ClusterController implements ClusterApiDelegate {
         return allOfUsCluster;
       };
 
-  private final LeonoardoNotebooksClient leonoardoNotebooksClient;
+  private final LeonardoNotebooksClient leonardoNotebooksClient;
   private Provider<User> userProvider;
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
@@ -96,7 +96,7 @@ public class ClusterController implements ClusterApiDelegate {
   private Clock clock;
 
   @Autowired
-  ClusterController(LeonoardoNotebooksClient leonoardoNotebooksClient,
+  ClusterController(LeonardoNotebooksClient leonardoNotebooksClient,
       Provider<User> userProvider,
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
@@ -105,7 +105,7 @@ public class ClusterController implements ClusterApiDelegate {
       UserRecentResourceService userRecentResourceService,
       UserDao userDao,
       Clock clock) {
-    this.leonoardoNotebooksClient = leonoardoNotebooksClient;
+    this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
@@ -136,10 +136,10 @@ public class ClusterController implements ClusterApiDelegate {
     String project = user.getFreeTierBillingProjectName();
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
-      fcCluster = this.leonoardoNotebooksClient.getCluster(project, LeonoardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      fcCluster = this.leonardoNotebooksClient.getCluster(project, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
     } catch (NotFoundException e) {
-      fcCluster = this.leonoardoNotebooksClient.createCluster(
-          project, LeonoardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      fcCluster = this.leonardoNotebooksClient.createCluster(
+          project, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
     }
 
     int retries = Optional.ofNullable(user.getClusterCreateRetries()).orElse(0);
@@ -154,7 +154,7 @@ public class ClusterController implements ClusterApiDelegate {
         }
         log.warning("Retrying cluster creation.");
 
-        this.leonoardoNotebooksClient.deleteCluster(project, LeonoardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+        this.leonardoNotebooksClient.deleteCluster(project, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
       }
     } else if (
         org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(fcCluster.getStatus()) &&
@@ -169,7 +169,7 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteCluster(String projectName, String clusterName) {
     this.userService.setClusterRetryCount(0);
-    this.leonoardoNotebooksClient.deleteCluster(projectName, clusterName);
+    this.leonardoNotebooksClient.deleteCluster(projectName, clusterName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -233,7 +233,7 @@ public class ClusterController implements ClusterApiDelegate {
               name -> localDir + "/" + name,
               name -> gcsNotebooksDir + "/" + name)));
     }
-    leonoardoNotebooksClient.localize(projectName, clusterName, localizeMap);
+    leonardoNotebooksClient.localize(projectName, clusterName, localizeMap);
 
     ClusterLocalizeResponse resp = new ClusterLocalizeResponse();
     // This is the Jupyer-server-root-relative path, the style used by the

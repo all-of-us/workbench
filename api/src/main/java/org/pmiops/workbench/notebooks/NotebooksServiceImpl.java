@@ -69,11 +69,11 @@ public class NotebooksServiceImpl implements NotebooksService {
     GoogleCloudLocators fromNotebookLocators = getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
     GoogleCloudLocators newNotebookLocators = getNotebookLocators(toWorkspaceNamespace, toWorkspaceName, newNotebookName);
 
+    workspaceService.enforceWorkspaceAccessLevel(fromWorkspaceNamespace, fromWorkspaceName, WorkspaceAccessLevel.READER);
+    workspaceService.enforceWorkspaceAccessLevel(toWorkspaceNamespace, toWorkspaceName, WorkspaceAccessLevel.WRITER);
     if (!cloudStorageService.blobsExist(Collections.singletonList(newNotebookLocators.blobId)).isEmpty()) {
       throw new BlobAlreadyExistsException();
     }
-    workspaceService.enforceWorkspaceAccessLevel(toWorkspaceNamespace, toWorkspaceName, WorkspaceAccessLevel.WRITER);
-
     cloudStorageService.copyBlob(fromNotebookLocators.blobId, newNotebookLocators.blobId);
 
     FileDetail fileDetail = new FileDetail();
