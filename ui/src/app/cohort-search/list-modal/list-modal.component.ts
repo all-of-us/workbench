@@ -237,6 +237,9 @@ export class ListModalComponent implements OnInit, OnDestroy {
       this.mode = this.backMode;
       this.attributesCrit = undefined;
     }
+    if (this.mode === 'tree') {
+      this.mode = 'list';
+    }
     if (this.mode === 'snomed') {
       this.setMode('tree');
     }

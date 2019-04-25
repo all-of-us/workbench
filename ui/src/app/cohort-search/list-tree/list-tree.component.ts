@@ -1,4 +1,4 @@
-import {Component, OnChanges, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {ListNodeComponent} from 'app/cohort-search/list-node/list-node.component';
 import {DomainType, TreeType} from 'generated';
 
@@ -13,6 +13,7 @@ import {DomainType, TreeType} from 'generated';
   styleUrls: ['./list-tree.component.css']
 })
 export class ListTreeComponent extends ListNodeComponent implements OnInit, OnChanges {
+  @Input() back: Function;
   _type: string;
   name: string;
 
