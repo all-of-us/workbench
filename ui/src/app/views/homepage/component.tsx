@@ -102,6 +102,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     firstVisitTraining: boolean,
     quickTour: boolean,
     trainingCompleted: boolean,
+    twoFactorAuthComplete: boolean,
     videoOpen: boolean,
     videoLink: string
   }> {
@@ -121,6 +122,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       firstVisitTraining: true,
       quickTour: false,
       trainingCompleted: undefined,
+      twoFactorAuthComplete: undefined,
       videoOpen: false,
       videoLink: '',
     };
@@ -183,8 +185,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
         this.setFirstVisit();
       }
       try {
-        this.setState({eraCommonsLinked: (!!profile.eraCommonsCompletionTime
-              || !!profile.eraCommonsBypassTime) });
+        this.setState({
+          eraCommonsLinked: (!!profile.eraCommonsCompletionTime || !!profile.eraCommonsBypassTime),
+          twoFactorAuthComplete: (!!profile.twoFactorAuthCompletionTime ||
+            !!profile.twoFactorAuthBypassTime)
+        });
       } catch (ex) {
         this.setState({eraCommonsLinked: false});
         console.error('error fetching era commons linking status');
@@ -244,7 +249,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
   render() {
     const {billingProjectInitialized, betaAccessGranted, videoOpen, accessTasksLoaded,
         accessTasksRemaining, eraCommonsLinked, eraCommonsError, firstVisitTraining,
-        trainingCompleted, quickTour, videoLink} = this.state;
+        trainingCompleted, quickTour, videoLink, twoFactorAuthComplete} = this.state;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -289,7 +294,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                         eraCommonsError={eraCommonsError}
                                         trainingCompleted={trainingCompleted}
                                         firstVisitTraining={firstVisitTraining}
-                                        betaAccessGranted={betaAccessGranted}/>
+                                        betaAccessGranted={betaAccessGranted}
+                                        twoFactorAuthCompleted={twoFactorAuthComplete}/>
                 ) : (
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                     <div style={styles.contentWrapperLeft}>

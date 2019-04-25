@@ -51,6 +51,7 @@ export interface RegistrationDashboardProps {
   eraCommonsLinked: boolean;
   eraCommonsError: string;
   trainingCompleted: boolean;
+  twoFactorAuthCompleted: boolean;
   firstVisitTraining: boolean;
 }
 
@@ -64,12 +65,20 @@ export class RegistrationDashboard extends
       trainingWarningOpen: !props.firstVisitTraining,
       taskCompletionMap: new Map<number, boolean>()
     };
-    this.state.taskCompletionMap.set(0, props.trainingCompleted);
-    this.state.taskCompletionMap.set(1, props.eraCommonsLinked);
+    this.state.taskCompletionMap.set(0, props.twoFactorAuthCompleted);
+    this.state.taskCompletionMap.set(1, props.trainingCompleted);
+    this.state.taskCompletionMap.set(2, props.eraCommonsLinked);
   }
 
   private registrationTasks = [
     {
+      title: 'Turn on Google 2-Step Verification',
+      description: 'With 2-Step Verification, you’ll protect your ' +
+        'account with both your password and your phone',
+      buttonText: 'Get Started',
+      completedText: 'Completed',
+      onClick: RegistrationDashboard.redirectToGoogleAuth
+    }, {
       title: 'Complete Online Training',
       description: 'Researchers must maintain up-to-date completion of compliance ' +
         'training courses hosted at the NNLM\'s Moodle installation',
@@ -96,6 +105,10 @@ export class RegistrationDashboard extends
   static async redirectToTraining() {
     await profileApi().updatePageVisits({page: 'moodle'});
     window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
+  }
+
+  static redirectToGoogleAuth() {
+    window.location.assign('https://myaccount.google.com/security');
   }
 
   isEnabled(i: number): boolean {
