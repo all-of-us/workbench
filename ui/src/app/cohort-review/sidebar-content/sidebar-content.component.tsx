@@ -14,7 +14,7 @@ import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import colors from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils/index';
-import {AnnotationType, CohortAnnotationDefinition, CohortStatus, ParticipantCohortAnnotation} from 'generated/fetch';
+import {AnnotationType, CohortAnnotationDefinition, CohortStatus, ParticipantCohortAnnotation, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {
   header: {
@@ -101,11 +101,15 @@ const AnnotationItem = fp.flow(
   }
 
   renderInput() {
-    const {definition: {annotationType, enumValues}, annotation} = this.props;
+    const {
+      definition: {annotationType, enumValues}, annotation, workspace: {accessLevel}
+    } = this.props;
     const {editValue, savingValue} = this.state;
     const value = fp.pull(undefined,
       [savingValue, editValue, readValue(annotationType, annotation)]
     )[0];
+    const disabled = accessLevel === WorkspaceAccessLevel[WorkspaceAccessLevel.NOACCESS] ||
+      accessLevel === WorkspaceAccessLevel[WorkspaceAccessLevel.READER];
     switch (annotationType) {
       case AnnotationType.INTEGER:
         return <NumberInput
@@ -115,6 +119,7 @@ const AnnotationItem = fp.flow(
             this.setState({editValue: undefined});
             this.save(value);
           }}
+          disabled={disabled}
         />;
       case AnnotationType.STRING:
         return <TextArea
@@ -124,6 +129,7 @@ const AnnotationItem = fp.flow(
             this.setState({editValue: undefined});
             this.save(value);
           }}
+          disabled={disabled}
         />;
       case AnnotationType.ENUM:
         return <Select
@@ -133,11 +139,13 @@ const AnnotationItem = fp.flow(
           ]}
           value={value}
           onChange={v => this.save(v)}
+          disabled={disabled}
         />;
       case AnnotationType.BOOLEAN:
         return <CheckBox
           checked={value}
           onChange={v => this.save(v)}
+          disabled={disabled}
         />;
       case AnnotationType.DATE:
         return <DatePicker
@@ -156,6 +164,7 @@ const AnnotationItem = fp.flow(
               this.save(value);
             }
           }}
+          disabled={disabled}
         />;
     }
   }
@@ -225,9 +234,11 @@ export const SidebarContent = fp.flow(
     const {
       participant: {participantId, birthDate, gender, race, ethnicity, status},
       annotations, setAnnotations, annotationDefinitions,
-      openCreateDefinitionModal, openEditDefinitionsModal
+      openCreateDefinitionModal, openEditDefinitionsModal, workspace: {accessLevel}
     } = this.props;
     const {savingStatus} = this.state;
+    const disabled = accessLevel === WorkspaceAccessLevel[WorkspaceAccessLevel.NOACCESS] ||
+      accessLevel === WorkspaceAccessLevel[WorkspaceAccessLevel.READER];
     return <div>
       <div style={styles.header}>Participant {participantId}</div>
       <div><span style={{fontWeight: 'bold'}}>DOB:</span> {birthDate}</div>
@@ -240,24 +251,30 @@ export const SidebarContent = fp.flow(
         {savingStatus && <Spinner width={16} height={16} style={{marginLeft: 'auto'}} />}
       </div>
       <div>Choose a Review Status for Participant {participantId}</div>
-      <Select
-        options={[
-          {label: '--', value: CohortStatus.NOTREVIEWED},
-          {label: 'Excluded', value: CohortStatus.EXCLUDED},
-          {label: 'Included', value: CohortStatus.INCLUDED},
-          {label: 'Needs Further Review', value: CohortStatus.NEEDSFURTHERREVIEW},
-        ]}
-        value={savingStatus || status}
-        onChange={v => this.saveStatus(v)}
-      />
+      <div style={{...(disabled ? {cursor: 'not-allowed'} : {})}}>
+        <Select
+          options={[
+            {label: '--', value: CohortStatus.NOTREVIEWED},
+            {label: 'Excluded', value: CohortStatus.EXCLUDED},
+            {label: 'Included', value: CohortStatus.INCLUDED},
+            {label: 'Needs Further Review', value: CohortStatus.NEEDSFURTHERREVIEW},
+          ]}
+          value={savingStatus || status}
+          onChange={v => this.saveStatus(v)}
+          isDisabled={disabled}
+        />
+      </div>
 
       <div style={{display: 'flex', marginTop: '1rem'}}>
         <div style={styles.header}>Annotations</div>
-        <Button type='link' style={{marginLeft: '1rem'}} onClick={openCreateDefinitionModal}>
+        <Button
+          type='link' style={{marginLeft: '1rem', ...(disabled ? {cursor: 'not-allowed'} : {})}}
+          onClick={openCreateDefinitionModal} disabled={disabled}>
           <ClrIcon shape='plus-circle' size={21} />
         </Button>
         {!!annotationDefinitions.length && <Button
-          style={{marginLeft: '1rem'}} type='link' onClick={openEditDefinitionsModal}
+          style={{marginLeft: '1rem', ...(disabled ? {cursor: 'not-allowed'} : {})}} type='link'
+          onClick={openEditDefinitionsModal} disabled={disabled}
         >Edit</Button>}
       </div>
       {annotationDefinitions.map(def => {
