@@ -72,6 +72,7 @@ export const TextInput = React.forwardRef(({style = {}, onChange, invalid = fals
     {...props}
     ref = {ref}
     onChange={onChange ? (e => onChange(e.target.value)) : undefined}
+    type='text'
     style={{
       width: '100%', height: '1.5rem',
       borderColor: '#c5c5c5', borderWidth: 1, borderStyle: 'solid', borderRadius: 3,

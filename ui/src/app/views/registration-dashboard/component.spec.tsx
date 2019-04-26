@@ -21,7 +21,8 @@ describe('RegistrationDashboard', () => {
       eraCommonsError: '',
       trainingCompleted: false,
       firstVisitTraining: true,
-      betaAccessGranted: true
+      betaAccessGranted: true,
+      dataUseAgreementCompleted: false
     };
   });
 
@@ -66,6 +67,7 @@ describe('RegistrationDashboard', () => {
   it('should display a success message when all tasks have been completed', () => {
     props.eraCommonsLinked = true;
     props.trainingCompleted = true;
+    props.dataUseAgreementCompleted = true;
     const wrapper = component();
     expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
   });

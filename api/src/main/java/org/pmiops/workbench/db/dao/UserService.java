@@ -221,6 +221,14 @@ public class UserService {
     });
   }
 
+  public User submitDataUseAgreement() {
+    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+    return updateUserWithRetries((user) -> {
+      user.setDataUseAgreementCompletionTime(timestamp);
+      return user;
+    });
+  }
+
   public User setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
     User user = userDao.findUserByUserId(userId);
     return updateUserWithRetries((u) -> {

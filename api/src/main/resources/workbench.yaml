@@ -332,6 +332,18 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /v1/account/submit-data-use-agreement:
+    post:
+      tags:
+        - profile
+      description: Submits consent to the data use agreement for researchers.
+      operationId: submitDataUseAgreement
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+
   /v1/account/sync-training-status:
     post:
       tags:

@@ -476,6 +476,12 @@ public class ProfileController implements ProfileApiDelegate {
     return getProfileResponse(saveUserWithConflictHandling(user));
   }
 
+  @Override
+  public ResponseEntity<Profile> submitDataUseAgreement() {
+    User user = userService.submitDataUseAgreement();
+    return getProfileResponse(saveUserWithConflictHandling(user));
+  }
+
   /**
    * This methods updates logged in user's training status from Moodle.
    * @return Profile updated with training completion time

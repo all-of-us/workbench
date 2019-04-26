@@ -27,6 +27,7 @@ describe('HomepageComponent', () => {
   };
 
   const reload = jest.fn();
+  const updateCache = jest.fn();
 
   beforeEach(() => {
     profileApi = new ProfileApiStub();
@@ -41,10 +42,10 @@ describe('HomepageComponent', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+      userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload});
+    userProfileStore.next({profile, reload, updateCache: () => {}});
   });
 
   it('should render the homepage', () => {
@@ -64,7 +65,7 @@ describe('HomepageComponent', () => {
       ...profile,
       pageVisits: [{page: 'homepage'}],
     };
-    userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+    userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
   });
@@ -80,7 +81,7 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
-    userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+    userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="registration-dashboard"]').length).toBeGreaterThanOrEqual(1);
@@ -91,7 +92,7 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
-    userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+    userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
