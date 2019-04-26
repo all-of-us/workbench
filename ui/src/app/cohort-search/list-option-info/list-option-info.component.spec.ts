@@ -2,22 +2,22 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {NgxPopperModule} from 'ngx-popper';
 
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
-import {OptionInfoComponent} from './list-option-info.component';
+import {ListOptionInfoComponent} from './list-option-info.component';
 
-describe('OptionInfoComponent', () => {
-  let component: OptionInfoComponent;
-  let fixture: ComponentFixture<OptionInfoComponent>;
+describe('ListOptionInfoComponent', () => {
+  let component: ListOptionInfoComponent;
+  let fixture: ComponentFixture<ListOptionInfoComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ OptionInfoComponent, SafeHtmlPipe ],
+      declarations: [ ListOptionInfoComponent, SafeHtmlPipe ],
       imports: [ NgxPopperModule]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(OptionInfoComponent);
+    fixture = TestBed.createComponent(ListOptionInfoComponent);
     component = fixture.componentInstance;
     component.option = {
       code: '385321',
