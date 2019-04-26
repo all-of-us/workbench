@@ -48,7 +48,7 @@ describe('RegistrationDashboard', () => {
     expect(wrapper.find('[data-test-id="registration-task-1"]')
       .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeTruthy();
 
-    props.trainingCompleted = true;
+    props.twoFactorAuthCompleted = true;
     wrapper = component();
     // now, first tile should be disabled but completed and second tile should be enabled
     expect(wrapper.find('[data-test-id="registration-task-0"]')
@@ -67,6 +67,7 @@ describe('RegistrationDashboard', () => {
   it('should display a success message when all tasks have been completed', () => {
     props.eraCommonsLinked = true;
     props.trainingCompleted = true;
+    props.twoFactorAuthCompleted = true;
     const wrapper = component();
     expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
   });
