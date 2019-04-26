@@ -21,6 +21,7 @@ describe('ProfilePageComponent', () => {
   };
 
   const reload = jest.fn();
+  const updateCache = jest.fn();
 
   beforeEach(() => {
     const profileApi = new ProfileApiStub();
@@ -29,10 +30,10 @@ describe('ProfilePageComponent', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+      userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload});
+    userProfileStore.next({profile, reload, updateCache});
   });
 
   it('should render the profile', () => {

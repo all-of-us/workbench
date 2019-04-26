@@ -7,8 +7,8 @@ import {baseStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
+import {navigate} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
-import {navigate} from '../../utils/navigation';
 import * as fp from 'lodash/fp';
 
 const styles = reactStyles({
