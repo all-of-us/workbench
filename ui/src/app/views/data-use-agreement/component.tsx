@@ -77,21 +77,24 @@ const DataUseAgreementText = () => {
       </li>
       <li>respect the privacy of research participants at all times.
         <IndentedUl>
-          <li style={{margin: '0.5rem 0'}}>I <strong>will <strong>NOT</strong> use</strong> or disclose any
+          <li style={{margin: '0.5rem 0'}}>
+            I <strong>will <strong>NOT</strong> use</strong> or disclose any
             information that directly identifies one or more participants.
             <br/>
             If I become aware of any information that directly identifies one or more
             participants, I will notify the <i>All of Us</i> Research Program immediately
             using the automatic notification system.
           </li>
-          <li style={{margin: '0.5rem 0'}}>I <strong>will <strong>NOT</strong> attempt</strong> to re-identify research
+          <li style={{margin: '0.5rem 0'}}>
+            I <strong>will <strong>NOT</strong> attempt</strong> to re-identify research
             participants or their relatives.
             <br/>
             If I unintentionally re-identify participants through the process of my work, I will
             contact the <i>All of Us</i> Research Program immediately using the automatic
             notification system.
           </li>
-          <li style={{margin: '0.5rem 0'}}>If I become aware of any uses or disclosures of <i>All of Us</i> Research Program data
+          <li style={{margin: '0.5rem 0'}}>
+            If I become aware of any uses or disclosures of <i>All of Us</i> Research Program data
             that could endanger the security or privacy of research participants, I will contact
             the <i>All of Us</i> Research Program immediately using the automatic
             notification system.
