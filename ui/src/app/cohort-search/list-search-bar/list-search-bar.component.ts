@@ -1,21 +1,9 @@
-import {NgRedux, select} from '@angular-redux/store';
 import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {
-  autocompleteError,
-  CohortSearchActions,
-  CohortSearchState,
-  ingredientsForBrand,
-  isAutocompleteLoading,
-} from 'app/cohort-search/redux';
-import {
-  autocompleteStore,
-  selectedPathStore,
-  selectedStore
-} from 'app/cohort-search/search-state.service';
+import {autocompleteStore, selectedPathStore, selectedStore} from 'app/cohort-search/search-state.service';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {TreeSubType, TreeType} from 'generated';
+import {TreeSubType} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
 
 const trigger = 2;
@@ -49,11 +37,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(
-    private ngRedux: NgRedux<CohortSearchState>,
-    private actions: CohortSearchActions
-  ) {}
-
   ngOnInit() {
     this.subscription = autocompleteStore.subscribe(searchTerm => {
       this.searchTerm.setValue(searchTerm, {emitEvent: false});
@@ -62,30 +45,7 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
     // TODO set to false for now, may need to change for conditions/procedures
     this.codes = false;
 
-    const loadingSub = this.ngRedux
-      .select(isAutocompleteLoading())
-      .subscribe(loading => this.loading = loading);
-
-    const ingredientSub = this.ngRedux
-      .select(ingredientsForBrand())
-      .subscribe(ingredients => {
-        this.ingredientList = [];
-        const ids = [];
-        let path = [];
-        ingredients.forEach(item => {
-          if (!this.ingredientList.includes(item.name)) {
-            this.ingredientList.push(item.name);
-            ids.push(item.id);
-            path = path.concat(item.path.split('.'));
-          }
-        });
-        if (this.ingredientList.length) {
-          this.actions.setCriteriaSearchTerms(this.ingredientList);
-          this.actions.loadCriteriaSubtree(this._type, TreeSubType[TreeSubType.BRAND], ids, path);
-        }
-      });
-
-    const inputSub = this.searchTerm.valueChanges
+    this.subscription.add(this.searchTerm.valueChanges
       .debounceTime(300)
       .distinctUntilChanged()
       .subscribe( value => {
@@ -94,48 +54,40 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
           this.inputChange();
         } else {
           if (!this.optionSelected) {
-            this.actions.setCriteriaSearchTerms([]);
+            autocompleteStore.next('');
           }
           this.options = [];
           this.noResults = false;
         }
-      });
-
-    this.subscription.add(loadingSub);
-    this.subscription.add(ingredientSub);
-    this.subscription.add(inputSub);
+      })
+    );
   }
 
   ngOnDestroy() {
-    this.options = [];
     this.subscription.unsubscribe();
   }
 
   inputChange() {
     this.typedTerm = this.searchTerm.value;
-    if (this._type === TreeType[TreeType.VISIT] || this._type === TreeType[TreeType.PM]) {
-      this.actions.setCriteriaSearchTerms([this.searchTerm.value]);
-    } else {
-      this.loading = true;
-      this.optionSelected = false;
-      this.ingredientList = [];
-      this.noResults = false;
-      // const subtype = this.codes ? this.subtype : null;
-      const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
-      cohortBuilderApi().getCriteriaAutoComplete(cdrId, this._type, this.searchTerm.value)
-        .then(resp => {
-          this.options = [];
-          const optionNames: Array<string> = [];
-          resp.items.forEach(option => {
-            this.highlightedOption = null;
-            if (optionNames.indexOf(option.name) === -1) {
-              optionNames.push(option.name);
-              this.options.push(option);
-            }
-          });
-          this.loading = false;
-        }, (err) => this.error = err);
-    }
+    this.loading = true;
+    this.optionSelected = false;
+    this.ingredientList = [];
+    this.noResults = false;
+    // const subtype = this.codes ? this.subtype : null;
+    const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
+    cohortBuilderApi().getCriteriaAutoComplete(cdrId, this._type, this.searchTerm.value)
+      .then(resp => {
+        this.options = [];
+        const optionNames: Array<string> = [];
+        resp.items.forEach(option => {
+          this.highlightedOption = null;
+          if (optionNames.indexOf(option.name) === -1) {
+            optionNames.push(option.name);
+            this.options.push(option);
+          }
+        });
+        this.loading = false;
+      }, (err) => this.error = err);
   }
 
   get showOverflow() {
@@ -148,7 +100,7 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
       this.searchTerm.reset('');
       this.searchTerm.setValue(option.name, {emitEvent: false});
       if (option.subtype === TreeSubType[TreeSubType.BRAND]) {
-        this.actions.fetchIngredientsForBrand(option.conceptId);
+        // TODO call api for ingredients
       } else {
         autocompleteStore.next(option.name);
         selectedPathStore.next(option.path.split('.'));
