@@ -4,7 +4,7 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
-import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
+import {ListNodeInfoComponent} from 'app/cohort-search/list-node-info/list-node-info.component';
 import {
   activeCriteriaTreeType,
   CohortSearchActions,
@@ -14,9 +14,13 @@ import {
   isCriteriaLoading,
 } from 'app/cohort-search/redux';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {CohortBuilderService, WorkspaceAccessLevel} from 'generated';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-import {NodeComponent} from './list-node.component';
+import {Observable} from 'rxjs/Observable';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {ListNodeComponent} from './list-node.component';
 
 class MockActions {
   @dispatch() activeCriteriaTreeType = activeCriteriaTreeType;
@@ -26,9 +30,9 @@ class MockActions {
   @dispatch() isCriteriaLoading = isCriteriaLoading;
 }
 
-describe('NodeComponent', () => {
-  let component: NodeComponent;
-  let fixture: ComponentFixture<NodeComponent>;
+describe('ListNodeComponent', () => {
+  let component: ListNodeComponent;
+  let fixture: ComponentFixture<ListNodeComponent>;
   let mockReduxInst;
 
   beforeEach(async(() => {
@@ -39,8 +43,8 @@ describe('NodeComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [
-        NodeComponent,
-        NodeInfoComponent,
+        ListNodeInfoComponent,
+        ListNodeComponent,
         SafeHtmlPipe,
       ],
       imports: [
@@ -51,16 +55,24 @@ describe('NodeComponent', () => {
       ],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
+        {provide: CohortBuilderService, useValue: {getCriteriaBy: () => {
+          return Observable.of({});
+        }}},
         {provide: CohortSearchActions, useValue: new MockActions()},
       ],
     })
       .compileComponents();
+    currentWorkspaceStore.next({
+      ...WorkspacesServiceStub.stubWorkspace(),
+      cdrVersionId: '1',
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    });
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NodeComponent);
+    fixture = TestBed.createComponent(ListNodeComponent);
     component = fixture.componentInstance;
-    component.node = fromJS({
+    component.node = {
       code: '',
       conceptId: 903133,
       count: 0,
@@ -74,7 +86,7 @@ describe('NodeComponent', () => {
       selectable: true,
       subtype: 'HEIGHT',
       type: 'PM'
-    });
+    };
     fixture.detectChanges();
   });
 

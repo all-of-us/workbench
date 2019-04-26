@@ -5,9 +5,10 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {CodeDropdownComponent} from 'app/cohort-search/code-dropdown/code-dropdown.component';
-import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
-import {NodeComponent} from 'app/cohort-search/node/node.component';
-import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.component';
+import {ListNodeInfoComponent} from 'app/cohort-search/list-node-info/list-node-info.component';
+import {ListNodeComponent} from 'app/cohort-search/list-node/list-node.component';
+import {ListOptionInfoComponent} from 'app/cohort-search/list-option-info/list-option-info.component';
+import {ListSearchBarComponent} from 'app/cohort-search/list-search-bar/list-search-bar.component';
 import {
 activeCriteriaTreeType,
 CohortSearchActions,
@@ -17,10 +18,13 @@ criteriaSearchTerms,
 isCriteriaLoading,
 } from 'app/cohort-search/redux';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
-import {SearchBarComponent} from 'app/cohort-search/search-bar/search-bar.component';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {CohortBuilderService, WorkspaceAccessLevel} from 'generated';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-import {TreeComponent} from './list-tree.component';
+import {Observable} from 'rxjs/Observable';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {ListTreeComponent} from './list-tree.component';
 
 class MockActions {
   @dispatch() activeCriteriaTreeType = activeCriteriaTreeType;
@@ -32,9 +36,9 @@ class MockActions {
   fetchCriteria(kind: string, parentId: number): void {}
 }
 
-describe('TreeComponent', () => {
-  let component: TreeComponent;
-  let fixture: ComponentFixture<TreeComponent>;
+describe('ListTreeComponent', () => {
+  let component: ListTreeComponent;
+  let fixture: ComponentFixture<ListTreeComponent>;
   let mockReduxInst;
 
   beforeEach(async(() => {
@@ -46,12 +50,12 @@ describe('TreeComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         CodeDropdownComponent,
-        TreeComponent,
-        NodeComponent,
-        NodeInfoComponent,
-        OptionInfoComponent,
+        ListNodeComponent,
+        ListNodeInfoComponent,
+        ListOptionInfoComponent,
+        ListSearchBarComponent,
+        ListTreeComponent,
         SafeHtmlPipe,
-        SearchBarComponent,
       ],
       imports: [
         BrowserAnimationsModule,
@@ -62,16 +66,24 @@ describe('TreeComponent', () => {
       ],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
+        {provide: CohortBuilderService, useValue: {getCriteriaBy: () => {
+          return Observable.of({});
+        }}},
         {provide: CohortSearchActions, useValue: new MockActions()},
       ],
     })
       .compileComponents();
+    currentWorkspaceStore.next({
+      ...WorkspacesServiceStub.stubWorkspace(),
+      cdrVersionId: '1',
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    });
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TreeComponent);
+    fixture = TestBed.createComponent(ListTreeComponent);
     component = fixture.componentInstance;
-    component.node = fromJS({
+    component.node = {
       code: '',
       conceptId: 903133,
       count: 0,
@@ -85,7 +97,7 @@ describe('TreeComponent', () => {
       selectable: true,
       subtype: 'HEIGHT',
       type: 'PM'
-    });
+    };
     fixture.detectChanges();
   });
 

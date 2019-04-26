@@ -6,11 +6,11 @@ import {CohortSearchActions} from 'app/cohort-search/redux';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-import {NodeInfoComponent} from './list-node-info.component';
+import {ListNodeInfoComponent} from './list-node-info.component';
 
-describe('NodeInfoComponent', () => {
-  let component: NodeInfoComponent;
-  let fixture: ComponentFixture<NodeInfoComponent>;
+describe('ListNodeInfoComponent', () => {
+  let component: ListNodeInfoComponent;
+  let fixture: ComponentFixture<ListNodeInfoComponent>;
   let mockReduxInst;
 
   beforeEach(async(() => {
@@ -21,7 +21,7 @@ describe('NodeInfoComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [
-        NodeInfoComponent,
+        ListNodeInfoComponent,
         SafeHtmlPipe,
       ],
       imports: [
@@ -37,9 +37,9 @@ describe('NodeInfoComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NodeInfoComponent);
+    fixture = TestBed.createComponent(ListNodeInfoComponent);
     component = fixture.componentInstance;
-    component.node = fromJS({
+    component.node = {
       code: '',
       conceptId: 903133,
       count: 0,
@@ -53,7 +53,7 @@ describe('NodeInfoComponent', () => {
       selectable: true,
       subtype: 'HEIGHT',
       type: 'PM'
-    });
+    };
     fixture.detectChanges();
   });
 

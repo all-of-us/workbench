@@ -6,14 +6,14 @@ import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 
-import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.component';
+import {ListOptionInfoComponent} from 'app/cohort-search/list-option-info/list-option-info.component';
 import {CohortSearchActions} from 'app/cohort-search/redux';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
-import {SearchBarComponent} from './list-search-bar.component';
+import {ListSearchBarComponent} from './list-search-bar.component';
 
-describe('SearchBarComponent', () => {
-  let component: SearchBarComponent;
-  let fixture: ComponentFixture<SearchBarComponent>;
+describe('ListSearchBarComponent', () => {
+  let component: ListSearchBarComponent;
+  let fixture: ComponentFixture<ListSearchBarComponent>;
   let mockReduxInst;
 
   beforeEach(async(() => {
@@ -23,7 +23,7 @@ describe('SearchBarComponent', () => {
     mockReduxInst.getState = _wrapped;
 
     TestBed.configureTestingModule({
-      declarations: [ OptionInfoComponent, SearchBarComponent, SafeHtmlPipe ],
+      declarations: [ ListOptionInfoComponent, ListSearchBarComponent, SafeHtmlPipe ],
       imports: [
         ClarityModule,
         NgxPopperModule,
@@ -38,7 +38,7 @@ describe('SearchBarComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SearchBarComponent);
+    fixture = TestBed.createComponent(ListSearchBarComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
