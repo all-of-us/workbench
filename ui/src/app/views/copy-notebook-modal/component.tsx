@@ -49,7 +49,7 @@ CopyNotebookModalState> {
   }
 
   dropFileSuffix(filename: string) {
-    if (filename.endsWith(".ipynb")) {
+    if (filename.endsWith('.ipynb')) {
       filename = filename.substring(0, filename.length - 6);
     }
 
@@ -57,8 +57,8 @@ CopyNotebookModalState> {
   }
 
   appendFileSuffix(filename: string) {
-    if (!filename.endsWith(".ipynb")) {
-      filename = filename + ".ipynb";
+    if (!filename.endsWith('.ipynb')) {
+      filename = filename + '.ipynb';
     }
 
     return filename;
