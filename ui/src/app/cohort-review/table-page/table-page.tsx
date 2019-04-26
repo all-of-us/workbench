@@ -262,15 +262,9 @@ export const ParticipantsTable = withCurrentWorkspace()(
         multiFilters = multiOptions.getValue();
         const review = cohortReviewStore.getValue();
         if (review) {
-          this.setState({
-            data: review.participantCohortStatuses.map(this.mapData),
-            loading: false,
-            page: review.page,
-            total: review.queryResultSize
-          });
-        } else {
-          this.getTableData();
+          this.setState({page: review.page});
         }
+        setTimeout(() => this.getTableData());
       }
       if (!vocabOptions.getValue()) {
         cohortReviewApi().getVocabularies(namespace, id, cid, +cdrVersionId)
