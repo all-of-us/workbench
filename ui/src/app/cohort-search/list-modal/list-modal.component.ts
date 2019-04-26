@@ -14,7 +14,16 @@ import {
   subtreeSelected,
   wizardOpen,
 } from 'app/cohort-search/redux';
-import {searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {
+  attributesStore,
+  autocompleteStore,
+  scrollStore,
+  searchRequestStore,
+  selectedPathStore,
+  selectedStore,
+  selectionsStore,
+  wizardStore
+} from 'app/cohort-search/search-state.service';
 import {stripHtml, subtypeToTitle, typeToTitle} from 'app/cohort-search/utils';
 import {TreeSubType, TreeType} from 'generated';
 import {DomainType} from 'generated/fetch';
@@ -58,7 +67,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
   open = false;
   noSelection = true;
   title = '';
-  mode: 'tree' | 'modifiers' | 'attributes' | 'snomed' = 'tree'; // default to criteria tree
+  mode = 'list';
   backMode: string;
   count = 0;
   originalNode: any;
@@ -68,6 +77,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
   conceptType: string = null;
   wizard: any;
   attributesCrit: any;
+  hierarchyCrit: any;
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -81,12 +91,22 @@ export class ListModalComponent implements OnInit, OnDestroy {
         this.noSelection = this.selectionList.length === 0;
         if (!this.open) {
           this.title = wizard.domain;
-          this.mode = 'tree';
+          this.mode = 'list';
           this.open = true;
         }
       });
 
     this.subscription.add(selectionsStore.subscribe(list => this.selectionIds = list));
+
+    this.subscription.add(scrollStore.filter(id => !!id).subscribe(id => this.setScroll(id)));
+
+    this.subscription.add(attributesStore
+      .filter(crit => !!crit)
+      .subscribe(criterion => {
+        this.backMode = this.mode;
+        this.attributesCrit = criterion;
+        this.mode = 'attributes';
+      }));
 
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
@@ -185,10 +205,11 @@ export class ListModalComponent implements OnInit, OnDestroy {
       }
     }
   }
-  setScroll(nodeId: string) {
-    const node = document.getElementById('node' + nodeId.toString());
+  setScroll(id: string) {
+    const nodeId = `node${id}`;
+    const node = document.getElementById(nodeId);
     if (node) {
-      setTimeout(() => node.scrollIntoView({behavior: 'smooth'}), 200);
+      setTimeout(() => node.scrollIntoView({behavior: 'smooth', block: 'center'}), 200);
     }
     this.disableCursor = false;
   }
@@ -198,15 +219,26 @@ export class ListModalComponent implements OnInit, OnDestroy {
   }
 
   close() {
+    const {groupId, role} = this.wizard;
+    const sr = searchRequestStore.getValue();
+    const group = sr[role].find(grp => grp.id === groupId);
+    // TODO change condition to check for total count instead of items when api call is ready
+    if (group.items.length === 0) {
+      sr[role] = sr[role].filter(grp => grp.id !== groupId);
+      searchRequestStore.next(sr);
+    }
     wizardStore.next(undefined);
     selectionsStore.next([]);
     this.open = false;
   }
 
-  back() {
+  back = () => {
     if (this.attributesCrit) {
-      this.mode = 'tree';
+      this.mode = this.backMode;
       this.attributesCrit = undefined;
+    }
+    if (this.mode === 'tree') {
+      this.mode = 'list';
     }
     if (this.mode === 'snomed') {
       this.setMode('tree');
@@ -306,9 +338,17 @@ export class ListModalComponent implements OnInit, OnDestroy {
     this.mode = mode;
   }
 
-  launchAttributes = (criterion: any) => {
-    this.attributesCrit = criterion;
-    this.mode = 'attributes';
+  showHierarchy = (criterion: any) => {
+    autocompleteStore.next(criterion.name);
+    selectedPathStore.next(criterion.path.split('.'));
+    selectedStore.next(criterion.id);
+    this.hierarchyCrit = {
+      type: criterion.type,
+      subtype: criterion.subtype,
+      fullTree: false,
+      id: 0,    // root parent ID is always 0
+    };
+    this.mode = 'tree';
   }
 
   selectionHeader(_type: string) {

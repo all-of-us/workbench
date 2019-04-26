@@ -1,0 +1,34 @@
+<clr-tree-node *ngIf="!secondLevel">
+  <div [id]="nodeId" class="clr-treenode-link container" (click)="toggleExpanded()">
+    <crit-list-node-info [node]="node"></crit-list-node-info>
+  </div>
+
+  <ng-template *ngIf="node.group"
+    [(clrIfExpanded)]="expanded"
+    (clrIfExpandedChange)="loadChildren($event)">
+    <ng-container [clrLoading]="loading">
+      <div class="node-list">
+        <div *ngIf="error || empty" class="alert alert-warning">
+          <div class="alert-items">
+            <div class="alert-item static">
+              <div class="alert-icon-wrapper">
+                <clr-icon class="alert-icon" shape="exclamation-triangle"></clr-icon>
+              </div>
+              <span class="alert-text">
+                A problem occurred and we were not able to retrieve the requested data
+              </span>
+            </div>
+          </div>
+        </div>
+        <crit-list-node *ngFor="let item of children" [node]="item"></crit-list-node>
+      </div>
+    </ng-container>
+  </ng-template>
+
+<!-- Skip first level of the tree and go straight to the second level -->
+<div *ngIf="secondLevel">
+  <crit-list-node *ngFor="let item of children" [node]="item"></crit-list-node>
+  <div *ngIf="loading" class="spinner root-spinner">
+    Loading...
+  </div>
+</div>

@@ -8,8 +8,13 @@ import {CodeDropdownComponent} from 'app/cohort-search/code-dropdown/code-dropdo
 import {DemographicsComponent} from 'app/cohort-search/demographics/demographics.component';
 import {ListAttributesPageComponent} from 'app/cohort-search/list-attributes-page/list-attributes-page.component';
 import {ListModifierPageComponent} from 'app/cohort-search/list-modifier-page/list-modifier-page.component';
+import {ListNodeInfoComponent} from 'app/cohort-search/list-node-info/list-node-info.component';
+import {ListNodeComponent} from 'app/cohort-search/list-node/list-node.component';
+import {ListOptionInfoComponent} from 'app/cohort-search/list-option-info/list-option-info.component';
+import {ListSearchBarComponent} from 'app/cohort-search/list-search-bar/list-search-bar.component';
 import {ListSearchComponent} from 'app/cohort-search/list-search/list-search.component';
 import {ListSelectionInfoComponent} from 'app/cohort-search/list-selection-info/list-selection-info.component';
+import {ListTreeComponent} from 'app/cohort-search/list-tree/list-tree.component';
 import {MultiSelectComponent} from 'app/cohort-search/multi-select/multi-select.component';
 import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
 import {NodeComponent} from 'app/cohort-search/node/node.component';
@@ -56,8 +61,13 @@ describe('ListModalComponent', () => {
         ListAttributesPageComponent,
         ListModalComponent,
         ListModifierPageComponent,
+        ListNodeInfoComponent,
+        ListNodeComponent,
+        ListOptionInfoComponent,
+        ListSearchBarComponent,
         ListSearchComponent,
         ListSelectionInfoComponent,
+        ListTreeComponent,
         MultiSelectComponent,
         NodeComponent,
         NodeInfoComponent,
