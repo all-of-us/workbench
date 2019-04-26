@@ -109,7 +109,7 @@ describe('CopyNotebookModal', () => {
       {
         toWorkspaceName: workspaces[2].id,
         toWorkspaceNamespace: workspaces[2].namespace,
-        newName: "Freeblast"
+        newName: "Freeblast.ipynb"
       }
     );
   });
