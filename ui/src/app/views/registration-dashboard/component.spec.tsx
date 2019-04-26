@@ -21,7 +21,8 @@ describe('RegistrationDashboard', () => {
       eraCommonsError: '',
       trainingCompleted: false,
       firstVisitTraining: true,
-      betaAccessGranted: true
+      betaAccessGranted: true,
+      twoFactorAuthCompleted: false
     };
   });
 

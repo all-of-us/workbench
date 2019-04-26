@@ -79,6 +79,10 @@ export class ProfileApiStub extends ProfileApi {
     return Promise.resolve(this.profile);
   }
 
+  public syncTwoFactorAuthStatus() {
+    return Promise.resolve(this.profile);
+  }
+
   public bypassAccessRequirement(
     userId: number, moduleName: string,
     bypassed?: AccessBypassRequest, options?: any): Promise<EmptyResponse> {
