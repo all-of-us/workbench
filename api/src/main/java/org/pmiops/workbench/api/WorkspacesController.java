@@ -12,12 +12,9 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -32,9 +29,8 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
@@ -47,6 +43,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -69,6 +66,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 
   private final WorkspaceService workspaceService;
+  private final WorkspaceMapper workspaceMapper;
   private final CdrVersionDao cdrVersionDao;
   private final CohortDao cohortDao;
   private final CohortFactory cohortFactory;
@@ -84,6 +82,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Autowired
   WorkspacesController(
       WorkspaceService workspaceService,
+      WorkspaceMapper workspaceMapper,
       CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
       CohortFactory cohortFactory,
@@ -96,6 +95,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       UserService userService,
       UserRecentResourceService userRecentResourceService) {
     this.workspaceService = workspaceService;
+    this.workspaceMapper = workspaceMapper;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
     this.cohortFactory = cohortFactory;
@@ -113,150 +113,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public void setUserProvider(Provider<User> userProvider) {
     this.userProvider = userProvider;
   }
-
-  // This does not populate the list of underserved research groups.
-  private static final Workspace constructListWorkspaceFromDb(
-      org.pmiops.workbench.db.model.Workspace workspace,
-      ResearchPurpose researchPurpose) {
-    FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
-    Workspace result = new Workspace()
-        .etag(Etags.fromVersion(workspace.getVersion()))
-        .lastModifiedTime(workspace.getLastModifiedTime().getTime())
-        .creationTime(workspace.getCreationTime().getTime())
-        .dataAccessLevel(workspace.getDataAccessLevelEnum())
-        .name(workspace.getName())
-        .id(workspaceId.getWorkspaceName())
-        .namespace(workspaceId.getWorkspaceNamespace())
-        .description(workspace.getDescription())
-        .researchPurpose(researchPurpose);
-    if (workspace.getCreator() != null) {
-      result.setCreator(workspace.getCreator().getEmail());
-    }
-    if (workspace.getCdrVersion() != null) {
-      result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
-    }
-
-    result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(TO_CLIENT_USER_ROLE)
-        .collect(Collectors.toList()));
-    return result;
-  }
-
-  @Deprecated
-  private static final Function<org.pmiops.workbench.db.model.Workspace, Workspace>
-      TO_CLIENT_WORKSPACE =
-      new Function<org.pmiops.workbench.db.model.Workspace, Workspace>() {
-        @Override
-        public Workspace apply(org.pmiops.workbench.db.model.Workspace workspace) {
-          ResearchPurpose researchPurpose = createResearchPurpose(workspace);
-          Workspace result = constructListWorkspaceFromDb(workspace, researchPurpose);
-          return result;
-        }
-      };
-
-  private static final ResearchPurpose createResearchPurpose(
-      org.pmiops.workbench.db.model.Workspace workspace) {
-    ResearchPurpose researchPurpose = new ResearchPurpose()
-        .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
-        .diseaseOfFocus(workspace.getDiseaseOfFocus())
-        .methodsDevelopment(workspace.getMethodsDevelopment())
-        .controlSet(workspace.getControlSet())
-        .aggregateAnalysis(workspace.getAggregateAnalysis())
-        .ancestry(workspace.getAncestry())
-        .commercialPurpose(workspace.getCommercialPurpose())
-        .population(workspace.getPopulation())
-        .populationOfFocus(workspace.getPopulationOfFocus())
-        .additionalNotes(workspace.getAdditionalNotes())
-        .reviewRequested(workspace.getReviewRequested())
-        .approved(workspace.getApproved())
-        .containsUnderservedPopulation(workspace.getContainsUnderservedPopulation());
-    if (workspace.getTimeRequested() != null) {
-      researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
-    }
-    return researchPurpose;
-  }
-
-  // This does not populate the list of underserved research groups.
-  private static final Workspace constructListWorkspaceFromFCAndDb(
-      org.pmiops.workbench.db.model.Workspace workspace,
-      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace, ResearchPurpose researchPurpose) {
-    Workspace result = new Workspace()
-        .etag(Etags.fromVersion(workspace.getVersion()))
-        .lastModifiedTime(workspace.getLastModifiedTime().getTime())
-        .creationTime(workspace.getCreationTime().getTime())
-        .dataAccessLevel(workspace.getDataAccessLevelEnum())
-        .name(workspace.getName())
-        .id(fcWorkspace.getName())
-        .namespace(fcWorkspace.getNamespace())
-        .description(workspace.getDescription())
-        .researchPurpose(researchPurpose)
-        .googleBucketName(fcWorkspace.getBucketName());
-    if (fcWorkspace.getCreatedBy() != null) {
-      result.setCreator(fcWorkspace.getCreatedBy());
-    }
-    if (workspace.getCdrVersion() != null) {
-      result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
-    }
-
-    result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(TO_CLIENT_USER_ROLE)
-        .collect(Collectors.toList()));
-
-    return result;
-  }
-
-  private static final BiFunction<org.pmiops.workbench.db.model.Workspace, org.pmiops.workbench.firecloud.model.Workspace, Workspace>
-      TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB =
-      new BiFunction<org.pmiops.workbench.db.model.Workspace, org.pmiops.workbench.firecloud.model.Workspace, Workspace>() {
-        @Override
-        public Workspace apply(org.pmiops.workbench.db.model.Workspace workspace,
-            org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
-          ResearchPurpose researchPurpose = createResearchPurpose(workspace);
-          if (workspace.getContainsUnderservedPopulation()) {
-            researchPurpose.setUnderservedPopulationDetails(
-                new ArrayList<>(workspace.getUnderservedPopulationsEnum()));
-          }
-          Workspace result = constructListWorkspaceFromFCAndDb(workspace, fcWorkspace,
-              researchPurpose);
-          return result;
-        }
-      };
-
-  private static final Function<Workspace, org.pmiops.workbench.db.model.Workspace>
-      FROM_CLIENT_WORKSPACE =
-      new Function<Workspace, org.pmiops.workbench.db.model.Workspace>() {
-        @Override
-        public org.pmiops.workbench.db.model.Workspace apply(Workspace workspace) {
-          org.pmiops.workbench.db.model.Workspace result = new org.pmiops.workbench.db.model.Workspace();
-          if (workspace.getDataAccessLevel() != null) {
-            result.setDataAccessLevelEnum(workspace.getDataAccessLevel());
-          }
-          result.setDescription(workspace.getDescription());
-          result.setName(workspace.getName());
-          if (workspace.getResearchPurpose() != null) {
-            setResearchPurposeDetails(result, workspace.getResearchPurpose());
-            result.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
-            if (workspace.getResearchPurpose().getTimeRequested() != null) {
-              result.setTimeRequested(
-                  new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
-            }
-            result.setApproved(workspace.getResearchPurpose().getApproved());
-          }
-          return result;
-        }
-      };
-
-  private static final Function<WorkspaceUserRole, UserRole> TO_CLIENT_USER_ROLE =
-      new Function<WorkspaceUserRole, UserRole>() {
-        @Override
-        public UserRole apply(WorkspaceUserRole workspaceUserRole) {
-
-          UserRole result = new UserRole();
-          result.setEmail(workspaceUserRole.getUser().getEmail());
-          result.setGivenName(workspaceUserRole.getUser().getGivenName());
-          result.setFamilyName(workspaceUserRole.getUser().getFamilyName());
-          result.setRole(workspaceUserRole.getRoleEnum());
-          return result;
-        }
-      };
 
   private static String generateRandomChars(String candidateChars, int length) {
     StringBuilder sb = new StringBuilder();
@@ -282,28 +138,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       return cdrVersion;
     } catch (NumberFormatException e) {
       throw new BadRequestException(String.format("Invalid cdr version ID: %s", cdrVersionId));
-    }
-  }
-
-  /**
-   * Sets user-editable research purpose detail fields.
-   */
-  private static void setResearchPurposeDetails(org.pmiops.workbench.db.model.Workspace dbWorkspace,
-      ResearchPurpose purpose) {
-    dbWorkspace.setDiseaseFocusedResearch(purpose.getDiseaseFocusedResearch());
-    dbWorkspace.setDiseaseOfFocus(purpose.getDiseaseOfFocus());
-    dbWorkspace.setMethodsDevelopment(purpose.getMethodsDevelopment());
-    dbWorkspace.setControlSet(purpose.getControlSet());
-    dbWorkspace.setAggregateAnalysis(purpose.getAggregateAnalysis());
-    dbWorkspace.setAncestry(purpose.getAncestry());
-    dbWorkspace.setCommercialPurpose(purpose.getCommercialPurpose());
-    dbWorkspace.setPopulation(purpose.getPopulation());
-    dbWorkspace.setPopulationOfFocus(purpose.getPopulationOfFocus());
-    dbWorkspace.setAdditionalNotes(purpose.getAdditionalNotes());
-    dbWorkspace.setContainsUnderservedPopulation(purpose.getContainsUnderservedPopulation());
-    if (purpose.getContainsUnderservedPopulation()) {
-      dbWorkspace
-          .setUnderservedPopulationsEnum(new HashSet<>(purpose.getUnderservedPopulationDetails()));
     }
   }
 
@@ -381,14 +215,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setVersion(1);
     setCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    org.pmiops.workbench.db.model.Workspace reqWorkspace = FROM_CLIENT_WORKSPACE.apply(workspace);
+    org.pmiops.workbench.db.model.Workspace reqWorkspace = workspaceMapper.toDbWorkspace(workspace);
     // TODO: enforce data access level authorization
     dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
     dbWorkspace.setName(reqWorkspace.getName());
     dbWorkspace.setDescription(reqWorkspace.getDescription());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
-    setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
+    workspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
     if (reqWorkspace.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -455,8 +289,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             dbConceptSet.getConceptSetId()));
       }
     }
-    return ResponseEntity
-        .ok(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
+    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
   @Override
@@ -518,48 +351,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    response
-        .setWorkspace(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
+    response.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
     return ResponseEntity.ok(response);
   }
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
-    User user = userProvider.get();
-
-    List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
-        fireCloudService.getWorkspaces();
-    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcUuidWorkspaceMap =
-        fcWorkspaces.stream().collect(
-            Collectors.toMap(
-                fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
-                fcWorkspace -> fcWorkspace));
-
-    List<org.pmiops.workbench.db.model.Workspace> dbWorkspaces =
-        workspaceService.getDao().findAllByFirecloudUuidIn(
-            fcUuidWorkspaceMap.keySet().stream().collect(Collectors.toList()));
-
-    List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
-
-    for (org.pmiops.workbench.db.model.Workspace dbWorkspace : dbWorkspaces) {
-      org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace =
-          fcUuidWorkspaceMap.get(dbWorkspace.getFirecloudUuid());
-      if (!(fcUuidWorkspaceMap.containsKey(dbWorkspace.getFirecloudUuid()))) {
-        continue;
-      }
-      WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-      currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
-      if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
-        currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
-      } else {
-        currentWorkspace
-            .setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
-      }
-      responseList.add(currentWorkspace);
-    }
-
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
-    response.setItems(responseList);
+    response.setItems(workspaceService.getWorkspaces());
     return ResponseEntity.ok(response);
   }
 
@@ -595,7 +394,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {
-      setResearchPurposeDetails(dbWorkspace, researchPurpose);
+      workspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
       if (researchPurpose.getReviewRequested()) {
         Timestamp now = new Timestamp(clock.instant().toEpochMilli());
         dbWorkspace.setTimeRequested(now);
@@ -605,8 +404,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    return ResponseEntity
-        .ok(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
+    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
   @Override
@@ -672,7 +470,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // half-way cloned workspaces via AoU - so it will just appear as a
     // transient failure.
     org.pmiops.workbench.db.model.Workspace toWorkspace =
-        FROM_CLIENT_WORKSPACE.apply(body.getWorkspace());
+        workspaceMapper.toDbWorkspace(body.getWorkspace());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         new org.pmiops.workbench.db.model.Workspace();
 
@@ -687,7 +485,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setName(toWorkspace.getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
-    setResearchPurposeDetails(dbWorkspace, researchPurpose);
+    workspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -733,8 +531,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       clonedRoles.add(ownerRole);
       savedWorkspace = workspaceService.updateUserRoles(savedWorkspace, clonedRoles);
     }
-    return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(
-        TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(savedWorkspace, toFcWorkspace)));
+    return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(workspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
   }
 
   @Override
@@ -815,7 +612,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
-    response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
+    response.setItems(workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 

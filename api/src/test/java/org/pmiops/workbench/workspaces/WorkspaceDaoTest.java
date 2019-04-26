@@ -1,9 +1,10 @@
-package org.pmiops.workbench.db.dao;
+package org.pmiops.workbench.workspaces;
 
 import static org.springframework.test.util.AssertionErrors.fail;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
