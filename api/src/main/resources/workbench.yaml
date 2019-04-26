@@ -372,6 +372,25 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/account/sync-two-factor-auth-status:
+    post:
+      tags:
+        - profile
+      summary: Sync two factor auth status
+      description: Syncs a user's 2FA status from google
+      operationId: syncTwoFactorAuthStatus
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+        404:
+          description: User not found
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # TODO: add demographic survey response data
   /v1/account/submit-demographic-survey:
     post:
@@ -878,6 +897,22 @@ paths:
       responses:
         200:
           description: All users' eRA Commons statuses were updated.
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /v1/cron/bulkSyncTwoFactorAuthStatus:
+    get:
+      security: []
+      tags:
+        - offlineUser
+        - cron
+      description: sync 2FA status for all users
+      operationId: bulkSyncTwoFactorAuthStatus
+      responses:
+        200:
+          description: All users' 2FA statuses were updated.
         500:
           description: Internal Error
           schema:
@@ -2413,8 +2448,6 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when the user is bypassed for completing identity verification
-      twoFactorEnabled:
-        type: boolean
       twoFactorAuthCompletionTime:
         type: integer
         format: int64

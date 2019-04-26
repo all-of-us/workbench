@@ -268,11 +268,8 @@ public class ProfileController implements ProfileApiDelegate {
       return user;
     }
 
-    Boolean twoFactorEnabled = Optional.ofNullable(user.getTwoFactorEnabled()).orElse(false);
-    if (!twoFactorEnabled) {
-      user.setTwoFactorEnabled(directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv());
-      user = saveUserWithConflictHandling(user);
-    }
+    // Check if 2FA is set up on account
+    userService.syncTwoFactorAuthStatus(user);
 
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (user.getFirstSignInTime() == null) {
@@ -496,6 +493,12 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> syncEraCommonsStatus() {
     userService.syncEraCommonsStatus();
+    return getProfileResponse(userProvider.get());
+  }
+
+  @Override
+  public ResponseEntity<Profile> syncTwoFactorAuthStatus() {
+    userService.syncTwoFactorAuthStatus();
     return getProfileResponse(userProvider.get());
   }
 

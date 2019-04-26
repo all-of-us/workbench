@@ -11,8 +11,7 @@ import java.util.List;
 
 public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
-  Criteria findCriteriaByTypeAndConceptIdAndSelectable(@Param("type") String type, @Param("conceptId") String conceptId, @Param("selectable") Boolean selectable);
-
+  //TODO:Remove freemabd
   List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type,
                                                            @Param("parentId") Long parentId);
 
@@ -53,25 +52,19 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and is_selectable = 1")
   List<Criteria> findCriteriaLeavesByType(String type, String subtype);
 
-  @Query(value = "select * " +
-    "from criteria " +
-    "where type = :type " +
-    "and (path like concat('%.',:parentId) or path like concat('%.',:parentId, '.%')) " +
-    "and is_group = 0 " +
-    "and is_selectable = 1", nativeQuery = true)
-  List<Criteria> findCriteriaChildrenByTypeAndParentId(@Param("type") String type,
-                                                       @Param("parentId") Long parentId);
-
+  //TODO:Remove freemabd
   List<Criteria> findCriteriaByTypeAndSubtypeAndParentIdOrderByIdAsc(@Param("type") String type,
                                                                      @Param("subtype") String subtype,
                                                                      @Param("parentId") Long parentId);
 
+  //TODO:Remove freemabd
   List<Criteria> findCriteriaByType(@Param("type") String type);
 
   @Query(value = "select cr from Criteria cr " +
     "    where cr.type = upper(?1) " +
     "    and (match(synonyms, ?2) > 0 or cr.code like upper(concat(?3,'%')))" +
     "    order by cr.count desc")
+  //TODO:Remove freemabd
   List<Criteria> findCriteriaByTypeForCodeOrName(String type,
                                                  String modifiedValue,
                                                  String value,
@@ -82,6 +75,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "    and cr.subtype = upper(?2) " +
     "    and (match(synonyms, ?3) > 0 or cr.code like upper(concat(?4,'%')))" +
     "    order by cr.count desc")
+  //TODO:Remove freemabd
   List<Criteria> findCriteriaByTypeAndSubtypeForCodeOrName(String type,
                                                            String subtype,
                                                            String modifiedValue,
@@ -93,6 +87,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "    and cr.subtype = upper(?2) " +
     "    and match(synonyms, ?3) > 0 " +
     "    order by cr.count desc")
+  //TODO:Remove freemabd
   List<Criteria> findCriteriaByTypeAndSubtypeForName(String type,
                                                      String subtype,
                                                      String value,
@@ -102,6 +97,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "where c.type = :type " +
     "and c.subtype = :subtype " +
     "order by c.id asc", nativeQuery = true)
+  //TODO:Remove freemabd
   List<Criteria> findCriteriaByTypeAndSubtypeOrderByIdAsc(@Param("type") String type,
                                                           @Param("subtype") String subtype);
 
@@ -113,6 +109,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "or upper(c.code) like upper(concat('%',:value,'%'))) " +
     "order by c.name asc " +
     "limit :limit", nativeQuery = true)
+  //TODO:Remove freemabd
   List<Criteria> findDrugBrandOrIngredientByValue(@Param("value") String value,
                                                   @Param("limit") Long limit);
 

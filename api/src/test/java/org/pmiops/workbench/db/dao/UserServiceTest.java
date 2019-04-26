@@ -10,6 +10,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.Providers;
@@ -57,6 +58,8 @@ public class UserServiceTest {
   private FireCloudService fireCloudService;
   @Mock
   private ComplianceService complianceService;
+  @Mock
+  private DirectoryService directoryService;
 
   private UserService userService;
 
@@ -68,7 +71,7 @@ public class UserServiceTest {
     testUser = insertUser(EMAIL_ADDRESS);
 
     userService = new UserService(Providers.of(testUser), userDao, adminActionHistoryDao, CLOCK,
-        new Random(), fireCloudService, configProvider, complianceService);
+        new Random(), fireCloudService, configProvider, complianceService, directoryService);
   }
 
   private User insertUser(String email) {
@@ -165,6 +168,31 @@ public class UserServiceTest {
 
     User user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getEraCommonsCompletionTime()).isNull();
+  }
+
+  @Test
+  public void testSyncTwoFactorAuthStatus() throws Exception {
+    com.google.api.services.admin.directory.model.User googleUser = new com.google.api.services.admin.directory.model.User();
+    googleUser.setPrimaryEmail(EMAIL_ADDRESS);
+    googleUser.setIsEnrolledIn2Sv(true);
+
+    when(directoryService.getUser(EMAIL_ADDRESS)).thenReturn(googleUser);
+    userService.syncTwoFactorAuthStatus();
+    // twoFactorAuthCompletionTime should now be set
+    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    assertThat(user.getTwoFactorAuthCompletionTime()).isNotNull();
+
+    // twoFactorAuthCompletionTime should not change when already set
+    Timestamp twoFactorAuthCompletionTime = user.getTwoFactorAuthCompletionTime();
+    userService.syncTwoFactorAuthStatus();
+    user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    assertThat(user.getTwoFactorAuthCompletionTime()).isEqualTo(twoFactorAuthCompletionTime);
+
+    // unset 2FA in google and check that twoFactorAuthCompletionTime is set to null
+    googleUser.setIsEnrolledIn2Sv(false);
+    userService.syncTwoFactorAuthStatus();
+    user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    assertThat(user.getTwoFactorAuthCompletionTime()).isNull();
   }
 
 }

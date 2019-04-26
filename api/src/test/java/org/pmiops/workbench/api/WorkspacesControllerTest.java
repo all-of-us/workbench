@@ -323,6 +323,24 @@ public class WorkspacesControllerTest {
             new WorkspaceACLUpdateResponseList());
   }
 
+  private void stubGetWorkspace(String ns, String name, String creator,
+      WorkspaceAccessLevel access) {
+    stubGetWorkspace(createFcWorkspace(ns, name, creator), access);
+  }
+
+  private void stubGetWorkspace(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+      WorkspaceAccessLevel access) {
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setWorkspace(fcWorkspace);
+    fcResponse.setAccessLevel(access.toString());
+    when(fireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))
+        .thenReturn(fcResponse);
+    List<WorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
+    workspaceResponses.add(fcResponse);
+    when(fireCloudService.getWorkspaces()).thenReturn(workspaceResponses);
+  }
+
   private void stubBigQueryCohortCalls() {
     TableResult queryResult = mock(TableResult.class);
     Iterable testIterable = new Iterable() {
@@ -395,26 +413,6 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(workspaceNamespace, workspaceName, LOGGED_IN_USER_EMAIL, accessLevel);
     return workspace;
   }
-
-  private void stubGetWorkspace(String ns, String name, String creator,
-      WorkspaceAccessLevel access) {
-    stubGetWorkspace(createFcWorkspace(ns, name, creator), access);
-  }
-
-  private void stubGetWorkspace(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
-      WorkspaceAccessLevel access) {
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(access.toString());
-    when(fireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))
-        .thenReturn(fcResponse);
-    List<WorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
-    workspaceResponses.add(fcResponse);
-    when(fireCloudService.getWorkspaces()).thenReturn(workspaceResponses);
-
-  }
-
 
   public Cohort createDefaultCohort(String name) {
     Cohort cohort = new Cohort();
@@ -1342,6 +1340,7 @@ public class WorkspacesControllerTest {
     readerUser.setFreeTierBillingProjectName("TestBillingProject3");
     readerUser.setDisabled(false);
     readerUser = userDao.save(readerUser);
+
     Workspace workspace = createStubbedWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
@@ -1400,6 +1399,7 @@ public class WorkspacesControllerTest {
     writerUser.setDisabled(false);
 
     writerUser = userDao.save(writerUser);
+
     Workspace workspace = createStubbedWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
@@ -1437,6 +1437,7 @@ public class WorkspacesControllerTest {
     readerUser.setFreeTierBillingProjectName("TestBillingProject3");
     readerUser.setDisabled(false);
     readerUser = userDao.save(readerUser);
+
     Workspace workspace = createStubbedWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
@@ -1771,7 +1772,7 @@ public class WorkspacesControllerTest {
 
     Workspace toWorkspace = createStubbedWorkspace("toWorkspaceNs", "toworkspace", WorkspaceAccessLevel.OWNER);
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
-    String newNotebookName = "new";
+    String newNotebookName = "new.ipynb";
 
     CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
     copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());

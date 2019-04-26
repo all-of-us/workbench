@@ -69,7 +69,6 @@ public class ProfileService {
     profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatusEnum());
     profile.setAboutYou(user.getAboutYou());
     profile.setAreaOfResearch(user.getAreaOfResearch());
-    profile.setTwoFactorEnabled(user.getTwoFactorEnabled());
     profile.setDisabled(user.getDisabled());
     profile.setEraCommonsLinkedNihUsername(user.getEraCommonsLinkedNihUsername());
 

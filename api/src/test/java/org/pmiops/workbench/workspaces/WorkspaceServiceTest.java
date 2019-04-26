@@ -85,8 +85,8 @@ public class WorkspaceServiceTest {
 
   private org.pmiops.workbench.db.model.Workspace mockDbWorkspace(String name, String firecloudUuid) {
     org.pmiops.workbench.db.model.Workspace workspace = mock(org.pmiops.workbench.db.model.Workspace.class);
-    doReturn(new Timestamp(1000000l)).when(workspace).getLastModifiedTime();
-    doReturn(new Timestamp(1000000l)).when(workspace).getCreationTime();
+    doReturn(mock(Timestamp.class)).when(workspace).getLastModifiedTime();
+    doReturn(mock(Timestamp.class)).when(workspace).getCreationTime();
     doReturn(name).when(workspace).getName();
     doReturn(mock(FirecloudWorkspaceId.class)).when(workspace).getFirecloudWorkspaceId();
     doReturn(firecloudUuid).when(workspace).getFirecloudUuid();

@@ -80,4 +80,29 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
+
+  /**
+   * Updates 2FA information for all users in the database.
+   *
+   * This API method is called by a cron job and is not part of our normal user-facing surface.
+   */
+  @Override
+  public ResponseEntity<Void> bulkSyncTwoFactorAuthStatus() {
+    int errorCount = 0;
+    for (User user : userService.getAllUsers()) {
+      try {
+        userService.syncTwoFactorAuthStatus(user);
+        log.info(String.format("Updated 2FA status for user %s.", user.getEmail()));
+      } catch (Exception e) {
+        errorCount++;
+        log.severe(String.format("Error syncing 2FA status for user %s: %s",
+                user.getEmail(), e.getMessage()));
+      }
+    }
+    if (errorCount > 0) {
+      throw new ServerErrorException(
+              String.format("%d errors encountered during 2FA sync", errorCount));
+    }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
 }
