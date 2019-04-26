@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
-import { Select, TextInput } from 'app/components/inputs';
+import { Select, TextInput, ValidationError } from 'app/components/inputs';
 import { Modal, ModalBody, ModalFooter, ModalTitle } from 'app/components/modals';
 import { FileDetail, Workspace } from 'generated/fetch';
 
@@ -120,8 +120,8 @@ CopyNotebookModalState> {
           { this.state.loading ?
             <ModalBody style={{ textAlign: 'center' }}><Spinner /></ModalBody> :
             <ModalBody>
-                {this.state.requestState === RequestState.UNSENT && this.renderFormBody()}
-                {this.state.requestState === RequestState.ERROR && this.renderErrorBody()}
+                {(this.state.requestState === RequestState.UNSENT ||
+                  this.state.requestState === RequestState.ERROR) && this.renderFormBody()}
                 {this.state.requestState === RequestState.SUCCESS && this.renderSuccessBody()}
             </ModalBody>
         }
@@ -136,9 +136,7 @@ CopyNotebookModalState> {
   }
 
   getCloseButtonText() {
-    if (this.state.requestState === RequestState.UNSENT) {
-      return 'Cancel';
-    } else if (this.state.requestState === RequestState.ERROR) {
+    if (this.state.requestState === RequestState.UNSENT || this.state.requestState === RequestState.ERROR) {
       return 'Close';
     } else if (this.state.requestState === RequestState.SUCCESS) {
       return 'Stay Here';
@@ -146,17 +144,15 @@ CopyNotebookModalState> {
   }
 
   renderActionButton() {
-    if (this.state.requestState === RequestState.UNSENT) {
+    if (this.state.requestState === RequestState.UNSENT || this.state.requestState === RequestState.ERROR) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
-          disabled={this.state.destination === null}
+          disabled={this.state.destination === null || this.state.loading}
           onClick={() => this.save()}
           data-test-id='copy-notebook-button'>
           Copy Notebook
         </Button>
       );
-    } else if (this.state.requestState === RequestState.ERROR) {
-      return null;
     } else if (this.state.requestState === RequestState.SUCCESS) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
@@ -172,7 +168,7 @@ CopyNotebookModalState> {
       <div>
         <div style={headerStyles.formLabel}>Destination *</div>
         <Select
-            value=''
+            value={this.state.destination}
             options={this.state.writeableWorkspaces.map(workspace => ({
               'value': workspace,
               'label': workspace.name
@@ -184,6 +180,8 @@ CopyNotebookModalState> {
             value={this.state.newName}
             onChange={v => this.setState({ newName: v })}
         />
+        {this.state.requestState === RequestState.ERROR && 
+          <ValidationError> {this.state.errorMsg} </ValidationError>}
       </div>
     );
   }
