@@ -432,7 +432,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     filterTemplate(column: string) {
-      const {data, filters} = this.state;
+      const {data, filters, loading} = this.state;
       if (!data) {
         return {};
       }
@@ -467,7 +467,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
               padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
               <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
                      checked={filters[colType].includes(opt.value)} value={opt.value}
-                     onChange={(e) => this.onCheckboxChange(e, colType)}/>
+                     onChange={(e) => this.onCheckboxChange(e, colType)} disabled={loading}/>
               <label style={{paddingLeft: '0.4rem'}}> {opt.name} </label>
             </div>
           ))}
