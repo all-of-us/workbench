@@ -61,6 +61,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
   private static final Long DEFAULT_TREE_SEARCH_LIMIT = 100L;
   private static final Long DEFAULT_CRITERIA_SEARCH_LIMIT = 250L;
+  private static final String DOMAIN_MESSAGE = "Bad Request: Please provide a valid criteria domain. %s is not valid.";
+  private static final String TYPE_MESSAGE = "Bad Request: Please provide a valid criteria type. %s is not valid.";
 
   private BigQueryService bigQueryService;
   private ParticipantCounter participantCounter;
@@ -195,22 +197,23 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListResponse> getCriteriaAutoComplete(Long cdrVersionId,
+                                                                      String domain,
+                                                                      String term,
                                                                       String type,
-                                                                      String value,
-                                                                      String subtype,
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
-    String matchExp = modifyKeywordMatch(value, type);
+    String matchExp = modifyKeywordMatch(term, domain);
     List<Criteria> criteriaList;
-    if (subtype == null) {
-      criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, value, new PageRequest(0, resultLimit.intValue()));
-    } else {
-      criteriaList = type.equals(TreeType.SNOMED.name()) ?
-        criteriaDao.findCriteriaByTypeAndSubtypeForName(type, subtype, matchExp, new PageRequest(0, resultLimit.intValue())) :
-        criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, value, new PageRequest(0, resultLimit.intValue()));
-    }
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
+
+    if (type == null) {
+      criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(domain, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+    } else {
+      criteriaList = domain.equals(TreeType.SNOMED.name()) ?
+        criteriaDao.findCriteriaByTypeAndSubtypeForName(domain, type, matchExp, new PageRequest(0, resultLimit.intValue())) :
+        criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(domain, type, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+    }
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
 
     return ResponseEntity.ok(criteriaResponse);
@@ -335,22 +338,20 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
 
     if (configProvider.get().cohortbuilder.enableListSearch) {
-      String domainMessage = "Bad Request: Please provide a valid criteria domain. %s is not valid.";
-      String typeMessage = "Bad Request: Please provide a valid criteria type. %s is not valid.";
       Optional
         .ofNullable(domain)
-        .orElseThrow(() -> new BadRequestException(String.format(domainMessage, domain)));
+        .orElseThrow(() -> new BadRequestException(String.format(DOMAIN_MESSAGE, domain)));
       Arrays
         .stream(DomainType.values())
         .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
         .findFirst()
-        .orElseThrow(() -> new BadRequestException(String.format(domainMessage, domain)));
+        .orElseThrow(() -> new BadRequestException(String.format(DOMAIN_MESSAGE, domain)));
       Optional.ofNullable(type)
         .ifPresent(t -> Arrays
           .stream(CriteriaType.values())
           .filter(critType -> critType.toString().equalsIgnoreCase(t))
           .findFirst()
-          .orElseThrow(() -> new BadRequestException(String.format(typeMessage, t))));
+          .orElseThrow(() -> new BadRequestException(String.format(TYPE_MESSAGE, t))));
 
       List<CBCriteria> criteriaList;
       if (parentId != null) {
