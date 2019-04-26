@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as fp from 'lodash/fp';
 
 import {AlertClose, AlertDanger, AlertWarning} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
@@ -116,7 +117,8 @@ export class RegistrationDashboard extends
     if (i === 0) {
       return !taskCompletionMap.get(i);
     } else {
-      return !taskCompletionMap.get(i) && !this.isEnabled(i - 1);
+      return !taskCompletionMap.get(i) &&
+        fp.filter(index => this.isEnabled(index), fp.range(0, i)).length === 0;
     }
   }
 

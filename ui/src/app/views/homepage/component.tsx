@@ -102,7 +102,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     firstVisitTraining: boolean,
     quickTour: boolean,
     trainingCompleted: boolean,
-    twoFactorAuthComplete: boolean,
+    twoFactorAuthCompleted: boolean,
     videoOpen: boolean,
     videoLink: string
   }> {
@@ -122,7 +122,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       firstVisitTraining: true,
       quickTour: false,
       trainingCompleted: undefined,
-      twoFactorAuthComplete: undefined,
+      twoFactorAuthCompleted: undefined,
       videoOpen: false,
       videoLink: '',
     };
@@ -186,9 +186,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       }
       try {
         this.setState({
-          eraCommonsLinked: (!!profile.eraCommonsCompletionTime || !!profile.eraCommonsBypassTime),
-          twoFactorAuthComplete: (!!profile.twoFactorAuthCompletionTime ||
-            !!profile.twoFactorAuthBypassTime)
+          eraCommonsLinked: !!profile.eraCommonsCompletionTime || !!profile.eraCommonsBypassTime
         });
       } catch (ex) {
         this.setState({eraCommonsLinked: false});
@@ -202,6 +200,15 @@ export const Homepage = withUserProfile()(class extends React.Component<
       } catch (ex) {
         this.setState({trainingCompleted: false});
         console.error('error fetching moodle training status');
+      }
+
+      try {
+        const result = await profileApi().syncTwoFactorAuthStatus();
+        this.setState({twoFactorAuthCompleted: !!profile.twoFactorAuthCompletionTime ||
+            !!profile.twoFactorAuthBypassTime});
+      } catch (ex) {
+        this.setState({twoFactorAuthCompleted: false});
+        console.error('error fetching two factor auth status');
       }
 
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
@@ -249,7 +256,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
   render() {
     const {billingProjectInitialized, betaAccessGranted, videoOpen, accessTasksLoaded,
         accessTasksRemaining, eraCommonsLinked, eraCommonsError, firstVisitTraining,
-        trainingCompleted, quickTour, videoLink, twoFactorAuthComplete} = this.state;
+        trainingCompleted, quickTour, videoLink, twoFactorAuthCompleted} = this.state;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -295,7 +302,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                         trainingCompleted={trainingCompleted}
                                         firstVisitTraining={firstVisitTraining}
                                         betaAccessGranted={betaAccessGranted}
-                                        twoFactorAuthCompleted={twoFactorAuthComplete}/>
+                                        twoFactorAuthCompletedd={twoFactorAuthCompleted}/>
                 ) : (
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                     <div style={styles.contentWrapperLeft}>
