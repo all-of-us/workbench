@@ -1,5 +1,5 @@
-import * as React from 'react';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 import {AlertClose, AlertDanger, AlertWarning} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
@@ -58,13 +58,14 @@ export interface RegistrationDashboardProps {
 
 export class RegistrationDashboard extends
     React.Component<RegistrationDashboardProps,
-      {trainingWarningOpen: boolean, taskCompletionMap: Map<number, boolean>}> {
+    {trainingWarningOpen: boolean, refreshPage: boolean, taskCompletionMap: Map<number, boolean>}> {
 
   constructor(props: RegistrationDashboardProps) {
     super(props);
     this.state = {
       trainingWarningOpen: !props.firstVisitTraining,
-      taskCompletionMap: new Map<number, boolean>()
+      taskCompletionMap: new Map<number, boolean>(),
+      refreshPage: false
     };
     this.state.taskCompletionMap.set(0, props.twoFactorAuthCompleted);
     this.state.taskCompletionMap.set(1, props.trainingCompleted);
@@ -78,7 +79,7 @@ export class RegistrationDashboard extends
         'account with both your password and your phone',
       buttonText: 'Get Started',
       completedText: 'Completed',
-      onClick: RegistrationDashboard.redirectToGoogleAuth
+      onClick: () => this.redirectToGoogleAuth()
     }, {
       title: 'Complete Online Training',
       description: 'Researchers must maintain up-to-date completion of compliance ' +
@@ -108,8 +109,13 @@ export class RegistrationDashboard extends
     window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
   }
 
-  static redirectToGoogleAuth() {
-    window.location.assign('https://myaccount.google.com/security');
+  componentDidMount() {
+    this.setState({refreshPage: false});
+  }
+
+  redirectToGoogleAuth() {
+    this.setState({refreshPage: true});
+    window.open('https://myaccount.google.com/security', '_blank');
   }
 
   isEnabled(i: number): boolean {
@@ -120,6 +126,10 @@ export class RegistrationDashboard extends
       return !taskCompletionMap.get(i) &&
         fp.filter(index => this.isEnabled(index), fp.range(0, i)).length === 0;
     }
+  }
+
+  showRefreshFlow(i): boolean {
+    return i === 0 && this.state.refreshPage;
   }
 
   allTasksCompleted(): boolean {
@@ -161,10 +171,17 @@ export class RegistrationDashboard extends
                       style={{backgroundColor: '#8BC990', width: 'max-content', cursor: 'default'}}>
                 <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{card.completedText}
               </Button> :
-            <Button type='darklingSecondary' onClick={card.onClick} style={{width: 'max-content',
-              cursor: this.isEnabled(i) ? 'pointer' : 'default'}}
+            <Button type='darklingSecondary'
+                    onClick={this.showRefreshFlow(i) ?
+                      () => window.location.reload() : card.onClick}
+                    style={{width: 'max-content',
+                      cursor: this.isEnabled(i) ? 'pointer' : 'default'}}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
-              {card.buttonText}
+              {this.showRefreshFlow(i) ?
+                <div>
+                  <ClrIcon shape='refresh' style={{marginRight: '0.3rem'}}/>
+                  Refresh
+                </div> : card.buttonText}
             </Button>}
           </ResourceCardBase>;
         })}

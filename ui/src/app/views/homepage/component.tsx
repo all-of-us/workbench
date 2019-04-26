@@ -204,7 +204,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
       try {
         const result = await profileApi().syncTwoFactorAuthStatus();
-        this.setState({twoFactorAuthCompleted: !!profile.twoFactorAuthCompletionTime ||
+        this.setState({twoFactorAuthCompleted: !!result.twoFactorAuthCompletionTime ||
             !!profile.twoFactorAuthBypassTime});
       } catch (ex) {
         this.setState({twoFactorAuthCompleted: false});
@@ -302,7 +302,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                         trainingCompleted={trainingCompleted}
                                         firstVisitTraining={firstVisitTraining}
                                         betaAccessGranted={betaAccessGranted}
-                                        twoFactorAuthCompletedd={twoFactorAuthCompleted}/>
+                                        twoFactorAuthCompleted={twoFactorAuthCompleted}/>
                 ) : (
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                     <div style={styles.contentWrapperLeft}>

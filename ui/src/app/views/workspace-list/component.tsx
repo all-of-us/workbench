@@ -4,7 +4,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
-import {AlertDanger, AlertWarning} from 'app/components/alert';
+import {AlertDanger} from 'app/components/alert';
 import {
   Button,
   CardButton,
