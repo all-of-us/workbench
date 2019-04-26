@@ -25,23 +25,22 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
                                                      @Param("term") String term,
                                                      Pageable page);
 
-  @Query(value = "select c from CBCriteria c where domainId=:domain and type=:type and (match(synonyms, :modifiedTerm) > 0 or code like upper(concat(:term,'%'))) order by c.count desc")
+  @Query(value = "select c from CBCriteria c where domainId=:domain and type=:type and hierarchy=1 and (match(synonyms, :modifiedTerm) > 0 or code like upper(concat(:term,'%'))) order by c.count desc")
   List<CBCriteria> findCriteriaByDomainAndTypeForCodeOrName(@Param("domain") String domain,
                                                             @Param("type") String type,
                                                             @Param("modifiedTerm") String modifiedTerm,
                                                             @Param("term") String term,
                                                             Pageable page);
 
-  @Query(value = "select c from CBCriteria c where domainId = :domain and type = :type and match(synonyms, :term) > 0 order by c.count desc")
+  @Query(value = "select c from CBCriteria c where domainId = :domain and type = :type and hierarchy=1 and match(synonyms, :term) > 0 order by c.count desc")
   List<CBCriteria> findCriteriaByDomainAndTypeForName(@Param("domain") String domain,
                                                       @Param("type") String type,
                                                       @Param("term") String term,
                                                       Pageable page);
 
-  @Query(value = "select * from cb_criteria c where domain_id = 'DRUG' and type in ('ATC', 'BRAND') " +
-    "and c.is_selectable = 1 and (upper(c.name) like upper(concat('%',:value,'%')) or upper(c.code) like upper(concat('%',:value,'%'))) " +
-    "order by c.name asc limit :limit", nativeQuery = true)
-  List<CBCriteria> findDrugBrandOrIngredientByValue(@Param("value") String value,
+  @Query(value = "select * from cb_criteria c where domain_id = 'DRUG' and type in ('ATC', 'BRAND') and c.is_selectable = 1 and " +
+    "(upper(c.name) like upper(concat('%',:term,'%')) or upper(c.code) like upper(concat('%',:term,'%'))) order by c.name asc limit :limit", nativeQuery = true)
+  List<CBCriteria> findDrugBrandOrIngredientByValue(@Param("term") String term,
                                                     @Param("limit") Long limit);
 
   @Query(value = "select * from cb_criteria c inner join ( select cr.concept_id_2 from criteria_relationship cr join concept c1 on (cr.concept_id_2 = c1.concept_id " +
