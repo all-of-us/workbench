@@ -99,20 +99,6 @@ public class CriteriaDaoTest {
 
   //TODO:Remove freemabd
   @Test
-  public void findCriteriaChildrenByTypeAndParentId() throws Exception {
-    Criteria drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
-    Criteria drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "2", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
-    criteriaDao.save(drugCriteriaIngredient);
-    criteriaDao.save(drugCriteriaIngredient1);
-
-    final List<Criteria> drugList =
-      criteriaDao.findCriteriaChildrenByTypeAndParentId(TreeType.DRUG.name(), 2L);
-    assertEquals(drugCriteriaIngredient, drugList.get(0));
-    assertEquals(drugCriteriaIngredient1, drugList.get(1));
-  }
-
-  //TODO:Remove freemabd
-  @Test
   public void findCriteriaByType() throws Exception {
     Criteria icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
     criteriaDao.save(icd9Criteria1);

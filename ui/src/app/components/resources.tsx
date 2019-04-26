@@ -11,11 +11,11 @@ import {Cohort, ConceptSet} from 'generated/fetch';
 export const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook?: Function,
   onRenameCohort?: Function, onOpenJupyterLabNotebook?: any, onCloneResource?: Function,
-  onDeleteResource?: Function, onEditCohort?: Function, onReviewCohort?: Function,
-  onEditConceptSet?: Function
+  onCopyResource?: Function, onDeleteResource?: Function, onEditCohort?: Function,
+  onReviewCohort?: Function, onEditConceptSet?: Function
 }> = ({
         disabled, resourceType, onRenameNotebook = () => {}, onRenameCohort = () => {},
-        onOpenJupyterLabNotebook = () => {}, onCloneResource = () => {},
+        onOpenJupyterLabNotebook = () => {}, onCloneResource = () => {}, onCopyResource = () => {},
         onDeleteResource = () => {}, onEditCohort = () => {}, onReviewCohort = () => {},
         onEditConceptSet = () => {}
       }) => {

@@ -32,7 +32,6 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.db.model.User;
@@ -52,6 +51,7 @@ import org.pmiops.workbench.model.NamedParameterValue;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -146,7 +146,6 @@ public class DataSetController implements DataSetApiDelegate {
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
   }
-
 
   @Override
   public ResponseEntity<DataSet> createDataSet(String workspaceNamespace, String workspaceId,
@@ -312,7 +311,7 @@ public class DataSetController implements DataSetApiDelegate {
   ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> valueSetList, Domain d) {
     List<String> values = valueSetList.stream().map(valueSet -> valueSet.getValue())
         .collect(Collectors.toList());
-    values.add(0, "SENTINEL_PLACEHOLDER_VALUE");
+    values.add(0, "CORE_TABLE_FOR_DOMAIN");
     String domainAsName = d.toString().charAt(0) + d.toString().substring(1).toLowerCase();
 
     String valuesQuery = "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";

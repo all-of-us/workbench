@@ -11,9 +11,8 @@ import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
-@Table(name = "criteria_attribute")
-//TODO:Remove freemabd
-public class CriteriaAttribute {
+@Table(name = "cb_criteria_attribute")
+public class CBCriteriaAttribute {
 
   private long id;
   private long conceptId;
@@ -33,7 +32,7 @@ public class CriteriaAttribute {
     this.id = id;
   }
 
-  public CriteriaAttribute id(long id) {
+  public CBCriteriaAttribute id(long id) {
     this.id = id;
     return this;
   }
@@ -47,7 +46,7 @@ public class CriteriaAttribute {
     this.conceptId = conceptId;
   }
 
-  public CriteriaAttribute conceptId(long conceptId) {
+  public CBCriteriaAttribute conceptId(long conceptId) {
     this.conceptId = conceptId;
     return this;
   }
@@ -61,7 +60,7 @@ public class CriteriaAttribute {
     this.valueAsConceptId = valueAsConceptId;
   }
 
-  public CriteriaAttribute valueAsConceptId(long valueAsConceptId) {
+  public CBCriteriaAttribute valueAsConceptId(long valueAsConceptId) {
     this.valueAsConceptId = valueAsConceptId;
     return this;
   }
@@ -75,7 +74,7 @@ public class CriteriaAttribute {
     this.conceptName = conceptName;
   }
 
-  public CriteriaAttribute conceptName(String conceptName) {
+  public CBCriteriaAttribute conceptName(String conceptName) {
     this.conceptName = conceptName;
     return this;
   }
@@ -89,7 +88,7 @@ public class CriteriaAttribute {
     this.type = type;
   }
 
-  public CriteriaAttribute type(String type) {
+  public CBCriteriaAttribute type(String type) {
     this.type = type;
     return this;
   }
@@ -103,7 +102,7 @@ public class CriteriaAttribute {
     this.estCount = estCount;
   }
 
-  public CriteriaAttribute estCount(String estCount) {
+  public CBCriteriaAttribute estCount(String estCount) {
     this.estCount = estCount;
     return this;
   }
@@ -112,7 +111,7 @@ public class CriteriaAttribute {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    CriteriaAttribute that = (CriteriaAttribute) o;
+    CBCriteriaAttribute that = (CBCriteriaAttribute) o;
     return conceptId == that.conceptId &&
       valueAsConceptId == that.valueAsConceptId &&
       Objects.equals(conceptName, that.conceptName) &&
