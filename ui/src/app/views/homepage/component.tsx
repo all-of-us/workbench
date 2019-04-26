@@ -96,6 +96,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     accessTasksRemaining: boolean,
     betaAccessGranted: boolean,
     billingProjectInitialized: boolean,
+    dataUseAgreementCompleted: boolean,
     eraCommonsError: string,
     eraCommonsLinked: boolean,
     firstVisit: boolean,
@@ -115,6 +116,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       accessTasksRemaining: undefined,
       betaAccessGranted: undefined,
       billingProjectInitialized: false,
+      dataUseAgreementCompleted: undefined,
       eraCommonsError: '',
       eraCommonsLinked: undefined,
       firstVisit: undefined,
@@ -183,13 +185,15 @@ export const Homepage = withUserProfile()(class extends React.Component<
         this.setFirstVisit();
       }
       try {
-        this.setState({eraCommonsLinked: (!!profile.eraCommonsCompletionTime
-              || !!profile.eraCommonsBypassTime) });
+        this.setState({
+          eraCommonsLinked: !!profile.eraCommonsCompletionTime
+            || !!profile.eraCommonsBypassTime,
+          dataUseAgreementCompleted: !!profile.dataUseAgreementCompletionTime
+            || !!profile.dataUseAgreementBypassTime });
       } catch (ex) {
         this.setState({eraCommonsLinked: false});
         console.error('error fetching era commons linking status');
       }
-
       try {
         const result = await profileApi().syncComplianceTrainingStatus();
         this.setState({trainingCompleted: !!result.complianceTrainingCompletionTime
@@ -244,7 +248,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
   render() {
     const {billingProjectInitialized, betaAccessGranted, videoOpen, accessTasksLoaded,
         accessTasksRemaining, eraCommonsLinked, eraCommonsError, firstVisitTraining,
-        trainingCompleted, quickTour, videoLink} = this.state;
+        trainingCompleted, quickTour, videoLink, dataUseAgreementCompleted} = this.state;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -289,7 +293,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                         eraCommonsError={eraCommonsError}
                                         trainingCompleted={trainingCompleted}
                                         firstVisitTraining={firstVisitTraining}
-                                        betaAccessGranted={betaAccessGranted}/>
+                                        betaAccessGranted={betaAccessGranted}
+                                        dataUseAgreementCompleted={dataUseAgreementCompleted}/>
                 ) : (
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                     <div style={styles.contentWrapperLeft}>

@@ -58,11 +58,24 @@ export class ProfileStorageService {
       .retryWhen(ProfileStorageService.conflictRetryPolicy())
       .subscribe((profile) => {
         this.profile.next(profile);
-        userProfileStore.next({profile, reload: () => this.reload()});
+        this.nextUserProfileStore(profile);
         this.activeCall = false;
       }, (err) => {
         this.errorHandlingService.profileLoadError = true;
         this.activeCall = false;
       });
+  }
+
+  nextUserProfileStore(profile) {
+    userProfileStore.next({
+      profile,
+      reload: () => this.reload(),
+      updateCache: p => this.updateCache(p)
+    });
+  }
+
+  updateCache(profile) {
+    this.profile.next(profile);
+    this.nextUserProfileStore(profile);
   }
 }

@@ -8,6 +8,8 @@ import {ClrIcon} from 'app/components/icons';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
 import {environment} from 'environments/environment';
+import {navigate} from '../../utils/navigation';
+import * as fp from 'lodash/fp';
 
 const styles = reactStyles({
   registrationPage: {
@@ -48,6 +50,7 @@ const styles = reactStyles({
 
 export interface RegistrationDashboardProps {
   betaAccessGranted: boolean;
+  dataUseAgreementCompleted: boolean;
   eraCommonsLinked: boolean;
   eraCommonsError: string;
   trainingCompleted: boolean;
@@ -66,6 +69,7 @@ export class RegistrationDashboard extends
     };
     this.state.taskCompletionMap.set(0, props.trainingCompleted);
     this.state.taskCompletionMap.set(1, props.eraCommonsLinked);
+    this.state.taskCompletionMap.set(2, props.dataUseAgreementCompleted);
   }
 
   private registrationTasks = [
@@ -83,6 +87,13 @@ export class RegistrationDashboard extends
       buttonText: 'Login',
       completedText: 'Linked',
       onClick: RegistrationDashboard.redirectToNiH
+    }, {
+      title: 'Data Use Agreement',
+      description: 'This data use agreement describes how All of Us ' +
+        'Research Program data can and cannot be used',
+      buttonText: 'View & Sign',
+      completedText: 'Signed',
+      onClick: () => navigate(['data-use-agreement'])
     }
   ];
 
@@ -103,7 +114,9 @@ export class RegistrationDashboard extends
     if (i === 0) {
       return !taskCompletionMap.get(i);
     } else {
-      return !taskCompletionMap.get(i) && !this.isEnabled(i - 1);
+      return !taskCompletionMap.get(i)
+        && fp.filter(index => this.isEnabled(index),
+          fp.range(0, i)).length === 0;
     }
   }
 
