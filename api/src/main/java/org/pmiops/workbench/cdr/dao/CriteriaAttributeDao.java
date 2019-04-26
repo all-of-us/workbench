@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+//TODO:Remove freemabd
 public interface CriteriaAttributeDao extends CrudRepository<CriteriaAttribute, Long> {
 
   List<CriteriaAttribute> findCriteriaAttributeByConceptId(@Param("conceptId") Long conceptId);

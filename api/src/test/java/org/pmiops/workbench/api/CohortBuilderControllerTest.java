@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
@@ -88,6 +89,9 @@ public class CohortBuilderControllerTest {
   private CriteriaAttributeDao criteriaAttributeDao;
 
   @Autowired
+  private CBCriteriaAttributeDao cbCriteriaAttributeDao;
+
+  @Autowired
   private ConceptDao conceptDao;
 
   @Autowired
@@ -108,8 +112,8 @@ public class CohortBuilderControllerTest {
     ElasticSearchService elasticSearchService =
         new ElasticSearchService(criteriaDao, cloudStorageService, configProvider);
 
-    controller = new CohortBuilderController(bigQueryService,
-      participantCounter, criteriaDao, cbCriteriaDao, criteriaAttributeDao,
+    controller = new CohortBuilderController(bigQueryService, participantCounter,
+      criteriaDao, cbCriteriaDao, criteriaAttributeDao, cbCriteriaAttributeDao,
       cdrVersionDao, genderRaceEthnicityConceptProvider, cdrVersionService,
       elasticSearchService, configProvider);
 
