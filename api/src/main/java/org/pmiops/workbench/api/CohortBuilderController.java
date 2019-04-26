@@ -204,17 +204,24 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
     String matchExp = modifyKeywordMatch(term, domain);
-    List<Criteria> criteriaList;
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-
-    if (type == null) {
-      criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(domain, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      validateDomainAndType(domain, type);
+      List<CBCriteria> criteriaList = CriteriaType.SNOMED.toString().equals(type) ?
+        cbCriteriaDao.findCriteriaByDomainAndTypeForName(domain, type, matchExp, new PageRequest(0, resultLimit.intValue())) :
+        cbCriteriaDao.findCriteriaByDomainAndTypeForCodeOrName(domain, type, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
     } else {
-      criteriaList = domain.equals(TreeType.SNOMED.name()) ?
-        criteriaDao.findCriteriaByTypeAndSubtypeForName(domain, type, matchExp, new PageRequest(0, resultLimit.intValue())) :
-        criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(domain, type, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+      List<Criteria> criteriaList;
+      if (type == null) {
+        criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(domain, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+      } else {
+        criteriaList = domain.equals(TreeType.SNOMED.name()) ?
+          criteriaDao.findCriteriaByTypeAndSubtypeForName(domain, type, matchExp, new PageRequest(0, resultLimit.intValue())) :
+          criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(domain, type, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+      }
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
     }
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
 
     return ResponseEntity.ok(criteriaResponse);
   }
@@ -225,22 +232,28 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                              Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
-    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
-
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
-
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      final List<CBCriteria> criteriaList = cbCriteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
+    } else {
+      final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+    }
     return ResponseEntity.ok(criteriaResponse);
   }
 
   @Override
   public ResponseEntity<CriteriaListResponse> getDrugIngredientByConceptId(Long cdrVersionId, Long conceptId) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findDrugIngredientByConceptId(conceptId);
-
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
-
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      final List<CBCriteria> criteriaList = cbCriteriaDao.findDrugIngredientByConceptId(conceptId);
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
+    } else {
+      final List<Criteria> criteriaList = criteriaDao.findDrugIngredientByConceptId(conceptId);
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+    }
     return ResponseEntity.ok(criteriaResponse);
   }
 
@@ -338,20 +351,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
 
     if (configProvider.get().cohortbuilder.enableListSearch) {
-      Optional
-        .ofNullable(domain)
-        .orElseThrow(() -> new BadRequestException(String.format(DOMAIN_MESSAGE, domain)));
-      Arrays
-        .stream(DomainType.values())
-        .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
-        .findFirst()
-        .orElseThrow(() -> new BadRequestException(String.format(DOMAIN_MESSAGE, domain)));
-      Optional.ofNullable(type)
-        .ifPresent(t -> Arrays
-          .stream(CriteriaType.values())
-          .filter(critType -> critType.toString().equalsIgnoreCase(t))
-          .findFirst()
-          .orElseThrow(() -> new BadRequestException(String.format(TYPE_MESSAGE, t))));
+      validateDomainAndType(domain, type);
 
       List<CBCriteria> criteriaList;
       if (parentId != null) {
@@ -484,6 +484,26 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       })
       .collect(Collectors.joining())
       + "+\"[rank1]\"";
+  }
+
+  private void validateDomainAndType(String domain, String type) {
+    Optional
+      .ofNullable(domain)
+      .orElseThrow(() -> new BadRequestException(String.format(DOMAIN_MESSAGE, domain)));
+    Optional
+      .ofNullable(type)
+      .orElseThrow(() -> new BadRequestException(String.format(TYPE_MESSAGE, type)));
+    Arrays
+      .stream(DomainType.values())
+      .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
+      .findFirst()
+      .orElseThrow(() -> new BadRequestException(String.format(DOMAIN_MESSAGE, domain)));
+    Optional.ofNullable(type)
+      .ifPresent(t -> Arrays
+        .stream(CriteriaType.values())
+        .filter(critType -> critType.toString().equalsIgnoreCase(t))
+        .findFirst()
+        .orElseThrow(() -> new BadRequestException(String.format(TYPE_MESSAGE, t))));
   }
 
 }
