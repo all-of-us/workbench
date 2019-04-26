@@ -353,20 +353,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (configProvider.get().cohortbuilder.enableListSearch) {
       String domainMessage = "Bad Request: Please provide a valid criteria domain. %s is not valid.";
       String typeMessage = "Bad Request: Please provide a valid criteria type. %s is not valid.";
-      Optional
-        .ofNullable(domain)
-        .orElseThrow(() -> new BadRequestException(String.format(domainMessage, domain)));
-      Arrays
-        .stream(DomainType.values())
-        .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
-        .findFirst()
-        .orElseThrow(() -> new BadRequestException(String.format(domainMessage, domain)));
-      Optional.ofNullable(type)
-        .ifPresent(t -> Arrays
-          .stream(CriteriaType.values())
-          .filter(critType -> critType.toString().equalsIgnoreCase(t))
-          .findFirst()
-          .orElseThrow(() -> new BadRequestException(String.format(typeMessage, t))));
+      validateDomainAndType(domain, type);
 
       List<CBCriteria> criteriaList;
       if (parentId != null) {
