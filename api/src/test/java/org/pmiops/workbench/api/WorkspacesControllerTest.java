@@ -253,8 +253,7 @@ public class WorkspacesControllerTest {
 
   @Before
   public void setUp() {
-    User user = createUser(LOGGED_IN_USER_EMAIL);
-    currentUser = user;
+    currentUser = createUser(LOGGED_IN_USER_EMAIL);;
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
     //set the db name to be empty since test cases currently
@@ -274,8 +273,6 @@ public class WorkspacesControllerTest {
     when(cloudStorageService.readAllDemoCohorts()).thenReturn(Collections.singletonList(cohort));
 
     doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
-
-    // doAnswer(returnsFirstArg()).when(workspaceDao).save(any(org.pmiops.workbench.db.model.Workspace.class));
 
     CLOCK.setInstant(NOW);
   }
@@ -1137,8 +1134,7 @@ public class WorkspacesControllerTest {
     cloner.setUserId(456L);
     cloner.setFreeTierBillingProjectName("TestBillingProject1");
     cloner.setDisabled(false);
-    cloner = userDao.save(cloner);
-    currentUser = cloner;
+    currentUser = userDao.save(cloner);
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.READER);
@@ -1280,8 +1276,7 @@ public class WorkspacesControllerTest {
     cloner.setUserId(456L);
     cloner.setFreeTierBillingProjectName("TestBillingProject1");
     cloner.setDisabled(false);
-    cloner = userDao.save(cloner);
-    currentUser = cloner;
+    currentUser = userDao.save(cloner);
 
     // Permission denied manifests as a 404 in Firecloud.
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
@@ -1674,10 +1669,10 @@ public class WorkspacesControllerTest {
     String newNotebookName = "new";
     String expectedNotebookName = newNotebookName + ".ipynb";
 
-    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
-    copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
-    copyNotebookRequest.setToWorkspaceNamespace(toWorkspace.getNamespace());
-    copyNotebookRequest.setNewName(newNotebookName);
+    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest()
+        .toWorkspaceName(toWorkspace.getName())
+        .toWorkspaceNamespace(toWorkspace.getNamespace())
+        .newName(newNotebookName);
 
     workspacesController.copyNotebook(
         fromWorkspace.getNamespace(),
@@ -1704,10 +1699,10 @@ public class WorkspacesControllerTest {
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new.ipynb";
 
-    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
-    copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
-    copyNotebookRequest.setToWorkspaceNamespace(toWorkspace.getNamespace());
-    copyNotebookRequest.setNewName(newNotebookName);
+    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest()
+        .toWorkspaceName(toWorkspace.getName())
+        .toWorkspaceNamespace(toWorkspace.getNamespace())
+        .newName(newNotebookName);
 
     workspacesController.copyNotebook(
         fromWorkspace.getNamespace(),
@@ -1730,10 +1725,11 @@ public class WorkspacesControllerTest {
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new";
 
-    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
-    copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
-    copyNotebookRequest.setToWorkspaceNamespace(toWorkspace.getNamespace());
-    copyNotebookRequest.setNewName(newNotebookName);
+    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest()
+        .toWorkspaceName(toWorkspace.getName())
+        .toWorkspaceNamespace(toWorkspace.getNamespace())
+        .newName(newNotebookName);
+
 
     workspacesController.copyNotebook(
         fromWorkspace.getNamespace(),
@@ -1744,7 +1740,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ForbiddenException.class)
   public void copyNotebook_hasReadPermissions() {
-    Workspace fromWorkspace = createStubbedWorkspace("fromWorkspaceNs", "fromworkspae", WorkspaceAccessLevel.NO_ACCESS);
+    Workspace fromWorkspace = createStubbedWorkspace("fromWorkspaceNs", "fromworkspace", WorkspaceAccessLevel.NO_ACCESS);
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
 
@@ -1752,10 +1748,11 @@ public class WorkspacesControllerTest {
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new";
 
-    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
-    copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
-    copyNotebookRequest.setToWorkspaceNamespace(toWorkspace.getNamespace());
-    copyNotebookRequest.setNewName(newNotebookName);
+    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest()
+        .toWorkspaceName(toWorkspace.getName())
+        .toWorkspaceNamespace(toWorkspace.getNamespace())
+        .newName(newNotebookName);
+
 
     workspacesController.copyNotebook(
         fromWorkspace.getNamespace(),
@@ -1774,10 +1771,10 @@ public class WorkspacesControllerTest {
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new.ipynb";
 
-    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest();
-    copyNotebookRequest.setToWorkspaceName(toWorkspace.getName());
-    copyNotebookRequest.setToWorkspaceNamespace(toWorkspace.getNamespace());
-    copyNotebookRequest.setNewName(newNotebookName);
+    CopyNotebookRequest copyNotebookRequest = new CopyNotebookRequest()
+        .toWorkspaceName(toWorkspace.getName())
+        .toWorkspaceNamespace(toWorkspace.getNamespace())
+        .newName(newNotebookName);
 
     BlobId newBlobId = BlobId.of(BUCKET_NAME, "notebooks/" + newNotebookName);
 
