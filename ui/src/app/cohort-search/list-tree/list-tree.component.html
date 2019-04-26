@@ -1,0 +1,34 @@
+<div *ngIf="isEmpty" class="alert alert-warning">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-icon-wrapper">
+        <clr-icon class="alert-icon" shape="exclamation-triangle"></clr-icon>
+      </div>
+      <span class="alert-text">
+        A problem occurred and we were not able to retrieve the requested data
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="dropdown-search-container">
+  <div [ngClass]="{'condition-dropdown' : showDropDown}">
+    <ng-container *ngIf="showDropDown">
+      <crit-code-dropdown (onOptionChange)="optionChange($event)" [_type]="_type"></crit-code-dropdown>
+    </ng-container>
+  </div>
+  <div [ngClass]="showDropDown ? 'search-container' : 'search-width'">
+    <app-list-search-bar *ngIf="showSearch" [_type]="_type"></app-list-search-bar>
+  </div>
+</div>
+
+<div class="tree-container" [class.ingredients]="ingredients.length > 0">
+  <div class="tree-header">
+    <button class="btn btn-link" (click)="back()">Return to list</button>
+  </div>
+  <crit-list-node *ngFor="let item of children" [node]="item"></crit-list-node>
+</div>
+
+<div *ngIf="loading" class="spinner root-spinner">
+  Loading...
+</div>

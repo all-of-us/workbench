@@ -8,6 +8,7 @@ import {baseStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
+import {navigate} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 const styles = reactStyles({
@@ -49,6 +50,7 @@ const styles = reactStyles({
 
 export interface RegistrationDashboardProps {
   betaAccessGranted: boolean;
+  dataUseAgreementCompleted: boolean;
   eraCommonsLinked: boolean;
   eraCommonsError: string;
   trainingCompleted: boolean;
@@ -71,6 +73,7 @@ export class RegistrationDashboard extends
     this.state.taskCompletionMap.set(0, props.twoFactorAuthCompleted);
     this.state.taskCompletionMap.set(1, props.trainingCompleted);
     this.state.taskCompletionMap.set(2, props.eraCommonsLinked);
+    this.state.taskCompletionMap.set(3, props.dataUseAgreementCompleted);
   }
 
   private registrationTasks = [
@@ -96,6 +99,13 @@ export class RegistrationDashboard extends
       buttonText: 'Login',
       completedText: 'Linked',
       onClick: RegistrationDashboard.redirectToNiH
+    }, {
+      title: 'Data Use Agreement',
+      description: 'This data use agreement describes how All of Us ' +
+        'Research Program data can and cannot be used',
+      buttonText: 'View & Sign',
+      completedText: 'Signed',
+      onClick: () => navigate(['data-use-agreement'])
     }
   ];
 

@@ -24,6 +24,7 @@ import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
 import {DataPageComponent} from 'app/views/data-page/component';
+import {DataUseAgreementComponent} from 'app/views/data-use-agreement/component';
 import {DataSetPageComponent} from 'app/views/dataset-page/component';
 import {environment} from 'environments/environment';
 import {BreadcrumbType, NavStore} from './utils/navigation';
@@ -58,6 +59,10 @@ const routes: Routes = [
         path: 'nih-callback',
         component: HomepageComponent,
         data: {title: 'Homepage'},
+      }, {
+        path: 'data-use-agreement',
+        component: DataUseAgreementComponent,
+        data: {title: 'Data Use Agreement'}
       }, {
         path: 'workspaces',
         children: [

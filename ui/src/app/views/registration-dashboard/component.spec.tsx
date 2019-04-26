@@ -22,7 +22,8 @@ describe('RegistrationDashboard', () => {
       trainingCompleted: false,
       firstVisitTraining: true,
       betaAccessGranted: true,
-      twoFactorAuthCompleted: false
+      twoFactorAuthCompleted: false,
+      dataUseAgreementCompleted: false
     };
   });
 
@@ -68,6 +69,7 @@ describe('RegistrationDashboard', () => {
     props.eraCommonsLinked = true;
     props.trainingCompleted = true;
     props.twoFactorAuthCompleted = true;
+    props.dataUseAgreementCompleted = true;
     const wrapper = component();
     expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
   });

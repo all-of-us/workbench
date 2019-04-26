@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {attributesStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -9,6 +9,13 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import * as React from 'react';
 
 const styles = reactStyles({
+  searchContainer: {
+    position: 'absolute',
+    width: '95%',
+    padding: '0.4rem 0',
+    background: '#ffffff',
+    zIndex: 10,
+  },
   searchBar: {
     height: '40px',
     width: '100%',
@@ -41,13 +48,19 @@ const styles = reactStyles({
     opacity: 0.4,
     cursor: 'not-allowed'
   },
+  treeIcon: {
+    color: '#0086C1',
+    cursor: 'pointer',
+    fontSize: '1.15rem'
+  },
   table: {
-    width: '100%',
-    margin: '1rem 0',
+    width: '99%',
+    margin: '3rem 0 1rem',
     fontSize: '12px',
     textAlign: 'left',
     border: '1px solid #c8c8c8',
     borderRadius: '3px',
+    tableLayout: 'fixed',
   },
   columnHeader: {
     padding: '10px',
@@ -77,14 +90,17 @@ const styles = reactStyles({
   nameDiv: {
     width: '94%',
     float: 'left',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
   }
 });
 
 interface ListSearchProps {
-  addAttributes: Function;
+  hierarchy: Function;
   selections: Array<string>;
-  workspace: WorkspaceData;
   wizard: any;
+  workspace: WorkspaceData;
 }
 
 export const ListSearch = withCurrentWorkspace()(
@@ -120,7 +136,32 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     launchAttributes = (row: any) => {
-      this.props.addAttributes(row);
+      attributesStore.next(row);
+    }
+
+    showHierarchy = (row: any) => {
+      // this.props.hierarchy(row);
+      // temp data until new api exists
+      const tempRow = {
+        code: 'LP15426-7',
+        conceptId: 40785861,
+        count: 388001,
+        domainId: '',
+        group: true,
+        hasAncestorData: null,
+        hasAttributes: false,
+        hasHierarchy: null,
+        id: 379527,
+        isStandard: null,
+        name: 'Aspartate aminotransferase',
+        parentId: 379173,
+        path: '379101.379103.379133.379173',
+        selectable: false,
+        subtype: 'LAB',
+        type: 'MEAS',
+        value: null
+      };
+      this.props.hierarchy(tempRow);
     }
 
     isSelected = (row: any) => {
@@ -135,10 +176,12 @@ export const ListSearch = withCurrentWorkspace()(
 
     render() {
       const {data, loading} = this.state;
-      return <div>
-        <div style={styles.searchBar}>
-          <ClrIcon shape='search' size='18'/>
-          <TextInput style={styles.searchInput} onKeyPress={this.handleInput} />
+      return <div style={{overflow: 'auto'}}>
+        <div style={styles.searchContainer}>
+          <div style={styles.searchBar}>
+            <ClrIcon shape='search' size='18'/>
+            <TextInput style={styles.searchInput} onKeyPress={this.handleInput} />
+          </div>
         </div>
         {data && <table className='p-datatable' style={styles.table}>
           <thead className='p-datatable-thead'>
@@ -146,13 +189,16 @@ export const ListSearch = withCurrentWorkspace()(
               <th style={styles.columnHeader}>Name</th>
               <th style={{...styles.columnHeader, width: '15%'}}>Vocab</th>
               <th style={{...styles.columnHeader, width: '15%'}}>Count</th>
+              <th style={{...styles.columnHeader, padding: '0.2rem 0.5rem', width: '10%'}}>
+                More Info
+              </th>
             </tr>
           </thead>
           <tbody className='p-datatable-tbody'>
             {data.map((row, r) => {
               return <tr key={r}>
                 <td style={styles.columnBody}>
-                  <div style={{...styles.selectDiv}}>
+                  {row.selectable && <div style={{...styles.selectDiv}}>
                     {row.hasAttributes &&
                       <ClrIcon style={styles.attrIcon}
                         shape='slider' dir='right' size='20'
@@ -166,11 +212,18 @@ export const ListSearch = withCurrentWorkspace()(
                         shape='plus-circle' size='16'
                         onClick={() => this.selectItem(row)}/>
                     }
-                  </div>
+                  </div>}
                   <div style={{...styles.nameDiv}}>{row.name}</div>
                 </td>
                 <td style={styles.columnBody}>{row.type}</td>
                 <td style={styles.columnBody}>{row.count.toLocaleString()}</td>
+                <td style={{...styles.columnBody, padding: '0.2rem'}}>
+                  {row.hasHierarchy &&
+                    <i className='pi pi-sitemap'
+                      style={styles.treeIcon}
+                      onClick={() => this.showHierarchy(row)}/>
+                  }
+                </td>
               </tr>;
             })}
           </tbody>
@@ -186,10 +239,10 @@ export const ListSearch = withCurrentWorkspace()(
   template: '<div #root></div>'
 })
 export class ListSearchComponent extends ReactWrapperBase {
-  @Input('addAttributes') addAttributes: ListSearchProps['addAttributes'];
+  @Input('hierarchy') hierarchy: ListSearchProps['hierarchy'];
   @Input('selections') selections: ListSearchProps['selections'];
   @Input('wizard') wizard: ListSearchProps['wizard'];
   constructor() {
-    super(ListSearch, ['addAttributes', 'selections', 'wizard']);
+    super(ListSearch, ['hierarchy', 'selections', 'wizard']);
   }
 }

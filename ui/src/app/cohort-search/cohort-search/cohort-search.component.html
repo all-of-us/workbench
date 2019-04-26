@@ -40,6 +40,7 @@
 
     <div class="col-xl-4 col-lg-6" id="list-exclude-groups" style="margin-top: 1.5rem">
       <app-list-search-group-list
+        *ngIf="includeSize > 0"
         [role]="'excludes'">
       </app-list-search-group-list>
     </div>

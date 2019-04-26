@@ -25,6 +25,7 @@ describe('WorkspaceList', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
   let profileApi: ProfileApiStub;
   const reload = jest.fn();
+  const updateCache = jest.fn();
 
   const component = () => {
     return mount(<WorkspaceList/>);
@@ -37,10 +38,10 @@ describe('WorkspaceList', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+      userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload});
+    userProfileStore.next({profile, reload, updateCache});
   });
 
   it('displays the correct number of workspaces', async () => {
