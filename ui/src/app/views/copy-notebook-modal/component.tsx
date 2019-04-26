@@ -9,6 +9,7 @@ import { FileDetail, Workspace } from 'generated/fetch';
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
+import { navigate } from 'app/utils/navigation';
 
 enum RequestState { UNSENT, ERROR, SUCCESS }
 
@@ -105,7 +106,7 @@ CopyNotebookModalState> {
   }
 
   goToDestinationWorkspace() {
-    window.location.href = this.getWorkspaceUrl(this.state.destination);
+    navigate(['workspaces', this.state.destination.namespace, this.state.destination.id, 'notebooks'])
   }
 
   getWorkspaceUrl(workspace: Workspace) {
@@ -159,7 +160,7 @@ CopyNotebookModalState> {
     } else if (this.state.requestState === RequestState.SUCCESS) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
-          onClick={this.goToDestinationWorkspace}>
+          onClick={() => this.goToDestinationWorkspace()}>
           Go to Copied Notebook
         </Button>
       );

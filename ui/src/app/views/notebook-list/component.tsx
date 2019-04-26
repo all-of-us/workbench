@@ -41,6 +41,12 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     this.loadNotebooks();
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.props.workspace.namespace !== prevProps.workspace.namespace || this.props.workspace.id !== prevProps.workspace.id) {
+      this.loadNotebooks();
+    }
+  }
+
   private async loadNotebooks() {
     try {
       const {workspace: {namespace, id}} = this.props;
