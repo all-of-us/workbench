@@ -253,7 +253,7 @@ public class WorkspacesControllerTest {
 
   @Before
   public void setUp() {
-    currentUser = createUser(LOGGED_IN_USER_EMAIL);;
+    currentUser = createUser(LOGGED_IN_USER_EMAIL);
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
     //set the db name to be empty since test cases currently
