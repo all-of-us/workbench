@@ -42,9 +42,14 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.workspace.namespace !== prevProps.workspace.namespace || this.props.workspace.id !== prevProps.workspace.id) {
+    if (this.workspaceChanged(prevProps)) {
       this.loadNotebooks();
     }
+  }
+
+  private workspaceChanged(prevProps) {
+    return this.props.workspace.namespace !== prevProps.workspace.namespace ||
+      this.props.workspace.id !== prevProps.workspace.id;
   }
 
   private async loadNotebooks() {

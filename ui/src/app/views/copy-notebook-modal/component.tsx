@@ -8,8 +8,8 @@ import { FileDetail, Workspace } from 'generated/fetch';
 
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
-import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 import { navigate } from 'app/utils/navigation';
+import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 enum RequestState { UNSENT, ERROR, SUCCESS }
 
@@ -106,7 +106,9 @@ CopyNotebookModalState> {
   }
 
   goToDestinationWorkspace() {
-    navigate(['workspaces', this.state.destination.namespace, this.state.destination.id, 'notebooks'])
+    navigate(
+      ['workspaces', this.state.destination.namespace, this.state.destination.id, 'notebooks']
+    );
   }
 
   getWorkspaceUrl(workspace: Workspace) {
@@ -136,7 +138,8 @@ CopyNotebookModalState> {
   }
 
   getCloseButtonText() {
-    if (this.state.requestState === RequestState.UNSENT || this.state.requestState === RequestState.ERROR) {
+    if (this.state.requestState === RequestState.UNSENT ||
+      this.state.requestState === RequestState.ERROR) {
       return 'Close';
     } else if (this.state.requestState === RequestState.SUCCESS) {
       return 'Stay Here';
@@ -144,7 +147,8 @@ CopyNotebookModalState> {
   }
 
   renderActionButton() {
-    if (this.state.requestState === RequestState.UNSENT || this.state.requestState === RequestState.ERROR) {
+    if (this.state.requestState === RequestState.UNSENT ||
+      this.state.requestState === RequestState.ERROR) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
           disabled={this.state.destination === null || this.state.loading}
@@ -180,7 +184,7 @@ CopyNotebookModalState> {
             value={this.state.newName}
             onChange={v => this.setState({ newName: v })}
         />
-        {this.state.requestState === RequestState.ERROR && 
+        {this.state.requestState === RequestState.ERROR &&
           <ValidationError> {this.state.errorMsg} </ValidationError>}
       </div>
     );
