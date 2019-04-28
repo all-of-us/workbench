@@ -329,34 +329,6 @@ public class DataSetControllerTest {
     );
   }
 
-
-
-  @Test(expected = BadRequestException.class)
-  public void testGetQueryFailsWithNoCohort() {
-    DataSetRequest dataSet = buildEmptyDataSet();
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-
-    dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void testGetQueryFailsWithNoConceptSet() {
-    DataSetRequest dataSet = buildEmptyDataSet();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-
-    dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
-  }
-
-  @Test
-  public void testGetQueryDropsQueriesWithNoValue() {
-    DataSetRequest dataSet = buildEmptyDataSet();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-
-    DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
-    assertThat(response.getQueryList()).isEmpty();
-  }
-
   private List<DomainValuePair> mockDomainValuePair() {
     List<DomainValuePair> domainValues = new ArrayList<>();
     DomainValuePair domainValuePair = new DomainValuePair();
@@ -382,6 +354,32 @@ public class DataSetControllerTest {
     });
     doReturn(values).when(tableResultMock).getValues();
     doReturn(tableResultMock).when(bigQueryService).executeQuery(any());
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testGetQueryFailsWithNoCohort() {
+    DataSetRequest dataSet = buildEmptyDataSet();
+    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+
+    dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testGetQueryFailsWithNoConceptSet() {
+    DataSetRequest dataSet = buildEmptyDataSet();
+    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
+
+    dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
+  }
+
+  @Test
+  public void testGetQueryDropsQueriesWithNoValue() {
+    DataSetRequest dataSet = buildEmptyDataSet();
+    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
+    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+
+    DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
+    assertThat(response.getQueryList()).isEmpty();
   }
 
   @Test
