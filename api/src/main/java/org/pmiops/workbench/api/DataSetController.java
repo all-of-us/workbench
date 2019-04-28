@@ -60,7 +60,7 @@ public class DataSetController implements DataSetApiDelegate {
   private Provider<User> userProvider;
   private final WorkspaceService workspaceService;
 
-  private static int NO_OF_PREIVEW_ROWS = 20;
+  private static int NO_OF_PREVIEW_ROWS = 20;
 
 
   @Autowired
@@ -198,7 +198,7 @@ public class DataSetController implements DataSetApiDelegate {
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
     bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
-      String query = queryJobConfiguration.getQuery().concat(" LIMIT "+ NO_OF_PREIVEW_ROWS);
+      String query = queryJobConfiguration.getQuery().concat(" LIMIT "+ NO_OF_PREVIEW_ROWS);
       queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
       TableResult queryResponse = bigQueryService.executeQuery(bigQueryService
