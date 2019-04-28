@@ -5,7 +5,6 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Streams;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -16,6 +15,8 @@ import java.util.List;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 import javax.inject.Provider;
 
@@ -29,7 +30,6 @@ import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSet;
@@ -132,11 +132,11 @@ public class DataSetController implements DataSetApiDelegate {
           result.setName(dataSet.getName());
           Iterable<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
               conceptSetDao.findAll(dataSet.getConceptSetId());
-          result.setConceptSets(Streams.stream(conceptSets)
+          result.setConceptSets(StreamSupport.stream(conceptSets.spliterator(), false)
               .map(conceptSet -> toClientConceptSet(conceptSet)).collect(Collectors.toList()));
 
           Iterable<Cohort> cohorts = cohortDao.findAll(dataSet.getCohortSetId());
-          result.setCohorts(Streams.stream(cohorts)
+          result.setCohorts(StreamSupport.stream(cohorts.spliterator(), false)
                 .map(CohortsController.TO_CLIENT_COHORT)
                 .collect(Collectors.toList()));
           result.setDescription(dataSet.getDescription());
@@ -153,7 +153,7 @@ public class DataSetController implements DataSetApiDelegate {
     if (!conceptSet.getConceptIds().isEmpty()) {
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts =
           conceptDao.findAll(conceptSet.getConceptIds());
-      result.setConcepts(Streams.stream(concepts)
+      result.setConcepts(StreamSupport.stream(concepts.spliterator(), false)
           .map(ConceptsController.TO_CLIENT_CONCEPT)
           .collect(Collectors.toList()));
 
@@ -197,27 +197,22 @@ public class DataSetController implements DataSetApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
-    int noOfValues = dataSet.getValues().size();
-
     bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
       String query = queryJobConfiguration.getQuery().concat(" LIMIT "+ NO_OF_PREIVEW_ROWS);
       queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
-      TableResult valuesLinking = bigQueryService.executeQuery(bigQueryService
+      TableResult queryResponse = bigQueryService.executeQuery(bigQueryService
           .filterBigQueryConfig(queryJobConfiguration));
 
-      List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
+      // Construct a list of all values with empty results.
+      List<DataSetPreviewValueList> valuePreviewList =
+          dataSet.getValues().stream().filter(value -> value.getDomain().toString().equals(domain))
+              .map(value -> new DataSetPreviewValueList().value(value.getValue())).collect(Collectors.toList());;
 
-      valuesLinking.getValues().forEach(valueLink -> {
-        int index = 0;
-        while (index < noOfValues) {
-          if (valuePreviewList.size() <= index) {
-            valuePreviewList.add(index, new DataSetPreviewValueList()
-                .value(dataSet.getValues().get(index).getValue())
-                .queryValue(new ArrayList<String>()));
-          }
-          valuePreviewList.get(index).getQueryValue().add(valueLink.get(index++).getValue().toString());
-        }
+      queryResponse.getValues().forEach(fieldValueList -> {
+        IntStream.range(0, fieldValueList.size()).forEach(columnNumber -> {
+          valuePreviewList.get(columnNumber).addQueryValueItem(fieldValueList.get(columnNumber).getValue().toString());
+        });
       });
       previewQueryResponse.addDomainValueItem(new DataSetPreviewList().domain(domain).values(valuePreviewList));
     });

@@ -41,23 +41,7 @@ import java.util.stream.Collectors;
  *
  * This is used to store the data pulled out of the linking table in bigquery.
  */
-class ValuesLinkingPair {
-  private List<String> selects;
-  private List<String> joins;
 
-  ValuesLinkingPair(List<String> selects, List<String> joins) {
-    this.selects = selects;
-    this.joins = joins;
-  }
-
-  public List<String> getSelects() {
-    return this.selects;
-  }
-
-  public List<String> getJoins() {
-    return this.joins;
-  }
-}
 
 /*
  * A subclass used to store a source and a standard concept ID column name.
@@ -82,6 +66,25 @@ class DomainConceptIds {
 @Service
 public class DataSetServiceImpl implements DataSetService {
 
+  @VisibleForTesting
+  public static class ValuesLinkingPair {
+    private List<String> selects;
+    private List<String> joins;
+
+    public ValuesLinkingPair(List<String> selects, List<String> joins) {
+      this.selects = selects;
+      this.joins = joins;
+    }
+
+    private List<String> getSelects() {
+      return this.selects;
+    }
+
+    private List<String> getJoins() {
+      return this.joins;
+    }
+  }
+
   private ParticipantCounter participantCounter;
   private BigQueryService bigQueryService;
   private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
@@ -96,7 +99,8 @@ public class DataSetServiceImpl implements DataSetService {
   CohortDao cohortDao;
 
   @Autowired
-  DataSetServiceImpl(BigQueryService bigQueryService,
+  @VisibleForTesting
+  public DataSetServiceImpl(BigQueryService bigQueryService,
       CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
@@ -131,7 +135,7 @@ public class DataSetServiceImpl implements DataSetService {
   public Map<String, QueryJobConfiguration> generateQuery(DataSetRequest dataSet) {
     CdrBigQuerySchemaConfig bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
 
-    Map dataSetUtil = new HashMap();
+    Map<String, QueryJobConfiguration> dataSetUtil = new HashMap<>();
     List<Cohort> cohortsSelected = this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds());
     List<org.pmiops.workbench.db.model.ConceptSet> conceptSetsSelected =
         this.conceptSetDao.findAllByConceptSetIdIn(dataSet.getConceptSetIds());
@@ -222,7 +226,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @VisibleForTesting
-  ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> valueSetList, Domain d) {
+  public ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> valueSetList, Domain d) {
     List<String> values = valueSetList.stream().map(valueSet -> valueSet.getValue())
         .collect(Collectors.toList());
     values.add(0, "CORE_TABLE_FOR_DOMAIN");
