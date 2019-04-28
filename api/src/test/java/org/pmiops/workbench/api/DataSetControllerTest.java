@@ -48,6 +48,8 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
@@ -162,6 +164,9 @@ public class DataSetControllerTest {
   Provider<User> userProvider;
 
   @Autowired
+  NotebooksService notebooksService;
+
+  @Autowired
   UserRecentResourceService userRecentResourceService;
 
   @Autowired
@@ -175,6 +180,7 @@ public class DataSetControllerTest {
 
   @TestConfiguration
   @Import({CohortFactoryImpl.class,
+      NotebooksServiceImpl.class,
       TestBigQueryCdrSchemaConfig.class,
       UserService.class,
       WorkspacesController.class,
@@ -206,8 +212,7 @@ public class DataSetControllerTest {
         cohortDao, conceptDao, conceptSetDao, dataSetService,participantCounter, userProvider, workspaceService);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
-            userProvider, fireCloudService, cloudStorageService, CLOCK, userService,
-            userRecentResourceService);
+            userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
     CohortsController cohortsController = new CohortsController(workspaceService, cohortDao, cdrVersionDao, cohortFactory,
         cohortReviewDao, conceptSetDao, cohortMaterializationService, userProvider, CLOCK,
         cdrVersionService, userRecentResourceService);

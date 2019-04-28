@@ -7,7 +7,6 @@ import com.google.common.base.Strings;
 
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -27,8 +26,9 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.ConceptSet;
@@ -61,9 +61,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   // If we later decide to tune this value, consider moving to the WorkbenchConfig.
   private static final int MAX_NOTEBOOK_SIZE_MB = 100;
   // "directory" for notebooks, within the workspace cloud storage bucket.
-  private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
-  private static final Pattern NOTEBOOK_PATTERN =
-      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
+  private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY;
+  private static final Pattern NOTEBOOK_PATTERN = NotebooksService.NOTEBOOK_PATTERN;
 
   private final WorkspaceService workspaceService;
   private final WorkspaceMapper workspaceMapper;
@@ -76,8 +75,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final FireCloudService fireCloudService;
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
+  private final NotebooksService notebooksService;
   private final UserService userService;
-  private final UserRecentResourceService userRecentResourceService;
 
   @Autowired
   WorkspacesController(
@@ -92,8 +91,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Clock clock,
-      UserService userService,
-      UserRecentResourceService userRecentResourceService) {
+      NotebooksService notebooksService,
+      UserService userService) {
     this.workspaceService = workspaceService;
     this.workspaceMapper = workspaceMapper;
     this.cdrVersionDao = cdrVersionDao;
@@ -105,8 +104,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.fireCloudService = fireCloudService;
     this.cloudStorageService = cloudStorageService;
     this.clock = clock;
+    this.notebooksService = notebooksService;
     this.userService = userService;
-    this.userRecentResourceService = userRecentResourceService;
   }
 
   @VisibleForTesting
@@ -151,8 +150,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return new FirecloudWorkspaceId(namespace, strippedName);
   }
 
-  private org.pmiops.workbench.firecloud.model.Workspace
-  attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
+  private org.pmiops.workbench.firecloud.model.Workspace attemptFirecloudWorkspaceCreation(
+      FirecloudWorkspaceId workspaceId) {
     fireCloudService.createWorkspace(workspaceId.getWorkspaceNamespace(),
         workspaceId.getWorkspaceName());
     return fireCloudService.getWorkspace(workspaceId.getWorkspaceNamespace(),
@@ -305,26 +304,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
     workspaceService.getDao().delete(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace,
-      String workspaceId) {
-    List<FileDetail> fileList = new ArrayList<>();
-    try {
-      org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
-          fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
-              .getWorkspace();
-      String bucketName = fireCloudWorkspace.getBucketName();
-      fileList = getFilesFromNotebooks(bucketName);
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      if (e.getCode() == 404) {
-        throw new NotFoundException(String.format("Workspace %s/%s not found",
-            workspaceNamespace, workspaceId));
-      }
-      throw new ServerErrorException(e);
-    }
-    return ResponseEntity.ok(fileList);
   }
 
   @Override
@@ -617,112 +596,58 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<FileDetail> renameNotebook(String workspace, String workspaceName,
-      NotebookRename rename) {
-    String newName = rename.getNewName();
-    if (!newName.matches("^.+\\.ipynb")) {
-      newName = newName + ".ipynb";
+  public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace,
+      String workspaceId) {
+    List<FileDetail> fileList = notebooksService.getNotebooks(workspaceNamespace, workspaceId);
+    return ResponseEntity.ok(fileList);
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> deleteNotebook(String workspace, String workspaceName,
+      String notebookName) {
+    notebooksService.deleteNotebook(workspace, workspaceName, notebookName);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<FileDetail> copyNotebook(String fromWorkspaceNamespace, String fromWorkspaceId,
+      String fromNotebookName, CopyNotebookRequest copyNotebookRequest) {
+    FileDetail fileDetail;
+    try {
+      fileDetail = notebooksService.copyNotebook(fromWorkspaceNamespace, fromWorkspaceId,
+          fromNotebookName,
+          copyNotebookRequest.getToWorkspaceNamespace(), copyNotebookRequest.getToWorkspaceName(),
+          copyNotebookRequest.getNewName());
+    } catch (BlobAlreadyExistsException e) {
+      throw new BadRequestException("File already exists at copy destination");
     }
-    FileDetail fileDetail = notebookCloneOperation(workspace, workspaceName, rename.getName(),
-        newName);
-    notebookDeleteOperation(workspace, workspaceName, rename.getName());
+
     return ResponseEntity.ok(fileDetail);
   }
 
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(String workspace, String workspaceName,
       String notebookName) {
-    String newName = notebookName.replaceAll("\\.ipynb", " ") + "Clone.ipynb";
-    FileDetail fileDetail = notebookCloneOperation(workspace, workspaceName, notebookName, newName);
+    FileDetail fileDetail;
+    try {
+      fileDetail = notebooksService.cloneNotebook(workspace, workspaceName, notebookName);
+    } catch (BlobAlreadyExistsException e) {
+      throw new BadRequestException("File already exists at copy destination");
+    }
+
     return ResponseEntity.ok(fileDetail);
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteNotebook(String workspace, String workspaceName,
-      String notebookName) {
-    notebookDeleteOperation(workspace, workspaceName, notebookName);
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  private FileDetail notebookCloneOperation(String workspace, String workspaceName,
-      String notebookName, String newName) {
-    NotebookOpSetup opDto = new NotebookOpSetup(workspace, workspaceName, notebookName, newName);
-    FileDetail fileDetail = new FileDetail();
-    cloudStorageService.copyBlob(opDto.blobId, opDto.newBlobId);
-    fileDetail.setName(newName);
-    fileDetail.setPath(opDto.fullPath);
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    fileDetail.setLastModifiedTime(now.getTime());
-    userRecentResourceService
-        .updateNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath, now);
-    return fileDetail;
-  }
-
-  private void notebookDeleteOperation(String workspace, String workspaceName,
-      String notebookName) {
-    NotebookOpSetup opDto = new NotebookOpSetup(workspace, workspaceName, notebookName, "");
-    cloudStorageService.deleteBlob(opDto.blobId);
-    userRecentResourceService.deleteNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath);
-  }
-
-  private class NotebookOpSetup {
-
-    private BlobId blobId;
-    private BlobId newBlobId;
-    private String fullPath;
-    private long userId;
-    private long workspaceId;
-
-    public NotebookOpSetup(String workspace, String workspaceName, String notebookName,
-        String newName) {
-      String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
-          .getWorkspace()
-          .getBucketName();
-      String origBlobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
-      String newBlobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName;
-      String pathStart = "gs://" + bucket + "/";
-      String origPath = pathStart + origBlobPath;
-      String newPath = pathStart + newBlobPath;
-      String fullPath = (newName.isEmpty()) ? origPath : newPath;
-      this.blobId = BlobId.of(bucket, origBlobPath);
-      this.newBlobId = BlobId.of(bucket, newBlobPath);
-      this.fullPath = fullPath;
-      this.userId = userProvider.get().getUserId();
-      this.workspaceId = workspaceService.getRequired(workspace, workspaceName).getWorkspaceId();
+  public ResponseEntity<FileDetail> renameNotebook(String workspace, String workspaceName,
+      NotebookRename rename) {
+    FileDetail fileDetail;
+    try {
+      fileDetail = notebooksService.renameNotebook(workspace, workspaceName, rename.getName(), rename.getNewName());
+    } catch (BlobAlreadyExistsException e) {
+      throw new BadRequestException("File already exists at copy destination");
     }
-  }
 
-  /**
-   * Returns List of python fileDetails from notebooks folder
-   *
-   * @return list of FileDetail
-   */
-  private List<FileDetail> getFilesFromNotebooks(String bucketName)
-      throws org.pmiops.workbench.firecloud.ApiException {
-    List<Blob> blobList = new ArrayList<>();
-    blobList = cloudStorageService.getBlobList(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY);
-    blobList = blobList.stream()
-        .filter(blob -> NOTEBOOK_PATTERN.matcher(blob.getName()).matches())
-        .collect(Collectors.toList());
-    return convertBlobToFileDetail(blobList, bucketName);
-
-  }
-
-  /**
-   * Convers Blob to FileDetail
-   *
-   * @return List of FileDetail
-   */
-  private List<FileDetail> convertBlobToFileDetail(List<Blob> blobList, String bucketName) {
-    List<FileDetail> fileList = new ArrayList<>();
-    blobList.forEach(blob -> {
-      String[] parts = blob.getName().split("/");
-      FileDetail fileDetail = new FileDetail();
-      fileDetail.setName(parts[parts.length - 1]);
-      fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
-      fileDetail.setLastModifiedTime(blob.getUpdateTime());
-      fileList.add(fileDetail);
-    });
-    return fileList;
+    return ResponseEntity.ok(fileDetail);
   }
 }

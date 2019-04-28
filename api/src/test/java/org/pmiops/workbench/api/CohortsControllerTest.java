@@ -45,6 +45,7 @@ import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -74,7 +75,7 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
@@ -182,9 +183,9 @@ public class CohortsControllerTest {
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortCloningService.class, CohortFactoryImpl.class,
-      UserService.class, WorkspaceMapper.class, WorkspacesController.class,
+      NotebooksServiceImpl.class, UserService.class, WorkspaceMapper.class, WorkspacesController.class,
       CohortsController.class, ConceptSetsController.class})
-  @MockBean({ConceptBigQueryService.class, FireCloudService.class, NotebooksService.class,
+  @MockBean({ConceptBigQueryService.class, FireCloudService.class, LeonardoNotebooksClient.class,
       CloudStorageService.class, ConceptSetService.class, UserRecentResourceService.class,
       CohortMaterializationService.class, CdrVersionService.class, ConceptService.class,
       ComplianceService.class, DirectoryService.class})

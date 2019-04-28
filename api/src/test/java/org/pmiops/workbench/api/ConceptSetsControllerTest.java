@@ -35,6 +35,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -175,6 +176,9 @@ public class ConceptSetsControllerTest {
   CloudStorageService cloudStorageService;
 
   @Autowired
+  NotebooksService notebooksService;
+
+  @Autowired
   UserService userService;
 
   @Autowired
@@ -196,8 +200,7 @@ public class ConceptSetsControllerTest {
   @Import({WorkspaceServiceImpl.class, WorkspaceMapper.class, CohortCloningService.class, CohortFactoryImpl.class,
       UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptSetService.class})
   @MockBean({ConceptBigQueryService.class, FireCloudService.class, CloudStorageService.class,
-      ConceptSetService.class, UserRecentResourceService.class, ComplianceService.class,
-      DirectoryService.class})
+      ConceptSetService.class, NotebooksService.class, UserRecentResourceService.class, ComplianceService.class, DirectoryService.class})
   static class Configuration {
     @Bean
     Clock clock() {
@@ -217,8 +220,7 @@ public class ConceptSetsControllerTest {
         conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao,
-                userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, userService,
-                userRecentResourceService);
+                userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
 
     User user = new User();
     user.setEmail(USER_EMAIL);
