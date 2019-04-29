@@ -18,7 +18,6 @@ import {
   dataSetApi
 } from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
-import colors from 'app/styles/colors';
 import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace} from 'app/utils';
 import {summarizeErrors} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
@@ -40,6 +39,8 @@ import {
   ValueSet,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
+
+import colors from 'app/styles/colors';
 
 import {validate} from 'validate.js';
 
