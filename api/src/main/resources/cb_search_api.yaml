@@ -109,7 +109,7 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/search:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
@@ -119,20 +119,20 @@ paths:
       operationId: "getCriteriaAutoComplete"
       parameters:
         - in: path
+          name: domain
+          type: string
+          required: true
+          description: the specific domain of criteria to get
+        - in: query
           name: type
           type: string
-          required: true
-          description: the specific type of criteria to get
-        - in: query
-          name: subtype
-          type: string
           required: false
-          description: the subtype of the criteria were search for
+          description: the type of the criteria were search for
         - in: query
-          name: value
+          name: term
           type: string
           required: true
-          description: the value to search for
+          description: the term to search for
         - in: query
           name: limit
           type: integer
