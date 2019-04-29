@@ -207,7 +207,7 @@ public class DataSetController implements DataSetApiDelegate {
       // Construct a list of all values with empty results.
       List<DataSetPreviewValueList> valuePreviewList =
           dataSet.getValues().stream().filter(value -> value.getDomain().toString().equals(domain))
-              .map(value -> new DataSetPreviewValueList().value(value.getValue())).collect(Collectors.toList());;
+              .map(value -> new DataSetPreviewValueList().value(value.getValue())).collect(Collectors.toList());
 
       queryResponse.getValues().forEach(fieldValueList -> {
         IntStream.range(0, fieldValueList.size()).forEach(columnNumber -> {
