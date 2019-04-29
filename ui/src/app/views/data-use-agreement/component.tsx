@@ -314,6 +314,8 @@ export const DataUseAgreement = withUserProfile()(
           <DuaTextInput style={{marginTop: '0.5rem'}}
                         disabled value={this.props.profileState.profile.username}/>
           <DuaTextInput style={{marginTop: '0.5rem'}}
+                        disabled value={this.props.profileState.profile.contactEmail}/>
+          <DuaTextInput style={{marginTop: '0.5rem'}}
                         type='text' disabled value={new Date().toLocaleDateString()}/>
           <TooltipTrigger content={errors && 'All fields required'}>
             <Button

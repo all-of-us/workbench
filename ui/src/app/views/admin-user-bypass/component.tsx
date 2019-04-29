@@ -26,6 +26,7 @@ export interface AccessModules {
   betaAccess: boolean;
   eraCommons: boolean;
   twoFactorAuth: boolean;
+  dataUseAgreement: boolean;
 }
 
 export class AdminUserBypass extends React.Component<
@@ -42,12 +43,14 @@ export class AdminUserBypass extends React.Component<
         betaAccess: true,
         eraCommons: true,
         twoFactorAuth: true,
+        dataUseAgreement: true
       },
       editedModules: {
         complianceTraining: true,
         betaAccess: true,
         eraCommons: true,
-        twoFactorAuth: true
+        twoFactorAuth: true,
+        dataUseAgreement: true
       }
     };
   }
@@ -59,6 +62,7 @@ export class AdminUserBypass extends React.Component<
       betaAccess: !!profile.betaAccessBypassTime,
       eraCommons: !!profile.eraCommonsBypassTime,
       twoFactorAuth: !!profile.twoFactorAuthBypassTime,
+      dataUseAgreement: !! profile.dataUseAgreementBypassTime
     };
     this.setState({modules: currModules, editedModules: currModules});
   }
@@ -119,6 +123,12 @@ export class AdminUserBypass extends React.Component<
                   data-test-id='two-factor-auth-toggle'
                   onToggle={() => {this.setState({editedModules:
                       fp.set('twoFactorAuth', !editedModules.twoFactorAuth, editedModules)}); }}/>
+          <Toggle name='Data Use Agreement'
+                  enabled={editedModules.dataUseAgreement}
+                  data-test-id='data-use-agreement-toggle'
+                  onToggle={() => {this.setState({editedModules:
+                      fp.set('dataUseAgreement', !editedModules.dataUseAgreement,
+                        editedModules)}); }}/>
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
             <IconButton icon='times'
                         onClick={() => this.cancel()}
