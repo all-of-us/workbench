@@ -178,8 +178,11 @@ public class DataSetController implements DataSetApiDelegate {
     List<DataSetQuery> respQueryList = new ArrayList<DataSetQuery>();
     List<NamedParameterEntry> parameters = new ArrayList<NamedParameterEntry>();
 
+    // Generate query per domain for the selected concept set, cohort and values
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
 
+    // Loop through and run the query for each domain and create LIST of
+    // domain, value and their corresponding query result
     bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
       queryJobConfiguration.getNamedParameters().forEach((key, value) ->
               parameters.add(generateResponseFromQueryParameter(key, value)));
