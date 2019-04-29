@@ -1,5 +1,5 @@
-import { AttrName, Operator, TreeSubType, TreeType } from 'generated';
-import {DomainType} from 'generated/fetch';
+import {AttrName, Operator, TreeSubType, TreeType} from 'generated';
+import {CriteriaType, DomainType} from 'generated/fetch';
 
 export const PROGRAM_TYPES = [
   { name: 'Surveys', type: TreeType.PPI, subtype: null },
@@ -37,6 +37,10 @@ export const LIST_PROGRAM_TYPES = [];
 
 export const LIST_DOMAIN_TYPES = [
   {name: 'Measurements', domain: DomainType.MEASUREMENT, type: null},
+  {name: 'Conditions', domain: DomainType.CONDITION, type: null, codes: [
+    {name: 'ICD9 Codes', type: CriteriaType.ICD9CM, subtype: null},
+    {name: 'ICD10 Codes', type: CriteriaType.ICD10CM, subtype: null}
+  ]}
 ];
 
 export const PM_UNITS = {
