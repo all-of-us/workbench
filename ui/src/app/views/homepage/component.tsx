@@ -96,12 +96,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
     accessTasksRemaining: boolean,
     betaAccessGranted: boolean,
     billingProjectInitialized: boolean,
+    dataUseAgreementCompleted: boolean,
     eraCommonsError: string,
     eraCommonsLinked: boolean,
     firstVisit: boolean,
     firstVisitTraining: boolean,
     quickTour: boolean,
     trainingCompleted: boolean,
+    twoFactorAuthCompleted: boolean,
     videoOpen: boolean,
     videoLink: string
   }> {
@@ -115,12 +117,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
       accessTasksRemaining: undefined,
       betaAccessGranted: undefined,
       billingProjectInitialized: false,
+      dataUseAgreementCompleted: undefined,
       eraCommonsError: '',
       eraCommonsLinked: undefined,
       firstVisit: undefined,
       firstVisitTraining: true,
       quickTour: false,
       trainingCompleted: undefined,
+      twoFactorAuthCompleted: undefined,
       videoOpen: false,
       videoLink: '',
     };
@@ -183,13 +187,15 @@ export const Homepage = withUserProfile()(class extends React.Component<
         this.setFirstVisit();
       }
       try {
-        this.setState({eraCommonsLinked: (!!profile.eraCommonsCompletionTime
-              || !!profile.eraCommonsBypassTime) });
+        this.setState({
+          eraCommonsLinked: !!profile.eraCommonsCompletionTime
+            || !!profile.eraCommonsBypassTime,
+          dataUseAgreementCompleted: !!profile.dataUseAgreementCompletionTime
+            || !!profile.dataUseAgreementBypassTime });
       } catch (ex) {
         this.setState({eraCommonsLinked: false});
         console.error('error fetching era commons linking status');
       }
-
       try {
         const result = await profileApi().syncComplianceTrainingStatus();
         this.setState({trainingCompleted: !!result.complianceTrainingCompletionTime
@@ -197,6 +203,15 @@ export const Homepage = withUserProfile()(class extends React.Component<
       } catch (ex) {
         this.setState({trainingCompleted: false});
         console.error('error fetching moodle training status');
+      }
+
+      try {
+        const result = await profileApi().syncTwoFactorAuthStatus();
+        this.setState({twoFactorAuthCompleted: !!result.twoFactorAuthCompletionTime ||
+            !!profile.twoFactorAuthBypassTime});
+      } catch (ex) {
+        this.setState({twoFactorAuthCompleted: false});
+        console.error('error fetching two factor auth status');
       }
 
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
@@ -244,7 +259,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
   render() {
     const {billingProjectInitialized, betaAccessGranted, videoOpen, accessTasksLoaded,
         accessTasksRemaining, eraCommonsLinked, eraCommonsError, firstVisitTraining,
-        trainingCompleted, quickTour, videoLink} = this.state;
+        trainingCompleted, quickTour, videoLink, twoFactorAuthCompleted,
+      dataUseAgreementCompleted} = this.state;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -289,7 +305,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                         eraCommonsError={eraCommonsError}
                                         trainingCompleted={trainingCompleted}
                                         firstVisitTraining={firstVisitTraining}
-                                        betaAccessGranted={betaAccessGranted}/>
+                                        betaAccessGranted={betaAccessGranted}
+                                        twoFactorAuthCompleted={twoFactorAuthCompleted}
+                                        dataUseAgreementCompleted={dataUseAgreementCompleted}/>
                 ) : (
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                     <div style={styles.contentWrapperLeft}>

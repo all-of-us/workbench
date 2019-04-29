@@ -1,4 +1,4 @@
-package org.pmiops.workbench.db.dao;
+package org.pmiops.workbench.workspaces;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -11,7 +11,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.db.dao.CohortCloningService;
+import org.pmiops.workbench.db.dao.ConceptSetService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.Workspace;
@@ -25,6 +29,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -43,12 +48,28 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
-  @Autowired private CohortCloningService cohortCloningService;
-  @Autowired private ConceptSetService conceptSetService;
-  @Autowired private WorkspaceDao workspaceDao;
+  private CohortCloningService cohortCloningService;
+  private ConceptSetService conceptSetService;
+  private WorkspaceDao workspaceDao;
+  private WorkspaceMapper workspaceMapper;
 
-  @Autowired private FireCloudService fireCloudService;
-  @Autowired private Clock clock;
+  private FireCloudService fireCloudService;
+  private Clock clock;
+
+  @Autowired
+  public WorkspaceServiceImpl(Clock clock,
+      CohortCloningService cohortCloningService,
+      ConceptSetService conceptSetService,
+      FireCloudService fireCloudService,
+      WorkspaceDao workspaceDao,
+      WorkspaceMapper workspaceMapper) {
+    this.clock = clock;
+    this.cohortCloningService = cohortCloningService;
+    this.conceptSetService = conceptSetService;
+    this.fireCloudService = fireCloudService;
+    this.workspaceDao = workspaceDao;
+    this.workspaceMapper = workspaceMapper;
+  }
 
   /**
    * Clients wishing to use the auto-generated methods from the DAO interface may directly access
@@ -58,13 +79,37 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public WorkspaceDao getDao() {
     return workspaceDao;
   }
+
   @Override
   public FireCloudService getFireCloudService() {
     return fireCloudService;
   }
+
   @Override
   public Workspace get(String ns, String firecloudName) {
     return workspaceDao.findByWorkspaceNamespaceAndFirecloudName(ns, firecloudName);
+  }
+
+  @Override
+  public List<WorkspaceResponse> getWorkspaces() {
+    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces = getFirecloudWorkspaces();
+    List<Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
+
+    return dbWorkspaces.stream()
+        .map(dbWorkspace -> {
+          String fcWorkspaceAccessLevel = fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
+          WorkspaceResponse currentWorkspace = new WorkspaceResponse();
+          currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
+          currentWorkspace.setAccessLevel(workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
+          return currentWorkspace;
+        }).collect(Collectors.toList());
+  }
+
+  private Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> getFirecloudWorkspaces() {
+    return fireCloudService.getWorkspaces().stream().collect(
+            Collectors.toMap(
+                fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
+                fcWorkspace -> fcWorkspace));
   }
 
   @Override

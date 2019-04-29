@@ -1,48 +1,22 @@
 package org.pmiops.workbench.notebooks;
 
 import java.util.List;
-import java.util.Map;
-import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.notebooks.model.Cluster;
+import java.util.regex.Pattern;
+import org.pmiops.workbench.model.FileDetail;
 
-/**
- * Encapsulate Notebooks API interaction details and provide a simple/mockable interface
- * for internal use.
- */
 public interface NotebooksService {
-  String DEFAULT_CLUSTER_NAME = "all-of-us";
 
-  /**
-   * Creates a notebooks cluster owned by the current authenticated user.
-   * @param googleProject the google project that will be used for this notebooks cluster
-   * @param clusterName the user assigned/auto-generated name for this notebooks cluster
-   */
-  Cluster createCluster(String googleProject, String clusterName)
-      throws WorkbenchException;
+  String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
+  Pattern NOTEBOOK_PATTERN = Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 
-  /**
-   * Deletes a notebook cluster
-   */
-  void deleteCluster(String googleProject, String clusterName) throws WorkbenchException;
+  List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName);
 
-  /**
-   * Lists all existing clusters
-   */
-  List<Cluster> listClusters(String labels, boolean includeDeleted) throws WorkbenchException;
+  FileDetail copyNotebook(String fromWorkspaceNamespace, String fromWorkspaceName, String fromNotebookName,
+      String toWorkspaceNamespace, String toWorkspaceName, String newNotebookName);
 
-  /**
-   * Gets information about a notebook cluster
-   */
-  Cluster getCluster(String googleProject, String clusterName) throws WorkbenchException;
+  FileDetail cloneNotebook(String workspaceNamespace, String workspaceName, String notebookName);
 
-  /**
-   * Send files over to notebook Cluster
-   */
-  void localize(String googleProject, String clusterName, Map<String, String> fileList)
-      throws WorkbenchException;
+  void deleteNotebook(String workspaceNamespace, String workspaceName, String notebookName);
 
-  /**
-   * @return true if notebooks is okay, false if notebooks are down.
-   */
-  boolean getNotebooksStatus();
+  FileDetail renameNotebook(String workspaceNamespace, String workspaceName, String notebookName, String newName);
 }

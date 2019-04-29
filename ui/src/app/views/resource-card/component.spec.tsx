@@ -4,6 +4,7 @@ import * as React from 'react';
 import {ResourceCard} from './component';
 import {ConceptSetsServiceStub} from "testing/stubs/concept-sets-service-stub";
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+import { WorkspaceAccessLevel } from 'generated';
 
 const ResourceCardWrapper = {
   cohortCard: {
@@ -61,9 +62,8 @@ describe('ResourceCardComponent', () => {
   it('should render a notebook if the resource is a notebook', () => {
     const wrapper = component(ResourceCardWrapper.notebookCard);
     expect(wrapper.find('[data-test-id="card-type"]').text()).toBe('Notebook');
-  })
+  });
 
   // Note: this spec is not testing the Popup menus on resource cards due to an issue using
   //    PopupTrigger in the test suite.
-
 });

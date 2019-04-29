@@ -16,6 +16,7 @@ import {RenameModal} from 'app/views/rename-modal/component';
 import {Domain, RecentResource} from 'generated/fetch';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import { CopyNotebookModal } from 'app/views/copy-notebook-modal/component';
 
 
 @Component({
@@ -113,6 +114,7 @@ export interface ResourceCardState {
   showErrorModal: boolean;
   errorModalTitle: string;
   errorModalBody: string;
+  showCopyNotebookModal: boolean;
 }
 
 export class ResourceCard extends React.Component<ResourceCardProps, ResourceCardState> {
@@ -131,7 +133,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         props.resourceCard.conceptSet),
       showErrorModal: false,
       errorModalTitle: 'Error Title',
-      errorModalBody: 'Error Body'
+      errorModalBody: 'Error Body',
+      showCopyNotebookModal: false,
     };
   }
 
@@ -294,6 +297,15 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     }
   }
 
+  copyResource(): void {
+    switch (this.resourceType) {
+      case ResourceType.NOTEBOOK: {
+        this.setState({ showCopyNotebookModal: true });
+        break;
+      }
+    }
+  }
+
   receiveDelete(): void {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
@@ -406,6 +418,14 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           body={this.state.errorModalBody}
           onConfirm={() => this.setState({showErrorModal: false})}/>
       }
+      {this.state.showCopyNotebookModal &&
+        <CopyNotebookModal
+          fromWorkspaceNamespace={this.props.resourceCard.workspaceNamespace}
+          fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
+          fromNotebook={this.props.resourceCard.notebook}
+          onClose={() => this.setState({ showCopyNotebookModal: false })}
+          onCopy={() => this.props.onUpdate() }/>
+      }
       <ResourceCardBase style={{...styles.card, marginTop: marginTop}}
                         data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
@@ -413,6 +433,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
             <ResourceCardMenu disabled={this.actionsDisabled}
                               resourceType={this.resourceType}
                               onCloneResource={() => this.cloneResource()}
+                              onCopyResource={() => this.copyResource()}
                               onDeleteResource={() => this.openConfirmDelete()}
                               onRenameNotebook={() => this.renameNotebook()}
                               onRenameCohort={() => this.renameCohort()}

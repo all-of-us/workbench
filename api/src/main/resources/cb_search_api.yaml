@@ -76,7 +76,7 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
@@ -88,26 +88,21 @@ paths:
       operationId: "getCriteriaBy"
       parameters:
         - in: path
-          name: type
+          name: domain
           type: string
           required: true
-          description: the specific type of criteria to get
+          description: the specific domain of criteria to get
         - in: query
-          name: subtype
+          name: type
           type: string
           required: false
-          description: the specific subtype of criteria to get
+          description: the specific type of criteria to get
         - in: query
           name: parentId
           type: integer
           format: int64
           required: false
           description: fetch direct children of parentId
-        - in: query
-          name: allChildren
-          type: boolean
-          required: false
-          description: fetch all children of parentId
       responses:
         200:
           description: A collection of criteria
