@@ -1,6 +1,12 @@
 package org.pmiops.workbench.api;
 
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldList;
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.TableResult;
 import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,6 +31,7 @@ import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.DataSetService;
+import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -179,13 +186,16 @@ public class DataSetControllerTest {
   WorkspaceMapper workspaceMapper;
 
   @TestConfiguration
+
   @Import({CohortFactoryImpl.class,
+      DataSetServiceImpl.class,
       NotebooksServiceImpl.class,
       TestBigQueryCdrSchemaConfig.class,
       UserService.class,
       WorkspacesController.class,
       WorkspaceMapper.class,
       WorkspaceServiceImpl.class})
+
   @MockBean({BigQueryService.class, CdrBigQuerySchemaConfigService.class, CdrVersionService.class,
       CloudStorageService.class, CohortCloningService.class,
       CohortMaterializationService.class, ComplianceService.class,
@@ -208,8 +218,9 @@ public class DataSetControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    dataSetController = new DataSetController(bigQueryService, cdrBigQuerySchemaConfigService, CLOCK,
-        cohortDao, conceptDao, conceptSetDao, dataSetService,participantCounter, userProvider, workspaceService);
+    dataSetService = new DataSetServiceImpl(bigQueryService, cdrBigQuerySchemaConfigService, cohortDao, conceptSetDao, participantCounter);
+    dataSetController = new DataSetController(bigQueryService, CLOCK,
+        cohortDao, conceptDao, conceptSetDao, dataSetService, userProvider, workspaceService);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
             userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
@@ -334,7 +345,32 @@ public class DataSetControllerTest {
     );
   }
 
+  private List<DomainValuePair> mockDomainValuePair() {
+    List<DomainValuePair> domainValues = new ArrayList<>();
+    DomainValuePair domainValuePair = new DomainValuePair();
+    domainValuePair.setDomain(Domain.CONDITION);
+    domainValuePair.setValue("PERSON_ID");
+    domainValues.add(domainValuePair);
+    return domainValues;
+  }
 
+  private void mockLinkingTableQuery(ArrayList<String> domainBaseTables) {
+    TableResult tableResultMock = mock(TableResult.class);
+    ArrayList<FieldValueList> values = new ArrayList<>();
+    domainBaseTables.forEach(domainBaseTable -> {
+      ArrayList<Field> schemaFields = new ArrayList<>();
+      schemaFields.add(Field.of("OMOP_SQL", LegacySQLTypeName.STRING));
+      schemaFields.add(Field.of("JOIN_VALUE", LegacySQLTypeName.STRING));
+      FieldList schema = FieldList.of(schemaFields);
+      ArrayList<FieldValue> rows = new ArrayList<>();
+      rows.add(FieldValue.of(FieldValue.Attribute.PRIMITIVE, "PERSON_ID"));
+      rows.add(FieldValue.of(FieldValue.Attribute.PRIMITIVE, domainBaseTable));
+      FieldValueList fieldValueList = FieldValueList.of(rows, schema);
+      values.add(fieldValueList);
+    });
+    doReturn(values).when(tableResultMock).getValues();
+    doReturn(tableResultMock).when(bigQueryService).executeQuery(any());
+  }
 
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoCohort() {
@@ -362,15 +398,6 @@ public class DataSetControllerTest {
     assertThat(response.getQueryList()).isEmpty();
   }
 
-  private List<DomainValuePair> mockDomainValuePair() {
-    List<DomainValuePair> domainValues = new ArrayList<>();
-    DomainValuePair domainValuePair = new DomainValuePair();
-    domainValuePair.setDomain(Domain.CONDITION);
-    domainValuePair.setValue("PERSON_ID");
-    domainValues.add(domainValuePair);
-    return domainValues;
-  }
-
   @Test
   public void testGetQuery() {
     DataSetRequest dataSet = buildEmptyDataSet();
@@ -379,18 +406,19 @@ public class DataSetControllerTest {
     List<DomainValuePair> domainValues = mockDomainValuePair();
     dataSet.setValues(domainValues);
 
-    List<String> selectStrings = new ArrayList<>();
-    selectStrings.add("PERSON_ID");
-    List<String> joinStrings = new ArrayList<>();
-    joinStrings.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
+    ArrayList<String> tables = new ArrayList<>();
+    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
 
-    dataSetController = spy(dataSetController);
-    doReturn(new ValuesLinkingPair(selectStrings, joinStrings)).when(dataSetController).getValueSelectsAndJoins(domainValues, Domain.CONDITION);
+    mockLinkingTableQuery(tables);
 
     DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList().size()).isEqualTo(1);
-    verify(dataSetController, times(1)).getValueSelectsAndJoins(domainValues, Domain.CONDITION);
-    assertThat(response.getQueryList().get(0).getQuery()).isEqualTo("SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence WHERE (condition_concept_id IN () OR condition_source_concept_id IN ()) AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
+    verify(bigQueryService, times(1)).executeQuery(any());
+    assertThat(response.getQueryList().get(0).getQuery())
+        .isEqualTo("SELECT PERSON_ID FROM " +
+            "`all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` " +
+            "c_occurrence WHERE (condition_concept_id IN () OR condition_source_concept_id IN ()) " +
+            "AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
   }
 
   @Test
@@ -407,26 +435,15 @@ public class DataSetControllerTest {
     domainValues.add(drugDomainValue);
     dataSet.setValues(domainValues);
 
-    List<DomainValuePair> valueSet2 = new ArrayList<>();
-    valueSet2.add(drugDomainValue);
+    ArrayList<String> tables = new ArrayList<>();
+    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
+    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.drug_exposure` d_exposure");
 
-    List<String> selectConditionStrings = new ArrayList<>();
-    selectConditionStrings.add("PERSON_ID");
-    List<String> joinConditionStrings = new ArrayList<>();
-    joinConditionStrings.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
-
-    List<String> selectDrugStrings = new ArrayList<>();
-    selectDrugStrings.add("PERSON_ID");
-    List<String> joinDrugStrings = new ArrayList<>();
-    joinDrugStrings.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.drug_exposure` d_exposure");
-
-    dataSetController = spy(dataSetController);
-    doReturn(new ValuesLinkingPair(selectConditionStrings, joinConditionStrings)).when(dataSetController).getValueSelectsAndJoins(mockDomainValuePair(), Domain.CONDITION);
-    doReturn(new ValuesLinkingPair(selectDrugStrings, joinDrugStrings)).when(dataSetController).getValueSelectsAndJoins(valueSet2, Domain.DRUG);
+    mockLinkingTableQuery(tables);
 
     DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList()).isNotEmpty();
-    verify(dataSetController, times(2)).getValueSelectsAndJoins(any(), any());
+    verify(bigQueryService, times(2)).executeQuery(any());
     assertThat(response.getQueryList().size()).isEqualTo(2);
   }
 
@@ -440,13 +457,10 @@ public class DataSetControllerTest {
     dataSet.setValues(domainValuePairList);
 
 
-    List<String> selectStrings = new ArrayList<>();
-    selectStrings.add("PERSON_ID");
-    List<String> joinStrings = new ArrayList<>();
-    joinStrings.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
+    ArrayList<String> tables = new ArrayList<>();
+    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
 
-    dataSetController = spy(dataSetController);
-    doReturn(new ValuesLinkingPair(selectStrings, joinStrings)).when(dataSetController).getValueSelectsAndJoins(domainValuePairList, Domain.CONDITION);
+    mockLinkingTableQuery(tables);
 
     DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList().size()).isEqualTo(1);
