@@ -10,6 +10,7 @@ import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.model.UpdateUserDisabledRequest;
@@ -58,6 +59,8 @@ public class AuthDomainControllerTest {
   private Provider<User> userProvider;
   @Mock
   private ComplianceService complianceService;
+  @Mock
+  private DirectoryService directoryService;
   @Autowired
   private UserDao userDao;
   
@@ -79,7 +82,7 @@ public class AuthDomainControllerTest {
     FakeClock clock = new FakeClock(Instant.now());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
         new FakeLongRandom(12345), fireCloudService, Providers.of(config),
-        complianceService);
+        complianceService, directoryService);
     this.authDomainController = new AuthDomainController(fireCloudService, userService, userDao);
   }
 

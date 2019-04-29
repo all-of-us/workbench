@@ -71,6 +71,7 @@ export class ListAttributesPageComponent implements OnInit {
   ngOnInit() {
     if (this.isMeasurement) {
       const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
+      // TODO this call will need to be switched when new version is added
       cohortBuilderApi().getCriteriaAttributeByConceptId(cdrid, this.criterion.conceptId)
         .then(resp => {
           resp.items.forEach(attr => {

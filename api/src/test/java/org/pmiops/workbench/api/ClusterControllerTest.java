@@ -31,10 +31,11 @@ import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -46,7 +47,7 @@ import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.Providers;
@@ -88,7 +89,7 @@ public class ClusterControllerTest {
   })
   @MockBean({
     FireCloudService.class,
-    NotebooksService.class,
+    LeonardoNotebooksClient.class,
     WorkspaceService.class,
     UserService.class,
     UserRecentResourceService.class
@@ -119,7 +120,7 @@ public class ClusterControllerTest {
   private ArgumentCaptor<Map<String, String>> mapCaptor;
 
   @Autowired
-  NotebooksService notebookService;
+  LeonardoNotebooksClient notebookService;
   @Mock
   private AdminActionHistoryDao adminActionHistoryDao;
   @Autowired
@@ -128,6 +129,8 @@ public class ClusterControllerTest {
   UserDao userDao;
   @Autowired
   WorkspaceService workspaceService;
+  @Mock
+  DirectoryService directoryService;
   @Mock
   Provider<User> userProvider;
   @Mock
@@ -162,7 +165,7 @@ public class ClusterControllerTest {
 
     UserService userService = new UserService(
         userProvider, userDao, adminActionHistoryDao, CLOCK, new FakeLongRandom(123),
-        fireCloudService, Providers.of(config), complianceService);
+        fireCloudService, Providers.of(config), complianceService, directoryService);
     clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();

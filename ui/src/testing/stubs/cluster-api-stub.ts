@@ -1,8 +1,10 @@
 import {
+  CdrVersionListResponse,
   Cluster,
   ClusterApi,
   ClusterListResponse,
-  ClusterStatus
+  ClusterStatus,
+  DataAccessLevel
 } from 'generated/fetch';
 
 // TODO: Port functionality from ClusterServiceStub as needed.
@@ -30,6 +32,34 @@ export class ClusterApiStub extends ClusterApi {
     return new Promise<{}>(resolve => {
       this.cluster.status = ClusterStatus.Deleting;
       resolve({});
+    });
+  }
+
+
+  getCdrVersions(): Promise<CdrVersionListResponse> {
+    let cdrVersionList: CdrVersionListResponse;
+    cdrVersionList = <CdrVersionListResponse>{
+      items: [{
+        cdrVersionId: '1',
+        name: 'Cdr version1',
+        dataAccessLevel: DataAccessLevel.Registered,
+        creationTime: 123
+      }, {
+        cdrVersionId: '2',
+        name: 'Cdr version2',
+        dataAccessLevel: DataAccessLevel.Unregistered,
+        creationTime: 456
+      }, {
+        cdrVersionId: '3',
+        name: 'Cdr version3',
+        dataAccessLevel: DataAccessLevel.Registered,
+        creationTime: 789
+      }],
+      defaultCdrVersionId: '1',
+    };
+
+    return new Promise<CdrVersionListResponse>(resolve => {
+      resolve(cdrVersionList);
     });
   }
 }

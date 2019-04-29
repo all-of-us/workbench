@@ -14,11 +14,16 @@ import {GenderChartComponent} from 'app/cohort-search/gender-chart/gender-chart.
 import {ListAttributesPageComponent} from 'app/cohort-search/list-attributes-page/list-attributes-page.component';
 import {ListModalComponent} from 'app/cohort-search/list-modal/list-modal.component';
 import {ListModifierPageComponent} from 'app/cohort-search/list-modifier-page/list-modifier-page.component';
+import {ListNodeInfoComponent} from 'app/cohort-search/list-node-info/list-node-info.component';
+import {ListNodeComponent} from 'app/cohort-search/list-node/list-node.component';
+import {ListOptionInfoComponent} from 'app/cohort-search/list-option-info/list-option-info.component';
+import {ListSearchBarComponent} from 'app/cohort-search/list-search-bar/list-search-bar.component';
 import {ListSearchGroupItemComponent} from 'app/cohort-search/list-search-group-item/list-search-group-item.component';
 import {ListSearchGroupListComponent} from 'app/cohort-search/list-search-group-list/list-search-group-list.component';
 import {ListSearchGroupComponent} from 'app/cohort-search/list-search-group/list-search-group.component';
 import {ListSearchComponent} from 'app/cohort-search/list-search/list-search.component';
 import {ListSelectionInfoComponent} from 'app/cohort-search/list-selection-info/list-selection-info.component';
+import {ListTreeComponent} from 'app/cohort-search/list-tree/list-tree.component';
 import {ModalComponent} from 'app/cohort-search/modal/modal.component';
 import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {MultiSelectComponent} from 'app/cohort-search/multi-select/multi-select.component';
@@ -82,11 +87,16 @@ describe('CohortSearchComponent', () => {
         ListAttributesPageComponent,
         ListModalComponent,
         ListModifierPageComponent,
+        ListNodeInfoComponent,
+        ListNodeComponent,
+        ListOptionInfoComponent,
+        ListSearchBarComponent,
         ListSearchGroupItemComponent,
         ListSearchGroupListComponent,
         ListSearchGroupComponent,
         ListSearchComponent,
         ListSelectionInfoComponent,
+        ListTreeComponent,
         ModalComponent,
         ModifierPageComponent,
         MultiSelectComponent,

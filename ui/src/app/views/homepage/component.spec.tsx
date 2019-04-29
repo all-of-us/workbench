@@ -8,47 +8,14 @@ import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-st
 import {userProfileStore} from 'app/utils/navigation';
 import {ConfigApiStub} from 'testing/stubs/config-api-stub';
 
-import {Homepage, WorkbenchAccessTasks, WorkbenchAccessTasksProps} from './component';
-import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from "generated/fetch/api";
-import {CohortsApiStub} from "testing/stubs/cohorts-api-stub";
-import {UserMetricsApiStub} from "testing/stubs/user-metrics-api-stub";
-import {ConceptSetsApiStub} from "testing/stubs/concept-sets-api-stub";
-import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
-import {waitOneTickAndUpdate} from "../../../testing/react-test-helpers";
+import {Homepage} from './component';
+import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generated/fetch/api';
+import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
+import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
+import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
-describe('WorkbenchAccessTasks', () => {
-  let props: WorkbenchAccessTasksProps;
-
-  const component = () => {
-    return mount<WorkbenchAccessTasks, WorkbenchAccessTasksProps, {trainingWarningOpen: boolean}>
-    (<WorkbenchAccessTasks {...props}/>);
-  };
-
-  beforeEach(() => {
-    registerApiClient(ProfileApi, new ProfileApiStub());
-    props  = {
-      eraCommonsLinked: false,
-      eraCommonsError: '',
-      trainingCompleted: false,
-      firstVisitTraining: true,
-      betaAccessGranted: true
-    }
-  });
-
-  it('should render', () => {
-    const wrapper = component();
-    expect(wrapper.exists()).toBeTruthy();
-  });
-
-  it('should show an error if passed an error message', () => {
-    const errorMessage = 'error message!';
-    props.eraCommonsError = errorMessage;
-    const wrapper = component();
-    expect(wrapper.find('[data-test-id="era-commons-error"]').first().text())
-        .toContain(errorMessage);
-  });
-
-});
 
 describe('HomepageComponent', () => {
 
@@ -60,6 +27,7 @@ describe('HomepageComponent', () => {
   };
 
   const reload = jest.fn();
+  const updateCache = jest.fn();
 
   beforeEach(() => {
     profileApi = new ProfileApiStub();
@@ -74,10 +42,10 @@ describe('HomepageComponent', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+      userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload});
+    userProfileStore.next({profile, reload, updateCache: () => {}});
   });
 
   it('should render the homepage', () => {
@@ -97,7 +65,7 @@ describe('HomepageComponent', () => {
       ...profile,
       pageVisits: [{page: 'homepage'}],
     };
-    userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+    userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
   });
@@ -113,20 +81,18 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
-    userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+    userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="complete-training"]')
-        .first().text()).toEqual('Complete Training');
-    expect(wrapper.find('[data-test-id="login"]').first().text()).toEqual('Login');
+    expect(wrapper.find('[data-test-id="registration-dashboard"]').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('should not display the quick tour if access tasks dashboard is open', async () => {
+  it('should not display the quick tour if registration dashboard is open', async () => {
     const newProfile = {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
-    userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+    userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();

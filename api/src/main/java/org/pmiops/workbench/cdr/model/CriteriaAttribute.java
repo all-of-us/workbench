@@ -12,6 +12,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "criteria_attribute")
+//TODO:Remove freemabd
 public class CriteriaAttribute {
 
   private long id;

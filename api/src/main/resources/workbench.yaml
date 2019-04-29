@@ -332,6 +332,18 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /v1/account/submit-data-use-agreement:
+    post:
+      tags:
+        - profile
+      description: Submits consent to the data use agreement for researchers.
+      operationId: submitDataUseAgreement
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+
   /v1/account/sync-training-status:
     post:
       tags:
@@ -360,6 +372,25 @@ paths:
       description: Retrieves and stores the current user's NIH / eRA Commons
                    linkage status, fetched via the FireCloud API.
       operationId: syncEraCommonsStatus
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+        404:
+          description: User not found
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /v1/account/sync-two-factor-auth-status:
+    post:
+      tags:
+        - profile
+      summary: Sync two factor auth status
+      description: Syncs a user's 2FA status from google
+      operationId: syncTwoFactorAuthStatus
       responses:
         200:
           description: The user's profile.
@@ -883,6 +914,22 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/cron/bulkSyncTwoFactorAuthStatus:
+    get:
+      security: []
+      tags:
+        - offlineUser
+        - cron
+      description: sync 2FA status for all users
+      operationId: bulkSyncTwoFactorAuthStatus
+      responses:
+        200:
+          description: All users' 2FA statuses were updated.
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -983,6 +1030,31 @@ paths:
       responses:
         200:
           description: Successful clone
+          schema:
+            $ref: "#/definitions/FileDetail"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/copy:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - in: path
+        name: notebookName
+        required: true
+        type: string
+    post:
+      tags:
+        - workspaces
+      description: Copy specified notebook in path to specified workspace in body
+      operationId: "copyNotebook"
+      parameters:
+        - in: body
+          name: copyNotebookRequest
+          required: true
+          schema:
+            $ref: '#/definitions/CopyNotebookRequest'
+      responses:
+        200:
+          description: Successful copy
           schema:
             $ref: "#/definitions/FileDetail"
 
@@ -1346,7 +1418,7 @@ paths:
 
 ### Data set ############################################
 
-  /v1/data-set/{workspaceNamespace}/{workspaceId}/create:
+  /v1/{workspaceNamespace}/{workspaceId}/data-set/create:
     post:
       tags:
         - dataSet
@@ -1375,29 +1447,50 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/dataSet/generateQuery:
-      post:
-        tags:
-          - dataSet
-        description: >
-          Given a Data Set, return the SQL query built from it.
-        operationId: "generateQuery"
-        parameters:
-          - $ref: '#/parameters/workspaceNamespace'
-          - $ref: '#/parameters/workspaceId'
-          - in: body
-            name: dataSet
-            required: true
-            schema:
-              $ref: "#/definitions/DataSetRequest"
-        responses:
-          200:
-            description: >
-              A SQL query for each domain in the Data Set
-            schema:
-              $ref: "#/definitions/DataSetQueryList"
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateQuery:
+    post:
+      tags:
+        - dataSet
+      description: >
+        Given a Data Set, return the SQL query built from it.
+      operationId: "generateQuery"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: body
+          name: dataSet
+          required: true
+          schema:
+            $ref: "#/definitions/DataSetRequest"
+      responses:
+        200:
+          description: >
+            A SQL query for each domain in the Data Set
+          schema:
+            $ref: "#/definitions/DataSetQueryList"
 
-
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/preview:
+    post:
+      tags:
+        - dataSet
+      description: >
+        Preview data set
+      operationId: "previewQuery"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: body
+          name: dataSet
+          required: true
+          schema:
+            $ref: "#/definitions/DataSetRequest"
+      responses:
+        200:
+          description: >
+            A SQL query for each domain in the Data Set
+          schema:
+            $ref: "#/definitions/DataSetPreviewResponse"
+            
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -1619,6 +1712,20 @@ definitions:
         items:
           $ref: "#/definitions/UserRole"
 
+  CopyNotebookRequest:
+    type: object
+    required:
+      - toWorkspaceName
+      - toWorkspaceNamespace
+      - newName
+    properties:
+      toWorkspaceName:
+        type: string
+      toWorkspaceNamespace:
+        type: string
+      newName:
+        type: string
+
   CloneWorkspaceRequest:
     type: object
     required:
@@ -1663,7 +1770,7 @@ definitions:
 
   WorkspaceAccessLevel:
     type: string
-    description: levels of access to workspace, NO ACCESS is akin to removing a user from a workspace ACL
+    description: levels of access to workspace, NO ACCESS is akin to removing a user from a workspace ACL.
     enum: [NO ACCESS, READER, WRITER, OWNER]
 
   ResearchPurpose:
@@ -2179,6 +2286,34 @@ definitions:
         type: object
         description: Can be any value
 
+  DataSetPreviewResponse:
+    type: object
+    properties:
+      domainValue:
+        type: "array"
+        items:
+          $ref: "#/definitions/DataSetPreviewList"
+
+  DataSetPreviewList:
+    type: object
+    properties:
+      domain:
+        type: string
+      values:
+        type: "array"
+        items:
+          $ref: "#/definitions/DataSetPreviewValueList"
+
+  DataSetPreviewValueList:
+    type: object
+    properties:
+      value:
+        type: string
+        description: Value selected by user which will act as column header in preview table
+      queryValue:
+        type: "array"
+        items:
+          type: string
 
   DomainInfoResponse:
     type: object
@@ -2374,8 +2509,6 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when the user is bypassed for completing identity verification
-      twoFactorEnabled:
-        type: boolean
       twoFactorAuthCompletionTime:
         type: integer
         format: int64

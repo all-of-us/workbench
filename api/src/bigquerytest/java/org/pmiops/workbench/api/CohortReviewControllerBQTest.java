@@ -22,7 +22,8 @@ import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
+import org.pmiops.workbench.workspaces.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -147,6 +148,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
+    WorkspaceMapper.class,
     CohortReviewServiceImpl.class,
     CohortReviewController.class,
     BigQueryService.class,

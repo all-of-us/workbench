@@ -24,6 +24,7 @@ import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -57,6 +58,7 @@ public class UserService {
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
+  private final DirectoryService directoryService;
   private static final Logger log = Logger.getLogger(UserService.class.getName());
 
   @Autowired
@@ -67,7 +69,8 @@ public class UserService {
       Random random,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> configProvider,
-      ComplianceService complianceService) {
+      ComplianceService complianceService,
+      DirectoryService directoryService) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -76,6 +79,7 @@ public class UserService {
     this.fireCloudService = fireCloudService;
     this.configProvider = configProvider;
     this.complianceService = complianceService;
+    this.directoryService = directoryService;
   }
 
   /**
@@ -123,12 +127,15 @@ public class UserService {
       user.getComplianceTrainingBypassTime() != null || !configProvider.get().access.enableComplianceTraining;
     boolean betaAccessGranted = user.getBetaAccessBypassTime() != null ||
             !configProvider.get().access.enableBetaAccess;
+    boolean twoFactorAuthComplete = user.getTwoFactorAuthCompletionTime() != null ||
+      user.getTwoFactorAuthBypassTime() != null;
 
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     boolean shouldBeRegistered = !user.getDisabled()
         && complianceTrainingCompliant
         && eraCommonsCompliant
         && betaAccessGranted
+        && twoFactorAuthComplete
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
     boolean isInGroup = this.fireCloudService.
             isUserMemberOfGroup(user.getEmail(), configProvider.get().firecloud.registeredDomainName);
@@ -213,6 +220,14 @@ public class UserService {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     return updateUserWithRetries((user) -> {
       user.setDemographicSurveyCompletionTime(timestamp);
+      return user;
+    });
+  }
+
+  public User submitDataUseAgreement() {
+    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+    return updateUserWithRetries((user) -> {
+      user.setDataUseAgreementCompletionTime(timestamp);
       return user;
     });
   }
@@ -485,4 +500,23 @@ public class UserService {
       }
     }
   }
+
+  public void syncTwoFactorAuthStatus() {
+    syncTwoFactorAuthStatus(userProvider.get());
+  }
+
+  public void syncTwoFactorAuthStatus(User targetUser) {
+    updateUserWithRetries(user -> {
+      boolean isEnrolledIn2FA = directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv();
+      if (isEnrolledIn2FA) {
+        if (user.getTwoFactorAuthCompletionTime() == null) {
+          user.setTwoFactorAuthCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
+        }
+      } else {
+        user.setTwoFactorAuthCompletionTime(null);
+      }
+      return user;
+    }, targetUser);
+  }
+
 }

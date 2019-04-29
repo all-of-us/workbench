@@ -13,6 +13,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "criteria")
+//TODO:Remove freemabd
 public class Criteria {
 
     private long id;

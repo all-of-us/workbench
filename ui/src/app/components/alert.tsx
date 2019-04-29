@@ -38,7 +38,7 @@ export const Alert = withStyle(styles.alert)('div');
 export const AlertDanger = withStyle(styles.danger)(Alert);
 export const AlertWarning = withStyle(styles.warning)(Alert);
 export const AlertClose = ({style = {}, ...props}) => {
-  return <Clickable style={{width: '8%', height: '16px', ...style}}
+  return <Clickable style={{...style, height: '16px'}}
                     {...props}>
     <ClrIcon shape='times'/>
   </Clickable>;

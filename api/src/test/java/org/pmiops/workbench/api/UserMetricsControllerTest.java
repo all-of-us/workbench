@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;

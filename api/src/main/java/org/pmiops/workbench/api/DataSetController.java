@@ -4,44 +4,37 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.common.collect.Streams;
-import com.google.gson.Gson;
 
 import java.sql.Timestamp;
 import java.time.Clock;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.List;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 import javax.inject.Provider;
 
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
-import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetPreviewList;
+import org.pmiops.workbench.model.DataSetPreviewResponse;
+import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DataSetQuery;
 import org.pmiops.workbench.model.DataSetQueryList;
@@ -49,69 +42,25 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.NamedParameterEntry;
 import org.pmiops.workbench.model.NamedParameterValue;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-/*
- * A subclass used to store a source and a standard concept ID column name.
- */
-class DomainConceptIds {
-  private String sourceConceptIdColumn;
-  private String standardConceptIdColumn;
-
-  DomainConceptIds(String sourceConceptIdColumn, String standardConceptIdColumn) {
-    this.sourceConceptIdColumn = sourceConceptIdColumn;
-    this.standardConceptIdColumn = standardConceptIdColumn;
-  }
-
-  public String getSourceConceptIdColumn() {
-    return this.sourceConceptIdColumn;
-  }
-  public String getStandardConceptIdColumn() {
-    return this.standardConceptIdColumn;
-  }
-}
-
-/*
- * A subclass to store the associated set of selects and joins for values for the data set builder.
- *
- * This is used to store the data pulled out of the linking table in bigquery.
- */
-class ValuesLinkingPair {
-  private List<String> selects;
-  private List<String> joins;
-
-  ValuesLinkingPair(List<String> selects, List<String> joins) {
-    this.selects = selects;
-    this.joins = joins;
-  }
-
-  public List<String> getSelects() {
-    return this.selects;
-  }
-
-  public List<String> getJoins() {
-    return this.joins;
-  }
-}
-
-
 @RestController
 public class DataSetController implements DataSetApiDelegate {
 
   private BigQueryService bigQueryService;
-  private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private final Clock clock;
   private DataSetService dataSetService;
-  private ParticipantCounter participantCounter;
 
   private Provider<User> userProvider;
   private final WorkspaceService workspaceService;
+
+  private static int NO_OF_PREVIEW_ROWS = 20;
 
 
   @Autowired
@@ -126,27 +75,22 @@ public class DataSetController implements DataSetApiDelegate {
   @Autowired
   DataSetController(
       BigQueryService bigQueryService,
-      CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
       Clock clock,
       CohortDao cohortDao,
       ConceptDao conceptDao,
       ConceptSetDao conceptSetDao,
       DataSetService dataSetService,
-      ParticipantCounter participantCounter,
       Provider<User> userProvider,
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
-    this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.clock = clock;
     this.cohortDao = cohortDao;
     this.conceptDao = conceptDao;
     this.conceptSetDao = conceptSetDao;
     this.dataSetService = dataSetService;
-    this.participantCounter = participantCounter;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
   }
-
 
   @Override
   public ResponseEntity<DataSet> createDataSet(String workspaceNamespace, String workspaceId,
@@ -188,11 +132,11 @@ public class DataSetController implements DataSetApiDelegate {
           result.setName(dataSet.getName());
           Iterable<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
               conceptSetDao.findAll(dataSet.getConceptSetId());
-          result.setConceptSets(Streams.stream(conceptSets)
+          result.setConceptSets(StreamSupport.stream(conceptSets.spliterator(), false)
               .map(conceptSet -> toClientConceptSet(conceptSet)).collect(Collectors.toList()));
 
           Iterable<Cohort> cohorts = cohortDao.findAll(dataSet.getCohortSetId());
-          result.setCohorts(Streams.stream(cohorts)
+          result.setCohorts(StreamSupport.stream(cohorts.spliterator(), false)
                 .map(CohortsController.TO_CLIENT_COHORT)
                 .collect(Collectors.toList()));
           result.setDescription(dataSet.getDescription());
@@ -209,7 +153,7 @@ public class DataSetController implements DataSetApiDelegate {
     if (!conceptSet.getConceptIds().isEmpty()) {
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts =
           conceptDao.findAll(conceptSet.getConceptIds());
-      result.setConcepts(Streams.stream(concepts)
+      result.setConcepts(StreamSupport.stream(concepts.spliterator(), false)
           .map(ConceptsController.TO_CLIENT_CONCEPT)
           .collect(Collectors.toList()));
 
@@ -230,125 +174,52 @@ public class DataSetController implements DataSetApiDelegate {
 
 
   public ResponseEntity<DataSetQueryList> generateQuery(String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
-
-    CdrBigQuerySchemaConfig bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
-
-
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    List<DataSetQuery> respQueryList = new ArrayList<DataSetQuery>();
+    List<NamedParameterEntry> parameters = new ArrayList<NamedParameterEntry>();
 
-    List<Cohort> cohortsSelected = this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds());
-    List<org.pmiops.workbench.db.model.ConceptSet> conceptSetsSelected =
-        this.conceptSetDao.findAllByConceptSetIdIn(dataSet.getConceptSetIds());
-    if (cohortsSelected == null || cohortsSelected.size() == 0 || conceptSetsSelected == null || conceptSetsSelected.size() == 0) {
-      throw new BadRequestException("Data Sets must include at least one cohort and concept.");
-    }
-    List<Domain> domainList = dataSet.getValues().stream().map(value -> value.getDomain()).collect(Collectors.toList());
-    Map<String, QueryParameterValue> cohortParameters = new HashMap<>();
-    // Below constructs the union of all cohort queries
-    String cohortQueries = cohortsSelected.stream().map(c -> {
-      String cohortDefinition = c.getCriteria();
-      if (cohortDefinition == null) {
-        throw new NotFoundException(
-            String.format("Not Found: No Cohort definition matching cohortId: %s", c.getCohortId()));
-      }
-      SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
-      QueryJobConfiguration participantIdQuery = participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
-      QueryJobConfiguration participantQueryConfig = bigQueryService.filterBigQueryConfig(participantIdQuery);
-      AtomicReference<String> participantQuery = new AtomicReference<>(participantQueryConfig.getQuery());
+    // Generate query per domain for the selected concept set, cohort and values
+    Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
 
-      participantQueryConfig.getNamedParameters().forEach((npKey, npValue) -> {
-        String newKey = npKey + "_" + c.getCohortId();
-        participantQuery.getAndSet(participantQuery.get().replaceAll("@".concat(npKey), "@".concat(newKey)));
-        cohortParameters.put(newKey, npValue);
-      });
-      return participantQuery.get();
-    }).collect(Collectors.joining(" OR PERSON_ID IN "));
-
-    ArrayList<DataSetQuery> respQueryList = new ArrayList<>();
-
-    for (Domain d: domainList) {
-      String query = "SELECT ";
-      // VALUES HERE:
-      Optional<List<DomainValuePair>> valueSetOpt =  Optional.of(dataSet.getValues().stream()
-          .filter(valueSet -> valueSet.getDomain() == d).collect(Collectors.toList()));
-      if (!valueSetOpt.isPresent()) {
-        continue;
-      }
-      List<NamedParameterEntry> parameters = new ArrayList<>();
-      cohortParameters.forEach((key, value) -> parameters.add(generateResponseFromQueryParameter(key, value)));
-
-      ValuesLinkingPair valuesLinkingPair = this.getValueSelectsAndJoins(valueSetOpt.get(), d);
-
-      query = query.concat(valuesLinkingPair.getSelects().stream().collect(Collectors.joining(", ")))
-          .concat(" ")
-          .concat(valuesLinkingPair.getJoins().stream().distinct().collect(Collectors.joining(" ")));
-
-      // CONCEPT SETS HERE:
-      String conceptSetQueries = conceptSetsSelected.stream().filter(cs -> d == cs.getDomainEnum())
-          .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
-          .collect(Collectors.joining(", "));
-      String conceptSetListQuery = " IN (" + conceptSetQueries + ")";
-
-      Optional<DomainConceptIds> domainConceptIds = bigQuerySchemaConfig.cohortTables.values().stream().filter(config -> d.toString().equals(config.domain))
-          .map(tableConfig -> new DomainConceptIds(getColumnName(tableConfig, "source"), getColumnName(tableConfig, "standard")))
-          .findFirst();
-      if (!domainConceptIds.isPresent()) {
-        throw new ServerErrorException("Couldn't find source and standard columns for domain: " + d.toString());
-      }
-      DomainConceptIds columnNames = domainConceptIds.get();
-
-      // This adds the where clauses for cohorts and concept sets.
-      query = query.concat(" WHERE (" + columnNames.getStandardConceptIdColumn() + conceptSetListQuery
-          + " OR " + columnNames.getSourceConceptIdColumn() + conceptSetListQuery + ") AND (PERSON_ID IN ("
-          + cohortQueries + "))");
-
-      respQueryList.add(new DataSetQuery().domain(d).query(query).namedParameters(parameters));
-    }
-
+    // Loop through and run the query for each domain and create LIST of
+    // domain, value and their corresponding query result
+    bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
+      queryJobConfiguration.getNamedParameters().forEach((key, value) ->
+              parameters.add(generateResponseFromQueryParameter(key, value)));
+      respQueryList.add(new DataSetQuery()
+          .domain(Domain.fromValue(domain))
+          .query(queryJobConfiguration.getQuery())
+          .namedParameters(parameters));
+    });
     return ResponseEntity.ok(new DataSetQueryList().queryList(respQueryList));
   }
 
-  @VisibleForTesting
-  ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> valueSetList, Domain d) {
-    List<String> values = valueSetList.stream().map(valueSet -> valueSet.getValue())
-        .collect(Collectors.toList());
-    values.add(0, "SENTINEL_PLACEHOLDER_VALUE");
-    String domainAsName = d.toString().charAt(0) + d.toString().substring(1).toLowerCase();
+  @Override
+  public ResponseEntity<DataSetPreviewResponse> previewQuery(String workspaceNamespace,
+      String workspaceId, DataSetRequest dataSet) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
+    Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
+    bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
+      String query = queryJobConfiguration.getQuery().concat(" LIMIT "+ NO_OF_PREVIEW_ROWS);
+      queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
-    String valuesQuery = "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
-    Map<String, QueryParameterValue> valuesQueryParams = new HashMap<>();
+      TableResult queryResponse = bigQueryService.executeQuery(bigQueryService
+          .filterBigQueryConfig(queryJobConfiguration));
 
-    valuesQueryParams.put("pDomain", QueryParameterValue.string(domainAsName));
-    valuesQueryParams.put("pValuesList", QueryParameterValue.array(values.toArray(new String[0]), String.class));
+      // Construct a list of all values with empty results.
+      List<DataSetPreviewValueList> valuePreviewList =
+          dataSet.getValues().stream().filter(value -> value.getDomain().toString().equals(domain))
+              .map(value -> new DataSetPreviewValueList().value(value.getValue())).collect(Collectors.toList());
 
-    TableResult valuesLinking = bigQueryService.executeQuery(
-        bigQueryService
-            .filterBigQueryConfig(QueryJobConfiguration
-                .newBuilder(valuesQuery)
-                .setNamedParameters(valuesQueryParams)
-                .setUseLegacySql(false)
-                .build()));
-
-    List<String> valueJoins = new ArrayList<>();
-    List<String> valueSelects = new ArrayList<>();
-    valuesLinking.getValues().forEach((value) -> {
-      valueJoins.add(value.get("JOIN_VALUE").getStringValue());
-      if (!value.get("OMOP_SQL").getStringValue().equals("CORE_TABLE_FOR_DOMAIN")) {
-        valueSelects.add(value.get("OMOP_SQL").getStringValue());
-      }
+      queryResponse.getValues().forEach(fieldValueList -> {
+        IntStream.range(0, fieldValueList.size()).forEach(columnNumber -> {
+          valuePreviewList.get(columnNumber).addQueryValueItem(fieldValueList.get(columnNumber).getValue().toString());
+        });
+      });
+      previewQueryResponse.addDomainValueItem(new DataSetPreviewList().domain(domain).values(valuePreviewList));
     });
-
-    return new ValuesLinkingPair(valueSelects, valueJoins);
-  }
-
-  private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {
-    Optional<CdrBigQuerySchemaConfig.ColumnConfig> conceptColumn = config.columns
-        .stream().filter(column -> type.equals(column.domainConcept))
-        .findFirst();
-    if (!conceptColumn.isPresent()) {
-      throw new ServerErrorException("Domain not supported");
-    }
-    return conceptColumn.get().name;
+    return ResponseEntity.ok(previewQueryResponse);
   }
 
   private NamedParameterEntry generateResponseFromQueryParameter(String key, QueryParameterValue value) {

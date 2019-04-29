@@ -18,6 +18,7 @@ h3 {
 
 body, input[text] {
   color: #888;
+  font-weight: 300;
 }
 
 * {
@@ -25,7 +26,10 @@ body, input[text] {
    * Need to include elsewhere as well to override clarity's font styles.
    */
   font-family: 'Montserrat', sans-serif;
-  font-weight: 300;
+}
+
+b,strong {
+  font-weight: bold;
 }
 
 a {

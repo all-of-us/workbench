@@ -14,10 +14,12 @@ export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined)
 export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
-export const userProfileStore = new BehaviorSubject<{ profile: Profile, reload: Function }>({
-  profile: {} as Profile,
-  reload: () => {}
-});
+export const userProfileStore =
+  new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
+    profile: {} as Profile,
+    reload: () => {},
+    updateCache: (profile) => {},
+  });
 
 // NOTE: Because these are wired up directly to the router component,
 // all navigation done from here will effectively use absolute paths.

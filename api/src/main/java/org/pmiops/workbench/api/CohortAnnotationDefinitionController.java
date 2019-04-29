@@ -4,7 +4,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.Workspace;
