@@ -117,11 +117,13 @@ public class CBCriteriaDaoTest {
     CBCriteria labCriteria = new CBCriteria()
       .domainId(domainId)
       .type(type)
+      .hierarchy(true)
       .count("10")
       .synonyms("LP123");
     CBCriteria labCriteria1 = new CBCriteria()
       .domainId(domainId)
       .type(type)
+      .hierarchy(true)
       .count("101")
       .code("LP1234");
     cbCriteriaDao.save(labCriteria);
