@@ -206,9 +206,12 @@ public class DataSetServiceImpl implements DataSetService {
 
       // This adds the where clauses for cohorts and concept sets.
       query = query.concat(" WHERE (" + columnNames.getStandardConceptIdColumn() + conceptSetListQuery
-          + " OR " + columnNames.getSourceConceptIdColumn() + conceptSetListQuery + ") AND (PERSON_ID IN ("
-          + cohortQueries + "))");
-        queryMap.put(query, cohortParameters);
+          + " OR " + columnNames.getSourceConceptIdColumn() + conceptSetListQuery + ")");
+      if (!includesAllParticipants) {
+        query = query.concat(" AND (PERSON_ID IN ("
+            + cohortQueries + "))");
+      }
+      queryMap.put(query, cohortParameters);
       QueryJobConfiguration queryJobConfiguration = QueryJobConfiguration
           .newBuilder(query)
           .setNamedParameters(cohortParameters)

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -178,8 +179,8 @@ public class DataSetController implements DataSetApiDelegate {
 
   public ResponseEntity<DataSetQueryList> generateQuery(String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<DataSetQuery> respQueryList = new ArrayList<DataSetQuery>();
-    List<NamedParameterEntry> parameters = new ArrayList<NamedParameterEntry>();
+    List<DataSetQuery> respQueryList = new ArrayList<>();
+    List<NamedParameterEntry> parameters = new ArrayList<>();
 
     // Generate query per domain for the selected concept set, cohort and values
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
