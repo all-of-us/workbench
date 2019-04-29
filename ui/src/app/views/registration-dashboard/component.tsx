@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {AlertClose, AlertDanger, AlertWarning} from 'app/components/alert';
@@ -9,7 +10,6 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
-import * as fp from 'lodash/fp';
 
 const styles = reactStyles({
   registrationPage: {
@@ -54,26 +54,38 @@ export interface RegistrationDashboardProps {
   eraCommonsLinked: boolean;
   eraCommonsError: string;
   trainingCompleted: boolean;
+  twoFactorAuthCompleted: boolean;
   firstVisitTraining: boolean;
 }
 
 export class RegistrationDashboard extends
     React.Component<RegistrationDashboardProps,
-      {trainingWarningOpen: boolean, taskCompletionMap: Map<number, boolean>}> {
+    {trainingWarningOpen: boolean, showRefreshButton: boolean,
+      taskCompletionMap: Map<number, boolean>}> {
 
   constructor(props: RegistrationDashboardProps) {
     super(props);
     this.state = {
       trainingWarningOpen: !props.firstVisitTraining,
-      taskCompletionMap: new Map<number, boolean>()
+      taskCompletionMap: new Map<number, boolean>(),
+      showRefreshButton: false
     };
-    this.state.taskCompletionMap.set(0, props.trainingCompleted);
-    this.state.taskCompletionMap.set(1, props.eraCommonsLinked);
-    this.state.taskCompletionMap.set(2, props.dataUseAgreementCompleted);
+    this.state.taskCompletionMap.set(0, props.twoFactorAuthCompleted);
+    this.state.taskCompletionMap.set(1, props.trainingCompleted);
+    this.state.taskCompletionMap.set(2, props.eraCommonsLinked);
+    this.state.taskCompletionMap.set(3, props.dataUseAgreementCompleted);
   }
 
   private registrationTasks = [
     {
+      title: 'Turn on Google 2-Step Verification',
+      description: 'With 2-Step Verification, you’ll protect your ' +
+        'account with both your password and your phone',
+      buttonText: 'Get Started',
+      completedText: 'Completed',
+      isRefreshable: true,
+      onClick: () => this.redirectToGoogleAuth()
+    }, {
       title: 'Complete Online Training',
       description: 'Researchers must maintain up-to-date completion of compliance ' +
         'training courses hosted at the NNLM\'s Moodle installation',
@@ -109,15 +121,27 @@ export class RegistrationDashboard extends
     window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
   }
 
+  componentDidMount() {
+    this.setState({showRefreshButton: false});
+  }
+
+  redirectToGoogleAuth() {
+    this.setState({showRefreshButton: true});
+    window.open('https://myaccount.google.com/security', '_blank');
+  }
+
   isEnabled(i: number): boolean {
     const {taskCompletionMap} = this.state;
     if (i === 0) {
       return !taskCompletionMap.get(i);
     } else {
-      return !taskCompletionMap.get(i)
-        && fp.filter(index => this.isEnabled(index),
-          fp.range(0, i)).length === 0;
+      return !taskCompletionMap.get(i) &&
+        fp.filter(index => this.isEnabled(index), fp.range(0, i)).length === 0;
     }
+  }
+
+  showRefreshFlow(isRefreshable: boolean): boolean {
+    return isRefreshable && this.state.showRefreshButton;
   }
 
   allTasksCompleted(): boolean {
@@ -159,10 +183,17 @@ export class RegistrationDashboard extends
                       style={{backgroundColor: '#8BC990', width: 'max-content', cursor: 'default'}}>
                 <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{card.completedText}
               </Button> :
-            <Button type='darklingSecondary' onClick={card.onClick} style={{width: 'max-content',
-              cursor: this.isEnabled(i) ? 'pointer' : 'default'}}
+            <Button type='darklingSecondary'
+                    onClick={this.showRefreshFlow(card.isRefreshable) ?
+                      () => window.location.reload() : card.onClick}
+                    style={{width: 'max-content',
+                      cursor: this.isEnabled(i) ? 'pointer' : 'default'}}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
-              {card.buttonText}
+              {this.showRefreshFlow(card.isRefreshable) ?
+                <div>
+                  <ClrIcon shape='refresh' style={{marginRight: '0.3rem'}}/>
+                  Refresh
+                </div> : card.buttonText}
             </Button>}
           </ResourceCardBase>;
         })}

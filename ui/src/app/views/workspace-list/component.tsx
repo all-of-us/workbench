@@ -4,7 +4,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
-import {AlertDanger, AlertWarning} from 'app/components/alert';
+import {AlertDanger} from 'app/components/alert';
 import {
   Button,
   CardButton,
@@ -226,7 +226,7 @@ export const WorkspaceList = withUserProfile()
   { profileState: { profile: Profile, reload: Function } },
   { workspacesLoading: boolean, billingProjectInitialized: boolean,
     workspaceList: WorkspacePermissions[], errorText: string,
-    firstSignIn: Date, twoFactorEnabled: boolean
+    firstSignIn: Date
   }> {
   private timer: NodeJS.Timer;
 
@@ -237,14 +237,12 @@ export const WorkspaceList = withUserProfile()
       billingProjectInitialized: false,
       workspaceList: [],
       errorText: '',
-      twoFactorEnabled: false,
       firstSignIn: undefined
     };
   }
 
   componentDidMount() {
     this.checkBillingProjectStatus();
-    this.checkTwoFactorAuth();
     this.reloadWorkspaces();
   }
 
@@ -278,30 +276,6 @@ export const WorkspaceList = withUserProfile()
     }
   }
 
-  checkTwoFactorAuth() {
-    const {profileState: {profile}} = this.props;
-    this.setState({
-      // TODO [RW-2454] Remove 2FA check from workspace list
-      twoFactorEnabled: !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime,
-      firstSignIn: new Date(profile.firstSignInTime)
-    });
-  }
-
-  get twoFactorBannerEnabled() {
-    if (this.state.firstSignIn === undefined) {
-      return false;
-    }
-    if (this.state.twoFactorEnabled === true) {
-      return false;
-    }
-    // Don't show the banner after 1 week as their account would
-    // have been disabled had they not enabled 2-factor auth.
-    if (new Date().getTime() - this.state.firstSignIn.getTime() > 7 * 24 * 60 * 60 * 1000) {
-      return false;
-    }
-    return true;
-  }
-
   render() {
     const {profileState: {profile}} = this.props;
     const {billingProjectInitialized, errorText,
@@ -311,18 +285,10 @@ export const WorkspaceList = withUserProfile()
       <FadeBox style={styles.fadeBox}>
         <div style={{padding: '0 1rem'}}>
           <ListPageHeader>Workspaces</ListPageHeader>
-          {this.twoFactorBannerEnabled && <AlertWarning>
-            <div>Please add a second layer of protection with 2-Step Verification.
-            After three days your account will be suspended.
-            If you already completed setup, please ignore this message.  <a
-                  style={{color: '#2691D0'}} href='https://myaccount.google.com/security'>
-              Set up 2-Step Verification here</a>.</div>
-          </AlertWarning>}
           {errorText && <AlertDanger>
             <ClrIcon shape='exclamation-circle'/>
             {errorText}
           </AlertDanger>}
-
           <div style={styles.cardArea}>
             {workspacesLoading ?
               (<Spinner style={{width: '100%', marginTop: '1.5rem'}}/>) :

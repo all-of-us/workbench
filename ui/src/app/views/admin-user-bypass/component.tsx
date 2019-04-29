@@ -25,6 +25,7 @@ export interface AccessModules {
   complianceTraining: boolean;
   betaAccess: boolean;
   eraCommons: boolean;
+  twoFactorAuth: boolean;
 }
 
 export class AdminUserBypass extends React.Component<
@@ -39,12 +40,14 @@ export class AdminUserBypass extends React.Component<
       modules: {
         complianceTraining: true,
         betaAccess: true,
-        eraCommons: true
+        eraCommons: true,
+        twoFactorAuth: true,
       },
       editedModules: {
         complianceTraining: true,
         betaAccess: true,
-        eraCommons: true
+        eraCommons: true,
+        twoFactorAuth: true
       }
     };
   }
@@ -54,7 +57,8 @@ export class AdminUserBypass extends React.Component<
     const currModules = {
       complianceTraining: !!profile.complianceTrainingBypassTime,
       betaAccess: !!profile.betaAccessBypassTime,
-      eraCommons: !!profile.eraCommonsBypassTime
+      eraCommons: !!profile.eraCommonsBypassTime,
+      twoFactorAuth: !!profile.twoFactorAuthBypassTime,
     };
     this.setState({modules: currModules, editedModules: currModules});
   }
@@ -110,6 +114,11 @@ export class AdminUserBypass extends React.Component<
                   data-test-id='era-commons-toggle'
                   onToggle={() => {this.setState({editedModules:
                       fp.set('eraCommons', !editedModules.eraCommons, editedModules)}); } } />
+          <Toggle name='Two Factor Auth'
+                  enabled={editedModules.twoFactorAuth}
+                  data-test-id='two-factor-auth-toggle'
+                  onToggle={() => {this.setState({editedModules:
+                      fp.set('twoFactorAuth', !editedModules.twoFactorAuth, editedModules)}); }}/>
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
             <IconButton icon='times'
                         onClick={() => this.cancel()}

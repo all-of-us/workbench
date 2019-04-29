@@ -127,12 +127,15 @@ public class UserService {
       user.getComplianceTrainingBypassTime() != null || !configProvider.get().access.enableComplianceTraining;
     boolean betaAccessGranted = user.getBetaAccessBypassTime() != null ||
             !configProvider.get().access.enableBetaAccess;
+    boolean twoFactorAuthComplete = user.getTwoFactorAuthCompletionTime() != null ||
+      user.getTwoFactorAuthBypassTime() != null;
 
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     boolean shouldBeRegistered = !user.getDisabled()
         && complianceTrainingCompliant
         && eraCommonsCompliant
         && betaAccessGranted
+        && twoFactorAuthComplete
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
     boolean isInGroup = this.fireCloudService.
             isUserMemberOfGroup(user.getEmail(), configProvider.get().firecloud.registeredDomainName);

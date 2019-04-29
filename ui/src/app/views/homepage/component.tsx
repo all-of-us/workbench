@@ -103,6 +103,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     firstVisitTraining: boolean,
     quickTour: boolean,
     trainingCompleted: boolean,
+    twoFactorAuthCompleted: boolean,
     videoOpen: boolean,
     videoLink: string
   }> {
@@ -123,6 +124,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       firstVisitTraining: true,
       quickTour: false,
       trainingCompleted: undefined,
+      twoFactorAuthCompleted: undefined,
       videoOpen: false,
       videoLink: '',
     };
@@ -203,6 +205,15 @@ export const Homepage = withUserProfile()(class extends React.Component<
         console.error('error fetching moodle training status');
       }
 
+      try {
+        const result = await profileApi().syncTwoFactorAuthStatus();
+        this.setState({twoFactorAuthCompleted: !!result.twoFactorAuthCompletionTime ||
+            !!profile.twoFactorAuthBypassTime});
+      } catch (ex) {
+        this.setState({twoFactorAuthCompleted: false});
+        console.error('error fetching two factor auth status');
+      }
+
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
@@ -248,7 +259,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
   render() {
     const {billingProjectInitialized, betaAccessGranted, videoOpen, accessTasksLoaded,
         accessTasksRemaining, eraCommonsLinked, eraCommonsError, firstVisitTraining,
-        trainingCompleted, quickTour, videoLink, dataUseAgreementCompleted} = this.state;
+        trainingCompleted, quickTour, videoLink, twoFactorAuthCompleted,
+      dataUseAgreementCompleted} = this.state;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -294,6 +306,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                         trainingCompleted={trainingCompleted}
                                         firstVisitTraining={firstVisitTraining}
                                         betaAccessGranted={betaAccessGranted}
+                                        twoFactorAuthCompleted={twoFactorAuthCompleted}
                                         dataUseAgreementCompleted={dataUseAgreementCompleted}/>
                 ) : (
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
