@@ -318,7 +318,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     renderButtonText() {
       switch (this.props.routeConfigData.mode) {
         case WorkspaceEditMode.Create: return 'Create Workspace';
-        case WorkspaceEditMode.Edit: return 'Update Worspace';
+        case WorkspaceEditMode.Edit: return 'Update Workspace';
         case WorkspaceEditMode.Clone: return 'Duplicate Workspace';
       }
     }
