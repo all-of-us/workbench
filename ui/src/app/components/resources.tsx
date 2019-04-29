@@ -96,3 +96,14 @@ export const ResourceListItem: React.FunctionComponent <
       <div style={{lineHeight: '1.5rem'}}>{resource.name}</div>
     </div>;
     };
+
+export const ImmutableListItem: React.FunctionComponent <{
+  name: string, onSelect: Function}> = ({name, onSelect}) => {
+  return <div style={{border: '0.5px solid #C3C3C3', margin: '.4rem',
+    height: '1.5rem', display: 'flex'}}>
+    <input type='checkbox' value={name} onClick={() => onSelect()}
+           style={{height: 17, width: 17, marginLeft: 10, marginTop: 10,
+             marginRight: 10, backgroundColor: '#7CC79B'}}/>
+    <div style={{lineHeight: '1.5rem'}}>{name}</div>
+  </div>
+}
