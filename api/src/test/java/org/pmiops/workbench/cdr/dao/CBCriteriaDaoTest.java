@@ -143,6 +143,7 @@ public class CBCriteriaDaoTest {
       .domainId(domainId)
       .type(type)
       .count("10")
+      .hierarchy(true)
       .synonyms("myMatch");
     cbCriteriaDao.save(snomedCriteria);
 
@@ -160,17 +161,20 @@ public class CBCriteriaDaoTest {
     CBCriteria drugCriteriaIngredient = new CBCriteria()
       .domainId(domainId)
       .type(type)
+      .hierarchy(true)
       .name("ACETAMIN")
       .selectable(true);
     CBCriteria drugCriteriaIngredient1 = new CBCriteria()
       .domainId(domainId)
       .type(type)
+      .hierarchy(true)
       .name("MIN1")
       .code("2")
       .selectable(true);
     CBCriteria drugCriteriaBrand = new CBCriteria()
       .domainId(domainId)
       .type(type)
+      .hierarchy(true)
       .name("BLAH")
       .selectable(true);
     cbCriteriaDao.save(drugCriteriaIngredient);
