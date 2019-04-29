@@ -155,7 +155,12 @@ This will start up the public API on http://localhost:8083/.
 
 ### UI
 
-From the `ui/` directory:
+Before launching or testing the UI, yarn must first install the neccessary packages. From the `ui/` directory:
+```Shell
+yarn install
+```
+
+To launch the local UI:
 ```Shell
 yarn dev-up
 ```
