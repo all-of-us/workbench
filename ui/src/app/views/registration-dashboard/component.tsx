@@ -104,9 +104,9 @@ export interface RegistrationDashboardProps {
 }
 
 interface State {
-  showRefreshButton: boolean,
-  trainingWarningOpen: boolean,
-  taskCompletionMap: Map<number, boolean>,
+  showRefreshButton: boolean;
+  trainingWarningOpen: boolean;
+  taskCompletionMap: Map<number, boolean>;
 }
 
 export class RegistrationDashboard extends React.Component<RegistrationDashboardProps, State> {
@@ -133,7 +133,8 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     if (i === 0) {
       return !taskCompletionMap.get(i);
     } else {
-      return !taskCompletionMap.get(i) && fp.filter(index => this.isEnabled(index), fp.range(0, i)).length === 0;
+      return !taskCompletionMap.get(i) &&
+      fp.filter(index => this.isEnabled(index), fp.range(0, i)).length === 0;
     }
   }
 
@@ -143,6 +144,19 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
 
   allTasksCompleted(): boolean {
     return Array.from(this.state.taskCompletionMap.values()).reduce((acc, val) => acc && val);
+  }
+
+  onCardClick(card) {
+    if (this.showRefreshFlow(card.isRefreshable)) {
+      window.location.reload();
+    } else {
+      if (card.isRefreshable) {
+        this.setState({
+          showRefreshButton: true
+        });
+      }
+      card.onClick();
+    }
   }
 
   render() {
@@ -181,8 +195,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                 <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{card.completedText}
               </Button> :
             <Button type='darklingSecondary'
-                    onClick={this.showRefreshFlow(card.isRefreshable) ?
-                      () => window.location.reload() : () => { if (card.isRefreshable) { this.setState({showRefreshButton: true}); }  card.onClick(); }}
+                    onClick={ () => this.onCardClick(card) }
                     style={{width: 'max-content',
                       cursor: this.isEnabled(i) ? 'pointer' : 'default'}}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
@@ -191,6 +204,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
           </ResourceCardBase>;
         })}
       </div>
+
       {eraCommonsError && <AlertDanger data-test-id='era-commons-error'
                                         style={{margin: '0px 1rem 1rem 0px'}}>
           <ClrIcon shape='exclamation-triangle' class='is-solid'/>

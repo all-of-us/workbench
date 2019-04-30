@@ -1,8 +1,9 @@
 import * as React from 'react';
+
 import { Button } from 'app/components/buttons';
-import { reactStyles } from 'app/utils';
-import colors from 'app/styles/colors';
 import { ClrIcon } from 'app/components/icons';
+import colors from 'app/styles/colors';
+import { reactStyles } from 'app/utils';
 
 const styles = reactStyles({
   box: {
@@ -21,12 +22,12 @@ const styles = reactStyles({
 
 
 interface Props {
-  title: string,
-  bypassedByAdmin: boolean,
-  completed: boolean,
-  incompletedButtonText: string,
-  completedButtonText: string,
-  completeStep: Function 
+  title: string;
+  bypassedByAdmin: boolean;
+  completed: boolean;
+  incompletedButtonText: string;
+  completedButtonText: string;
+  completeStep: Function;
 }
 
 class ProfileRegistrationStepStatus extends React.Component<Props> {
@@ -50,7 +51,8 @@ class ProfileRegistrationStepStatus extends React.Component<Props> {
                     disabled={true}
                 >
                   <ClrIcon shape='check' style={{width: 40, marginLeft: -10 }}/>
-                  { this.props.bypassedByAdmin ? "Bypassed By Admin" : this.props.completedButtonText }
+                  { this.props.bypassedByAdmin ?
+                    'Bypassed By Admin' : this.props.completedButtonText }
                 </Button>
               ) : (
                 <Button
@@ -75,4 +77,4 @@ class ProfileRegistrationStepStatus extends React.Component<Props> {
 export {
   ProfileRegistrationStepStatus,
   Props as ProfileRegistrationStepStatusProps
-}
+};

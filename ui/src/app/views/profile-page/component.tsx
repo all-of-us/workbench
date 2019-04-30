@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
-import * as React from 'react';
 import * as moment from 'moment';
+import * as React from 'react';
 import * as validate from 'validate.js';
 
 import {Button, Clickable} from 'app/components/buttons';
@@ -12,10 +12,11 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import { ProfileRegistrationStepStatus } from 'app/views/profile-registration-step-status/component';
+import { RegistrationTasks } from 'app/views/registration-dashboard/component';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
-import { ProfileRegistrationStepStatus } from '../profile-registration-step-status/component';
-import { RegistrationTasks } from '../registration-dashboard/component';
+
 
 
 const styles = reactStyles({
@@ -323,8 +324,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 <div> { profile.eraCommonsLinkedNihUsername } </div>
                 <div> Link Expiration: </div>
                 <div>
-                  { console.log(profile.eraCommonsLinkExpireTime) }
-                  { moment.unix(profile.eraCommonsLinkExpireTime).format('MMMM Do, YYYY, h:mm:ss A') }
+                  { moment.unix(profile.eraCommonsLinkExpireTime)
+                    .format('MMMM Do, YYYY, h:mm:ss A') }
                 </div>
               </div>
             )}

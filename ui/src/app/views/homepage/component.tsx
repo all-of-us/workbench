@@ -192,8 +192,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
           || !!profile.eraCommonsBypassTime,
         dataUseAgreementCompleted: !!profile.dataUseAgreementCompletionTime
           || !!profile.dataUseAgreementBypassTime
-        });
-          
+      });
+
       try {
         const result = await profileApi().syncComplianceTrainingStatus();
         this.setState({trainingCompleted: !!result.complianceTrainingCompletionTime
