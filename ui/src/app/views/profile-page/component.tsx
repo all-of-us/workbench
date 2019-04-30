@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as moment from 'moment';
 import * as validate from 'validate.js';
 
 import {Button, Clickable} from 'app/components/buttons';
@@ -13,6 +14,8 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
+import { ProfileRegistrationStepStatus } from '../profile-registration-step-status/component';
+import { RegistrationTasks } from '../registration-dashboard/component';
 
 
 const styles = reactStyles({
@@ -57,6 +60,23 @@ const validators = {
   organization: {...required, ...notTooLong(255)},
   areaOfResearch: required,
 };
+
+function isTwoFactorAuthEnabled(profile: Profile): boolean {
+  return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
+}
+
+function isTrainingComplete(profile: Profile): boolean {
+  return !!profile.complianceTrainingCompletionTime || !!profile.complianceTrainingBypassTime;
+}
+
+function isEraCommonsLinked(profile: Profile): boolean {
+  return !!profile.eraCommonsCompletionTime || !!profile.eraCommonsBypassTime;
+}
+
+function isDataUseAgreementSigned(profile: Profile): boolean {
+  return !!profile.dataUseAgreementCompletionTime || !!profile.dataUseAgreementBypassTime;
+}
+
 
 export const ProfilePage = withUserProfile()(class extends React.Component<
   { profileState: { profile: Profile, reload: Function } },
@@ -273,29 +293,61 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
           </div>
         </div>
 
-        <div style={{flex: '0 0 420px'}}>
-          <div style={styles.box}>
-            <div style={{...styles.h1, marginBottom: 12}}>
-              All of Us Training
-              <TooltipTrigger
-                side='left'
-                content=''
-              >
-                <ClrIcon
-                  shape='info-standard'
-                  className='is-solid'
-                  style={{marginLeft: 10, verticalAlign: 'middle', color: colors.blue[0]}}
-                />
-              </TooltipTrigger>
+        <div>
+          <ProfileRegistrationStepStatus
+            title='Google 2-Step Verification'
+            bypassedByAdmin={!!profile.twoFactorAuthBypassTime}
+            incompletedButtonText='Set Up'
+            completedButtonText={RegistrationTasks[0].completedText}
+            completed={isTwoFactorAuthEnabled(profile)}
+            completeStep={RegistrationTasks[0].onClick  } />
+
+          <ProfileRegistrationStepStatus
+            title='Access Training'
+            bypassedByAdmin={!!profile.complianceTrainingBypassTime}
+            incompletedButtonText='Access Training'
+            completedButtonText={RegistrationTasks[1].completedText}
+            completed={isTrainingComplete(profile)}
+            completeStep={RegistrationTasks[1].onClick} />
+
+          <ProfileRegistrationStepStatus
+            title='ERA Commons Account'
+            bypassedByAdmin={!!profile.eraCommonsBypassTime}
+            incompletedButtonText='Link'
+            completedButtonText={RegistrationTasks[2].completedText}
+            completed={isEraCommonsLinked(profile)}
+            completeStep={RegistrationTasks[2].onClick} >
+            { isEraCommonsLinked(profile) && (
+              <div>
+                <div> Username: </div>
+                <div> { profile.eraCommonsLinkedNihUsername } </div>
+                <div> Link Expiration: </div>
+                <div>
+                  { console.log(profile.eraCommonsLinkExpireTime) }
+                  { moment.unix(profile.eraCommonsLinkExpireTime).format('MMMM Do, YYYY, h:mm:ss A') }
+                </div>
+              </div>
+            )}
+          </ProfileRegistrationStepStatus>
+
+          <ProfileRegistrationStepStatus
+            title='Data Use Agreement'
+            bypassedByAdmin={!!profile.dataUseAgreementBypassTime}
+            incompletedButtonText='Sign'
+            completedButtonText={RegistrationTasks[3].completedText}
+            completed={isDataUseAgreementSigned(profile)}
+            completeStep={RegistrationTasks[3].onClick} >
+            <div> Agreement Renewal: </div>
+            <div>
+              { moment.unix(profile.dataUseAgreementCompletionTime / 1000).format('MMMM Do, YYYY') }
             </div>
-            <Button
-                type='purplePrimary'
-                onClick={this.navigateToTraining}
-            >
-              Access Training
-            </Button>
-          </div>
+            <a
+              onClick={RegistrationTasks[3].onClick}>
+              View current agreement
+            </a>
+          </ProfileRegistrationStepStatus>
         </div>
+
       </div>
     </div>;
   }

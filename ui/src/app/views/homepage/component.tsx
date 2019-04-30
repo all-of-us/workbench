@@ -186,16 +186,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
         // page visits is null; is first visit
         this.setFirstVisit();
       }
-      try {
-        this.setState({
-          eraCommonsLinked: !!profile.eraCommonsCompletionTime
-            || !!profile.eraCommonsBypassTime,
-          dataUseAgreementCompleted: !!profile.dataUseAgreementCompletionTime
-            || !!profile.dataUseAgreementBypassTime });
-      } catch (ex) {
-        this.setState({eraCommonsLinked: false});
-        console.error('error fetching era commons linking status');
-      }
+
+      this.setState({
+        eraCommonsLinked: !!profile.eraCommonsCompletionTime
+          || !!profile.eraCommonsBypassTime,
+        dataUseAgreementCompleted: !!profile.dataUseAgreementCompletionTime
+          || !!profile.dataUseAgreementBypassTime
+        });
+          
       try {
         const result = await profileApi().syncComplianceTrainingStatus();
         this.setState({trainingCompleted: !!result.complianceTrainingCompletionTime

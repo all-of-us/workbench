@@ -1,4 +1,3 @@
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {AlertClose, AlertDanger, AlertWarning} from 'app/components/alert';
@@ -48,20 +47,66 @@ const styles = reactStyles({
   }
 });
 
+function redirectToNiH(): void {
+  const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
+          encodeURIComponent(
+            window.location.origin.toString() + '/nih-callback?token={token}');
+  window.location.assign(url);
+}
+
+async function redirectToTraining() {
+  await profileApi().updatePageVisits({page: 'moodle'});
+  window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
+}
+
+export const RegistrationTasks = [
+  {
+    title: 'Turn on Google 2-Step Verification',
+    description: 'With 2-Step Verification, you’ll protect your ' +
+      'account with both your password and your phone',
+    buttonText: 'Get Started',
+    completedText: 'Completed',
+    isRefreshable: true,
+    onClick: () => window.open('https://myaccount.google.com/security', '_blank')
+  }, {
+    title: 'Complete Online Training',
+    description: 'Researchers must maintain up-to-date completion of compliance ' +
+      'training courses hosted at the NNLM\'s Moodle installation',
+    buttonText: 'Complete training',
+    completedText: 'Completed',
+    onClick: redirectToTraining
+  }, {
+    title: 'Login to ERA Commons',
+    description: 'Researchers must maintain up-to-date completion of compliance' +
+      ' training courses hosted at the NNLM’s Moodle installation',
+    buttonText: 'Login',
+    completedText: 'Linked',
+    onClick: redirectToNiH
+  }, {
+    title: 'Data Use Agreement',
+    description: 'This data use agreement describes how All of Us ' +
+      'Research Program data can and cannot be used',
+    buttonText: 'View & Sign',
+    completedText: 'Signed',
+    onClick: () => navigate(['data-use-agreement'])
+  }
+];
+
 export interface RegistrationDashboardProps {
   betaAccessGranted: boolean;
-  dataUseAgreementCompleted: boolean;
   eraCommonsLinked: boolean;
   eraCommonsError: string;
   trainingCompleted: boolean;
-  twoFactorAuthCompleted: boolean;
   firstVisitTraining: boolean;
 }
 
-export class RegistrationDashboard extends
-    React.Component<RegistrationDashboardProps,
-    {trainingWarningOpen: boolean, showRefreshButton: boolean,
-      taskCompletionMap: Map<number, boolean>}> {
+interface State {
+  showRefreshButton: boolean,
+  trainingWarningOpen: boolean,
+  taskCompletionMap: Map<number, boolean>,
+}
+
+export class RegistrationDashboard extends React.Component<RegistrationDashboardProps, State> {
 
   constructor(props: RegistrationDashboardProps) {
     super(props);
@@ -70,64 +115,12 @@ export class RegistrationDashboard extends
       taskCompletionMap: new Map<number, boolean>(),
       showRefreshButton: false
     };
-    this.state.taskCompletionMap.set(0, props.twoFactorAuthCompleted);
-    this.state.taskCompletionMap.set(1, props.trainingCompleted);
-    this.state.taskCompletionMap.set(2, props.eraCommonsLinked);
-    this.state.taskCompletionMap.set(3, props.dataUseAgreementCompleted);
-  }
-
-  private registrationTasks = [
-    {
-      title: 'Turn on Google 2-Step Verification',
-      description: 'With 2-Step Verification, you’ll protect your ' +
-        'account with both your password and your phone',
-      buttonText: 'Get Started',
-      completedText: 'Completed',
-      isRefreshable: true,
-      onClick: () => this.redirectToGoogleAuth()
-    }, {
-      title: 'Complete Online Training',
-      description: 'Researchers must maintain up-to-date completion of compliance ' +
-        'training courses hosted at the NNLM\'s Moodle installation',
-      buttonText: 'Complete training',
-      completedText: 'Completed',
-      onClick: RegistrationDashboard.redirectToTraining
-    }, {
-      title: 'Login to ERA Commons',
-      description: 'Researchers must maintain up-to-date completion of compliance' +
-        ' training courses hosted at the NNLM’s Moodle installation',
-      buttonText: 'Login',
-      completedText: 'Linked',
-      onClick: RegistrationDashboard.redirectToNiH
-    }, {
-      title: 'Data Use Agreement',
-      description: 'This data use agreement describes how All of Us ' +
-        'Research Program data can and cannot be used',
-      buttonText: 'View & Sign',
-      completedText: 'Signed',
-      onClick: () => navigate(['data-use-agreement'])
-    }
-  ];
-
-  static redirectToNiH(): void {
-    const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
-            encodeURIComponent(
-              window.location.origin.toString() + '/nih-callback?token={token}');
-    window.location.assign(url);
-  }
-
-  static async redirectToTraining() {
-    await profileApi().updatePageVisits({page: 'moodle'});
-    window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
+    this.state.taskCompletionMap.set(0, props.trainingCompleted);
+    this.state.taskCompletionMap.set(1, props.eraCommonsLinked);
   }
 
   componentDidMount() {
     this.setState({showRefreshButton: false});
-  }
-
-  redirectToGoogleAuth() {
-    this.setState({showRefreshButton: true});
-    window.open('https://myaccount.google.com/security', '_blank');
   }
 
   isEnabled(i: number): boolean {
@@ -135,13 +128,8 @@ export class RegistrationDashboard extends
     if (i === 0) {
       return !taskCompletionMap.get(i);
     } else {
-      return !taskCompletionMap.get(i) &&
-        fp.filter(index => this.isEnabled(index), fp.range(0, i)).length === 0;
+      return !taskCompletionMap.get(i) && !this.isEnabled(i - 1);
     }
-  }
-
-  showRefreshFlow(isRefreshable: boolean): boolean {
-    return isRefreshable && this.state.showRefreshButton;
   }
 
   allTasksCompleted(): boolean {
@@ -167,7 +155,7 @@ export class RegistrationDashboard extends
       </div>}
 
       <div style={{display: 'flex', flexDirection: 'row'}}>
-        {this.registrationTasks.map((card, i) => {
+        {RegistrationTasks.map((card, i) => {
           return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
             style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
               opacity: '0.6', maxHeight: this.allTasksCompleted() ? '160px' : '305px',
@@ -185,15 +173,11 @@ export class RegistrationDashboard extends
               </Button> :
             <Button type='darklingSecondary'
                     onClick={this.showRefreshFlow(card.isRefreshable) ?
-                      () => window.location.reload() : card.onClick}
+                      () => window.location.reload() : () => { if (card.isRefreshable) { this.setState({showRefreshButton: true}); }  card.onClick(); }}
                     style={{width: 'max-content',
                       cursor: this.isEnabled(i) ? 'pointer' : 'default'}}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
-              {this.showRefreshFlow(card.isRefreshable) ?
-                <div>
-                  <ClrIcon shape='refresh' style={{marginRight: '0.3rem'}}/>
-                  Refresh
-                </div> : card.buttonText}
+              {card.buttonText}
             </Button>}
           </ResourceCardBase>;
         })}
