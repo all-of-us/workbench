@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {AlertClose, AlertDanger, AlertWarning} from 'app/components/alert';
@@ -117,8 +118,10 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       taskCompletionMap: new Map<number, boolean>(),
       showRefreshButton: false
     };
-    this.state.taskCompletionMap.set(0, props.trainingCompleted);
-    this.state.taskCompletionMap.set(1, props.eraCommonsLinked);
+    this.state.taskCompletionMap.set(0, props.twoFactorAuthCompleted);
+    this.state.taskCompletionMap.set(1, props.trainingCompleted);
+    this.state.taskCompletionMap.set(2, props.eraCommonsLinked);
+    this.state.taskCompletionMap.set(3, props.dataUseAgreementCompleted);
   }
 
   componentDidMount() {
@@ -130,7 +133,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     if (i === 0) {
       return !taskCompletionMap.get(i);
     } else {
-      return !taskCompletionMap.get(i) && !this.isEnabled(i - 1);
+      return !taskCompletionMap.get(i) && fp.filter(index => this.isEnabled(index), fp.range(0, i)).length === 0;
     }
   }
 
