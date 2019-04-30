@@ -34,7 +34,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * A higher-level service class containing user manipulation and business logic which can't be
@@ -107,7 +109,7 @@ public class UserService {
       try {
         user = userDao.save(user);
         return user;
-      } catch (ObjectOptimisticLockingFailureException e) {
+      } catch (ObjectOptimisticLockingFailureException | JpaSystemException e) {
         if (numAttempts < MAX_RETRIES) {
           user = userDao.findOne(user.getUserId());
           numAttempts++;
