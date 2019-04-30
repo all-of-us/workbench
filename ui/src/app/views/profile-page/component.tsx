@@ -297,50 +297,50 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
         <div>
           <ProfileRegistrationStepStatus
             title='Google 2-Step Verification'
-            bypassedByAdmin={!!profile.twoFactorAuthBypassTime}
-            incompletedButtonText='Set Up'
+            wasBypassed={!!profile.twoFactorAuthBypassTime}
+            incompleteButtonText='Set Up'
             completedButtonText={RegistrationTasks[0].completedText}
-            completed={isTwoFactorAuthEnabled(profile)}
+            isComplete={isTwoFactorAuthEnabled(profile)}
             completeStep={RegistrationTasks[0].onClick  } />
 
           <ProfileRegistrationStepStatus
             title='Access Training'
-            bypassedByAdmin={!!profile.complianceTrainingBypassTime}
-            incompletedButtonText='Access Training'
+            wasBypassed={!!profile.complianceTrainingBypassTime}
+            incompleteButtonText='Access Training'
             completedButtonText={RegistrationTasks[1].completedText}
-            completed={isTrainingComplete(profile)}
+            isComplete={isTrainingComplete(profile)}
             completeStep={RegistrationTasks[1].onClick} />
 
           <ProfileRegistrationStepStatus
             title='ERA Commons Account'
-            bypassedByAdmin={!!profile.eraCommonsBypassTime}
-            incompletedButtonText='Link'
+            wasBypassed={!!profile.eraCommonsBypassTime}
+            incompleteButtonText='Link'
             completedButtonText={RegistrationTasks[2].completedText}
-            completed={isEraCommonsLinked(profile)}
+            isComplete={isEraCommonsLinked(profile)}
             completeStep={RegistrationTasks[2].onClick} >
-            { isEraCommonsLinked(profile) && (
+            <div>
+              <div> Username: </div>
+              <div> { profile.eraCommonsLinkedNihUsername } </div>
+              <div> Link Expiration: </div>
               <div>
-                <div> Username: </div>
-                <div> { profile.eraCommonsLinkedNihUsername } </div>
-                <div> Link Expiration: </div>
-                <div>
-                  { moment.unix(profile.eraCommonsLinkExpireTime)
-                    .format('MMMM Do, YYYY, h:mm:ss A') }
-                </div>
+                { moment.unix(profile.eraCommonsLinkExpireTime)
+                  .format('MMMM Do, YYYY, h:mm:ss A') }
               </div>
-            )}
+            </div>
           </ProfileRegistrationStepStatus>
 
           <ProfileRegistrationStepStatus
             title='Data Use Agreement'
-            bypassedByAdmin={!!profile.dataUseAgreementBypassTime}
-            incompletedButtonText='Sign'
+            wasBypassed={!!profile.dataUseAgreementBypassTime}
+            incompleteButtonText='Sign'
             completedButtonText={RegistrationTasks[3].completedText}
-            completed={isDataUseAgreementSigned(profile)}
+            isComplete={isDataUseAgreementSigned(profile)}
             completeStep={RegistrationTasks[3].onClick} >
             <div> Agreement Renewal: </div>
             <div>
-              { moment.unix(profile.dataUseAgreementCompletionTime / 1000).format('MMMM Do, YYYY') }
+              { moment.unix(profile.dataUseAgreementCompletionTime / 1000)
+                  .add(1, 'year')
+                  .format('MMMM Do, YYYY') }
             </div>
             <a
               onClick={RegistrationTasks[3].onClick}>
