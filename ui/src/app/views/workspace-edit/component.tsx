@@ -311,14 +311,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         case WorkspaceEditMode.Edit:
           return 'Edit workspace \"' + this.state.workspace.name + '\"';
         case WorkspaceEditMode.Clone:
-          return 'Clone workspace \"' + this.state.workspace.name + '\"';
+          // use workspace name from props instead of state here
+          // because it's a record of the initial value
+          return 'Clone workspace \"' + this.props.workspace.name + '\"';
       }
     }
 
     renderButtonText() {
       switch (this.props.routeConfigData.mode) {
         case WorkspaceEditMode.Create: return 'Create Workspace';
-        case WorkspaceEditMode.Edit: return 'Update Worspace';
+        case WorkspaceEditMode.Edit: return 'Update Workspace';
         case WorkspaceEditMode.Clone: return 'Duplicate Workspace';
       }
     }
