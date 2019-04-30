@@ -98,6 +98,8 @@ export interface RegistrationDashboardProps {
   eraCommonsError: string;
   trainingCompleted: boolean;
   firstVisitTraining: boolean;
+  twoFactorAuthCompleted: boolean;
+  dataUseAgreementCompleted: boolean;
 }
 
 interface State {
@@ -130,6 +132,10 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     } else {
       return !taskCompletionMap.get(i) && !this.isEnabled(i - 1);
     }
+  }
+
+  showRefreshFlow(isRefreshable: boolean): boolean {
+    return isRefreshable && this.state.showRefreshButton;
   }
 
   allTasksCompleted(): boolean {
