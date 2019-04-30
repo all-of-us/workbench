@@ -1109,7 +1109,7 @@ def backfill_gsuite_user_data(cmd_name, *args)
   # This command reads from the AoU database and reads/writes to the associated GSuite API.
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
-        gradle --info backfillGSuiteUserData
+        gradle backfillGSuiteUserData
        -PappArgs=[#{op.opts.dry_run}]}
   end
 end
@@ -1141,7 +1141,7 @@ def fetch_firecloud_user_profile(cmd_name, *args)
 
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
-        gradle --info fetchFireCloudUserProfile
+        gradle fetchFireCloudUserProfile
        -PappArgs=["#{op.opts.user}"]}
   end
 end
@@ -1186,7 +1186,7 @@ def set_authority(cmd_name, *args)
   with_cloud_proxy_and_db(gcc) do
     common = Common.new
     common.run_inline %W{
-      gradle --info setAuthority
+      gradle setAuthority
      -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
   end
 end
@@ -1205,7 +1205,7 @@ def set_authority_local(cmd_name, *args)
 
   common = Common.new
   common.run_inline %W{
-      gradle --info setAuthority
+      gradle setAuthority
      -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
 end
 
@@ -1241,7 +1241,7 @@ def delete_clusters(cmd_name, *args)
   ServiceAccountContext.new(gcc.project).run do
     common = Common.new
     common.run_inline %W{
-       gradle --info manageClusters
+       gradle manageClusters
       -PappArgs=['delete','#{api_url}','#{op.opts.min_age_days}','#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
   end
 end
@@ -1263,7 +1263,7 @@ def list_clusters(cmd_name, *args)
   ServiceAccountContext.new(gcc.project).run do
     common = Common.new
     common.run_inline %W{
-      gradle --info manageClusters -PappArgs=['list','#{api_url}']
+      gradle manageClusters -PappArgs=['list','#{api_url}']
     }
   end
 end
@@ -1359,7 +1359,7 @@ end
 def update_cdr_versions_for_project(versions_file, dry_run)
   common = Common.new
   common.run_inline %W{
-    gradle --info updateCdrVersions
+    gradle updateCdrVersions
    -PappArgs=['#{versions_file}',#{dry_run}]}
 end
 
@@ -1657,7 +1657,7 @@ def migrate_database(dry_run = false)
   common = Common.new
   common.status "Migrating main database..."
   Dir.chdir("db") do
-    run_inline_or_log(dry_run, %W{gradle --info update -PrunList=main})
+    run_inline_or_log(dry_run, %W{gradle update -PrunList=main})
   end
 end
 
@@ -1665,7 +1665,7 @@ def migrate_workbench_data()
   common = Common.new
   common.status "Migrating workbench data..."
   Dir.chdir("db") do
-    common.run_inline(%W{gradle --info update -PrunList=data -Pcontexts=cloud})
+    common.run_inline(%W{gradle update -PrunList=data -Pcontexts=cloud})
   end
 end
 
@@ -1692,8 +1692,8 @@ def load_config(project, dry_run = false)
 
   common = Common.new
   common.status "Loading #{config_json} into database..."
-  run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=config/#{config_json}})
-  run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json})
+  run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=main -Pconfig_file=config/#{config_json}})
+  run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json})
 end
 
 def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
