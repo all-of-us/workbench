@@ -102,7 +102,7 @@ const routes: Routes = [
                 component: WorkspaceEditComponent,
                 data: {
                   title: 'Clone Workspace',
-                  mode: WorkspaceEditMode.Clone,
+                  mode: WorkspaceEditMode.Duplicate,
                   breadcrumb: BreadcrumbType.WorkspaceClone
                 }
               },
