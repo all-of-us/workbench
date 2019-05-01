@@ -23,6 +23,7 @@ public class DataSet {
   private long creatorId;
   private Timestamp creationTime;
   private Boolean invalid;
+  private Boolean includesAllParticipants;
   private List<Long> conceptSetId;
   private List<Long> cohortSetId;
   private List<DataSetValues> values;
@@ -101,6 +102,15 @@ public class DataSet {
 
   public void setInvalid(Boolean invalid) {
     this.invalid = invalid;
+  }
+
+  @Column(name = "includes_all_participants")
+  public Boolean getIncludesAllParticipants() {
+    return includesAllParticipants;
+  }
+
+  public void setIncludesAllParticipants(Boolean includesAllParticipants) {
+    this.includesAllParticipants = includesAllParticipants;
   }
 
   @ElementCollection

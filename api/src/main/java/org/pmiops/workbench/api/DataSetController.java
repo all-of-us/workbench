@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -95,11 +96,12 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSet> createDataSet(String workspaceNamespace, String workspaceId,
       DataSetRequest dataSetRequest) {
+    boolean includesAllParticipants = Optional.of(dataSetRequest.getIncludesAllParticipants()).orElse(false);
     if (Strings.isNullOrEmpty(dataSetRequest.getName())) {
       throw new BadRequestException("Missing name");
     } else if (dataSetRequest.getConceptSetIds() == null || dataSetRequest.getConceptSetIds().size() == 0) {
       throw new BadRequestException("Missing concept set ids");
-    } else if (dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().size() == 0) {
+    } else if ((dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().size() == 0) && !includesAllParticipants) {
       throw new BadRequestException("Missing cohort ids");
     } else if (dataSetRequest.getValues() == null || dataSetRequest.getValues().size() == 0) {
       throw new BadRequestException("Missing values");
@@ -116,7 +118,8 @@ public class DataSetController implements DataSetApiDelegate {
         }).collect(Collectors.toList());
     try {
       org.pmiops.workbench.db.model.DataSet savedDataSet = dataSetService.saveDataSet(
-          dataSetRequest.getName(), dataSetRequest.getDescription(), wId, dataSetRequest.getCohortIds(),
+          dataSetRequest.getName(), dataSetRequest.getIncludesAllParticipants(),
+          dataSetRequest.getDescription(), wId, dataSetRequest.getCohortIds(),
           dataSetRequest.getConceptSetIds(), dataSetValuesList, userProvider.get().getUserId(), now);
       return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(savedDataSet));
     } catch (DataIntegrityViolationException ex) {
@@ -130,6 +133,7 @@ public class DataSetController implements DataSetApiDelegate {
         public DataSet apply(org.pmiops.workbench.db.model.DataSet dataSet) {
           DataSet result = new DataSet();
           result.setName(dataSet.getName());
+          result.setIncludesAllParticipants(dataSet.getIncludesAllParticipants());
           Iterable<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
               conceptSetDao.findAll(dataSet.getConceptSetId());
           result.setConceptSets(StreamSupport.stream(conceptSets.spliterator(), false)
@@ -175,8 +179,8 @@ public class DataSetController implements DataSetApiDelegate {
 
   public ResponseEntity<DataSetQueryList> generateQuery(String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<DataSetQuery> respQueryList = new ArrayList<DataSetQuery>();
-    List<NamedParameterEntry> parameters = new ArrayList<NamedParameterEntry>();
+    List<DataSetQuery> respQueryList = new ArrayList<>();
+    List<NamedParameterEntry> parameters = new ArrayList<>();
 
     // Generate query per domain for the selected concept set, cohort and values
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);

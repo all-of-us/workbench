@@ -3,10 +3,22 @@ import * as React from 'react';
 import {Clickable, MenuItem} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
+import colors from 'app/styles/colors';
 import {switchCase} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {environment} from 'environments/environment';
 import {Cohort, ConceptSet} from 'generated/fetch';
+
+const styles = {
+  listItem: {
+    border: '0.5px solid #C3C3C3', margin: '.4rem',
+    height: '1.5rem', display: 'flex'
+  },
+  listItemCheckbox: {
+    height: 17, width: 17, marginLeft: 10, marginTop: 10,
+    marginRight: 10, backgroundColor: colors.green[1]
+  }
+};
 
 export const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook?: Function,
@@ -78,8 +90,7 @@ export const ResourceListItem: React.FunctionComponent <
     onClone?: Function, onReview?: Function}
     > = ({resource, openConfirmDelete, edit, rType, onSelect, onClone = () => {},
                                           onReview = () => {}}) => {
-      return<div style={{border: '0.5px solid #C3C3C3', margin: '.4rem',
-        height: '1.5rem', display: 'flex'}}>
+      return<div style={styles.listItem}>
       <div style={{width: '.75rem', paddingTop: 5, paddingLeft: 10}}>
         <ResourceCardMenu disabled={false}
                           resourceType={rType}
@@ -91,8 +102,16 @@ export const ResourceListItem: React.FunctionComponent <
 
       </div>
       <input type='checkbox' value={resource.name} onClick={() => onSelect()}
-             style={{height: 17, width: 17, marginLeft: 10, marginTop: 10,
-               marginRight: 10, backgroundColor: '#7CC79B'}}/>
+             style={styles.listItemCheckbox}/>
       <div style={{lineHeight: '1.5rem'}}>{resource.name}</div>
     </div>;
     };
+
+export const ImmutableListItem: React.FunctionComponent <{
+  name: string, onSelect: Function}> = ({name, onSelect}) => {
+    return <div style={styles.listItem}>
+    <input type='checkbox' value={name} onClick={() => onSelect()}
+           style={styles.listItemCheckbox}/>
+    <div style={{lineHeight: '1.5rem'}}>{name}</div>
+  </div>;
+  };

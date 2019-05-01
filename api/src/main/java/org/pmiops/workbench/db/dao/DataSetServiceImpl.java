@@ -114,11 +114,12 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public DataSet saveDataSet(String name, String description, long workspaceId,
+  public DataSet saveDataSet(String name, Boolean includesAllParticipants, String description, long workspaceId,
       List<Long> cohortIdList, List<Long> conceptIdList, List<DataSetValues> values, long creatorId,
       Timestamp creationTime) {
     DataSet dataSetDb = new DataSet();
     dataSetDb.setName(name);
+    dataSetDb.setIncludesAllParticipants(includesAllParticipants);
     dataSetDb.setDescription(description);
     dataSetDb.setWorkspaceId(workspaceId);
     dataSetDb.setInvalid(false);
@@ -135,12 +136,15 @@ public class DataSetServiceImpl implements DataSetService {
   public Map<String, QueryJobConfiguration> generateQuery(DataSetRequest dataSet) {
     CdrBigQuerySchemaConfig bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
 
+    boolean includesAllParticipants = Optional.of(dataSet.getIncludesAllParticipants()).orElse(false);
+
+
     Map<String, QueryJobConfiguration> dataSetUtil = new HashMap<>();
     List<Cohort> cohortsSelected = this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds());
     List<org.pmiops.workbench.db.model.ConceptSet> conceptSetsSelected =
         this.conceptSetDao.findAllByConceptSetIdIn(dataSet.getConceptSetIds());
 
-    if (cohortsSelected == null || cohortsSelected.size() == 0 || conceptSetsSelected == null || conceptSetsSelected.size() == 0) {
+    if (((cohortsSelected == null || cohortsSelected.size() == 0) && !includesAllParticipants) || conceptSetsSelected == null || conceptSetsSelected.size() == 0) {
       throw new BadRequestException("Data Sets must include at least one cohort and concept.");
     }
 
@@ -202,9 +206,12 @@ public class DataSetServiceImpl implements DataSetService {
 
       // This adds the where clauses for cohorts and concept sets.
       query = query.concat(" WHERE (" + columnNames.getStandardConceptIdColumn() + conceptSetListQuery
-          + " OR " + columnNames.getSourceConceptIdColumn() + conceptSetListQuery + ") AND (PERSON_ID IN ("
-          + cohortQueries + "))");
-        queryMap.put(query, cohortParameters);
+          + " OR " + columnNames.getSourceConceptIdColumn() + conceptSetListQuery + ")");
+      if (!includesAllParticipants) {
+        query = query.concat(" AND (PERSON_ID IN ("
+            + cohortQueries + "))");
+      }
+      queryMap.put(query, cohortParameters);
       QueryJobConfiguration queryJobConfiguration = QueryJobConfiguration
           .newBuilder(query)
           .setNamedParameters(cohortParameters)
