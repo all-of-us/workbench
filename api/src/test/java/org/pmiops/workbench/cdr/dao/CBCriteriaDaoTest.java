@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.StandardProjection;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -37,7 +40,53 @@ public class CBCriteriaDaoTest {
   private JdbcTemplate jdbcTemplate;
 
   @Test
-  public void findCriteriaByDomainAndSearchTerm() throws Exception {
+  public void findStandardProjectionByCode() throws Exception {
+    String domainId = DomainType.CONDITION.toString();
+
+    //test that we match just one source code
+    CBCriteria sourceCriteria = new CBCriteria()
+      .domainId(domainId)
+      .count("100")
+      .standard(false)
+      .code("120");
+    cbCriteriaDao.save(sourceCriteria);
+    List<StandardProjection> projections =
+      cbCriteriaDao.findStandardProjectionByCode(domainId, "120");
+    assertEquals(1, projections.size());
+    assertFalse(projections.get(0).getStandard());
+
+    //test that we match both source and standard codes
+    CBCriteria standardCriteria = new CBCriteria()
+      .domainId(domainId)
+      .count("100")
+      .standard(true)
+      .code("120");
+    cbCriteriaDao.save(standardCriteria);
+    projections =
+      cbCriteriaDao.findStandardProjectionByCode(domainId, "120");
+    assertEquals(2, projections.size());
+    assertTrue(projections.get(0).getStandard());
+  }
+
+  @Test
+  public void findCriteriaByDomainAndCode() throws Exception {
+    String domainId = DomainType.CONDITION.toString();
+    CBCriteria criteria = new CBCriteria()
+      .domainId(domainId)
+      .count("100")
+      .standard(true)
+      .code("001")
+      .synonyms("[rank1]");
+    cbCriteriaDao.save(criteria);
+    PageRequest page = new PageRequest(0, 10);
+    List<CBCriteria> criteriaList =
+      cbCriteriaDao.findCriteriaByDomainAndCode(domainId, Boolean.TRUE,"001", page);
+    assertEquals(1, criteriaList.size());
+    assertEquals(criteria, criteriaList.get(0));
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSynonyms() throws Exception {
     String domainId = DomainType.MEASUREMENT.toString();
     CBCriteria criteria = new CBCriteria()
       .domainId(domainId)
@@ -47,7 +96,7 @@ public class CBCriteriaDaoTest {
     cbCriteriaDao.save(criteria);
     PageRequest page = new PageRequest(0, 10);
     List<CBCriteria> measurements =
-      cbCriteriaDao.findCriteriaByDomainAndSearchTerm(domainId, Boolean.TRUE,"001", page);
+      cbCriteriaDao.findCriteriaByDomainAndSynonyms(domainId, Boolean.TRUE,"001", page);
     assertEquals(1, measurements.size());
     assertEquals(criteria, measurements.get(0));
   }

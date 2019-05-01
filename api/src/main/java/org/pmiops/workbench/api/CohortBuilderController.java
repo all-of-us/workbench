@@ -8,6 +8,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cdr.model.CBCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
+import org.pmiops.workbench.cdr.model.StandardProjection;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -286,15 +288,20 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> findCriteriaByDomainAndSearchTerm(Long cdrVersionId,
                                                                                 String domain,
                                                                                 String term,
-                                                                                Boolean isStandard,
                                                                                 Long limit) {
-    CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
-    cdrVersionService.setCdrVersion(cdrVersion);
-    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT);
-    String matchExp = modifyTermMatch(term);
-    List<CBCriteria> criteriaList = cbCriteriaDao.findCriteriaByDomainAndSearchTerm(domain, isStandard, matchExp, new PageRequest(0, resultLimit.intValue()));
-    CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
+    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    List<CBCriteria> criteriaList = new ArrayList<>();
+    int resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT).intValue();
+    List<StandardProjection> projections = cbCriteriaDao.findStandardProjectionByCode(domain, term);
+    boolean isStandard = projections.isEmpty() || projections.get(0).getStandard() == true;
+    if (projections.isEmpty()) {
+      criteriaList = cbCriteriaDao.findCriteriaByDomainAndSynonyms(domain, isStandard, modifyTermMatch(term), new PageRequest(0, resultLimit));
+    }
+    if (criteriaList.isEmpty()) {
+      criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, new PageRequest(0, resultLimit));
+    }
+    CriteriaListResponse criteriaResponse = new CriteriaListResponse()
+      .items(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
 
     return ResponseEntity.ok(criteriaResponse);
   }
