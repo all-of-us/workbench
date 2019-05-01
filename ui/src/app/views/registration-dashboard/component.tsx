@@ -199,7 +199,11 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                     style={{width: 'max-content',
                       cursor: this.isEnabled(i) ? 'pointer' : 'default'}}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
-              {card.buttonText}
+              {this.showRefreshFlow(card.isRefreshable) ?
+                <div>
+                  <ClrIcon shape='refresh' style={{marginRight: '0.3rem'}}/>
+                  Refresh
+                </div> : card.buttonText}
             </Button>}
           </ResourceCardBase>;
         })}
