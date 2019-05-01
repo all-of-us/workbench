@@ -1,3 +1,49 @@
+import {ElementRef} from '@angular/core';
+
+export function initializeZendeskWidget(
+  elementRef: ElementRef, accessKey: string): void {
+  // This external script loads the Zendesk web widget, connected to our
+  // production Zendesk account. If we ever get a test Zendesk account, the key
+  // should be templated in using an environment variable.
+  const s = document.createElement('script');
+  s.type = 'text/javascript';
+  s.id = 'ze-snippet';
+  s.src = 'https://static.zdassets.com/ekr/snippet.js?key=' + accessKey;
+  elementRef.nativeElement.appendChild(s);
+
+  // This data configures the Zendesk web widget with settings to show only
+  // the "contact us" form. See https://developer.zendesk.com/embeddables/docs/widget/
+  // for API docs.
+  window['zESettings'] = {
+    webWidget: {
+      chat: {
+        suppress: true,
+      },
+      color: {
+        // This is an AoU dark purple color.
+        theme: '#262262'
+      },
+      contactForm: {
+        attachments: true,
+        subject: false,
+        // We include a tag indicating that this support request was filed via the
+        // research workbench. This helps distinguish from tickets filed via other
+        // AoU sub-products, e.g. Research Hub or Data Browser.
+        tags: ['research_workbench'],
+        title: {
+          '*': 'Help Desk',
+        },
+      },
+      helpCenter: {
+        suppress: true,
+      },
+      talk: {
+        suppress: true,
+      },
+    }
+  };
+}
+
 export function openZendeskWidget(
   givenName: string, familyName: string, aouEmailAddress: string,
   contactEmailAddress: string): void {
