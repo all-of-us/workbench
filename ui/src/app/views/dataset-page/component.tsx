@@ -65,7 +65,7 @@ export const styles = {
     marginLeft: 10,
     marginTop: 10,
     marginRight: 10,
-    backgroundColor: '#7CC79B'
+    backgroundColor: colors.green[1]
   },
 
   subheader: {
