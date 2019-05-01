@@ -136,6 +136,7 @@ public class UserService {
         && eraCommonsCompliant
         && betaAccessGranted
         && twoFactorAuthComplete
+        && dataUseAgreementCompliant
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
     boolean isInGroup = this.fireCloudService.
             isUserMemberOfGroup(user.getEmail(), configProvider.get().firecloud.registeredDomainName);
