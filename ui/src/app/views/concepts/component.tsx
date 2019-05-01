@@ -381,7 +381,8 @@ export const ConceptWrapper = withCurrentWorkspace()(
                             loading={searchLoading}
                             onSelectConcepts={this.selectConcept.bind(this)}
                             placeholderValue={this.noConceptsConstant}
-                            selectedConcepts={conceptsToAdd}/>
+                            selectedConcepts={conceptsToAdd}
+                            reactKey={selectedDomain.name}/>
               <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
                                iconShape='plus'
                                expanded={this.addToSetText}

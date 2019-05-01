@@ -29,9 +29,7 @@ import {ConceptStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {
-  findElements,
   simulateClick as simulateClickReact,
-  simulateClickNthElement
 } from 'testing/react-testing-utility';
 
 import {

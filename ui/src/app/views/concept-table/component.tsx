@@ -83,7 +83,7 @@ export class SynonymsObject extends React.Component<{},
 
 export class ConceptTable extends React.Component<{concepts: Concept[];
   loading: boolean; placeholderValue: string, onSelectConcepts: Function,
-  selectedConcepts: Concept[], reactKey: string,},
+  selectedConcepts: Concept[], reactKey: string},
   {selectedConcepts: Concept[]; selectedVocabularies: string[]; }> {
 
   private dt: DataTable;

@@ -7,8 +7,8 @@ import {conceptsApi, registerApiClient} from 'app/services/swagger-fetch-clients
 import {ConceptsApi, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {StandardConceptFilter, WorkspaceAccessLevel} from 'generated';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {WorkspaceAccessLevel} from 'generated';
 import {DomainInfo} from 'generated/fetch';
 import {ConceptsApiStub, DomainStubVariables} from 'testing/stubs/concepts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
