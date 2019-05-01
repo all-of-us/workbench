@@ -60,11 +60,6 @@ paths:
           required: true
           description: the term to search for
         - in: query
-          name: isStandard
-          type: boolean
-          required: true
-          description: specifies if search is standard or source
-        - in: query
           name: limit
           type: integer
           format: int64

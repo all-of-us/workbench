@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cdr.dao;
 
 import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.cdr.model.StandardProjection;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -19,8 +20,18 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
   List<CBCriteria> findCriteriaByDomainAndTypeOrderByIdAsc(@Param("domain") String domain,
                                                            @Param("type") String type);
 
-  @Query(value = "select c from CBCriteria c where domainId=:domain and standard=:standard and match(synonyms, :term) > 0 order by c.count desc")
-  List<CBCriteria> findCriteriaByDomainAndSearchTerm(@Param("domain") String domain,
+  @Query(value = "select c.standard as standard from CBCriteria c where domainId=:domain and code=:term order by standard desc")
+  List<StandardProjection> findStandardProjectionByCode(@Param("domain") String domain,
+                                                        @Param("term") String term);
+
+  @Query(value = "select c from CBCriteria c where domainId=:domain and standard=:standard and code like upper(concat(:term,'%')) and match(synonyms, '+[rank1]') > 0 and c.count > 0 order by c.count desc")
+  List<CBCriteria> findCriteriaByDomainAndCode(@Param("domain") String domain,
+                                               @Param("standard") Boolean isStandard,
+                                               @Param("term") String term,
+                                               Pageable page);
+
+  @Query(value = "select c from CBCriteria c where domainId=:domain and standard=:standard and match(synonyms, :term) > 0 and c.count > 0 order by c.count desc")
+  List<CBCriteria> findCriteriaByDomainAndSynonyms(@Param("domain") String domain,
                                                      @Param("standard") Boolean isStandard,
                                                      @Param("term") String term,
                                                      Pageable page);
