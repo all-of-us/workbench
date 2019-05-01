@@ -974,12 +974,12 @@ paths:
           - in: body
             name: body
             schema:
-              $ref: "#/definitions/DuplicateWorkspaceRequest"
+              $ref: "#/definitions/CloneWorkspaceRequest"
       responses:
         200:
           description: Successful duplicate response
           schema:
-            $ref: "#/definitions/DuplicateWorkspaceResponse"
+            $ref: "#/definitions/CloneWorkspaceResponse"
 
   # Notebooks ############################################################################
 
@@ -1726,7 +1726,7 @@ definitions:
       newName:
         type: string
 
-  DuplicateWorkspaceRequest:
+  CloneWorkspaceRequest:
     type: object
     required:
      - workspace
@@ -1753,7 +1753,7 @@ definitions:
           All other fields will be ignored and are generated server-side or are copied from the
           cloned workspace.
 
-  DuplicateWorkspaceResponse:
+  CloneWorkspaceResponse:
     type: object
     properties:
       workspace:
