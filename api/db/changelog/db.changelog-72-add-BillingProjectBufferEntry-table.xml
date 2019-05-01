@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="ericsong" id="db.changelog-72-add-BillingProjectBufferEntry-table">
+    <createTable tableName="BillingProjectBufferEntry">
+
+      <column name="id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+
+      <column name="project_name" type="varchar(255)">
+        <constraints unique="true" nullable="false" />
+      </column>
+
+      <column name="creation_time" type="datetime">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="status" type="varchar(32)">
+        <constraints nullable="false" />
+      </column>
+
+    </createTable>
+  </changeSet>
+</databaseChangeLog>

@@ -79,4 +79,5 @@
   <include file="changelog/db.changelog-69-replace-idv-with-beta-access.xml"/>
   <include file="changelog/db.changelog-70-data-set.xml"/>
   <include file="changelog/db.changelog-71-remove-2fa-enabled.xml"/>
+  <include file="changelog/db.changelog-72-add-BillingProjectBufferEntry-table.xml"/>
 </databaseChangeLog>
