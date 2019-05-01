@@ -1,8 +1,8 @@
 import {Observable} from 'rxjs/Observable';
 
 import {
-  CloneWorkspaceRequest,
-  CloneWorkspaceResponse,
+  DuplicateWorkspaceRequest,
+  DuplicateWorkspaceResponse,
   EmptyResponse,
   FileDetail,
   NotebookRename,
@@ -136,7 +136,7 @@ export class WorkspacesServiceStub {
     ];
   }
 
-  private clone(w: Workspace): Workspace {
+  private duplicate(w: Workspace): Workspace {
     if (w == null) {
       return w;
     }
@@ -154,8 +154,8 @@ export class WorkspacesServiceStub {
                                    + `id: ${newWorkspace.id} already exists.`));
           return;
         }
-        this.workspaces.push(this.clone(newWorkspace));
-        observer.next(this.clone(newWorkspace));
+        this.workspaces.push(this.duplicate(newWorkspace));
+        observer.next(this.duplicate(newWorkspace));
         observer.complete();
       }, 0);
     });
@@ -193,7 +193,7 @@ export class WorkspacesServiceStub {
           accessLevel = this.workspaceAccess.get(workspaceId);
         }
         const response: WorkspaceResponse = {
-          workspace: this.clone(workspaceReceived),
+          workspace: this.duplicate(workspaceReceived),
           accessLevel: accessLevel
         };
         observer.next(response);
@@ -212,7 +212,7 @@ export class WorkspacesServiceStub {
               accessLevel = this.workspaceAccess.get(workspace.id);
             }
             return {
-              workspace: this.clone(workspace),
+              workspace: this.duplicate(workspace),
               accessLevel: accessLevel
             };
           })
@@ -245,7 +245,7 @@ export class WorkspacesServiceStub {
           observer.error(new Error(msg));
           return;
         }
-        this.workspaces.splice(updateIndex, 1, this.clone(newWorkspace.workspace));
+        this.workspaces.splice(updateIndex, 1, this.duplicate(newWorkspace.workspace));
         observer.complete();
       }, 0);
     });
@@ -253,8 +253,8 @@ export class WorkspacesServiceStub {
 
   cloneWorkspace(workspaceNamespace: string,
     workspaceId: string,
-    cloneReq: CloneWorkspaceRequest): Observable<CloneWorkspaceResponse> {
-    return new Observable<CloneWorkspaceResponse>(observer => {
+    cloneReq: DuplicateWorkspaceRequest): Observable<DuplicateWorkspaceResponse> {
+    return new Observable<DuplicateWorkspaceResponse>(observer => {
       setTimeout(() => {
         if (cloneReq.workspace.name === WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME) {
           const msg = 'Workspace with name already exist';
@@ -267,7 +267,7 @@ export class WorkspacesServiceStub {
           observer.error(new Error(msg));
           return;
         }
-        const cloned = this.clone(cloneReq.workspace);
+        const cloned = this.duplicate(cloneReq.workspace);
         cloned.id = 'id-' + cloned.name;
         this.workspaces.push(cloned);
         observer.next({workspace: cloned});
@@ -334,7 +334,7 @@ export class WorkspacesServiceStub {
     notebookName: String): Observable<any> {
     return new Observable<any>(observer => {
       setTimeout(() => {
-        const cloneName = notebookName.replace('.ipynb', '') + ' Clone.ipynb';
+        const cloneName = 'Duplicate of ' + notebookName;
         this.notebookList.push({
           'name': cloneName,
           'path': 'gs://bucket/notebooks/' + cloneName,

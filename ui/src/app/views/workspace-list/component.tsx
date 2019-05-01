@@ -78,7 +78,7 @@ const WorkspaceCardMenu: React.FunctionComponent<{
       closeOnClick
       content={ <React.Fragment>
         <MenuItem icon='copy'
-                  onClick={() => {navigate([wsPathPrefix, 'clone']); }}>
+                  onClick={() => {navigate([wsPathPrefix, 'duplicate']); }}>
           Duplicate
         </MenuItem>
         <TooltipTrigger content={<div>Requires Write Permission</div>}
