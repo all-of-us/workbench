@@ -1,8 +1,8 @@
 import {Observable} from 'rxjs/Observable';
 
 import {
-  DuplicateWorkspaceRequest,
-  DuplicateWorkspaceResponse,
+  CloneWorkspaceRequest,
+  CloneWorkspaceResponse,
   EmptyResponse,
   FileDetail,
   NotebookRename,
@@ -253,8 +253,8 @@ export class WorkspacesServiceStub {
 
   cloneWorkspace(workspaceNamespace: string,
     workspaceId: string,
-    cloneReq: DuplicateWorkspaceRequest): Observable<DuplicateWorkspaceResponse> {
-    return new Observable<DuplicateWorkspaceResponse>(observer => {
+    cloneReq: CloneWorkspaceRequest): Observable<CloneWorkspaceResponse> {
+    return new Observable<CloneWorkspaceResponse>(observer => {
       setTimeout(() => {
         if (cloneReq.workspace.name === WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME) {
           const msg = 'Workspace with name already exist';
