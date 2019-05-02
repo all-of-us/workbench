@@ -445,7 +445,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
           variables and values for one or more of your cohorts. Then export the completed dataset
           to Notebooks where you can perform your analysis</div>
         <div style={{display: 'flex'}}>
-          <div style={{marginLeft: '1.5rem', marginRight: '1.5rem', width: '33%'}}>
+          <div style={{width: '33%'}}>
             <h2>Select Cohorts</h2>
             <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
               <div style={styles.selectBoxHeader}>
@@ -481,7 +481,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
               </div>
             </div>
           </div>
-          <div style={{width: '58%'}}>
+          <div style={{marginLeft: '1.5rem', width: '65%'}}>
             <h2>Select Concept Sets</h2>
             <div style={{display: 'flex', backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
               <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
