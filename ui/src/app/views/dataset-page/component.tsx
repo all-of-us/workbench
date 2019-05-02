@@ -539,7 +539,8 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       </FadeBox>
       <FadeBox style={{marginTop: '1rem'}}>
         <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-          <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row', position: 'relative'}}>
+          <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row',
+            position: 'relative'}}>
             <div style={{color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
             <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}}
