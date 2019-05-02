@@ -46,13 +46,13 @@ class Method:
 
     def __repr__(self):
         return "Method({0}, {1})".format(repr(self.klass), repr(self.name))
-    
+
 class Endpoint:
     """A REST API endpoint."""
     def __init__(self, verb, path, klass, method, api=None):
         self.verb = verb
         self.path = path
-        
+
         # Endpoints are Methods, so add Method fields.
         self.klass = klass
         self.name = method
@@ -180,8 +180,6 @@ def callgraph_edges_from_file(fp, endpoints):
             caller = endpoints.get(caller, caller)
             callee = Method(src_class, src_method)
             callee = endpoints.get(callee, callee)
-            assert caller != Method('org.pmiops.workbench.firecloud.api.StatusApi', 'status')
-            assert callee != Method('org.pmiops.workbench.firecloud.api.StatusApi', 'status')
             edges.append(Edge(caller, callee))
         if src_method.startswith("lambda$"):
             m = lambdapat.match(src_method)
@@ -325,11 +323,9 @@ class CallTree:
             self._traverse_rec(fn, child, depth+1)
 
     def __lt__(self, other):
-        assert type(other) == type(self)
         return self.order < other.order
 
     def __eq__(self, other):
-        assert type(other) == type(self)
         return self.method == other.method and self.order == other.order
 
 class Path:
@@ -365,10 +361,9 @@ def read_endpoints_from_api(api):
     for ep in endpoints:
         ep.api = api
     return endpoints
-    
+
 def main(argv):
     """Program entry point."""
-    assert len(argv) > 0
     EXIT_SUCCESS = 0
     EXIT_FAILURE = 1
     if len(argv) != 3:
