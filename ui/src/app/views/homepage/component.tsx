@@ -17,7 +17,7 @@ import {configApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWork} from 'app/views/recent-work/component';
-import {RegistrationDashboard} from 'app/views/registration-dashboard/component';
+import {RegistrationDashboard, RegistrationTasksMap} from 'app/views/registration-dashboard/component';
 import {
   BillingProjectStatus,
   Profile,
@@ -186,20 +186,17 @@ export const Homepage = withUserProfile()(class extends React.Component<
         // page visits is null; is first visit
         this.setFirstVisit();
       }
-      try {
-        this.setState({
-          eraCommonsLinked: !!profile.eraCommonsCompletionTime
-            || !!profile.eraCommonsBypassTime,
-          dataUseAgreementCompleted: !!profile.dataUseAgreementCompletionTime
-            || !!profile.dataUseAgreementBypassTime });
-      } catch (ex) {
-        this.setState({eraCommonsLinked: false});
-        console.error('error fetching era commons linking status');
-      }
+
+      this.setState({
+        eraCommonsLinked: RegistrationTasksMap['eraCommons'].isComplete(profile),
+        dataUseAgreementCompleted: RegistrationTasksMap['dataUseAgreement'].isComplete(profile),
+      });
+
       try {
         const result = await profileApi().syncComplianceTrainingStatus();
-        this.setState({trainingCompleted: !!result.complianceTrainingCompletionTime
-              || !!result.complianceTrainingBypassTime});
+        this.setState({
+          trainingCompleted: RegistrationTasksMap['complianceTraining'].isComplete(result)
+        });
       } catch (ex) {
         this.setState({trainingCompleted: false});
         console.error('error fetching moodle training status');
@@ -207,8 +204,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
       try {
         const result = await profileApi().syncTwoFactorAuthStatus();
-        this.setState({twoFactorAuthCompleted: !!result.twoFactorAuthCompletionTime ||
-            !!profile.twoFactorAuthBypassTime});
+        this.setState({
+          twoFactorAuthCompleted: RegistrationTasksMap['twoFactorAuth'].isComplete(result)
+        });
       } catch (ex) {
         this.setState({twoFactorAuthCompleted: false});
         console.error('error fetching two factor auth status');
