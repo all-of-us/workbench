@@ -293,7 +293,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     List<CBCriteria> criteriaList = new ArrayList<>();
     int resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT).intValue();
     List<StandardProjection> projections = cbCriteriaDao.findStandardProjectionByCode(domain, term);
-    boolean isStandard = projections.isEmpty() || projections.get(0).getStandard() == true;
+    boolean isStandard = projections.isEmpty() || projections.get(0).getStandard();
     if (projections.isEmpty()) {
       criteriaList = cbCriteriaDao.findCriteriaByDomainAndSynonyms(domain, isStandard, modifyTermMatch(term), new PageRequest(0, resultLimit));
     }
