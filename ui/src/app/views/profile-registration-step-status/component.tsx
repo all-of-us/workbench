@@ -21,9 +21,6 @@ const styles = reactStyles({
     fontWeight: 600,
     marginBottom: 6
   },
-  body: {
-    display: 'flex'
-  },
   buttonContainer: {
     width: 'calc(50%)',
     marginTop: 6
@@ -50,47 +47,52 @@ interface Props {
   completeStep: Function;
 }
 
-class ProfileRegistrationStepStatus extends React.Component<Props> {
-  constructor(props: Props) {
-    super(props);
-  }
+const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
+  (props) => {
+    const {
+      title,
+      wasBypassed,
+      isComplete,
+      incompleteButtonText,
+      completedButtonText,
+      completeStep,
+      children
+    } = props;
 
-  render() {
     return (
       <div style={styles.container}>
-        <div style={{...styles.title}}>
-          { this.props.title }
+        <div style={styles.title}>
+          { title }
         </div>
-        <div style={styles.body}>
+        <div style={{ display: 'flex' }}>
           <div style={styles.buttonContainer}>
-            { this.props.isComplete ? (
+            { isComplete ? (
               <Button
                   type='purplePrimary'
-                  style={{ ...styles.button, ...styles.successButton}}
+                  style={ {...styles.button, ...styles.successButton} }
                   disabled={true}
               >
-                <ClrIcon shape='check' style={{width: 40, marginLeft: -10 }}/>
-                { this.props.wasBypassed ?
-                  'Bypassed By Admin' : this.props.completedButtonText }
+                <ClrIcon shape='check' style={ {width: 40, marginLeft: -10 } }/>
+                { wasBypassed ?
+                  'Bypassed By Admin' : completedButtonText }
               </Button>
             ) : (
               <Button
                 type='purplePrimary'
-                style={styles.button}
-                onClick={ this.props.completeStep }
+                style={ styles.button }
+                onClick={ completeStep }
               >
-                { this.props.incompleteButtonText }
+                { incompleteButtonText }
               </Button>
             ) }
           </div>
           <div style={styles.detailsContainer}>
-            { this.props.children }
+            { children }
           </div>
         </div>
       </div>
     );
-  }
-}
+  };
 
 export {
   ProfileRegistrationStepStatus,

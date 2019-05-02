@@ -10,6 +10,7 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
+import { Profile } from 'generated/fetch';
 
 const styles = reactStyles({
   registrationPage: {
@@ -62,36 +63,57 @@ async function redirectToTraining() {
 
 export const RegistrationTasks = [
   {
+    key: 'twoFactorAuth',
     title: 'Turn on Google 2-Step Verification',
     description: 'With 2-Step Verification, you’ll protect your ' +
       'account with both your password and your phone',
     buttonText: 'Get Started',
     completedText: 'Completed',
     isRefreshable: true,
+    isComplete: (profile: Profile) => {
+      return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
+    },
     onClick: () => window.open('https://myaccount.google.com/security', '_blank')
   }, {
+    key: 'complianceTraining',
     title: 'Complete Online Training',
     description: 'Researchers must maintain up-to-date completion of compliance ' +
       'training courses hosted at the NNLM\'s Moodle installation',
     buttonText: 'Complete training',
     completedText: 'Completed',
+    isComplete: (profile: Profile) => {
+      return !!profile.complianceTrainingCompletionTime || !!profile.complianceTrainingBypassTime;
+    },
     onClick: redirectToTraining
   }, {
+    key: 'eraCommons',
     title: 'Login to ERA Commons',
     description: 'Researchers must maintain up-to-date completion of compliance' +
       ' training courses hosted at the NNLM’s Moodle installation',
     buttonText: 'Login',
     completedText: 'Linked',
+    isComplete: (profile: Profile) => {
+      return !!profile.eraCommonsCompletionTime || !!profile.eraCommonsBypassTime;
+    },
     onClick: redirectToNiH
   }, {
+    key: 'dataUseAgreement',
     title: 'Data Use Agreement',
     description: 'This data use agreement describes how All of Us ' +
       'Research Program data can and cannot be used',
     buttonText: 'View & Sign',
     completedText: 'Signed',
+    isComplete: (profile: Profile) => {
+      return !!profile.dataUseAgreementCompletionTime || !!profile.dataUseAgreementBypassTime;
+    },
     onClick: () => navigate(['data-use-agreement'])
   }
 ];
+
+export const RegistrationTasksMap = RegistrationTasks.reduce((acc, curr) => {
+  acc[curr.key] = curr;
+  return acc;
+}, {});
 
 export interface RegistrationDashboardProps {
   betaAccessGranted: boolean;
