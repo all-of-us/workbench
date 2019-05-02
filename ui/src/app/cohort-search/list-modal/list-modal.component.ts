@@ -229,6 +229,8 @@ export class ListModalComponent implements OnInit, OnDestroy {
     }
     wizardStore.next(undefined);
     selectionsStore.next([]);
+    selectedPathStore.next([]);
+    this.hierarchyCrit = null;
     this.open = false;
   }
 
@@ -343,9 +345,9 @@ export class ListModalComponent implements OnInit, OnDestroy {
     selectedPathStore.next(criterion.path.split('.'));
     selectedStore.next(criterion.id);
     this.hierarchyCrit = {
+      domainId: criterion.domainId,
       type: criterion.type,
       subtype: criterion.subtype,
-      fullTree: false,
       id: 0,    // root parent ID is always 0
     };
     this.mode = 'tree';
