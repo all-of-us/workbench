@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 
 import {validate} from 'validate.js';
@@ -15,13 +14,25 @@ import {
   DomainValuePair
 } from 'generated/fetch';
 
-export class NewDataSetModal extends React.Component<
-  {includesAllParticipants: boolean, selectedConceptSetIds: number[],
-    selectedCohortIds: number[], selectedValues: DomainValuePair[], workspaceNamespace: string,
-    workspaceId: string, closeFunction: Function},
-  {name: string, nameTouched: boolean, conflictDataSetName: boolean,
-    missingDataSetInfo: boolean}
-  > {
+interface Props {
+  includesAllParticipants: boolean;
+  selectedConceptSetIds: number[];
+  selectedCohortIds: number[];
+  selectedValues: DomainValuePair[];
+  workspaceNamespace: string;
+  workspaceId: string;
+  closeFunction: Function;
+}
+
+interface State {
+  name: string;
+  nameTouched: boolean;
+  conflictDataSetName: boolean;
+  missingDataSetInfo: boolean;
+}
+
+
+class NewDataSetModal extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {name: '', nameTouched: false,
@@ -92,3 +103,8 @@ export class NewDataSetModal extends React.Component<
     </Modal>;
   }
 }
+
+export {
+  NewDataSetModal,
+  Props as NewDataSetModalProps
+};
