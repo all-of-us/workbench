@@ -583,26 +583,34 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
             <Spinner style={{position: 'relative', top: '2rem',
               left: '20rem'}}></Spinner>
             <div style={{top: '3rem', position: 'relative',
-              left: '15rem'}}>It may take up to a minute to load the data</div></div>}
+              left: '15rem'}}>It may take up to a minute to load the data</div></div>
+          }
           {dataSets.length > 0 &&
-          <div style={{display: 'flex', flexDirection: 'column'}}>
-            <div style={{display: 'flex', flexDirection: 'row'}}>
-            {dataSets.map(dataSet =>
-               <Clickable key={dataSet.domain}
-                          onClick={() => this.setSelectedDomain(dataSet.domain)}
-                          style={{lineHeight: '32px', fontSize : '18px',
-                            fontWeight: (selectedPreviewDomain === dataSet.domain) ? 600 : 400,
-                            textDecoration:
-                                   (selectedPreviewDomain === dataSet.domain) ? 'underline' : ''}}>
-                 <div key={dataSet.domain}
-                      style={{marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'}}>
-                        {dataSet.domain}
-                 </div>
-               </Clickable>
-            )}
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+              <div style={{display: 'flex', flexDirection: 'row'}}>
+                {dataSets.map(dataSet =>
+                   <Clickable key={dataSet.domain}
+                             onClick={() => this.setSelectedDomain(dataSet.domain)}
+                             style={{
+                               lineHeight: '32px', fontSize: '18px',
+                               fontWeight: (selectedPreviewDomain === dataSet.domain) ? 600 : 400,
+                               textDecoration:
+                                   (selectedPreviewDomain === dataSet.domain) ? 'underline' : ''
+                             }}>
+                     <div key={dataSet.domain}
+                         style={{
+                           marginLeft: '0.2rem',
+                           color: colors.blue[0],
+                           paddingRight: '3rem'
+                         }}>
+                       {dataSet.domain}
+                     </div>
+                   </Clickable>
+                )}
+              </div>
+              {this.renderPreviewDataTable()}
             </div>
-            {this.renderPreviewDataTable()}
-          </div>}
+          }
           <div style={{height: '8rem'}}>
             {queries.map(query =>
               <React.Fragment>
