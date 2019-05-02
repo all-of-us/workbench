@@ -21,11 +21,9 @@ Then, to produce the list of endpoints, run `python3 api.py path/to/aou-repo pat
 """
 import collections
 import os
-import pprint
 import re
 import sys
 import yaml
-import operator
 
 def capitalized(s):
     """Return a string with its first character capitalized."""
@@ -78,8 +76,7 @@ class Endpoint:
             repr(self.verb),
             repr(self.path),
             repr(self.klass),
-            repr(self.name),
-            repr(self.api)
+            repr(self.name)
         )
 
     def __hash__(self):
@@ -98,7 +95,6 @@ def methods_from_endpoint(endpoint):
         klass = "{0}{1}".format(class_prefix, suffix)
         name = endpoint.name
         method = Method(klass, name)
-        assert method != Method('org.pmiops.workbench.firecloud.api.StatusApi', 'status')
         methods.append(method)
     return methods
 
@@ -199,8 +195,6 @@ def callgraph_edges_from_file(fp, endpoints):
             caller = endpoints.get(caller, caller)
             callee = Method(src_class, src_method)
             callee = endpoints.get(callee, callee)
-            assert caller != Method('org.pmiops.workbench.firecloud.api.StatusApi', 'status')
-            assert callee != Method('org.pmiops.workbench.firecloud.api.StatusApi', 'status')
             edges.append(Edge(caller, callee))
     return edges
 
@@ -375,7 +369,6 @@ def read_endpoints_from_api(api):
 def main(argv):
     """Program entry point."""
     assert len(argv) > 0
-    
     EXIT_SUCCESS = 0
     EXIT_FAILURE = 1
     if len(argv) != 3:
