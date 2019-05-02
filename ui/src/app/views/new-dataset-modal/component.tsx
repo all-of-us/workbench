@@ -15,20 +15,20 @@ import {
 } from 'generated/fetch';
 
 interface Props {
+  closeFunction: Function;
   includesAllParticipants: boolean;
   selectedConceptSetIds: number[];
   selectedCohortIds: number[];
   selectedValues: DomainValuePair[];
   workspaceNamespace: string;
   workspaceId: string;
-  closeFunction: Function;
 }
 
 interface State {
-  name: string;
-  nameTouched: boolean;
   conflictDataSetName: boolean;
   missingDataSetInfo: boolean;
+  name: string;
+  nameTouched: boolean;
 }
 
 
@@ -36,10 +36,10 @@ class NewDataSetModal extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
+      conflictDataSetName: false,
+      missingDataSetInfo: false,
       name: '',
       nameTouched: false,
-      conflictDataSetName: false,
-      missingDataSetInfo: false
     };
   }
 
@@ -48,7 +48,7 @@ class NewDataSetModal extends React.Component<Props, State> {
     if (!this.state.name) {
       return;
     }
-    this.setState({conflictDataSetName: false, missingDataSetInfo: false });
+    this.setState({conflictDataSetName: false, missingDataSetInfo: false});
     const request = {
       name: this.state.name,
       includesAllParticipants: this.props.includesAllParticipants,
@@ -92,17 +92,20 @@ class NewDataSetModal extends React.Component<Props, State> {
           <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
           }
           <TextInput type='text' autoFocus placeholder='Dataset Name'
-                     value = {name}
-                     onChange={v => this.setState({name: v, nameTouched: true,
-                       conflictDataSetName: false})}/>
+                     value={name}
+                     onChange={v => this.setState({
+                       name: v, nameTouched: true,
+                       conflictDataSetName: false
+                     })}/>
         </div>
       </ModalBody>
       <ModalFooter>
-        <Button onClick = {this.props.closeFunction}
-                type='secondary' style={{marginRight: '2rem'}}>
+        <Button type='secondary' onClick={this.props.closeFunction} style={{marginRight: '2rem'}}>
           Cancel
         </Button>
-        <Button type='primary' disabled={errors} onClick={() => this.saveDataSet()}>SAVE</Button>
+        <Button type='primary' disabled={errors} onClick={() => this.saveDataSet()}>
+          Save
+        </Button>
       </ModalFooter>
     </Modal>;
   }
@@ -110,5 +113,4 @@ class NewDataSetModal extends React.Component<Props, State> {
 
 export {
   NewDataSetModal,
-  Props as NewDataSetModalProps
 };
