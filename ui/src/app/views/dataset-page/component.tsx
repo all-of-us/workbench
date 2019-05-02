@@ -9,7 +9,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
-import {ResourceListItem} from 'app/components/resources';
+import {ImmutableListItem, ResourceListItem} from 'app/components/resources';
 import {Spinner} from 'app/components/spinners';
 import {
   cohortsApi,
@@ -43,6 +43,7 @@ import {
 import {DataSetPreviewList} from 'generated/model/dataSetPreviewList';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
+
 import {validate} from 'validate.js';
 
 export const styles = {
@@ -67,7 +68,14 @@ export const styles = {
     marginLeft: 10,
     marginTop: 10,
     marginRight: 10,
-    backgroundColor: '#7CC79B'
+    backgroundColor: colors.green[1]
+  },
+
+  subheader: {
+    fontWeight: 400,
+    fontSize: '0.6rem',
+    marginTop: '0.5rem',
+    color: colors.purple[0]
   }
 };
 
@@ -75,6 +83,10 @@ interface DomainValuePair {
   domain: Domain;
   value: string;
 }
+
+const Subheader = (props) => {
+  return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
+};
 
 export const ValueListItem: React.FunctionComponent <
   {domainValue: DomainValue, onSelect: Function, checked: boolean}> =
@@ -96,8 +108,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     valueSets: ValueSet[], selectedValues: DomainValuePair[], openSaveModal: boolean,
     nameRequired: boolean, conflictDataSetName: boolean, missingDataSetInfo: boolean,
     nameTouched: boolean, queries: Array<DataSetQuery>, dataSets: Array<DataSetPreviewList>,
-    selectedPreviewDomain: string, previewDataLoading: boolean
-  }> {
+    selectedPreviewDomain: string, previewDataLoading: boolean, includesAllParticipants: boolean}> {
 
   constructor(props) {
     super(props);
@@ -124,7 +135,8 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       queries: [],
       dataSets: [],
       selectedPreviewDomain: '',
-      previewDataLoading: false
+      previewDataLoading: false,
+      includesAllParticipants: false
     };
   }
 
@@ -308,6 +320,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     this.setState({conflictDataSetName: false, missingDataSetInfo: false });
     const request = {
       name: this.state.name,
+      includesAllParticipants: this.state.includesAllParticipants,
       description: '',
       conceptSetIds: this.state.selectedConceptSetIds,
       cohortIds: this.state.selectedCohortIds,
@@ -328,7 +341,8 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
 
   disableSave() {
     return !this.state.selectedConceptSetIds || this.state.selectedConceptSetIds.length === 0 ||
-        !this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0 ||
+        ((!this.state.selectedCohortIds ||
+        this.state.selectedCohortIds.length === 0) && !this.state.includesAllParticipants) ||
         !this.state.selectedValues || this.state.selectedValues.length === 0;
   }
 
@@ -352,6 +366,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       conceptSetIds: this.state.selectedConceptSetIds,
       cohortIds: this.state.selectedCohortIds,
       values: this.state.selectedValues,
+      includesAllParticipants: this.state.includesAllParticipants
     };
     const sqlQueries = await dataSetApi().generateQuery(namespace, id, dataSet);
     this.setState({queries: sqlQueries.queryList});
@@ -430,7 +445,8 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       conflictDataSetName,
       dataSets,
       selectedPreviewDomain,
-      previewDataLoading
+      previewDataLoading,
+      includesAllParticipants
     } = this.state;
     const currentResource = this.getCurrentResource();
     const errors = validate({name}, {
@@ -454,6 +470,11 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
                   onClick={() => navigate(['workspaces', namespace, id,  'cohorts', 'build'])}/>
               </div>
               <div style={{height: '10rem', overflowY: 'auto'}}>
+                <Subheader>Prepackaged Cohorts</Subheader>
+                <ImmutableListItem name='All AoU Participants' onSelect={
+                  () => this.setState({includesAllParticipants: !includesAllParticipants})
+                }/>
+                <Subheader>Workspace Cohorts</Subheader>
                 {!loadingResources && this.state.cohortList.map(cohort =>
                   <ResourceListItem key={cohort.id} resource={cohort} rType={ResourceType.COHORT}
                                     data-test-id='cohort-list-item'

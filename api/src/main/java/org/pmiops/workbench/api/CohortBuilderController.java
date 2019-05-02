@@ -8,6 +8,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cdr.model.CBCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
+import org.pmiops.workbench.cdr.model.StandardProjection;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -61,6 +63,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
   private static final Long DEFAULT_TREE_SEARCH_LIMIT = 100L;
   private static final Long DEFAULT_CRITERIA_SEARCH_LIMIT = 250L;
+  private static final String DOMAIN_MESSAGE = "Bad Request: Please provide a valid criteria domain. %s is not valid.";
+  private static final String TYPE_MESSAGE = "Bad Request: Please provide a valid criteria type. %s is not valid.";
 
   private BigQueryService bigQueryService;
   private ParticipantCounter participantCounter;
@@ -195,23 +199,31 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListResponse> getCriteriaAutoComplete(Long cdrVersionId,
+                                                                      String domain,
+                                                                      String term,
                                                                       String type,
-                                                                      String value,
-                                                                      String subtype,
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
-    String matchExp = modifyKeywordMatch(value, type);
-    List<Criteria> criteriaList;
-    if (subtype == null) {
-      criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, value, new PageRequest(0, resultLimit.intValue()));
-    } else {
-      criteriaList = type.equals(TreeType.SNOMED.name()) ?
-        criteriaDao.findCriteriaByTypeAndSubtypeForName(type, subtype, matchExp, new PageRequest(0, resultLimit.intValue())) :
-        criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, value, new PageRequest(0, resultLimit.intValue()));
-    }
+    String matchExp = modifyKeywordMatch(term, domain);
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      validateDomainAndType(domain, type);
+      List<CBCriteria> criteriaList = CriteriaType.SNOMED.toString().equals(type) ?
+        cbCriteriaDao.findCriteriaByDomainAndTypeForName(domain, type, matchExp, new PageRequest(0, resultLimit.intValue())) :
+        cbCriteriaDao.findCriteriaByDomainAndTypeForCodeOrName(domain, type, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
+    } else {
+      List<Criteria> criteriaList;
+      if (type == null) {
+        criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(domain, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+      } else {
+        criteriaList = domain.equals(TreeType.SNOMED.name()) ?
+          criteriaDao.findCriteriaByTypeAndSubtypeForName(domain, type, matchExp, new PageRequest(0, resultLimit.intValue())) :
+          criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(domain, type, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+      }
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+    }
 
     return ResponseEntity.ok(criteriaResponse);
   }
@@ -222,22 +234,28 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                              Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
-    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
-
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
-
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      final List<CBCriteria> criteriaList = cbCriteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
+    } else {
+      final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+    }
     return ResponseEntity.ok(criteriaResponse);
   }
 
   @Override
   public ResponseEntity<CriteriaListResponse> getDrugIngredientByConceptId(Long cdrVersionId, Long conceptId) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findDrugIngredientByConceptId(conceptId);
-
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
-
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      final List<CBCriteria> criteriaList = cbCriteriaDao.findDrugIngredientByConceptId(conceptId);
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
+    } else {
+      final List<Criteria> criteriaList = criteriaDao.findDrugIngredientByConceptId(conceptId);
+      criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+    }
     return ResponseEntity.ok(criteriaResponse);
   }
 
@@ -270,15 +288,20 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> findCriteriaByDomainAndSearchTerm(Long cdrVersionId,
                                                                                 String domain,
                                                                                 String term,
-                                                                                Boolean isStandard,
                                                                                 Long limit) {
-    CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
-    cdrVersionService.setCdrVersion(cdrVersion);
-    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT);
-    String matchExp = modifyTermMatch(term);
-    List<CBCriteria> criteriaList = cbCriteriaDao.findCriteriaByDomainAndSearchTerm(domain, isStandard, matchExp, new PageRequest(0, resultLimit.intValue()));
-    CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
+    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    List<CBCriteria> criteriaList = new ArrayList<>();
+    int resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT).intValue();
+    List<StandardProjection> projections = cbCriteriaDao.findStandardProjectionByCode(domain, term);
+    boolean isStandard = projections.isEmpty() || projections.get(0).getStandard();
+    if (projections.isEmpty()) {
+      criteriaList = cbCriteriaDao.findCriteriaByDomainAndSynonyms(domain, isStandard, modifyTermMatch(term), new PageRequest(0, resultLimit));
+    }
+    if (criteriaList.isEmpty()) {
+      criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, new PageRequest(0, resultLimit));
+    }
+    CriteriaListResponse criteriaResponse = new CriteriaListResponse()
+      .items(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
 
     return ResponseEntity.ok(criteriaResponse);
   }
@@ -337,20 +360,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (configProvider.get().cohortbuilder.enableListSearch) {
       String domainMessage = "Bad Request: Please provide a valid criteria domain. %s is not valid.";
       String typeMessage = "Bad Request: Please provide a valid criteria type. %s is not valid.";
-      Optional
-        .ofNullable(domain)
-        .orElseThrow(() -> new BadRequestException(String.format(domainMessage, domain)));
-      Arrays
-        .stream(DomainType.values())
-        .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
-        .findFirst()
-        .orElseThrow(() -> new BadRequestException(String.format(domainMessage, domain)));
-      Optional.ofNullable(type)
-        .ifPresent(t -> Arrays
-          .stream(CriteriaType.values())
-          .filter(critType -> critType.toString().equalsIgnoreCase(t))
-          .findFirst()
-          .orElseThrow(() -> new BadRequestException(String.format(typeMessage, t))));
+      validateDomainAndType(domain, type);
 
       List<CBCriteria> criteriaList;
       if (parentId != null) {
@@ -483,6 +493,26 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       })
       .collect(Collectors.joining())
       + "+\"[rank1]\"";
+  }
+
+  private void validateDomainAndType(String domain, String type) {
+    Optional
+      .ofNullable(domain)
+      .orElseThrow(() -> new BadRequestException(String.format(DOMAIN_MESSAGE, domain)));
+    Optional
+      .ofNullable(type)
+      .orElseThrow(() -> new BadRequestException(String.format(TYPE_MESSAGE, type)));
+    Arrays
+      .stream(DomainType.values())
+      .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
+      .findFirst()
+      .orElseThrow(() -> new BadRequestException(String.format(DOMAIN_MESSAGE, domain)));
+    Optional.ofNullable(type)
+      .ifPresent(t -> Arrays
+        .stream(CriteriaType.values())
+        .filter(critType -> critType.toString().equalsIgnoreCase(t))
+        .findFirst()
+        .orElseThrow(() -> new BadRequestException(String.format(TYPE_MESSAGE, t))));
   }
 
 }

@@ -29,7 +29,6 @@ import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TreeSubType;
-import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -54,10 +53,6 @@ import static org.mockito.Mockito.when;
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 public class CohortBuilderControllerTest {
-
-  private static final String SUBTYPE_LAB = "LAB";
-  private static final String SUBTYPE_ATC = "ATC";
-  private static final String SUBTYPE_BRAND = "BRAND";
 
   private CohortBuilderController controller;
 
@@ -174,6 +169,15 @@ public class CohortBuilderControllerTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
+      assertEquals("Bad Request: Please provide a valid criteria type. null is not valid.", bre.getMessage());
+    }
+
+    try {
+      controller
+        .getCriteriaBy(1L, "blah", "blah",  null);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //success
       assertEquals("Bad Request: Please provide a valid criteria domain. blah is not valid.", bre.getMessage());
     }
 
@@ -208,15 +212,20 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteNoSubtype() throws Exception {
-    Criteria labMeasurement = criteriaDao.save(
-      createCriteria(TreeType.MEAS.name(), SUBTYPE_LAB, 0L, "xxxLP12345", "name", DomainType.MEASUREMENT.name(), null, false, true).synonyms("LP12*\"[rank1]\"")
-    );
+  public void getCriteriaAutoCompleteMatchesSynonyms() throws Exception {
+    testConfig.cohortbuilder.enableListSearch = true;
+    CBCriteria criteria = new CBCriteria()
+      .domainId(DomainType.MEASUREMENT.toString())
+      .type(CriteriaType.LOINC.toString())
+      .count("0")
+      .hierarchy(true)
+      .synonyms("LP12*\"[rank1]\"");
+    cbCriteriaDao.save(criteria);
 
     assertEquals(
-      createResponseCriteria(labMeasurement),
+      createResponseCriteria(criteria),
       controller
-        .getCriteriaAutoComplete(1L, TreeType.MEAS.name(),"LP12", null, null)
+        .getCriteriaAutoComplete(1L, DomainType.MEASUREMENT.toString(),"LP12", CriteriaType.LOINC.toString(), null)
         .getBody()
         .getItems()
         .get(0)
@@ -224,15 +233,20 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteWithSubtype() throws Exception {
-    Criteria drugATCCriteriaChild = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false, true).synonyms("drugN*\"[rank1]\"")
-    );
+  public void getCriteriaAutoCompleteMatchesCode() throws Exception {
+    testConfig.cohortbuilder.enableListSearch = true;
+    CBCriteria criteria = new CBCriteria()
+      .domainId(DomainType.MEASUREMENT.toString())
+      .type(CriteriaType.LOINC.toString())
+      .count("0")
+      .hierarchy(true)
+      .code("LP123");
+    cbCriteriaDao.save(criteria);
 
     assertEquals(
-      createResponseCriteria(drugATCCriteriaChild),
+      createResponseCriteria(criteria),
       controller
-        .getCriteriaAutoComplete(1L, TreeType.DRUG.name(),"drugN", TreeSubType.ATC.name(), null)
+        .getCriteriaAutoComplete(1L, DomainType.MEASUREMENT.toString(),"LP12", CriteriaType.LOINC.toString(), null)
         .getBody()
         .getItems()
         .get(0)
@@ -240,17 +254,20 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompletePPI() throws Exception {
-    Criteria ppiCriteriaParent = criteriaDao.save(
-      createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0L, "324836",
-        "Are you currently covered by any of the following types of health insurance or health coverage plans? Select all that apply from one group",
-        DomainType.OBSERVATION.name(), "43529119", false, true).synonyms("covered*\"[rank1]\"")
-    );
+  public void getCriteriaAutoCompleteSnomed() throws Exception {
+    testConfig.cohortbuilder.enableListSearch = true;
+    CBCriteria criteria = new CBCriteria()
+      .domainId(DomainType.CONDITION.toString())
+      .type(CriteriaType.SNOMED.toString())
+      .count("0")
+      .hierarchy(true)
+      .synonyms("LP12*\"[rank1]\"");
+    cbCriteriaDao.save(criteria);
 
     assertEquals(
-      createResponseCriteria(ppiCriteriaParent),
+      createResponseCriteria(criteria),
       controller
-        .getCriteriaAutoComplete(1L, TreeType.PPI.name(),"covered", null, null)
+        .getCriteriaAutoComplete(1L, DomainType.CONDITION.toString(),"LP12", CriteriaType.SNOMED.toString(), null)
         .getBody()
         .getItems()
         .get(0)
@@ -258,12 +275,106 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndSearchTerm() throws Exception {
+  public void getCriteriaAutoCompleteExceptions() throws Exception {
+    testConfig.cohortbuilder.enableListSearch = true;
+    try {
+      controller
+        .getCriteriaAutoComplete(1L, null, "blah",  null, null);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //success
+      assertEquals("Bad Request: Please provide a valid criteria domain. null is not valid.", bre.getMessage());
+    }
+
+    try {
+      controller
+        .getCriteriaAutoComplete(1L, "blah", "blah",  null, null);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //success
+      assertEquals("Bad Request: Please provide a valid criteria type. null is not valid.", bre.getMessage());
+    }
+
+    try {
+      controller
+        .getCriteriaAutoComplete(1L, "blah", "blah",  "blah", null);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //success
+      assertEquals("Bad Request: Please provide a valid criteria domain. blah is not valid.", bre.getMessage());
+    }
+
+    try {
+      controller
+        .getCriteriaAutoComplete(1L, DomainType.CONDITION.toString(), "blah",  "blah", null);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //success
+      assertEquals("Bad Request: Please provide a valid criteria type. blah is not valid.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTermMatchesSourceCode() throws Exception {
     CBCriteria criteria = new CBCriteria()
       .code("001")
       .count("10")
       .conceptId("123")
-      .domainId(DomainType.MEASUREMENT.toString())
+      .domainId(DomainType.CONDITION.toString())
+      .group(Boolean.TRUE)
+      .selectable(Boolean.TRUE)
+      .name("chol blah")
+      .parentId(0)
+      .type(CriteriaType.LOINC.toString())
+      .attribute(Boolean.FALSE)
+      .standard(false)
+      .synonyms("[rank1]");
+    cbCriteriaDao.save(criteria);
+
+    assertEquals(
+      createResponseCriteria(criteria),
+      controller
+        .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(), "001", null)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTermMatchesStandardCode() throws Exception {
+    CBCriteria criteria = new CBCriteria()
+      .code("LP12")
+      .count("10")
+      .conceptId("123")
+      .domainId(DomainType.CONDITION.toString())
+      .group(Boolean.TRUE)
+      .selectable(Boolean.TRUE)
+      .name("chol blah")
+      .parentId(0)
+      .type(CriteriaType.LOINC.toString())
+      .attribute(Boolean.FALSE)
+      .standard(true)
+      .synonyms("[rank1]");
+    cbCriteriaDao.save(criteria);
+
+    assertEquals(
+      createResponseCriteria(criteria),
+      controller
+        .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(),"LP12",null)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTermMatchesSynonyms() throws Exception {
+    CBCriteria criteria = new CBCriteria()
+      .code("001")
+      .count("10")
+      .conceptId("123")
+      .domainId(DomainType.CONDITION.toString())
       .group(Boolean.TRUE)
       .selectable(Boolean.TRUE)
       .name("chol blah")
@@ -272,12 +383,12 @@ public class CohortBuilderControllerTest {
       .attribute(Boolean.FALSE)
       .standard(true)
       .synonyms("LP12*\"[rank1]\"");
-    CBCriteria labMeasurement = cbCriteriaDao.save(criteria);
+    cbCriteriaDao.save(criteria);
 
     assertEquals(
-      createResponseCriteria(labMeasurement),
+      createResponseCriteria(criteria),
       controller
-        .findCriteriaByDomainAndSearchTerm(1L, DomainType.MEASUREMENT.name(),"LP12", true, null)
+        .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(),"LP12",null)
         .getBody()
         .getItems()
         .get(0)
@@ -286,15 +397,28 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void getDrugBrandOrIngredientByName() throws Exception {
-    Criteria drugATCCriteria = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true, true)
-    );
-    Criteria drugBrandCriteria = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_BRAND, 0L, "LP6789", "brandName", DomainType.DRUG.name(), "1235", true, true)
-    );
+    testConfig.cohortbuilder.enableListSearch = true;
+    CBCriteria drugATC = new CBCriteria()
+      .domainId(DomainType.DRUG.toString())
+      .type(CriteriaType.ATC.toString())
+      .code("LP12345")
+      .name("drugName")
+      .group(true)
+      .selectable(true)
+      .count("0");
+    CBCriteria drugBrand = new CBCriteria()
+      .domainId(DomainType.DRUG.toString())
+      .type(CriteriaType.BRAND.toString())
+      .code("LP6789")
+      .name("brandName")
+      .group(true)
+      .selectable(true)
+      .count("0");
+    cbCriteriaDao.save(drugATC);
+    cbCriteriaDao.save(drugBrand);
 
     assertEquals(
-      createResponseCriteria(drugATCCriteria),
+      createResponseCriteria(drugATC),
       controller
         .getDrugBrandOrIngredientByValue(1L, "drugN", null)
         .getBody()
@@ -303,7 +427,7 @@ public class CohortBuilderControllerTest {
     );
 
     assertEquals(
-      createResponseCriteria(drugBrandCriteria),
+      createResponseCriteria(drugBrand),
       controller
         .getDrugBrandOrIngredientByValue(1L, "brandN", null)
         .getBody()
@@ -312,7 +436,7 @@ public class CohortBuilderControllerTest {
     );
 
     assertEquals(
-      createResponseCriteria(drugBrandCriteria),
+      createResponseCriteria(drugBrand),
       controller
         .getDrugBrandOrIngredientByValue(1L, "LP6789", null)
         .getBody()
@@ -323,15 +447,23 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void getDrugIngredientByConceptId() throws Exception {
-    Criteria drugATCCriteria = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true, true)
-    );
+    testConfig.cohortbuilder.enableListSearch = true;
+    CBCriteria drugATC = new CBCriteria()
+      .domainId(DomainType.DRUG.toString())
+      .type(CriteriaType.ATC.toString())
+      .code("LP12345")
+      .name("drugName")
+      .conceptId("12345")
+      .group(true)
+      .selectable(true)
+      .count("0");
+    cbCriteriaDao.save(drugATC);
     jdbcTemplate.execute("create table criteria_relationship (concept_id_1 integer, concept_id_2 integer)");
     jdbcTemplate.execute("insert into criteria_relationship(concept_id_1, concept_id_2) values (1247, 12345)");
     conceptDao.save(new Concept().conceptId(12345).conceptClassId("Ingredient"));
 
     assertEquals(
-      createResponseCriteria(drugATCCriteria),
+      createResponseCriteria(drugATC),
       controller
         .getDrugIngredientByConceptId(1L, 1247L)
         .getBody()

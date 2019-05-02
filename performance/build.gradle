@@ -1,0 +1,39 @@
+plugins {
+    id "com.github.lkishalmi.gatling" version "3.0.2"
+}
+
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'com.github.lkishalmi.gatling'
+apply plugin: 'scala'
+
+// Latest Gatling scala defaults to '2.12.3'
+def projectScalaVersion = '2.12.3'
+
+dependencies {
+    compile group: 'io.gatling', name: 'gatling-core', version: '3.0.2'
+    compile group: 'io.gatling', name: 'gatling-http', version: '3.0.2'
+    compile group: 'org.scala-lang', name: 'scala-library', version: projectScalaVersion
+}
+
+gatling {
+    scalaVersion = projectScalaVersion
+}
+
+// See https://github.com/lkishalmi/gradle-gatling-plugin#source-files-layout
+// `src/gatling/simulations` is a plugin requirement. 
+sourceSets {
+    gatling {
+        scala {
+            srcDirs = ['src/gatling/simulations']
+        }
+        resources {
+            srcDirs = ['src/gatling/resources']
+        }
+    }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8

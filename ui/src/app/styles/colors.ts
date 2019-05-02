@@ -5,7 +5,10 @@ export default {
   ],
   backgroundGrey: '#f1f2f2',
   red: '#d0021b',
-  green: '#8bc990',
+  green: [
+    '#8bc990',
+    '#7CC79B'
+  ],
   blue: [
     '#2691d0',
     '#5aa6da',
