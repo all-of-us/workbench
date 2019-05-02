@@ -35,8 +35,12 @@ interface State {
 class NewDataSetModal extends React.Component<Props, State> {
   constructor(props) {
     super(props);
-    this.state = {name: '', nameTouched: false,
-      conflictDataSetName: false, missingDataSetInfo: false};
+    this.state = {
+      name: '',
+      nameTouched: false,
+      conflictDataSetName: false,
+      missingDataSetInfo: false
+    };
   }
 
   async saveDataSet() {
