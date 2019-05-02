@@ -59,6 +59,6 @@
     "enableBetaAccess": true
   },
   "cohortbuilder": {
-    "enableListSearch": false
+    "enableListSearch": true
   }
 }

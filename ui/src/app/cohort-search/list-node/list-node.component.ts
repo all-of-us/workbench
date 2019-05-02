@@ -56,9 +56,8 @@ export class ListNodeComponent implements OnInit, OnDestroy {
     if (!event) { return ; }
     this.loading = true;
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    const _type = this.node.type;
-    const parentId = this.node.id;
-    this.api.getCriteriaBy(cdrid, _type, null, parentId)
+    const {domainId, id, type} = this.node;
+    this.api.getCriteriaBy(cdrid, domainId, type, id)
       .toPromise()
       .then(resp => {
         this.children = resp.items;
