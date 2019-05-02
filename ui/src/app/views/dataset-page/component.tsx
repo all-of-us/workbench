@@ -39,7 +39,6 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
-import colors from 'app/styles/colors';
 
 
 export const styles = {
