@@ -18,7 +18,7 @@
     </ng-container>
   </div>
   <div [ngClass]="showDropDown ? 'search-container' : 'search-width'">
-    <app-list-search-bar *ngIf="showSearch" [_type]="_type"></app-list-search-bar>
+    <app-list-search-bar *ngIf="showSearch" [node]="node"></app-list-search-bar>
   </div>
 </div>
 
