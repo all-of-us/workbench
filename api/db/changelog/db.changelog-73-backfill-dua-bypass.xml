@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet author="jroberti" id="changelog-73-backfill-dua-bypass">
+        <!--
+          We need to backfill the dua "bypass" field for users who have beta access.
+          The "bypass" time is what's read by the backend to determine a user's access state.
+        -->
+        <sql>
+            UPDATE user
+            SET data_use_agreement_bypass_time = CASE WHEN beta_access_bypass_time IS NOT NULL THEN (select NOW()) ELSE NULL END
+        </sql>
+    </changeSet>
+</databaseChangeLog>
