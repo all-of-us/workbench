@@ -342,6 +342,77 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
+  public void findCriteriaByDomainAndSearchTermDrugMatchesStandardCode() throws Exception {
+    CBCriteria criteria1 = new CBCriteria()
+      .code("672535")
+      .count("-1")
+      .conceptId("19001487")
+      .domainId(DomainType.DRUG.toString())
+      .group(Boolean.FALSE)
+      .selectable(Boolean.TRUE)
+      .name("4-Way")
+      .parentId(0)
+      .type(CriteriaType.BRAND.toString())
+      .attribute(Boolean.FALSE)
+      .standard(true)
+      .synonyms("[rank1]");
+    cbCriteriaDao.save(criteria1);
+    CBCriteria criteria2 = new CBCriteria()
+      .code("8163")
+      .count("2")
+      .conceptId("1135766")
+      .domainId(DomainType.DRUG.toString())
+      .group(Boolean.FALSE)
+      .selectable(Boolean.TRUE)
+      .name("Phenylephrine")
+      .parentId(0)
+      .type(CriteriaType.RXNORM.toString())
+      .attribute(Boolean.FALSE)
+      .standard(true)
+      .synonyms("[rank1]");
+    cbCriteriaDao.save(criteria2);
+    CBCriteria criteria3 = new CBCriteria()
+      .code("8163")
+      .count("87551")
+      .conceptId("1135767")
+      .domainId(DomainType.DRUG.toString())
+      .group(Boolean.FALSE)
+      .selectable(Boolean.TRUE)
+      .name("Phenylephrine1")
+      .parentId(0)
+      .type(CriteriaType.RXNORM.toString())
+      .attribute(Boolean.FALSE)
+      .standard(true)
+      .synonyms("[rank1]");
+    cbCriteriaDao.save(criteria3);
+    jdbcTemplate.execute("create table criteria_relationship (concept_id_1 integer, concept_id_2 integer)");
+    jdbcTemplate.execute("insert into criteria_relationship(concept_id_1, concept_id_2) values (19001487, 1135766)");
+    jdbcTemplate.execute("insert into criteria_relationship(concept_id_1, concept_id_2) values (19001487, 1135767)");
+    Concept concept1 = new Concept()
+      .conceptId(1135766)
+      .conceptClassId("Ingredient");
+    conceptDao.save(concept1);
+    Concept concept2 = new Concept()
+      .conceptId(1135767)
+      .conceptClassId("Ingredient");
+    conceptDao.save(concept2);
+
+    List<org.pmiops.workbench.model.Criteria> results = controller
+      .findCriteriaByDomainAndSearchTerm(1L, DomainType.DRUG.name(), "672535", null)
+      .getBody()
+      .getItems();
+    assertEquals(2, results.size());
+    assertEquals(
+      createResponseCriteria(criteria3),
+      results.get(0)
+    );
+    assertEquals(
+      createResponseCriteria(criteria2),
+      results.get(1)
+    );
+  }
+
+  @Test
   public void findCriteriaByDomainAndSearchTermMatchesStandardCode() throws Exception {
     CBCriteria criteria = new CBCriteria()
       .code("LP12")
@@ -389,6 +460,33 @@ public class CohortBuilderControllerTest {
       createResponseCriteria(criteria),
       controller
         .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(),"LP12",null)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTermDrugMatchesSynonyms() throws Exception {
+    CBCriteria criteria = new CBCriteria()
+      .code("001")
+      .count("10")
+      .conceptId("123")
+      .domainId(DomainType.DRUG.toString())
+      .group(Boolean.TRUE)
+      .selectable(Boolean.TRUE)
+      .name("chol blah")
+      .parentId(0)
+      .type(CriteriaType.ATC.toString())
+      .attribute(Boolean.FALSE)
+      .standard(true)
+      .synonyms("LP12*\"[rank1]\"");
+    cbCriteriaDao.save(criteria);
+
+    assertEquals(
+      createResponseCriteria(criteria),
+      controller
+        .findCriteriaByDomainAndSearchTerm(1L, DomainType.DRUG.name(),"LP12",null)
         .getBody()
         .getItems()
         .get(0)
@@ -448,22 +546,22 @@ public class CohortBuilderControllerTest {
   @Test
   public void getDrugIngredientByConceptId() throws Exception {
     testConfig.cohortbuilder.enableListSearch = true;
-    CBCriteria drugATC = new CBCriteria()
+    CBCriteria drug = new CBCriteria()
       .domainId(DomainType.DRUG.toString())
-      .type(CriteriaType.ATC.toString())
+      .type(CriteriaType.RXNORM.toString())
       .code("LP12345")
       .name("drugName")
       .conceptId("12345")
       .group(true)
       .selectable(true)
       .count("0");
-    cbCriteriaDao.save(drugATC);
+    cbCriteriaDao.save(drug);
     jdbcTemplate.execute("create table criteria_relationship (concept_id_1 integer, concept_id_2 integer)");
     jdbcTemplate.execute("insert into criteria_relationship(concept_id_1, concept_id_2) values (1247, 12345)");
     conceptDao.save(new Concept().conceptId(12345).conceptClassId("Ingredient"));
 
     assertEquals(
-      createResponseCriteria(drugATC),
+      createResponseCriteria(drug),
       controller
         .getDrugIngredientByConceptId(1L, 1247L)
         .getBody()

@@ -17,6 +17,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -264,7 +266,7 @@ public class CBCriteriaDaoTest {
     jdbcTemplate.execute("insert into criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
     CBCriteria drugCriteriaIngredient = new CBCriteria()
       .domainId(DomainType.DRUG.toString())
-      .type(CriteriaType.ATC.toString())
+      .type(CriteriaType.RXNORM.toString())
       .name("ACETAMIN")
       .selectable(true)
       .path("1.2.3.4")
@@ -272,7 +274,7 @@ public class CBCriteriaDaoTest {
     cbCriteriaDao.save(drugCriteriaIngredient);
     conceptDao.save(new Concept().conceptId(1L).conceptClassId("Ingredient"));
 
-    List<CBCriteria> drugList = cbCriteriaDao.findDrugIngredientByConceptId(12345L);
+    List<CBCriteria> drugList = cbCriteriaDao.findDrugIngredientByConceptId(Arrays.asList(12345L));
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
     jdbcTemplate.execute("drop table criteria_relationship");
