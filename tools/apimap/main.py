@@ -16,7 +16,7 @@ mvn install # install 'maven' before running this command
 java -jar target/javacg-0.1-SNAPSHOT-static.jar path-to-aou-repo/{aou-utils/swagger-codegen-cli.jar,common-api/build/libs/common-api-0.1.0.jar} >path/to/callgraph.txt
 ```
 
-Then, to produce the list of endpoints, run `python3 api.py path/to/aou-repo path/to/callgraph.txt`. The endpoints are output in CSV.
+Then, to produce the list of endpoints, run `pipenv install && pipenv run python main.py path/to/aou-repo path/to/callgraph.txt`. The endpoints are written to stdout as CSV.
 
 """
 import collections
@@ -24,6 +24,32 @@ import os
 import re
 import sys
 import yaml
+
+class API:
+    """A Swagger API."""
+    def __init__(self, name, path, package):
+        self.name = name
+        self.path = path
+        self.package = package
+
+    def __repr__(self):
+        return "API({0}, {1}, {2})".format(
+            repr(self.name),
+            repr(self.path),
+            repr(self.package)
+        )
+
+# Note: For best results, synchronize this list of APIs with those in the repository.
+def api_list(project_root):
+    return [
+        # Note: Workbench should remain first.
+        API("Workbench", os.path.join(project_root, "api/src/main/resources/workbench.yaml"), "org.pmiops.workbench.api"),
+        API("Terra", os.path.join(project_root, "api/src/main/resources/fireCloud.yaml"), "org.pmiops.workbench.firecloud.api"),
+        API("Notebooks", os.path.join(project_root, "api/src/main/resources/notebooks.yaml"), "org.pmiops.workbench.notebooks.api"),
+        API("JIRA", os.path.join(project_root, "api/src/main/resources/jira.yaml"), "org.pmiops.workbench.jira.api"),
+        API("Mandrill", os.path.join(project_root, "api/src/main/resources/mandrill_api.yaml"), "org.pmiops.workbench.mandrill.api"),
+        API("Moodle", os.path.join(project_root, "api/src/main/resources/moodle.yaml"), "org.pmiops.workbench.moodle.api"),
+    ]
 
 def capitalized(s):
     """Return a string with its first character capitalized."""
@@ -269,20 +295,6 @@ def group_by(keyfn, seq):
     if group:
         yield group
 
-class API:
-    """A Swagger API."""
-    def __init__(self, name, path, package):
-        self.name = name
-        self.path = path
-        self.package = package
-
-    def __repr__(self):
-        return "API({0}, {1}, {2})".format(
-            repr(self.name),
-            repr(self.path),
-            repr(self.package)
-        )
-
 def read_callgraph_edges(path, endpoints):
     """Read the callgraph edges from a file."""
     with open(path) as fp:
@@ -357,7 +369,11 @@ def tree_print(method, depth, isendpoint):
     print("{0}{1}".format('\t' * depth, method))
 
 def read_endpoints_from_api(api):
-    endpoints = read_endpoints_from_swagger_yaml(api.path, api.package)
+    try:
+        endpoints = read_endpoints_from_swagger_yaml(api.path, api.package)
+    except FileNotFoundError as e:
+        sys.stderr.write("WARNING: {0}\n".format(e))
+        return []
     for ep in endpoints:
         ep.api = api
     return endpoints
@@ -369,16 +385,8 @@ def main(argv):
     if len(argv) != 3:
         sys.stderr.write("Usage: python {0} project-root callgraph-file\n".format(argv[0]))
         return EXIT_FAILURE
-    project_root = argv[1]
+    apis = api_list(argv[1])
     callgraph_path = argv[2]
-    apis = [
-        API("Workbench", os.path.join(project_root, "api/src/main/resources/workbench.yaml"), "org.pmiops.workbench.api"),
-        API("Terra", os.path.join(project_root, "api/src/main/resources/fireCloud.yaml"), "org.pmiops.workbench.firecloud.api"),
-        API("Notebooks", os.path.join(project_root, "api/src/main/resources/notebooks.yaml"), "org.pmiops.workbench.notebooks.api"),
-        API("JIRA", os.path.join(project_root, "api/src/main/resources/jira.yaml"), "org.pmiops.workbench.jira.api"),
-        API("Mandrill", os.path.join(project_root, "api/src/main/resources/mandrill_api.yaml"), "org.pmiops.workbench.mandrill.api"),
-        API("Moodle", os.path.join(project_root, "api/src/main/resources/moodle.yaml"), "org.pmiops.workbench.moodle.api"),
-    ]
     def make_endpoint_printer(apis, origin):
         state = {"print_origin": True}
         def print_endpoint(method, depth, isendpoint):
