@@ -18,6 +18,7 @@ import {
   dataSetApi
 } from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
+import colors from 'app/styles/colors';
 import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace} from 'app/utils';
 import {summarizeErrors} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
@@ -25,7 +26,6 @@ import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
-import colors from 'app/styles/colors';
 import {
   Cohort,
   ConceptSet,
@@ -407,8 +407,9 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
 
     return <DataTable key={this.state.selectedPreviewDomain}
                       value={this.getDataTableValue(filteredDataset.values)}>
-      {filteredDataset[0].values.map(value =>
-          <Column header={value.value} field={value.value}></Column>
+      {filteredDataset.values.map(value =>
+          <Column header={value.value} headerStyle={{textAlign: 'left'}} field={value.value}>
+          </Column>
       )}
     </DataTable>;
   }
@@ -569,9 +570,9 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
             {dataSets.map(dataSet =>
                <Clickable key={dataSet.domain}
                           onClick={() => this.filterDomain(dataSet.domain)}
-                          style={{lineHeight: '22px',
-                                 fontWeight: (selectedPreviewDomain === dataSet.domain) ? 600 : 400,
-                                 textDecoration:
+                          style={{lineHeight: '32px', fontSize : '18px',
+                            fontWeight: (selectedPreviewDomain === dataSet.domain) ? 600 : 400,
+                            textDecoration:
                                    (selectedPreviewDomain === dataSet.domain) ? 'underline' : ''}}>
                  <div key={dataSet.domain}
                       style={{marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'}}>
