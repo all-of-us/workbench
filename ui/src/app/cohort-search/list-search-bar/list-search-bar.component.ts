@@ -14,7 +14,7 @@ const trigger = 2;
   styleUrls: ['./list-search-bar.component.css']
 })
 export class ListSearchBarComponent implements OnInit, OnDestroy {
-  @Input() _type;
+  @Input() node: any;
   searchTerm: FormControl = new FormControl();
   typedTerm: string;
   options = [];
@@ -75,7 +75,8 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
     this.noResults = false;
     // const subtype = this.codes ? this.subtype : null;
     const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
-    cohortBuilderApi().getCriteriaAutoComplete(cdrId, this._type, this.searchTerm.value)
+    const {domainId, type} = this.node;
+    cohortBuilderApi().getCriteriaAutoComplete(cdrId, domainId, this.searchTerm.value, type)
       .then(resp => {
         this.options = [];
         const optionNames: Array<string> = [];
