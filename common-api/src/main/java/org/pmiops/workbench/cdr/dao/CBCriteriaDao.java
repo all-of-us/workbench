@@ -32,9 +32,9 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(value = "select c from CBCriteria c where domainId=:domain and standard=:standard and match(synonyms, :term) > 0 and c.count > 0 order by c.count desc")
   List<CBCriteria> findCriteriaByDomainAndSynonyms(@Param("domain") String domain,
-                                                     @Param("standard") Boolean isStandard,
-                                                     @Param("term") String term,
-                                                     Pageable page);
+                                                   @Param("standard") Boolean isStandard,
+                                                   @Param("term") String term,
+                                                   Pageable page);
 
   @Query(value = "select c from CBCriteria c where domainId=:domain and type=:type and hierarchy=1 and (match(synonyms, :modifiedTerm) > 0 or code like upper(concat(:term,'%'))) order by c.count desc")
   List<CBCriteria> findCriteriaByDomainAndTypeForCodeOrName(@Param("domain") String domain,

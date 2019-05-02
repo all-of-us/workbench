@@ -115,7 +115,7 @@ export const ListSearch = withCurrentWorkspace()(
         this.setState({data: null, loading: true});
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
         cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
-          +cdrVersionId, domain, event.target.value, true
+          +cdrVersionId, domain, event.target.value
         ).then(resp => {
           const data = resp.items.length ? resp.items : null;
           this.setState({data, loading: false});
