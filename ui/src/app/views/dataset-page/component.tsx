@@ -6,7 +6,7 @@ import {AlertDanger} from 'app/components/alert';
 import {TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 
-import {Button} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {ResourceListItem} from 'app/components/resources';
@@ -25,6 +25,7 @@ import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
+import colors from 'app/styles/colors';
 import {
   Cohort,
   ConceptSet,
@@ -39,6 +40,9 @@ import {
   ValueSet,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
+import {DataSetPreviewList} from 'generated/model/dataSetPreviewList';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
 import {validate} from 'validate.js';
 
 export const styles = {
@@ -91,7 +95,8 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[],
     valueSets: ValueSet[], selectedValues: DomainValuePair[], openSaveModal: boolean,
     nameRequired: boolean, conflictDataSetName: boolean, missingDataSetInfo: boolean,
-    nameTouched: boolean, queries: Array<DataSetQuery>
+    nameTouched: boolean, queries: Array<DataSetQuery>, dataSets: Array<DataSetPreviewList>,
+    selectedPreviewDomain: string, previewDataLoading: boolean
   }> {
 
   constructor(props) {
@@ -116,7 +121,10 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       conflictDataSetName: false,
       missingDataSetInfo: false,
       nameTouched: false,
-      queries: []
+      queries: [],
+      dataSets: [],
+      selectedPreviewDomain: '',
+      previewDataLoading: false
     };
   }
 
@@ -324,6 +332,21 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
         !this.state.selectedValues || this.state.selectedValues.length === 0;
   }
 
+  filterDomain(domain) {
+    const filteredDataset =
+        this.state.dataSets.filter(dataSet => fp.contains(dataSet.domain, domain));
+    this.setState({selectedPreviewDomain: domain});
+  }
+
+  getDataTableValue(data) {
+    const tableData = fp.flow(
+      fp.map(({value, queryValue}) => fp.map(v => [value, v], queryValue)),
+      fp.unzip,
+      fp.map(fp.fromPairs)
+    )(data);
+    return tableData;
+  }
+
   async generateCode() {
     const {namespace, id} = this.props.workspace;
     const dataSet: DataSetRequest = {
@@ -334,6 +357,28 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     };
     const sqlQueries = await dataSetApi().generateQuery(namespace, id, dataSet);
     this.setState({queries: sqlQueries.queryList});
+    this.setState({dataSets: []});
+  }
+
+  async getPreviewData() {
+    this.setState({dataSets: [], previewDataLoading: true});
+    const {namespace, id} = this.props.workspace;
+    const request = {
+      name: this.state.name,
+      description: '',
+      conceptSetIds: this.state.selectedConceptSetIds,
+      cohortIds: this.state.selectedCohortIds,
+      values: this.state.selectedValues
+    };
+    try {
+      const dataSetPreviewResp = await dataSetApi().previewQuery(namespace, id, request);
+      this.setState({dataSets: dataSetPreviewResp.domainValue,
+        selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain});
+    } catch (ex) {
+      console.log(ex);
+    } finally {
+      this.setState({previewDataLoading: false});
+    }
   }
 
   buildQueryConfig(np: NamedParameterEntry) {
@@ -355,6 +400,19 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
+  renderPreviewDataTable() {
+    const filteredDataset =
+        this.state.dataSets.filter(
+          dataSet => fp.contains(dataSet.domain, this.state.selectedPreviewDomain))[0];
+
+    return <DataTable key={this.state.selectedPreviewDomain}
+                      value={this.getDataTableValue(filteredDataset.values)}>
+      {filteredDataset[0].values.map(value =>
+          <Column header={value.value} field={value.value}></Column>
+      )}
+    </DataTable>;
+  }
+
   render() {
     const {namespace, id} = this.props.workspace;
     const {
@@ -370,7 +428,10 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       valueSets,
       openSaveModal,
       nameTouched,
-      conflictDataSetName
+      conflictDataSetName,
+      dataSets,
+      selectedPreviewDomain,
+      previewDataLoading
     } = this.state;
     const currentResource = this.getCurrentResource();
     const errors = validate({name}, {
@@ -463,8 +524,9 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
                         {fp.capitalize(valueSet.domain.toString())}
                       </div>
                       {valueSet.values.items.map(domainValue =>
-                        <ValueListItem key={domainValue.value} domainValue={domainValue} onSelect={
-                          () => this.selectDomainValue(valueSet.domain, domainValue)}
+                        <ValueListItem data-test-id='value-items'
+                          key={domainValue.value} domainValue={domainValue}
+                          onSelect={() => this.selectDomainValue(valueSet.domain, domainValue)}
                           checked={fp.some({domain: valueSet.domain, value: domainValue.value},
                             selectedValues)}/>
                       )}
@@ -478,25 +540,48 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       </FadeBox>
       <FadeBox style={{marginTop: '1rem'}}>
         <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-          <div style={{...styles.selectBoxHeader, display: 'flex', position: 'relative'}}>
-            <div>Preview Dataset</div>
-            <div style={{marginLeft: '1rem', color: '#000000', fontSize: '14px'}}>A visualization
+          <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row', position: 'relative'}}>
+            <div style={{color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
             <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}}
-                    onClick={() => {
-                      this.generateCode();
-                    }}>
+                    disabled={this.disableSave()} onClick={() => {this.generateCode(); }}>
               GENERATE CODE
             </Button>
-            {/* Button disabled until this functionality added*/}
+            <Button style={{position: 'absolute', right: '16rem', top: '0.25rem'}}
+                    disabled={this.disableSave()} onClick={() => {this.getPreviewData(); }}>
+              PREVIEW DATA SET
+            </Button>
             <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
                     onClick ={() => this.setState({openSaveModal: true, nameRequired: false,
                       conflictDataSetName: false, missingDataSetInfo: false})}
                     disabled={this.disableSave()}>
-              SAVE DATASET
+              SAVE DATA SET
             </Button>
           </div>
-          {/*TODO: Display dataset preview*/}
+          {previewDataLoading && <div style={{display: 'flex', flexDirection: 'column'}}>
+            <Spinner style={{position: 'relative', top: '2rem',
+              left: '20rem'}}></Spinner>
+            <div style={{top: '3rem', position: 'relative',
+              left: '15rem'}}>It may take up to a minute to load the data</div></div>}
+          {dataSets.length > 0 &&
+          <div style={{display: 'flex', flexDirection: 'column'}}>
+            <div style={{display: 'flex', flexDirection: 'row'}}>
+            {dataSets.map(dataSet =>
+               <Clickable key={dataSet.domain}
+                          onClick={() => this.filterDomain(dataSet.domain)}
+                          style={{lineHeight: '22px',
+                                 fontWeight: (selectedPreviewDomain === dataSet.domain) ? 600 : 400,
+                                 textDecoration:
+                                   (selectedPreviewDomain === dataSet.domain) ? 'underline' : ''}}>
+                 <div key={dataSet.domain}
+                      style={{marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'}}>
+                        {dataSet.domain}
+                 </div>
+               </Clickable>
+            )}
+            </div>
+            {this.renderPreviewDataTable()}
+          </div>}
           <div style={{height: '8rem'}}>
             {queries.map(query =>
               <React.Fragment>
