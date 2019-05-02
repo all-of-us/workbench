@@ -5,6 +5,7 @@ import {dateValidator, integerAndRangeValidator} from 'app/cohort-search/validat
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {ModifierType, Operator, TreeType} from 'generated';
+import {CriteriaType, DomainType} from 'generated/fetch';
 import {List} from 'immutable';
 import * as moment from 'moment';
 import {Subscription} from 'rxjs/Subscription';
@@ -129,7 +130,8 @@ export class ListModifierPageComponent implements OnInit, OnDestroy {
       this.form.addControl('encounters',
         new FormGroup({operator: new FormControl(),
           encounterType: new FormControl()}));
-      cohortBuilderApi().getCriteriaBy(cdrid, TreeType[TreeType.VISIT])
+      cohortBuilderApi()
+        .getCriteriaBy(cdrid, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT])
         .then(response => {
           this.visitCounts = {};
           response.items.forEach(option => {

@@ -140,28 +140,28 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     showHierarchy = (row: any) => {
-      // this.props.hierarchy(row);
+      this.props.hierarchy(row);
       // temp data until new api exists
-      const tempRow = {
-        code: 'LP15426-7',
-        conceptId: 40785861,
-        count: 388001,
-        domainId: '',
-        group: true,
-        hasAncestorData: null,
-        hasAttributes: false,
-        hasHierarchy: null,
-        id: 379527,
-        isStandard: null,
-        name: 'Aspartate aminotransferase',
-        parentId: 379173,
-        path: '379101.379103.379133.379173',
-        selectable: false,
-        subtype: 'LAB',
-        type: 'MEAS',
-        value: null
-      };
-      this.props.hierarchy(tempRow);
+      // const tempRow = {
+      //   code: 'LP15426-7',
+      //   conceptId: 40785861,
+      //   count: 388001,
+      //   domainId: '',
+      //   group: true,
+      //   hasAncestorData: null,
+      //   hasAttributes: false,
+      //   hasHierarchy: null,
+      //   id: 379527,
+      //   isStandard: null,
+      //   name: 'Aspartate aminotransferase',
+      //   parentId: 379173,
+      //   path: '379101.379103.379133.379173',
+      //   selectable: false,
+      //   subtype: 'LAB',
+      //   type: 'MEAS',
+      //   value: null
+      // };
+      // this.props.hierarchy(tempRow);
     }
 
     isSelected = (row: any) => {
