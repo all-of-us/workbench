@@ -332,9 +332,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
         !this.state.selectedValues || this.state.selectedValues.length === 0;
   }
 
-  filterDomain(domain) {
-    const filteredDataset =
-        this.state.dataSets.filter(dataSet => fp.contains(dataSet.domain, domain));
+  setSelectedDomain(domain) {
     this.setState({selectedPreviewDomain: domain});
   }
 
@@ -569,7 +567,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
             <div style={{display: 'flex', flexDirection: 'row'}}>
             {dataSets.map(dataSet =>
                <Clickable key={dataSet.domain}
-                          onClick={() => this.filterDomain(dataSet.domain)}
+                          onClick={() => this.setSelectedDomain(dataSet.domain)}
                           style={{lineHeight: '32px', fontSize : '18px',
                             fontWeight: (selectedPreviewDomain === dataSet.domain) ? 600 : 400,
                             textDecoration:
