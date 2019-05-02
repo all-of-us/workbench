@@ -1,5 +1,9 @@
 import {ElementRef} from '@angular/core';
 
+// ideally this initialization would be done by including <script> tags in
+// the component template html file.  However, Angular does not allow this.
+// TODO: investigate whether this will be possible after we migrate to React
+
 export function initializeZendeskWidget(
   elementRef: ElementRef, accessKey: string): void {
   // This external script loads the Zendesk web widget, connected to our
