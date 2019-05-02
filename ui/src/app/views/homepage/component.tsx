@@ -17,7 +17,7 @@ import {configApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWork} from 'app/views/recent-work/component';
-import {RegistrationDashboard, RegistrationTasks, RegistrationTasksMap} from 'app/views/registration-dashboard/component';
+import {RegistrationDashboard, RegistrationTasksMap} from 'app/views/registration-dashboard/component';
 import {
   BillingProjectStatus,
   Profile,
