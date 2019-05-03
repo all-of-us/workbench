@@ -27,6 +27,7 @@ import {
   Cohort,
   ConceptSet,
   DataSetQuery,
+  DataSetPreviewList,
   DataSetRequest,
   Domain,
   DomainInfo,
@@ -38,7 +39,6 @@ import {
   ValueSet,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
-import {DataSetPreviewList} from 'generated/model/dataSetPreviewList';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 
@@ -100,7 +100,7 @@ interface State {
   conceptDomainList: DomainInfo[];
   conceptSetList: ConceptSet[];
   creatingConceptSet: boolean;
-  dataSets: Array<DataSetPreviewList>;
+  previewData: Array<DataSetPreviewList>;
   editing: boolean;
   includesAllParticipants: boolean;
   loadingResources: boolean;
@@ -136,7 +136,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       selectedValues: [],
       openSaveModal: false,
       queries: [],
-      dataSets: [],
+      previewData: [],
       selectedPreviewDomain: '',
       previewDataLoading: false,
       includesAllParticipants: false
@@ -361,12 +361,11 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       includesAllParticipants: this.state.includesAllParticipants
     };
     const sqlQueries = await dataSetApi().generateQuery(namespace, id, dataSet);
-    this.setState({queries: sqlQueries.queryList});
-    this.setState({dataSets: []});
+    this.setState({queries: sqlQueries.queryList, previewData: []});
   }
 
   async getPreviewData() {
-    this.setState({dataSets: [], previewDataLoading: true});
+    this.setState({previewData: [], previewDataLoading: true});
     const {namespace, id} = this.props.workspace;
     const request = {
       name: '',
@@ -377,7 +376,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
     };
     try {
       const dataSetPreviewResp = await dataSetApi().previewQuery(namespace, id, request);
-      this.setState({dataSets: dataSetPreviewResp.domainValue,
+      this.setState({previewData: dataSetPreviewResp.domainValue,
         selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain});
     } catch (ex) {
       console.log(ex);
@@ -407,8 +406,8 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
 
   renderPreviewDataTable() {
     const filteredDataSet =
-        this.state.dataSets.filter(
-          dataSet => fp.contains(dataSet.domain, this.state.selectedPreviewDomain))[0];
+        this.state.previewData.filter(
+          preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
 
     return <DataTable key={this.state.selectedPreviewDomain}
                       value={this.getDataTableValue(filteredDataSet.values)}>
@@ -434,7 +433,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       selectedCohortIds,
       selectedConceptSetIds,
       selectedValues,
-      dataSets,
+      previewData,
       selectedPreviewDomain,
       previewDataLoading,
       valueSets
@@ -566,27 +565,27 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
           </div>
           {previewDataLoading && <div style={{display: 'flex', flexDirection: 'column'}}>
             <Spinner style={{position: 'relative', top: '2rem',
-              left: '20rem'}}></Spinner>
+              left: '45%'}}></Spinner>
             <div style={{top: '3rem', position: 'relative',
-              left: '15rem'}}>It may take up to a minute to load the data</div></div>
+              left: '35%'}}>It may take up to a minute to load the data</div></div>
           }
-          {dataSets.length > 0 &&
+          {previewData.length > 0 &&
             <div style={{display: 'flex', flexDirection: 'column'}}>
               <div style={{display: 'flex', flexDirection: 'row'}}>
-                {dataSets.map(dataSet =>
-                   <Clickable key={dataSet.domain}
-                             onClick={() => this.setSelectedPreivewDomain(dataSet.domain)}
+                {previewData.map(previewRow =>
+                   <Clickable key={previewRow.domain}
+                             onClick={() => this.setSelectedPreivewDomain(previewRow.domain)}
                              style={{
                                lineHeight: '32px', fontSize: '18px',
-                               fontWeight: (selectedPreviewDomain === dataSet.domain) ? 600 : 400,
+                               fontWeight: (selectedPreviewDomain === previewRow.domain) ? 600 : 400,
                                textDecoration:
-                                   (selectedPreviewDomain === dataSet.domain) ? 'underline' : ''
+                                   (selectedPreviewDomain === previewRow.domain) ? 'underline' : ''
                              }}>
-                     <div key={dataSet.domain}
+                     <div key={previewRow.domain}
                          style={{
                            marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'
                          }}>
-                       {dataSet.domain}
+                       {previewRow.domain}
                      </div>
                    </Clickable>
                 )}
