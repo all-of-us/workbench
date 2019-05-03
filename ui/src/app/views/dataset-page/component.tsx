@@ -422,11 +422,9 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       selectedCohortIds,
       selectedConceptSetIds,
       selectedValues,
-      valueSets,
       dataSets,
       selectedPreviewDomain,
       previewDataLoading,
-      includesAllParticipants,
       valueSets
     } = this.state;
     const currentResource = this.getCurrentResource();
