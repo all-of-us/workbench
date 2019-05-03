@@ -5,13 +5,13 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="ericsong" id="db.changelog-73-add-BillingProjectBufferEntry-table">
-    <createTable tableName="BillingProjectBufferEntry">
+    <createTable tableName="billing_project_buffer_entry">
 
-      <column name="id" type="bigint" autoIncrement="true">
+      <column name="billing_projet_buffer_entry_id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false" />
       </column>
 
-      <column name="project_name" type="varchar(255)">
+      <column name="firecloud_project_name" type="varchar(255)">
         <constraints unique="true" nullable="false" />
       </column>
 
@@ -19,7 +19,7 @@
         <constraints nullable="false" />
       </column>
 
-      <column name="status" type="varchar(32)">
+      <column name="status" type="tinyint">
         <constraints nullable="false" />
       </column>
 

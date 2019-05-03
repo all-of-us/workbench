@@ -10,7 +10,7 @@ public interface BillingProjectBufferEntryDao  extends CrudRepository<BillingPro
 
   BillingProjectBufferEntry findByProjectName(String projectName);
 
-  @Query("SELECT COUNT(*) FROM BillingProjectBufferEntry WHERE status='CREATING' OR status='AVAILABLE' OR status='ASSIGNING'")
+  @Query("SELECT COUNT(*) FROM BillingProjectBufferEntry WHERE status=0 OR status=2 OR status=3")
   Long getCurrentBufferSize();
 
 }

@@ -19,7 +19,7 @@ public class BillingController implements BillingApiDelegate {
   @Override
   public ResponseEntity<Void> bufferBillingProject() {
     billingProjectBufferService.bufferBillingProject();
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    return ResponseEntity.status(HttpStatus.OK).build();
   }
 
 }

@@ -1,6 +1,6 @@
 package org.pmiops.workbench.billing;
 
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.Status.CREATING;
+import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -43,7 +43,7 @@ public class BillingProjectBufferService {
     BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
     entry.setProjectName(projectName);
     entry.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
-    entry.setStatus(CREATING);
+    entry.setStatusEnum(CREATING);
 
     billingProjectBufferEntryDao.save(entry);
   }

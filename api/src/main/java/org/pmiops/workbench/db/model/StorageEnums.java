@@ -2,11 +2,11 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.UnderservedPopulationEnum;
@@ -65,6 +65,23 @@ public final class StorageEnums {
 
   public static Short billingProjectStatusToStorage(BillingProjectStatus s) {
     return CLIENT_TO_STORAGE_BILLING_PROJECT_STATUS.get(s);
+  }
+
+  private static final BiMap<BillingProjectBufferStatus, Short> CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS =
+      ImmutableBiMap.<BillingProjectBufferStatus, Short>builder()
+      .put(BillingProjectBufferStatus.CREATING, (short) 0)
+      .put(BillingProjectBufferStatus.ERROR, (short) 1)
+      .put(BillingProjectBufferStatus.AVAILABLE, (short) 2)
+      .put(BillingProjectBufferStatus.ASSIGNING, (short) 3)
+      .put(BillingProjectBufferStatus.ASSIGNED, (short) 4)
+      .build();
+
+  public static BillingProjectBufferStatus billingProjectBufferStatusFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS.inverse().get(s);
+  }
+
+  public static Short billingProjectBufferStatusToStorage(BillingProjectBufferStatus s) {
+    return CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS.get(s);
   }
 
   private static final BiMap<EmailVerificationStatus, Short>

@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.Status.ASSIGNED;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.Status.CREATING;
+import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
+import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -90,7 +90,7 @@ public class BillingProjectBufferServiceTest {
     String billingProjectName = captor.getValue();
 
     assertThat(billingProjectName).startsWith(workbenchConfig.firecloud.billingProjectPrefix);
-    assertThat(billingProjectBufferEntryDao.findByProjectName(billingProjectName).getStatus())
+    assertThat(billingProjectBufferEntryDao.findByProjectName(billingProjectName).getStatusEnum())
         .isEqualTo(CREATING);
   }
 
@@ -107,7 +107,7 @@ public class BillingProjectBufferServiceTest {
 
     // free up buffer
     BillingProjectBufferEntry entry = billingProjectBufferEntryDao.findAll().iterator().next();
-    entry.setStatus(ASSIGNED);
+    entry.setStatusEnum(ASSIGNED);
     billingProjectBufferEntryDao.save(entry);
     expectedCallCount++;
     billingProjectBufferService.bufferBillingProject();

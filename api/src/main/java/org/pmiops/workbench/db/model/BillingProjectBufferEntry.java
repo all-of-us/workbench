@@ -15,9 +15,9 @@ public class BillingProjectBufferEntry {
   private long id;
   private String projectName;
   private Timestamp creationTime;
-  private Status status;
+  private Short status;
 
-  public enum Status {
+  public enum BillingProjectBufferStatus {
     CREATING,
     ERROR,
     AVAILABLE,
@@ -27,7 +27,7 @@ public class BillingProjectBufferEntry {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "billingprojectbufferentry_id")
+  @Column(name = "billing_project_buffer_entry_id")
   public long getId() {
     return id;
   }
@@ -35,7 +35,7 @@ public class BillingProjectBufferEntry {
     this.id = id;
   }
 
-  @Column(name = "project_name")
+  @Column(name = "firecloud_project_name")
   public String getProjectName() {
     return projectName;
   }
@@ -51,13 +51,15 @@ public class BillingProjectBufferEntry {
     this.creationTime = creationTime;
   }
 
-  @Enumerated(EnumType.STRING)
+  public BillingProjectBufferStatus getStatusEnum() {
+    return StorageEnums.billingProjectBufferStatusFromStorage(status);
+  }
+  public void setStatusEnum(BillingProjectBufferStatus status) {
+    this.status = StorageEnums.billingProjectBufferStatusToStorage(status);
+  }
+
   @Column(name = "status")
-  public Status getStatus() {
-    return status;
-  }
-  public void setStatus(Status status) {
-    this.status = status;
-  }
+  private Short getStatusValue() { return this.status; }
+  private void setStatusValue(Short s) { this.status = status; }
 
 }
