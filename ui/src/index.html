@@ -13,48 +13,6 @@
     <script src="https://apis.google.com/js/platform.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-
-    <script type="text/javascript">
-      // This data configures the Zendesk web widget with settings to show only
-      // the "contact us" form. See https://developer.zendesk.com/embeddables/docs/widget/
-      // for API docs.
-      window.zESettings = {
-        webWidget: {
-          chat: {
-            suppress: true,
-          },
-          color: {
-            // This is an AoU dark purple color.
-            theme: "#262262"
-          },
-          contactForm: {
-            attachments: true,
-            subject: false,
-            // We include a tag indicating that this support request was filed via the
-            // research workbench. This helps distinguish from tickets filed via other
-            // AoU sub-products, e.g. Research Hub or Data Browser.
-            tags: ['research_workbench'],
-            title: {
-              '*': 'Help Desk',
-            },
-          },
-          helpCenter: {
-            suppress: true,
-          },
-          talk: {
-            suppress: true,
-          },
-        }
-      };
-    </script>
-
-    <!--
-      This external script loads the Zendesk web widget, connected to our
-      production Zendesm account. If we ever get a test Zendesk account, the key
-      should be templated in using an environment variable.
-    -->
-    <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=5a7d70b9-37f9-443b-8d0e-c3bd3c2a55e3"> </script>
-
   </head>
   <!-- Push state routing -->
   <base href="/">

@@ -953,7 +953,7 @@ paths:
           schema:
             $ref: "#/definitions/ShareWorkspaceResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/clone:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicate:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -963,9 +963,9 @@ paths:
       consumes:
         - application/json
       description: >
-        Clone an existing workspace, with given modifications to workspace metadata. Caller will own
-        the newly cloned workspace, and must have read access to the source workspace. In
-        addition to workspace metadata, the following will also be cloned:
+        Duplicate an existing workspace, with given modifications to workspace metadata. Caller will own
+        the newly duplicated workspace, and must have read access to the source workspace. In
+        addition to workspace metadata, the following will also be duplicated:
           - the associated Firecloud workspace
           - cohorts, along with reviews and annotations
           - notebooks located in the default notebook directory for this workspace
@@ -977,7 +977,7 @@ paths:
               $ref: "#/definitions/CloneWorkspaceRequest"
       responses:
         200:
-          description: Successful clone response
+          description: Successful duplicate response
           schema:
             $ref: "#/definitions/CloneWorkspaceResponse"
 
@@ -1013,14 +1013,14 @@ paths:
             $ref: "#/definitions/FileDetail"
 
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/clone:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/duplicate:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
     post:
       tags:
         - workspaces
-      description: Clones specified notebook
+      description: Duplicates specified notebook
       operationId: "cloneNotebook"
       parameters:
         - in: path
@@ -1029,7 +1029,7 @@ paths:
           type: string
       responses:
         200:
-          description: Successful clone
+          description: Successful duplicate
           schema:
             $ref: "#/definitions/FileDetail"
 
@@ -1734,8 +1734,8 @@ definitions:
       includeUserRoles:
         type: boolean
         description: >
-          Whether to clone the user roles (sharing settings) on the workspace.
-          By default, clone follows the behavior of CreateWorkspace - it is
+          Whether to duplicate the user roles (sharing settings) on the workspace.
+          By default, duplicate follows the behavior of CreateWorkspace - it is
           shared solely with the creator as an OWNER. If true, all user roles
           are also copied onto the new workspace in addition to the caller
           becoming an OWNER.
@@ -1758,7 +1758,7 @@ definitions:
     properties:
       workspace:
         $ref: "#/definitions/Workspace"
-        description: The newly created workspace clone.
+        description: The newly created workspace duplicate.
 
   UpdateWorkspaceRequest:
     type: object
