@@ -54,7 +54,7 @@ public class BillingProjectBufferService {
   }
 
   private long getCurrentBufferSize() {
-    return billingProjectBufferEntryDao.count();
+    return billingProjectBufferEntryDao.getCurrentBufferSize();
   }
 
   private int getBufferCapacity() {
