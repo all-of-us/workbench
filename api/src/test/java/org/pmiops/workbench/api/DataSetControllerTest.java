@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -217,16 +216,13 @@ public class DataSetControllerTest {
 
   private DataSetController dataSetController;
 
-  @Mock
-  BillingProjectBufferService billingProjectBufferService;
-
   @Before
   public void setUp() throws Exception {
     dataSetService = new DataSetServiceImpl(bigQueryService, cdrBigQuerySchemaConfigService, cohortDao, conceptSetDao, participantCounter);
     dataSetController = new DataSetController(bigQueryService, CLOCK,
         cohortDao, conceptDao, conceptSetDao, dataSetService, userProvider, workspaceService);
     WorkspacesController workspacesController =
-        new WorkspacesController(billingProjectBufferService, workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
+        new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
             userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
     CohortsController cohortsController = new CohortsController(workspaceService, cohortDao, cdrVersionDao, cohortFactory,
         cohortReviewDao, conceptSetDao, cohortMaterializationService, userProvider, CLOCK,

@@ -20,7 +20,6 @@ import javax.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -65,7 +64,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY;
   private static final Pattern NOTEBOOK_PATTERN = NotebooksService.NOTEBOOK_PATTERN;
 
-  private final BillingProjectBufferService billingProjectBufferService;
   private final WorkspaceService workspaceService;
   private final WorkspaceMapper workspaceMapper;
   private final CdrVersionDao cdrVersionDao;
@@ -82,7 +80,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Autowired
   WorkspacesController(
-      BillingProjectBufferService billingProjectBufferService,
       WorkspaceService workspaceService,
       WorkspaceMapper workspaceMapper,
       CdrVersionDao cdrVersionDao,
@@ -96,7 +93,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Clock clock,
       NotebooksService notebooksService,
       UserService userService) {
-    this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.workspaceMapper = workspaceMapper;
     this.cdrVersionDao = cdrVersionDao;

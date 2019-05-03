@@ -21,7 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohorts.CohortFactory;
@@ -214,16 +213,13 @@ public class ConceptSetsControllerTest {
     }
   }
 
-  @Mock
-  BillingProjectBufferService billingProjectBufferService;
-
   @Before
   public void setUp() throws Exception {
 
     conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao,
         conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
     WorkspacesController workspacesController =
-        new WorkspacesController(billingProjectBufferService, workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao,
+        new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao,
                 userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
 
     User user = new User();

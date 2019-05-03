@@ -19,8 +19,6 @@ import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry.Status;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;

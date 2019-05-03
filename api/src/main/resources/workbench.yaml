@@ -981,6 +981,24 @@ paths:
           schema:
             $ref: "#/definitions/CloneWorkspaceResponse"
 
+  # Billing ##############################################################################
+
+  /v1/cron/bufferBillingProject:
+    get:
+      security: []
+      tags:
+        - billing
+        - cron
+      description: If the AoU Billing Project buffer is not full, create a firecloud billing project and add one
+      operationId: bufferBillingProject
+      responses:
+        200:
+          description: No Error
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # Notebooks ############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:
