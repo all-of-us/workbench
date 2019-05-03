@@ -26,8 +26,8 @@ import {NewDataSetModal} from 'app/views/new-dataset-modal/component';
 import {
   Cohort,
   ConceptSet,
-  DataSetQuery,
   DataSetPreviewList,
+  DataSetQuery,
   DataSetRequest,
   Domain,
   DomainInfo,
@@ -577,7 +577,8 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
                              onClick={() => this.setSelectedPreivewDomain(previewRow.domain)}
                              style={{
                                lineHeight: '32px', fontSize: '18px',
-                               fontWeight: (selectedPreviewDomain === previewRow.domain) ? 600 : 400,
+                               fontWeight: (selectedPreviewDomain === previewRow.domain)
+                                   ? 600 : 400,
                                textDecoration:
                                    (selectedPreviewDomain === previewRow.domain) ? 'underline' : ''
                              }}>
