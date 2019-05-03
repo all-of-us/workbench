@@ -1,4 +1,13 @@
-import {Concept, Domain, DomainCount, DomainInfo, DomainInfoResponse} from 'generated/fetch';
+import {
+  Concept,
+  ConceptListResponse,
+  Domain,
+  DomainCount,
+  DomainInfo,
+  DomainInfoResponse,
+  SearchConceptsRequest,
+  StandardConceptFilter
+} from 'generated/fetch';
 import {ConceptsApi} from 'generated/fetch/api';
 
 export class ConceptStubVariables {
@@ -112,6 +121,58 @@ export class ConceptsApiStub extends ConceptsApi {
   public getDomainInfo(
     workspaceNamespace: string, workspaceId: string): Promise<DomainInfoResponse> {
     return Promise.resolve({items: DomainStubVariables.STUB_DOMAINS});
+  }
+
+  // This just returns static values rather than doing a real search.
+  // Real search functionality should be tested at the API level.
+  // This creates more predictable responses.
+  public searchConcepts(
+    workspaceNamespace: string, workspaceId: string,
+    request?: SearchConceptsRequest): Promise<ConceptListResponse> {
+    return new Promise<ConceptListResponse>(resolve => {
+      // setTimeout(() => {
+      const response = {
+        items: [],
+        standardConcepts: [],
+        vocabularyCounts: [],
+        domainCounts: undefined
+      };
+      if (request.includeDomainCounts) {
+        response.domainCounts = DomainStubVariables.STUB_DOMAINS.map((domainInfo) => {
+          return {
+            domain: domainInfo.domain,
+            name: domainInfo.name,
+            conceptCount: domainInfo.allConceptCount
+          };
+        });
+      }
+      const foundDomain =
+        DomainStubVariables.STUB_DOMAINS.find(domain => domain.domain === request.domain);
+      this.concepts.forEach((concept) => {
+        if (concept.domainId !== foundDomain.name) {
+          return;
+        }
+        if (request.standardConceptFilter === StandardConceptFilter.ALLCONCEPTS) {
+          response.items.push(concept);
+          if (concept.standardConcept) {
+            response.standardConcepts.push(concept);
+          }
+        } else if (
+          request.standardConceptFilter === StandardConceptFilter.STANDARDCONCEPTS) {
+          if (concept.standardConcept) {
+            response.items.push(concept);
+            response.standardConcepts.push(concept);
+          }
+        } else if (request.standardConceptFilter
+          === StandardConceptFilter.NONSTANDARDCONCEPTS) {
+          if (!concept.standardConcept) {
+            response.items.push(concept);
+          }
+        }
+      });
+      resolve(response);
+      // }, 0);
+    });
   }
 
 }

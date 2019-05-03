@@ -217,6 +217,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
         completedDomainSearches.push(conceptDomain.domain);
         conceptDomain.items = this.convertToConceptInfo(resp.items);
         conceptDomain.vocabularyList = resp.vocabularyCounts;
+        this.setState({completedDomainSearches: completedDomainSearches});
         if (activeTabSearch) {
           this.setState({
             searchLoading: false,
@@ -329,6 +330,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
                 <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
             </Clickable>}
             <CheckBox checked={standardConceptsOnly}
+                      data-test-id='standardConceptsCheckBox'
                       style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
                       onChange={() => this.setState({
                         standardConceptsOnly: !standardConceptsOnly
@@ -355,8 +357,8 @@ export const ConceptWrapper = withCurrentWorkspace()(
                     <Clickable style={styles.domainHeaderLink}
                                onClick={() => this.selectDomain(domain)}
                                disabled={this.domainLoading(domain)}
-                               data-test-id='domain-header'>
-                    <div style={{fontSize: '16px'}} data-test-id='domain-name'>{domain.name}</div>
+                               data-test-id={'domain-header-' + domain.name}>
+                    <div style={{fontSize: '16px'}}>{domain.name}</div>
                     {this.domainLoading(domain) ?
                       <Spinner style={{height: '15px', width: '15px'}}/> :
                       <div style={{display: 'flex', flexDirection: 'row',
@@ -370,6 +372,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
                     }
                   </Clickable>
                   {domain === selectedDomain && <hr data-test-id='active-domain'
+                                                    key={selectedDomain.domain}
                                                     style={styles.domainHeaderSelected}/>}
                   </div>;
                 })}

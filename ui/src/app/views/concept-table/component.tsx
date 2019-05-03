@@ -170,7 +170,7 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
                  onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
       <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
               selectionMode='multiple' />
-      <Column bodyStyle={styles.colStyle} field='conceptName' header='Name'/>
+      <Column bodyStyle={styles.colStyle} field='conceptName' header='Name' data-test-id='conceptName'/>
       <Column bodyStyle={styles.colStyle} field='conceptCode' header='Code'/>
       <Column field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle}
               filter={true} headerStyle={{display: 'flex', textAlign: 'center', paddingTop: '0.6rem'
