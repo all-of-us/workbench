@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
+import * as moment from 'moment';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
@@ -11,8 +12,11 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import { ProfileRegistrationStepStatus } from 'app/views/profile-registration-step-status/component';
+import { RegistrationTasksMap } from 'app/views/registration-dashboard/component';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
+
 
 
 const styles = reactStyles({
@@ -273,29 +277,61 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
           </div>
         </div>
 
-        <div style={{flex: '0 0 420px'}}>
-          <div style={styles.box}>
-            <div style={{...styles.h1, marginBottom: 12}}>
-              All of Us Training
-              <TooltipTrigger
-                side='left'
-                content=''
-              >
-                <ClrIcon
-                  shape='info-standard'
-                  className='is-solid'
-                  style={{marginLeft: 10, verticalAlign: 'middle', color: colors.blue[0]}}
-                />
-              </TooltipTrigger>
+        <div>
+          <ProfileRegistrationStepStatus
+            title='Google 2-Step Verification'
+            wasBypassed={!!profile.twoFactorAuthBypassTime}
+            incompleteButtonText='Set Up'
+            completedButtonText={RegistrationTasksMap['twoFactorAuth'].completedText}
+            isComplete={RegistrationTasksMap['twoFactorAuth'].isComplete(profile)}
+            completeStep={RegistrationTasksMap['twoFactorAuth'].onClick  } />
+
+          <ProfileRegistrationStepStatus
+            title='Access Training'
+            wasBypassed={!!profile.complianceTrainingBypassTime}
+            incompleteButtonText='Access Training'
+            completedButtonText={RegistrationTasksMap['complianceTraining'].completedText}
+            isComplete={RegistrationTasksMap['complianceTraining'].isComplete(profile)}
+            completeStep={RegistrationTasksMap['complianceTraining'].onClick} />
+
+          <ProfileRegistrationStepStatus
+            title='ERA Commons Account'
+            wasBypassed={!!profile.eraCommonsBypassTime}
+            incompleteButtonText='Link'
+            completedButtonText={RegistrationTasksMap['eraCommons'].completedText}
+            isComplete={RegistrationTasksMap['eraCommons'].isComplete(profile)}
+            completeStep={RegistrationTasksMap['eraCommons'].onClick} >
+            <div>
+              <div> Username: </div>
+              <div> { profile.eraCommonsLinkedNihUsername } </div>
+              <div> Link Expiration: </div>
+              <div>
+                { moment.unix(profile.eraCommonsLinkExpireTime)
+                  .format('MMMM Do, YYYY, h:mm:ss A') }
+              </div>
             </div>
-            <Button
-                type='purplePrimary'
-                onClick={this.navigateToTraining}
-            >
-              Access Training
-            </Button>
-          </div>
+          </ProfileRegistrationStepStatus>
+
+          <ProfileRegistrationStepStatus
+            title='Data Use Agreement'
+            wasBypassed={!!profile.dataUseAgreementBypassTime}
+            incompleteButtonText='Sign'
+            completedButtonText={RegistrationTasksMap['dataUseAgreement'].completedText}
+            isComplete={RegistrationTasksMap['dataUseAgreement'].isComplete(profile)}
+            completeStep={RegistrationTasksMap['dataUseAgreement'].onClick} >
+            <div> Agreement Renewal: </div>
+            <div>
+              { moment.unix(profile.dataUseAgreementCompletionTime / 1000)
+                  .add(1, 'year')
+                  .format('MMMM Do, YYYY') }
+            </div>
+            <a
+              onClick={RegistrationTasksMap['dataUseAgreement'].onClick}>
+              View current agreement
+            </a>
+          </ProfileRegistrationStepStatus>
         </div>
+
       </div>
     </div>;
   }

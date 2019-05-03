@@ -2180,6 +2180,11 @@ definitions:
       workspaceId:
         type: integer
         format: int64
+      includesAllParticipants:
+        type: boolean
+        default: false
+        description: >
+          Whether to include all participants or filter by cohorts
       conceptSetIds:
         type: array
         description: >
@@ -2216,6 +2221,8 @@ definitions:
     properties:
       name:
         type: string
+      includesAllParticipants:
+        type: boolean
       description:
         type: string
       workspaceId:

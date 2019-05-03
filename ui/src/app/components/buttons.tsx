@@ -116,7 +116,7 @@ const buttonVariants = {
 
 const computeStyle = ({style = {}, hover = {}, disabledStyle = {}}, {disabled}) => {
   return {
-    style: {...style, ...(disabled ? disabledStyle : {})},
+    style: {...style, ...(disabled ? {cursor: 'not-allowed', ...disabledStyle} : {})},
     hover: disabled ? undefined : hover
   };
 };

@@ -29,7 +29,6 @@ import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TreeSubType;
-import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -54,10 +53,6 @@ import static org.mockito.Mockito.when;
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 public class CohortBuilderControllerTest {
-
-  private static final String SUBTYPE_LAB = "LAB";
-  private static final String SUBTYPE_ATC = "ATC";
-  private static final String SUBTYPE_BRAND = "BRAND";
 
   private CohortBuilderController controller;
 
@@ -320,12 +315,66 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndSearchTerm() throws Exception {
+  public void findCriteriaByDomainAndSearchTermMatchesSourceCode() throws Exception {
     CBCriteria criteria = new CBCriteria()
       .code("001")
       .count("10")
       .conceptId("123")
-      .domainId(DomainType.MEASUREMENT.toString())
+      .domainId(DomainType.CONDITION.toString())
+      .group(Boolean.TRUE)
+      .selectable(Boolean.TRUE)
+      .name("chol blah")
+      .parentId(0)
+      .type(CriteriaType.LOINC.toString())
+      .attribute(Boolean.FALSE)
+      .standard(false)
+      .synonyms("[rank1]");
+    cbCriteriaDao.save(criteria);
+
+    assertEquals(
+      createResponseCriteria(criteria),
+      controller
+        .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(), "001", null)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTermMatchesStandardCode() throws Exception {
+    CBCriteria criteria = new CBCriteria()
+      .code("LP12")
+      .count("10")
+      .conceptId("123")
+      .domainId(DomainType.CONDITION.toString())
+      .group(Boolean.TRUE)
+      .selectable(Boolean.TRUE)
+      .name("chol blah")
+      .parentId(0)
+      .type(CriteriaType.LOINC.toString())
+      .attribute(Boolean.FALSE)
+      .standard(true)
+      .synonyms("[rank1]");
+    cbCriteriaDao.save(criteria);
+
+    assertEquals(
+      createResponseCriteria(criteria),
+      controller
+        .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(),"LP12",null)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTermMatchesSynonyms() throws Exception {
+    CBCriteria criteria = new CBCriteria()
+      .code("001")
+      .count("10")
+      .conceptId("123")
+      .domainId(DomainType.CONDITION.toString())
       .group(Boolean.TRUE)
       .selectable(Boolean.TRUE)
       .name("chol blah")
@@ -334,12 +383,12 @@ public class CohortBuilderControllerTest {
       .attribute(Boolean.FALSE)
       .standard(true)
       .synonyms("LP12*\"[rank1]\"");
-    CBCriteria labMeasurement = cbCriteriaDao.save(criteria);
+    cbCriteriaDao.save(criteria);
 
     assertEquals(
-      createResponseCriteria(labMeasurement),
+      createResponseCriteria(criteria),
       controller
-        .findCriteriaByDomainAndSearchTerm(1L, DomainType.MEASUREMENT.name(),"LP12", true, null)
+        .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(),"LP12",null)
         .getBody()
         .getItems()
         .get(0)

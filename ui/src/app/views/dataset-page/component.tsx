@@ -2,14 +2,11 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {AlertDanger} from 'app/components/alert';
-import {TextInput, ValidationError} from 'app/components/inputs';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
-import {ResourceListItem} from 'app/components/resources';
+import {ImmutableListItem, ResourceListItem} from 'app/components/resources';
 import {Spinner} from 'app/components/spinners';
 import {
   cohortsApi,
@@ -18,13 +15,14 @@ import {
   dataSetApi
 } from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
+import colors from 'app/styles/colors';
 import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace} from 'app/utils';
-import {summarizeErrors} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
+import {NewDataSetModal} from 'app/views/new-dataset-modal/component';
 import {
   Cohort,
   ConceptSet,
@@ -33,13 +31,15 @@ import {
   Domain,
   DomainInfo,
   DomainValue,
+  DomainValuePair,
   DomainValuesResponse,
   NamedParameterEntry,
   RecentResource,
   ValueSet,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
-import {validate} from 'validate.js';
+
+
 
 export const styles = {
   selectBoxHeader: {
@@ -63,14 +63,20 @@ export const styles = {
     marginLeft: 10,
     marginTop: 10,
     marginRight: 10,
-    backgroundColor: '#7CC79B'
+    backgroundColor: colors.green[1]
+  },
+
+  subheader: {
+    fontWeight: 400,
+    fontSize: '0.6rem',
+    marginTop: '0.5rem',
+    color: colors.purple[0]
   }
 };
 
-interface DomainValuePair {
-  domain: Domain;
-  value: string;
-}
+const Subheader = (props) => {
+  return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
+};
 
 export const ValueListItem: React.FunctionComponent <
   {domainValue: DomainValue, onSelect: Function, checked: boolean}> =
@@ -85,19 +91,17 @@ export const ValueListItem: React.FunctionComponent <
 
 export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
-  {name: string, creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
+  {creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
     conceptSetList: ConceptSet[], cohortList: Cohort[], loadingResources: boolean,
     confirmDeleting: boolean, editing: boolean, resource: RecentResource,
     rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[],
     valueSets: ValueSet[], selectedValues: DomainValuePair[], openSaveModal: boolean,
-    nameRequired: boolean, conflictDataSetName: boolean, missingDataSetInfo: boolean,
-    nameTouched: boolean, queries: Array<DataSetQuery>
+    queries: Array<DataSetQuery>, includesAllParticipants: boolean
   }> {
 
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
       creatingConceptSet: false,
       conceptDomainList: undefined,
       conceptSetList: [],
@@ -112,11 +116,8 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       valueSets: [],
       selectedValues: [],
       openSaveModal: false,
-      nameRequired: false,
-      conflictDataSetName: false,
-      missingDataSetInfo: false,
-      nameTouched: false,
-      queries: []
+      queries: [],
+      includesAllParticipants: false
     };
   }
 
@@ -292,35 +293,10 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
-  async saveDataSet() {
-    this.setState({nameTouched: true});
-    if (!this.state.name) {
-      return;
-    }
-    this.setState({conflictDataSetName: false, missingDataSetInfo: false });
-    const request = {
-      name: this.state.name,
-      description: '',
-      conceptSetIds: this.state.selectedConceptSetIds,
-      cohortIds: this.state.selectedCohortIds,
-      values: this.state.selectedValues
-    };
-    try {
-      await dataSetApi().createDataSet(
-        this.props.workspace.namespace, this.props.workspace.id, request);
-      this.setState({openSaveModal: false});
-    } catch (e) {
-      if (e.status === 409) {
-        this.setState({conflictDataSetName: true});
-      } else if (e.status === 400) {
-        this.setState({missingDataSetInfo: true});
-      }
-    }
-  }
-
   disableSave() {
     return !this.state.selectedConceptSetIds || this.state.selectedConceptSetIds.length === 0 ||
-        !this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0 ||
+        ((!this.state.selectedCohortIds ||
+        this.state.selectedCohortIds.length === 0) && !this.state.includesAllParticipants) ||
         !this.state.selectedValues || this.state.selectedValues.length === 0;
   }
 
@@ -331,6 +307,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       conceptSetIds: this.state.selectedConceptSetIds,
       cohortIds: this.state.selectedCohortIds,
       values: this.state.selectedValues,
+      includesAllParticipants: this.state.includesAllParticipants
     };
     const sqlQueries = await dataSetApi().generateQuery(namespace, id, dataSet);
     this.setState({queries: sqlQueries.queryList});
@@ -358,26 +335,21 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
   render() {
     const {namespace, id} = this.props.workspace;
     const {
-      name,
       creatingConceptSet,
       conceptDomainList,
       conceptSetList,
+      includesAllParticipants,
       loadingResources,
+      openSaveModal,
       queries,
       resource,
       rType,
+      selectedCohortIds,
+      selectedConceptSetIds,
       selectedValues,
-      valueSets,
-      openSaveModal,
-      nameTouched,
-      conflictDataSetName
+      valueSets
     } = this.state;
     const currentResource = this.getCurrentResource();
-    const errors = validate({name}, {
-      name: {
-        presence: {allowEmpty: false}
-      }
-    });
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
         <h2 style={{marginTop: 0}}>Datasets</h2>
@@ -394,6 +366,11 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
                   onClick={() => navigate(['workspaces', namespace, id,  'cohorts', 'build'])}/>
               </div>
               <div style={{height: '10rem', overflowY: 'auto'}}>
+                <Subheader>Prepackaged Cohorts</Subheader>
+                <ImmutableListItem name='All AoU Participants' onSelect={
+                  () => this.setState({includesAllParticipants: !includesAllParticipants})
+                }/>
+                <Subheader>Workspace Cohorts</Subheader>
                 {!loadingResources && this.state.cohortList.map(cohort =>
                   <ResourceListItem key={cohort.id} resource={cohort} rType={ResourceType.COHORT}
                                     data-test-id='cohort-list-item'
@@ -490,8 +467,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
             </Button>
             {/* Button disabled until this functionality added*/}
             <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
-                    onClick ={() => this.setState({openSaveModal: true, nameRequired: false,
-                      conflictDataSetName: false, missingDataSetInfo: false})}
+                    onClick ={() => this.setState({openSaveModal: true})}
                     disabled={this.disableSave()}>
               SAVE DATASET
             </Button>
@@ -540,37 +516,18 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       <EditModal resource={resource}
                  onEdit={e => this.receiveEdit(e)}
                  onCancel={() => this.closeEditModal()}/>}
-      {openSaveModal && <Modal>
-        <ModalTitle>Save Dataset</ModalTitle>
-        <ModalBody>
-          <div>
-             <ValidationError>
-              {summarizeErrors(nameTouched && errors && errors.name)}
-            </ValidationError>
-            {conflictDataSetName &&
-            <AlertDanger>DataSet with same name exist</AlertDanger>
-            }
-            {this.state.missingDataSetInfo &&
-            <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
-            }
-            <TextInput type='text' autoFocus placeholder='Dataset Name'
-                       value = {this.state.name}
-                       onChange={v => this.setState({name: v, nameTouched: true,
-                         conflictDataSetName: false})}/>
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          <Button onClick = {() => this.setState({openSaveModal: false})}
-                  type='secondary' style={{marginRight: '2rem'}}>
-            Cancel
-          </Button>
-          <Button type='primary' onClick={() => this.saveDataSet()}>SAVE</Button>
-        </ModalFooter>
-      </Modal>}
+      {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
+                                         selectedConceptSetIds={selectedConceptSetIds}
+                                         selectedCohortIds={selectedCohortIds}
+                                         selectedValues={selectedValues}
+                                         workspaceNamespace={namespace}
+                                         workspaceId={id}
+                                         closeFunction={() => {
+                                           this.setState({openSaveModal: false});
+                                         }}
+      />}
     </React.Fragment>;
   }
-
-
 });
 
 @Component({

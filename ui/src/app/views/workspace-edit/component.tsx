@@ -510,7 +510,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             paddingBottom: '14.4px', paddingTop: '0.3rem'}}>
             <CheckBox style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
               onChange={v => this.setState(
-                fp.set(['workspace', 'researchPurpose', 'reviewRequested' ], v.value))}
+                fp.set(['workspace', 'researchPurpose', 'reviewRequested' ], v))}
               checked={this.state.workspace.researchPurpose.reviewRequested}/>
             <label style={styles.text}>
               I am concerned about potential
@@ -544,14 +544,15 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <Modal>
           <ModalTitle>Error:</ModalTitle>
           <ModalBody>Could not
-            {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'create' : 'update'}
+            {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? ' create ' : ' update '}
             workspace.
           </ModalBody>
           <ModalFooter>
             <Button onClick = {() => this.props.cancel()}
                 type='secondary' style={{marginRight: '2rem'}}>
               Cancel
-              {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'Creation' : 'Update'}
+              {this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
+                ' Creation' : ' Update'}
                 </Button>
             <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
           </ModalFooter>

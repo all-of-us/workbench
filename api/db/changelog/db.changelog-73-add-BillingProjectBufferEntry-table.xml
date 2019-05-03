@@ -4,7 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="ericsong" id="db.changelog-72-add-BillingProjectBufferEntry-table">
+  <changeSet author="ericsong" id="db.changelog-73-add-BillingProjectBufferEntry-table">
     <createTable tableName="BillingProjectBufferEntry">
 
       <column name="id" type="bigint" autoIncrement="true">
