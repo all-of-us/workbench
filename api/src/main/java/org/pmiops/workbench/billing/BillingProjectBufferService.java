@@ -2,6 +2,7 @@ package org.pmiops.workbench.billing;
 
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
 
+import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.UUID;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BillingProjectBufferService {
+
+  private static final int PROJECT_BILLING_ID_SIZE = 16;
 
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
@@ -48,8 +51,11 @@ public class BillingProjectBufferService {
     billingProjectBufferEntryDao.save(entry);
   }
 
+
   private String createBillingProjectName() {
-    return workbenchConfigProvider.get().firecloud.billingProjectPrefix + "-" + UUID.randomUUID().toString();
+    String randomString = Hashing.sha256().hashUnencodedChars(UUID.randomUUID().toString()).toString()
+        .substring(0, PROJECT_BILLING_ID_SIZE);
+    return workbenchConfigProvider.get().firecloud.billingProjectPrefix + "-" + randomString;
   }
 
   private long getCurrentBufferSize() {

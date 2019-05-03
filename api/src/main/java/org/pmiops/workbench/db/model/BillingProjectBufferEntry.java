@@ -3,8 +3,6 @@ package org.pmiops.workbench.db.model;
 import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -60,6 +58,6 @@ public class BillingProjectBufferEntry {
 
   @Column(name = "status")
   private Short getStatusValue() { return this.status; }
-  private void setStatusValue(Short s) { this.status = status; }
+  private void setStatusValue(Short s) { this.status = s; }
 
 }
