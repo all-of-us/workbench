@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class BillingProjectBufferService {
 
-  private static final int PROJECT_BILLING_ID_SIZE = 16;
+  private static final int PROJECT_BILLING_ID_SIZE = 8;
 
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
@@ -44,7 +44,7 @@ public class BillingProjectBufferService {
 
     fireCloudService.createAllOfUsBillingProject(projectName);
     BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
-    entry.setProjectName(projectName);
+    entry.setFireCloudProjectName(projectName);
     entry.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
     entry.setStatusEnum(CREATING);
 
@@ -65,4 +65,5 @@ public class BillingProjectBufferService {
   private int getBufferCapacity() {
     return workbenchConfigProvider.get().firecloud.billingProjectBufferCapacity;
   }
+
 }

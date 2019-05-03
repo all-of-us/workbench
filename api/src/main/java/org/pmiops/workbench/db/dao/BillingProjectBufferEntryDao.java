@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BillingProjectBufferEntryDao  extends CrudRepository<BillingProjectBufferEntry, Long> {
 
-  BillingProjectBufferEntry findByProjectName(String projectName);
+  BillingProjectBufferEntry findByFireCloudProjectName(String fireCloudProjectName);
 
   @Query("SELECT COUNT(*) FROM BillingProjectBufferEntry WHERE status=0 OR status=2 OR status=3")
   Long getCurrentBufferSize();

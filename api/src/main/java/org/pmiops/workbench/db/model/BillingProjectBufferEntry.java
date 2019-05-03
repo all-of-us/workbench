@@ -11,16 +11,16 @@ import javax.persistence.Id;
 public class BillingProjectBufferEntry {
 
   private long id;
-  private String projectName;
+  private String fireCloudProjectName;
   private Timestamp creationTime;
   private Short status;
 
   public enum BillingProjectBufferStatus {
-    CREATING,
-    ERROR,
-    AVAILABLE,
-    ASSIGNING,
-    ASSIGNED
+    CREATING, // Sent a request to FireCloud to create a BillingProject. Status of BillingProject is TBD
+    ERROR, // Failed to create BillingProject
+    AVAILABLE, // BillingProject is ready to be assigned to a user
+    ASSIGNING, //  BillingProject is being assigned to a user
+    ASSIGNED // BillingProject has been assigned to a user
   }
 
   @Id
@@ -34,11 +34,11 @@ public class BillingProjectBufferEntry {
   }
 
   @Column(name = "firecloud_project_name")
-  public String getProjectName() {
-    return projectName;
+  public String getFireCloudProjectName() {
+    return fireCloudProjectName;
   }
-  public void setProjectName(String projectName) {
-    this.projectName = projectName;
+  public void setFireCloudProjectName(String fireCloudProjectName) {
+    this.fireCloudProjectName = fireCloudProjectName;
   }
 
   @Column(name = "creation_time")

@@ -90,7 +90,7 @@ public class BillingProjectBufferServiceTest {
     String billingProjectName = captor.getValue();
 
     assertThat(billingProjectName).startsWith(workbenchConfig.firecloud.billingProjectPrefix);
-    assertThat(billingProjectBufferEntryDao.findByProjectName(billingProjectName).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findByFireCloudProjectName(billingProjectName).getStatusEnum())
         .isEqualTo(CREATING);
   }
 
