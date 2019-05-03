@@ -12,7 +12,7 @@
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-stable",
     "billingRetryCount": 2,
-    "billingProjectBufferCapacity": 5
+    "billingProjectBufferCapacity": 10
   },
   "auth": {
     "serviceAccountApiUsers": [ "all-of-us-rw-stable@appspot.gserviceaccount.com" ]
