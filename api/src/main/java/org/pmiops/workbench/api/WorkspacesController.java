@@ -340,8 +340,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
-    billingProjectBufferService.fillBuffer(1);
-
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
     response.setItems(workspaceService.getWorkspaces());
     return ResponseEntity.ok(response);

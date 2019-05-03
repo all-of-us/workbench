@@ -3,6 +3,8 @@ package org.pmiops.workbench.db.model;
 import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,7 +15,15 @@ public class BillingProjectBufferEntry {
   private long id;
   private String projectName;
   private Timestamp creationTime;
-  private String status;
+  private Status status;
+
+  public enum Status {
+    CREATING,
+    ERROR,
+    AVAILABLE,
+    ASSIGNING,
+    ASSIGNED
+  }
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,11 +51,12 @@ public class BillingProjectBufferEntry {
     this.creationTime = creationTime;
   }
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "status")
-  public String getStatus() {
+  public Status getStatus() {
     return status;
   }
-  public void setStatus(String status) {
+  public void setStatus(Status status) {
     this.status = status;
   }
 

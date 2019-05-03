@@ -56,6 +56,7 @@ public class WorkbenchConfig {
     public String jupyterPlaygroundExtensionUri;
     public String leoBaseUrl;
     public Integer billingRetryCount;
+    public Integer billingProjectBufferCapacity;
   }
 
   public static class AuthConfig {

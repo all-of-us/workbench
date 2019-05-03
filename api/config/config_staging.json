@@ -11,7 +11,8 @@
     "jupyterPlaygroundExtensionUri": "gs:\/\/all-of-us-rw-staging-cluster-resources/playground-extension.js",
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-staging",
-    "billingRetryCount": 2
+    "billingRetryCount": 2,
+    "billingProjectBufferCapacity": 5
   },
   "auth": {
     "serviceAccountApiUsers": [ "all-of-us-rw-staging@appspot.gserviceaccount.com" ]
