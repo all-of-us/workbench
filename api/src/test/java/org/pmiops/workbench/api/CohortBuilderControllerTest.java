@@ -385,9 +385,9 @@ public class CohortBuilderControllerTest {
       .standard(true)
       .synonyms("[rank1]");
     cbCriteriaDao.save(criteria3);
-    jdbcTemplate.execute("create table criteria_relationship (concept_id_1 integer, concept_id_2 integer)");
-    jdbcTemplate.execute("insert into criteria_relationship(concept_id_1, concept_id_2) values (19001487, 1135766)");
-    jdbcTemplate.execute("insert into criteria_relationship(concept_id_1, concept_id_2) values (19001487, 1135767)");
+    jdbcTemplate.execute("create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
+    jdbcTemplate.execute("insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (19001487, 1135766)");
+    jdbcTemplate.execute("insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (19001487, 1135767)");
     Concept concept1 = new Concept()
       .conceptId(1135766)
       .conceptClassId("Ingredient");
@@ -468,6 +468,7 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void findCriteriaByDomainAndSearchTermDrugMatchesSynonyms() throws Exception {
+    jdbcTemplate.execute("create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
     CBCriteria criteria = new CBCriteria()
       .code("001")
       .count("10")
@@ -491,6 +492,7 @@ public class CohortBuilderControllerTest {
         .getItems()
         .get(0)
     );
+    jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
   @Test

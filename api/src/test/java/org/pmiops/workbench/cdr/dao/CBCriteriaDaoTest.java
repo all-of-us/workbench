@@ -262,8 +262,8 @@ public class CBCriteriaDaoTest {
 
   @Test
   public void findDrugIngredientsByConceptId() throws Exception {
-    jdbcTemplate.execute("create table criteria_relationship (concept_id_1 integer, concept_id_2 integer)");
-    jdbcTemplate.execute("insert into criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
+    jdbcTemplate.execute("create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
+    jdbcTemplate.execute("insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
     CBCriteria drugCriteriaIngredient = new CBCriteria()
       .domainId(DomainType.DRUG.toString())
       .type(CriteriaType.RXNORM.toString())
@@ -277,7 +277,7 @@ public class CBCriteriaDaoTest {
     List<CBCriteria> drugList = cbCriteriaDao.findDrugIngredientByConceptId(Arrays.asList(12345L));
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
-    jdbcTemplate.execute("drop table criteria_relationship");
+    jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
 }
