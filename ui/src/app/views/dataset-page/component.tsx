@@ -86,7 +86,7 @@ export const ValueListItem: React.FunctionComponent <
       <input type='checkbox' value={domainValue.value} onChange={() => onSelect()}
              style={styles.valueListItemCheckboxStyling}
              checked={checked}/>
-      <div style={{lineHeight: '1.5rem'}}>{domainValue.value}</div>
+      <div style={{lineHeight: '1.5rem', wordWrap: 'break-word'}}>{domainValue.value}</div>
     </div>;
   };
 
@@ -298,15 +298,26 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
   }
 
   selectDomainValue(domain: Domain, domainValue: DomainValue): void {
+    const valueSets = this.state.valueSets
+        .filter(value => value.domain === domain)
+        .map(valueSet => valueSet.values.items)[0];
     const origSelected = this.state.selectedValues;
     const selectObj = {domain: domain, value: domainValue.value};
+    let valuesSelected = [];
     if (fp.some(selectObj, origSelected)) {
-      this.setState({selectedValues:
-        fp.remove((dv) => dv.domain === selectObj.domain
-        && dv.value === selectObj.value, origSelected)});
+      valuesSelected = fp.remove((dv) => dv.domain === selectObj.domain
+          && dv.value === selectObj.value, origSelected);
+
     } else {
-      this.setState({selectedValues: (origSelected).concat(selectObj)});
+      valuesSelected = (origSelected).concat(selectObj);
     }
+
+    // Sort the values selected as per the order display rather than appending top end
+
+    valuesSelected = valuesSelected.sort((a, b) =>
+        valueSets.findIndex(({value}) => a.value === value) -
+        valueSets.findIndex(({value}) => b.value === value));
+    this.setState({selectedValues: valuesSelected});
   }
 
   getCurrentResource(): Cohort | ConceptSet {
@@ -402,7 +413,8 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
     return <DataTable key={this.state.selectedPreviewDomain}
                       value={this.getDataTableValue(filteredDataSet.values)}>
       {filteredDataSet.values.map(value =>
-          <Column header={value.value} headerStyle={{textAlign: 'left'}} field={value.value}/>
+          <Column header={value.value} headerStyle={{textAlign: 'left', wordWrap: 'break-word'}}
+                  field={value.value}/>
       )}
     </DataTable>;
   }
