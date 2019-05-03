@@ -326,7 +326,8 @@ export const ConceptWrapper = withCurrentWorkspace()(
             <TextInput style={styles.searchBar} data-test-id='concept-search-input'
                        placeholder='Search concepts in domain'
                        onKeyDown={e => {this.searchButton(e); }}/>
-            {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()}>
+            {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()}
+                                                      data-test-id='clear-search'>
                 <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
             </Clickable>}
             <CheckBox checked={standardConceptsOnly}
@@ -365,7 +366,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
                         justifyContent: 'space-between'}}>
                         <div>{domain.conceptCount}</div>
                         {(selectedConceptDomainMap[domain.domain] > 0) &&
-                        <div style={styles.selectedConceptsCount}>
+                        <div style={styles.selectedConceptsCount} data-test-id='selectedConcepts'>
                           {selectedConceptDomainMap[domain.domain]}
                         </div>}
                       </div>

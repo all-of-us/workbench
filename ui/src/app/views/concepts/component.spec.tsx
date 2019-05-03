@@ -29,6 +29,14 @@ function conceptsCountInDomain(domain: DomainInfo, isStandardConcepts: boolean):
   }
 }
 
+function searchTable(searchTerm: string, wrapper) {
+  const searchInput = wrapper.find('[data-test-id="concept-search-input"]')
+    .find('input').getDOMNode() as HTMLInputElement;
+  searchInput.value = searchTerm;
+  wrapper.find('[data-test-id="concept-search-input"]')
+    .find('input').simulate('keydown', {keyCode: 13});
+}
+
 describe('ConceptWrapper', () => {
 
   beforeEach(() => {
@@ -46,23 +54,19 @@ describe('ConceptWrapper', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should have one card per domain.', async () => {
+  it('should have one card per domain.', async() => {
     const wrapper = mount(<ConceptWrapper />);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="domain-box-name"]').length)
       .toBe(DomainStubVariables.STUB_DOMAINS.length);
   });
 
-  it('should default to standard concepts only, and performs a full search', async () => {
+  it('should default to standard concepts only, and performs a full search', async() => {
     const searchTerm = 'test';
     const spy = jest.spyOn(conceptsApi(), 'searchConcepts');
     const wrapper = mount(<ConceptWrapper />);
     await waitOneTickAndUpdate(wrapper);
-    const searchInput = wrapper.find('[data-test-id="concept-search-input"]')
-      .find('input').getDOMNode() as HTMLInputElement;
-    searchInput.value = searchTerm;
-    wrapper.find('[data-test-id="concept-search-input"]')
-      .find('input').simulate('keydown', {keyCode: 13});
+    searchTable(searchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
 
     DomainStubVariables.STUB_DOMAINS.forEach((domain) => {
@@ -100,7 +104,7 @@ describe('ConceptWrapper', () => {
 
   });
 
-  it('should changes search criteria when standard only not checked', async () => {
+  it('should changes search criteria when standard only not checked', async() => {
     const spy = jest.spyOn(conceptsApi(), 'searchConcepts');
     const searchTerm = 'test';
     const selectedDomain = DomainStubVariables.STUB_DOMAINS[1];
@@ -110,11 +114,7 @@ describe('ConceptWrapper', () => {
     wrapper.find('[data-test-id="standardConceptsCheckBox"]').first()
       .simulate('change', { target: { checked: true } });
     await waitOneTickAndUpdate(wrapper);
-    const searchInput = wrapper.find('[data-test-id="concept-search-input"]')
-      .find('input').getDOMNode() as HTMLInputElement;
-    searchInput.value = searchTerm;
-    wrapper.find('[data-test-id="concept-search-input"]')
-      .find('input').simulate('keydown', {keyCode: 13});
+    searchTable(searchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
 
     DomainStubVariables.STUB_DOMAINS.forEach((domain) => {
@@ -134,25 +134,72 @@ describe('ConceptWrapper', () => {
         expectedRequest
       );
     });
-    // check number of rows in table minus header rows
-    expect( wrapper.find('[data-test-id="conceptName"]').length)
-      .toBe(conceptsCountInDomain(selectedDomain, false) - 1);
+    // check number of rows in table plus header row
+    expect(wrapper.find('[data-test-id="conceptName"]').length)
+      .toBe(conceptsCountInDomain(selectedDomain, false) + 1);
   });
 
-  // it('should display the selected concepts on header', () => {
-  //   // TODO: test toggling tabs
-  // });
-  //
-  // it('should display the selected concepts on sliding button', () => {
-  //   // TODO
-  // });
-  //
-  // it('should clear search and selected concepts', () => {
-  //   // TODO
-  // });
-  //
-  // it('should clear selected concepts after adding', () => {
-  //   // TODO
-  // });
+  it('should display the selected concepts on header', async() => {
+    const wrapper = mount(<ConceptWrapper />);
+    await waitOneTickAndUpdate(wrapper);
+    searchTable('test', wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('span.p-checkbox-icon.p-clickable').at(1).simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="selectedConcepts"]').text()).toBe('1');
+  });
+
+  it('should display the selected concepts on sliding button', async () => {
+    const wrapper = mount(<ConceptWrapper />);
+    await waitOneTickAndUpdate(wrapper);
+    searchTable('test', wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    // before anything is selected, the sliding button should be disabled
+    expect(wrapper.find('[data-test-id="sliding-button"]')
+      .parent().props()['disable']).toBeTruthy();
+
+    wrapper.find('span.p-checkbox-icon.p-clickable').at(1).simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="sliding-button"]')
+      .parent().props()['disable']).toBeFalsy();
+    expect(wrapper.find('[data-test-id="sliding-button"]').text()).toBe('Add (1) to set');
+  });
+
+  it('should clear search and selected concepts', async() => {
+    const wrapper = mount(<ConceptWrapper />);
+    await waitOneTickAndUpdate(wrapper);
+    searchTable('test', wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('span.p-checkbox-icon.p-clickable').at(1).simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="selectedConcepts"]').text()).toBe('1');
+
+    wrapper.find('[data-test-id="clear-search"]').first().simulate('click');
+    expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toEqual(0);
+  });
+
+  it('should clear selected concepts after adding', async() => {
+    const wrapper = mount(<ConceptWrapper />);
+    await waitOneTickAndUpdate(wrapper);
+    searchTable('test', wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('span.p-checkbox-icon.p-clickable').at(1).simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="selectedConcepts"]').text()).toBe('1');
+
+    wrapper.find('[data-test-id="sliding-button"]').simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="toggle-new-set"]').first().simulate('click');
+    wrapper.find('[data-test-id="create-new-set-name"]').first()
+      .simulate('change', {target: {value: 'test-set'}});
+    wrapper.find('[data-test-id="save-concept-set"]').first().simulate('click');
+
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toEqual(0);
+  });
 
 });
