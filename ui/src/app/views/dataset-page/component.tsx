@@ -358,7 +358,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
     this.setState({dataSets: [], previewDataLoading: true});
     const {namespace, id} = this.props.workspace;
     const request = {
-      name: this.state.name,
+      name: '',
       description: '',
       conceptSetIds: this.state.selectedConceptSetIds,
       cohortIds: this.state.selectedCohortIds,
