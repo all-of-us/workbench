@@ -410,6 +410,7 @@ public class CohortBuilderControllerTest {
       createResponseCriteria(criteria2),
       results.get(1)
     );
+    jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
   @Test
@@ -558,8 +559,8 @@ public class CohortBuilderControllerTest {
       .selectable(true)
       .count("0");
     cbCriteriaDao.save(drug);
-    jdbcTemplate.execute("create table criteria_relationship (concept_id_1 integer, concept_id_2 integer)");
-    jdbcTemplate.execute("insert into criteria_relationship(concept_id_1, concept_id_2) values (1247, 12345)");
+    jdbcTemplate.execute("create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
+    jdbcTemplate.execute("insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (1247, 12345)");
     conceptDao.save(new Concept().conceptId(12345).conceptClassId("Ingredient"));
 
     assertEquals(
@@ -571,7 +572,7 @@ public class CohortBuilderControllerTest {
         .get(0)
     );
 
-    jdbcTemplate.execute("drop table criteria_relationship");
+    jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
   @Test
