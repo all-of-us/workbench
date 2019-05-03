@@ -98,12 +98,12 @@ const routes: Routes = [
                   breadcrumb: BreadcrumbType.WorkspaceEdit
                 }
               }, {
-                path: 'clone',
+                path: 'duplicate',
                 component: WorkspaceEditComponent,
                 data: {
-                  title: 'Clone Workspace',
-                  mode: WorkspaceEditMode.Clone,
-                  breadcrumb: BreadcrumbType.WorkspaceClone
+                  title: 'Duplicate Workspace',
+                  mode: WorkspaceEditMode.Duplicate,
+                  breadcrumb: BreadcrumbType.WorkspaceDuplicate
                 }
               },
               {

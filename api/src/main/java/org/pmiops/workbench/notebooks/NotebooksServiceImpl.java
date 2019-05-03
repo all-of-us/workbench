@@ -94,7 +94,7 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public FileDetail cloneNotebook(String workspaceNamespace, String workspaceName, String fromNotebookName) {
-    String newName = fromNotebookName.replaceAll("\\.ipynb", " ") + "Clone.ipynb";
+    String newName = "Duplicate of " + fromNotebookName;
     return copyNotebook(workspaceNamespace, workspaceName, fromNotebookName,
         workspaceNamespace, workspaceName, newName);
   }

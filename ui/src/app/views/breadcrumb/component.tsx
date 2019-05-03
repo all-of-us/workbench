@@ -44,10 +44,10 @@ export const getTrail = (type: BreadcrumbType, data): {label: string, url: strin
         ...getTrail(BreadcrumbType.Workspace, data),
         {label: 'Edit Workspace', url: `${prefix}/edit`}
       ];
-    case BreadcrumbType.WorkspaceClone:
+    case BreadcrumbType.WorkspaceDuplicate:
       return [
         ...getTrail(BreadcrumbType.Workspace, data),
-        {label: 'Duplicate Workspace', url: `${prefix}/clone`}
+        {label: 'Duplicate Workspace', url: `${prefix}/duplicate`}
       ];
     case BreadcrumbType.Notebook:
       return [
