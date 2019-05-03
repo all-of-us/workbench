@@ -38,7 +38,7 @@ public class BillingProjectBufferService {
       return;
     }
 
-    String projectName = createBillingProjectName();
+    final String projectName = createBillingProjectName();
 
     fireCloudService.createAllOfUsBillingProject(projectName);
     BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
