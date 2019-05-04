@@ -43,7 +43,9 @@ public class BillingProjectBufferServiceTest {
   private static WorkbenchConfig workbenchConfig;
 
   @TestConfiguration
-  @Import({})
+  @Import({
+      BillingProjectBufferService.class
+  })
   @MockBean({
       FireCloudService.class
   })
@@ -60,7 +62,6 @@ public class BillingProjectBufferServiceTest {
     }
   }
 
-
   @Autowired
   private Clock clock;
   @Autowired
@@ -70,16 +71,13 @@ public class BillingProjectBufferServiceTest {
   @Autowired
   private Provider<WorkbenchConfig> workbenchConfigProvider;
 
+  @Autowired
   private BillingProjectBufferService billingProjectBufferService;
 
   private final long BUFFER_CAPACITY = 5;
 
   @Before
   public void setUp() {
-    billingProjectBufferService = new BillingProjectBufferService(
-        billingProjectBufferEntryDao, clock, fireCloudService, workbenchConfigProvider
-    );
-
     workbenchConfig = new WorkbenchConfig();
     workbenchConfig.firecloud = new FireCloudConfig();
     workbenchConfig.firecloud.billingProjectPrefix = "test-prefix";
