@@ -12,7 +12,8 @@
     "jupyterPlaygroundExtensionUri": "gs:\/\/all-of-us-workbench-test-cluster-resources/playground-extension.js",
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-test",
-    "billingRetryCount": 2
+    "billingRetryCount": 2,
+    "billingProjectBufferCapacity": 10
   },
   "auth": {
     "serviceAccountApiUsers": [ "all-of-us-workbench-test@appspot.gserviceaccount.com" ]
