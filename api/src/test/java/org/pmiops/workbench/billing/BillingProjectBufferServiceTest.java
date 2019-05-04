@@ -7,14 +7,15 @@ import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Iterator;
 import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
@@ -48,6 +49,11 @@ public class BillingProjectBufferServiceTest {
   })
   static class Configuration {
     @Bean
+    public Clock clock() {
+      return CLOCK;
+    }
+
+    @Bean
     @Scope("prototype")
     public WorkbenchConfig workbenchConfig() {
       return workbenchConfig;
@@ -55,6 +61,8 @@ public class BillingProjectBufferServiceTest {
   }
 
 
+  @Autowired
+  private Clock clock;
   @Autowired
   private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   @Autowired
@@ -68,10 +76,8 @@ public class BillingProjectBufferServiceTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
-
     billingProjectBufferService = new BillingProjectBufferService(
-        billingProjectBufferEntryDao, CLOCK, fireCloudService, workbenchConfigProvider
+        billingProjectBufferEntryDao, clock, fireCloudService, workbenchConfigProvider
     );
 
     workbenchConfig = new WorkbenchConfig();
@@ -124,6 +130,44 @@ public class BillingProjectBufferServiceTest {
     // should be at capacity
     billingProjectBufferService.bufferBillingProject();
     verify(fireCloudService, times((int) BUFFER_CAPACITY + expectedCallCount))
+        .createAllOfUsBillingProject(anyString());
+  }
+
+  @Test
+  public void fillBuffer_decreaseCapacity() {
+    // fill up buffer
+    for (int i = 0; i < BUFFER_CAPACITY; i++) {
+      billingProjectBufferService.bufferBillingProject();
+    }
+
+    workbenchConfig.firecloud.billingProjectBufferCapacity = (int) BUFFER_CAPACITY - 2;
+
+    // should no op since we're at capacity + 2
+    billingProjectBufferService.bufferBillingProject();
+    verify(fireCloudService, times((int) BUFFER_CAPACITY))
+        .createAllOfUsBillingProject(anyString());
+
+    // should no op since we're at capacity + 1
+    Iterator<BillingProjectBufferEntry> bufferEntries = billingProjectBufferEntryDao.findAll().iterator();
+    BillingProjectBufferEntry entry = bufferEntries.next();
+    entry.setStatusEnum(ASSIGNED);
+    billingProjectBufferEntryDao.save(entry);
+    billingProjectBufferService.bufferBillingProject();
+    verify(fireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
+
+    // should no op since we're at capacity
+    entry = bufferEntries.next();
+    entry.setStatusEnum(ASSIGNED);
+    billingProjectBufferEntryDao.save(entry);
+    billingProjectBufferService.bufferBillingProject();
+    verify(fireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
+
+    // should invoke since we're below capacity
+    entry = bufferEntries.next();
+    entry.setStatusEnum(ASSIGNED);
+    billingProjectBufferEntryDao.save(entry);
+    billingProjectBufferService.bufferBillingProject();
+    verify(fireCloudService, times((int) BUFFER_CAPACITY + 1))
         .createAllOfUsBillingProject(anyString());
   }
 }

@@ -10,7 +10,7 @@ public interface BillingProjectBufferEntryDao  extends CrudRepository<BillingPro
 
   BillingProjectBufferEntry findByFireCloudProjectName(String fireCloudProjectName);
 
-  @Query("SELECT COUNT(*) FROM BillingProjectBufferEntry WHERE status=0 OR status=2 OR status=3")
+  @Query("SELECT COUNT(*) FROM BillingProjectBufferEntry WHERE status IN (0, 2)")
   Long getCurrentBufferSize();
 
 }
