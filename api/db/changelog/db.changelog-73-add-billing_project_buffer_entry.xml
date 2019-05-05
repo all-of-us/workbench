@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="ericsong" id="db.changelog-73-add-billing_project_buffer_entry">
+    <createTable tableName="billing_project_buffer_entry">
+
+      <column name="billing_project_buffer_entry_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+
+      <column name="firecloud_project_name" type="varchar(255)">
+        <constraints unique="true" nullable="false" />
+      </column>
+
+      <column name="creation_time" type="datetime">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="status" type="tinyint">
+        <constraints nullable="false" />
+      </column>
+
+    </createTable>
+  </changeSet>
+</databaseChangeLog>

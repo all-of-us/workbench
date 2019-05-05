@@ -35,7 +35,7 @@ export enum BreadcrumbType {
   Workspaces = 'Workspaces',
   Workspace = 'Workspace',
   WorkspaceEdit = 'WorkspaceEdit',
-  WorkspaceClone = 'WorkspaceClone',
+  WorkspaceDuplicate = 'WorkspaceDuplicate',
   Notebook = 'Notebook',
   ConceptSet = 'ConceptSet',
   Cohort = 'Cohort',

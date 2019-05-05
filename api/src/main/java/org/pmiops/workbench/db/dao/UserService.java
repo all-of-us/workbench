@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import javax.inject.Provider;
 
 import com.google.api.client.http.HttpStatusCodes;
+import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.AdminActionHistory;
@@ -34,7 +35,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
+
 
 /**
  * A higher-level service class containing user manipulation and business logic which can't be
@@ -100,7 +103,8 @@ public class UserService {
    * user; handles conflicts with concurrent updates by retrying.
    */
     public User updateUserWithRetries(Function<User, User> userModifier, User user) {
-    int numAttempts = 0;
+    int objectLockingFailureCount = 0;
+    int statementClosedCount = 0;
     while (true) {
       user = userModifier.apply(user);
       updateDataAccessLevel(user);
@@ -108,11 +112,25 @@ public class UserService {
         user = userDao.save(user);
         return user;
       } catch (ObjectOptimisticLockingFailureException e) {
-        if (numAttempts < MAX_RETRIES) {
+        if (objectLockingFailureCount < MAX_RETRIES) {
           user = userDao.findOne(user.getUserId());
-          numAttempts++;
+          objectLockingFailureCount++;
         } else {
-          throw new ConflictException(String.format("Could not update user %s", user.getUserId()));
+          throw new ConflictException(String.format("Could not update user %s after %d object locking failures",
+                  user.getUserId(), objectLockingFailureCount));
+        }
+      } catch (JpaSystemException e) {
+        // We don't know why this happens instead of the object locking failure.
+        if (((GenericJDBCException) e.getCause()).getSQLException().getMessage().equals("Statement closed.")) {
+          if (statementClosedCount < MAX_RETRIES) {
+            user = userDao.findOne(user.getUserId());
+            statementClosedCount++;
+          } else {
+              throw new ConflictException(String.format("Could not update user %s after %d statement closes",
+                      user.getUserId(), statementClosedCount));
+          }
+        } else {
+          throw e;
         }
       }
     }

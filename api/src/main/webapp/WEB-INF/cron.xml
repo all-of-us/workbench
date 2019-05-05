@@ -24,4 +24,10 @@
     <description>Daily sync of eRA Commons linkage status (via FireCloud API)</description>
     <schedule>every 24 hours</schedule>
   </cron>
+  <cron>
+    <url>/v1/cron/bufferBillingProject</url>
+    <target>api</target>
+    <description>If the AoU Billing Project buffer is not full, create a firecloud billing project and add one</description>
+    <schedule>every 1 minutes</schedule>
+  </cron>
 </cronentries>
