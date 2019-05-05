@@ -24,10 +24,4 @@
     <description>Daily sync of eRA Commons linkage status (via FireCloud API)</description>
     <schedule>every 24 hours</schedule>
   </cron>
-  <cron>
-    <url>/v1/cron/bulkSyncTwoFactorAuthStatus</url>
-    <target>api</target>
-    <description>Daily sync of 2FA set up status (via Google Directory Service)</description>
-    <schedule>every 24 hours</schedule>
-  </cron>
 </cronentries>
