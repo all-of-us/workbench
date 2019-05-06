@@ -736,8 +736,8 @@ def generate_cloudsql_db(cmd_name, *args)
 end
 Common.register_command({
   :invocation => "generate-cloudsql-db",
-  :description => "generate-cloudsql-db  --project <PROJECT> --instance <INSTANCE> \
---database <cdrYYYYMMDD> --bucket <BUCKET>
+  :description => "generate-cloudsql-db  --project <PROJECT> --instance <workbenchmaindb> \
+--database <synth_r_20XXqX_X> --bucket <BUCKET>
 Generates a cloudsql database from data in a bucket. Used to make cdr count databases.",
   :fn => ->(*args) { generate_cloudsql_db("generate-cloudsql-db", *args) }
 })
@@ -795,7 +795,7 @@ end
 
 Common.register_command({
   :invocation => "generate-local-cdr-db",
-  :description => "generate-cloudsql-cdr --cdr-version <''|YYYYMMDD> --cdr-db-prefix <cdr> --bucket <BUCKET>
+  :description => "generate-cloudsql-cdr --cdr-version <synth_r_20XXqX_X> --cdr-db-prefix <cdr> --bucket <BUCKET>
 Creates and populates local mysql database from data in bucket made by generate-private-cdr-counts.",
   :fn => ->(*args) { generate_local_cdr_db(*args) }
 })
@@ -808,7 +808,7 @@ end
 
 Common.register_command({
   :invocation => "generate-local-count-dbs",
-  :description => "generate-local-count-dbs.sh --cdr-version <''|YYYYMMDD> --bucket <BUCKET>
+  :description => "generate-local-count-dbs --cdr-version <synth_r_20XXqX_X> --bucket <BUCKET>
 Creates and populates local mysql databases cdr<VERSION> from data in bucket made by generate-private-cdr-counts.",
   :fn => ->(*args) { generate_local_count_dbs(*args) }
 })
