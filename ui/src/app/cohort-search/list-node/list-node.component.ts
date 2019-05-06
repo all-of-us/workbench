@@ -1,5 +1,5 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {scrollStore, selectedPathStore, selectedStore} from 'app/cohort-search/search-state.service';
+import {scrollStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderService, TreeSubType, TreeType} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
@@ -26,11 +26,11 @@ export class ListNodeComponent implements OnInit, OnDestroy {
   constructor(private api: CohortBuilderService) {}
 
   ngOnInit() {
-    this.subscription = selectedPathStore.subscribe(path => {
+    this.subscription = subtreePathStore.subscribe(path => {
       this.expanded = path.includes(this.node.id.toString());
     });
 
-    this.subscription.add(selectedStore.subscribe(id => {
+    this.subscription.add(subtreeSelectedStore.subscribe(id => {
       this.selected = id === this.node.id;
       if (this.selected) {
         setTimeout(() => scrollStore.next(this.node.id));
@@ -43,7 +43,7 @@ export class ListNodeComponent implements OnInit, OnDestroy {
       this.subscription.unsubscribe();
     }
     if (this.selected) {
-      selectedStore.next(undefined);
+      subtreeSelectedStore.next(undefined);
       scrollStore.next(undefined);
     }
   }
@@ -56,9 +56,8 @@ export class ListNodeComponent implements OnInit, OnDestroy {
     if (!event) { return ; }
     this.loading = true;
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    const _type = this.node.type;
-    const parentId = this.node.id;
-    this.api.getCriteriaBy(cdrid, _type, null, parentId)
+    const {domainId, id, type} = this.node;
+    this.api.getCriteriaBy(cdrid, domainId, type, id)
       .toPromise()
       .then(resp => {
         this.children = resp.items;

@@ -1,6 +1,6 @@
 import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {autocompleteStore, selectedPathStore, selectedStore} from 'app/cohort-search/search-state.service';
+import {autocompleteStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {TreeSubType} from 'generated';
@@ -14,7 +14,7 @@ const trigger = 2;
   styleUrls: ['./list-search-bar.component.css']
 })
 export class ListSearchBarComponent implements OnInit, OnDestroy {
-  @Input() _type;
+  @Input() node: any;
   searchTerm: FormControl = new FormControl();
   typedTerm: string;
   options = [];
@@ -40,7 +40,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = autocompleteStore.subscribe(searchTerm => {
       this.searchTerm.setValue(searchTerm, {emitEvent: false});
-      console.log(this.searchTerm.value);
     });
     // TODO set to false for now, may need to change for conditions/procedures
     this.codes = false;
@@ -49,7 +48,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
       .debounceTime(300)
       .distinctUntilChanged()
       .subscribe( value => {
-        console.log(value);
         if (value.length >= trigger) {
           this.inputChange();
         } else {
@@ -75,7 +73,8 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
     this.noResults = false;
     // const subtype = this.codes ? this.subtype : null;
     const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
-    cohortBuilderApi().getCriteriaAutoComplete(cdrId, this._type, this.searchTerm.value)
+    const {domainId, type} = this.node;
+    cohortBuilderApi().getCriteriaAutoComplete(cdrId, domainId, this.searchTerm.value, type)
       .then(resp => {
         this.options = [];
         const optionNames: Array<string> = [];
@@ -103,8 +102,8 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
         // TODO call api for ingredients
       } else {
         autocompleteStore.next(option.name);
-        selectedPathStore.next(option.path.split('.'));
-        selectedStore.next(option.id);
+        subtreePathStore.next(option.path.split('.'));
+        subtreeSelectedStore.next(option.id);
       }
     }
   }

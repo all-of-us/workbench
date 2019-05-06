@@ -1,4 +1,4 @@
-import { AttrName, Operator, TreeSubType, TreeType } from 'generated';
+import {AttrName, Operator, TreeSubType, TreeType} from 'generated';
 import {DomainType} from 'generated/fetch';
 
 export const PROGRAM_TYPES = [
@@ -37,6 +37,7 @@ export const LIST_PROGRAM_TYPES = [];
 
 export const LIST_DOMAIN_TYPES = [
   {name: 'Measurements', domain: DomainType.MEASUREMENT, type: null},
+  {name: 'Conditions', domain: DomainType.CONDITION, type: null}
 ];
 
 export const PM_UNITS = {
