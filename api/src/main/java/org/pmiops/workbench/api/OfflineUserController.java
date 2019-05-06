@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         User updatedUser = userService.syncComplianceTrainingStatus(user);
 
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
-        DataAccessLevel newLevel = user.getDataAccessLevelEnum();
+        DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
 
         if (newTime != oldTime) {
           log.info(String.format(
@@ -62,7 +63,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
               user.getEmail(), oldLevel.toString(), newLevel.toString()));
           accessLevelChangeCount++;
         }
-      } catch (Exception e) {
+      } catch (org.pmiops.workbench.moodle.ApiException | NotFoundException e) {
         errorCount++;
         log.severe(String.format("Error syncing compliance training status for user %s: %s",
             user.getEmail(), e.getMessage()));
