@@ -278,11 +278,10 @@ def deploy(cmd_name, args)
       --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
-      --skip-public-api
   } + (op.opts.dry_run ? %W{--dry-run} : [])
 
-  maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api and " +
-                      "public-api services (including DB updates)"
+  maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
+                      "service (including DB updates)"
   common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
 
   maybe_log_jira.call "'#{op.opts.project}': completed api service " +

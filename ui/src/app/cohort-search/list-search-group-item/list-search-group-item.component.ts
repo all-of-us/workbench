@@ -87,7 +87,6 @@ export class ListSearchGroupItemComponent {
 
   launchWizard() {
     const selections = this.item.searchParameters.map(sp => sp.paramId);
-    console.log(selections);
     selectionsStore.next(selections);
     const codes = getCodeOptions(this.item.type);
     const fullTree = this.item.fullTree;

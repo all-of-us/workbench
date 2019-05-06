@@ -29,11 +29,11 @@ export class ListTreeComponent extends ListNodeComponent implements OnInit, OnCh
   ngOnInit() {
     super.ngOnInit();
     setTimeout(() => super.loadChildren(true));
-    this._type = this.node.type;
+    this._type = this.node.domainId;
   }
 
   get showSearch() {
-    return !this.isEmpty && this.node.domain !== DomainType[DomainType.PERSON];
+    return !this.isEmpty && this.node.domainId !== DomainType[DomainType.PERSON];
   }
 
   get showDropDown() {

@@ -6,6 +6,3 @@ ENV.each { |k, v| xml.gsub! "${#{k}}", v }
 xml.gsub! "$DB_HOST", ENV["DB_HOST"]
 
 File.write("src/main/webapp/WEB-INF/appengine-web.xml", xml)
-
-puts "Generated appengine-web.xml"
-puts xml

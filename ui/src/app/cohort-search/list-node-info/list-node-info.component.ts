@@ -16,7 +16,7 @@ import {
   ppiAnswers,
   selectedGroups,
 } from 'app/cohort-search/redux';
-import {attributesStore, selectedStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {attributesStore, groupSelectionsStore, selectionsStore, subtreeSelectedStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {stripHtml} from 'app/cohort-search/utils';
 import {AttrName, Operator, TreeSubType, TreeType} from 'generated';
 import {Observable} from 'rxjs/Observable';
@@ -47,13 +47,16 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       this.isSelected = selections.includes(this.paramId);
     });
 
-    // this.subscription.add(this.groups$
-    //   .filter(groupIds => !!groupIds)
-    //   .subscribe(groupIds => {
-    //     this.isSelectedChild = groupIds.some(id => this.node.path.split('.').includes(id));
-    //   }));
+    this.subscription.add(groupSelectionsStore
+      .subscribe(groupIds => {
+        this.isSelectedChild = groupIds.some(
+          id => this.node.path.split('.')
+            .filter(pathId => pathId !== this.node.id.toString())
+            .includes(id.toString())
+        );
+      }));
 
-    this.subscription.add(selectedStore
+    this.subscription.add(subtreeSelectedStore
       .filter(selected => !!selected)
       .subscribe(selected => this.matched = selected === this.node.id)
     );
@@ -132,55 +135,55 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
        */
       let selections = selectionsStore.getValue();
       if (!selections.includes(this.paramId)) {
-        if (this.selectAllChildren) {
-          this.actions.fetchAllChildren(this.node);
-        } else {
-          let modifiedName = this.node.name;
-          if (this.node.type === TreeType[TreeType.PPI]) {
-            const parent = ppiAnswers(this.node.path)(this.ngRedux.getState()).toJS();
-            modifiedName = parent.name + ' - ' + modifiedName;
-          }
-          let attributes = [];
-          if (this.node.subtype === TreeSubType[TreeSubType.BP]) {
-            const name = stripHtml(this.node.name);
-            Object.keys(PREDEFINED_ATTRIBUTES).forEach(key => {
-              if (name.indexOf(key) === 0) {
-                attributes = PREDEFINED_ATTRIBUTES[key];
-              }
+        if (this.node.group) {
+          const groups = [...groupSelectionsStore.getValue(), this.node.id];
+          groupSelectionsStore.next(groups);
+        }
+        let modifiedName = this.node.name;
+        if (this.node.type === TreeType[TreeType.PPI]) {
+          const parent = ppiAnswers(this.node.path)(this.ngRedux.getState()).toJS();
+          modifiedName = parent.name + ' - ' + modifiedName;
+        }
+        let attributes = [];
+        if (this.node.subtype === TreeSubType[TreeSubType.BP]) {
+          const name = stripHtml(this.node.name);
+          Object.keys(PREDEFINED_ATTRIBUTES).forEach(key => {
+            if (name.indexOf(key) === 0) {
+              attributes = PREDEFINED_ATTRIBUTES[key];
+            }
+          });
+        } else if (this.isPMCat) {
+          attributes.push({
+            name: AttrName.CAT,
+            operator: Operator.IN,
+            operands: [this.node.code]
+          });
+        } else if (this.node.type === TreeType.PPI && !this.node.group) {
+          if (this.node.code === '') {
+            attributes.push({
+              name: AttrName.NUM,
+              operator: Operator.EQUAL,
+              operands: [this.node.name]
             });
-          } else if (this.isPMCat) {
+          } else {
             attributes.push({
               name: AttrName.CAT,
               operator: Operator.IN,
               operands: [this.node.code]
             });
-          } else if (this.node.type === TreeType.PPI && !this.node.group) {
-            if (this.node.code === '') {
-              attributes.push({
-                name: AttrName.NUM,
-                operator: Operator.EQUAL,
-                operands: [this.node.name]
-              });
-            } else {
-              attributes.push({
-                name: AttrName.CAT,
-                operator: Operator.IN,
-                operands: [this.node.code]
-              });
-            }
           }
-          const param = {
-            ...this.node,
-            parameterId: this.paramId,
-            attributes: attributes,
-            name: modifiedName
-          };
-          const wizard = wizardStore.getValue();
-          wizard.item.searchParameters.push(param);
-          selections = [this.paramId, ...selections];
-          selectionsStore.next(selections);
-          wizardStore.next(wizard);
         }
+        const param = {
+          ...this.node,
+          parameterId: this.paramId,
+          attributes: attributes,
+          name: modifiedName
+        };
+        const wizard = wizardStore.getValue();
+        wizard.item.searchParameters.push(param);
+        selections = [this.paramId, ...selections];
+        selectionsStore.next(selections);
+        wizardStore.next(wizard);
       }
     }
   }

@@ -1795,7 +1795,7 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
       LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     String nb1 = "notebooks/nb1.ipynb";
-    String newPath = "notebooks/nb1 Clone.ipynb";
+    String newPath = "notebooks/Duplicate of nb1.ipynb";
     String fullPath = "gs://workspace-bucket/" + newPath;
     long workspaceIdInDb = 1;
     long userIdInDb = 1;

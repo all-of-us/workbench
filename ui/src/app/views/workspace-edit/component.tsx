@@ -224,7 +224,7 @@ export const WorkspaceCategory = (props) => {
   </div>;
 };
 
-export enum WorkspaceEditMode { Create = 1, Edit = 2, Clone = 3 }
+export enum WorkspaceEditMode { Create = 1, Edit = 2, Duplicate = 3 }
 
 
 export interface WorkspaceEditProps {
@@ -279,7 +279,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     componentDidMount() {
       if (!this.isMode(WorkspaceEditMode.Create)) {
         this.setState({workspace : this.props.workspace});
-        if (this.isMode(WorkspaceEditMode.Clone)) {
+        if (this.isMode(WorkspaceEditMode.Duplicate)) {
           this.setState({workspace: {
             ...this.props.workspace,
             // These are the only fields which are not automatically handled/differentiated
@@ -310,16 +310,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           return 'Create a new Workspace';
         case WorkspaceEditMode.Edit:
           return 'Edit workspace \"' + this.state.workspace.name + '\"';
-        case WorkspaceEditMode.Clone:
-          return 'Clone workspace \"' + this.state.workspace.name + '\"';
+        case WorkspaceEditMode.Duplicate:
+          // use workspace name from props instead of state here
+          // because it's a record of the initial value
+          return 'Duplicate workspace \"' + this.props.workspace.name + '\"';
       }
     }
 
     renderButtonText() {
       switch (this.props.routeConfigData.mode) {
         case WorkspaceEditMode.Create: return 'Create Workspace';
-        case WorkspaceEditMode.Edit: return 'Update Worspace';
-        case WorkspaceEditMode.Clone: return 'Duplicate Workspace';
+        case WorkspaceEditMode.Edit: return 'Update Workspace';
+        case WorkspaceEditMode.Duplicate: return 'Duplicate Workspace';
       }
     }
 
@@ -346,7 +348,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         if (this.isMode(WorkspaceEditMode.Create)) {
           workspace =
               await workspacesApi().createWorkspace(this.state.workspace);
-        } else if (this.isMode(WorkspaceEditMode.Clone)) {
+        } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
           const cloneWorkspace = await workspacesApi().cloneWorkspace(
             this.props.workspace.namespace, this.props.workspace.id,
             {
@@ -398,7 +400,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               value = {this.state.workspace.name}
               onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
             <TooltipTrigger
-                content='To use a different dataset version, clone or create a new workspace.'
+                content='To use a different dataset version, duplicate or create a new workspace.'
                 disabled={!(this.isMode(WorkspaceEditMode.Edit))}>
               <div style={styles.select}>
                 <select style={{borderColor: 'rgb(151, 151, 151)', borderRadius: '6px',
@@ -419,7 +421,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </TooltipTrigger>
           </div>
         </WorkspaceEditSection>
-        {this.isMode(WorkspaceEditMode.Clone) &&
+        {this.isMode(WorkspaceEditMode.Duplicate) &&
         <div style={{display: 'flex', flexDirection: 'row'}}>
           <CheckBox
                  style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '1.2rem'}}
@@ -508,7 +510,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             paddingBottom: '14.4px', paddingTop: '0.3rem'}}>
             <CheckBox style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
               onChange={v => this.setState(
-                fp.set(['workspace', 'researchPurpose', 'reviewRequested' ], v.value))}
+                fp.set(['workspace', 'researchPurpose', 'reviewRequested' ], v))}
               checked={this.state.workspace.researchPurpose.reviewRequested}/>
             <label style={styles.text}>
               I am concerned about potential
@@ -542,14 +544,15 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <Modal>
           <ModalTitle>Error:</ModalTitle>
           <ModalBody>Could not
-            {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'create' : 'update'}
+            {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? ' create ' : ' update '}
             workspace.
           </ModalBody>
           <ModalFooter>
             <Button onClick = {() => this.props.cancel()}
                 type='secondary' style={{marginRight: '2rem'}}>
               Cancel
-              {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'Creation' : 'Update'}
+              {this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
+                ' Creation' : ' Update'}
                 </Button>
             <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
           </ModalFooter>

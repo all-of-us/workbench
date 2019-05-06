@@ -115,7 +115,7 @@ export const ListSearch = withCurrentWorkspace()(
         this.setState({data: null, loading: true});
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
         cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
-          +cdrVersionId, domain, event.target.value, true
+          +cdrVersionId, domain, event.target.value
         ).then(resp => {
           const data = resp.items.length ? resp.items : null;
           this.setState({data, loading: false});
@@ -140,28 +140,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     showHierarchy = (row: any) => {
-      // this.props.hierarchy(row);
-      // temp data until new api exists
-      const tempRow = {
-        code: 'LP15426-7',
-        conceptId: 40785861,
-        count: 388001,
-        domainId: '',
-        group: true,
-        hasAncestorData: null,
-        hasAttributes: false,
-        hasHierarchy: null,
-        id: 379527,
-        isStandard: null,
-        name: 'Aspartate aminotransferase',
-        parentId: 379173,
-        path: '379101.379103.379133.379173',
-        selectable: false,
-        subtype: 'LAB',
-        type: 'MEAS',
-        value: null
-      };
-      this.props.hierarchy(tempRow);
+      this.props.hierarchy(row);
     }
 
     isSelected = (row: any) => {

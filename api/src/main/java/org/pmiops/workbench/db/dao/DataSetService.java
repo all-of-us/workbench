@@ -12,11 +12,9 @@ import java.util.Map;
 
 @Service
 public interface DataSetService {
-
-  DataSet saveDataSet(String name, String description, long workspaceId, List<Long> cohortIdList,
-      List<Long> conceptIdList, List<DataSetValues> values, long creatorId, Timestamp creationTime);
+  DataSet saveDataSet(String name, Boolean includesAllParticipants, String description, long workspaceId,
+                      List<Long> cohortIdList, List<Long> conceptIdList, List<DataSetValues> values,
+                      long creatorId, Timestamp creationTime);
 
   Map<String, QueryJobConfiguration> generateQuery(DataSetRequest dataSet);
-
-
 }

@@ -2,14 +2,11 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {AlertDanger} from 'app/components/alert';
-import {TextInput, ValidationError} from 'app/components/inputs';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 
-import {Button} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
-import {ResourceListItem} from 'app/components/resources';
+import {ImmutableListItem, ResourceListItem} from 'app/components/resources';
 import {Spinner} from 'app/components/spinners';
 import {
   cohortsApi,
@@ -18,28 +15,32 @@ import {
   dataSetApi
 } from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
+import colors from 'app/styles/colors';
 import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace} from 'app/utils';
-import {summarizeErrors} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
+import {NewDataSetModal} from 'app/views/new-dataset-modal/component';
 import {
   Cohort,
   ConceptSet,
+  DataSetPreviewList,
   DataSetQuery,
   DataSetRequest,
   Domain,
   DomainInfo,
   DomainValue,
+  DomainValuePair,
   DomainValuesResponse,
   NamedParameterEntry,
   RecentResource,
   ValueSet,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
-import {validate} from 'validate.js';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
 
 export const styles = {
   selectBoxHeader: {
@@ -63,14 +64,20 @@ export const styles = {
     marginLeft: 10,
     marginTop: 10,
     marginRight: 10,
-    backgroundColor: '#7CC79B'
+    backgroundColor: colors.green[1]
+  },
+
+  subheader: {
+    fontWeight: 400,
+    fontSize: '0.6rem',
+    marginTop: '0.5rem',
+    color: colors.purple[0]
   }
 };
 
-interface DomainValuePair {
-  domain: Domain;
-  value: string;
-}
+const Subheader = (props) => {
+  return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
+};
 
 export const ValueListItem: React.FunctionComponent <
   {domainValue: DomainValue, onSelect: Function, checked: boolean}> =
@@ -83,21 +90,37 @@ export const ValueListItem: React.FunctionComponent <
     </div>;
   };
 
-export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
-  {workspace: WorkspaceData},
-  {name: string, creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
-    conceptSetList: ConceptSet[], cohortList: Cohort[], loadingResources: boolean,
-    confirmDeleting: boolean, editing: boolean, resource: RecentResource,
-    rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[],
-    valueSets: ValueSet[], selectedValues: DomainValuePair[], openSaveModal: boolean,
-    nameRequired: boolean, conflictDataSetName: boolean, missingDataSetInfo: boolean,
-    nameTouched: boolean, queries: Array<DataSetQuery>
-  }> {
+interface Props {
+  workspace: WorkspaceData;
+}
+
+interface State {
+  confirmDeleting: boolean;
+  cohortList: Cohort[];
+  conceptDomainList: DomainInfo[];
+  conceptSetList: ConceptSet[];
+  creatingConceptSet: boolean;
+  previewList: Array<DataSetPreviewList>;
+  editing: boolean;
+  includesAllParticipants: boolean;
+  loadingResources: boolean;
+  openSaveModal: boolean;
+  previewDataLoading: boolean;
+  resource: RecentResource;
+  rType: ResourceType;
+  selectedCohortIds: number[];
+  selectedConceptSetIds: number[];
+  selectedPreviewDomain: string;
+  selectedValues: DomainValuePair[];
+  valueSets: ValueSet[];
+  queries: Array<DataSetQuery>;
+}
+
+const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, State> {
 
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
       creatingConceptSet: false,
       conceptDomainList: undefined,
       conceptSetList: [],
@@ -112,11 +135,11 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       valueSets: [],
       selectedValues: [],
       openSaveModal: false,
-      nameRequired: false,
-      conflictDataSetName: false,
-      missingDataSetInfo: false,
-      nameTouched: false,
-      queries: []
+      queries: [],
+      previewList: [],
+      selectedPreviewDomain: '',
+      previewDataLoading: false,
+      includesAllParticipants: false
     };
   }
 
@@ -292,36 +315,29 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
-  async saveDataSet() {
-    this.setState({nameTouched: true});
-    if (!this.state.name) {
-      return;
-    }
-    this.setState({conflictDataSetName: false, missingDataSetInfo: false });
-    const request = {
-      name: this.state.name,
-      description: '',
-      conceptSetIds: this.state.selectedConceptSetIds,
-      cohortIds: this.state.selectedCohortIds,
-      values: this.state.selectedValues
-    };
-    try {
-      await dataSetApi().createDataSet(
-        this.props.workspace.namespace, this.props.workspace.id, request);
-      this.setState({openSaveModal: false});
-    } catch (e) {
-      if (e.status === 409) {
-        this.setState({conflictDataSetName: true});
-      } else if (e.status === 400) {
-        this.setState({missingDataSetInfo: true});
-      }
-    }
-  }
-
   disableSave() {
     return !this.state.selectedConceptSetIds || this.state.selectedConceptSetIds.length === 0 ||
-        !this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0 ||
+        ((!this.state.selectedCohortIds ||
+        this.state.selectedCohortIds.length === 0) && !this.state.includesAllParticipants) ||
         !this.state.selectedValues || this.state.selectedValues.length === 0;
+  }
+
+  setSelectedPreivewDomain(domain) {
+    this.setState({selectedPreviewDomain: domain});
+  }
+
+  getDataTableValue(data) {
+    // convert data model from api :
+    // [{value[0]: '', queryValue: []}, {value[1]: '', queryValue: []}]
+    // to compatible with DataTable
+    // {value[0]: queryValue[0], value[1]: queryValue[1]}
+
+    const tableData = fp.flow(
+      fp.map(({value, queryValue}) => fp.map(v => [value, v], queryValue)),
+      fp.unzip,
+      fp.map(fp.fromPairs)
+    )(data);
+    return tableData;
   }
 
   async generateCode() {
@@ -331,9 +347,31 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       conceptSetIds: this.state.selectedConceptSetIds,
       cohortIds: this.state.selectedCohortIds,
       values: this.state.selectedValues,
+      includesAllParticipants: this.state.includesAllParticipants
     };
     const sqlQueries = await dataSetApi().generateQuery(namespace, id, dataSet);
-    this.setState({queries: sqlQueries.queryList});
+    this.setState({queries: sqlQueries.queryList, previewList: []});
+  }
+
+  async getPreviewData() {
+    this.setState({previewList: [], previewDataLoading: true});
+    const {namespace, id} = this.props.workspace;
+    const request = {
+      name: '',
+      description: '',
+      conceptSetIds: this.state.selectedConceptSetIds,
+      cohortIds: this.state.selectedCohortIds,
+      values: this.state.selectedValues
+    };
+    try {
+      const dataSetPreviewResp = await dataSetApi().previewQuery(namespace, id, request);
+      this.setState({previewList: dataSetPreviewResp.domainValue,
+        selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain});
+    } catch (ex) {
+      console.log(ex);
+    } finally {
+      this.setState({previewDataLoading: false});
+    }
   }
 
   buildQueryConfig(np: NamedParameterEntry) {
@@ -355,29 +393,40 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
+  renderPreviewDataTable() {
+    const filteredPreviewData =
+        this.state.previewList.filter(
+          preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
+
+    return <DataTable key={this.state.selectedPreviewDomain}
+                      value={this.getDataTableValue(filteredPreviewData.values)}>
+      {filteredPreviewData.values.map(value =>
+          <Column header={value.value} headerStyle={{textAlign: 'left'}} field={value.value}/>
+      )}
+    </DataTable>;
+  }
+
   render() {
     const {namespace, id} = this.props.workspace;
     const {
-      name,
       creatingConceptSet,
       conceptDomainList,
       conceptSetList,
+      includesAllParticipants,
       loadingResources,
+      openSaveModal,
       queries,
       resource,
       rType,
+      selectedCohortIds,
+      selectedConceptSetIds,
       selectedValues,
-      valueSets,
-      openSaveModal,
-      nameTouched,
-      conflictDataSetName
+      previewList,
+      selectedPreviewDomain,
+      previewDataLoading,
+      valueSets
     } = this.state;
     const currentResource = this.getCurrentResource();
-    const errors = validate({name}, {
-      name: {
-        presence: {allowEmpty: false}
-      }
-    });
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
         <h2 style={{marginTop: 0}}>Datasets</h2>
@@ -385,7 +434,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
           variables and values for one or more of your cohorts. Then export the completed dataset
           to Notebooks where you can perform your analysis</div>
         <div style={{display: 'flex'}}>
-          <div style={{marginLeft: '1.5rem', marginRight: '1.5rem', width: '33%'}}>
+          <div style={{width: '33%'}}>
             <h2>Select Cohorts</h2>
             <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
               <div style={styles.selectBoxHeader}>
@@ -394,6 +443,11 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
                   onClick={() => navigate(['workspaces', namespace, id,  'cohorts', 'build'])}/>
               </div>
               <div style={{height: '10rem', overflowY: 'auto'}}>
+                <Subheader>Prepackaged Cohorts</Subheader>
+                <ImmutableListItem name='All AoU Participants' onSelect={
+                  () => this.setState({includesAllParticipants: !includesAllParticipants})
+                }/>
+                <Subheader>Workspace Cohorts</Subheader>
                 {!loadingResources && this.state.cohortList.map(cohort =>
                   <ResourceListItem key={cohort.id} resource={cohort} rType={ResourceType.COHORT}
                                     data-test-id='cohort-list-item'
@@ -421,7 +475,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
               </div>
             </div>
           </div>
-          <div style={{width: '58%'}}>
+          <div style={{marginLeft: '1.5rem', width: '65%'}}>
             <h2>Select Concept Sets</h2>
             <div style={{display: 'flex', backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
               <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
@@ -463,8 +517,9 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
                         {fp.capitalize(valueSet.domain.toString())}
                       </div>
                       {valueSet.values.items.map(domainValue =>
-                        <ValueListItem key={domainValue.value} domainValue={domainValue} onSelect={
-                          () => this.selectDomainValue(valueSet.domain, domainValue)}
+                        <ValueListItem data-test-id='value-items'
+                          key={domainValue.value} domainValue={domainValue}
+                          onSelect={() => this.selectDomainValue(valueSet.domain, domainValue)}
                           checked={fp.some({domain: valueSet.domain, value: domainValue.value},
                             selectedValues)}/>
                       )}
@@ -478,25 +533,55 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       </FadeBox>
       <FadeBox style={{marginTop: '1rem'}}>
         <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-          <div style={{...styles.selectBoxHeader, display: 'flex', position: 'relative'}}>
-            <div>Preview Dataset</div>
-            <div style={{marginLeft: '1rem', color: '#000000', fontSize: '14px'}}>A visualization
+          <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row',
+            position: 'relative'}}>
+            <div style={{color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
             <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}}
-                    onClick={() => {
-                      this.generateCode();
-                    }}>
+                    disabled={this.disableSave()} onClick={() => {this.generateCode(); }}>
               GENERATE CODE
             </Button>
-            {/* Button disabled until this functionality added*/}
+            <Button style={{position: 'absolute', right: '16rem', top: '0.25rem'}}
+                    disabled={this.disableSave()} onClick={() => {this.getPreviewData(); }}>
+              PREVIEW DATA SET
+            </Button>
             <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
-                    onClick ={() => this.setState({openSaveModal: true, nameRequired: false,
-                      conflictDataSetName: false, missingDataSetInfo: false})}
+                    onClick ={() => this.setState({openSaveModal: true})}
                     disabled={this.disableSave()}>
-              SAVE DATASET
+              SAVE DATA SET
             </Button>
           </div>
-          {/*TODO: Display dataset preview*/}
+          {previewDataLoading && <div style={{display: 'flex', flexDirection: 'column'}}>
+            <Spinner style={{position: 'relative', top: '2rem',
+              left: '45%'}}></Spinner>
+            <div style={{top: '3rem', position: 'relative',
+              left: '35%'}}>It may take up to a minute to load the data</div></div>
+          }
+          {previewList.length > 0 &&
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+              <div style={{display: 'flex', flexDirection: 'row'}}>
+                {previewList.map(previewRow =>
+                   <Clickable key={previewRow.domain}
+                             onClick={() => this.setSelectedPreivewDomain(previewRow.domain)}
+                             style={{
+                               lineHeight: '32px', fontSize: '18px',
+                               fontWeight: (selectedPreviewDomain === previewRow.domain)
+                                   ? 600 : 400,
+                               textDecoration:
+                                   (selectedPreviewDomain === previewRow.domain) ? 'underline' : ''
+                             }}>
+                     <div key={previewRow.domain}
+                         style={{
+                           marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'
+                         }}>
+                       {previewRow.domain}
+                     </div>
+                   </Clickable>
+                )}
+              </div>
+              {this.renderPreviewDataTable()}
+            </div>
+          }
           <div style={{height: '8rem'}}>
             {queries.map(query =>
               <React.Fragment>
@@ -540,38 +625,24 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       <EditModal resource={resource}
                  onEdit={e => this.receiveEdit(e)}
                  onCancel={() => this.closeEditModal()}/>}
-      {openSaveModal && <Modal>
-        <ModalTitle>Save Dataset</ModalTitle>
-        <ModalBody>
-          <div>
-             <ValidationError>
-              {summarizeErrors(nameTouched && errors && errors.name)}
-            </ValidationError>
-            {conflictDataSetName &&
-            <AlertDanger>DataSet with same name exist</AlertDanger>
-            }
-            {this.state.missingDataSetInfo &&
-            <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
-            }
-            <TextInput type='text' autoFocus placeholder='Dataset Name'
-                       value = {this.state.name}
-                       onChange={v => this.setState({name: v, nameTouched: true,
-                         conflictDataSetName: false})}/>
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          <Button onClick = {() => this.setState({openSaveModal: false})}
-                  type='secondary' style={{marginRight: '2rem'}}>
-            Cancel
-          </Button>
-          <Button type='primary' onClick={() => this.saveDataSet()}>SAVE</Button>
-        </ModalFooter>
-      </Modal>}
+      {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
+                                         selectedConceptSetIds={selectedConceptSetIds}
+                                         selectedCohortIds={selectedCohortIds}
+                                         selectedValues={selectedValues}
+                                         workspaceNamespace={namespace}
+                                         workspaceId={id}
+                                         closeFunction={() => {
+                                           this.setState({openSaveModal: false});
+                                         }}
+      />}
     </React.Fragment>;
   }
-
-
 });
+
+export {
+  DataSetPage,
+  Props as DataSetPageProps
+};
 
 @Component({
   template: '<div #root></div>'

@@ -1,5 +1,5 @@
 import {Location} from '@angular/common';
-import {Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
@@ -8,7 +8,7 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {hasRegisteredAccess} from 'app/utils';
 import {routeConfigDataStore} from 'app/utils/navigation';
-import {openZendeskWidget} from 'app/utils/zendesk';
+import {initializeZendeskWidget, openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Authority, BillingProjectStatus} from 'generated';
 
@@ -19,7 +19,7 @@ import {Authority, BillingProjectStatus} from 'generated';
     '../../styles/errors.css'],
   templateUrl: './component.html'
 })
-export class SignedInComponent implements OnInit, OnDestroy {
+export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   hasDataAccess = true;
   hasReviewResearchPurpose = false;
   hasAccessModuleAdmin = false;
@@ -68,6 +68,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
     private profileStorageService: ProfileStorageService,
     /* Angular's */
     private locationService: Location,
+    private elementRef: ElementRef
   ) {}
 
   ngOnInit(): void {
@@ -111,6 +112,12 @@ export class SignedInComponent implements OnInit, OnDestroy {
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.minimizeChrome = minimizeChrome;
     }));
+  }
+
+  ngAfterViewInit() {
+    // If we ever get a test Zendesk account,
+    // the key should be templated in using an environment variable.
+    initializeZendeskWidget(this.elementRef, '5a7d70b9-37f9-443b-8d0e-c3bd3c2a55e3');
   }
 
   ngOnDestroy() {
