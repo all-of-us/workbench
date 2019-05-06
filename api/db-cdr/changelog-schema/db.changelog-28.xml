@@ -5,7 +5,7 @@
   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-  <changeSet author="brianfreeman" id="changelog-27">
+  <changeSet author="brianfreeman" id="changelog-28">
 
     <dropIndex tableName="cb_criteria" indexName="idx_cb_criteria_type_parent_id"></dropIndex>
     <dropIndex tableName="cb_criteria" indexName="idx_cb_criteria_concept_id"></dropIndex>
