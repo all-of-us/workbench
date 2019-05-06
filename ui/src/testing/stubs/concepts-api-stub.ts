@@ -130,7 +130,6 @@ export class ConceptsApiStub extends ConceptsApi {
     workspaceNamespace: string, workspaceId: string,
     request?: SearchConceptsRequest): Promise<ConceptListResponse> {
     return new Promise<ConceptListResponse>(resolve => {
-      // setTimeout(() => {
       const response = {
         items: [],
         standardConcepts: [],
@@ -171,7 +170,6 @@ export class ConceptsApiStub extends ConceptsApi {
         }
       });
       resolve(response);
-      // }, 0);
     });
   }
 
