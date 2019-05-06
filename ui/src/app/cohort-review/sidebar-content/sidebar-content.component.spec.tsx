@@ -23,7 +23,6 @@ describe('SidebarContent', () => {
       setAnnotations={() => {}}
       openCreateDefinitionModal={() => {}}
       openEditDefinitionsModal={() => {}}
-      workspace={{}}
     />);
     expect(wrapper.exists()).toBeTruthy();
   });
