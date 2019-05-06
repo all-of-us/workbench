@@ -37,7 +37,8 @@ export const LIST_PROGRAM_TYPES = [];
 
 export const LIST_DOMAIN_TYPES = [
   {name: 'Measurements', domain: DomainType.MEASUREMENT, type: null},
-  {name: 'Conditions', domain: DomainType.CONDITION, type: null}
+  {name: 'Conditions', domain: DomainType.CONDITION, type: null},
+  {name: 'Drugs', domain: DomainType.DRUG, type: null}
 ];
 
 export const PM_UNITS = {
