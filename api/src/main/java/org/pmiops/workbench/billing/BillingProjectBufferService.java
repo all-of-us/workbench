@@ -1,6 +1,8 @@
 package org.pmiops.workbench.billing;
 
+import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
+import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
 
 import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
@@ -10,6 +12,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,6 +54,25 @@ public class BillingProjectBufferService {
     billingProjectBufferEntryDao.save(entry);
   }
 
+  public void syncBillingProjectStatus() {
+    BillingProjectBufferEntry entry = billingProjectBufferEntryDao
+        .findFirstByStatus(StorageEnums.billingProjectBufferStatusToStorage(CREATING));
+
+    if (entry == null) {
+      return;
+    }
+
+    switch (fireCloudService.getBillingProjectStatus(entry.getFireCloudProjectName()).getCreationStatus()) {
+      case READY:
+        entry.setStatusEnum(AVAILABLE);
+        break;
+      case ERROR:
+        entry.setStatusEnum(ERROR);
+        break;
+    }
+
+    billingProjectBufferEntryDao.save(entry);
+  }
 
   private String createBillingProjectName() {
     String randomString = Hashing.sha256().hashUnencodedChars(UUID.randomUUID().toString()).toString()

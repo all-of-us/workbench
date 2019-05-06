@@ -13,4 +13,7 @@ public interface BillingProjectBufferEntryDao  extends CrudRepository<BillingPro
   @Query("SELECT COUNT(*) FROM BillingProjectBufferEntry WHERE status IN (0, 2)")
   Long getCurrentBufferSize();
 
+  BillingProjectBufferEntry findFirstByStatus(short status);
+
+  Long countByStatus(short status);
 }

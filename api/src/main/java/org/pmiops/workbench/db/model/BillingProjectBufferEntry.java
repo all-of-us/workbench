@@ -61,7 +61,7 @@ public class BillingProjectBufferEntry {
   }
 
   @Column(name = "status")
-  private Short getStatusValue() { return this.status; }
-  private void setStatusValue(Short s) { this.status = s; }
+  private short getStatus() { return this.status; }
+  private void setStatus(short s) { this.status = s; }
 
 }

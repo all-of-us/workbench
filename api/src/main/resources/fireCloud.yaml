@@ -293,6 +293,29 @@ paths:
         500:
           description: Internal Server Error
 
+  /api/profile/billing/{projectName}:
+    get:
+      tags:
+        - billing
+      operationId: billingProjectStatus
+      parameters:
+        - name: projectName
+          description: Name of the billing project
+          required: true
+          type: string
+          in: path
+      description: billing project status
+      summary: billing project status
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/BillingProjectStatus'
+        404:
+          description: Project Not Found
+        500:
+          description: Internal Server Error
+
   /api/workspaces:
     get:
       tags:
@@ -695,6 +718,20 @@ definitions:
       role:
         type: string
         description: the role of the current user in the project
+      creationStatus:
+        type: string
+        enum: ["Creating", "Ready", "Error"]
+
+  BillingProjectStatus:
+    description: a billing project status
+    required:
+      - projectName
+      - creationStatus
+    type: object
+    properties:
+      projectName:
+        type: string
+        description: the name of the billing project
       creationStatus:
         type: string
         enum: ["Creating", "Ready", "Error"]

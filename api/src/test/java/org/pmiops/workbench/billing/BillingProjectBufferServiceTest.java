@@ -2,15 +2,19 @@ package org.pmiops.workbench.billing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
+import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
+import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Iterator;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +23,11 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
+import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -177,4 +185,86 @@ public class BillingProjectBufferServiceTest {
         .createAllOfUsBillingProject(anyString());
   }
 
+  @Test
+  public void syncBillingProjectStatus_creating() {
+    billingProjectBufferService.bufferBillingProject();
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
+    String billingProjectName = captor.getValue();
+
+    BillingProjectStatus billingProjectStatus = new BillingProjectStatus();
+    billingProjectStatus.setCreationStatus(CreationStatusEnum.CREATING);
+    doReturn(billingProjectStatus).when(fireCloudService).getBillingProjectStatus(billingProjectName);
+    billingProjectBufferService.syncBillingProjectStatus();
+    assertThat(billingProjectBufferEntryDao.findByFireCloudProjectName(billingProjectName).getStatusEnum())
+        .isEqualTo(CREATING);
+  }
+
+  @Test
+  public void syncBillingProjectStatus_ready() {
+    billingProjectBufferService.bufferBillingProject();
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
+    String billingProjectName = captor.getValue();
+
+    BillingProjectStatus billingProjectStatus = new BillingProjectStatus();
+    billingProjectStatus.setCreationStatus(CreationStatusEnum.READY);
+    doReturn(billingProjectStatus).when(fireCloudService).getBillingProjectStatus(billingProjectName);
+    billingProjectBufferService.syncBillingProjectStatus();
+    assertThat(billingProjectBufferEntryDao.findByFireCloudProjectName(billingProjectName).getStatusEnum())
+        .isEqualTo(BillingProjectBufferStatus.AVAILABLE);
+  }
+
+  @Test
+  public void syncBillingProjectStatus_error() {
+    billingProjectBufferService.bufferBillingProject();
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
+    String billingProjectName = captor.getValue();
+
+    BillingProjectStatus billingProjectStatus = new BillingProjectStatus();
+    billingProjectStatus.setCreationStatus(CreationStatusEnum.ERROR);
+    doReturn(billingProjectStatus).when(fireCloudService).getBillingProjectStatus(billingProjectName);
+    billingProjectBufferService.syncBillingProjectStatus();
+    assertThat(billingProjectBufferEntryDao.findByFireCloudProjectName(billingProjectName).getStatusEnum())
+        .isEqualTo(ERROR);
+  }
+
+  @Test
+  public void syncBillingProjectStatus_multiple() {
+    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProject();
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    verify(fireCloudService, times(3)).createAllOfUsBillingProject(captor.capture());
+    List<String> capturedProjectNames = captor.getAllValues();
+    doReturn(createBillingProjectStatus(CreationStatusEnum.READY)).when(fireCloudService)
+        .getBillingProjectStatus(capturedProjectNames.get(0));
+    doReturn(createBillingProjectStatus(CreationStatusEnum.READY)).when(fireCloudService)
+        .getBillingProjectStatus(capturedProjectNames.get(1));
+    doReturn(createBillingProjectStatus(CreationStatusEnum.ERROR)).when(fireCloudService)
+        .getBillingProjectStatus(capturedProjectNames.get(2));
+
+    billingProjectBufferService.syncBillingProjectStatus();
+    billingProjectBufferService.syncBillingProjectStatus();
+    billingProjectBufferService.syncBillingProjectStatus();
+    billingProjectBufferService.syncBillingProjectStatus();
+
+    assertThat(billingProjectBufferEntryDao.countByStatus(StorageEnums.billingProjectBufferStatusToStorage(CREATING)))
+    .isEqualTo(0);
+    assertThat(billingProjectBufferEntryDao.countByStatus(StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE)))
+        .isEqualTo(2);
+    assertThat(billingProjectBufferEntryDao.countByStatus(StorageEnums.billingProjectBufferStatusToStorage(ERROR)))
+        .isEqualTo(1);
+  }
+
+  private BillingProjectStatus createBillingProjectStatus(CreationStatusEnum status) {
+    BillingProjectStatus billingProjectStatus = new BillingProjectStatus();
+    billingProjectStatus.setCreationStatus(status);
+    return billingProjectStatus;
+  }
 }

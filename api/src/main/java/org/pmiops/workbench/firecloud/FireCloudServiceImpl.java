@@ -15,6 +15,7 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
+import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.JWTWrapper;
 import org.pmiops.workbench.firecloud.model.ManagedGroupAccessResponse;
@@ -191,7 +192,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void createAllOfUsBillingProject(String projectName)  {
+  public void createAllOfUsBillingProject(String projectName) {
     BillingApi billingApi = billingApiProvider.get();
     CreateRawlsBillingProjectFullRequest request = new CreateRawlsBillingProjectFullRequest();
     request.setBillingAccount("billingAccounts/"+configProvider.get().firecloud.billingAccountId);
@@ -200,6 +201,11 @@ public class FireCloudServiceImpl implements FireCloudService {
       billingApi.createBillingProjectFull(request);
       return null;
     });
+  }
+
+  @Override
+  public BillingProjectStatus getBillingProjectStatus(String projectName) {
+    return retryHandler.run((context) -> billingApiProvider.get().billingProjectStatus(projectName));
   }
 
   @Override
