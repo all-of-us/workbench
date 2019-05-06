@@ -4,7 +4,6 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.moodle.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.logging.Logger;
 
 /**
