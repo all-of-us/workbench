@@ -2,17 +2,25 @@ import * as React from 'react';
 
 import {validate} from 'validate.js';
 
-import {dataSetApi} from 'app/services/swagger-fetch-clients';
+import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {AlertDanger} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
-import {ValidationError} from 'app/components/inputs';
-import {TextInput} from 'app/components/inputs';
+import {SmallHeader} from 'app/components/headers';
+import {TextArea} from 'app/components/inputs';
+import {CheckBox, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {TooltipTrigger} from 'app/components/popups';
+import {convertQueryToText} from 'app/utils/big-query-queries';
 import {summarizeErrors} from 'app/utils/index';
+import {navigate} from 'app/utils/navigation';
 import {
-  DomainValuePair
+  DataSetQuery,
+  DataSetRequest,
+  DomainValuePair,
+  FileDetail
 } from 'generated/fetch';
+import {SpinnerOverlay} from "../../components/spinners";
 
 interface Props {
   closeFunction: Function;
@@ -26,9 +34,14 @@ interface Props {
 
 interface State {
   conflictDataSetName: boolean;
+  existingNotebooks: FileDetail[];
+  exportToNewNotebook: boolean;
+  loading: boolean;
   missingDataSetInfo: boolean;
   name: string;
-  nameTouched: boolean;
+  notebookName: string;
+  notebooksLoading: boolean;
+  queries: Array<DataSetQuery>;
 }
 
 
@@ -37,18 +50,42 @@ class NewDataSetModal extends React.Component<Props, State> {
     super(props);
     this.state = {
       conflictDataSetName: false,
+      exportToNewNotebook: false,
+      loading: false,
       missingDataSetInfo: false,
       name: '',
-      nameTouched: false,
+      notebookName: '',
+      existingNotebooks: [],
+      notebooksLoading: false,
+      queries: [],
     };
   }
 
+  componentDidMount() {
+    this.generateQuery();
+    this.loadNotebooks();
+  }
+
+  private async loadNotebooks() {
+    try {
+      const {workspaceNamespace, workspaceId} = this.props;
+      this.setState({notebooksLoading: true});
+      const existingNotebooks =
+        await workspacesApi().getNoteBookList(workspaceNamespace, workspaceId);
+      this.setState({existingNotebooks});
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.setState({notebooksLoading: false});
+    }
+  }
+
   async saveDataSet() {
-    this.setState({nameTouched: true});
+    const {workspaceNamespace, workspaceId} = this.props;
     if (!this.state.name) {
       return;
     }
-    this.setState({conflictDataSetName: false, missingDataSetInfo: false});
+    this.setState({conflictDataSetName: false, missingDataSetInfo: false, loading: true});
     const request = {
       name: this.state.name,
       includesAllParticipants: this.props.includesAllParticipants,
@@ -59,53 +96,114 @@ class NewDataSetModal extends React.Component<Props, State> {
     };
     try {
       await dataSetApi().createDataSet(
-        this.props.workspaceNamespace, this.props.workspaceId, request);
-      this.props.closeFunction();
+        workspaceNamespace, workspaceId, request);
+      if (!this.state.exportToNewNotebook) {
+        this.props.closeFunction();
+      } else {
+        await dataSetApi().exportToNotebook(
+          workspaceNamespace, workspaceId,
+          {dataSetRequest: request, notebookName: this.state.notebookName, newNotebook: true});
+        navigate(['workspaces',
+          workspaceNamespace,
+          workspaceId, 'notebooks', this.state.notebookName + '.ipynb']);
+      }
     } catch (e) {
       if (e.status === 409) {
-        this.setState({conflictDataSetName: true});
+        this.setState({conflictDataSetName: true, loading: false});
       } else if (e.status === 400) {
-        this.setState({missingDataSetInfo: true});
+        this.setState({missingDataSetInfo: true, loading: false});
       }
     }
   }
 
-  render() {
-    const {name, nameTouched, conflictDataSetName, missingDataSetInfo} = this.state;
+  changeExportToNewNotebook() {
+    if (this.state.exportToNewNotebook) {
+      this.setState({exportToNewNotebook: false});
+    } else {
+      this.setState({exportToNewNotebook: true});
+    }
+  }
 
-    const errors = validate({name}, {
+  async generateQuery() {
+    const {workspaceNamespace, workspaceId} = this.props;
+    const dataSet: DataSetRequest = {
+      name: '',
+      conceptSetIds: this.props.selectedConceptSetIds,
+      cohortIds: this.props.selectedCohortIds,
+      values: this.props.selectedValues,
+      includesAllParticipants: this.props.includesAllParticipants,
+    };
+    const sqlQueries = await dataSetApi().generateQuery(workspaceNamespace, workspaceId, dataSet);
+    this.setState({queries: sqlQueries.queryList});
+  }
+
+  render() {
+    const {
+      conflictDataSetName,
+      exportToNewNotebook,
+      loading,
+      missingDataSetInfo,
+      name,
+      notebookName,
+      notebooksLoading,
+      existingNotebooks,
+      queries,
+    } = this.state;
+
+    const errors = validate({name, notebookName}, {
       name: {
         presence: {allowEmpty: false}
+      },
+      notebookName: {
+        presence: {allowEmpty: !exportToNewNotebook},
+        exclusion: {
+          within: existingNotebooks.map(fd => fd.name.slice(0, -6)),
+          message: 'already exists'
+        }
       }
     });
-    return <Modal>
+    return <Modal loading={loading}>
       <ModalTitle>Save Dataset</ModalTitle>
       <ModalBody>
         <div>
-          <ValidationError>
-            {summarizeErrors(nameTouched && errors && errors.name)}
-          </ValidationError>
           {conflictDataSetName &&
           <AlertDanger>DataSet with same name exist</AlertDanger>
           }
           {missingDataSetInfo &&
           <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
           }
-          <TextInput type='text' autoFocus placeholder='Dataset Name'
+          <TextInput type='text' autoFocus placeholder='Data Set Name'
                      value={name}
                      onChange={v => this.setState({
-                       name: v, nameTouched: true,
-                       conflictDataSetName: false
+                       name: v, conflictDataSetName: false
                      })}/>
         </div>
+        <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem'}}>
+          <CheckBox style={{height: 17, width: 17}}
+                    onChange={() => this.changeExportToNewNotebook()} />
+          <div style={{marginLeft: '.5rem', color: 'black'}}>Export to new Python notebook</div>
+        </div>
+        {exportToNewNotebook && <React.Fragment>
+          {(queries.length === 0 || notebooksLoading) && <SpinnerOverlay />}
+          <TextArea disabled={true} onChange={() => {}} style={{marginTop: '1rem'}}
+                    value={queries.map(query =>
+                      convertQueryToText(name, query.domain, query))} />
+          <SmallHeader style={{fontSize: 14}}>Notebook Name</SmallHeader>
+          <TextInput onChange={(v) => this.setState({notebookName: v})}
+                     value={notebookName}/>
+        </React.Fragment>}
       </ModalBody>
       <ModalFooter>
-        <Button type='secondary' onClick={this.props.closeFunction} style={{marginRight: '2rem'}}>
+        <Button type='secondary'
+                onClick={this.props.closeFunction}
+                style={{marginRight: '2rem'}}>
           Cancel
         </Button>
-        <Button type='primary' disabled={errors} onClick={() => this.saveDataSet()}>
-          Save
-        </Button>
+        <TooltipTrigger content={summarizeErrors(errors)}>
+          <Button type='primary' disabled={errors} onClick={() => this.saveDataSet()}>
+            Save{exportToNewNotebook && ' and Open'}
+          </Button>
+        </TooltipTrigger>
       </ModalFooter>
     </Modal>;
   }
