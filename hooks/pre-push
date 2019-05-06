@@ -26,7 +26,7 @@ do
 
   files=$(git diff --name-only "${baseline}..${local_sha}")
 
-  for dir in "ui" "public-ui"; do
+  for dir in "ui"; do
     pushd "${dir}" > /dev/null
     if [ -n "`echo ${files} | grep "^${dir}\/.*\.tsx\?$"`" ]; then
       echo "Linting ${dir}..."

@@ -78,12 +78,7 @@ local API server under http://localhost:8081/api/.
 ./project.rb run-local-data-migrations
 ```
 
-If you want to run the public api also do this to load the public db
-```Shell
-./project.rb run-local-public-data-migrations
-```
-
-Or you can do both of the above at once by doing run-local-all-migrations
+Or you can run all migrations with:
 ```Shell
 ./project.rb run-local-all-migrations
 ```
@@ -141,17 +136,6 @@ All commands should be run from `workbench/api`
 #### Hot Code Swapping
 
 While the API is running locally, saving a .java file should cause a recompile and reload of that class. Status is logged to the console. Not all changes reload correctly (e.g., model classes do not appear to reload more than once).
-
-### Public API: dev AppEngine appserver
-
-After running dev-up, run-local-data-migrations, and
-run-local-public-data-migrations, run in the api dir:
-
-```Shell
-./project.rb run-public-api
-```
-
-This will start up the public API on http://localhost:8083/.
 
 ### UI
 
@@ -219,9 +203,6 @@ directory run:
 This also migrates the SQL databases, so avoid using this when you have local
 SQL schema changes.
 
-Note: This deploys both the API and public API. Use `deploy-api` or
-`deploy-public-api` for finer granularity.
-
 Example:
 
 ```
@@ -229,8 +210,7 @@ Example:
 ```
 
 When the api is deployed, you'll be able to access it at https://VERSION-dot-api-dot-PROJECT.appspot.com. If you specify --promote, it will be the main API code
-served out of https://api-dot-PROJECT.appspot.com. Likewise, see
-https://VERSION-public-api-dot-PROJECT.appspot.com for the public API changes.
+served out of https://api-dot-PROJECT.appspot.com.
 Aside from releases, this command can be used to test a topic branch in the
 shared test project before submitting. If possible, push to a version with your
 own username and --no-promote.
@@ -553,7 +533,7 @@ ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=schema")
 
 ## Running test cases
 
-To run both api and public api unit tests, in the api dir run:
+To run both api and common api unit tests, in the api dir run:
 
 ```
 ./project.rb test
@@ -563,11 +543,6 @@ To run just api unit tests, run:
 
 ```
 ./project.rb test-api
-```
-
-To run just public api unit tests run:
-```
-./project.rb test-public-api
 ```
 
 To run bigquery tests (which run slowly and actually
