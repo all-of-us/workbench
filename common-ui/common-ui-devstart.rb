@@ -55,9 +55,6 @@ def build(cmd_name, ui_name, args)
 
   # Angular version 5 requires --environment instead of --configuration as an option
   angular_opts = "--configuration=#{options.env}"
-  if ui_name == "public-ui"
-    angular_opts = "--environment=#{options.env}"
-  end
   common.run_inline %W{yarn run build
       #{optimize} #{angular_opts} --no-watch --no-progress}
 end
@@ -85,9 +82,6 @@ class CommonUiDevStart
     install_dependencies
 
     ENV["ENV_FLAG"] = "--configuration=#{options.env}"
-    if @ui_name == "public-ui"
-      ENV["ENV_FLAG"] = "--environment=#{options.env}"
-    end
     at_exit { common.run_inline %W{docker-compose down} }
 
     # Can't use swagger_regen here as it enters docker.
@@ -95,7 +89,7 @@ class CommonUiDevStart
     common.run_inline %W{docker-compose run -d --service-ports tests}
 
     common.status "Tests started. Open\n"
-    common.status "    http://localhost:9876/debug.html for ui and http://localhost:9877/debug.html for public-ui\n"
+    common.status "    http://localhost:9876/debug.html for ui \n"
     common.status "in a browser to view/run tests."
 
     common.run_inline %W{docker-compose run --rm --service-ports #{@ui_name}}

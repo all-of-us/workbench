@@ -10,6 +10,7 @@ import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.inject.Provider;
 
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -250,7 +252,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     if (configProvider.get().cohortbuilder.enableListSearch) {
-      final List<CBCriteria> criteriaList = cbCriteriaDao.findDrugIngredientByConceptId(conceptId);
+      final List<CBCriteria> criteriaList = cbCriteriaDao.findDrugIngredientByConceptId(Arrays.asList(conceptId));
       criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
     } else {
       final List<Criteria> criteriaList = criteriaDao.findDrugIngredientByConceptId(conceptId);
@@ -299,6 +301,19 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
     if (criteriaList.isEmpty()) {
       criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, new PageRequest(0, resultLimit));
+    }
+    if (DomainType.DRUG.toString().equals(domain)) {
+      Map<Boolean, List<CBCriteria>> groups =
+        criteriaList.stream().collect(Collectors.partitioningBy(c -> c.getType().equals(CriteriaType.BRAND.toString())));
+      List<Long> conceptIds = groups.get(true)
+        .stream()
+        .map(c -> Long.valueOf(c.getConceptId()))
+        .collect(Collectors.toList());
+      List<CBCriteria> ingredients = cbCriteriaDao.findDrugIngredientByConceptId(conceptIds);
+      criteriaList = Stream
+        .concat(groups.get(false).stream(), ingredients.stream())
+        .sorted(Comparator.comparing(CBCriteria::getCount).reversed())
+        .collect(Collectors.toList());
     }
     CriteriaListResponse criteriaResponse = new CriteriaListResponse()
       .items(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));

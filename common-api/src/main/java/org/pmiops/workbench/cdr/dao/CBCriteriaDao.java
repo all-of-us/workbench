@@ -54,7 +54,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
   List<CBCriteria> findDrugBrandOrIngredientByValue(@Param("term") String term,
                                                     @Param("limit") Long limit);
 
-  @Query(value = "select * from cb_criteria c inner join ( select cr.concept_id_2 from criteria_relationship cr join concept c1 on (cr.concept_id_2 = c1.concept_id " +
-    "and cr.concept_id_1 = :conceptId and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2", nativeQuery = true)
-  List<CBCriteria> findDrugIngredientByConceptId(@Param("conceptId") Long conceptId);
+  @Query(value = "select * from cb_criteria c inner join ( select cr.concept_id_2 from cb_criteria_relationship cr join concept c1 on (cr.concept_id_2 = c1.concept_id " +
+    "and cr.concept_id_1 in (:conceptIds) and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2 and c.domain_id = 'DRUG' and c.type = 'RXNORM'", nativeQuery = true)
+  List<CBCriteria> findDrugIngredientByConceptId(@Param("conceptIds") List<Long> conceptIds);
 }

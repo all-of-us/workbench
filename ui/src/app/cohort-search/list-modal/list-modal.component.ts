@@ -19,9 +19,9 @@ import {
   autocompleteStore,
   scrollStore,
   searchRequestStore,
-  selectedPathStore,
-  selectedStore,
   selectionsStore,
+  subtreePathStore,
+  subtreeSelectedStore,
   wizardStore
 } from 'app/cohort-search/search-state.service';
 import {stripHtml, subtypeToTitle, typeToTitle} from 'app/cohort-search/utils';
@@ -229,19 +229,22 @@ export class ListModalComponent implements OnInit, OnDestroy {
     }
     wizardStore.next(undefined);
     selectionsStore.next([]);
+    subtreePathStore.next([]);
+    this.hierarchyCrit = null;
     this.open = false;
   }
 
   back = () => {
-    if (this.attributesCrit) {
-      this.mode = this.backMode;
-      this.attributesCrit = undefined;
-    }
-    if (this.mode === 'tree') {
-      this.mode = 'list';
-    }
-    if (this.mode === 'snomed') {
-      this.setMode('tree');
+    switch (this.mode) {
+      case 'attributes':
+        this.mode = this.backMode;
+        this.attributesCrit = undefined;
+        break;
+      case 'tree':
+        this.mode = 'list';
+        break;
+      case 'snomed':
+        this.setMode('tree');
     }
   }
 
@@ -340,12 +343,12 @@ export class ListModalComponent implements OnInit, OnDestroy {
 
   showHierarchy = (criterion: any) => {
     autocompleteStore.next(criterion.name);
-    selectedPathStore.next(criterion.path.split('.'));
-    selectedStore.next(criterion.id);
+    subtreePathStore.next(criterion.path.split('.'));
+    subtreeSelectedStore.next(criterion.id);
     this.hierarchyCrit = {
+      domainId: criterion.domainId,
       type: criterion.type,
       subtype: criterion.subtype,
-      fullTree: false,
       id: 0,    // root parent ID is always 0
     };
     this.mode = 'tree';
