@@ -11,7 +11,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Iterator;
-import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -95,6 +94,19 @@ public class BillingProjectBufferServiceTest {
   }
 
   @Test
+  public void fillBuffer_prefixName() {
+    workbenchConfig.firecloud.billingProjectPrefix = "test-prefix-";
+    billingProjectBufferService.bufferBillingProject();
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
+
+    String billingProjectName = captor.getValue();
+
+    assertThat(billingProjectName).doesNotContain("--");
+  }
+
+  @Test
   public void fillBuffer_capacity() {
     // fill up buffer
     for (int i = 0; i < BUFFER_CAPACITY; i++) {
@@ -164,4 +176,5 @@ public class BillingProjectBufferServiceTest {
     verify(fireCloudService, times((int) BUFFER_CAPACITY + 1))
         .createAllOfUsBillingProject(anyString());
   }
+
 }

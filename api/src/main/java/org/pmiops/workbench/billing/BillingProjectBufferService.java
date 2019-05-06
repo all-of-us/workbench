@@ -55,7 +55,13 @@ public class BillingProjectBufferService {
   private String createBillingProjectName() {
     String randomString = Hashing.sha256().hashUnencodedChars(UUID.randomUUID().toString()).toString()
         .substring(0, PROJECT_BILLING_ID_SIZE);
-    return workbenchConfigProvider.get().firecloud.billingProjectPrefix + "-" + randomString;
+
+    String prefix = workbenchConfigProvider.get().firecloud.billingProjectPrefix;
+    if (!prefix.endsWith("-")) {
+      prefix = prefix + "-";
+    }
+
+    return prefix + randomString;
   }
 
   private long getCurrentBufferSize() {
