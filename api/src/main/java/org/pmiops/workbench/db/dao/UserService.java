@@ -514,7 +514,7 @@ public class UserService {
         // We'll catch the NOT_FOUND ApiException here, since we expect many users to have an empty
         // eRA Commons linkage.
         log.info(String.format("NIH Status not found for user %s", user.getEmail()));
-        return null;
+        return user;
       } else {
         throw e;
       }

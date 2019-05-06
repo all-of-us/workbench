@@ -49,6 +49,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
+
         if (newTime != oldTime) {
           log.info(String.format(
               "Compliance training completion changed for user %s. Old %s, new %s",
