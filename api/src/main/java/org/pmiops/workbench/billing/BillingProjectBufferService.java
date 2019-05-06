@@ -56,7 +56,7 @@ public class BillingProjectBufferService {
 
   public void syncBillingProjectStatus() {
     BillingProjectBufferEntry entry = billingProjectBufferEntryDao
-        .findFirstByStatus(StorageEnums.billingProjectBufferStatusToStorage(CREATING));
+        .findFirstByStatusOrderByCreationTimeAsc(StorageEnums.billingProjectBufferStatusToStorage(CREATING));
 
     if (entry == null) {
       return;
