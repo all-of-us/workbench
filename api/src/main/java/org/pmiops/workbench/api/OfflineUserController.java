@@ -93,8 +93,8 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     int accessLevelChangeCount = 0;
 
     for (User user : userService.getAllUsers()) {
+      userCount++;
       try {
-
         Timestamp oldTime = user.getEraCommonsCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
