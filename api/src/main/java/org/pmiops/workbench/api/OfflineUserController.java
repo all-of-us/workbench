@@ -3,12 +3,17 @@ package org.pmiops.workbench.api;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.moodle.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 /**
@@ -33,21 +38,49 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   @Override
   public ResponseEntity<Void> bulkSyncComplianceTrainingStatus() {
     int errorCount = 0;
+    int userCount = 0;
+    int changeCount = 0;
+    int accessLevelChangeCount = 0;
+
     for (User user : userService.getAllUsers()) {
+      userCount++;
       try {
-        userService.syncComplianceTrainingStatus(user);
-        log.info(String.format("Updated compliance training status for user %s.", user.getEmail()));
+        Timestamp oldTime = user.getComplianceTrainingCompletionTime();
+        DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
+
+        User updatedUser = userService.syncComplianceTrainingStatus(user);
+
+        Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
+        DataAccessLevel newLevel = user.getDataAccessLevelEnum();
+        if (newTime != oldTime) {
+          log.info(String.format(
+              "Compliance training completion changed for user %s. Old %s, new %s",
+              user.getEmail(), oldTime, newTime));
+          changeCount++;
+        }
+        if (oldLevel != newLevel) {
+          log.info(String.format(
+              "Data access level changed for user %s. Old %s, new %s",
+              user.getEmail(), oldLevel.toString(), newLevel.toString()));
+          accessLevelChangeCount++;
+        }
       } catch (Exception e) {
         errorCount++;
         log.severe(String.format("Error syncing compliance training status for user %s: %s",
             user.getEmail(), e.getMessage()));
+        return null;
       }
     }
 
+    log.info(String.format(
+        "Checked %d users, updated %d completion times, updated %d access levels",
+        userCount, changeCount, accessLevelChangeCount));
+
     if (errorCount > 0) {
       throw new ServerErrorException(
-          String.format("%d errors encountered during complince training sync", errorCount));
+          String.format("%d errors encountered during compliance training sync", errorCount));
     }
+
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
@@ -59,10 +92,34 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   @Override
   public ResponseEntity<Void> bulkSyncEraCommonsStatus() {
     int errorCount = 0;
+    int userCount = 0;
+    int changeCount = 0;
+    int accessLevelChangeCount = 0;
+
     for (User user : userService.getAllUsers()) {
       try {
         userService.syncEraCommonsStatusUsingImpersonation(user);
-        log.info(String.format("Updated eRA Commons status for user %s.", user.getEmail()));
+
+        Timestamp oldTime = user.getEraCommonsCompletionTime();
+        DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
+
+        User updatedUser = userService.syncTwoFactorAuthStatus(user);
+
+        Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
+        DataAccessLevel newLevel = user.getDataAccessLevelEnum();
+
+        if (newTime != oldTime) {
+          log.info(String.format(
+              "eRA Commons completion changed for user %s. Old %s, new %s",
+              user.getEmail(), oldTime, newTime));
+          changeCount++;
+        }
+        if (oldLevel != newLevel) {
+          log.info(String.format(
+              "Data access level changed for user %s. Old %s, new %s",
+              user.getEmail(), oldLevel.toString(), newLevel.toString()));
+          accessLevelChangeCount++;
+        }
       } catch (org.pmiops.workbench.firecloud.ApiException e) {
         errorCount++;
         log.severe(String.format("Error syncing eRA Commons status for user %s: %s",
@@ -73,6 +130,10 @@ public class OfflineUserController implements OfflineUserApiDelegate {
             user.getEmail(), e.getMessage()));
       }
     }
+
+    log.info(String.format(
+        "Checked %d users, updated %d completion times, updated %d access levels",
+        userCount, changeCount, accessLevelChangeCount));
 
     if (errorCount > 0) {
       throw new ServerErrorException(
@@ -89,16 +150,44 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   @Override
   public ResponseEntity<Void> bulkSyncTwoFactorAuthStatus() {
     int errorCount = 0;
+    int userCount = 0;
+    int changeCount = 0;
+    int accessLevelChangeCount = 0;
+
     for (User user : userService.getAllUsers()) {
+      userCount++;
       try {
-        userService.syncTwoFactorAuthStatus(user);
-        log.info(String.format("Updated 2FA status for user %s.", user.getEmail()));
+        Timestamp oldTime = user.getTwoFactorAuthCompletionTime();
+        DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
+
+        User updatedUser = userService.syncTwoFactorAuthStatus(user);
+
+        Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
+        DataAccessLevel newLevel = user.getDataAccessLevelEnum();
+
+        if (newTime != oldTime) {
+          log.info(String.format(
+              "Two-factor completion changed for user %s. Old %s, new %s",
+              user.getEmail(), oldTime, newTime));
+          changeCount++;
+        }
+        if (oldLevel != newLevel) {
+          log.info(String.format(
+              "Data access level changed for user %s. Old %s, new %s",
+              user.getEmail(), oldLevel.toString(), newLevel.toString()));
+          accessLevelChangeCount++;
+        }
       } catch (Exception e) {
         errorCount++;
         log.severe(String.format("Error syncing 2FA status for user %s: %s",
                 user.getEmail(), e.getMessage()));
       }
     }
+
+    log.info(String.format(
+        "Checked %d users, updated %d completion times, updated %d access levels",
+        userCount, changeCount, accessLevelChangeCount));
+
     if (errorCount > 0) {
       throw new ServerErrorException(
               String.format("%d errors encountered during 2FA sync", errorCount));
