@@ -94,12 +94,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
     for (User user : userService.getAllUsers()) {
       try {
-        userService.syncEraCommonsStatusUsingImpersonation(user);
 
         Timestamp oldTime = user.getEraCommonsCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
-        User updatedUser = userService.syncTwoFactorAuthStatus(user);
+        User updatedUser = userService.syncEraCommonsStatusUsingImpersonation(user);
 
         Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
@@ -158,12 +157,12 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
         User updatedUser = userService.syncTwoFactorAuthStatus(user);
 
-        Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
+        Timestamp newTime = updatedUser.getTwoFactorAuthCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
 
         if (newTime != oldTime) {
           log.info(String.format(
-              "Two-factor completion changed for user %s. Old %s, new %s",
+              "Two-factor auth completion changed for user %s. Old %s, new %s",
               user.getEmail(), oldTime, newTime));
           changeCount++;
         }
@@ -175,7 +174,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         }
       } catch (Exception e) {
         errorCount++;
-        log.severe(String.format("Error syncing 2FA status for user %s: %s",
+        log.severe(String.format("Error syncing two-factor auth status for user %s: %s",
                 user.getEmail(), e.getMessage()));
       }
     }
@@ -186,7 +185,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
     if (errorCount > 0) {
       throw new ServerErrorException(
-              String.format("%d errors encountered during 2FA sync", errorCount));
+              String.format("%d errors encountered during two-factor auth sync", errorCount));
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
