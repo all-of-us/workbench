@@ -77,6 +77,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         errorCount++;
         log.severe(String.format("Error syncing compliance training status for user %s: %s",
             user.getEmail(), e.getMessage()));
+        return null;
       }
     }
 
