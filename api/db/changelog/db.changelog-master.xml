@@ -80,4 +80,5 @@
   <include file="changelog/db.changelog-70-data-set.xml"/>
   <include file="changelog/db.changelog-71-remove-2fa-enabled.xml"/>
   <include file="changelog/db.changelog-72-all-participants-data-set.xml"/>
+  <include file="changelog/db.changelog-73-add-billing_project_buffer_entry.xml"/>
 </databaseChangeLog>

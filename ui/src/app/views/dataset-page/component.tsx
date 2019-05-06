@@ -100,7 +100,7 @@ interface State {
   conceptDomainList: DomainInfo[];
   conceptSetList: ConceptSet[];
   creatingConceptSet: boolean;
-  previewData: Array<DataSetPreviewList>;
+  previewList: Array<DataSetPreviewList>;
   editing: boolean;
   includesAllParticipants: boolean;
   loadingResources: boolean;
@@ -136,7 +136,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       selectedValues: [],
       openSaveModal: false,
       queries: [],
-      previewData: [],
+      previewList: [],
       selectedPreviewDomain: '',
       previewDataLoading: false,
       includesAllParticipants: false
@@ -361,11 +361,11 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       includesAllParticipants: this.state.includesAllParticipants
     };
     const sqlQueries = await dataSetApi().generateQuery(namespace, id, dataSet);
-    this.setState({queries: sqlQueries.queryList, previewData: []});
+    this.setState({queries: sqlQueries.queryList, previewList: []});
   }
 
-  async getPreviewData() {
-    this.setState({previewData: [], previewDataLoading: true});
+  async getPreviewList() {
+    this.setState({previewList: [], previewDataLoading: true});
     const {namespace, id} = this.props.workspace;
     const request = {
       name: '',
@@ -376,7 +376,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
     };
     try {
       const dataSetPreviewResp = await dataSetApi().previewQuery(namespace, id, request);
-      this.setState({previewData: dataSetPreviewResp.domainValue,
+      this.setState({previewList: dataSetPreviewResp.domainValue,
         selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain});
     } catch (ex) {
       console.log(ex);
@@ -405,15 +405,14 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
   }
 
   renderPreviewDataTable() {
-    const filteredDataSet =
-        this.state.previewData.filter(
+    const filteredPreviewData =
+        this.state.previewList.filter(
           preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
 
     return <DataTable key={this.state.selectedPreviewDomain}
-                      value={this.getDataTableValue(filteredDataSet.values)}>
-      {filteredDataSet.values.map(value =>
-          <Column header={value.value} headerStyle={{textAlign: 'left', wordWrap: 'break-word'}}
-                  field={value.value}/>
+                      value={this.getDataTableValue(filteredPreviewData.values)}>
+      {filteredPreviewData.values.map(value =>
+          <Column header={value.value} headerStyle={{textAlign: 'left'}} field={value.value}/>
       )}
     </DataTable>;
   }
@@ -433,7 +432,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       selectedCohortIds,
       selectedConceptSetIds,
       selectedValues,
-      previewData,
+      previewList,
       selectedPreviewDomain,
       previewDataLoading,
       valueSets
@@ -554,7 +553,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
               GENERATE CODE
             </Button>
             <Button style={{position: 'absolute', right: '16rem', top: '0.25rem'}}
-                    disabled={this.disableSave()} onClick={() => {this.getPreviewData(); }}>
+                    disabled={this.disableSave()} onClick={() => {this.getPreviewList(); }}>
               PREVIEW DATA SET
             </Button>
             <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
@@ -569,10 +568,10 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
             <div style={{top: '3rem', position: 'relative',
               left: '35%'}}>It may take up to a minute to load the data</div></div>
           }
-          {previewData.length > 0 &&
+          {previewList.length > 0 &&
             <div style={{display: 'flex', flexDirection: 'column'}}>
               <div style={{display: 'flex', flexDirection: 'row'}}>
-                {previewData.map(previewRow =>
+                {previewList.map(previewRow =>
                    <Clickable key={previewRow.domain}
                              onClick={() => this.setSelectedPreivewDomain(previewRow.domain)}
                              style={{
