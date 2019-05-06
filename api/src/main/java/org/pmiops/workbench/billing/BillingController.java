@@ -22,4 +22,10 @@ public class BillingController implements BillingApiDelegate {
     return ResponseEntity.status(HttpStatus.OK).build();
   }
 
+  @Override
+  public ResponseEntity<Void> syncBillingProjectStatus() {
+    billingProjectBufferService.syncBillingProjectStatus();
+    return ResponseEntity.status(HttpStatus.OK).build();
+  }
+
 }

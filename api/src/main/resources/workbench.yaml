@@ -999,6 +999,22 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/cron/syncBillingProjectStatus:
+    get:
+      security: []
+      tags:
+        - billing
+        - cron
+      description: Fetch a BillingProjectBufferEntry that is in the CREATING state and check its status on Firecloud
+      operationId: syncBillingProjectStatus
+      responses:
+        200:
+          description: No Error
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # Notebooks ############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:
