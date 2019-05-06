@@ -70,8 +70,10 @@ From the `api/` directory:
 ./project.rb dev-up
 ```
 
-When the console displays "Dev App Server is now running", you can hit your
-local API server under http://localhost:8081/api/.
+When the console displays "Listening for transport dt_socket at address: 8001", your
+local API server endpoints are available under http://localhost:8081/.  You can test this by 
+navigating to the [status endpoint](http://localhost:8081/v1/status) in your browser or 
+executing `curl http://localhost:8081/v1/status`
 
 **Note:** If you haven't loaded any data locally for the app, please run the goal below. Also, this will not run while dev-up is running, so please kill dev-up first.
 ```Shell
