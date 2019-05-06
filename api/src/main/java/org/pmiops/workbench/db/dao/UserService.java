@@ -421,11 +421,7 @@ public class UserService {
       List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
       // The assumption here is that the User will always get 1 badge which will be AoU
       if (badgeResponse != null && badgeResponse.size() > 0) {
-        // Only set the completion time if the existing time is null, because we don't want to
-        // overwrite an older completion time with the "now" value.
-        if (user.getComplianceTrainingCompletionTime() == null) {
-          user.setComplianceTrainingCompletionTime(now);
-        }
+        user.setComplianceTrainingCompletionTime(now);
 
         BadgeDetails badge = badgeResponse.get(0);
         if (badge.getDateexpire() == null) {
