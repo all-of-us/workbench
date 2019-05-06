@@ -38,9 +38,9 @@ export const ConceptSetsList = withCurrentWorkspace()(
     constructor(props) {
       super(props);
       this.state = {
+        conceptDomainsList: undefined,
         conceptSetsList: undefined,
         conceptSetsLoading: true,
-        conceptDomainsList: undefined,
         createModalOpen: false
       };
     }

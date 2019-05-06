@@ -36,19 +36,21 @@ const activatedStyles = reactStyles({
   }
 });
 
-const tooltipContent = [<ul><u>What is a concept?</u><ul/>
-      Concepts describe information in a patient’s medical record,
-      such as a condition they have, a  prescription they are
-  taking or their physical measurements. <p/>
+const tooltipContent = [
+  <ul><u>What is a concept?</u><ul/>
+    Concepts describe information in a patient’s medical record,
+    such as a condition they have, a  prescription they are
+    taking or their physical measurements. <p/>
   <u>What is a concept set?</u><ul/>
-      You can search for and save collections of concepts from a particular domain as a
-      “Concept set”. For example, you can search for height, weight and blood pressure
-      concepts from “Measurements” domain and call it “biometrics” concept set.<p/>
+    You can search for and save collections of concepts from a particular domain as a
+    “Concept set”. For example, you can search for height, weight and blood pressure
+    concepts from “Measurements” domain and call it “biometrics” concept set.<p/>
   <u>How to use a concept set </u><ul/>
-      You can use Notebooks to extract data defined in your “concept set” from your “cohort”.
-      For example, you can launch a Notebook to import your “diabetes cases” cohort
-      and then select your “biometrics” concept set, to get biometrics data for
-  the participants in your cohort.</ul>];
+    You can use Notebooks to extract data defined in your “concept set” from your “cohort”.
+    For example, you can launch a Notebook to import your “diabetes cases” cohort
+    and then select your “biometrics” concept set, to get biometrics data for
+    the participants in your cohort.</ul>
+];
 
 export class ConceptHomepage extends React.Component<{}, {showConcepts: boolean}> {
   constructor(props) {
