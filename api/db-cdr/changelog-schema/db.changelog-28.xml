@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="brianfreeman" id="changelog-27">
+
+    <dropIndex tableName="cb_criteria" indexName="idx_cb_criteria_type_parent_id"></dropIndex>
+    <dropIndex tableName="cb_criteria" indexName="idx_cb_criteria_concept_id"></dropIndex>
+    <dropIndex tableName="cb_criteria" indexName="idx_cb_criteria_code"></dropIndex>
+
+    <createIndex
+      indexName="idx_cb_criteria_domain_type"
+      tableName="cb_criteria"
+      unique="false">
+      <column name="domain_id"/>
+      <column name="type"/>
+    </createIndex>
+
+    <createIndex
+      indexName="idx_cb_criteria_domain_code"
+      tableName="cb_criteria"
+      unique="false">
+      <column name="domain_id"/>
+      <column name="code"/>
+    </createIndex>
+
+  </changeSet>
+</databaseChangeLog>
