@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 
-import {Button} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {ImmutableListItem, ResourceListItem} from 'app/components/resources';
@@ -26,6 +26,7 @@ import {NewDataSetModal} from 'app/views/new-dataset-modal/component';
 import {
   Cohort,
   ConceptSet,
+  DataSetPreviewList,
   DataSetQuery,
   DataSetRequest,
   Domain,
@@ -38,8 +39,8 @@ import {
   ValueSet,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
-
-
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
 
 export const styles = {
   selectBoxHeader: {
@@ -89,15 +90,33 @@ export const ValueListItem: React.FunctionComponent <
     </div>;
   };
 
-export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
-  {workspace: WorkspaceData},
-  {creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
-    conceptSetList: ConceptSet[], cohortList: Cohort[], loadingResources: boolean,
-    confirmDeleting: boolean, editing: boolean, resource: RecentResource,
-    rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[],
-    valueSets: ValueSet[], selectedValues: DomainValuePair[], openSaveModal: boolean,
-    queries: Array<DataSetQuery>, includesAllParticipants: boolean
-  }> {
+interface Props {
+  workspace: WorkspaceData;
+}
+
+interface State {
+  confirmDeleting: boolean;
+  cohortList: Cohort[];
+  conceptDomainList: DomainInfo[];
+  conceptSetList: ConceptSet[];
+  creatingConceptSet: boolean;
+  previewList: Array<DataSetPreviewList>;
+  editing: boolean;
+  includesAllParticipants: boolean;
+  loadingResources: boolean;
+  openSaveModal: boolean;
+  previewDataLoading: boolean;
+  resource: RecentResource;
+  rType: ResourceType;
+  selectedCohortIds: number[];
+  selectedConceptSetIds: number[];
+  selectedPreviewDomain: string;
+  selectedValues: DomainValuePair[];
+  valueSets: ValueSet[];
+  queries: Array<DataSetQuery>;
+}
+
+const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, State> {
 
   constructor(props) {
     super(props);
@@ -117,6 +136,9 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       selectedValues: [],
       openSaveModal: false,
       queries: [],
+      previewList: [],
+      selectedPreviewDomain: '',
+      previewDataLoading: false,
       includesAllParticipants: false
     };
   }
@@ -300,6 +322,24 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
         !this.state.selectedValues || this.state.selectedValues.length === 0;
   }
 
+  setSelectedPreivewDomain(domain) {
+    this.setState({selectedPreviewDomain: domain});
+  }
+
+  getDataTableValue(data) {
+    // convert data model from api :
+    // [{value[0]: '', queryValue: []}, {value[1]: '', queryValue: []}]
+    // to compatible with DataTable
+    // {value[0]: queryValue[0], value[1]: queryValue[1]}
+
+    const tableData = fp.flow(
+      fp.map(({value, queryValue}) => fp.map(v => [value, v], queryValue)),
+      fp.unzip,
+      fp.map(fp.fromPairs)
+    )(data);
+    return tableData;
+  }
+
   async generateCode() {
     const {namespace, id} = this.props.workspace;
     const dataSet: DataSetRequest = {
@@ -310,7 +350,28 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       includesAllParticipants: this.state.includesAllParticipants
     };
     const sqlQueries = await dataSetApi().generateQuery(namespace, id, dataSet);
-    this.setState({queries: sqlQueries.queryList});
+    this.setState({queries: sqlQueries.queryList, previewList: []});
+  }
+
+  async getPreviewData() {
+    this.setState({previewList: [], previewDataLoading: true});
+    const {namespace, id} = this.props.workspace;
+    const request = {
+      name: '',
+      description: '',
+      conceptSetIds: this.state.selectedConceptSetIds,
+      cohortIds: this.state.selectedCohortIds,
+      values: this.state.selectedValues
+    };
+    try {
+      const dataSetPreviewResp = await dataSetApi().previewQuery(namespace, id, request);
+      this.setState({previewList: dataSetPreviewResp.domainValue,
+        selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain});
+    } catch (ex) {
+      console.log(ex);
+    } finally {
+      this.setState({previewDataLoading: false});
+    }
   }
 
   buildQueryConfig(np: NamedParameterEntry) {
@@ -332,6 +393,19 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
+  renderPreviewDataTable() {
+    const filteredPreviewData =
+        this.state.previewList.filter(
+          preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
+
+    return <DataTable key={this.state.selectedPreviewDomain}
+                      value={this.getDataTableValue(filteredPreviewData.values)}>
+      {filteredPreviewData.values.map(value =>
+          <Column header={value.value} headerStyle={{textAlign: 'left'}} field={value.value}/>
+      )}
+    </DataTable>;
+  }
+
   render() {
     const {namespace, id} = this.props.workspace;
     const {
@@ -347,6 +421,9 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       selectedCohortIds,
       selectedConceptSetIds,
       selectedValues,
+      previewList,
+      selectedPreviewDomain,
+      previewDataLoading,
       valueSets
     } = this.state;
     const currentResource = this.getCurrentResource();
@@ -357,7 +434,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
           variables and values for one or more of your cohorts. Then export the completed dataset
           to Notebooks where you can perform your analysis</div>
         <div style={{display: 'flex'}}>
-          <div style={{marginLeft: '1.5rem', marginRight: '1.5rem', width: '33%'}}>
+          <div style={{width: '33%'}}>
             <h2>Select Cohorts</h2>
             <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
               <div style={styles.selectBoxHeader}>
@@ -398,7 +475,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
               </div>
             </div>
           </div>
-          <div style={{width: '58%'}}>
+          <div style={{marginLeft: '1.5rem', width: '65%'}}>
             <h2>Select Concept Sets</h2>
             <div style={{display: 'flex', backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
               <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
@@ -440,8 +517,9 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
                         {fp.capitalize(valueSet.domain.toString())}
                       </div>
                       {valueSet.values.items.map(domainValue =>
-                        <ValueListItem key={domainValue.value} domainValue={domainValue} onSelect={
-                          () => this.selectDomainValue(valueSet.domain, domainValue)}
+                        <ValueListItem data-test-id='value-items'
+                          key={domainValue.value} domainValue={domainValue}
+                          onSelect={() => this.selectDomainValue(valueSet.domain, domainValue)}
                           checked={fp.some({domain: valueSet.domain, value: domainValue.value},
                             selectedValues)}/>
                       )}
@@ -455,24 +533,55 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       </FadeBox>
       <FadeBox style={{marginTop: '1rem'}}>
         <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-          <div style={{...styles.selectBoxHeader, display: 'flex', position: 'relative'}}>
-            <div>Preview Dataset</div>
-            <div style={{marginLeft: '1rem', color: '#000000', fontSize: '14px'}}>A visualization
+          <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row',
+            position: 'relative'}}>
+            <div style={{color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
             <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}}
-                    onClick={() => {
-                      this.generateCode();
-                    }}>
+                    disabled={this.disableSave()} onClick={() => {this.generateCode(); }}>
               GENERATE CODE
             </Button>
-            {/* Button disabled until this functionality added*/}
+            <Button style={{position: 'absolute', right: '16rem', top: '0.25rem'}}
+                    disabled={this.disableSave()} onClick={() => {this.getPreviewData(); }}>
+              PREVIEW DATA SET
+            </Button>
             <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
                     onClick ={() => this.setState({openSaveModal: true})}
                     disabled={this.disableSave()}>
-              SAVE DATASET
+              SAVE DATA SET
             </Button>
           </div>
-          {/*TODO: Display dataset preview*/}
+          {previewDataLoading && <div style={{display: 'flex', flexDirection: 'column'}}>
+            <Spinner style={{position: 'relative', top: '2rem',
+              left: '45%'}}></Spinner>
+            <div style={{top: '3rem', position: 'relative',
+              left: '35%'}}>It may take up to a minute to load the data</div></div>
+          }
+          {previewList.length > 0 &&
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+              <div style={{display: 'flex', flexDirection: 'row'}}>
+                {previewList.map(previewRow =>
+                   <Clickable key={previewRow.domain}
+                             onClick={() => this.setSelectedPreivewDomain(previewRow.domain)}
+                             style={{
+                               lineHeight: '32px', fontSize: '18px',
+                               fontWeight: (selectedPreviewDomain === previewRow.domain)
+                                   ? 600 : 400,
+                               textDecoration:
+                                   (selectedPreviewDomain === previewRow.domain) ? 'underline' : ''
+                             }}>
+                     <div key={previewRow.domain}
+                         style={{
+                           marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'
+                         }}>
+                       {previewRow.domain}
+                     </div>
+                   </Clickable>
+                )}
+              </div>
+              {this.renderPreviewDataTable()}
+            </div>
+          }
           <div style={{height: '8rem'}}>
             {queries.map(query =>
               <React.Fragment>
@@ -529,6 +638,11 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     </React.Fragment>;
   }
 });
+
+export {
+  DataSetPage,
+  Props as DataSetPageProps
+};
 
 @Component({
   template: '<div #root></div>'
