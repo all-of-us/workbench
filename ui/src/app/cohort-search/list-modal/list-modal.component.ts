@@ -19,9 +19,9 @@ import {
   autocompleteStore,
   scrollStore,
   searchRequestStore,
+  selectionsStore,
   subtreePathStore,
   subtreeSelectedStore,
-  selectionsStore,
   wizardStore
 } from 'app/cohort-search/search-state.service';
 import {stripHtml, subtypeToTitle, typeToTitle} from 'app/cohort-search/utils';
