@@ -1,6 +1,6 @@
 import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {autocompleteStore, selectedPathStore, selectedStore} from 'app/cohort-search/search-state.service';
+import {autocompleteStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {TreeSubType} from 'generated';
@@ -104,8 +104,8 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
         // TODO call api for ingredients
       } else {
         autocompleteStore.next(option.name);
-        selectedPathStore.next(option.path.split('.'));
-        selectedStore.next(option.id);
+        subtreePathStore.next(option.path.split('.'));
+        subtreeSelectedStore.next(option.id);
       }
     }
   }
