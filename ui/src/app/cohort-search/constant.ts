@@ -1,5 +1,5 @@
 import {AttrName, Operator, TreeSubType, TreeType} from 'generated';
-import {CriteriaType, DomainType} from 'generated/fetch';
+import {DomainType} from 'generated/fetch';
 
 export const PROGRAM_TYPES = [
   { name: 'Surveys', type: TreeType.PPI, subtype: null },
