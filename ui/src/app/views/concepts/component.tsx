@@ -61,13 +61,13 @@ const styles = reactStyles({
   }
 });
 
-interface ConceptCacheSet {
+interface ConceptCacheItem {
   domain: Domain;
   vocabularyList: Array<VocabularyCount>;
   items: Array<Concept>;
 }
 
-const DomainBox: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
+const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
   standardConceptsOnly: boolean, browseInDomain: Function}> =
     ({conceptDomainInfo, standardConceptsOnly, browseInDomain}) => {
       const conceptCount = standardConceptsOnly ?
@@ -86,14 +86,24 @@ const DomainBox: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
 
 export const ConceptWrapper = withCurrentWorkspace()(
   class extends React.Component<{workspace: WorkspaceData},
-      {loadingDomains: boolean, currentSearchString: string, standardConceptsOnly: boolean,
-        searching: boolean, searchLoading: boolean, showSearchError: boolean,
-        selectedDomain: DomainCount, conceptDomainList: Array<DomainInfo>,
-        conceptDomainCounts: Array<DomainCount>, concepts: Array<Concept>,
-        conceptsCache: Array<ConceptCacheSet>, selectedConceptDomainMap: Map<String, number>,
-        completedDomainSearches: Array<Domain>, conceptsToAdd: Concept[],
-        vocabularies: Array<VocabularyCount>, conceptAddModalOpen: boolean,
-        conceptsSavedText: string}> {
+    {completedDomainSearches: Array<Domain>,
+      conceptAddModalOpen: boolean,
+      conceptDomainCounts: Array<DomainCount>,
+      conceptDomainList: Array<DomainInfo>,
+      concepts: Array<Concept>,
+      conceptsCache: Array<ConceptCacheItem>,
+      conceptsSavedText: string,
+      conceptsToAdd: Concept[],
+      currentSearchString: string,
+      loadingDomains: boolean,
+      searchLoading: boolean,
+      searching: boolean,
+      selectedConceptDomainMap: Map<String, number>,
+      selectedDomain: DomainCount,
+      showSearchError: boolean,
+      standardConceptsOnly: boolean,
+      vocabularies: Array<VocabularyCount>
+    }> {
 
     private MAX_CONCEPT_FETCH = 100;
     constructor(props) {
@@ -130,7 +140,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
     async loadDomains() {
       const {namespace, id} = this.props.workspace;
       try {
-        const conceptsCache: ConceptCacheSet[] = [];
+        const conceptsCache: ConceptCacheItem[] = [];
         const conceptDomainCounts: DomainCount[] = [];
         const resp = await conceptsApi().getDomainInfo(namespace, id);
         this.setState({conceptDomainList: resp.items});
@@ -177,7 +187,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
 
     setConceptsAndVocabularies() {
       const cacheItem = this.state.conceptsCache
-        .find(conceptDomain => conceptDomain.domain === this.state.selectedDomain.domain);
+        .find(c => c.domain === this.state.selectedDomain.domain);
       this.setState({concepts: cacheItem.items});
       this.setState({vocabularies: cacheItem.vocabularyList});
     }
@@ -191,26 +201,26 @@ export const ConceptWrapper = withCurrentWorkspace()(
       const standardConceptFilter = standardConceptsOnly ?
         StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
 
-      conceptsCache.forEach(async(conceptDomain) => {
-        const activeTabSearch = conceptDomain.domain === selectedDomain.domain;
+      conceptsCache.forEach(async(cacheItem) => {
+        const activeTabSearch = cacheItem.domain === selectedDomain.domain;
         const resp = await conceptsApi().searchConcepts(namespace, id, {
           query: currentSearchString,
           standardConceptFilter: standardConceptFilter,
-          domain: conceptDomain.domain,
+          domain: cacheItem.domain,
           includeDomainCounts: activeTabSearch,
           includeVocabularyCounts: true,
           maxResults: this.MAX_CONCEPT_FETCH
         });
-        completedDomainSearches.push(conceptDomain.domain);
-        conceptDomain.items = resp.items;
-        conceptDomain.vocabularyList = resp.vocabularyCounts;
+        completedDomainSearches.push(cacheItem.domain);
+        cacheItem.items = resp.items;
+        cacheItem.vocabularyList = resp.vocabularyCounts;
         this.setState({completedDomainSearches: completedDomainSearches});
         if (activeTabSearch) {
           this.setState({
             searchLoading: false,
             conceptDomainCounts: resp.domainCounts,
             selectedDomain: resp.domainCounts
-              .find(domainCount => domainCount.domain === conceptDomain.domain)});
+              .find(domainCount => domainCount.domain === cacheItem.domain)});
           this.setConceptsAndVocabularies();
         }
       });
@@ -362,13 +372,13 @@ export const ConceptWrapper = withCurrentWorkspace()(
             </FadeBox> :
             <div style={{display: 'flex', flexDirection: 'row', width: '94.3%', flexWrap: 'wrap'}}>
               {conceptDomainList.map((domain, i) => {
-                return <DomainBox conceptDomainInfo={domain}
-                                  standardConceptsOnly={standardConceptsOnly}
-                                  browseInDomain={() => {
-                                    this.browseDomain(domain);
-                                    this.setState({searching: true});
-                                  }}
-                                  key={i} data-test-id='domain-box'/>;
+                return <DomainCard conceptDomainInfo={domain}
+                                    standardConceptsOnly={standardConceptsOnly}
+                                    browseInDomain={() => {
+                                      this.browseDomain(domain);
+                                      this.setState({searching: true});
+                                    }}
+                                    key={i} data-test-id='domain-box'/>;
               })}
           </div>
         }
