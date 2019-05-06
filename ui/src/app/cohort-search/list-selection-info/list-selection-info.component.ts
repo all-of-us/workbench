@@ -1,5 +1,9 @@
 import {Component, Input} from '@angular/core';
-import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {
+  groupSelectionsStore,
+  selectionsStore,
+  wizardStore
+} from 'app/cohort-search/search-state.service';
 import {DomainType} from 'generated/fetch';
 
 @Component({
@@ -19,6 +23,10 @@ export class ListSelectionInfoComponent {
     const wizard = wizardStore.getValue();
     wizard.item.searchParameters = wizard.item.searchParameters.filter(p => p.paramId !== paramId);
     selections = selections.filter(s => s !== paramId);
+    if (this.parameter.group) {
+      const groups = groupSelectionsStore.getValue().filter(id => id !== this.parameter.id);
+      groupSelectionsStore.next(groups);
+    }
     selectionsStore.next(selections);
     wizardStore.next(wizard);
   }
