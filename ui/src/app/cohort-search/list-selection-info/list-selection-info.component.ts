@@ -18,11 +18,12 @@ export class ListSelectionInfoComponent {
   constructor() {}
 
   remove(): void {
-    const {paramId} = this.parameter;
+    const {parameterId} = this.parameter;
     let selections = selectionsStore.getValue();
     const wizard = wizardStore.getValue();
-    wizard.item.searchParameters = wizard.item.searchParameters.filter(p => p.paramId !== paramId);
-    selections = selections.filter(s => s !== paramId);
+    wizard.item.searchParameters = wizard.item.searchParameters
+      .filter(p => p.parameterId !== parameterId);
+    selections = selections.filter(s => s !== parameterId);
     if (this.parameter.group) {
       const groups = groupSelectionsStore.getValue().filter(id => id !== this.parameter.id);
       groupSelectionsStore.next(groups);

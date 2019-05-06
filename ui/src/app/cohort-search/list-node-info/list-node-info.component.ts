@@ -51,7 +51,7 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(groupIds => {
         this.isSelectedChild = groupIds.some(
           id => this.node.path.split('.')
-            .filter(id => id.toString() !== this.node.id)
+            .filter(pathId => pathId !== this.node.id.toString())
             .includes(id.toString())
         );
       }));

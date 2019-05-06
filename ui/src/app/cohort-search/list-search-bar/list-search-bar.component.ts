@@ -40,7 +40,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = autocompleteStore.subscribe(searchTerm => {
       this.searchTerm.setValue(searchTerm, {emitEvent: false});
-      console.log(this.searchTerm.value);
     });
     // TODO set to false for now, may need to change for conditions/procedures
     this.codes = false;
@@ -49,7 +48,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
       .debounceTime(300)
       .distinctUntilChanged()
       .subscribe( value => {
-        console.log(value);
         if (value.length >= trigger) {
           this.inputChange();
         } else {
