@@ -63,13 +63,9 @@ public class BillingProjectBufferServiceTest {
   }
 
   @Autowired
-  private Clock clock;
-  @Autowired
   private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   @Autowired
   private FireCloudService fireCloudService;
-  @Autowired
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   private BillingProjectBufferService billingProjectBufferService;
