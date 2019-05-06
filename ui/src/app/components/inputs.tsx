@@ -139,7 +139,7 @@ export const Select = ({value, options, onChange, ...props}) => {
 };
 
 export class DatePicker extends React.Component<
-  {value: Date, onChange: Function, onBlur?: Function, maxDate?: Date}
+  {value: Date, onChange: Function, onBlur?: Function, maxDate?: Date, disabled?: boolean}
 > {
   popup: React.RefObject<any>;
   constructor(props) {
@@ -148,7 +148,7 @@ export class DatePicker extends React.Component<
   }
 
   render() {
-    const {value, onChange, onBlur, ...props} = this.props;
+    const {value, onChange, onBlur, disabled, ...props} = this.props;
     let date, text;
     if (value !== null && typeof value === 'object') {
       date = value;
@@ -165,12 +165,15 @@ export class DatePicker extends React.Component<
         border: 0,
         padding: '0',
         color: '#565656', background: 'transparent',
+        ...(disabled ? {opacity: .5} : {}),
       }}
     >
       <TextInput
         value={text}
         onChange={onChange}
-        onBlur={onBlur}/>
+        onBlur={onBlur}
+        disabled={disabled}
+        style={{...(disabled ? {cursor: 'not-allowed'} : {})}}/>
       <PopupTrigger
         ref={this.popup}
         content={<Calendar
@@ -182,7 +185,8 @@ export class DatePicker extends React.Component<
           }}
         />}
       >
-        <Clickable style={{display: 'flex', alignItems: 'center', flex: 1}}>
+        <Clickable style={{display: 'flex', alignItems: 'center', flex: 1,
+          ...(disabled ? {cursor: 'not-allowed'} : {})}} disabled={disabled}>
           <ClrIcon
             style={{flex: 'none', marginLeft: '4px', color: '#216FB4'}}
             shape='calendar'
