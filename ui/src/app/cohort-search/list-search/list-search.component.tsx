@@ -7,6 +7,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import * as React from 'react';
+import {DomainType} from '../../../generated/fetch';
 
 const styles = reactStyles({
   searchContainer: {
@@ -114,12 +115,21 @@ export const ListSearch = withCurrentWorkspace()(
       if (event.key === 'Enter') {
         this.setState({data: null, loading: true});
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
-        cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
-          +cdrVersionId, domain, event.target.value
-        ).then(resp => {
-          const data = resp.items.length ? resp.items : null;
-          this.setState({data, loading: false});
-        });
+        if (domain === DomainType.DRUG) {
+          // temp call until new api call is ready
+          cohortBuilderApi().getDrugBrandOrIngredientByValue(+cdrVersionId, event.target.value)
+            .then(resp => {
+              const data = resp.items.length ? resp.items : null;
+              this.setState({data, loading: false});
+            });
+        } else {
+          cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
+            +cdrVersionId, domain, event.target.value
+          ).then(resp => {
+            const data = resp.items.length ? resp.items : null;
+            this.setState({data, loading: false});
+          });
+        }
       }
     }
 
