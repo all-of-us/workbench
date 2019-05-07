@@ -3,6 +3,7 @@ package org.pmiops.workbench.firecloud;
 import java.io.IOException;
 import java.util.List;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
+import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.JWTWrapper;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
@@ -41,6 +42,11 @@ public interface FireCloudService {
    * Creates a billing project owned by AllOfUs.
    */
   void createAllOfUsBillingProject(String projectName);
+
+  /**
+   * Get Billing Project Status
+   */
+  BillingProjectStatus getBillingProjectStatus(String projectName);
 
   /**
    * Adds the specified user to the specified billing project.

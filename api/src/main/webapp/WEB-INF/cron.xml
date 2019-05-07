@@ -30,4 +30,10 @@
     <description>If the AoU Billing Project buffer is not full, create a firecloud billing project and add one</description>
     <schedule>every 1 minutes</schedule>
   </cron>
+  <cron>
+    <url>/v1/cron/syncBillingProjectStatus</url>
+    <target>api</target>
+    <description>Fetch a BillingProjectBufferEntry that is in the CREATING state and check its status on Firecloud</description>
+    <schedule>every 5 seconds</schedule>
+  </cron>
 </cronentries>
