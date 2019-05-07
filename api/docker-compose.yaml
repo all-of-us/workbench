@@ -6,10 +6,10 @@ services:
     user: ${UID}
     working_dir: /w/api
     volumes:
-      - ..:/w:cached
-      - gradle-cache:/.gradle
-      - ~/.config:/.config:cached
-      - ~/.gsutil:/.gsutil:cached
+      - ..:/w:delegated
+      - gradle-cache:/.gradle:delegated
+      - ~/.config:/.config:delegated
+      - ~/.gsutil:/.gsutil:delegated
   db:
     image: mysql:5.7
     env_file:
@@ -39,10 +39,10 @@ services:
     user: ${UID}
     working_dir: /w/api
     volumes:
-      - ..:/w:cached
-      - gradle-cache:/.gradle
-      - ~/.config:/.config:cached
-      - ~/.gsutil:/.gsutil:cached
+      - ..:/w:delegated
+      - gradle-cache:/.gradle:delegated
+      - ~/.config:/.config:delegated
+      - ~/.gsutil:/.gsutil:delegated
     command: ./project.rb start-api-and-incremental-build
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/w/api/sa-key.json
