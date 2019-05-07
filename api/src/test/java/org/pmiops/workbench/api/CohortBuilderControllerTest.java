@@ -328,7 +328,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.LOINC.toString())
       .attribute(Boolean.FALSE)
       .standard(false)
-      .synonyms("[rank1]");
+      .synonyms("[condition_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -355,7 +355,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.BRAND.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("[rank1]");
+      .synonyms("[drug_rank1]");
     cbCriteriaDao.save(criteria1);
     CBCriteria criteria2 = new CBCriteria()
       .code("8163")
@@ -369,7 +369,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.RXNORM.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("[rank1]");
+      .synonyms("[drug_rank1]");
     cbCriteriaDao.save(criteria2);
     CBCriteria criteria3 = new CBCriteria()
       .code("8163")
@@ -383,7 +383,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.RXNORM.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("[rank1]");
+      .synonyms("[drug_rank1]");
     cbCriteriaDao.save(criteria3);
     jdbcTemplate.execute("create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
     jdbcTemplate.execute("insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (19001487, 1135766)");
@@ -427,7 +427,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.LOINC.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("[rank1]");
+      .synonyms("[condition_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -454,7 +454,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.LOINC.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("LP12*\"[rank1]\"");
+      .synonyms("LP12*[condition_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -482,7 +482,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.ATC.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("LP12*\"[rank1]\"");
+      .synonyms("LP12*[drug_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(

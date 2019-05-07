@@ -24,10 +24,11 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
   List<StandardProjection> findStandardProjectionByCode(@Param("domain") String domain,
                                                         @Param("term") String term);
 
-  @Query(value = "select c from CBCriteria c where domainId=:domain and standard=:standard and code like upper(concat(:term,'%')) and match(synonyms, '+[rank1]') > 0 order by c.count desc")
+  @Query(value = "select c from CBCriteria c where domainId=:domain and standard=:standard and code like upper(concat(:term,'%')) and match(synonyms, :domainRank) > 0 order by c.count desc")
   List<CBCriteria> findCriteriaByDomainAndCode(@Param("domain") String domain,
                                                @Param("standard") Boolean isStandard,
                                                @Param("term") String term,
+                                               @Param("domainRank") String domainRank,
                                                Pageable page);
 
   @Query(value = "select c from CBCriteria c where domainId=:domain and standard=:standard and match(synonyms, :term) > 0 order by c.count desc")

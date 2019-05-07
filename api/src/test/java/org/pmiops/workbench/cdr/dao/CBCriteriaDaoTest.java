@@ -81,7 +81,7 @@ public class CBCriteriaDaoTest {
     cbCriteriaDao.save(criteria);
     PageRequest page = new PageRequest(0, 10);
     List<CBCriteria> criteriaList =
-      cbCriteriaDao.findCriteriaByDomainAndCode(domainId, Boolean.TRUE,"001", page);
+      cbCriteriaDao.findCriteriaByDomainAndCode(domainId, Boolean.TRUE,"001", "+[rank1]", page);
     assertEquals(1, criteriaList.size());
     assertEquals(criteria, criteriaList.get(0));
   }
