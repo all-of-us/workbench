@@ -3,6 +3,7 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {Profile} from 'generated';
 import {Cohort, ConceptSet} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export const NavStore = {
