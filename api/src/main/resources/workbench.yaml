@@ -1791,6 +1791,11 @@ definitions:
     description: levels of access to workspace, NO ACCESS is akin to removing a user from a workspace ACL.
     enum: [NO ACCESS, READER, WRITER, OWNER]
 
+  WorkspaceActiveStatus:
+    type: string
+    description: Status of workspace
+    enum: [ACTIVE, DELETED]
+
   ResearchPurpose:
     type: object
     required:

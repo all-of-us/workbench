@@ -212,6 +212,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     setCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
     org.pmiops.workbench.db.model.Workspace reqWorkspace = workspaceMapper.toDbWorkspace(workspace);
@@ -294,6 +295,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(String workspaceNamespace,
       String workspaceId) {
+    // TODO: do we want to delete any workspace resources?
     //general note. When you delete a workspace the related rows in the following tables will also be deleted
     //Cohort, cohort review, cohort annotation definition, cohort annotation enum value,
     //participant cohort annotations, participant cohort status. Please see liquibase/db for more
@@ -302,7 +304,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceNamespace, workspaceId);
     // This automatically handles access control to the workspace.
     fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
-    workspaceService.getDao().delete(dbWorkspace);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+
     return ResponseEntity.ok(new EmptyResponse());
   }
 
