@@ -15,6 +15,7 @@ import java.util.List;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -62,6 +63,7 @@ public class DataSetController implements DataSetApiDelegate {
   private final WorkspaceService workspaceService;
 
   private static int NO_OF_PREVIEW_ROWS = 20;
+  private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
 
   @Autowired
@@ -218,7 +220,14 @@ public class DataSetController implements DataSetApiDelegate {
 
       queryResponse.getValues().forEach(fieldValueList -> {
         IntStream.range(0, fieldValueList.size()).forEach(columnNumber -> {
-          valuePreviewList.get(columnNumber).addQueryValueItem(fieldValueList.get(columnNumber).getValue().toString());
+          try {
+            valuePreviewList.get(columnNumber).addQueryValueItem(
+                fieldValueList.get(columnNumber).getValue().toString());
+          } catch (NullPointerException ex) {
+            log.severe(
+                String.format("Null pointer exception while retriving value for query: Column %s ", columnNumber));
+            valuePreviewList.get(columnNumber).addQueryValueItem("");
+          }
         });
       });
       previewQueryResponse.addDomainValueItem(new DataSetPreviewList().domain(domain).values(valuePreviewList));
