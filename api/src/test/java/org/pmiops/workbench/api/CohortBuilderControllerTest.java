@@ -219,13 +219,14 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.LOINC.toString())
       .count("0")
       .hierarchy(true)
+      .standard(true)
       .synonyms("LP12*\"[rank1]\"");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
       createResponseCriteria(criteria),
       controller
-        .getCriteriaAutoComplete(1L, DomainType.MEASUREMENT.toString(),"LP12", CriteriaType.LOINC.toString(), null)
+        .getCriteriaAutoComplete(1L, DomainType.MEASUREMENT.toString(),"LP12", CriteriaType.LOINC.toString(), true,null)
         .getBody()
         .getItems()
         .get(0)
@@ -240,13 +241,15 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.LOINC.toString())
       .count("0")
       .hierarchy(true)
-      .code("LP123");
+      .standard(true)
+      .code("LP123")
+      .synonyms("[measurement_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
       createResponseCriteria(criteria),
       controller
-        .getCriteriaAutoComplete(1L, DomainType.MEASUREMENT.toString(),"LP12", CriteriaType.LOINC.toString(), null)
+        .getCriteriaAutoComplete(1L, DomainType.MEASUREMENT.toString(),"LP12", CriteriaType.LOINC.toString(),true,null)
         .getBody()
         .getItems()
         .get(0)
@@ -261,13 +264,14 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.SNOMED.toString())
       .count("0")
       .hierarchy(true)
+      .standard(true)
       .synonyms("LP12*\"[rank1]\"");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
       createResponseCriteria(criteria),
       controller
-        .getCriteriaAutoComplete(1L, DomainType.CONDITION.toString(),"LP12", CriteriaType.SNOMED.toString(), null)
+        .getCriteriaAutoComplete(1L, DomainType.CONDITION.toString(),"LP12", CriteriaType.SNOMED.toString(),true,null)
         .getBody()
         .getItems()
         .get(0)
@@ -279,7 +283,7 @@ public class CohortBuilderControllerTest {
     testConfig.cohortbuilder.enableListSearch = true;
     try {
       controller
-        .getCriteriaAutoComplete(1L, null, "blah",  null, null);
+        .getCriteriaAutoComplete(1L,null,"blah",null,null,null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
@@ -288,7 +292,7 @@ public class CohortBuilderControllerTest {
 
     try {
       controller
-        .getCriteriaAutoComplete(1L, "blah", "blah",  null, null);
+        .getCriteriaAutoComplete(1L,"blah","blah",null,null,null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
@@ -297,7 +301,7 @@ public class CohortBuilderControllerTest {
 
     try {
       controller
-        .getCriteriaAutoComplete(1L, "blah", "blah",  "blah", null);
+        .getCriteriaAutoComplete(1L,"blah","blah","blah",null,null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
@@ -306,7 +310,7 @@ public class CohortBuilderControllerTest {
 
     try {
       controller
-        .getCriteriaAutoComplete(1L, DomainType.CONDITION.toString(), "blah",  "blah", null);
+        .getCriteriaAutoComplete(1L, DomainType.CONDITION.toString(), "blah",  "blah", null,null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success

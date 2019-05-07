@@ -37,18 +37,20 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
                                                    @Param("term") String term,
                                                    Pageable page);
 
-  @Query(value = "select c from CBCriteria c where domainId=:domain and type=:type and hierarchy=1 and (match(synonyms, :modifiedTerm) > 0 or code like upper(concat(:term,'%'))) order by c.count desc")
-  List<CBCriteria> findCriteriaByDomainAndTypeForCodeOrName(@Param("domain") String domain,
-                                                            @Param("type") String type,
-                                                            @Param("modifiedTerm") String modifiedTerm,
-                                                            @Param("term") String term,
-                                                            Pageable page);
+  @Query(value = "select c from CBCriteria c where domainId=:domain and type=:type and standard=:standard and hierarchy=1 and code like upper(concat(:term,'%')) and match(synonyms, :domainRank) > 0 order by c.count desc")
+  List<CBCriteria> findCriteriaByDomainAndTypeAndStandardAndCode(@Param("domain") String domain,
+                                                                 @Param("type") String type,
+                                                                 @Param("standard") Boolean standard,
+                                                                 @Param("term") String term,
+                                                                 @Param("domainRank") String domainRank,
+                                                                 Pageable page);
 
-  @Query(value = "select c from CBCriteria c where domainId = :domain and type = :type and hierarchy=1 and match(synonyms, :term) > 0 order by c.count desc")
-  List<CBCriteria> findCriteriaByDomainAndTypeForName(@Param("domain") String domain,
-                                                      @Param("type") String type,
-                                                      @Param("term") String term,
-                                                      Pageable page);
+  @Query(value = "select c from CBCriteria c where domainId = :domain and type = :type and standard = :standard and hierarchy=1 and match(synonyms, :term) > 0 order by c.count desc")
+  List<CBCriteria> findCriteriaByDomainAndTypeAndStandardAndSynonyms(@Param("domain") String domain,
+                                                                     @Param("type") String type,
+                                                                     @Param("standard") Boolean standard,
+                                                                     @Param("term") String term,
+                                                                     Pageable page);
 
   @Query(value = "select * from cb_criteria c where domain_id = 'DRUG' and type in ('ATC', 'BRAND') and c.is_selectable = 1 and " +
     "(upper(c.name) like upper(concat('%',:term,'%')) or upper(c.code) like upper(concat('%',:term,'%'))) order by c.name asc limit :limit", nativeQuery = true)

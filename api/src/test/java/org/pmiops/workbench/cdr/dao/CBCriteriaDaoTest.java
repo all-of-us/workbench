@@ -161,34 +161,38 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndTypeForCodeOrName() throws Exception {
+  public void findCriteriaByDomainAndTypeAndStandardAndCode() throws Exception {
     String domainId = DomainType.MEASUREMENT.toString();
     String type = CriteriaType.LOINC.toString();
     CBCriteria labCriteria = new CBCriteria()
       .domainId(domainId)
       .type(type)
       .hierarchy(true)
+      .standard(true)
       .count("10")
-      .synonyms("LP123");
+      .code("LP123")
+      .synonyms("[rank1]");
     CBCriteria labCriteria1 = new CBCriteria()
       .domainId(domainId)
       .type(type)
       .hierarchy(true)
+      .standard(true)
       .count("101")
-      .code("LP1234");
+      .code("LP1234")
+      .synonyms("[rank1]");
     cbCriteriaDao.save(labCriteria);
     cbCriteriaDao.save(labCriteria1);
 
     PageRequest page = new PageRequest(0, 10);
     List<CBCriteria> labs =
-      cbCriteriaDao.findCriteriaByDomainAndTypeForCodeOrName(domainId, type,"LP123", "LP1234", page);
+      cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(domainId, type, true,"LP123", "+[rank1]", page);
     assertEquals(2, labs.size());
     assertEquals(labCriteria1, labs.get(0));
     assertEquals(labCriteria, labs.get(1));
   }
 
   @Test
-  public void findCriteriaByDomainAndTypeForName() throws Exception {
+  public void findCriteriaByDomainAndTypeAndStandardAndSynonyms() throws Exception {
     String domainId = DomainType.CONDITION.toString();
     String type = CriteriaType.SNOMED.toString();
     CBCriteria snomedCriteria = new CBCriteria()
@@ -196,12 +200,13 @@ public class CBCriteriaDaoTest {
       .type(type)
       .count("10")
       .hierarchy(true)
+      .standard(true)
       .synonyms("myMatch");
     cbCriteriaDao.save(snomedCriteria);
 
     PageRequest page = new PageRequest(0, 10);
     List<CBCriteria> conditions =
-      cbCriteriaDao.findCriteriaByDomainAndTypeForName(domainId, type,"myMatch", page);
+      cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(domainId, type, true,"myMatch", page);
     assertEquals(1, conditions.size());
     assertEquals(snomedCriteria, conditions.get(0));
   }

@@ -124,6 +124,11 @@ paths:
           required: false
           description: the type of the criteria were search for
         - in: query
+          name: standard
+          type: boolean
+          required: false
+          description: the type of the criteria were search for
+        - in: query
           name: term
           type: string
           required: true
