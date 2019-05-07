@@ -204,6 +204,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                       String domain,
                                                                       String term,
                                                                       String type,
+                                                                      Boolean standard,
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
@@ -211,9 +212,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     if (configProvider.get().cohortbuilder.enableListSearch) {
       validateDomainAndType(domain, type);
-      List<CBCriteria> criteriaList = CriteriaType.SNOMED.toString().equals(type) ?
-        cbCriteriaDao.findCriteriaByDomainAndTypeForName(domain, type, matchExp, new PageRequest(0, resultLimit.intValue())) :
-        cbCriteriaDao.findCriteriaByDomainAndTypeForCodeOrName(domain, type, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+      String domainRank = "+[" + domain.toLowerCase() + "_rank1]";
+      List<CBCriteria> criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(domain, type, standard, matchExp, new PageRequest(0, resultLimit.intValue()));
+      if (criteriaList.isEmpty()) {
+        criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(domain, type, standard, term, domainRank, new PageRequest(0, resultLimit.intValue()));
+      }
       criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
     } else {
       List<Criteria> criteriaList;
