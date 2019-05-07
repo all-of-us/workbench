@@ -465,6 +465,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
 
     dbWorkspace.setName(toWorkspace.getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();

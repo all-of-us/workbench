@@ -106,6 +106,7 @@ import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -393,6 +394,7 @@ public class WorkspacesControllerTest {
     workspace.setName(workspaceName);
     workspace.setNamespace(workspaceNameSpace);
     workspace.setDescription("description");
+    workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(researchPurpose);
     workspace.setUserRoles(new ArrayList<UserRole>());

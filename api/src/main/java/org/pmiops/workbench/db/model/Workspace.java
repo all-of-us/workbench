@@ -412,7 +412,7 @@ public class Workspace {
   public void setFirecloudUuid(String firecloudUuid) {this.firecloudUuid = firecloudUuid;}
 
   @Column(name = "active_status")
-  public short getActiveStatus() {return this.activeStatus; }
+  public short getActiveStatus() { return activeStatus; }
 
   public void setActiveStatus(Short activeStatus) {
     this.activeStatus = activeStatus;
