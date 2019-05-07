@@ -1493,10 +1493,6 @@ paths:
           description: Invalid data set request
           schema:
             $ref: "#/definitions/ErrorResponse"
-        409:
-          description: Data set with same name exist
-          schema:
-            $ref: "#/definitions/ErrorResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/preview:
     post:

@@ -12,7 +12,7 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 export const WINDOW_REF = 'window-ref';
 import {
   currentCohortStore,
-  currentConceptSetStore, currentDataSetQueryStore,
+  currentConceptSetStore,
   currentWorkspaceStore,
   routeConfigDataStore,
   urlParamsStore,
@@ -316,11 +316,6 @@ export const withUrlParams = () => {
 // HOC that provides a 'routeConfigData' prop with current route's data object
 export const withRouteConfigData = () => {
   return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
-};
-
-// HOC that provides a 'currentDataSetQuery' prop with a query and a name for route simplification.
-export const withCurrentDataSetQuery = () => {
-  return connectBehaviorSubject(currentDataSetQueryStore, 'currentDataSetQuery');
 };
 
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain

@@ -259,6 +259,9 @@ public class DataSetController implements DataSetApiDelegate {
                 .put("source", new JSONArray()
                   .put(queriesAsStrings))))
         .put("metadata", new JSONObject())
+        // nbformat and nbformat_minor are the notebook major and minor version we are creating.
+        // Specifically, here we create notebook version 4.2 (I believe)
+        // See https://nbformat.readthedocs.io/en/latest/api.html
         .put("nbformat", 4)
         .put("nbformat_minor", 2);
 
@@ -291,25 +294,29 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   private String convertNamedParameterToString(NamedParameterEntry namedParameterEntry) {
-    if (namedParameterEntry.getValue() != null) {
-      boolean isArrayParameter = !(namedParameterEntry.getValue().getParameterValue() instanceof String);
-      return "      {\n" +
-          "        'name': \"" + namedParameterEntry.getValue().getName() + "\",\n" +
-          "        'parameterType': {'type': \"" + namedParameterEntry.getValue().getParameterType() + "\"" +
-          (isArrayParameter ? ",'arrayType': {'type': \"" + namedParameterEntry.getValue().getArrayType() + "\"}," : "") + "},\n" +
-          "        \'parameterValue\': {" + (isArrayParameter ? "\'arrayValues\': [" + (
-              (List<NamedParameterValue>) namedParameterEntry.getValue().getParameterValue())
-          .stream().map(namedParameterValue -> "{\'value\': " + namedParameterValue.getParameterValue() + "}") + "]" :
-          "'value': \"" + namedParameterEntry.getValue().getParameterValue() + "\"") + "}\n" +
-          "      },";
-    } else {
+    if (namedParameterEntry.getValue() == null) {
       return "";
     }
+    boolean isArrayParameter = !(namedParameterEntry.getValue().getParameterValue() instanceof String);
+    List<NamedParameterValue> arrayValues = (List<NamedParameterValue>) namedParameterEntry.getValue().getParameterValue();
+    return "      {\n" +
+        "        'name': \"" + namedParameterEntry.getValue().getName() + "\",\n" +
+        "        'parameterType': {'type': \"" + namedParameterEntry.getValue().getParameterType() + "\"" +
+        (isArrayParameter ? ",'arrayType': {'type': \"" + namedParameterEntry.getValue().getArrayType() + "\"}," : "") + "},\n" +
+        "        \'parameterValue\': {" + (isArrayParameter ? "\'arrayValues\': [" + (
+            arrayValues)
+        .stream().map(namedParameterValue -> "{\'value\': " + namedParameterValue.getParameterValue() + "}") + "]" :
+        "'value': \"" + namedParameterEntry.getValue().getParameterValue() + "\"") + "}\n" +
+        "      },";
   }
 
   private NamedParameterEntry generateResponseFromQueryParameter(String key, QueryParameterValue value) {
     if (value.getValue() != null) {
-      return new NamedParameterEntry().key(key).value(new NamedParameterValue().name(key).parameterType(value.getType().toString()).parameterValue(value.getValue()));
+      return new NamedParameterEntry().key(key)
+          .value(new NamedParameterValue()
+              .name(key)
+              .parameterType(value.getType().toString())
+              .parameterValue(value.getValue()));
     } else if (value.getArrayValues() != null) {
       List<NamedParameterValue> values = value.getArrayValues().stream()
           .map(arrayValue -> generateResponseFromQueryParameter(key, arrayValue).getValue())

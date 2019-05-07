@@ -12,6 +12,7 @@ import {CheckBox, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import colors from 'app/styles/colors';
 import {convertQueryToText} from 'app/utils/big-query-queries';
 import {summarizeErrors} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
@@ -117,11 +118,7 @@ class NewDataSetModal extends React.Component<Props, State> {
   }
 
   changeExportToNewNotebook() {
-    if (this.state.exportToNewNotebook) {
-      this.setState({exportToNewNotebook: false});
-    } else {
-      this.setState({exportToNewNotebook: true});
-    }
+    this.setState({exportToNewNotebook: !this.state.exportToNewNotebook});
   }
 
   async generateQuery() {
@@ -181,7 +178,7 @@ class NewDataSetModal extends React.Component<Props, State> {
         <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem'}}>
           <CheckBox style={{height: 17, width: 17}}
                     onChange={() => this.changeExportToNewNotebook()} />
-          <div style={{marginLeft: '.5rem', color: 'black'}}>Export to new Python notebook</div>
+          <div style={{marginLeft: '.5rem', color: colors.black}}>Export to new Python notebook</div>
         </div>
         {exportToNewNotebook && <React.Fragment>
           {(queries.length === 0 || notebooksLoading) && <SpinnerOverlay />}
