@@ -4,10 +4,10 @@ import {
   Cohort,
   CohortListResponse,
   EmptyResponse,
-  RecentResource,
   Workspace,
-  WorkspaceAccessLevel
 } from 'generated';
+
+import {RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
 
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';

@@ -34,6 +34,7 @@ import {ConceptHomepageComponent} from './views/concept-homepage/component';
 import {ConceptSetDetailsComponent} from './views/concept-set-details/component';
 import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {ConceptTableComponent} from './views/concept-table/component';
+import {ConceptsComponent} from './views/concepts/component';
 import {CreateConceptSetModalComponent} from './views/conceptset-create-modal/component';
 import {DataUseAgreementComponent} from './views/data-use-agreement/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
@@ -148,6 +149,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConceptHomepageComponent,
     ConceptTableComponent,
     ConceptSetListComponent,
+    ConceptsComponent,
     DataPageComponent,
     DataSetPageComponent,
     DataUseAgreementComponent,

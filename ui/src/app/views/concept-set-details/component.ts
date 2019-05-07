@@ -120,7 +120,6 @@ export class ConceptSetDetailsComponent implements OnInit, OnDestroy {
       });
   }
 
-  // TO-DO: This is a dummy function created because @Output in conceptTable is removed
   onSelectConcepts(concepts) {
     this.selectedConcepts = concepts;
   }
