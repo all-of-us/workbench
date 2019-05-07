@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class BillingProjectBufferService {
 
+  private static final int SYNCS_PER_INVOCATION = 5;
   private static final int PROJECT_BILLING_ID_SIZE = 8;
   private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
 
@@ -59,35 +60,38 @@ public class BillingProjectBufferService {
   }
 
   public void syncBillingProjectStatus() {
-    BillingProjectBufferEntry entry = billingProjectBufferEntryDao
-        .findFirstByStatusOrderByLastSyncRequestTimeAsc(StorageEnums.billingProjectBufferStatusToStorage(CREATING));
+    for (int i = 0; i < SYNCS_PER_INVOCATION; i++) {
+      BillingProjectBufferEntry entry = billingProjectBufferEntryDao
+          .findFirstByStatusOrderByLastSyncRequestTimeAsc(
+              StorageEnums.billingProjectBufferStatusToStorage(CREATING));
 
-    if (entry == null) {
-      return;
-    }
-
-    entry.setLastSyncRequestTime(new Timestamp(clock.instant().toEpochMilli()));
-
-    try {
-      switch (fireCloudService.getBillingProjectStatus(entry.getFireCloudProjectName())
-          .getCreationStatus()) {
-        case READY:
-          entry.setStatusEnum(AVAILABLE);
-          break;
-        case ERROR:
-          log.warning(String.format("SyncBillingProjectStatus: BillingProject %s creation failed",
-              entry.getFireCloudProjectName()));
-          entry.setStatusEnum(ERROR);
-          break;
-        case CREATING:
-        default:
-          break;
+      if (entry == null) {
+        return;
       }
-    } catch (WorkbenchException e) {
-      log.log(Level.WARNING, "Get BillingProject status call failed", e);
-    }
 
-    billingProjectBufferEntryDao.save(entry);
+      entry.setLastSyncRequestTime(new Timestamp(clock.instant().toEpochMilli()));
+
+      try {
+        switch (fireCloudService.getBillingProjectStatus(entry.getFireCloudProjectName())
+            .getCreationStatus()) {
+          case READY:
+            entry.setStatusEnum(AVAILABLE);
+            break;
+          case ERROR:
+            log.warning(String.format("SyncBillingProjectStatus: BillingProject %s creation failed",
+                entry.getFireCloudProjectName()));
+            entry.setStatusEnum(ERROR);
+            break;
+          case CREATING:
+          default:
+            break;
+        }
+      } catch (WorkbenchException e) {
+        log.log(Level.WARNING, "Get BillingProject status call failed", e);
+      }
+
+      billingProjectBufferEntryDao.save(entry);
+    }
   }
 
   private String createBillingProjectName() {
