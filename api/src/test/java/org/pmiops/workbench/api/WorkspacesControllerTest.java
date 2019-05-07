@@ -394,7 +394,6 @@ public class WorkspacesControllerTest {
     workspace.setName(workspaceName);
     workspace.setNamespace(workspaceNameSpace);
     workspace.setDescription("description");
-    workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(researchPurpose);
     workspace.setUserRoles(new ArrayList<UserRole>());
