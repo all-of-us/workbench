@@ -100,6 +100,11 @@ public class UserServiceTest {
         new Timestamp(TIMESTAMP_MSECS));
     assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(
         new Timestamp(12345));
+
+    // Completion timestamp should not change when the method is called again.
+    Timestamp completionTime = user.getComplianceTrainingCompletionTime();
+    userService.syncComplianceTrainingStatus();
+    assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(completionTime);
   }
 
   @Test
@@ -140,7 +145,8 @@ public class UserServiceTest {
   public void testSyncEraCommonsStatus() throws Exception {
     NihStatus nihStatus = new NihStatus();
     nihStatus.setLinkedNihUsername("nih-user");
-    nihStatus.setLinkExpireTime(TIMESTAMP_MSECS + 1);
+    // FireCloud stores the NIH status in seconds, not msecs.
+    nihStatus.setLinkExpireTime(TIMESTAMP_MSECS / 1000);
 
     when(fireCloudService.getNihStatus()).thenReturn(nihStatus);
 
@@ -150,8 +156,13 @@ public class UserServiceTest {
     assertThat(user.getEraCommonsCompletionTime()).isEqualTo(
         new Timestamp(TIMESTAMP_MSECS));
     assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(
-        new Timestamp(TIMESTAMP_MSECS + 1));
+        new Timestamp(TIMESTAMP_MSECS / 1000));
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
+
+    // Completion timestamp should not change when the method is called again.
+    Timestamp completionTime = user.getEraCommonsCompletionTime();
+    userService.syncEraCommonsStatus();
+    assertThat(user.getEraCommonsCompletionTime()).isEqualTo(completionTime);
   }
 
   @Test
