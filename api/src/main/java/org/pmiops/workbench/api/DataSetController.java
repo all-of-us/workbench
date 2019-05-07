@@ -182,7 +182,6 @@ public class DataSetController implements DataSetApiDelegate {
   public ResponseEntity<DataSetQueryList> generateQuery(String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     List<DataSetQuery> respQueryList = new ArrayList<>();
-    List<NamedParameterEntry> parameters = new ArrayList<>();
 
     // Generate query per domain for the selected concept set, cohort and values
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
@@ -190,6 +189,7 @@ public class DataSetController implements DataSetApiDelegate {
     // Loop through and run the query for each domain and create LIST of
     // domain, value and their corresponding query result
     bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
+      List<NamedParameterEntry> parameters = new ArrayList<>();
       queryJobConfiguration.getNamedParameters().forEach((key, value) ->
               parameters.add(generateResponseFromQueryParameter(key, value)));
       respQueryList.add(new DataSetQuery()
