@@ -11,6 +11,7 @@ import {TextArea} from 'app/components/inputs';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {convertQueryToText} from 'app/utils/big-query-queries';
 import {summarizeErrors} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
@@ -20,7 +21,6 @@ import {
   DomainValuePair,
   FileDetail
 } from 'generated/fetch';
-import {SpinnerOverlay} from "../../components/spinners";
 
 interface Props {
   closeFunction: Function;
