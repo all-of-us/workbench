@@ -34,6 +34,6 @@
     <url>/v1/cron/syncBillingProjectStatus</url>
     <target>api</target>
     <description>Fetch a BillingProjectBufferEntry that is in the CREATING state and check its status on Firecloud</description>
-    <schedule>every 5 seconds</schedule>
+    <schedule>every 1 minutes</schedule>
   </cron>
 </cronentries>

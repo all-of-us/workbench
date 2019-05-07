@@ -24,7 +24,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
