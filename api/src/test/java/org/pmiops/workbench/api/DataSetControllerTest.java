@@ -417,7 +417,7 @@ public class DataSetControllerTest {
     assertThat(response.getQueryList().get(0).getQuery())
         .isEqualTo("SELECT PERSON_ID FROM " +
             "`all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` " +
-            "c_occurrence WHERE (condition_concept_id IN () OR condition_source_concept_id IN ()) " +
+            "c_occurrence WHERE \n(condition_concept_id IN () OR \ncondition_source_concept_id IN ()) \n" +
             "AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
   }
 
