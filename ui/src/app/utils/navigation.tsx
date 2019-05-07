@@ -8,15 +8,9 @@ export const NavStore = {
   navigateByUrl: undefined
 };
 
-interface DataSetQuery {
-  name: string;
-  query: string;
-}
-
 export const currentWorkspaceStore = new BehaviorSubject<WorkspaceData>(undefined);
 export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
 export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined);
-export const currentDataSetQueryStore = new BehaviorSubject<DataSetQuery>(undefined);
 export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
