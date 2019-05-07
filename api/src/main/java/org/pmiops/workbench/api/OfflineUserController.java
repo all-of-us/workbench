@@ -28,6 +28,16 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     this.userService = userService;
   }
 
+  private boolean timestampsEqual(Timestamp a, Timestamp b) {
+    if (a != null) {
+      return a.equals(b);
+    } else if (b != null) {
+      return b.equals(a);
+    } else {
+      return a == b;
+    }
+  }
+
   /**
    * Updates moodle information for all users in the database.
    *
@@ -51,7 +61,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
         DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
 
-        if (newTime != oldTime || (newTime != null && !newTime.equals(oldTime))) {
+        if (!timestampsEqual(newTime, oldTime)) {
           log.info(String.format(
               "Compliance training completion changed for user %s. Old %s, new %s",
               user.getEmail(), oldTime, newTime));
@@ -105,7 +115,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
 
-        if (newTime != oldTime || (newTime != null && !newTime.equals(oldTime))) {
+        if (!timestampsEqual(newTime, oldTime)) {
           log.info(String.format(
               "eRA Commons completion changed for user %s. Old %s, new %s",
               user.getEmail(), oldTime, newTime));
@@ -162,7 +172,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getTwoFactorAuthCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
 
-        if (newTime != oldTime || (newTime != null && !newTime.equals(oldTime))) {
+        if (!timestampsEqual(newTime, oldTime)) {
           log.info(String.format(
               "Two-factor auth completion changed for user %s. Old %s, new %s",
               user.getEmail(), oldTime, newTime));
