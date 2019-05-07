@@ -52,7 +52,6 @@
       MyReactComponent,
       Props as MyReactComponentProps
     };
-
     ```
     - One place to look at to determine what a file is exposing versus having to scan the file for export statements
     - Aliases can be used to namespace only when necessary. Ex. Props can just be Props in this file but can be prefixed 
