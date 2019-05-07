@@ -26,6 +26,7 @@ import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
 import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
@@ -273,7 +274,7 @@ public class BillingProjectBufferServiceTest {
     List<String> capturedProjectNames = captor.getAllValues();
     doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING)).when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(0));
-    doThrow(RuntimeException.class).when(fireCloudService).getBillingProjectStatus(capturedProjectNames.get(1));
+    doThrow(WorkbenchException.class).when(fireCloudService).getBillingProjectStatus(capturedProjectNames.get(1));
     doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.READY)).when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(2));
 

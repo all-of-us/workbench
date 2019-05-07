@@ -8,15 +8,15 @@ import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
-import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -80,8 +80,8 @@ public class BillingProjectBufferService {
           entry.setStatusEnum(ERROR);
           break;
       }
-    } catch (Exception e) {
-      e.printStackTrace();
+    } catch (WorkbenchException e) {
+      log.log(Level.WARNING, "Get BillingProject status call failed", e);
     }
 
     billingProjectBufferEntryDao.save(entry);
