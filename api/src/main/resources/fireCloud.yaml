@@ -796,7 +796,7 @@ definitions:
           type: object
       linkExpireTime:
         type: integer
-        description: The FireCloud-calculated expiration time
+        description: The FireCloud-calculated expiration time, in Epoch seconds
         format: int64
         default: 0
 
