@@ -3,6 +3,7 @@ package org.pmiops.workbench.billing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
@@ -261,4 +262,26 @@ public class BillingProjectBufferServiceTest {
         .isEqualTo(1);
   }
 
+  @Test
+  public void syncBillingProjectStatus_iteratePastStallingRequests() {
+    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProject();
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    verify(fireCloudService, times(3)).createAllOfUsBillingProject(captor.capture());
+    List<String> capturedProjectNames = captor.getAllValues();
+    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING)).when(fireCloudService)
+        .getBillingProjectStatus(capturedProjectNames.get(0));
+    doThrow(RuntimeException.class).when(fireCloudService).getBillingProjectStatus(capturedProjectNames.get(1));
+    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.READY)).when(fireCloudService)
+        .getBillingProjectStatus(capturedProjectNames.get(2));
+
+    billingProjectBufferService.syncBillingProjectStatus();
+    billingProjectBufferService.syncBillingProjectStatus();
+    billingProjectBufferService.syncBillingProjectStatus();
+
+    assertThat(billingProjectBufferEntryDao.findByFireCloudProjectName(capturedProjectNames.get(2)).getStatusEnum())
+        .isEqualTo(AVAILABLE);
+  }
 }

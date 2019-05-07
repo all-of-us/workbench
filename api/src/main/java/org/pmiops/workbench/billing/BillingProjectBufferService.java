@@ -15,6 +15,8 @@ import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
+import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,20 +60,28 @@ public class BillingProjectBufferService {
 
   public void syncBillingProjectStatus() {
     BillingProjectBufferEntry entry = billingProjectBufferEntryDao
-        .findFirstByStatusOrderByCreationTimeAsc(StorageEnums.billingProjectBufferStatusToStorage(CREATING));
+        .findFirstByStatusOrderByLastSyncRequestTimeAsc(StorageEnums.billingProjectBufferStatusToStorage(CREATING));
 
     if (entry == null) {
       return;
     }
 
-    switch (fireCloudService.getBillingProjectStatus(entry.getFireCloudProjectName()).getCreationStatus()) {
-      case READY:
-        entry.setStatusEnum(AVAILABLE);
-        break;
-      case ERROR:
-        log.warning(String.format("SyncBillingProjectStatus: BillingProject %s creation failed", entry.getFireCloudProjectName()));
-        entry.setStatusEnum(ERROR);
-        break;
+    entry.setLastSyncRequestTime(new Timestamp(clock.instant().toEpochMilli()));
+
+    try {
+      switch (fireCloudService.getBillingProjectStatus(entry.getFireCloudProjectName())
+          .getCreationStatus()) {
+        case READY:
+          entry.setStatusEnum(AVAILABLE);
+          break;
+        case ERROR:
+          log.warning(String.format("SyncBillingProjectStatus: BillingProject %s creation failed",
+              entry.getFireCloudProjectName()));
+          entry.setStatusEnum(ERROR);
+          break;
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
     billingProjectBufferEntryDao.save(entry);

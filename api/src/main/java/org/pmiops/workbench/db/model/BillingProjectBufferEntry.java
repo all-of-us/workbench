@@ -16,6 +16,7 @@ public class BillingProjectBufferEntry {
   private long id;
   private String fireCloudProjectName;
   private Timestamp creationTime;
+  private Timestamp lastSyncRequestTime;
   private Short status;
 
   public enum BillingProjectBufferStatus {
@@ -50,6 +51,14 @@ public class BillingProjectBufferEntry {
   }
   public void setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+  }
+
+  @Column(name = "last_sync_request_time")
+  public Timestamp getLastSyncRequestTime() {
+    return lastSyncRequestTime;
+  }
+  public void setLastSyncRequestTime(Timestamp lastSyncRequestTime) {
+    this.lastSyncRequestTime = lastSyncRequestTime;
   }
 
   @Transient
