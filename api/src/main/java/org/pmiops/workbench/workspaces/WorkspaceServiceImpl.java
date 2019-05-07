@@ -29,6 +29,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -120,7 +121,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public Workspace getRequired(String ns, String firecloudName) {
     Workspace workspace = get(ns, firecloudName);
-    if (workspace == null) {
+    if (workspace == null || (workspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.DELETED)) {
       throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
     }
     return workspace;

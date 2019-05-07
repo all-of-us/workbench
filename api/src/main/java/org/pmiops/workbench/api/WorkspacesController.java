@@ -315,6 +315,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
+
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
 

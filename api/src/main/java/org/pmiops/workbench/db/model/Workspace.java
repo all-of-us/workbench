@@ -418,11 +418,6 @@ public class Workspace {
     this.activeStatus = activeStatus;
   }
 
-  public Workspace activeStatus(Short activeStatus) {
-    this.activeStatus = activeStatus;
-    return this;
-  }
-
   @Transient
   public WorkspaceActiveStatus getWorkspaceActiveStatusEnum() {
     return StorageEnums.workspaceActiveStatusFromStorage(getActiveStatus());
@@ -430,10 +425,6 @@ public class Workspace {
 
   public void setWorkspaceActiveStatusEnum(WorkspaceActiveStatus activeStatus) {
     setActiveStatus(StorageEnums.workspaceActiveStatusToStorage(activeStatus));
-  }
-
-  public Workspace activeStatusEnum(WorkspaceActiveStatus activeStatus) {
-    return this.activeStatus(StorageEnums.workspaceActiveStatusToStorage(activeStatus));
   }
 
   /**
