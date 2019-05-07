@@ -100,6 +100,7 @@ public class DataSetController implements DataSetApiDelegate {
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
+    this.cloudStorageService = cloudStorageService;
     this.cohortDao = cohortDao;
     this.conceptDao = conceptDao;
     this.conceptSetDao = conceptSetDao;
