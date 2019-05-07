@@ -49,6 +49,7 @@ import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.TableQuery;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.CdrJpaConfig;
@@ -126,6 +127,7 @@ public class CohortMaterializationServiceTest {
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
+    workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     workspaceDao.save(workspace);
 
     Cohort cohort = new Cohort();

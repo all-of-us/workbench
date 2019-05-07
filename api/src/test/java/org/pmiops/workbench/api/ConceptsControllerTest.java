@@ -42,6 +42,7 @@ import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.VocabularyCount;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -266,6 +267,7 @@ public class ConceptsControllerTest {
     workspace.setFirecloudName("name");
     workspace.setWorkspaceNamespace("ns");
     workspace.setCdrVersion(cdrVersion);
+    workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     workspaceDao.save(workspace);
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();

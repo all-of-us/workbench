@@ -64,6 +64,7 @@ public class UserRecentResourceServiceTest {
     newUser.setUserId(userId);
     userDao.save(newUser);
     newWorkspace.setWorkspaceId(workspaceId);
+    newWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     workspaceDao.save(newWorkspace);
     Cohort cohort = new Cohort();
     cohort.setWorkspaceId(workspaceId);

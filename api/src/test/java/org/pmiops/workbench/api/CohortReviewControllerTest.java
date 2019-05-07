@@ -54,6 +54,7 @@ import org.pmiops.workbench.model.ParticipantCohortStatuses;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -223,6 +224,7 @@ public class CohortReviewControllerTest {
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
+    workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     workspaceDao.save(workspace);
 
     cohort = new Cohort();
