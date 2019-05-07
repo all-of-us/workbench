@@ -18,7 +18,6 @@ import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.JWTWrapper;
-import org.pmiops.workbench.firecloud.model.ManagedGroupAccessResponse;
 import org.pmiops.workbench.firecloud.model.ManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
