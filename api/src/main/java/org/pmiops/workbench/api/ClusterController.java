@@ -127,19 +127,26 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ClusterListResponse> listClusters() {
+  public ResponseEntity<ClusterListResponse> listClusters(String projectName) {
     User user = this.userProvider.get();
+    // TODO as part of Billing Project epic RW-1205: enable status checking for arbitrary project
+    // until then: continue to check the user's free tier project status
+    // because that is the only project we'll pass in here
+    if (!user.getFreeTierBillingProjectName().equals(projectName)) {
+      throw new FailedPreconditionException(
+          "NOT YET IMPLEMENTED: Cannot list clusters using arbitrary project name");
+    }
     if (user.getFreeTierBillingProjectStatusEnum() != BillingProjectStatus.READY) {
       throw new FailedPreconditionException(
           "User billing project is not yet initialized, cannot list/create clusters");
     }
-    String project = user.getFreeTierBillingProjectName();
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
-      fcCluster = this.leonardoNotebooksClient.getCluster(project, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      fcCluster = this.leonardoNotebooksClient.getCluster(projectName,
+              LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
     } catch (NotFoundException e) {
-      fcCluster = this.leonardoNotebooksClient.createCluster(
-          project, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      fcCluster = this.leonardoNotebooksClient.createCluster(projectName,
+              LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
     }
 
     int retries = Optional.ofNullable(user.getClusterCreateRetries()).orElse(0);
@@ -154,7 +161,8 @@ public class ClusterController implements ClusterApiDelegate {
         }
         log.warning("Retrying cluster creation.");
 
-        this.leonardoNotebooksClient.deleteCluster(project, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+        this.leonardoNotebooksClient.deleteCluster(projectName,
+                LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
       }
     } else if (
         org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(fcCluster.getStatus()) &&

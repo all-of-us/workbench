@@ -31,6 +31,7 @@ import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -225,7 +226,7 @@ public class ClusterControllerTest {
   public void testListClusters() throws Exception {
     when(notebookService.getCluster(WORKSPACE_NS, "all-of-us")).thenReturn(testFcCluster);
 
-    assertThat(clusterController.listClusters().getBody().getDefaultCluster())
+    assertThat(clusterController.listClusters(WORKSPACE_NS).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
   }
 
@@ -234,8 +235,16 @@ public class ClusterControllerTest {
     when(notebookService.getCluster(WORKSPACE_NS, "all-of-us")).thenReturn(
         testFcCluster.status(null));
 
-    assertThat(clusterController.listClusters().getBody().getDefaultCluster().getStatus())
+    assertThat(clusterController.listClusters(WORKSPACE_NS).getBody().getDefaultCluster().getStatus())
         .isEqualTo(ClusterStatus.UNKNOWN);
+  }
+
+  @Test(expected = FailedPreconditionException.class)
+  public void testListClustersWrongBillingProject() throws Exception {
+    when(notebookService.getCluster(WORKSPACE_NS, "all-of-us")).thenReturn(
+            testFcCluster.status(null));
+
+    clusterController.listClusters("not the right project");
   }
 
   @Test
@@ -244,7 +253,7 @@ public class ClusterControllerTest {
     when(notebookService.createCluster(eq(WORKSPACE_NS), eq("all-of-us")))
         .thenReturn(testFcCluster);
 
-    assertThat(clusterController.listClusters().getBody().getDefaultCluster())
+    assertThat(clusterController.listClusters(WORKSPACE_NS).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
   }
 
