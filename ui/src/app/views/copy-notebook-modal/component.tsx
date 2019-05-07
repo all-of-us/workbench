@@ -13,7 +13,7 @@ import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 enum RequestState { UNSENT, ERROR, SUCCESS }
 
-export interface CopyNotebookModalProps {
+interface Props {
   fromWorkspaceNamespace: string;
   fromWorkspaceName: string;
   fromNotebook: FileDetail;
@@ -21,7 +21,7 @@ export interface CopyNotebookModalProps {
   onCopy: Function;
 }
 
-export interface CopyNotebookModalState {
+interface State {
   writeableWorkspaces: Array<Workspace>;
   destination: Workspace;
   newName: string;
@@ -34,9 +34,8 @@ const boldStyle = {
   fontWeight: 600
 };
 
-export class CopyNotebookModal extends React.Component<CopyNotebookModalProps,
-CopyNotebookModalState> {
-  constructor(props: CopyNotebookModalProps) {
+class CopyNotebookModal extends React.Component<Props, State> {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -202,4 +201,9 @@ CopyNotebookModalState> {
       Do you want to view the copied notebook?</div>
     );
   }
+}
+
+export {
+  CopyNotebookModal,
+  Props as CopyNotebookModalProps
 }
