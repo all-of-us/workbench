@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.jira.JSON;
 import org.pmiops.workbench.model.Cohort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -175,6 +176,11 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   public GoogleCredential getDefaultServiceAccountCredentials() throws IOException {
     String json = readToString(getCredentialsBucketName(), "app-engine-default-sa.json");
     return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
+  }
+
+  @Override
+  public JSONObject getNotebook(String bucketName, String fileName) throws IOException {
+    return new JSONObject(readToString(bucketName, "notebooks/" + fileName));
   }
 
   @Override

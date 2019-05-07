@@ -454,6 +454,8 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
                   onClick={() => navigate(['workspaces', namespace, id,  'cohorts', 'build'])}/>
               </div>
               <div style={{height: '10rem', overflowY: 'auto'}}>
+                {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
+                  left: '10rem'}}/>}
                 <Subheader>Prepackaged Cohorts</Subheader>
                 <ImmutableListItem name='All AoU Participants' onSelect={
                   () => this.setState({includesAllParticipants: !includesAllParticipants})
@@ -481,8 +483,6 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
                                     }/>
                   )
                 }
-                {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
-                  left: '10rem'}}/>}
               </div>
             </div>
           </div>
@@ -564,7 +564,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
           </div>
           {previewDataLoading && <div style={{display: 'flex', flexDirection: 'column'}}>
             <Spinner style={{position: 'relative', top: '2rem',
-              left: '45%'}}></Spinner>
+              left: '45%'}} />
             <div style={{top: '3rem', position: 'relative',
               left: '35%'}}>It may take up to a minute to load the data</div></div>
           }

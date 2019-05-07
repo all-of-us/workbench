@@ -6,6 +6,7 @@ import com.google.cloud.bigquery.TableResult;
 
 import com.google.common.base.Strings;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -258,27 +259,45 @@ public class DataSetController implements DataSetApiDelegate {
     DataSetQueryList queryList = generateQuery(workspaceNamespace, workspaceId, dataSetExportRequest.getDataSetRequest()).getBody();
     String queriesAsStrings = "import pandas\n\n" + queryList.getQueryList().stream()
         .map(query -> convertQueryToString(query, dataSetExportRequest.getDataSetRequest().getName())).collect(Collectors.joining("\n\n"));
-    JSONObject notebookFile = new JSONObject()
-        .put("cells", new JSONArray()
-            .put(new JSONObject()
-                .put("cell_type", "code")
-                .put("metadata", new JSONObject())
-                .put("execution_count", JSONObject.NULL)
-                .put("outputs", new JSONArray())
-                .put("source", new JSONArray()
-                  .put(queriesAsStrings))))
-        .put("metadata", new JSONObject())
-        // nbformat and nbformat_minor are the notebook major and minor version we are creating.
-        // Specifically, here we create notebook version 4.2 (I believe)
-        // See https://nbformat.readthedocs.io/en/latest/api.html
-        .put("nbformat", 4)
-        .put("nbformat_minor", 2);
-
+    JSONObject notebookFile;
     WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+    if (dataSetExportRequest.getNewNotebook()) {
+       notebookFile = new JSONObject()
+          .put("cells", new JSONArray()
+              .put(new JSONObject()
+                  .put("cell_type", "code")
+                  .put("metadata", new JSONObject())
+                  .put("execution_count", JSONObject.NULL)
+                  .put("outputs", new JSONArray())
+                  .put("source", new JSONArray()
+                      .put(queriesAsStrings))))
+          .put("metadata", new JSONObject())
+          // nbformat and nbformat_minor are the notebook major and minor version we are creating.
+          // Specifically, here we create notebook version 4.2 (I believe)
+          // See https://nbformat.readthedocs.io/en/latest/api.html
+          .put("nbformat", 4)
+          .put("nbformat_minor", 2);
+    } else {
+      try {
+        notebookFile = cloudStorageService.getNotebook(
+            workspace.getWorkspace().getBucketName(),
+            dataSetExportRequest.getNotebookName().concat(".ipynb"));
+        notebookFile.getJSONArray("cells").put(new JSONObject()
+            .put("cell_type", "code")
+            .put("metadata", new JSONObject())
+            .put("execution_count", JSONObject.NULL)
+            .put("outputs", new JSONArray())
+            .put("source", new JSONArray()
+                .put(queriesAsStrings)));
+      } catch (IOException e) {
+        throw new ServerErrorException("Failed to get notebook " +
+            dataSetExportRequest.getNotebookName() + " from bucket " +
+            workspace.getWorkspace().getBucketName());
+      }
+    }
 
     cloudStorageService.writeFile(workspace.getWorkspace().getBucketName(),
         "notebooks/" + dataSetExportRequest.getNotebookName() + ".ipynb", notebookFile.toString().getBytes(StandardCharsets.UTF_8));
-
 
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -307,7 +326,11 @@ public class DataSetController implements DataSetApiDelegate {
       return "";
     }
     boolean isArrayParameter = !(namedParameterEntry.getValue().getParameterValue() instanceof String);
-    List<NamedParameterValue> arrayValues = (List<NamedParameterValue>) namedParameterEntry.getValue().getParameterValue();
+
+    List<NamedParameterValue> arrayValues = new ArrayList<>();
+    if (namedParameterEntry.getValue().getParameterValue() instanceof List){
+      arrayValues = (List<NamedParameterValue>) namedParameterEntry.getValue().getParameterValue();
+    }
     return "      {\n" +
         "        'name': \"" + namedParameterEntry.getValue().getName() + "\",\n" +
         "        'parameterType': {'type': \"" + namedParameterEntry.getValue().getParameterType() + "\"" +
