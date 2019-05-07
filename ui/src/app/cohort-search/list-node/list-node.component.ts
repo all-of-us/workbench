@@ -2,6 +2,7 @@ import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {scrollStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderService, TreeSubType, TreeType} from 'generated';
+import {CriteriaType, DomainType} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
 @Component({
@@ -56,12 +57,22 @@ export class ListNodeComponent implements OnInit, OnDestroy {
     if (!event) { return ; }
     this.loading = true;
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    const {domainId, id, type} = this.node;
+    const {domainId, id} = this.node;
+    const type = domainId === DomainType.DRUG ? CriteriaType[CriteriaType.ATC] : this.node.type;
     this.api.getCriteriaBy(cdrid, domainId, type, id)
       .toPromise()
       .then(resp => {
-        this.children = resp.items;
-        this.loading = false;
+        if (resp.items.length === 0 && domainId === DomainType.DRUG) {
+          this.api.getCriteriaBy(cdrid, domainId, CriteriaType[CriteriaType.RXNORM], id)
+            .toPromise()
+            .then(rxResp => {
+              this.children = rxResp.items;
+              this.loading = false;
+            });
+        } else {
+          this.children = resp.items;
+          this.loading = false;
+        }
       });
   }
 
