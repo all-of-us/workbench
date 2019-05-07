@@ -179,7 +179,7 @@ class NewDataSetModal extends React.Component<Props, State> {
           <CheckBox style={{height: 17, width: 17}}
                     onChange={() => this.changeExportToNewNotebook()} />
           <div style={{marginLeft: '.5rem',
-            color: colors.black}}>Export to new Python notebook</div>
+            color: colors.black[0]}}>Export to new Python notebook</div>
         </div>
         {exportToNewNotebook && <React.Fragment>
           {(queries.length === 0 || notebooksLoading) && <SpinnerOverlay />}
