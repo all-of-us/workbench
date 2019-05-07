@@ -51,7 +51,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
         DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
 
-        if (newTime != oldTime) {
+        if (newTime != oldTime || (newTime != null && !newTime.equals(oldTime))) {
           log.info(String.format(
               "Compliance training completion changed for user %s. Old %s, new %s",
               user.getEmail(), oldTime, newTime));
@@ -105,7 +105,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
 
-        if (newTime != oldTime) {
+        if (newTime != oldTime || (newTime != null && !newTime.equals(oldTime))) {
           log.info(String.format(
               "eRA Commons completion changed for user %s. Old %s, new %s",
               user.getEmail(), oldTime, newTime));
@@ -162,7 +162,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getTwoFactorAuthCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
 
-        if (newTime != oldTime) {
+        if (newTime != oldTime || (newTime != null && !newTime.equals(oldTime))) {
           log.info(String.format(
               "Two-factor auth completion changed for user %s. Old %s, new %s",
               user.getEmail(), oldTime, newTime));
