@@ -342,6 +342,33 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
+  public void findCriteriaByDomainAndSearchTermLikeSourceCode() throws Exception {
+    CBCriteria criteria = new CBCriteria()
+      .code("001")
+      .count("10")
+      .conceptId("123")
+      .domainId(DomainType.CONDITION.toString())
+      .group(Boolean.TRUE)
+      .selectable(Boolean.TRUE)
+      .name("chol blah")
+      .parentId(0)
+      .type(CriteriaType.LOINC.toString())
+      .attribute(Boolean.FALSE)
+      .standard(false)
+      .synonyms("[condition_rank1]");
+    cbCriteriaDao.save(criteria);
+
+    assertEquals(
+      createResponseCriteria(criteria),
+      controller
+        .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(), "00", null)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
   public void findCriteriaByDomainAndSearchTermDrugMatchesStandardCode() throws Exception {
     CBCriteria criteria1 = new CBCriteria()
       .code("672535")

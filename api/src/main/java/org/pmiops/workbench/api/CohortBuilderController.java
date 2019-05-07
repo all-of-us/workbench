@@ -307,7 +307,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (criteriaList.isEmpty()) {
       criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, !isStandard, term, domainRank, new PageRequest(0, resultLimit));
     }
-    if (DomainType.DRUG.toString().equals(domain)) {
+    if (DomainType.DRUG.equals(DomainType.fromValue(domain))) {
       Map<Boolean, List<CBCriteria>> groups = criteriaList
         .stream()
         .collect(Collectors.partitioningBy(c -> c.getType().equals(CriteriaType.BRAND.toString())));
