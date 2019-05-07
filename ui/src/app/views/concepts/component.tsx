@@ -86,22 +86,38 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
 
 export const ConceptWrapper = withCurrentWorkspace()(
   class extends React.Component<{workspace: WorkspaceData},
-    {completedDomainSearches: Array<Domain>,
+    { // Array of domains that have finished being searched for concepts with search string
+      completedDomainSearches: Array<Domain>,
+      // If modal to add concepts to set is open
       conceptAddModalOpen: boolean,
+      // Array of domains and the number of concepts found in the search for each
       conceptDomainCounts: Array<DomainCount>,
+      // Array of domains and their metadata
       conceptDomainList: Array<DomainInfo>,
+      // Array of concepts found in the search
       concepts: Array<Concept>,
+      // Cache for storing selected concepts, their domain, and vocabulary
       conceptsCache: Array<ConceptCacheItem>,
       conceptsSavedText: string,
+      // Array of concepts that have been selected
       conceptsToAdd: Concept[],
+      // Current string in search box
       currentSearchString: string,
+      // If concept metadata is still being gathered for any domain
       loadingDomains: boolean,
+      // If we are still searching concepts and should show a spinner on the table
       searchLoading: boolean,
+      // If we are in 'search mode' and should show the table
       searching: boolean,
+      // Map of domain to number of selected concepts in domain
       selectedConceptDomainMap: Map<String, number>,
+      // Domain being viewed. Will be the domain that the add button uses.
       selectedDomain: DomainCount,
+      // Show if a search error occurred
       showSearchError: boolean,
+      // Only search on standard concepts
       standardConceptsOnly: boolean,
+      // Array of vocabulary id and number of concepts in vocabulary
       vocabularies: Array<VocabularyCount>
     }> {
 

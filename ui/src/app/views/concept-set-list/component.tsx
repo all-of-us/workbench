@@ -34,11 +34,11 @@ const styles = reactStyles({
 export const ConceptSetsList = withCurrentWorkspace()(
   class extends React.Component<{workspace: WorkspaceData},
       {conceptSetsList: RecentResource[], conceptSetsLoading: boolean,
-        conceptDomainsList: Array<DomainInfo>, createModalOpen: boolean}> {
+        conceptDomainList: Array<DomainInfo>, createModalOpen: boolean}> {
     constructor(props) {
       super(props);
       this.state = {
-        conceptDomainsList: undefined,
+        conceptDomainList: undefined,
         conceptSetsList: undefined,
         conceptSetsLoading: true,
         createModalOpen: false
@@ -57,7 +57,7 @@ export const ConceptSetsList = withCurrentWorkspace()(
       const {namespace, id} = this.props.workspace;
       try {
         const resp = await conceptsApi().getDomainInfo(namespace, id);
-        this.setState({conceptDomainsList: resp.items});
+        this.setState({conceptDomainList: resp.items});
       } catch (error) {
         console.log(error);
       }
@@ -77,7 +77,7 @@ export const ConceptSetsList = withCurrentWorkspace()(
     }
 
     render() {
-      const {conceptSetsLoading, conceptSetsList, conceptDomainsList, createModalOpen} = this.state;
+      const {conceptSetsLoading, conceptSetsList, conceptDomainList, createModalOpen} = this.state;
       const accessLevel = this.props.workspace.accessLevel as unknown as WorkspaceAccessLevel;
       const writePermission = accessLevel === WorkspaceAccessLevel.OWNER ||
           accessLevel === WorkspaceAccessLevel.WRITER;
@@ -94,8 +94,8 @@ export const ConceptSetsList = withCurrentWorkspace()(
                 </CardButton>
               </TooltipTrigger>
               <div style={styles.resourceCardArea}>
-                {conceptSetsList && conceptSetsList.map((set: RecentResource) => {
-                  return <ResourceCard resourceCard={set} key={set.conceptSet.name}
+                {conceptSetsList && conceptSetsList.map((conceptSet: RecentResource) => {
+                  return <ResourceCard resourceCard={conceptSet} key={conceptSet.conceptSet.name}
                                        onUpdate={() => this.loadConceptSets()}>
                   </ResourceCard>;
                 })}
@@ -105,9 +105,9 @@ export const ConceptSetsList = withCurrentWorkspace()(
 
         {createModalOpen &&
         <CreateConceptSetModal onCreate={() => this.loadConceptSets()}
-                                        onClose={() => this.setState({createModalOpen: false})}
-                                        conceptDomainList={conceptDomainsList}
-                                        existingConceptSets={conceptSetsList}/>}
+                               onClose={() => this.setState({createModalOpen: false})}
+                               conceptDomainList={conceptDomainList}
+                               existingConceptSets={conceptSetsList}/>}
           </React.Fragment>;
     }
 
