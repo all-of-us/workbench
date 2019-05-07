@@ -225,8 +225,7 @@ public class BillingProjectBufferServiceTest {
     verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
     String billingProjectName = captor.getValue();
 
-    BillingProjectStatus billingProjectStatus = new BillingProjectStatus();
-    billingProjectStatus.setCreationStatus(CreationStatusEnum.ERROR);
+    BillingProjectStatus billingProjectStatus = new BillingProjectStatus().creationStatus(CreationStatusEnum.ERROR);
     doReturn(billingProjectStatus).when(fireCloudService).getBillingProjectStatus(billingProjectName);
     billingProjectBufferService.syncBillingProjectStatus();
     assertThat(billingProjectBufferEntryDao.findByFireCloudProjectName(billingProjectName).getStatusEnum())
@@ -242,11 +241,11 @@ public class BillingProjectBufferServiceTest {
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(fireCloudService, times(3)).createAllOfUsBillingProject(captor.capture());
     List<String> capturedProjectNames = captor.getAllValues();
-    doReturn(createBillingProjectStatus(CreationStatusEnum.READY)).when(fireCloudService)
+    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.READY)).when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(0));
-    doReturn(createBillingProjectStatus(CreationStatusEnum.READY)).when(fireCloudService)
+    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.READY)).when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(1));
-    doReturn(createBillingProjectStatus(CreationStatusEnum.ERROR)).when(fireCloudService)
+    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.ERROR)).when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(2));
 
     billingProjectBufferService.syncBillingProjectStatus();
@@ -255,16 +254,11 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.syncBillingProjectStatus();
 
     assertThat(billingProjectBufferEntryDao.countByStatus(StorageEnums.billingProjectBufferStatusToStorage(CREATING)))
-    .isEqualTo(0);
+        .isEqualTo(0);
     assertThat(billingProjectBufferEntryDao.countByStatus(StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE)))
         .isEqualTo(2);
     assertThat(billingProjectBufferEntryDao.countByStatus(StorageEnums.billingProjectBufferStatusToStorage(ERROR)))
         .isEqualTo(1);
   }
 
-  private BillingProjectStatus createBillingProjectStatus(CreationStatusEnum status) {
-    BillingProjectStatus billingProjectStatus = new BillingProjectStatus();
-    billingProjectStatus.setCreationStatus(status);
-    return billingProjectStatus;
-  }
 }

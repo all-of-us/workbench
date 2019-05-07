@@ -8,6 +8,7 @@ import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.UUID;
+import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 public class BillingProjectBufferService {
 
   private static final int PROJECT_BILLING_ID_SIZE = 8;
+  private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
 
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
@@ -67,6 +69,7 @@ public class BillingProjectBufferService {
         entry.setStatusEnum(AVAILABLE);
         break;
       case ERROR:
+        log.warning(String.format("SyncBillingProjectStatus: BillingProject %s creation failed", entry.getFireCloudProjectName()));
         entry.setStatusEnum(ERROR);
         break;
     }
