@@ -79,6 +79,9 @@ public class BillingProjectBufferService {
               entry.getFireCloudProjectName()));
           entry.setStatusEnum(ERROR);
           break;
+        case CREATING:
+        default:
+          break;
       }
     } catch (WorkbenchException e) {
       log.log(Level.WARNING, "Get BillingProject status call failed", e);

@@ -216,7 +216,7 @@ public class BillingProjectBufferServiceTest {
     doReturn(billingProjectStatus).when(fireCloudService).getBillingProjectStatus(billingProjectName);
     billingProjectBufferService.syncBillingProjectStatus();
     assertThat(billingProjectBufferEntryDao.findByFireCloudProjectName(billingProjectName).getStatusEnum())
-        .isEqualTo(BillingProjectBufferStatus.AVAILABLE);
+        .isEqualTo(AVAILABLE);
   }
 
   @Test
