@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.TestCase.fail;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
