@@ -204,6 +204,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                       String domain,
                                                                       String term,
                                                                       String type,
+                                                                      Boolean standard,
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
@@ -211,9 +212,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     if (configProvider.get().cohortbuilder.enableListSearch) {
       validateDomainAndType(domain, type);
-      List<CBCriteria> criteriaList = CriteriaType.SNOMED.toString().equals(type) ?
-        cbCriteriaDao.findCriteriaByDomainAndTypeForName(domain, type, matchExp, new PageRequest(0, resultLimit.intValue())) :
-        cbCriteriaDao.findCriteriaByDomainAndTypeForCodeOrName(domain, type, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+      String domainRank = "+[" + domain.toLowerCase() + "_rank1]";
+      List<CBCriteria> criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(domain, type, standard, matchExp, new PageRequest(0, resultLimit.intValue()));
+      if (criteriaList.isEmpty()) {
+        criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(domain, type, standard, term, domainRank, new PageRequest(0, resultLimit.intValue()));
+      }
       criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
     } else {
       List<Criteria> criteriaList;
@@ -292,19 +295,25 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                                 String term,
                                                                                 Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    String domainRank = "+[" + domain.toLowerCase() + "_rank1]";
     List<CBCriteria> criteriaList = new ArrayList<>();
     int resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT).intValue();
     List<StandardProjection> projections = cbCriteriaDao.findStandardProjectionByCode(domain, term);
     boolean isStandard = projections.isEmpty() || projections.get(0).getStandard();
     if (projections.isEmpty()) {
-      criteriaList = cbCriteriaDao.findCriteriaByDomainAndSynonyms(domain, isStandard, modifyTermMatch(term), new PageRequest(0, resultLimit));
+      String modTerm = modifyTermMatch(term) + domainRank;
+      criteriaList = cbCriteriaDao.findCriteriaByDomainAndSynonyms(domain, isStandard, modTerm, new PageRequest(0, resultLimit));
     }
     if (criteriaList.isEmpty()) {
-      criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, new PageRequest(0, resultLimit));
+      criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, domainRank, new PageRequest(0, resultLimit));
     }
-    if (DomainType.DRUG.toString().equals(domain)) {
-      Map<Boolean, List<CBCriteria>> groups =
-        criteriaList.stream().collect(Collectors.partitioningBy(c -> c.getType().equals(CriteriaType.BRAND.toString())));
+    if (criteriaList.isEmpty()) {
+      criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, !isStandard, term, domainRank, new PageRequest(0, resultLimit));
+    }
+    if (DomainType.DRUG.equals(DomainType.fromValue(domain))) {
+      Map<Boolean, List<CBCriteria>> groups = criteriaList
+        .stream()
+        .collect(Collectors.partitioningBy(c -> c.getType().equals(CriteriaType.BRAND.toString())));
       List<Long> conceptIds = groups.get(true)
         .stream()
         .map(c -> Long.valueOf(c.getConceptId()))
@@ -494,7 +503,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
     String[] keywords = term.split("\\W+");
     if (keywords.length == 1 && keywords[0].length() <= 3) {
-      return "+\"" + keywords[0] + "\"+\"[rank1]\"";
+      return "+\"" + keywords[0];
     }
 
     return IntStream
@@ -506,8 +515,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         }
         return "+" + keywords[i] + "*";
       })
-      .collect(Collectors.joining())
-      + "+\"[rank1]\"";
+      .collect(Collectors.joining());
   }
 
   private void validateDomainAndType(String domain, String type) {

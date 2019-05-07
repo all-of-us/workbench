@@ -1503,6 +1503,31 @@ paths:
           schema:
             $ref: "#/definitions/DataSetQueryList"
 
+  /v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook:
+    post:
+      tags:
+        - dataSet
+      description: >
+        Exports a data set query to a notebook
+      operationId: "exportToNotebook"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: body
+          name: dataSetExportRequest
+          required: true
+          schema:
+            $ref: "#/definitions/DataSetExportRequest"
+      responses:
+        200:
+          description: Data set has been exported correctly
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+        400:
+          description: Invalid data set request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/preview:
     post:
       tags:
@@ -2221,6 +2246,20 @@ definitions:
           All the selected values in the data set
         items:
           $ref: "#/definitions/DomainValuePair"
+
+  DataSetExportRequest:
+    type: object
+    required:
+      - dataSetRequest
+      - notebookName
+      - newNotebook
+    properties:
+      dataSetRequest:
+        $ref: "#/definitions/DataSetRequest"
+      notebookName:
+        type: string
+      newNotebook:
+        type: boolean
 
   DomainValuePair:
     type: object

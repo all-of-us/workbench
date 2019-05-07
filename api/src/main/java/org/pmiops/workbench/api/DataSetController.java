@@ -6,6 +6,7 @@ import com.google.cloud.bigquery.TableResult;
 
 import com.google.common.base.Strings;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
 
@@ -15,12 +16,15 @@ import java.util.List;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 import javax.inject.Provider;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -31,8 +35,12 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewList;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
@@ -41,6 +49,7 @@ import org.pmiops.workbench.model.DataSetQuery;
 import org.pmiops.workbench.model.DataSetQueryList;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.NamedParameterEntry;
 import org.pmiops.workbench.model.NamedParameterValue;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -62,7 +71,10 @@ public class DataSetController implements DataSetApiDelegate {
   private final WorkspaceService workspaceService;
 
   private static int NO_OF_PREVIEW_ROWS = 20;
+  private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
+  @Autowired
+  private CloudStorageService cloudStorageService;
 
   @Autowired
   private final CohortDao cohortDao;
@@ -74,21 +86,28 @@ public class DataSetController implements DataSetApiDelegate {
   private ConceptSetDao conceptSetDao;
 
   @Autowired
+  private FireCloudService fireCloudService;
+
+  @Autowired
   DataSetController(
       BigQueryService bigQueryService,
       Clock clock,
+      CloudStorageService cloudStorageService,
       CohortDao cohortDao,
       ConceptDao conceptDao,
       ConceptSetDao conceptSetDao,
       DataSetService dataSetService,
+      FireCloudService fireCloudService,
       Provider<User> userProvider,
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
+    this.cloudStorageService = cloudStorageService;
     this.cohortDao = cohortDao;
     this.conceptDao = conceptDao;
     this.conceptSetDao = conceptSetDao;
     this.dataSetService = dataSetService;
+    this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
   }
@@ -218,7 +237,14 @@ public class DataSetController implements DataSetApiDelegate {
 
       queryResponse.getValues().forEach(fieldValueList -> {
         IntStream.range(0, fieldValueList.size()).forEach(columnNumber -> {
-          valuePreviewList.get(columnNumber).addQueryValueItem(fieldValueList.get(columnNumber).getValue().toString());
+          try {
+            valuePreviewList.get(columnNumber).addQueryValueItem(
+                fieldValueList.get(columnNumber).getValue().toString());
+          } catch (NullPointerException ex) {
+            log.severe(
+                String.format("Null pointer exception while retriving value for query: Column %s ", columnNumber));
+            valuePreviewList.get(columnNumber).addQueryValueItem("");
+          }
         });
       });
       previewQueryResponse.addDomainValueItem(new DataSetPreviewList().domain(domain).values(valuePreviewList));
@@ -226,9 +252,80 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(previewQueryResponse);
   }
 
+  @Override
+  public ResponseEntity<EmptyResponse> exportToNotebook(String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    DataSetQueryList queryList = generateQuery(workspaceNamespace, workspaceId, dataSetExportRequest.getDataSetRequest()).getBody();
+    String queriesAsStrings = "import pandas\n\n" + queryList.getQueryList().stream()
+        .map(query -> convertQueryToString(query, dataSetExportRequest.getDataSetRequest().getName())).collect(Collectors.joining("\n\n"));
+    JSONObject notebookFile = new JSONObject()
+        .put("cells", new JSONArray()
+            .put(new JSONObject()
+                .put("cell_type", "code")
+                .put("metadata", new JSONObject())
+                .put("execution_count", JSONObject.NULL)
+                .put("outputs", new JSONArray())
+                .put("source", new JSONArray()
+                  .put(queriesAsStrings))))
+        .put("metadata", new JSONObject())
+        // nbformat and nbformat_minor are the notebook major and minor version we are creating.
+        // Specifically, here we create notebook version 4.2 (I believe)
+        // See https://nbformat.readthedocs.io/en/latest/api.html
+        .put("nbformat", 4)
+        .put("nbformat_minor", 2);
+
+    WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+
+    cloudStorageService.writeFile(workspace.getWorkspace().getBucketName(),
+        "notebooks/" + dataSetExportRequest.getNotebookName() + ".ipynb", notebookFile.toString().getBytes(StandardCharsets.UTF_8));
+
+
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  private String convertQueryToString(DataSetQuery query, String prefix) {
+    String namespace = prefix.toLowerCase().replaceAll(" ", "_") + "_" + query.getDomain().toString().toLowerCase() + "_";
+    String sqlSection = namespace + "sql = \"\"\"" + query.getQuery() + "\"\"\"";
+
+    String namedParamsSection = namespace +
+        "query_config = {\n" +
+        "  \'query\': {\n" +
+        "\'parameterMode\': \'NAMED\',\n" +
+        "\'queryParameters\': [\n" +
+        query.getNamedParameters().stream().map(namedParameterEntry -> convertNamedParameterToString(namedParameterEntry) + "\n").collect(Collectors.joining("")) +
+        "    ]\n" +
+        "  }\n" +
+        "}\n\n";
+
+    String dataFrameSection = namespace + "df = pandas.read_gbq(" + namespace + "sql, dialect=\"standard\", configuration=" + namespace + "query_config)";
+
+    return sqlSection + "\n\n" + namedParamsSection + "\n\n" + dataFrameSection;
+  }
+
+  private String convertNamedParameterToString(NamedParameterEntry namedParameterEntry) {
+    if (namedParameterEntry.getValue() == null) {
+      return "";
+    }
+    boolean isArrayParameter = !(namedParameterEntry.getValue().getParameterValue() instanceof String);
+    List<NamedParameterValue> arrayValues = (List<NamedParameterValue>) namedParameterEntry.getValue().getParameterValue();
+    return "      {\n" +
+        "        'name': \"" + namedParameterEntry.getValue().getName() + "\",\n" +
+        "        'parameterType': {'type': \"" + namedParameterEntry.getValue().getParameterType() + "\"" +
+        (isArrayParameter ? ",'arrayType': {'type': \"" + namedParameterEntry.getValue().getArrayType() + "\"}," : "") + "},\n" +
+        "        \'parameterValue\': {" + (isArrayParameter ? "\'arrayValues\': [" + (
+            arrayValues)
+        .stream().map(namedParameterValue -> "{\'value\': " + namedParameterValue.getParameterValue() + "}") + "]" :
+        "'value': \"" + namedParameterEntry.getValue().getParameterValue() + "\"") + "}\n" +
+        "      },";
+  }
+
   private NamedParameterEntry generateResponseFromQueryParameter(String key, QueryParameterValue value) {
     if (value.getValue() != null) {
-      return new NamedParameterEntry().key(key).value(new NamedParameterValue().name(key).parameterType(value.getType().toString()).parameterValue(value.getValue()));
+      return new NamedParameterEntry().key(key)
+          .value(new NamedParameterValue()
+              .name(key)
+              .parameterType(value.getType().toString())
+              .parameterValue(value.getValue()));
     } else if (value.getArrayValues() != null) {
       List<NamedParameterValue> values = value.getArrayValues().stream()
           .map(arrayValue -> generateResponseFromQueryParameter(key, arrayValue).getValue())

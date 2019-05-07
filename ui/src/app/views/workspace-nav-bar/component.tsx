@@ -103,7 +103,7 @@ export const WorkspaceNavBarReact = fp.flow(
           <div style={styles.dropdownHeader}>Workspace Actions</div>
           <MenuItem
             icon='copy'
-            onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'clone'])}>
+            onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}>
             Duplicate
           </MenuItem>
           <MenuItem
