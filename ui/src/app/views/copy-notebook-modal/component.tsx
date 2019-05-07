@@ -19,7 +19,7 @@ export interface Props {
   fromNotebook: FileDetail;
   onClose: Function;
   onCopy: Function;
-};
+}
 
 interface State {
   writeableWorkspaces: Array<Workspace>;
@@ -28,7 +28,7 @@ interface State {
   requestState: RequestState;
   errorMsg: string;
   loading: boolean;
-};
+}
 
 const boldStyle = {
   fontWeight: 600
