@@ -3,6 +3,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Http, HttpModule, RequestOptions, XHRBackend} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {RouteReuseStrategy} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
@@ -20,6 +21,7 @@ import {SignInService} from './services/sign-in.service';
 import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
+import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {AdminUserBypassComponent} from './views/admin-user-bypass/component';
@@ -226,7 +228,9 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     {
       provide: WINDOW_REF,
       useValue: window
-    }
+    },
+    WorkbenchRouteReuseStrategy,
+    {provide: RouteReuseStrategy, useExisting: WorkbenchRouteReuseStrategy}
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent, ErrorHandlerComponent, InitialErrorComponent]
