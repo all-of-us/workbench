@@ -103,25 +103,31 @@ public class WorkspaceServiceImpl implements WorkspaceService {
           currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
           currentWorkspace.setAccessLevel(workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
           return currentWorkspace;
-        }).collect(Collectors.toList());
+        }).filter(dbWorkspace -> dbWorkspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)
+        .collect(Collectors.toList());
   }
 
   private Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> getFirecloudWorkspaces() {
-    return fireCloudService.getWorkspaces().stream().collect(
-            Collectors.toMap(
+    return fireCloudService.getWorkspaces().stream()
+            .filter(dbWorkspace -> dbWorkspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)
+            .collect(Collectors.toMap(
                 fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
                 fcWorkspace -> fcWorkspace));
   }
 
   @Override
   public Workspace getByName(String ns, String name) {
-    return workspaceDao.findByWorkspaceNamespaceAndName(ns, name);
+    Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndName(ns, name);
+    if (workspace == null || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
+      throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
+    }
+    return workspace;
   }
 
   @Override
   public Workspace getRequired(String ns, String firecloudName) {
     Workspace workspace = get(ns, firecloudName);
-    if (workspace == null || (workspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.DELETED)) {
+    if (workspace == null || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
       throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
     }
     return workspace;
@@ -131,7 +137,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Transactional
   public Workspace getRequiredWithCohorts(String ns, String firecloudName) {
     Workspace workspace = workspaceDao.findByFirecloudWithEagerCohorts(ns, firecloudName);
-    if (workspace == null) {
+    if (workspace == null || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
       throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
     }
     return workspace;
@@ -296,6 +302,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Workspace findByWorkspaceId(long workspaceId) {
-    return getDao().findOne(workspaceId);
+    Workspace workspace = getDao().findOne(workspaceId);
+    if (workspace == null || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
+      throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
+    }
+    return workspace;
   }
 }

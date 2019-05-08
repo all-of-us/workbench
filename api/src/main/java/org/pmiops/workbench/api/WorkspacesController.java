@@ -295,11 +295,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(String workspaceNamespace,
       String workspaceId) {
-    // TODO: do we want to delete any workspace resources?
-    //general note. When you delete a workspace the related rows in the following tables will also be deleted
-    //Cohort, cohort review, cohort annotation definition, cohort annotation enum value,
-    //participant cohort annotations, participant cohort status. Please see liquibase/db for more
-    //details on how these tables relate to each other.
+    // This deletes all Firecloud and google resources, however saves all references
+    // to the workspace and its resources in the Workbench database.
+    // This is for auditing purposes and potentially workspace restore.
+    // TODO: do we want to delete workspace resource references and save only metadata?
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
     // This automatically handles access control to the workspace.
