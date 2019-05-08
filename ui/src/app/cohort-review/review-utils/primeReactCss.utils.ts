@@ -1,4 +1,4 @@
-export const css = `
+export const datatableStyles = `
   body .p-datatable .p-sortable-column:not(.p-highlight):hover,
   body .p-datatable .p-sortable-column.p-highlight {
     color: #333333;
