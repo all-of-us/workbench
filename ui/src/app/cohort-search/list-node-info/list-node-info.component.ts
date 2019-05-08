@@ -189,11 +189,11 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get isPM() {
-    return this.node.type === DomainType[DomainType.PHYSICALMEASUREMENT];
+    return this.node.domainId === DomainType[DomainType.PHYSICALMEASUREMENT];
   }
 
   get isDrug() {
-    return this.node.domain === DomainType[DomainType.DRUG];
+    return this.node.domainId === DomainType[DomainType.DRUG];
   }
 
   get isPPI() {

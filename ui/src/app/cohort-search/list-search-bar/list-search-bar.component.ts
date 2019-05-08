@@ -68,10 +68,12 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
     this.ingredientList = [];
     this.noResults = false;
     const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
-    const {domainId, type} = this.node;
+    const {domainId, isStandard, type} = this.node;
     const apiCall = domainId === DomainType.DRUG
       ? cohortBuilderApi().getDrugBrandOrIngredientByValue(cdrId, this.searchTerm.value)
-      : cohortBuilderApi().getCriteriaAutoComplete(cdrId, domainId, this.searchTerm.value, type);
+      : cohortBuilderApi().getCriteriaAutoComplete(
+        cdrId, domainId, this.searchTerm.value, type, isStandard
+      );
     apiCall.then(resp => {
       this.options = [];
       const optionNames: Array<string> = [];
