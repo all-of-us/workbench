@@ -51,6 +51,7 @@ public class ClusterController implements ClusterApiDelegate {
   // delocalization of saved files back to a given GCS location. See
   // https://github.com/DataBiosphere/leonardo/blob/develop/jupyter-docker/jupyter_delocalize.py#L12
   private static final String DELOCALIZE_CONFIG_FILENAME = ".delocalize.json";
+  private static final String WORKSPACE_DELIMITER = "___";
 
   // This file is used by the All of Us libraries to access workspace/CDR metadata.
   private static final String AOU_CONFIG_FILENAME = ".all_of_us_config.json";
@@ -204,11 +205,11 @@ public class ClusterController implements ClusterApiDelegate {
     );
     String workspacePath = body.getWorkspaceId();
     if (!projectName.equals(body.getWorkspaceNamespace())) {
-      workspacePath = body.getWorkspaceNamespace() + ":" + body.getWorkspaceId();
+      workspacePath = body.getWorkspaceNamespace() + WORKSPACE_DELIMITER + body.getWorkspaceId();
     }
     String apiDir = "workspaces/" + workspacePath;
     if (body.getPlaygroundMode()) {
-      apiDir = "workspaces:playground/" + workspacePath;
+      apiDir = "workspaces" + WORKSPACE_DELIMITER + "playground/" + workspacePath;
     }
     String localDir = "~/" + apiDir;
 
