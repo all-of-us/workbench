@@ -90,7 +90,7 @@ export class CohortSearchEpics {
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
-        return this.service.getCriteriaBy(cdrVersionId, kind, null, parentId)
+        return this.service.getCriteriaBy(cdrVersionId, kind, null, false, parentId)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -104,7 +104,7 @@ export class CohortSearchEpics {
   fetchCriteriaBySubtype: CSEpic = (action$) => (
     action$.ofType(BEGIN_SUBTYPE_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, subtype, parentId}: CritSubRequestAction) => {
-        return this.service.getCriteriaBy(cdrVersionId, kind, subtype, parentId)
+        return this.service.getCriteriaBy(cdrVersionId, kind, subtype, false, parentId)
           .map(result => loadCriteriaSubtypeRequestResults(kind, subtype, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -133,7 +133,7 @@ export class CohortSearchEpics {
     action$.ofType(BEGIN_DRUG_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId, subtype}: DrugCritRequestAction) => {
         return this.service
-          .getCriteriaBy(cdrVersionId, kind, subtype, parentId, null)
+          .getCriteriaBy(cdrVersionId, kind, subtype, false, parentId)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)

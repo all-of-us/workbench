@@ -154,7 +154,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           this.form.addControl('encounters',
             new FormGroup({operator: new FormControl(),
               encounterType: new FormControl()}));
-          this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
+          this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, true, 0)
             .filter(response => !!response)
             .subscribe(response => {
               this.visitCounts = {};

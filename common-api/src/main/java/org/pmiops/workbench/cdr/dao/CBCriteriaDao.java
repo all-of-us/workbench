@@ -11,9 +11,10 @@ import java.util.List;
 
 public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
-  @Query(value = "select * from cb_criteria where domain_id=:domain and type=:type and parent_id=:parentId and has_hierarchy = 1", nativeQuery = true)
+  @Query(value = "select * from cb_criteria where domain_id=:domain and type=:type and is_standard=:standard and parent_id=:parentId and has_hierarchy = 1 order by id asc", nativeQuery = true)
   List<CBCriteria> findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(@Param("domain") String domain,
                                                                         @Param("type") String type,
+                                                                        @Param("standard") Boolean isStandard,
                                                                         @Param("parentId") Long parentId);
 
   @Query(value = "select c from CBCriteria c where domainId=:domain and type=:type order by id asc")
@@ -24,11 +25,10 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
   List<StandardProjection> findStandardProjectionByCode(@Param("domain") String domain,
                                                         @Param("term") String term);
 
-  @Query(value = "select c from CBCriteria c where domainId=:domain and standard=:standard and code like upper(concat(:term,'%')) and match(synonyms, :domainRank) > 0 order by c.count desc")
+  @Query(value = "select c from CBCriteria c where domainId=:domain and standard=:standard and code like upper(concat(:term,'%')) and match(synonyms, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
   List<CBCriteria> findCriteriaByDomainAndCode(@Param("domain") String domain,
                                                @Param("standard") Boolean isStandard,
                                                @Param("term") String term,
-                                               @Param("domainRank") String domainRank,
                                                Pageable page);
 
   @Query(value = "select c from CBCriteria c where domainId=:domain and standard=:standard and match(synonyms, :term) > 0 order by c.count desc")
@@ -37,12 +37,11 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
                                                    @Param("term") String term,
                                                    Pageable page);
 
-  @Query(value = "select c from CBCriteria c where domainId=:domain and type=:type and standard=:standard and hierarchy=1 and code like upper(concat(:term,'%')) and match(synonyms, :domainRank) > 0 order by c.count desc")
+  @Query(value = "select c from CBCriteria c where domainId=:domain and type=:type and standard=:standard and hierarchy=1 and code like upper(concat(:term,'%')) and match(synonyms, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
   List<CBCriteria> findCriteriaByDomainAndTypeAndStandardAndCode(@Param("domain") String domain,
                                                                  @Param("type") String type,
                                                                  @Param("standard") Boolean standard,
                                                                  @Param("term") String term,
-                                                                 @Param("domainRank") String domainRank,
                                                                  Pageable page);
 
   @Query(value = "select c from CBCriteria c where domainId = :domain and type = :type and standard = :standard and hierarchy=1 and match(synonyms, :term) > 0 order by c.count desc")
@@ -52,7 +51,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
                                                                      @Param("term") String term,
                                                                      Pageable page);
 
-  @Query(value = "select * from cb_criteria c where domain_id = 'DRUG' and type in ('ATC', 'BRAND') and c.is_selectable = 1 and " +
+  @Query(value = "select * from cb_criteria c where domain_id = 'DRUG' and type in ('ATC', 'BRAND', 'RXNORM') and c.is_selectable = 1 and " +
     "(upper(c.name) like upper(concat('%',:term,'%')) or upper(c.code) like upper(concat('%',:term,'%'))) order by c.name asc limit :limit", nativeQuery = true)
   List<CBCriteria> findDrugBrandOrIngredientByValue(@Param("term") String term,
                                                     @Param("limit") Long limit);
