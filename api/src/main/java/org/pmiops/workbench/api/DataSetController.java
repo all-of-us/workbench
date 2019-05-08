@@ -274,7 +274,7 @@ public class DataSetController implements DataSetApiDelegate {
     } else {
       notebookFile = notebooksService.getNotebookContents(
           workspace.getWorkspace().getBucketName(),
-          dataSetExportRequest.getNotebookName().concat(".ipynb"));
+          dataSetExportRequest.getNotebookName());
       notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(queriesAsStrings));
     }
 
@@ -295,7 +295,12 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   private String convertQueryToString(DataSetQuery query, String prefix) {
-    String namespace = prefix.toLowerCase().replaceAll(" ", "_") + "_" + query.getDomain().toString().toLowerCase() + "_";
+    String namespace = prefix
+        .toLowerCase()
+        .replaceAll(" ", "_") +
+        "_" +
+        query.getDomain()
+            .toString().toLowerCase() + "_";
     String sqlSection = namespace + "sql = \"\"\"" + query.getQuery() + "\"\"\"";
 
     String namedParamsSection = namespace +

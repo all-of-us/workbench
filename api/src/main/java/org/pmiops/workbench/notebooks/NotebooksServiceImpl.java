@@ -130,7 +130,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public JSONObject getNotebookContents(String bucketName, String notebookName) {
     try {
-      return cloudStorageService.getFileAsJson(bucketName, "notebooks/" + notebookName);
+      return cloudStorageService.getFileAsJson(bucketName, "notebooks/".concat(notebookName.concat(".ipynb")));
     } catch (IOException e) {
       throw new ServerErrorException("Failed to get notebook " +
           notebookName + " from bucket " +
