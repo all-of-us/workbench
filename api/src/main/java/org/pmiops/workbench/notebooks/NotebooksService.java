@@ -2,6 +2,8 @@ package org.pmiops.workbench.notebooks;
 
 import java.util.List;
 import java.util.regex.Pattern;
+
+import org.json.JSONObject;
 import org.pmiops.workbench.model.FileDetail;
 
 public interface NotebooksService {
@@ -19,4 +21,8 @@ public interface NotebooksService {
   void deleteNotebook(String workspaceNamespace, String workspaceName, String notebookName);
 
   FileDetail renameNotebook(String workspaceNamespace, String workspaceName, String notebookName, String newName);
+
+  JSONObject getNotebookContents(String bucketName, String notebookName);
+
+  void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents);
 }

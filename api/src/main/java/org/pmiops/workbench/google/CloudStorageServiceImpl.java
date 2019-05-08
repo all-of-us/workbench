@@ -179,8 +179,8 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public JSONObject getNotebook(String bucketName, String fileName) throws IOException {
-    return new JSONObject(readToString(bucketName, "notebooks/" + fileName));
+  public JSONObject getFileAsJson(String bucketName, String fileName) throws IOException {
+    return new JSONObject(readToString(bucketName, fileName));
   }
 
   @Override

@@ -45,7 +45,7 @@ public interface CloudStorageService {
 
   GoogleCredential getDefaultServiceAccountCredentials() throws IOException;
 
-  JSONObject getNotebook(String bucketName, String notebookName) throws IOException;
+  JSONObject getFileAsJson(String bucketName, String fileName) throws IOException;
 
   void deleteBlob(BlobId blobId);
 

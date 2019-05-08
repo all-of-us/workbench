@@ -7,7 +7,6 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.base.Strings;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
 
@@ -38,7 +37,6 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
-import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
@@ -55,6 +53,7 @@ import org.pmiops.workbench.model.NamedParameterEntry;
 import org.pmiops.workbench.model.NamedParameterValue;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -75,9 +74,6 @@ public class DataSetController implements DataSetApiDelegate {
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   @Autowired
-  private CloudStorageService cloudStorageService;
-
-  @Autowired
   private final CohortDao cohortDao;
 
   @Autowired
@@ -90,25 +86,28 @@ public class DataSetController implements DataSetApiDelegate {
   private FireCloudService fireCloudService;
 
   @Autowired
+  private NotebooksService notebooksService;
+
+  @Autowired
   DataSetController(
       BigQueryService bigQueryService,
       Clock clock,
-      CloudStorageService cloudStorageService,
       CohortDao cohortDao,
       ConceptDao conceptDao,
       ConceptSetDao conceptSetDao,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
+      NotebooksService notebooksService,
       Provider<User> userProvider,
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
-    this.cloudStorageService = cloudStorageService;
     this.cohortDao = cohortDao;
     this.conceptDao = conceptDao;
     this.conceptSetDao = conceptSetDao;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
+    this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
   }
@@ -258,19 +257,14 @@ public class DataSetController implements DataSetApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     DataSetQueryList queryList = generateQuery(workspaceNamespace, workspaceId, dataSetExportRequest.getDataSetRequest()).getBody();
     String queriesAsStrings = "import pandas\n\n" + queryList.getQueryList().stream()
-        .map(query -> convertQueryToString(query, dataSetExportRequest.getDataSetRequest().getName())).collect(Collectors.joining("\n\n"));
+        .map(query -> convertQueryToString(query, dataSetExportRequest.getDataSetRequest().getName()))
+        .collect(Collectors.joining("\n\n"));
     JSONObject notebookFile;
     WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
     if (dataSetExportRequest.getNewNotebook()) {
        notebookFile = new JSONObject()
           .put("cells", new JSONArray()
-              .put(new JSONObject()
-                  .put("cell_type", "code")
-                  .put("metadata", new JSONObject())
-                  .put("execution_count", JSONObject.NULL)
-                  .put("outputs", new JSONArray())
-                  .put("source", new JSONArray()
-                      .put(queriesAsStrings))))
+              .put(createNotebookCodeCellWithString(queriesAsStrings)))
           .put("metadata", new JSONObject())
           // nbformat and nbformat_minor are the notebook major and minor version we are creating.
           // Specifically, here we create notebook version 4.2 (I believe)
@@ -279,16 +273,10 @@ public class DataSetController implements DataSetApiDelegate {
           .put("nbformat_minor", 2);
     } else {
       try {
-        notebookFile = cloudStorageService.getNotebook(
+        notebookFile = notebooksService.getNotebookContents(
             workspace.getWorkspace().getBucketName(),
             dataSetExportRequest.getNotebookName().concat(".ipynb"));
-        notebookFile.getJSONArray("cells").put(new JSONObject()
-            .put("cell_type", "code")
-            .put("metadata", new JSONObject())
-            .put("execution_count", JSONObject.NULL)
-            .put("outputs", new JSONArray())
-            .put("source", new JSONArray()
-                .put(queriesAsStrings)));
+        notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(queriesAsStrings));
       } catch (IOException e) {
         throw new ServerErrorException("Failed to get notebook " +
             dataSetExportRequest.getNotebookName() + " from bucket " +
@@ -296,10 +284,20 @@ public class DataSetController implements DataSetApiDelegate {
       }
     }
 
-    cloudStorageService.writeFile(workspace.getWorkspace().getBucketName(),
-        "notebooks/" + dataSetExportRequest.getNotebookName() + ".ipynb", notebookFile.toString().getBytes(StandardCharsets.UTF_8));
+    notebooksService.saveNotebook(workspace.getWorkspace().getBucketName(),
+        dataSetExportRequest.getNotebookName(), notebookFile);
 
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  private JSONObject createNotebookCodeCellWithString(String cellInformation) {
+    return new JSONObject()
+        .put("cell_type", "code")
+        .put("metadata", new JSONObject())
+        .put("execution_count", JSONObject.NULL)
+        .put("outputs", new JSONArray())
+        .put("source", new JSONArray()
+            .put(cellInformation));
   }
 
   private String convertQueryToString(DataSetQuery query, String prefix) {
