@@ -21,7 +21,9 @@ export class DataSetApiStub extends DataSetApi {
     });
   }
 
-  exportToNotebook(workspaceNamespace: string, workspaceId: string, dataSetExportRequest: DataSetExportRequest): Promise<EmptyResponse> {
+  exportToNotebook(workspaceNamespace: string,
+    workspaceId: string,
+    dataSetExportRequest: DataSetExportRequest): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(resolve => {
       resolve({});
     });
