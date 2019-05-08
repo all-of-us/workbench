@@ -51,7 +51,7 @@ public class ClusterController implements ClusterApiDelegate {
   // delocalization of saved files back to a given GCS location. See
   // https://github.com/DataBiosphere/leonardo/blob/develop/jupyter-docker/jupyter_delocalize.py#L12
   private static final String DELOCALIZE_CONFIG_FILENAME = ".delocalize.json";
-  private static final String WORKSPACE_DELIMITER = "___";
+  public static final String WORKSPACE_DELIMITER = "__";
 
   // This file is used by the All of Us libraries to access workspace/CDR metadata.
   private static final String AOU_CONFIG_FILENAME = ".all_of_us_config.json";

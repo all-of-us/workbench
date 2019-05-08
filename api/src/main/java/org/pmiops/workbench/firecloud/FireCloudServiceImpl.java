@@ -1,5 +1,7 @@
 package org.pmiops.workbench.firecloud;
 
+import static org.pmiops.workbench.api.ClusterController.WORKSPACE_DELIMITER;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.common.collect.ImmutableList;
@@ -192,6 +194,10 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public void createAllOfUsBillingProject(String projectName) {
+    if (projectName.contains(WORKSPACE_DELIMITER)) {
+      throw new RuntimeException("Attempting to create billing project with name that contains workspace delimiter : " + projectName);
+    }
+
     BillingApi billingApi = billingApiProvider.get();
     CreateRawlsBillingProjectFullRequest request = new CreateRawlsBillingProjectFullRequest();
     request.setBillingAccount("billingAccounts/"+configProvider.get().firecloud.billingAccountId);
