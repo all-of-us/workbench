@@ -115,6 +115,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 fcWorkspace -> fcWorkspace));
   }
 
+  /**
+   * This is an internal method used by createWorkspace and cloneWorkspace endpoints, to
+   * check the existance of ws name.  Currently does not return a conflict if user
+   * is checking the name of a deleted ws.
+   **/
   @Override
   public Workspace getByName(String ns, String name) {
     Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndName(ns, name);
