@@ -26,7 +26,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
   ingredientList = [];
   highlightedOption: number;
   subtype: string;
-  codes: any;
 
   @ViewChild('searchBar') searchBar;
   @HostListener('document:mouseup', ['$event.target'])
@@ -41,9 +40,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
     this.subscription = autocompleteStore.subscribe(searchTerm => {
       this.searchTerm.setValue(searchTerm, {emitEvent: false});
     });
-    // TODO set to false for now, may need to change for conditions/procedures
-    this.codes = false;
-
     this.subscription.add(this.searchTerm.valueChanges
       .debounceTime(300)
       .distinctUntilChanged()
