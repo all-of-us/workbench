@@ -1,7 +1,7 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {scrollStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortBuilderService, TreeSubType, TreeType} from 'generated';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -20,11 +20,7 @@ export class ListNodeComponent implements OnInit, OnDestroy {
   empty: boolean;
   selected: boolean;
   error = false;
-  fullTree = false;
-  ingredients = [];
   subscription: Subscription;
-
-  constructor(private api: CohortBuilderService) {}
 
   ngOnInit() {
     this.subscription = subtreePathStore.subscribe(path => {
@@ -54,36 +50,29 @@ export class ListNodeComponent implements OnInit, OnDestroy {
   }
 
   loadChildren(event) {
-    if (!event) { return ; }
+    if (!event || !!this.children) { return ; }
     this.loading = true;
-    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
+    const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
     const {domainId, id} = this.node;
     const type = domainId === DomainType.DRUG ? CriteriaType[CriteriaType.ATC] : this.node.type;
-    this.api.getCriteriaBy(cdrid, domainId, type, id)
-      .toPromise()
+    cohortBuilderApi().getCriteriaBy(cdrId, domainId, type, id)
       .then(resp => {
         if (resp.items.length === 0 && domainId === DomainType.DRUG) {
-          this.api.getCriteriaBy(cdrid, domainId, CriteriaType[CriteriaType.RXNORM], id)
-            .toPromise()
+          cohortBuilderApi().getCriteriaBy(cdrId, domainId, CriteriaType[CriteriaType.RXNORM], id)
             .then(rxResp => {
+              this.empty = rxResp.items.length === 0;
               this.children = rxResp.items;
               this.loading = false;
-            });
+            }, () => this.error = true);
         } else {
+          this.empty = resp.items.length === 0;
           this.children = resp.items;
           this.loading = false;
         }
-      });
+      }, () => this.error = true);
   }
 
   toggleExpanded() {
     this.expanded = !this.expanded;
-  }
-
-  get secondLevel() {
-    return this.node.parentId === 0
-      && (this.node.type === TreeType[TreeType.ICD10]
-      || (this.node.type === TreeType[TreeType.ICD9]
-      && this.node.subtype === TreeSubType[TreeSubType.PROC]));
   }
 }
