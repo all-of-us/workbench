@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
 import {vocabOptions} from 'app/cohort-review/review-state.service';
-import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
+import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
@@ -17,6 +17,74 @@ import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
 
+const css = `
+  .name-container {
+    overflow: hidden;
+  }
+  .name-container:before {
+    content:"";
+    float: left;
+    width: 1px;
+    height: 100%;
+  }
+  .name-wrapper {
+    float: right;
+    width: 100%;
+    margin-left: -1px;
+  }
+  .name-content {
+    margin: 0;
+  }
+  .show-more {
+    box-sizing: content-box;
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    float: right;
+    position: relative;
+    margin-right: 1px;
+    text-align: right;
+  }
+  /* page specific styling */
+  .name-container {
+    height: 1.2rem;
+  }
+  .name-content {
+    /* it's critical to set a fixed font-size and line-height in order for
+    the ellipsis position to be predictable */
+    font-size: 12px;
+    line-height: 0.6rem;
+  }
+  .show-more {
+    /* set width of ellipsis.  width must equal margin-left */
+    width: 60px;
+    margin-left: -60px;
+    /* set ellipsis position */
+    bottom: 22px;
+    left: 201px;
+    /* add a gradient background */
+    background: -webkit-gradient(linear, left top, right top,
+      from(rgba(255, 255, 255, 0)), to(white), color-stop(50%, white));
+    background: -moz-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+    background: -o-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+    background: -ms-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+  }
+  /* make the ellipsis a link */
+  .ellipsis a {
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    height: 16px;
+    background-color: #ddd;
+    border-radius: 3px;
+    margin-right: 3px;
+    padding: 3px;
+    line-height: 5px;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+  }
+`;
 
 const styles = reactStyles({
   container: {
@@ -255,11 +323,18 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     overlayTemplate(rowData: any, column: any) {
       let vl: any;
-      const valueField = (rowData.refRange || rowData.unit ) && column.field === 'value';
+      const valueField = (rowData.refRange || rowData.unit) && column.field === 'value';
       const nameField = rowData.route && column.field === 'standardName';
-      return <div style={{position: 'relative'}}>
-        { column.field === 'value' && <span>{rowData.value}</span>}
-        { column.field === 'standardName' && <span>{rowData.standardName}</span>}
+      return <div className={column.field === 'standardName' ? 'name-container' : ''}
+        style={{position: 'relative'}}>
+        {column.field === 'value' && <span>{rowData.value}</span>}
+        {column.field === 'standardName' && <React.Fragment>
+          <div className='name-wrapper'>
+            <p className='name-content'>{rowData.standardName}</p>
+          </div>
+          <span className='show-more'>Show more</span>
+        </React.Fragment>
+        }
         {(valueField || nameField)
         && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => vl.toggle(e)}/>}
         <OverlayPanel className='labOverlay' ref={(el) => vl = el}
@@ -617,7 +692,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       });
 
       return <div style={styles.container}>
-        <style>{css}</style>
+        <style>{datatableStyles + css}</style>
         {filteredData && <DataTable
           expandedRows={this.state.expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
