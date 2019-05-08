@@ -97,7 +97,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     List<Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
     return dbWorkspaces.stream()
-        .filter(dbWorkspace -> dbWorkspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)
+        .filter(dbWorkspace -> dbWorkspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.ACTIVE)
         .map(dbWorkspace -> {
           String fcWorkspaceAccessLevel = fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
           WorkspaceResponse currentWorkspace = new WorkspaceResponse();
@@ -118,8 +118,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public Workspace getByName(String ns, String name) {
     Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndName(ns, name);
-    if (workspace == null || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
-      throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, name));
+    if (workspace == null || workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE) {
+      return null;
     }
     return workspace;
   }

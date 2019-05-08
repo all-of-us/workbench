@@ -97,6 +97,10 @@ public class Workspace {
 
   private Set<WorkspaceUserRole> usersWithAccess = new HashSet<WorkspaceUserRole>();
 
+  public Workspace() {
+    setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "workspace_id")
