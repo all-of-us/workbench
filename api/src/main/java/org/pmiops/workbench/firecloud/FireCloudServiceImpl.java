@@ -1,7 +1,5 @@
 package org.pmiops.workbench.firecloud;
 
-import static org.pmiops.workbench.api.ClusterController.WORKSPACE_DELIMITER;
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.common.collect.ImmutableList;
@@ -43,6 +41,8 @@ import java.util.logging.Logger;
 @Service
 // TODO: consider retrying internally when FireCloud returns a 503
 public class FireCloudServiceImpl implements FireCloudService {
+
+  public static final String WORKSPACE_DELIMITER = "__";
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
   private final Provider<WorkbenchConfig> configProvider;

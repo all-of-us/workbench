@@ -21,6 +21,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -51,7 +52,6 @@ public class ClusterController implements ClusterApiDelegate {
   // delocalization of saved files back to a given GCS location. See
   // https://github.com/DataBiosphere/leonardo/blob/develop/jupyter-docker/jupyter_delocalize.py#L12
   private static final String DELOCALIZE_CONFIG_FILENAME = ".delocalize.json";
-  public static final String WORKSPACE_DELIMITER = "__";
 
   // This file is used by the All of Us libraries to access workspace/CDR metadata.
   private static final String AOU_CONFIG_FILENAME = ".all_of_us_config.json";
@@ -205,11 +205,11 @@ public class ClusterController implements ClusterApiDelegate {
     );
     String workspacePath = body.getWorkspaceId();
     if (!projectName.equals(body.getWorkspaceNamespace())) {
-      workspacePath = body.getWorkspaceNamespace() + WORKSPACE_DELIMITER + body.getWorkspaceId();
+      workspacePath = body.getWorkspaceNamespace() + FireCloudServiceImpl.WORKSPACE_DELIMITER + body.getWorkspaceId();
     }
     String apiDir = "workspaces/" + workspacePath;
     if (body.getPlaygroundMode()) {
-      apiDir = "workspaces" + WORKSPACE_DELIMITER + "playground/" + workspacePath;
+      apiDir = "workspaces_playground/" + workspacePath;
     }
     String localDir = "~/" + apiDir;
 
