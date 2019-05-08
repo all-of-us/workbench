@@ -81,9 +81,9 @@ export class SynonymsObject extends React.Component<{},
 }
 
 
-export class ConceptTable extends React.Component<{concepts: Concept[],
-  getSelectedConcepts: Function, loading: boolean, placeholderValue: string,
-  reactKey: string, setSelectedConcepts: Function},
+export class ConceptTable extends React.Component<{concepts: Concept[];
+  loading: boolean; placeholderValue: string, onSelectConcepts: Function,
+  selectedConcepts: Concept[], reactKey: string},
   {selectedConcepts: Concept[]; selectedVocabularies: string[]; }> {
 
   private dt: DataTable;
@@ -92,24 +92,28 @@ export class ConceptTable extends React.Component<{concepts: Concept[],
   constructor(props) {
     super(props);
     this.state = {
-      selectedConcepts: [],
+      selectedConcepts: props.selectedConcepts,
       selectedVocabularies: []
     };
     this.filterImageSrc = 'filter';
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.state.selectedConcepts !== this.props.selectedConcepts) {
+      // when parent has updated a set with selected concepts, unselect them from table
+      this.setState({selectedConcepts: this.props.selectedConcepts});
+    }
+  }
+
   updateSelectedConceptList(selectedConcepts) {
     this.setState({selectedConcepts : selectedConcepts});
-    // This will be removed once concept set list has a better way to access selected concepts
-    this.props.setSelectedConcepts(selectedConcepts);
-    this.props.getSelectedConcepts(selectedConcepts);
+    this.props.onSelectConcepts(selectedConcepts);
   }
 
   distinctVocabulary() {
     const vocabularyIds = this.props.concepts.map(concept => concept.vocabularyId);
     return fp.uniq(vocabularyIds);
   }
-
 
   filterByVocabulary(vocabulary) {
     const selectedVocabularies =
@@ -163,10 +167,12 @@ export class ConceptTable extends React.Component<{concepts: Concept[],
                  expandedRows={this.props.concepts
                    .filter(concept => concept.conceptSynonyms.length > 0)}
                  rowExpansionTemplate={this.rowExpansionTemplate}
+                 data-test-id='conceptRow'
                  onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
       <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
-              selectionMode='multiple' />
-      <Column bodyStyle={styles.colStyle} field='conceptName' header='Name'/>
+              data-test-id='conceptCheckBox' selectionMode='multiple' />
+      <Column bodyStyle={styles.colStyle} field='conceptName' header='Name'
+              data-test-id='conceptName'/>
       <Column bodyStyle={styles.colStyle} field='conceptCode' header='Code'/>
       <Column field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle}
               filter={true} headerStyle={{display: 'flex', textAlign: 'center', paddingTop: '0.6rem'
@@ -184,21 +190,13 @@ export class ConceptTable extends React.Component<{concepts: Concept[],
 })
 export class ConceptTableComponent extends ReactWrapperBase {
   @Input() concepts: Object[];
-  @Input() getSelectedConcepts;
+  @Input() onSelectConcepts;
   @Input() loading = false;
   @Input() placeholderValue = '';
-  @Input() reactKey;
-  @Input() searchTerm = '';
-
-  selectedConcepts: Array<any> = [];
+  @Input() selectedConcepts: Array<any> = [];
 
   constructor() {
-    super(ConceptTable, ['concepts', 'getSelectedConcepts', 'loading', 'placeholderValue',
-      'reactKey', 'setSelectedConcepts']);
-    this.setSelectedConcepts = this.setSelectedConcepts.bind(this);
-  }
-
-  setSelectedConcepts(selectedConcepts: Concept[]) {
-    this.selectedConcepts = selectedConcepts;
+    super(ConceptTable, ['concepts', 'loading', 'placeholderValue', 'onSelectConcepts',
+      'selectedConcepts']);
   }
 }

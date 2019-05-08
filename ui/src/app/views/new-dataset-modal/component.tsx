@@ -2,16 +2,25 @@ import * as React from 'react';
 
 import {validate} from 'validate.js';
 
-import {dataSetApi} from 'app/services/swagger-fetch-clients';
+import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {AlertDanger} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
-import {ValidationError} from 'app/components/inputs';
-import {TextInput} from 'app/components/inputs';
+import {SmallHeader} from 'app/components/headers';
+import {Select, TextArea} from 'app/components/inputs';
+import {CheckBox, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
+import colors from 'app/styles/colors';
+import {convertQueryToText} from 'app/utils/big-query-queries';
 import {summarizeErrors} from 'app/utils/index';
+import {navigate} from 'app/utils/navigation';
 import {
-  DomainValuePair
+  DataSetQuery,
+  DataSetRequest,
+  DomainValuePair,
+  FileDetail
 } from 'generated/fetch';
 
 interface Props {
@@ -26,9 +35,16 @@ interface Props {
 
 interface State {
   conflictDataSetName: boolean;
+  existingNotebooks: FileDetail[];
+  exportToNotebook: boolean;
+  loading: boolean;
   missingDataSetInfo: boolean;
   name: string;
-  nameTouched: boolean;
+  newNotebook: boolean;
+  notebookName: string;
+  notebooksLoading: boolean;
+  queries: Array<DataSetQuery>;
+  seePreview: boolean;
 }
 
 
@@ -37,18 +53,44 @@ class NewDataSetModal extends React.Component<Props, State> {
     super(props);
     this.state = {
       conflictDataSetName: false,
+      existingNotebooks: [],
+      exportToNotebook: false,
+      loading: false,
       missingDataSetInfo: false,
       name: '',
-      nameTouched: false,
+      newNotebook: true,
+      notebookName: '',
+      notebooksLoading: false,
+      queries: [],
+      seePreview: false
     };
   }
 
+  componentDidMount() {
+    this.generateQuery();
+    this.loadNotebooks();
+  }
+
+  private async loadNotebooks() {
+    try {
+      const {workspaceNamespace, workspaceId} = this.props;
+      this.setState({notebooksLoading: true});
+      const existingNotebooks =
+        await workspacesApi().getNoteBookList(workspaceNamespace, workspaceId);
+      this.setState({existingNotebooks});
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.setState({notebooksLoading: false});
+    }
+  }
+
   async saveDataSet() {
-    this.setState({nameTouched: true});
+    const {workspaceNamespace, workspaceId} = this.props;
     if (!this.state.name) {
       return;
     }
-    this.setState({conflictDataSetName: false, missingDataSetInfo: false});
+    this.setState({conflictDataSetName: false, missingDataSetInfo: false, loading: true});
     const request = {
       name: this.state.name,
       includesAllParticipants: this.props.includesAllParticipants,
@@ -59,53 +101,140 @@ class NewDataSetModal extends React.Component<Props, State> {
     };
     try {
       await dataSetApi().createDataSet(
-        this.props.workspaceNamespace, this.props.workspaceId, request);
-      this.props.closeFunction();
+        workspaceNamespace, workspaceId, request);
+      if (!this.state.exportToNotebook) {
+        this.props.closeFunction();
+      } else {
+        await dataSetApi().exportToNotebook(
+          workspaceNamespace, workspaceId,
+          {
+            dataSetRequest: request,
+            notebookName: this.state.notebookName,
+            newNotebook: this.state.newNotebook
+          });
+        navigate(['workspaces',
+          workspaceNamespace,
+          workspaceId, 'notebooks', this.state.notebookName + '.ipynb']);
+      }
     } catch (e) {
       if (e.status === 409) {
-        this.setState({conflictDataSetName: true});
+        this.setState({conflictDataSetName: true, loading: false});
       } else if (e.status === 400) {
-        this.setState({missingDataSetInfo: true});
+        this.setState({missingDataSetInfo: true, loading: false});
       }
     }
   }
 
-  render() {
-    const {name, nameTouched, conflictDataSetName, missingDataSetInfo} = this.state;
+  changeExportToNotebook() {
+    this.setState({exportToNotebook: !this.state.exportToNotebook});
+  }
 
-    const errors = validate({name}, {
+  async generateQuery() {
+    const {workspaceNamespace, workspaceId} = this.props;
+    const dataSet: DataSetRequest = {
+      name: '',
+      conceptSetIds: this.props.selectedConceptSetIds,
+      cohortIds: this.props.selectedCohortIds,
+      values: this.props.selectedValues,
+      includesAllParticipants: this.props.includesAllParticipants,
+    };
+    const sqlQueries = await dataSetApi().generateQuery(workspaceNamespace, workspaceId, dataSet);
+    this.setState({queries: sqlQueries.queryList});
+  }
+
+  render() {
+    const {
+      conflictDataSetName,
+      exportToNotebook,
+      loading,
+      missingDataSetInfo,
+      name,
+      newNotebook,
+      notebookName,
+      notebooksLoading,
+      existingNotebooks,
+      queries,
+      seePreview
+    } = this.state;
+
+    const selectOptions = [{label: '(Create a new notebook)', value: ''}]
+      .concat(existingNotebooks.map(notebook => ({
+        value: notebook.name.slice(0, -6),
+        label: notebook.name.slice(0, -6)
+      })));
+
+    const errors = validate({name, notebookName}, {
       name: {
         presence: {allowEmpty: false}
+      },
+      notebookName: {
+        presence: {allowEmpty: !exportToNotebook},
+        exclusion: {
+          within: newNotebook ? existingNotebooks.map(fd => fd.name.slice(0, -6)) : [],
+          message: 'already exists'
+        }
       }
     });
-    return <Modal>
+    return <Modal loading={loading}>
       <ModalTitle>Save Dataset</ModalTitle>
       <ModalBody>
         <div>
-          <ValidationError>
-            {summarizeErrors(nameTouched && errors && errors.name)}
-          </ValidationError>
           {conflictDataSetName &&
           <AlertDanger>DataSet with same name exist</AlertDanger>
           }
           {missingDataSetInfo &&
           <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
           }
-          <TextInput type='text' autoFocus placeholder='Dataset Name'
-                     value={name}
+          <TextInput type='text' autoFocus placeholder='Data Set Name'
+                     value={name} data-test-id='data-set-name-input'
                      onChange={v => this.setState({
-                       name: v, nameTouched: true,
-                       conflictDataSetName: false
+                       name: v, conflictDataSetName: false
                      })}/>
         </div>
+        <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem'}}>
+          <CheckBox style={{height: 17, width: 17}}
+                    data-test-id='export-to-notebook'
+                    onChange={() => this.changeExportToNotebook()} />
+          <div style={{marginLeft: '.5rem',
+            color: colors.black[0]}}>Export to Python notebook</div>
+        </div>
+        {exportToNotebook && <React.Fragment>
+          {notebooksLoading && <SpinnerOverlay />}
+          <Button style={{marginTop: '1rem'}} data-test-id='code-preview-button'
+                  onClick={() => this.setState({seePreview: !seePreview})}>
+            {seePreview ? 'Hide Preview' : 'See Code Preview'}
+          </Button>
+          {seePreview && <React.Fragment>
+            {queries.length === 0 && <SpinnerOverlay />}
+            <TextArea disabled={true} onChange={() => {}} style={{marginTop: '1rem'}}
+                      data-test-id='code-text-box'
+                      value={queries.map(query =>
+                        convertQueryToText(name, query.domain, query))} />
+          </React.Fragment>}
+          <div style={{marginTop: '1rem'}}>
+            <Select value={this.state.notebookName}
+                    options={selectOptions}
+                    onChange={v => this.setState({notebookName: v, newNotebook: v === ''})}/>
+          </div>
+          {newNotebook && <React.Fragment>
+            <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
+            <TextInput onChange={(v) => this.setState({notebookName: v})}
+                       value={notebookName} data-test-id='notebook-name-input'/>
+          </React.Fragment>}
+        </React.Fragment>}
       </ModalBody>
       <ModalFooter>
-        <Button type='secondary' onClick={this.props.closeFunction} style={{marginRight: '2rem'}}>
+        <Button type='secondary'
+                onClick={this.props.closeFunction}
+                style={{marginRight: '2rem'}}>
           Cancel
         </Button>
-        <Button type='primary' disabled={errors} onClick={() => this.saveDataSet()}>
-          Save
-        </Button>
+        <TooltipTrigger content={summarizeErrors(errors)}>
+          <Button type='primary' data-test-id='save-data-set'
+                  disabled={errors} onClick={() => this.saveDataSet()}>
+            Save{exportToNotebook && ' and Open'}
+          </Button>
+        </TooltipTrigger>
       </ModalFooter>
     </Modal>;
   }

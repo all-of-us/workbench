@@ -93,6 +93,11 @@ paths:
           required: false
           description: the specific type of criteria to get
         - in: query
+          name: standard
+          type: boolean
+          required: false
+          description: reveals if source or standard
+        - in: query
           name: parentId
           type: integer
           format: int64
@@ -121,6 +126,11 @@ paths:
         - in: query
           name: type
           type: string
+          required: false
+          description: the type of the criteria were search for
+        - in: query
+          name: standard
+          type: boolean
           required: false
           description: the type of the criteria were search for
         - in: query

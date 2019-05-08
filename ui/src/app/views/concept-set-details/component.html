@@ -72,7 +72,7 @@
   </div>
   <div *ngIf="conceptSet.concepts?.length" class="concept-table-wrap">
     <app-concept-table [concepts]="conceptSet.concepts" [placeholderValue]="'No Concepts Found'"
-    [getSelectedConcepts]="onSelectConcepts"></app-concept-table>
+    [onSelectConcepts]="onSelectConcepts" [selectedConcepts]="selectedConcepts"></app-concept-table>
   </div>
   <app-sliding-fab [disable]="disableRemoveFab" [expanded]="'Remove from set'"
                    [submitFunction]="removeFab" [iconShape]="'trash'">

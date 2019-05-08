@@ -253,6 +253,12 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       });
   }
 
+  onCancel(): void {
+    // Reload the workspace to remove the temp added user/user roles in state variable workspace
+    this.reloadWorkspace();
+    this.props.onClose();
+  }
+
   removeCollaborator(user: UserRole): void {
     this.setState(({workspace}) => ({
       workspace: {...workspace,
@@ -470,7 +476,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         </ModalBody>
         <ModalFooter>
             <Button type='secondary' style={{marginRight: '.8rem', border: 'none'}}
-                    onClick={() => this.props.onClose()}>Cancel</Button>
+                    onClick={() => this.onCancel()}>Cancel</Button>
             <Button data-test-id='save' disabled={!this.hasPermission}
                     onClick={() => this.save()}>Save</Button>
         </ModalFooter>
@@ -485,7 +491,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         </ModalBody>
         <ModalFooter>
           <Button onClick={() => this.reloadWorkspace()}>Reload Workspace</Button>
-          <Button onClick={() => this.props.onClose()}>Cancel Sharing</Button>
+          <Button onClick={() => this.onCancel()}>Cancel Sharing</Button>
         </ModalFooter>
       </Modal>}
     </React.Fragment>;

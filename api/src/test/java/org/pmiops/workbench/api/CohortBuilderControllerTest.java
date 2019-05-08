@@ -123,6 +123,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.ICD9CM.toString())
       .count("0")
       .hierarchy(true)
+      .standard(false)
       .parentId(0L);
     cbCriteriaDao.save(icd9CriteriaParent);
     CBCriteria icd9Criteria = new CBCriteria()
@@ -130,13 +131,14 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.ICD9CM.toString())
       .count("0")
       .hierarchy(true)
+      .standard(false)
       .parentId(icd9CriteriaParent.getId());
     cbCriteriaDao.save(icd9Criteria);
 
     assertEquals(
       createResponseCriteria(icd9CriteriaParent),
       controller
-        .getCriteriaBy(1L, DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(),  0L)
+        .getCriteriaBy(1L, DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(),false,0L)
         .getBody()
         .getItems()
         .get(0)
@@ -144,7 +146,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(icd9Criteria),
       controller
-        .getCriteriaBy(1L, DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), icd9CriteriaParent.getId())
+        .getCriteriaBy(1L, DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(),false, icd9CriteriaParent.getId())
         .getBody()
         .getItems()
         .get(0)
@@ -156,38 +158,38 @@ public class CohortBuilderControllerTest {
     testConfig.cohortbuilder.enableListSearch = true;
     try {
       controller
-        .getCriteriaBy(1L, null, null,  null);
+        .getCriteriaBy(1L,null,null,false,null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
-      assertEquals("Bad Request: Please provide a valid criteria domain. null is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid domain. null is not valid.", bre.getMessage());
     }
 
     try {
       controller
-        .getCriteriaBy(1L, "blah", null,  null);
+        .getCriteriaBy(1L,"blah",null,false,null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
-      assertEquals("Bad Request: Please provide a valid criteria type. null is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid type. null is not valid.", bre.getMessage());
     }
 
     try {
       controller
-        .getCriteriaBy(1L, "blah", "blah",  null);
+        .getCriteriaBy(1L,"blah","blah",false,null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
-      assertEquals("Bad Request: Please provide a valid criteria domain. blah is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid domain. blah is not valid.", bre.getMessage());
     }
 
     try {
       controller
-        .getCriteriaBy(1L, DomainType.CONDITION.toString(), "blah",  null);
+        .getCriteriaBy(1L, DomainType.CONDITION.toString(),"blah",false,null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
-      assertEquals("Bad Request: Please provide a valid criteria type. blah is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid type. blah is not valid.", bre.getMessage());
     }
   }
 
@@ -204,7 +206,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(demoCriteria),
       controller
-        .getCriteriaBy(1L, DomainType.PERSON.toString(), CriteriaType.AGE.toString(), null)
+        .getCriteriaBy(1L, DomainType.PERSON.toString(), CriteriaType.AGE.toString(),false,null)
         .getBody()
         .getItems()
         .get(0)
@@ -219,13 +221,14 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.LOINC.toString())
       .count("0")
       .hierarchy(true)
-      .synonyms("LP12*\"[rank1]\"");
+      .standard(true)
+      .synonyms("LP12*[measurement_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
       createResponseCriteria(criteria),
       controller
-        .getCriteriaAutoComplete(1L, DomainType.MEASUREMENT.toString(),"LP12", CriteriaType.LOINC.toString(), null)
+        .getCriteriaAutoComplete(1L, DomainType.MEASUREMENT.toString(),"LP12", CriteriaType.LOINC.toString(), true,null)
         .getBody()
         .getItems()
         .get(0)
@@ -240,13 +243,15 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.LOINC.toString())
       .count("0")
       .hierarchy(true)
-      .code("LP123");
+      .standard(true)
+      .code("LP123")
+      .synonyms("+[MEASUREMENT_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
       createResponseCriteria(criteria),
       controller
-        .getCriteriaAutoComplete(1L, DomainType.MEASUREMENT.toString(),"LP12", CriteriaType.LOINC.toString(), null)
+        .getCriteriaAutoComplete(1L, DomainType.MEASUREMENT.toString(),"LP12", CriteriaType.LOINC.toString(),true,null)
         .getBody()
         .getItems()
         .get(0)
@@ -261,13 +266,14 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.SNOMED.toString())
       .count("0")
       .hierarchy(true)
-      .synonyms("LP12*\"[rank1]\"");
+      .standard(true)
+      .synonyms("LP12*[condition_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
       createResponseCriteria(criteria),
       controller
-        .getCriteriaAutoComplete(1L, DomainType.CONDITION.toString(),"LP12", CriteriaType.SNOMED.toString(), null)
+        .getCriteriaAutoComplete(1L, DomainType.CONDITION.toString(),"LP12", CriteriaType.SNOMED.toString(),true,null)
         .getBody()
         .getItems()
         .get(0)
@@ -279,38 +285,38 @@ public class CohortBuilderControllerTest {
     testConfig.cohortbuilder.enableListSearch = true;
     try {
       controller
-        .getCriteriaAutoComplete(1L, null, "blah",  null, null);
+        .getCriteriaAutoComplete(1L,null,"blah",null,null,null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
-      assertEquals("Bad Request: Please provide a valid criteria domain. null is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid domain. null is not valid.", bre.getMessage());
     }
 
     try {
       controller
-        .getCriteriaAutoComplete(1L, "blah", "blah",  null, null);
+        .getCriteriaAutoComplete(1L,"blah","blah",null,null,null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
-      assertEquals("Bad Request: Please provide a valid criteria type. null is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid type. null is not valid.", bre.getMessage());
     }
 
     try {
       controller
-        .getCriteriaAutoComplete(1L, "blah", "blah",  "blah", null);
+        .getCriteriaAutoComplete(1L,"blah","blah","blah",null,null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
-      assertEquals("Bad Request: Please provide a valid criteria domain. blah is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid domain. blah is not valid.", bre.getMessage());
     }
 
     try {
       controller
-        .getCriteriaAutoComplete(1L, DomainType.CONDITION.toString(), "blah",  "blah", null);
+        .getCriteriaAutoComplete(1L, DomainType.CONDITION.toString(), "blah",  "blah", null,null);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
-      assertEquals("Bad Request: Please provide a valid criteria type. blah is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid type. blah is not valid.", bre.getMessage());
     }
   }
 
@@ -328,13 +334,40 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.LOINC.toString())
       .attribute(Boolean.FALSE)
       .standard(false)
-      .synonyms("[rank1]");
+      .synonyms("[CONDITION_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
       createResponseCriteria(criteria),
       controller
         .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(), "001", null)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTermLikeSourceCode() throws Exception {
+    CBCriteria criteria = new CBCriteria()
+      .code("001")
+      .count("10")
+      .conceptId("123")
+      .domainId(DomainType.CONDITION.toString())
+      .group(Boolean.TRUE)
+      .selectable(Boolean.TRUE)
+      .name("chol blah")
+      .parentId(0)
+      .type(CriteriaType.LOINC.toString())
+      .attribute(Boolean.FALSE)
+      .standard(false)
+      .synonyms("[CONDITION_rank1]");
+    cbCriteriaDao.save(criteria);
+
+    assertEquals(
+      createResponseCriteria(criteria),
+      controller
+        .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(), "00", null)
         .getBody()
         .getItems()
         .get(0)
@@ -355,7 +388,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.BRAND.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("[rank1]");
+      .synonyms("[DRUG_rank1]");
     cbCriteriaDao.save(criteria1);
     CBCriteria criteria2 = new CBCriteria()
       .code("8163")
@@ -369,7 +402,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.RXNORM.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("[rank1]");
+      .synonyms("[DRUG_rank1]");
     cbCriteriaDao.save(criteria2);
     CBCriteria criteria3 = new CBCriteria()
       .code("8163")
@@ -383,7 +416,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.RXNORM.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("[rank1]");
+      .synonyms("[DRUG_rank1]");
     cbCriteriaDao.save(criteria3);
     jdbcTemplate.execute("create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
     jdbcTemplate.execute("insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (19001487, 1135766)");
@@ -427,7 +460,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.LOINC.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("[rank1]");
+      .synonyms("[CONDITION_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -454,7 +487,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.LOINC.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("LP12*\"[rank1]\"");
+      .synonyms("LP12*[condition_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -482,7 +515,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.ATC.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("LP12*\"[rank1]\"");
+      .synonyms("LP12*[drug_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(

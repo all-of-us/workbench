@@ -162,12 +162,14 @@ public class UserService {
       if (!isInGroup) {
         this.fireCloudService.addUserToGroup(user.getEmail(),
             configProvider.get().firecloud.registeredDomainName);
+        log.info(String.format("Added user %s to registered-tier group.", user.getEmail()));
       }
       user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
     } else {
       if (isInGroup) {
         this.fireCloudService.removeUserFromGroup(user.getEmail(),
             configProvider.get().firecloud.registeredDomainName);
+        log.info(String.format("Removed user %s from registered-tier group.", user.getEmail()));
       }
       user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
     }
@@ -385,8 +387,8 @@ public class UserService {
   /**
    *  Syncs the current user's training status from Moodle.
    */
-  public void syncComplianceTrainingStatus() throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    syncComplianceTrainingStatus(userProvider.get());
+  public User syncComplianceTrainingStatus() throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+    return syncComplianceTrainingStatus(userProvider.get());
   }
 
   /**
@@ -403,7 +405,7 @@ public class UserService {
    *    b. training expiration date with as returned from MOODLE.
    * 3. If there are no badges for a user set training completion time and expiration date as null
    */
-  public void syncComplianceTrainingStatus(User user) throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+  public User syncComplianceTrainingStatus(User user) throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     try {
       Integer moodleId = user.getMoodleId();
@@ -411,7 +413,7 @@ public class UserService {
         moodleId = complianceService.getMoodleId(user.getEmail());
         if (moodleId == null) {
           // User has not yet created/logged into MOODLE
-          return;
+          return user;
         }
         user.setMoodleId(moodleId);
       }
@@ -433,10 +435,9 @@ public class UserService {
         // training completion & expiration time.
         user.setComplianceTrainingCompletionTime(null);
         user.setComplianceTrainingExpirationTime(null);
-
       }
 
-      updateUserWithRetries(dbUser -> {
+      return updateUserWithRetries(dbUser -> {
         dbUser.setMoodleId(user.getMoodleId());
         dbUser.setComplianceTrainingExpirationTime(user.getComplianceTrainingExpirationTime());
         dbUser.setComplianceTrainingCompletionTime(user.getComplianceTrainingCompletionTime());
@@ -459,10 +460,10 @@ public class UserService {
   /**
    * Updates the given user's eraCommons-related fields with the NihStatus object returned from FC.
    */
-  private void setEraCommonsStatus(User targetUser, NihStatus nihStatus) {
+  private User setEraCommonsStatus(User targetUser, NihStatus nihStatus) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
-    updateUserWithRetries(user -> {
+    return updateUserWithRetries(user -> {
       if (nihStatus != null) {
         Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
         // NihStatus should never come back from firecloud with an empty linked username.
@@ -490,10 +491,10 @@ public class UserService {
   /**
    * Syncs the eraCommons access module status for the current user.
    */
-  public void syncEraCommonsStatus() {
+  public User syncEraCommonsStatus() {
     User user = userProvider.get();
     NihStatus nihStatus = fireCloudService.getNihStatus();
-    setEraCommonsStatus(user, nihStatus);
+    return setEraCommonsStatus(user, nihStatus);
   }
 
   /**
@@ -502,18 +503,18 @@ public class UserService {
    * This uses impersonated credentials and should only be called in the context of a cron job or a
    * request from a user with elevated privileges.
    */
-  public void syncEraCommonsStatusUsingImpersonation(User user) throws IOException, org.pmiops.workbench.firecloud.ApiException {
+  public User syncEraCommonsStatusUsingImpersonation(User user) throws IOException, org.pmiops.workbench.firecloud.ApiException {
     ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
     NihApi api = new NihApi(apiClient);
     try {
       NihStatus nihStatus = api.nihStatus();
-      setEraCommonsStatus(user, nihStatus);
+      return setEraCommonsStatus(user, nihStatus);
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
         // We'll catch the NOT_FOUND ApiException here, since we expect many users to have an empty
         // eRA Commons linkage.
         log.info(String.format("NIH Status not found for user %s", user.getEmail()));
-        return;
+        return user;
       } else {
         throw e;
       }
@@ -524,8 +525,8 @@ public class UserService {
     syncTwoFactorAuthStatus(userProvider.get());
   }
 
-  public void syncTwoFactorAuthStatus(User targetUser) {
-    updateUserWithRetries(user -> {
+  public User syncTwoFactorAuthStatus(User targetUser) {
+    return updateUserWithRetries(user -> {
       boolean isEnrolledIn2FA = directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv();
       if (isEnrolledIn2FA) {
         if (user.getTwoFactorAuthCompletionTime() == null) {

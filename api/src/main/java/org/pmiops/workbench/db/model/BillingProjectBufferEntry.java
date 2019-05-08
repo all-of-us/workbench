@@ -16,6 +16,7 @@ public class BillingProjectBufferEntry {
   private long id;
   private String fireCloudProjectName;
   private Timestamp creationTime;
+  private Timestamp lastSyncRequestTime;
   private Short status;
 
   public enum BillingProjectBufferStatus {
@@ -52,6 +53,14 @@ public class BillingProjectBufferEntry {
     this.creationTime = creationTime;
   }
 
+  @Column(name = "last_sync_request_time")
+  public Timestamp getLastSyncRequestTime() {
+    return lastSyncRequestTime;
+  }
+  public void setLastSyncRequestTime(Timestamp lastSyncRequestTime) {
+    this.lastSyncRequestTime = lastSyncRequestTime;
+  }
+
   @Transient
   public BillingProjectBufferStatus getStatusEnum() {
     return StorageEnums.billingProjectBufferStatusFromStorage(status);
@@ -61,7 +70,7 @@ public class BillingProjectBufferEntry {
   }
 
   @Column(name = "status")
-  private Short getStatusValue() { return this.status; }
-  private void setStatusValue(Short s) { this.status = s; }
+  private short getStatus() { return this.status; }
+  private void setStatus(short s) { this.status = s; }
 
 }

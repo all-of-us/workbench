@@ -205,10 +205,10 @@ public class DataSetServiceImpl implements DataSetService {
       DomainConceptIds columnNames = domainConceptIds.get();
 
       // This adds the where clauses for cohorts and concept sets.
-      query = query.concat(" WHERE (" + columnNames.getStandardConceptIdColumn() + conceptSetListQuery
-          + " OR " + columnNames.getSourceConceptIdColumn() + conceptSetListQuery + ")");
+      query = query.concat(" WHERE \n(" + columnNames.getStandardConceptIdColumn() + conceptSetListQuery
+          + " OR \n" + columnNames.getSourceConceptIdColumn() + conceptSetListQuery + ")");
       if (!includesAllParticipants) {
-        query = query.concat(" AND (PERSON_ID IN ("
+        query = query.concat(" \nAND (PERSON_ID IN ("
             + cohortQueries + "))");
       }
       queryMap.put(query, cohortParameters);

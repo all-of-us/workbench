@@ -65,8 +65,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
   private static final Long DEFAULT_TREE_SEARCH_LIMIT = 100L;
   private static final Long DEFAULT_CRITERIA_SEARCH_LIMIT = 250L;
-  private static final String DOMAIN_MESSAGE = "Bad Request: Please provide a valid criteria domain. %s is not valid.";
-  private static final String TYPE_MESSAGE = "Bad Request: Please provide a valid criteria type. %s is not valid.";
+  private static final String BAD_REQUEST_MESSAGE = "Bad Request: Please provide a valid %s. %s is not valid.";
 
   private BigQueryService bigQueryService;
   private ParticipantCounter participantCounter;
@@ -204,19 +203,23 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                       String domain,
                                                                       String term,
                                                                       String type,
+                                                                      Boolean standard,
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
-    String matchExp = modifyKeywordMatch(term, domain);
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     if (configProvider.get().cohortbuilder.enableListSearch) {
       validateDomainAndType(domain, type);
-      List<CBCriteria> criteriaList = CriteriaType.SNOMED.toString().equals(type) ?
-        cbCriteriaDao.findCriteriaByDomainAndTypeForName(domain, type, matchExp, new PageRequest(0, resultLimit.intValue())) :
-        cbCriteriaDao.findCriteriaByDomainAndTypeForCodeOrName(domain, type, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+      String domainRank = "+[" + domain.toLowerCase() + "_rank1]";
+      String matchExp = modifyTermMatch(term) + domainRank;
+      List<CBCriteria> criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(domain, type, standard, matchExp, new PageRequest(0, resultLimit.intValue()));
+      if (criteriaList.isEmpty()) {
+        criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(domain, type, standard, term, new PageRequest(0, resultLimit.intValue()));
+      }
       criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
     } else {
       List<Criteria> criteriaList;
+      String matchExp = modifyKeywordMatch(term, domain);
       if (type == null) {
         criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(domain, matchExp, term, new PageRequest(0, resultLimit.intValue()));
       } else {
@@ -292,19 +295,25 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                                 String term,
                                                                                 Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    String domainRank = "+[" + domain.toLowerCase() + "_rank1]";
     List<CBCriteria> criteriaList = new ArrayList<>();
     int resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT).intValue();
     List<StandardProjection> projections = cbCriteriaDao.findStandardProjectionByCode(domain, term);
     boolean isStandard = projections.isEmpty() || projections.get(0).getStandard();
     if (projections.isEmpty()) {
-      criteriaList = cbCriteriaDao.findCriteriaByDomainAndSynonyms(domain, isStandard, modifyTermMatch(term), new PageRequest(0, resultLimit));
+      String modTerm = modifyTermMatch(term) + domainRank;
+      criteriaList = cbCriteriaDao.findCriteriaByDomainAndSynonyms(domain, isStandard, modTerm, new PageRequest(0, resultLimit));
     }
     if (criteriaList.isEmpty()) {
       criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, new PageRequest(0, resultLimit));
     }
-    if (DomainType.DRUG.toString().equals(domain)) {
-      Map<Boolean, List<CBCriteria>> groups =
-        criteriaList.stream().collect(Collectors.partitioningBy(c -> c.getType().equals(CriteriaType.BRAND.toString())));
+    if (criteriaList.isEmpty()) {
+      criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, !isStandard, term, new PageRequest(0, resultLimit));
+    }
+    if (DomainType.DRUG.equals(DomainType.fromValue(domain))) {
+      Map<Boolean, List<CBCriteria>> groups = criteriaList
+        .stream()
+        .collect(Collectors.partitioningBy(c -> c.getType().equals(CriteriaType.BRAND.toString())));
       List<Long> conceptIds = groups.get(true)
         .stream()
         .map(c -> Long.valueOf(c.getConceptId()))
@@ -368,18 +377,17 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> getCriteriaBy(Long cdrVersionId,
                                                             String domain,
                                                             String type,
+                                                            Boolean standard,
                                                             Long parentId) {
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
 
     if (configProvider.get().cohortbuilder.enableListSearch) {
-      String domainMessage = "Bad Request: Please provide a valid criteria domain. %s is not valid.";
-      String typeMessage = "Bad Request: Please provide a valid criteria type. %s is not valid.";
       validateDomainAndType(domain, type);
 
       List<CBCriteria> criteriaList;
       if (parentId != null) {
-        criteriaList = cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(domain, type, parentId);
+        criteriaList = cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(domain, type, standard, parentId);
       } else {
         criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeOrderByIdAsc(domain, type);
       }
@@ -494,7 +502,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
     String[] keywords = term.split("\\W+");
     if (keywords.length == 1 && keywords[0].length() <= 3) {
-      return "+\"" + keywords[0] + "\"+\"[rank1]\"";
+      return "+\"" + keywords[0];
     }
 
     return IntStream
@@ -506,28 +514,27 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         }
         return "+" + keywords[i] + "*";
       })
-      .collect(Collectors.joining())
-      + "+\"[rank1]\"";
+      .collect(Collectors.joining());
   }
 
   private void validateDomainAndType(String domain, String type) {
     Optional
       .ofNullable(domain)
-      .orElseThrow(() -> new BadRequestException(String.format(DOMAIN_MESSAGE, domain)));
+      .orElseThrow(() -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "domain", domain)));
     Optional
       .ofNullable(type)
-      .orElseThrow(() -> new BadRequestException(String.format(TYPE_MESSAGE, type)));
+      .orElseThrow(() -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "type", type)));
     Arrays
       .stream(DomainType.values())
       .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
       .findFirst()
-      .orElseThrow(() -> new BadRequestException(String.format(DOMAIN_MESSAGE, domain)));
+      .orElseThrow(() -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "domain", domain)));
     Optional.ofNullable(type)
       .ifPresent(t -> Arrays
         .stream(CriteriaType.values())
         .filter(critType -> critType.toString().equalsIgnoreCase(t))
         .findFirst()
-        .orElseThrow(() -> new BadRequestException(String.format(TYPE_MESSAGE, t))));
+        .orElseThrow(() -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "type", t))));
   }
 
 }

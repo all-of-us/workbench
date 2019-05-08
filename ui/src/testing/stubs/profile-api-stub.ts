@@ -67,6 +67,10 @@ export class ProfileApiStub extends ProfileApi {
     return Promise.resolve(this.profile);
   }
 
+  public requestBetaAccess(options?: any) {
+    return Promise.resolve(this.profile);
+  }
+
   public updatePageVisits(pageVisit) {
     return Promise.resolve(this.profile);
   }

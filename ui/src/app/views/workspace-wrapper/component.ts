@@ -64,7 +64,13 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     this.subscriptions.push(urlParamsStore
       .map(({ns, wsid}) => ({ns, wsid}))
       .distinctUntilChanged(fp.isEqual)
-      .switchMap(({ns, wsid}) => this.workspaceStorageService.getWorkspace(ns, wsid))
+      .switchMap(({ns, wsid}) => {
+        // Clear the workspace/access level during the transition to ensure we
+        // do not render the child component with a stale workspace.
+        this.workspace = undefined;
+        this.accessLevel = undefined;
+        return this.workspaceStorageService.getWorkspace(ns, wsid);
+      })
       .subscribe(workspace => {
         this.workspace = workspace;
         this.accessLevel = workspace.accessLevel;
@@ -120,8 +126,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   closeShare(): void {
     this.sharing = false;
-    // TODO: RW-1919 - remove this
-    window.location.reload();
   }
 
   submitWorkspaceDeleteBugReport(): void {
