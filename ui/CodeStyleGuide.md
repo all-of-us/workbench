@@ -35,7 +35,7 @@
     ```
 
   <a name="react-component-structure--export"></a><a name="1.2"></a>
-  - [1.2](#react-component-structure--export) Declare all exports in single statement in the bottom of the file
+  - [1.2](#react-component-structure--export) Exports
 
     ```javascript
     interface Props {
@@ -53,6 +53,6 @@
       Props as MyReactComponentProps
     };
     ```
-    - One place to look at to determine what a file is exposing versus having to scan the file for export statements
-    - Aliases can be used to namespace only when necessary. Ex. Props can just be Props in this file but can be prefixed 
-    with the class name when it is exposed publicly.
+    - Declare all exports at the bottom of the file so there is one place to look at to determine what a file is exposing versus having to scan the file for export statements
+    - Only export something when it must be referenced by something externally. Try to limit what gets exported.
+    - Use aliases to keep variables namespaced appropriately to their scope. Ex. Props can just be Props in this file but can be prefixed with the class name when it is exposed publicly.
