@@ -77,11 +77,11 @@ public class CBCriteriaDaoTest {
       .count("100")
       .standard(true)
       .code("001")
-      .synonyms("[rank1]");
+      .synonyms("+[CONDITION_rank1]");
     cbCriteriaDao.save(criteria);
     PageRequest page = new PageRequest(0, 10);
     List<CBCriteria> criteriaList =
-      cbCriteriaDao.findCriteriaByDomainAndCode(domainId, Boolean.TRUE,"001", "+[rank1]", page);
+      cbCriteriaDao.findCriteriaByDomainAndCode(domainId, Boolean.TRUE,"001", page);
     assertEquals(1, criteriaList.size());
     assertEquals(criteria, criteriaList.get(0));
   }
@@ -173,7 +173,7 @@ public class CBCriteriaDaoTest {
       .standard(true)
       .count("10")
       .code("LP123")
-      .synonyms("[rank1]");
+      .synonyms("+[MEASUREMENT_rank1]");
     CBCriteria labCriteria1 = new CBCriteria()
       .domainId(domainId)
       .type(type)
@@ -181,13 +181,13 @@ public class CBCriteriaDaoTest {
       .standard(true)
       .count("101")
       .code("LP1234")
-      .synonyms("[rank1]");
+      .synonyms("+[MEASUREMENT_rank1]");
     cbCriteriaDao.save(labCriteria);
     cbCriteriaDao.save(labCriteria1);
 
     PageRequest page = new PageRequest(0, 10);
     List<CBCriteria> labs =
-      cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(domainId, type, true,"LP123", "+[rank1]", page);
+      cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(domainId, type, true,"LP123", page);
     assertEquals(2, labs.size());
     assertEquals(labCriteria1, labs.get(0));
     assertEquals(labCriteria, labs.get(1));

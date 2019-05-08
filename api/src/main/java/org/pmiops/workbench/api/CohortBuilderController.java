@@ -214,7 +214,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String matchExp = modifyTermMatch(term) + domainRank;
       List<CBCriteria> criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(domain, type, standard, matchExp, new PageRequest(0, resultLimit.intValue()));
       if (criteriaList.isEmpty()) {
-        criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(domain, type, standard, term, domainRank, new PageRequest(0, resultLimit.intValue()));
+        criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(domain, type, standard, term, new PageRequest(0, resultLimit.intValue()));
       }
       criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
     } else {
@@ -305,10 +305,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       criteriaList = cbCriteriaDao.findCriteriaByDomainAndSynonyms(domain, isStandard, modTerm, new PageRequest(0, resultLimit));
     }
     if (criteriaList.isEmpty()) {
-      criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, domainRank, new PageRequest(0, resultLimit));
+      criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, isStandard, term, new PageRequest(0, resultLimit));
     }
     if (criteriaList.isEmpty()) {
-      criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, !isStandard, term, domainRank, new PageRequest(0, resultLimit));
+      criteriaList = cbCriteriaDao.findCriteriaByDomainAndCode(domain, !isStandard, term, new PageRequest(0, resultLimit));
     }
     if (DomainType.DRUG.equals(DomainType.fromValue(domain))) {
       Map<Boolean, List<CBCriteria>> groups = criteriaList
