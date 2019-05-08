@@ -205,5 +205,6 @@ class CopyNotebookModal extends React.Component<Props, State> {
 
 export {
   CopyNotebookModal,
-  Props as CopyNotebookModalProps
+  Props as CopyNotebookModalProps,
+  State as CopyNotebookModalState,
 };
