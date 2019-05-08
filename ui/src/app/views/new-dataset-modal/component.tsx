@@ -7,7 +7,7 @@ import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {AlertDanger} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
 import {SmallHeader} from 'app/components/headers';
-import {TextArea} from 'app/components/inputs';
+import {Select, TextArea} from 'app/components/inputs';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
@@ -36,13 +36,15 @@ interface Props {
 interface State {
   conflictDataSetName: boolean;
   existingNotebooks: FileDetail[];
-  exportToNewNotebook: boolean;
+  exportToNotebook: boolean;
   loading: boolean;
   missingDataSetInfo: boolean;
   name: string;
+  newNotebook: boolean;
   notebookName: string;
   notebooksLoading: boolean;
   queries: Array<DataSetQuery>;
+  seePreview: boolean;
 }
 
 
@@ -51,14 +53,16 @@ class NewDataSetModal extends React.Component<Props, State> {
     super(props);
     this.state = {
       conflictDataSetName: false,
-      exportToNewNotebook: false,
+      existingNotebooks: [],
+      exportToNotebook: false,
       loading: false,
       missingDataSetInfo: false,
       name: '',
+      newNotebook: true,
       notebookName: '',
-      existingNotebooks: [],
       notebooksLoading: false,
       queries: [],
+      seePreview: false
     };
   }
 
@@ -98,12 +102,16 @@ class NewDataSetModal extends React.Component<Props, State> {
     try {
       await dataSetApi().createDataSet(
         workspaceNamespace, workspaceId, request);
-      if (!this.state.exportToNewNotebook) {
+      if (!this.state.exportToNotebook) {
         this.props.closeFunction();
       } else {
         await dataSetApi().exportToNotebook(
           workspaceNamespace, workspaceId,
-          {dataSetRequest: request, notebookName: this.state.notebookName, newNotebook: true});
+          {
+            dataSetRequest: request,
+            notebookName: this.state.notebookName,
+            newNotebook: this.state.newNotebook
+          });
         navigate(['workspaces',
           workspaceNamespace,
           workspaceId, 'notebooks', this.state.notebookName + '.ipynb']);
@@ -117,8 +125,8 @@ class NewDataSetModal extends React.Component<Props, State> {
     }
   }
 
-  changeExportToNewNotebook() {
-    this.setState({exportToNewNotebook: !this.state.exportToNewNotebook});
+  changeExportToNotebook() {
+    this.setState({exportToNotebook: !this.state.exportToNotebook});
   }
 
   async generateQuery() {
@@ -137,24 +145,32 @@ class NewDataSetModal extends React.Component<Props, State> {
   render() {
     const {
       conflictDataSetName,
-      exportToNewNotebook,
+      exportToNotebook,
       loading,
       missingDataSetInfo,
       name,
+      newNotebook,
       notebookName,
       notebooksLoading,
       existingNotebooks,
       queries,
+      seePreview
     } = this.state;
+
+    const selectOptions = [{label: '(Create a new notebook)', value: ''}]
+      .concat(existingNotebooks.map(notebook => ({
+        value: notebook.name.slice(0, -6),
+        label: notebook.name.slice(0, -6)
+      })));
 
     const errors = validate({name, notebookName}, {
       name: {
         presence: {allowEmpty: false}
       },
       notebookName: {
-        presence: {allowEmpty: !exportToNewNotebook},
+        presence: {allowEmpty: !exportToNotebook},
         exclusion: {
-          within: existingNotebooks.map(fd => fd.name.slice(0, -6)),
+          within: newNotebook ? existingNotebooks.map(fd => fd.name.slice(0, -6)) : [],
           message: 'already exists'
         }
       }
@@ -170,25 +186,41 @@ class NewDataSetModal extends React.Component<Props, State> {
           <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
           }
           <TextInput type='text' autoFocus placeholder='Data Set Name'
-                     value={name}
+                     value={name} data-test-id='data-set-name-input'
                      onChange={v => this.setState({
                        name: v, conflictDataSetName: false
                      })}/>
         </div>
         <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem'}}>
           <CheckBox style={{height: 17, width: 17}}
-                    onChange={() => this.changeExportToNewNotebook()} />
+                    data-test-id='export-to-notebook'
+                    onChange={() => this.changeExportToNotebook()} />
           <div style={{marginLeft: '.5rem',
-            color: colors.black[0]}}>Export to new Python notebook</div>
+            color: colors.black[0]}}>Export to Python notebook</div>
         </div>
-        {exportToNewNotebook && <React.Fragment>
-          {(queries.length === 0 || notebooksLoading) && <SpinnerOverlay />}
-          <TextArea disabled={true} onChange={() => {}} style={{marginTop: '1rem'}}
-                    value={queries.map(query =>
-                      convertQueryToText(name, query.domain, query))} />
-          <SmallHeader style={{fontSize: 14}}>Notebook Name</SmallHeader>
-          <TextInput onChange={(v) => this.setState({notebookName: v})}
-                     value={notebookName}/>
+        {exportToNotebook && <React.Fragment>
+          {notebooksLoading && <SpinnerOverlay />}
+          <Button style={{marginTop: '1rem'}} data-test-id='code-preview-button'
+                  onClick={() => this.setState({seePreview: !seePreview})}>
+            {seePreview ? 'Hide Preview' : 'See Code Preview'}
+          </Button>
+          {seePreview && <React.Fragment>
+            {queries.length === 0 && <SpinnerOverlay />}
+            <TextArea disabled={true} onChange={() => {}} style={{marginTop: '1rem'}}
+                      data-test-id='code-text-box'
+                      value={queries.map(query =>
+                        convertQueryToText(name, query.domain, query))} />
+          </React.Fragment>}
+          <div style={{marginTop: '1rem'}}>
+            <Select value={this.state.notebookName}
+                    options={selectOptions}
+                    onChange={v => this.setState({notebookName: v, newNotebook: v === ''})}/>
+          </div>
+          {newNotebook && <React.Fragment>
+            <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
+            <TextInput onChange={(v) => this.setState({notebookName: v})}
+                       value={notebookName} data-test-id='notebook-name-input'/>
+          </React.Fragment>}
         </React.Fragment>}
       </ModalBody>
       <ModalFooter>
@@ -198,8 +230,9 @@ class NewDataSetModal extends React.Component<Props, State> {
           Cancel
         </Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
-          <Button type='primary' disabled={errors} onClick={() => this.saveDataSet()}>
-            Save{exportToNewNotebook && ' and Open'}
+          <Button type='primary' data-test-id='save-data-set'
+                  disabled={errors} onClick={() => this.saveDataSet()}>
+            Save{exportToNotebook && ' and Open'}
           </Button>
         </TooltipTrigger>
       </ModalFooter>

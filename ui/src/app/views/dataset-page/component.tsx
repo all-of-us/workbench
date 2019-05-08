@@ -564,7 +564,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
           </div>
           {previewDataLoading && <div style={{display: 'flex', flexDirection: 'column'}}>
             <Spinner style={{position: 'relative', top: '2rem',
-              left: '45%'}}></Spinner>
+              left: '45%'}} />
             <div style={{top: '3rem', position: 'relative',
               left: '35%'}}>It may take up to a minute to load the data</div></div>
           }

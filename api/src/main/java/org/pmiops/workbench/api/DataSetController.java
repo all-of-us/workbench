@@ -6,7 +6,7 @@ import com.google.cloud.bigquery.TableResult;
 
 import com.google.common.base.Strings;
 
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 
@@ -37,7 +37,6 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
-import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
@@ -54,6 +53,7 @@ import org.pmiops.workbench.model.NamedParameterEntry;
 import org.pmiops.workbench.model.NamedParameterValue;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -74,9 +74,6 @@ public class DataSetController implements DataSetApiDelegate {
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   @Autowired
-  private CloudStorageService cloudStorageService;
-
-  @Autowired
   private final CohortDao cohortDao;
 
   @Autowired
@@ -89,25 +86,28 @@ public class DataSetController implements DataSetApiDelegate {
   private FireCloudService fireCloudService;
 
   @Autowired
+  private NotebooksService notebooksService;
+
+  @Autowired
   DataSetController(
       BigQueryService bigQueryService,
       Clock clock,
-      CloudStorageService cloudStorageService,
       CohortDao cohortDao,
       ConceptDao conceptDao,
       ConceptSetDao conceptSetDao,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
+      NotebooksService notebooksService,
       Provider<User> userProvider,
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
-    this.cloudStorageService = cloudStorageService;
     this.cohortDao = cohortDao;
     this.conceptDao = conceptDao;
     this.conceptSetDao = conceptSetDao;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
+    this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
   }
@@ -257,41 +257,57 @@ public class DataSetController implements DataSetApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     DataSetQueryList queryList = generateQuery(workspaceNamespace, workspaceId, dataSetExportRequest.getDataSetRequest()).getBody();
     String queriesAsStrings = "import pandas\n\n" + queryList.getQueryList().stream()
-        .map(query -> convertQueryToString(query, dataSetExportRequest.getDataSetRequest().getName())).collect(Collectors.joining("\n\n"));
-    JSONObject notebookFile = new JSONObject()
-        .put("cells", new JSONArray()
-            .put(new JSONObject()
-                .put("cell_type", "code")
-                .put("metadata", new JSONObject())
-                .put("execution_count", JSONObject.NULL)
-                .put("outputs", new JSONArray())
-                .put("source", new JSONArray()
-                  .put(queriesAsStrings))))
-        .put("metadata", new JSONObject())
-        // nbformat and nbformat_minor are the notebook major and minor version we are creating.
-        // Specifically, here we create notebook version 4.2 (I believe)
-        // See https://nbformat.readthedocs.io/en/latest/api.html
-        .put("nbformat", 4)
-        .put("nbformat_minor", 2);
-
+        .map(query -> convertQueryToString(query, dataSetExportRequest.getDataSetRequest().getName()))
+        .collect(Collectors.joining("\n\n"));
+    JSONObject notebookFile;
     WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+    if (dataSetExportRequest.getNewNotebook()) {
+       notebookFile = new JSONObject()
+          .put("cells", new JSONArray()
+              .put(createNotebookCodeCellWithString(queriesAsStrings)))
+          .put("metadata", new JSONObject())
+          // nbformat and nbformat_minor are the notebook major and minor version we are creating.
+          // Specifically, here we create notebook version 4.2 (I believe)
+          // See https://nbformat.readthedocs.io/en/latest/api.html
+          .put("nbformat", 4)
+          .put("nbformat_minor", 2);
+    } else {
+      notebookFile = notebooksService.getNotebookContents(
+          workspace.getWorkspace().getBucketName(),
+          dataSetExportRequest.getNotebookName());
+      notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(queriesAsStrings));
+    }
 
-    cloudStorageService.writeFile(workspace.getWorkspace().getBucketName(),
-        "notebooks/" + dataSetExportRequest.getNotebookName() + ".ipynb", notebookFile.toString().getBytes(StandardCharsets.UTF_8));
-
+    notebooksService.saveNotebook(workspace.getWorkspace().getBucketName(),
+        dataSetExportRequest.getNotebookName(), notebookFile);
 
     return ResponseEntity.ok(new EmptyResponse());
   }
 
+  private JSONObject createNotebookCodeCellWithString(String cellInformation) {
+    return new JSONObject()
+        .put("cell_type", "code")
+        .put("metadata", new JSONObject())
+        .put("execution_count", JSONObject.NULL)
+        .put("outputs", new JSONArray())
+        .put("source", new JSONArray()
+            .put(cellInformation));
+  }
+
   private String convertQueryToString(DataSetQuery query, String prefix) {
-    String namespace = prefix.toLowerCase().replaceAll(" ", "_") + "_" + query.getDomain().toString().toLowerCase() + "_";
+    String namespace = prefix
+        .toLowerCase()
+        .replaceAll(" ", "_") +
+        "_" +
+        query.getDomain()
+            .toString().toLowerCase() + "_";
     String sqlSection = namespace + "sql = \"\"\"" + query.getQuery() + "\"\"\"";
 
     String namedParamsSection = namespace +
         "query_config = {\n" +
         "  \'query\': {\n" +
-        "\'parameterMode\': \'NAMED\',\n" +
-        "\'queryParameters\': [\n" +
+        "  \'parameterMode\': \'NAMED\',\n" +
+        "  \'queryParameters\': [\n" +
         query.getNamedParameters().stream().map(namedParameterEntry -> convertNamedParameterToString(namedParameterEntry) + "\n").collect(Collectors.joining("")) +
         "    ]\n" +
         "  }\n" +
@@ -307,7 +323,11 @@ public class DataSetController implements DataSetApiDelegate {
       return "";
     }
     boolean isArrayParameter = !(namedParameterEntry.getValue().getParameterValue() instanceof String);
-    List<NamedParameterValue> arrayValues = (List<NamedParameterValue>) namedParameterEntry.getValue().getParameterValue();
+
+    List<NamedParameterValue> arrayValues = new ArrayList<>();
+    if (namedParameterEntry.getValue().getParameterValue() instanceof List){
+      arrayValues = (List<NamedParameterValue>) namedParameterEntry.getValue().getParameterValue();
+    }
     return "      {\n" +
         "        'name': \"" + namedParameterEntry.getValue().getName() + "\",\n" +
         "        'parameterType': {'type': \"" + namedParameterEntry.getValue().getParameterType() + "\"" +
