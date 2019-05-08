@@ -20,7 +20,6 @@ import {WorkspaceAccessLevel} from 'generated';
 import {CohortBuilderApi} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-import {Observable} from 'rxjs/Observable';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {ListNodeComponent} from './list-node.component';
