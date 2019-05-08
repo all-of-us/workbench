@@ -8,8 +8,7 @@
     "creationTime": "2017-12-26 00:00:00Z",
     "releaseNumber": 1,
     "numParticipants": 946237,
-    "cdrDbName": "cdr20181213",
-    "publicDbName": "public20181213"
+    "cdrDbName": "cdr20181213"
   },
   {
     "cdrVersionId": 2,
@@ -21,7 +20,6 @@
     "creationTime": "2018-11-13 15:09:27Z",
     "releaseNumber": 1,
     "numParticipants": 116157,
-    "cdrDbName": "r_2019q1_2",
-    "publicDbName": "public20190219_prod"
+    "cdrDbName": "r_2019q1_2"
   }
 ]
