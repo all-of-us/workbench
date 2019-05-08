@@ -331,7 +331,7 @@ public class ClusterControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
       clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces" + WORKSPACE_DELIMITER + "playground/wsid");
+    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces_playground/wsid");
     verify(notebookService).localize(eq(WORKSPACE_NS), eq("cluster"), mapCaptor.capture());
     Map<String, String> localizeMap = mapCaptor.getValue();
     JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces:playground/wsid/.all_of_us_config.json"));
