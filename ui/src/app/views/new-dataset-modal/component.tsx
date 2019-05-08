@@ -186,26 +186,28 @@ class NewDataSetModal extends React.Component<Props, State> {
           <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
           }
           <TextInput type='text' autoFocus placeholder='Data Set Name'
-                     value={name}
+                     value={name} data-test-id='data-set-name-input'
                      onChange={v => this.setState({
                        name: v, conflictDataSetName: false
                      })}/>
         </div>
         <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem'}}>
           <CheckBox style={{height: 17, width: 17}}
+                    data-test-id='export-to-notebook'
                     onChange={() => this.changeExportToNotebook()} />
           <div style={{marginLeft: '.5rem',
             color: colors.black[0]}}>Export to Python notebook</div>
         </div>
         {exportToNotebook && <React.Fragment>
           {notebooksLoading && <SpinnerOverlay />}
-          <Button style={{marginTop: '1rem'}}
+          <Button style={{marginTop: '1rem'}} data-test-id='code-preview-button'
                   onClick={() => this.setState({seePreview: !seePreview})}>
             {seePreview ? 'Hide Preview' : 'See Code Preview'}
           </Button>
           {seePreview && <React.Fragment>
             {queries.length === 0 && <SpinnerOverlay />}
             <TextArea disabled={true} onChange={() => {}} style={{marginTop: '1rem'}}
+                      data-test-id='code-text-box'
                       value={queries.map(query =>
                         convertQueryToText(name, query.domain, query))} />
           </React.Fragment>}
@@ -217,7 +219,7 @@ class NewDataSetModal extends React.Component<Props, State> {
           {newNotebook && <React.Fragment>
             <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
             <TextInput onChange={(v) => this.setState({notebookName: v})}
-                       value={notebookName}/>
+                       value={notebookName} data-test-id='notebook-name-input'/>
           </React.Fragment>}
         </React.Fragment>}
       </ModalBody>
@@ -228,7 +230,8 @@ class NewDataSetModal extends React.Component<Props, State> {
           Cancel
         </Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
-          <Button type='primary' disabled={errors} onClick={() => this.saveDataSet()}>
+          <Button type='primary' data-test-id='save-data-set'
+                  disabled={errors} onClick={() => this.saveDataSet()}>
             Save{exportToNotebook && ' and Open'}
           </Button>
         </TooltipTrigger>
