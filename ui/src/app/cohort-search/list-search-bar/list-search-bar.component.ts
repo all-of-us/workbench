@@ -109,7 +109,7 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
               subtreePathStore.next(path.split('.'));
               subtreeSelectedStore.next(id);
             }
-          })
+          });
       } else {
         autocompleteStore.next(option.name);
         subtreePathStore.next(option.path.split('.'));
