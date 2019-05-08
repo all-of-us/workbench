@@ -119,7 +119,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       .setDebugging(true)
       .setBasePath(configProvider.get().firecloud.baseUrl)
       .setDebugging(configProvider.get().firecloud.debugEndpoints)
-      .addDefaultHeader(FireCloudConfig.X_APP_ID_HEADER, FireCloudConfig.X_APP_ID_HEADER_VALUE);
+      .addDefaultHeader(FireCloudConfig.X_APP_ID_HEADER, configProvider.get().firecloud.xAppIdValue);
     apiClient.setAccessToken(impersonatedUserCredential.getAccessToken());
     return apiClient;
   }

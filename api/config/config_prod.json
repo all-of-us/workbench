@@ -12,7 +12,8 @@
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-prod",
     "billingRetryCount": 4,
-    "billingProjectBufferCapacity": 20
+    "billingProjectBufferCapacity": 20,
+    "xAppIdValue": "AoU-RW"
   },
   "auth": {
     "serviceAccountApiUsers": [ "all-of-us-rw-prod@appspot.gserviceaccount.com" ]

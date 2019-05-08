@@ -57,6 +57,7 @@ public class WorkbenchConfig {
     public String leoBaseUrl;
     public Integer billingRetryCount;
     public Integer billingProjectBufferCapacity;
+    public String xAppIdValue;
   }
 
   public static class AuthConfig {

@@ -23,7 +23,6 @@ import org.springframework.web.context.annotation.RequestScope;
 public class FireCloudConfig {
 
   public static final String X_APP_ID_HEADER = "X-App-ID";
-  public static final String X_APP_ID_HEADER_VALUE = "AoU-RW";
 
   // Bean names used to differentiate between an API client authenticated as the end user (via
   // UserAuthentication) and an API client authenticated as the service account user (via
@@ -49,7 +48,7 @@ public class FireCloudConfig {
     apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
     apiClient.setAccessToken(userAuthentication.getCredentials());
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
-    addFireCloudDefaultHeader(apiClient);
+    addFireCloudDefaultHeader(apiClient, workbenchConfig.firecloud.xAppIdValue);
     return apiClient;
   }
 
@@ -128,13 +127,13 @@ public class FireCloudConfig {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
-    addFireCloudDefaultHeader(apiClient);
+    addFireCloudDefaultHeader(apiClient, workbenchConfig.firecloud.xAppIdValue);
     statusApi.setApiClient(apiClient);
     return statusApi;
   }
 
-  private void addFireCloudDefaultHeader(ApiClient apiClient) {
-    apiClient.addDefaultHeader(X_APP_ID_HEADER, X_APP_ID_HEADER_VALUE);
+  private void addFireCloudDefaultHeader(ApiClient apiClient, String value) {
+    apiClient.addDefaultHeader(X_APP_ID_HEADER, value);
   }
 
 }

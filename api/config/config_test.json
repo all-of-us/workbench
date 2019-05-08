@@ -13,7 +13,8 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-test",
     "billingRetryCount": 2,
-    "billingProjectBufferCapacity": 10
+    "billingProjectBufferCapacity": 10,
+    "xAppIdValue": "test-AoU-RW"
   },
   "auth": {
     "serviceAccountApiUsers": [ "all-of-us-workbench-test@appspot.gserviceaccount.com" ]
