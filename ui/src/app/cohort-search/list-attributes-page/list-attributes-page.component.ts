@@ -166,7 +166,7 @@ export class ListAttributesPageComponent implements OnInit {
       }
       this.setValidation(option.name);
       this.preview = option.value === AttrName.ANY
-        ? {count : this.criterion.count} : null;
+        ? {count : this.criterion.count} : {count: -1};
     }
   }
 
