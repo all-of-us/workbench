@@ -219,7 +219,7 @@ public class DataSetControllerTest {
   @Before
   public void setUp() throws Exception {
     dataSetService = new DataSetServiceImpl(bigQueryService, cdrBigQuerySchemaConfigService, cohortDao, conceptSetDao, participantCounter);
-    dataSetController = new DataSetController(bigQueryService, CLOCK, cohortDao, conceptDao, conceptSetDao, 
+    dataSetController = new DataSetController(bigQueryService, CLOCK, cohortDao, conceptDao, conceptSetDao,
         dataSetService, fireCloudService, notebooksService, userProvider, workspaceService);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,

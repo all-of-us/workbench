@@ -132,7 +132,9 @@ public class NotebooksServiceImpl implements NotebooksService {
     try {
       return cloudStorageService.getFileAsJson(bucketName, "notebooks/" + notebookName);
     } catch (IOException e) {
-      throw new ServerErrorException("Failed to read notebook from bucket");
+      throw new ServerErrorException("Failed to get notebook " +
+          notebookName + " from bucket " +
+          bucketName);
     }
   }
 

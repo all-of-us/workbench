@@ -272,16 +272,10 @@ public class DataSetController implements DataSetApiDelegate {
           .put("nbformat", 4)
           .put("nbformat_minor", 2);
     } else {
-      try {
-        notebookFile = notebooksService.getNotebookContents(
-            workspace.getWorkspace().getBucketName(),
-            dataSetExportRequest.getNotebookName().concat(".ipynb"));
-        notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(queriesAsStrings));
-      } catch (IOException e) {
-        throw new ServerErrorException("Failed to get notebook " +
-            dataSetExportRequest.getNotebookName() + " from bucket " +
-            workspace.getWorkspace().getBucketName());
-      }
+      notebookFile = notebooksService.getNotebookContents(
+          workspace.getWorkspace().getBucketName(),
+          dataSetExportRequest.getNotebookName().concat(".ipynb"));
+      notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(queriesAsStrings));
     }
 
     notebooksService.saveNotebook(workspace.getWorkspace().getBucketName(),
