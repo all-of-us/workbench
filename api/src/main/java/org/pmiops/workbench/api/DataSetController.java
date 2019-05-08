@@ -306,8 +306,8 @@ public class DataSetController implements DataSetApiDelegate {
     String namedParamsSection = namespace +
         "query_config = {\n" +
         "  \'query\': {\n" +
-        "\'parameterMode\': \'NAMED\',\n" +
-        "\'queryParameters\': [\n" +
+        "  \'parameterMode\': \'NAMED\',\n" +
+        "  \'queryParameters\': [\n" +
         query.getNamedParameters().stream().map(namedParameterEntry -> convertNamedParameterToString(namedParameterEntry) + "\n").collect(Collectors.joining("")) +
         "    ]\n" +
         "  }\n" +
