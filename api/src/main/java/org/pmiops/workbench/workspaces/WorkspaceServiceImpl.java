@@ -97,19 +97,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     List<Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
     return dbWorkspaces.stream()
+        .filter(dbWorkspace -> dbWorkspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)
         .map(dbWorkspace -> {
           String fcWorkspaceAccessLevel = fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
           WorkspaceResponse currentWorkspace = new WorkspaceResponse();
           currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
           currentWorkspace.setAccessLevel(workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
           return currentWorkspace;
-        }).filter(dbWorkspace -> dbWorkspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)
+        })
         .collect(Collectors.toList());
   }
 
   private Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> getFirecloudWorkspaces() {
     return fireCloudService.getWorkspaces().stream()
-            .filter(dbWorkspace -> dbWorkspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)
             .collect(Collectors.toMap(
                 fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
                 fcWorkspace -> fcWorkspace));
@@ -119,7 +119,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public Workspace getByName(String ns, String name) {
     Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndName(ns, name);
     if (workspace == null || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
-      throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
+      throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, name));
     }
     return workspace;
   }
@@ -304,7 +304,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public Workspace findByWorkspaceId(long workspaceId) {
     Workspace workspace = getDao().findOne(workspaceId);
     if (workspace == null || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
-      throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
+      throw new NotFoundException(String.format("Workspace %s not found.", workspaceId));
     }
     return workspace;
   }
