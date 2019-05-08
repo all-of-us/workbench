@@ -111,21 +111,23 @@ public class CBCriteriaDaoTest {
       .domainId(domainId)
       .type(icd9Type)
       .hierarchy(true)
+      .standard(false)
       .parentId(0);
     CBCriteria criteriaIcd10 = new CBCriteria()
       .domainId(domainId)
       .type(icd10Type)
       .hierarchy(true)
+      .standard(false)
       .parentId(0);
     cbCriteriaDao.save(criteriaIcd9);
     cbCriteriaDao.save(criteriaIcd10);
 
     final CBCriteria actualIcd9 =
-      cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(domainId, icd9Type, 0L).get(0);
+      cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(domainId, icd9Type, false, 0L).get(0);
     assertEquals(criteriaIcd9, actualIcd9);
 
     final CBCriteria actualIcd10 =
-      cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(domainId, icd10Type, 0L).get(0);
+      cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(domainId, icd10Type, false, 0L).get(0);
     assertEquals(criteriaIcd10, actualIcd10);
   }
 

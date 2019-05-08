@@ -45,7 +45,7 @@ export class PageLayout implements OnInit, OnDestroy {
       this.cohortLoaded = true;
     });
     if (!visitsFilterOptions.getValue()) {
-      this.builderApi.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
+      this.builderApi.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, true,0)
         .toPromise()
         .then(response => {
           visitsFilterOptions.next([
