@@ -330,12 +330,12 @@ public class ProfileController implements ProfileApiDelegate {
             log.log(Level.INFO, "Failed to remove user from errored billing project");
           }
           String billingProjectName = createFirecloudBillingProject(user);
-          return this.userService.setBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.PENDING);
+          return this.userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.PENDING);
         } else {
           String billingProjectName = user.getFreeTierBillingProjectName();
           log.log(Level.SEVERE, String.format(
               "free tier project %s failed to be created", billingProjectName));
-          return userService.setBillingProjectNameAndStatus(billingProjectName, status);
+          return userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, status);
         }
       case READY:
         break;
@@ -369,7 +369,7 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (GatewayTimeoutException e) {
       log.log(Level.WARNING, "Socket Timeout creating cluster.");
     }
-    return userService.setBillingProjectNameAndStatus(user.getFreeTierBillingProjectName(), BillingProjectStatus.READY);
+    return userService.setFreeTierBillingProjectNameAndStatus(user.getFreeTierBillingProjectName(), BillingProjectStatus.READY);
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
