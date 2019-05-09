@@ -194,7 +194,9 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public void createAllOfUsBillingProject(String projectName) {
     if (projectName.contains(WORKSPACE_DELIMITER)) {
-      throw new IllegalArgumentException("Attempting to create billing project with name that contains workspace delimiter : " + projectName);
+      throw new IllegalArgumentException(
+          String.format("Attempting to create billing project with name (%s) that contains workspace delimiter (%s)",
+              projectName, WORKSPACE_DELIMITER));
     }
 
     BillingApi billingApi = billingApiProvider.get();
