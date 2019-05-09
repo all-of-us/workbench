@@ -18,8 +18,7 @@ describe('ListAttributesPageComponent', () => {
       declarations: [ListAttributesPageComponent, ValidatorErrorsComponent],
       imports: [ClarityModule, ReactiveFormsModule],
       providers: [],
-    })
-      .compileComponents();
+    }).compileComponents();
   }));
 
   beforeEach(() => {
