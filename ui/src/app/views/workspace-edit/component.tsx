@@ -596,7 +596,7 @@ export class WorkspaceEditComponent extends ReactWrapperBase {
     this._location.back();
   }
 
-  reloadWorkspace(namespace, id): Promise<WorkspaceData> {
+  reloadWorkspace(namespace, id): Promise<void> {
     return this.workspaceStorage.reloadWorkspace(namespace, id);
   }
 

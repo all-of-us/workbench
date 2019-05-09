@@ -24,7 +24,7 @@ export class WorkspaceStorageService {
     return `${wsNs}/${wsId}`;
   }
 
-  async reloadWorkspace(wsNs: string, wsId: string): Promise<WorkspaceData> {
+  async reloadWorkspace(wsNs: string, wsId: string): Promise<void> {
     const key = this.wsKey(wsNs, wsId);
     const workspace = await this.workspacesService.getWorkspace(wsNs, wsId)
       .toPromise()
@@ -44,13 +44,13 @@ export class WorkspaceStorageService {
       });
     currentWorkspaceStore.next(workspace);
     this.cache.set(key, workspace);
-    return workspace;
+    return;
   }
 
   async getWorkspace(wsNs: string, wsId: string): Promise<WorkspaceData> {
     const key = this.wsKey(wsNs, wsId);
     if (!this.cache.has(key)) {
-      return await this.reloadWorkspace(wsNs, wsId);
+      await this.reloadWorkspace(wsNs, wsId);
     }
     currentWorkspaceStore.next(this.cache.get(key));
     return Promise.resolve(this.cache.get(key));
