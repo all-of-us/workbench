@@ -553,13 +553,14 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
                     disabled={this.disableSave()} onClick={() => {this.generateCode(); }}>
               GENERATE CODE
             </Button>
-            <Button data-test-id='preview-button' style={{position: 'absolute', right: '16rem', top: '0.25rem'}}
-                    disabled={this.disableSave()} onClick={() => {this.getPreviewList(); }}>
+            <Button data-test-id='preview-button' style={{position: 'absolute', right: '16rem',
+              top: '0.25rem'}} onClick={() => {this.getPreviewList(); }}
+              disabled={this.disableSave()} >
               PREVIEW DATA SET
             </Button>
-            <Button data-test-id='save-button' style={{position: 'absolute', right: '1rem', top: '.25rem'}}
-                    onClick ={() => this.setState({openSaveModal: true})}
-                    disabled={this.disableSave()}>
+            <Button data-test-id='save-button' style={{position: 'absolute', right: '1rem',
+              top: '.25rem'}} onClick ={() => this.setState({openSaveModal: true})}
+              disabled={this.disableSave()}>
               SAVE DATA SET
             </Button>
           </div>
