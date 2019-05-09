@@ -118,5 +118,4 @@ describe('ListModalComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
 });
