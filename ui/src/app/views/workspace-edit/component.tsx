@@ -11,7 +11,7 @@ import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
-import {navigate, userProfileStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, userProfileStore} from 'app/utils/navigation';
 import {CdrVersion, DataAccessLevel, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -362,9 +362,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   {workspace: this.state.workspace});
           await this.props
               .reloadWorkspace(this.state.workspace.namespace, this.state.workspace.id);
+          currentWorkspaceStore.next({
+            ...workspace, accessLevel: this.props.workspace.accessLevel
+          });
         }
         navigate(['workspaces', workspace.namespace, workspace.id]);
       } catch (error) {
+        console.log(error);
         this.setState({loading: false});
         if (error.status === 409) {
           this.setState({workspaceCreationConflictError: true});

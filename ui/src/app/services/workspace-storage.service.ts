@@ -41,7 +41,6 @@ export class WorkspaceStorageService {
         }
         throw e;
       });
-    currentWorkspaceStore.next(workspace);
     this.cache.set(key, workspace);
     return;
   }
@@ -51,7 +50,6 @@ export class WorkspaceStorageService {
     if (!this.cache.has(key)) {
       await this.reloadWorkspace(wsNs, wsId);
     }
-    currentWorkspaceStore.next(this.cache.get(key));
     return Promise.resolve(this.cache.get(key));
   }
 }
