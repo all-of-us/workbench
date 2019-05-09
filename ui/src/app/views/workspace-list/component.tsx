@@ -246,6 +246,12 @@ export const WorkspaceList = withUserProfile()
     this.reloadWorkspaces();
   }
 
+  componentDidUpdate() {
+    if (!this.state.billingProjectInitialized) {
+      this.checkBillingProjectStatus();
+    }
+  }
+
   componentWillUnmount() {
     clearTimeout(this.timer);
   }
