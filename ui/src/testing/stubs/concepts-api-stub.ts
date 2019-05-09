@@ -147,7 +147,7 @@ export class ConceptsApiStub extends ConceptsApi {
         });
       }
       const foundDomain =
-          DomainStubVariables.STUB_DOMAINS.find(domain => domain.domain === request.domain);
+        DomainStubVariables.STUB_DOMAINS.find(domain => domain.domain === request.domain);
       this.concepts.forEach((concept) => {
         if (concept.domainId !== foundDomain.name) {
           return;
@@ -158,13 +158,13 @@ export class ConceptsApiStub extends ConceptsApi {
             response.standardConcepts.push(concept);
           }
         } else if (
-            request.standardConceptFilter === StandardConceptFilter.STANDARDCONCEPTS) {
+          request.standardConceptFilter === StandardConceptFilter.STANDARDCONCEPTS) {
           if (concept.standardConcept) {
             response.items.push(concept);
             response.standardConcepts.push(concept);
           }
         } else if (request.standardConceptFilter
-            === StandardConceptFilter.NONSTANDARDCONCEPTS) {
+          === StandardConceptFilter.NONSTANDARDCONCEPTS) {
           if (!concept.standardConcept) {
             response.items.push(concept);
           }
