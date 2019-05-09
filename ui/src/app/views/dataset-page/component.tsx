@@ -548,11 +548,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
             position: 'relative'}}>
             <div style={{color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
-            <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}}
-                    disabled={this.disableSave()} onClick={() => {this.generateCode(); }}>
-              GENERATE CODE
-            </Button>
-            <Button style={{position: 'absolute', right: '16rem', top: '0.25rem'}}
+            <Button style={{position: 'absolute', right: '8rem', top: '0.25rem'}}
                     disabled={this.disableSave()} onClick={() => {this.getPreviewList(); }}>
               PREVIEW DATA SET
             </Button>
