@@ -35,7 +35,7 @@ public class NotebooksConfig {
     apiClient.setBasePath(workbenchConfig.firecloud.leoBaseUrl);
     apiClient.setAccessToken(userAuthentication.getCredentials());
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
-    addNotebooksDefaultHeader(apiClient);
+    addNotebooksDefaultHeader(apiClient, workbenchConfig.firecloud.xAppIdValue);
     return apiClient;
   }
 
@@ -53,7 +53,7 @@ public class NotebooksConfig {
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
-    addNotebooksDefaultHeader(apiClient);
+    addNotebooksDefaultHeader(apiClient, workbenchConfig.firecloud.xAppIdValue);
     return apiClient;
   }
 
@@ -89,8 +89,8 @@ public class NotebooksConfig {
     return api;
   }
 
-  private void addNotebooksDefaultHeader(ApiClient apiClient) {
+  private void addNotebooksDefaultHeader(ApiClient apiClient, String xAppHeaderValue) {
     apiClient.addDefaultHeader(org.pmiops.workbench.firecloud.FireCloudConfig.X_APP_ID_HEADER,
-        org.pmiops.workbench.firecloud.FireCloudConfig.X_APP_ID_HEADER_VALUE);
+        xAppHeaderValue);
   }
 }
