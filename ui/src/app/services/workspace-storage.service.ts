@@ -2,7 +2,6 @@ import 'rxjs/Rx';
 
 import {Injectable} from '@angular/core';
 
-import {currentWorkspaceStore} from 'app/utils/navigation';
 
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
@@ -23,7 +22,7 @@ export class WorkspaceStorageService {
     return `${wsNs}/${wsId}`;
   }
 
-  async reloadWorkspace(wsNs: string, wsId: string): Promise<void> {
+  async reloadWorkspace(wsNs: string, wsId: string): Promise<WorkspaceData> {
     const key = this.wsKey(wsNs, wsId);
     const workspace = await this.workspacesService.getWorkspace(wsNs, wsId)
       .toPromise()
@@ -42,7 +41,7 @@ export class WorkspaceStorageService {
         throw e;
       });
     this.cache.set(key, workspace);
-    return;
+    return workspace;
   }
 
   async getWorkspace(wsNs: string, wsId: string): Promise<WorkspaceData> {

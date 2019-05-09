@@ -7,7 +7,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+import {WorkspaceData, WorkspaceStorageService} from 'app/services/workspace-storage.service';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
@@ -361,10 +361,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               .updateWorkspace(this.state.workspace.namespace, this.state.workspace.id,
                   {workspace: this.state.workspace});
           await this.props
-              .reloadWorkspace(this.state.workspace.namespace, this.state.workspace.id);
-          currentWorkspaceStore.next({
-            ...workspace, accessLevel: this.props.workspace.accessLevel
-          });
+            .reloadWorkspace(this.state.workspace.namespace, this.state.workspace.id)
+            .then(ws => currentWorkspaceStore.next(ws));
         }
         navigate(['workspaces', workspace.namespace, workspace.id]);
       } catch (error) {
@@ -600,7 +598,7 @@ export class WorkspaceEditComponent extends ReactWrapperBase {
     this._location.back();
   }
 
-  reloadWorkspace(namespace, id): Promise<void> {
+  reloadWorkspace(namespace, id): Promise<WorkspaceData> {
     // Pass through the response on reload workspace so we can properly
     // await the completion of it.
     return this.workspaceStorage.reloadWorkspace(namespace, id);
