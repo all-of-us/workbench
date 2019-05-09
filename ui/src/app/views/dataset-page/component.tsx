@@ -83,7 +83,8 @@ export const ValueListItem: React.FunctionComponent <
   {domainValue: DomainValue, onSelect: Function, checked: boolean}> =
   ({domainValue, onSelect, checked}) => {
     return <div style={{display: 'flex', color: 'black', height: '1.2rem'}}>
-      <input type='checkbox' value={domainValue.value} onChange={() => onSelect()}
+      <input type='checkbox' value={domainValue.value} onClick={() => onSelect()}
+             onChange={() => onSelect()}
              style={styles.valueListItemCheckboxStyling}
              checked={checked}/>
       <div style={{lineHeight: '1.5rem', wordWrap: 'break-word'}}>{domainValue.value}</div>
@@ -528,7 +529,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
                         {fp.capitalize(valueSet.domain.toString())}
                       </div>
                       {valueSet.values.items.map(domainValue =>
-                        <ValueListItem data-test-id='value-items'
+                        <ValueListItem data-test-id='value-list-items'
                           key={domainValue.value} domainValue={domainValue}
                           onSelect={() => this.selectDomainValue(valueSet.domain, domainValue)}
                           checked={fp.some({domain: valueSet.domain, value: domainValue.value},
@@ -552,11 +553,11 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
                     disabled={this.disableSave()} onClick={() => {this.generateCode(); }}>
               GENERATE CODE
             </Button>
-            <Button style={{position: 'absolute', right: '16rem', top: '0.25rem'}}
+            <Button data-test-id='preview-button' style={{position: 'absolute', right: '16rem', top: '0.25rem'}}
                     disabled={this.disableSave()} onClick={() => {this.getPreviewList(); }}>
               PREVIEW DATA SET
             </Button>
-            <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
+            <Button data-test-id='save-button' style={{position: 'absolute', right: '1rem', top: '.25rem'}}
                     onClick ={() => this.setState({openSaveModal: true})}
                     disabled={this.disableSave()}>
               SAVE DATA SET

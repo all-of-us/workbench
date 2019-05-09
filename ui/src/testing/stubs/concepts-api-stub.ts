@@ -1,14 +1,15 @@
 import {
   Concept,
   ConceptListResponse,
+  ConceptsApi,
   Domain,
   DomainCount,
   DomainInfo,
   DomainInfoResponse,
+  DomainValuesResponse,
   SearchConceptsRequest,
   StandardConceptFilter
 } from 'generated/fetch';
-import {ConceptsApi} from 'generated/fetch/api';
 
 export class ConceptStubVariables {
   static STUB_CONCEPTS: Concept[] = [
@@ -146,7 +147,7 @@ export class ConceptsApiStub extends ConceptsApi {
         });
       }
       const foundDomain =
-        DomainStubVariables.STUB_DOMAINS.find(domain => domain.domain === request.domain);
+          DomainStubVariables.STUB_DOMAINS.find(domain => domain.domain === request.domain);
       this.concepts.forEach((concept) => {
         if (concept.domainId !== foundDomain.name) {
           return;
@@ -157,13 +158,13 @@ export class ConceptsApiStub extends ConceptsApi {
             response.standardConcepts.push(concept);
           }
         } else if (
-          request.standardConceptFilter === StandardConceptFilter.STANDARDCONCEPTS) {
+            request.standardConceptFilter === StandardConceptFilter.STANDARDCONCEPTS) {
           if (concept.standardConcept) {
             response.items.push(concept);
             response.standardConcepts.push(concept);
           }
         } else if (request.standardConceptFilter
-          === StandardConceptFilter.NONSTANDARDCONCEPTS) {
+            === StandardConceptFilter.NONSTANDARDCONCEPTS) {
           if (!concept.standardConcept) {
             response.items.push(concept);
           }
@@ -171,6 +172,26 @@ export class ConceptsApiStub extends ConceptsApi {
       });
       resolve(response);
     });
+  }
+
+  public getValuesFromDomain(workspaceNamespace: string, workspaceId: string, domain: string)
+  : Promise<DomainValuesResponse> {
+    const domainValueItems = [];
+    switch (domain) {
+      case 'CONDITION':
+        domainValueItems.push({value: 'Condition1'});
+        domainValueItems.push({value: 'Condition2'});
+        break;
+      case 'MEASUREMENT':
+        domainValueItems.push({value: 'Measurement1'});
+        domainValueItems.push({value: 'Measurement2'});
+        domainValueItems.push({value: 'Measurement3'});
+        break;
+      case 'DRUG':
+        domainValueItems.push({value: 'Drug1'});
+        break;
+    }
+    return Promise.resolve({items: domainValueItems});
   }
 
 }
