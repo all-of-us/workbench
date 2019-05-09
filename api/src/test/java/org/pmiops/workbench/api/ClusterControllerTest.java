@@ -334,7 +334,7 @@ public class ClusterControllerTest {
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces_playground/wsid");
     verify(notebookService).localize(eq(WORKSPACE_NS), eq("cluster"), mapCaptor.capture());
     Map<String, String> localizeMap = mapCaptor.getValue();
-    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces:playground/wsid/.all_of_us_config.json"));
+    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces_playground/wsid/.all_of_us_config.json"));
     assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
     assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(WORKSPACE_NS);
     assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
