@@ -120,7 +120,7 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
     const repoll = () => {
       this.pollClusterTimer = setTimeout(() => this.pollCluster(), 15000);
     };
-    clusterApi().listClusters()
+    clusterApi().listClusters(this.state.cluster.clusterNamespace)
       .then((body) => {
         const cluster = body.defaultCluster;
         if (SettingsReact.TRANSITIONAL_STATUSES.has(cluster.status)) {

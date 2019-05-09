@@ -130,7 +130,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.jupyterLabMode = jupyterLabMode === 'true';
     this.setNotebookNames();
 
-    this.loadingSub = this.clusterService.listClusters()
+    this.loadingSub = this.clusterService.listClusters(this.wsNamespace)
       .flatMap((resp) => {
         const c = resp.defaultCluster;
         this.incrementProgress(Progress.Initializing);
