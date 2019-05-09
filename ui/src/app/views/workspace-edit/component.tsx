@@ -7,7 +7,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+import {WorkspaceData, WorkspaceStorageService} from 'app/services/workspace-storage.service';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
@@ -596,8 +596,8 @@ export class WorkspaceEditComponent extends ReactWrapperBase {
     this._location.back();
   }
 
-  reloadWorkspace(namespace, id): void {
-    this.workspaceStorage.reloadWorkspace(namespace, id);
+  reloadWorkspace(namespace, id): Promise<WorkspaceData> {
+    return this.workspaceStorage.reloadWorkspace(namespace, id);
   }
 
 
