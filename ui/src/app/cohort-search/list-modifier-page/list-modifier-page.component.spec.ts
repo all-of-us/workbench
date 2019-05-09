@@ -64,7 +64,7 @@ describe('ListModifierPageComponent', () => {
     fixture = TestBed.createComponent(ListModifierPageComponent);
     component = fixture.componentInstance;
     component.disabled = () => {};
-    component.wizard = {domain: DomainType.MEASUREMENT};
+    component.wizard = {domain: DomainType.MEASUREMENT, modifiers: []};
     fixture.detectChanges();
   });
 
