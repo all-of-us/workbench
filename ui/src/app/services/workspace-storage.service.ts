@@ -14,8 +14,7 @@ export interface WorkspaceData extends Workspace {
 
 @Injectable()
 export class WorkspaceStorageService {
-  // Cache of loading or completed Promises for workspace data. Key is of the
-  // form "ns/id".
+  // Cache of loaded workspace data. Key is of the form "ns/id".
   private cache = new Map<string, WorkspaceData>();
 
   constructor(private workspacesService: WorkspacesService) {}
