@@ -12,10 +12,6 @@ export interface WorkspaceData extends Workspace {
   accessLevel: WorkspaceAccessLevel;
 }
 
-const nextCurrentWorkspace = (workspace: WorkspaceData) => {
-  currentWorkspaceStore.next(workspace);
-};
-
 @Injectable()
 export class WorkspaceStorageService {
   // Cache of loading or completed Promises for workspace data. Key is of the
@@ -33,11 +29,10 @@ export class WorkspaceStorageService {
     const workspace = await this.workspacesService.getWorkspace(wsNs, wsId)
       .toPromise()
       .then((resp) => {
-        const workspaceResp = {
+        return {
           ...resp.workspace,
           accessLevel: resp.accessLevel
         };
-        return workspaceResp;
       })
       .catch((e) => {
         // Purge the cache on error to allow for retries.
@@ -47,7 +42,7 @@ export class WorkspaceStorageService {
         }
         throw e;
       });
-    nextCurrentWorkspace(workspace);
+    currentWorkspaceStore.next(workspace);
     this.cache.set(key, workspace);
     return workspace;
   }
@@ -57,7 +52,7 @@ export class WorkspaceStorageService {
     if (!this.cache.has(key)) {
       return await this.reloadWorkspace(wsNs, wsId);
     }
-    nextCurrentWorkspace(this.cache.get(key));
+    currentWorkspaceStore.next(this.cache.get(key));
     return Promise.resolve(this.cache.get(key));
   }
 }

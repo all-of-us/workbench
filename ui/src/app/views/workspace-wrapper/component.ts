@@ -69,7 +69,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         // do not render the child component with a stale workspace.
         this.workspace = undefined;
         this.accessLevel = undefined;
-        return Promise.resolve(this.workspaceStorageService.getWorkspace(ns, wsid));
+        return this.workspaceStorageService.getWorkspace(ns, wsid);
       })
       .subscribe(workspace => {
         this.workspace = workspace;
