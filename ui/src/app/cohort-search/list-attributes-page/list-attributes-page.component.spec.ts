@@ -10,7 +10,7 @@ import {ListAttributesPageComponent} from './list-attributes-page.component';
 
 describe('ListAttributesPageComponent', () => {
   let component: ListAttributesPageComponent;
-  let fixture: ComponentFixture<ListAttributesPageComponent>
+  let fixture: ComponentFixture<ListAttributesPageComponent>;
 
   beforeEach(async(() => {
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
