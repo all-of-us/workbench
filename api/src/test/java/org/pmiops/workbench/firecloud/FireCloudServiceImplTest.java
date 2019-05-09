@@ -54,8 +54,6 @@ public class FireCloudServiceImplTest {
   @Mock
   private GroupsApi groupsApi;
   @Mock
-  private GroupsApi endUserGroupsApi;
-  @Mock
   private NihApi nihApi;
   @Mock
   private StatusApi statusApi;
@@ -78,7 +76,7 @@ public class FireCloudServiceImplTest {
 
     service = new FireCloudServiceImpl(Providers.of(workbenchConfig),
         Providers.of(profileApi), Providers.of(billingApi), Providers.of(groupsApi),
-        Providers.of(endUserGroupsApi), Providers.of(nihApi), Providers.of(workspacesApi),
+        Providers.of(nihApi), Providers.of(workspacesApi),
         Providers.of(statusApi), new FirecloudRetryHandler(new NoBackOffPolicy()),
         serviceAccounts,
         Providers.of(fireCloudCredential));

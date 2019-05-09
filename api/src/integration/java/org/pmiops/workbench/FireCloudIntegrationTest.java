@@ -97,7 +97,6 @@ public class FireCloudIntegrationTest {
         Providers.of(profileApi),
         Providers.of(billingApi),
         Providers.of(allOfUsGroupsApi),
-        Providers.of(endUserGroupsApi),
         Providers.of(nihApi),
         Providers.of(workspacesApi),
         Providers.of(new StatusApi(apiClient)),
