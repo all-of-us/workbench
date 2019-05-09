@@ -57,6 +57,8 @@ public class WorkbenchConfig {
     public String leoBaseUrl;
     public Integer billingRetryCount;
     public Integer billingProjectBufferCapacity;
+    // This value specifies the information we hand to Terra as our AppId header.
+    // It is primarily used for metrics gathering information.
     public String xAppIdValue;
   }
 

@@ -47,7 +47,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
-  private final Provider<GroupsApi> endUserGroupsApiProvider;
   private final Provider<NihApi> nihApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
   private final Provider<StatusApi> statusApiProvider;
@@ -76,8 +75,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   public FireCloudServiceImpl(Provider<WorkbenchConfig> configProvider,
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
-      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_GROUPS_API) Provider<GroupsApi> groupsApiProvider,
-      @Qualifier(FireCloudConfig.END_USER_GROUPS_API) Provider<GroupsApi> endUserGroupsApiProvider,
+      Provider<GroupsApi> groupsApiProvider,
       Provider<NihApi> nihApiProvider, Provider<WorkspacesApi> workspacesApiProvider,
       Provider<StatusApi> statusApiProvider,
       FirecloudRetryHandler retryHandler,
@@ -87,7 +85,6 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
     this.groupsApiProvider = groupsApiProvider;
-    this.endUserGroupsApiProvider = endUserGroupsApiProvider;
     this.nihApiProvider = nihApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
     this.statusApiProvider = statusApiProvider;
@@ -115,11 +112,7 @@ public class FireCloudServiceImpl implements FireCloudService {
         googleCredential, userEmail, FIRECLOUD_API_OAUTH_SCOPES
     );
 
-    ApiClient apiClient = new ApiClient()
-      .setDebugging(true)
-      .setBasePath(configProvider.get().firecloud.baseUrl)
-      .setDebugging(configProvider.get().firecloud.debugEndpoints)
-      .addDefaultHeader(FireCloudConfig.X_APP_ID_HEADER, configProvider.get().firecloud.xAppIdValue);
+    ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
     apiClient.setAccessToken(impersonatedUserCredential.getAccessToken());
     return apiClient;
   }
