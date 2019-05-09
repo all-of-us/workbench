@@ -318,6 +318,10 @@ public class DataSetController implements DataSetApiDelegate {
     return sqlSection + "\n\n" + namedParamsSection + "\n\n" + dataFrameSection;
   }
 
+  // BigQuery api returns parameter values either as a list or an object.
+  // To avoid warnings on our cast to list, we suppress those warnings here,
+  // as they are expected.
+  @SuppressWarnings("unchecked")
   private String convertNamedParameterToString(NamedParameterEntry namedParameterEntry) {
     if (namedParameterEntry.getValue() == null) {
       return "";
@@ -325,15 +329,16 @@ public class DataSetController implements DataSetApiDelegate {
     boolean isArrayParameter = !(namedParameterEntry.getValue().getParameterValue() instanceof String);
 
     List<NamedParameterValue> arrayValues = new ArrayList<>();
-    if (namedParameterEntry.getValue().getParameterValue() instanceof List){
-      arrayValues = (List<NamedParameterValue>) namedParameterEntry.getValue().getParameterValue();
+    Object value = namedParameterEntry.getValue().getParameterValue();
+    if (value instanceof List) {
+      arrayValues = (List<NamedParameterValue>) value;
     }
     return "      {\n" +
         "        'name': \"" + namedParameterEntry.getValue().getName() + "\",\n" +
         "        'parameterType': {'type': \"" + namedParameterEntry.getValue().getParameterType() + "\"" +
         (isArrayParameter ? ",'arrayType': {'type': \"" + namedParameterEntry.getValue().getArrayType() + "\"}," : "") + "},\n" +
-        "        \'parameterValue\': {" + (isArrayParameter ? "\'arrayValues\': [" + (
-            arrayValues)
+        "        \'parameterValue\': {" + (isArrayParameter ? "\'arrayValues\': [" +
+            arrayValues
         .stream().map(namedParameterValue -> "{\'value\': " + namedParameterValue.getParameterValue() + "}") + "]" :
         "'value': \"" + namedParameterEntry.getValue().getParameterValue() + "\"") + "}\n" +
         "      },";
