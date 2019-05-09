@@ -330,10 +330,10 @@ public class ClusterControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
       clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces:playground/wsid");
+    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces_playground/wsid");
     verify(notebookService).localize(eq(WORKSPACE_NS), eq("cluster"), mapCaptor.capture());
     Map<String, String> localizeMap = mapCaptor.getValue();
-    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces:playground/wsid/.all_of_us_config.json"));
+    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces_playground/wsid/.all_of_us_config.json"));
     assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
     assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(WORKSPACE_NS);
     assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
@@ -353,9 +353,9 @@ public class ClusterControllerTest {
 
     Map<String, String> localizeMap = mapCaptor.getValue();
     assertThat(localizeMap).containsEntry(
-        "~/workspaces/proj:wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/proj:wsid");
-    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces/proj:wsid/.all_of_us_config.json"));
+        "~/workspaces/proj__wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
+    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/proj__wsid");
+    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces/proj__wsid/.all_of_us_config.json"));
     assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo("other-proj");
   }
 

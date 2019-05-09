@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 @Service
 // TODO: consider retrying internally when FireCloud returns a 503
 public class FireCloudServiceImpl implements FireCloudService {
+
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
   private final Provider<WorkbenchConfig> configProvider;
@@ -192,6 +193,12 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public void createAllOfUsBillingProject(String projectName) {
+    if (projectName.contains(WORKSPACE_DELIMITER)) {
+      throw new IllegalArgumentException(
+          String.format("Attempting to create billing project with name (%s) that contains workspace delimiter (%s)",
+              projectName, WORKSPACE_DELIMITER));
+    }
+
     BillingApi billingApi = billingApiProvider.get();
     CreateRawlsBillingProjectFullRequest request = new CreateRawlsBillingProjectFullRequest();
     request.setBillingAccount("billingAccounts/"+configProvider.get().firecloud.billingAccountId);
