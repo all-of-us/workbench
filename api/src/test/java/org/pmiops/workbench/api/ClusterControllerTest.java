@@ -8,7 +8,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.WORKSPACE_DELIMITER;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
@@ -354,9 +353,9 @@ public class ClusterControllerTest {
 
     Map<String, String> localizeMap = mapCaptor.getValue();
     assertThat(localizeMap).containsEntry(
-        "~/workspaces/proj" + WORKSPACE_DELIMITER + "wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/proj" + WORKSPACE_DELIMITER + "wsid");
-    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces/proj" + WORKSPACE_DELIMITER + "wsid/.all_of_us_config.json"));
+        "~/workspaces/proj__wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
+    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/proj__wsid");
+    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces/proj__wsid/.all_of_us_config.json"));
     assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo("other-proj");
   }
 

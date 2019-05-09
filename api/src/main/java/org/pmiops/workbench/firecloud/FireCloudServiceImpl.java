@@ -42,7 +42,6 @@ import java.util.logging.Logger;
 // TODO: consider retrying internally when FireCloud returns a 503
 public class FireCloudServiceImpl implements FireCloudService {
 
-  public static final String WORKSPACE_DELIMITER = "__";
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
   private final Provider<WorkbenchConfig> configProvider;
@@ -195,7 +194,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public void createAllOfUsBillingProject(String projectName) {
     if (projectName.contains(WORKSPACE_DELIMITER)) {
-      throw new RuntimeException("Attempting to create billing project with name that contains workspace delimiter : " + projectName);
+      throw new IllegalArgumentException("Attempting to create billing project with name that contains workspace delimiter : " + projectName);
     }
 
     BillingApi billingApi = billingApiProvider.get();

@@ -21,7 +21,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -205,7 +204,7 @@ public class ClusterController implements ClusterApiDelegate {
     );
     String workspacePath = body.getWorkspaceId();
     if (!projectName.equals(body.getWorkspaceNamespace())) {
-      workspacePath = body.getWorkspaceNamespace() + FireCloudServiceImpl.WORKSPACE_DELIMITER + body.getWorkspaceId();
+      workspacePath = body.getWorkspaceNamespace() + FireCloudService.WORKSPACE_DELIMITER + body.getWorkspaceId();
     }
     String apiDir = "workspaces/" + workspacePath;
     if (body.getPlaygroundMode()) {
