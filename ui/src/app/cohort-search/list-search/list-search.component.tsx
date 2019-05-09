@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {attributesStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {attributesStore, groupSelectionsStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -126,10 +126,14 @@ export const ListSearch = withCurrentWorkspace()(
     selectItem = (row: any) => {
       const {wizard} = this.props;
       let {selections} = this.props;
-      const paramId = this.getParamId(row);
-      if (!selections.includes(paramId)) {
-        wizard.item.searchParameters.push({paramId, ...row});
-        selections = [paramId, ...selections];
+      const parameterId = this.getParamId(row);
+      if (!selections.includes(parameterId)) {
+        if (row.group) {
+          const groups = [...groupSelectionsStore.getValue(), row.id];
+          groupSelectionsStore.next(groups);
+        }
+        wizard.item.searchParameters.push({parameterId, ...row});
+        selections = [parameterId, ...selections];
         selectionsStore.next(selections);
         wizardStore.next(wizard);
       }

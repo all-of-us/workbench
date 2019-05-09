@@ -166,7 +166,7 @@ export class ListAttributesPageComponent implements OnInit {
       }
       this.setValidation(option.name);
       this.preview = option.value === AttrName.ANY
-        ? {count : this.criterion.count} : null;
+        ? {count : this.criterion.count} : {count: -1};
     }
   }
 
@@ -292,7 +292,7 @@ export class ListAttributesPageComponent implements OnInit {
     }
     return {
       ...this.criterion,
-      paramId: this.paramId,
+      parameterId: this.paramId,
       name: name,
       attributes: attrs
     };
@@ -328,12 +328,12 @@ export class ListAttributesPageComponent implements OnInit {
     const param = this.paramWithAttributes;
     const wizard = wizardStore.getValue();
     let selections = selectionsStore.getValue();
-    if (!selections.includes(param.paramId)) {
-      selections = [param.paramId, ...selections];
+    if (!selections.includes(param.parameterId)) {
+      selections = [param.parameterId, ...selections];
       selectionsStore.next(selections);
     } else {
       wizard.item.searchParameters = wizard.item.searchParameters
-        .filter(p => p.paramId !== param.paramId);
+        .filter(p => p.parameterId !== param.parameterId);
     }
     wizard.item.searchParameters.push(param);
     wizardStore.next(wizard);
