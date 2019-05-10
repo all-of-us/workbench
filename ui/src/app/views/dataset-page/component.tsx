@@ -83,10 +83,8 @@ export const ValueListItem: React.FunctionComponent <
   {domainValue: DomainValue, onSelect: Function, checked: boolean}> =
   ({domainValue, onSelect, checked}) => {
     return <div style={{display: 'flex', color: 'black', height: '1.2rem'}}>
-      <input type='checkbox' value={domainValue.value} onClick={() => onSelect()}
-             onChange={() => onSelect()}
-             style={styles.valueListItemCheckboxStyling}
-             checked={checked}/>
+      <input type='checkbox' value={domainValue.value} onChange={() => onSelect()}
+             style={styles.valueListItemCheckboxStyling} checked={checked}/>
       <div style={{lineHeight: '1.5rem', wordWrap: 'break-word'}}>{domainValue.value}</div>
     </div>;
   };

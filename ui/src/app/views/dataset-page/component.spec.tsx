@@ -73,7 +73,7 @@ describe('DataSet', () => {
     expect(wrapper.find('[data-test-id="value-list-items"]').length).toBe(5);
   });
 
-  it('should enable all buttons once cohorts, concepts and views are selected', async() => {
+  it('should enable all buttons once cohorts, concepts and values are selected', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -95,7 +95,7 @@ describe('DataSet', () => {
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="value-list-items"]').find('input').first()
-      .simulate('click');
+      .simulate('change');
 
     // Buttons should now be enables
     const buttons = wrapper.find(Button);
