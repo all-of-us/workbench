@@ -302,16 +302,16 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
             selectedConceptSetIds: newSelectedConceptSets,
             valueSets: updatedValueSets.concat(newValueSets),
             selectedValues: updatedSelectedValues
-          }, () => this.defaultPrviewDataRequest()));
+          }, () => this.defaultPreviewDataRequest()));
       } else {
         this.setState({selectedConceptSetIds: newSelectedConceptSets,
           valueSets: updatedValueSets,
-          selectedValues: updatedSelectedValues}, () => this.defaultPrviewDataRequest());
+          selectedValues: updatedSelectedValues}, () => this.defaultPreviewDataRequest());
       }
     } else {
       this.setState({selectedCohortIds: toggleIncludes(resource.id,
         this.state.selectedCohortIds) as unknown as number[]},
-        () => this.defaultPrviewDataRequest());
+        () => this.defaultPreviewDataRequest());
     }
   }
 
@@ -335,7 +335,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
     valuesSelected = valuesSelected.sort((a, b) =>
         valueSets.findIndex(({value}) => a.value === value) -
         valueSets.findIndex(({value}) => b.value === value));
-    this.setState({selectedValues: valuesSelected}, () => this.defaultPrviewDataRequest());
+    this.setState({selectedValues: valuesSelected}, () => this.defaultPreviewDataRequest());
   }
 
   getCurrentResource(): Cohort | ConceptSet {
@@ -351,7 +351,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
         !this.state.selectedValues || this.state.selectedValues.length === 0;
   }
 
-  defaultPrviewDataRequest() {
+  defaultPreviewDataRequest() {
     if (this.state.defaultPreviewView && !this.disableSave()) {
       this.getPreviewList();
       this.setState({defaultPreviewView: false});

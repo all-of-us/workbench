@@ -111,6 +111,7 @@ describe('DataSet', () => {
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
+    // Select one cohort , concept and value
     wrapper.find('[data-test-id="cohort-list-item"]').first()
       .find('input').first().simulate('click');
     wrapper.update();
@@ -124,9 +125,12 @@ describe('DataSet', () => {
       .simulate('change');
 
     await waitOneTickAndUpdate(wrapper);
+
+    // Preview data api has been called
     expect(spy).toHaveBeenCalledTimes(1);
 
-    wrapper.find('[data-test-id="concept-set-list-item"]').at(2)
+    // Select another value preview data api should not be called now
+    wrapper.find('[data-test-id="value-list-items"]').at(1)
       .find('input').first().simulate('click');
 
     await waitOneTickAndUpdate(wrapper);
@@ -139,6 +143,7 @@ describe('DataSet', () => {
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
+    // Should click one cohort concept and value
     wrapper.find('[data-test-id="cohort-list-item"]').first()
       .find('input').first().simulate('click');
     wrapper.update();
@@ -152,6 +157,10 @@ describe('DataSet', () => {
       .simulate('change');
     await waitOneTickAndUpdate(wrapper);
 
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    // After clicking another value preview data api should be called only after
+    // clicking the preview icon
     wrapper.find('[data-test-id="value-list-items"]').at(1)
       .find('input').first().simulate('click');
 
