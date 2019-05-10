@@ -599,8 +599,6 @@ export class WorkspaceEditComponent extends ReactWrapperBase {
   }
 
   reloadWorkspace(namespace, id): Promise<WorkspaceData> {
-    // Pass through the response on reload workspace so we can properly
-    // await the completion of it.
     return this.workspaceStorage.reloadWorkspace(namespace, id);
   }
 }
