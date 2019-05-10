@@ -2,8 +2,8 @@ import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {reactStyles} from 'app/utils';
+import {navigate} from 'app/utils/navigation';
 import * as React from 'react';
-import {navigate} from "app/utils/navigation";
 
 const styles = reactStyles({
   headerLinks: {

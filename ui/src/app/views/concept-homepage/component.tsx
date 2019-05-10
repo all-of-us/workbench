@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {AlertClose, AlertDanger} from 'app/components/alert';
@@ -12,11 +11,11 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {queryParamsStore} from 'app/utils/navigation';
 import {ConceptAddModal} from 'app/views/concept-add-modal/component';
+import {ConceptNavigationBar} from 'app/views/concept-navigation-bar/component';
 import {ConceptTable} from 'app/views/concept-table/component';
 import {SlidingFabReact} from 'app/views/sliding-fab/component';
-import {queryParamsStore} from 'app/utils/navigation';
-import {ConceptNavigationBar} from 'app/views/concept-navigation-bar/component';
 import {
   Concept,
   Domain,

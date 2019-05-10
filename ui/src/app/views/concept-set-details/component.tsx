@@ -15,7 +15,6 @@ import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {
   reactStyles,
   ReactWrapperBase,
-  withCurrentConceptSet,
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
@@ -23,6 +22,7 @@ import {currentConceptSetStore, navigate, navigateByUrl} from 'app/utils/navigat
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {ConceptTable} from 'app/views/concept-table/component';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
+import {SlidingFabReact} from 'app/views/sliding-fab/component';
 import {Concept, ConceptSet, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -79,18 +79,22 @@ const ConceptSetMenu: React.FunctionComponent<{
 export const ConceptSetDetails =
   fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<{
     urlParams: any, workspace: WorkspaceData}, {
-      conceptSet: ConceptSet, conceptSetDeletionError: boolean, deleting: boolean, editName: string,
-      editDescription: string, editSaving: boolean, editing: boolean, loading: boolean,
+      conceptSet: ConceptSet, deleting: boolean, deletingConcepts: boolean,
+      deleteSubmitting: boolean, editName: string, editDescription: string, editSaving: boolean,
+      error: boolean, errorMessage: string, editing: boolean, loading: boolean,
       selectedConcepts: Concept[]}> {
     constructor(props) {
       super(props);
       this.state = {
         conceptSet: undefined,
-        conceptSetDeletionError: false,
         editName: '',
         editDescription: '',
         editSaving: false,
+        error: false,
+        errorMessage: '',
         deleting: false,
+        deletingConcepts: false,
+        deleteSubmitting: false,
         editing: false,
         loading: true,
         selectedConcepts: []
@@ -110,7 +114,8 @@ export const ConceptSetDetails =
         currentConceptSetStore.next(resp);
       } catch (error) {
         console.log(error);
-        // todo: cannot find concept set
+        // TODO: what do we do with resources not found?  Currently we just have an endless spinner
+        // Maybe want to think about designing an AoU not found page for better UX
       }
     }
 
@@ -129,23 +134,37 @@ export const ConceptSetDetails =
       }
     }
 
-    onSelectConcepts() {
-      // TODO
+    onSelectConcepts(concepts) {
+      this.setState({selectedConcepts: concepts});
     }
 
-    onDeleteConcept() {
-      // TODO
+    async onDeleteConcepts() {
+      const {urlParams: {ns, wsid, csid}} = this.props;
+      const {selectedConcepts, conceptSet} = this.state;
+      this.setState({deleteSubmitting: true});
+      try {
+        const updatedSet = await conceptSetsApi().updateConceptSetConcepts(ns, wsid, csid,
+          {etag: conceptSet.etag, removedIds: selectedConcepts.map(c => c.conceptId)});
+        this.setState({conceptSet: updatedSet});
+      } catch (error) {
+        console.log(error);
+        this.setState({error: true, errorMessage: 'Could not delete concepts.'});
+      } finally {
+        this.setState({deleteSubmitting: false, deletingConcepts: false});
+      }
     }
 
     async onDeleteConceptSet() {
       const {urlParams: {ns, wsid, csid}} = this.props;
       try {
         await conceptSetsApi().deleteConceptSet(ns, wsid, csid);
-        this.setState({deleting: false});
         navigate(['workspaces', ns, wsid, 'concepts', 'sets']);
       } catch (error) {
         console.log(error);
-        this.setState({deleting: false, conceptSetDeletionError: true});
+        this.setState({error: true,
+          errorMessage: 'Could not concept set \'' + this.state.conceptSet.name + '\''});
+      } finally {
+        this.setState({deleting: false});
       }
     }
 
@@ -163,10 +182,15 @@ export const ConceptSetDetails =
         === WorkspaceAccessLevel.OWNER;
     }
 
+    get selectedConceptsCount(): number {
+      return !!this.state.selectedConcepts ? this.state.selectedConcepts.length : 0;
+    }
+
     render() {
       const {urlParams: {ns, wsid}} = this.props;
-      const {conceptSet, conceptSetDeletionError, editing, editDescription, editName,
-        editSaving, deleting, loading, selectedConcepts} = this.state;
+      const {conceptSet, deletingConcepts, editing, editDescription, editName,
+        error, errorMessage, editSaving, deleting, deleteSubmitting, loading,
+        selectedConcepts} = this.state;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         {loading ? <SpinnerOverlay/> :
         <div style={{display: 'flex', flexDirection: 'column'}}>
@@ -203,7 +227,8 @@ export const ConceptSetDetails =
                       <EditComponentReact disabled={!this.canEdit} style={{marginTop: '0.1rem'}}/>
                     </Clickable>
                   </div>
-                  <div style={{marginBottom: '1.5rem', color: '#000'}}>{conceptSet.description}</div>
+                  <div style={{marginBottom: '1.5rem', color: '#000'}}>
+                    {conceptSet.description}</div>
                 </React.Fragment>}
                 <div style={styles.conceptSetData}>
                     <div>Participant Count: {conceptSet.participantCount}</div>
@@ -227,7 +252,7 @@ export const ConceptSetDetails =
           {!!conceptSet.concepts ?
           <ConceptTable concepts={conceptSet.concepts} loading={loading}
                         reactKey={conceptSet.domain.toString()}
-                        onSelectConcepts={() => this.onSelectConcepts()}
+                        onSelectConcepts={this.onSelectConcepts.bind(this)}
                         placeholderValue={'No Concepts Found'}
                         selectedConcepts={selectedConcepts}/> :
           <Button type='secondaryLight'
@@ -236,19 +261,35 @@ export const ConceptSetDetails =
                     wsid + '/concepts' + '?domain=' + conceptSet.domain)}>
             <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
           </Button>}
+          {this.canEdit && this.selectedConceptsCount > 0 &&
+            <SlidingFabReact submitFunction={() => this.setState({deletingConcepts: true})}
+                             iconShape='trash' expanded='Remove from set'
+                             disable={!this.canEdit || this.selectedConceptsCount === 0}/>}
         </div>}
         {!loading && deleting &&
         <ConfirmDeleteModal closeFunction={() => this.setState({deleting: false})}
                             receiveDelete={() => this.onDeleteConceptSet()}
                             resourceName={conceptSet.name}
                             resourceType={ResourceType.CONCEPT_SET}/>}
-        {conceptSetDeletionError && <Modal>
-            <ModalTitle>Error: Could not concept set '{conceptSet.name}'</ModalTitle>
+        {error && <Modal>
+            <ModalTitle>Error: {errorMessage}</ModalTitle>
             <ModalFooter>
                 <Button type='secondary'
                         onClick={() =>
-                          this.setState({conceptSetDeletionError: false})}>Close</Button>
+                          this.setState({error: false})}>Close</Button>
             </ModalFooter>
+        </Modal>}
+        {deletingConcepts && <Modal>
+          <ModalTitle>Are you sure you want to remove {this.selectedConceptsCount}
+          {this.selectedConceptsCount > 1 ? ' concepts' : ' concept'} from this set?</ModalTitle>
+          <ModalFooter>
+              <Button type='secondary' style={{marginRight: '0.5rem'}} disabled={deleteSubmitting}
+                      onClick={() => this.setState({deletingConcepts: false})}>
+                  Cancel</Button>
+              <Button type='primary' onClick={() => this.onDeleteConcepts()}
+                      disabled={deleteSubmitting}>
+                  Remove concepts</Button>
+          </ModalFooter>
         </Modal>}
       </FadeBox>;
     }

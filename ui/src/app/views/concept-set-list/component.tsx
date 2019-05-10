@@ -13,14 +13,14 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils/ind
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
 
 import {CardButton} from 'app/components/buttons';
+import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
+import {ConceptNavigationBar} from 'app/views/concept-navigation-bar/component';
 import {ResourceCard} from 'app/views/resource-card/component';
-import {FadeBox} from "../../components/containers";
-import {ConceptNavigationBar} from "../concept-navigation-bar/component";
 
 const styles = reactStyles({
   pageArea: {
