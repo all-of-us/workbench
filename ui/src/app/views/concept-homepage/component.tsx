@@ -191,8 +191,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
     browseDomainFromQueryParams() {
       const queryParams = queryParamsStore.getValue();
       if (queryParams.domain) {
-        console.log(queryParams.domain);
-        console.log(this.state.conceptDomainCounts);
         this.browseDomain(this.state.conceptDomainList
           .find(dc => dc.domain === queryParams.domain));
       }

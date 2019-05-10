@@ -12,8 +12,14 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit/component';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withRouteConfigData, withUrlParams} from 'app/utils';
-import {navigate, navigateByUrl} from 'app/utils/navigation';
+import {
+  reactStyles,
+  ReactWrapperBase,
+  withCurrentConceptSet,
+  withCurrentWorkspace,
+  withUrlParams
+} from 'app/utils';
+import {currentConceptSetStore, navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {ConceptTable} from 'app/views/concept-table/component';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
@@ -70,8 +76,8 @@ const ConceptSetMenu: React.FunctionComponent<{
   </PopupTrigger>;
 };
 
-export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace())(
-  class extends React.Component<{
+export const ConceptSetDetails =
+  fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<{
     urlParams: any, workspace: WorkspaceData}, {
       conceptSet: ConceptSet, conceptSetDeletionError: boolean, deleting: boolean, editName: string,
       editDescription: string, editSaving: boolean, editing: boolean, loading: boolean,
@@ -101,6 +107,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
         const resp = await conceptSetsApi().getConceptSet(ns, wsid, csid);
         this.setState({conceptSet: resp, editName: resp.name,
           editDescription: resp.description, loading: false});
+        currentConceptSetStore.next(resp);
       } catch (error) {
         console.log(error);
         // todo: cannot find concept set
@@ -217,11 +224,18 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
               </Button>
             </div>
           </div>
+          {!!conceptSet.concepts ?
           <ConceptTable concepts={conceptSet.concepts} loading={loading}
                         reactKey={conceptSet.domain.toString()}
                         onSelectConcepts={() => this.onSelectConcepts()}
                         placeholderValue={'No Concepts Found'}
-                        selectedConcepts={selectedConcepts}/>
+                        selectedConcepts={selectedConcepts}/> :
+          <Button type='secondaryLight'
+                  style={{...styles.buttonBoxes, marginLeft: '0.5rem', maxWidth: '22%'}}
+                  onClick={() => navigateByUrl('workspaces/' + ns + '/' +
+                    wsid + '/concepts' + '?domain=' + conceptSet.domain)}>
+            <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
+          </Button>}
         </div>}
         {!loading && deleting &&
         <ConfirmDeleteModal closeFunction={() => this.setState({deleting: false})}
