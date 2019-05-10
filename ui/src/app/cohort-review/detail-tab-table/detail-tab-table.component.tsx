@@ -290,21 +290,22 @@ export const DetailTabTable = withCurrentWorkspace()(
       this.setState({start: event.first});
     }
 
-    overlayTemplate(rowData: any, column: any) {
-      let nl, vl: any;
+    overlayTemplate = (rowData: any, column: any) => {
+      let nl: any, vl: any;
+      const {filterState: {vocab}} = this.props;
       const valueField = (rowData.refRange || rowData.unit) && column.field === 'value';
-      const nameField = rowData.route && column.field === 'standardName';
+      const nameField = rowData.route && column.field === `${vocab}Name`;
       return <React.Fragment>
         <div style={{position: 'relative'}}>
           {column.field === 'value' && <span>{rowData.value}</span>}
-          {column.field === 'standardName' && <div className='name-container'>
+          {column.field === `${vocab}Name` && <div className='name-container'>
             <div style={styles.nameWrapper}>
-              <p style={styles.nameContent}>{rowData.standardName}</p>
+              <p style={styles.nameContent}>{rowData[`${vocab}Name`]}</p>
             </div>
             <span style={styles.showMore} onClick={(e) => nl.toggle(e)}>Show more</span>
             <OverlayPanel className='labOverlay' ref={(el) => nl = el}
                           showCloseIcon={true} dismissable={true}>
-              <div style={{paddingBottom: '0.2rem'}}>{rowData.standardName}</div>
+              <div style={{paddingBottom: '0.2rem'}}>{rowData[`${vocab}Name`]}</div>
             </OverlayPanel>
           </div>
           }
@@ -578,12 +579,13 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     rowExpansionTemplate = (rowData: any) => {
       const {data} = this.state;
+      const {filterState: {vocab}} = this.props;
       const conceptIdBasedData = fp.groupBy('standardConceptId', data);
       const unitsObj = fp.groupBy( 'unit', conceptIdBasedData[rowData.standardConceptId]);
       const unitKey = Object.keys(unitsObj);
       let valueArray;
       return <React.Fragment>
-        <div style={styles.headerStyle}>{rowData.standardName}</div>
+        <div style={styles.headerStyle}>{rowData[`${vocab}Name`]}</div>
       <TabView className='unitTab'>
         {unitKey.map((k, i) => {
           const name = k === 'null' ? 'No Unit' : k;
@@ -601,12 +603,15 @@ export const DetailTabTable = withCurrentWorkspace()(
       </React.Fragment>;
     }
     hideGraphIcon = (rowData: any) => {
-      const noConcept = rowData.standardName && rowData.standardName === 'No matching concept';
+      const {filterState: {vocab}} = this.props;
+      const noConcept = rowData[`${vocab}Name`]
+        && rowData[`${vocab}Name`] === 'No matching concept';
       return {'graphExpander' : noConcept};
     }
 
     render() {
       const {filteredData, loading, start, sortField, sortOrder} = this.state;
+      const {filterState: {vocab}, tabName} = this.props;
       let pageReportTemplate;
       if (filteredData !== null) {
         const lastRowOfPage = (start + rows) > filteredData.length
@@ -620,7 +625,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const columns = this.props.columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
-        const colName = col.name === 'value' || col.name === 'standardName';
+        const colName = col.name === 'value' || col.name === `${vocab}Name`;
         const hasCheckboxFilter = [
           'domain',
           'sourceVocabulary',
@@ -639,7 +644,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           'survey'
         ].includes(col.name);
         const isExpanderNeeded = col.name === 'graph' &&
-          (this.props.tabName === 'Vitals' || this.props.tabName === 'Labs');
+          (tabName === 'Vitals' || tabName === 'Labs');
         const overlayTemplate = colName && this.overlayTemplate;
         const header = <React.Fragment>
           <span
