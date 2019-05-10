@@ -72,6 +72,14 @@ export const styles = {
     fontSize: '0.6rem',
     marginTop: '0.5rem',
     color: colors.purple[0]
+  },
+  refreshIcon: {
+    marginRight: '1rem',
+    marginTop: '0.5rem',
+    height: '25px',
+    width: '25px',
+    borderRadius: '5px',
+    backgroundColor: '#262262'
   }
 };
 
@@ -84,8 +92,7 @@ export const ValueListItem: React.FunctionComponent <
   ({domainValue, onSelect, checked}) => {
     return <div style={{display: 'flex', color: 'black', height: '1.2rem'}}>
       <input type='checkbox' value={domainValue.value} onChange={() => onSelect()}
-             style={styles.valueListItemCheckboxStyling}
-             checked={checked}/>
+             style={styles.valueListItemCheckboxStyling} checked={checked}/>
       <div style={{lineHeight: '1.5rem', wordWrap: 'break-word'}}>{domainValue.value}</div>
     </div>;
   };
@@ -538,7 +545,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
                         {fp.capitalize(valueSet.domain.toString())}
                       </div>
                       {valueSet.values.items.map(domainValue =>
-                        <ValueListItem data-test-id='value-items'
+                        <ValueListItem data-test-id='value-list-items'
                           key={domainValue.value} domainValue={domainValue}
                           onSelect={() => this.selectDomainValue(valueSet.domain, domainValue)}
                           checked={fp.some({domain: valueSet.domain, value: domainValue.value},
@@ -560,18 +567,18 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
               fontFamily: 'Montserrat', fontSize: '16px', fontWeight: 600}}>
               Preview Data Set
             </div>
-            {!defaultPreviewView && <Clickable style={{
-              marginRight: '1rem', marginTop: '0.5rem', height: '25px',
-              width: '25px', borderRadius: '5px', backgroundColor: '#262262',
-            }} onClick={() => {this.getPreviewList();}}>
+            {!defaultPreviewView && <Clickable style={styles.refreshIcon}
+                                               onClick={() => {this.getPreviewList();}}>
               <ClrIcon style={{fill: '#F1F1F1', marginLeft: '0.1rem', marginTop: '-1rem'}}
                        shape='refresh'></ClrIcon>
             </Clickable>
             }
             <div style={{color: '#000000', fontSize: '14px'}}>A visualization
-              of your data table based on the variable and value you selected above</div>
-            <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
-                    onClick ={() => this.setState({openSaveModal: true})}
+              of your data table based on the variable and value you selected above
+            </div>
+            <Button data-test-id='save-button'
+                    style={{position: 'absolute', right: '1rem', top: '.25rem'}}
+                    onClick={() => this.setState({openSaveModal: true})}
                     disabled={this.disableSave()}>
               SAVE DATA SET
             </Button>
