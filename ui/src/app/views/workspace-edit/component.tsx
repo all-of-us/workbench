@@ -7,11 +7,11 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+import {WorkspaceData, WorkspaceStorageService} from 'app/services/workspace-storage.service';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
-import {navigate, userProfileStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, userProfileStore} from 'app/utils/navigation';
 import {CdrVersion, DataAccessLevel, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -361,10 +361,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               .updateWorkspace(this.state.workspace.namespace, this.state.workspace.id,
                   {workspace: this.state.workspace});
           await this.props
-              .reloadWorkspace(this.state.workspace.namespace, this.state.workspace.id);
+            .reloadWorkspace(this.state.workspace.namespace, this.state.workspace.id)
+            .then(ws => currentWorkspaceStore.next(ws));
         }
         navigate(['workspaces', workspace.namespace, workspace.id]);
       } catch (error) {
+        console.log(error);
         this.setState({loading: false});
         if (error.status === 409) {
           this.setState({workspaceCreationConflictError: true});
@@ -596,9 +598,7 @@ export class WorkspaceEditComponent extends ReactWrapperBase {
     this._location.back();
   }
 
-  reloadWorkspace(namespace, id): void {
-    this.workspaceStorage.reloadWorkspace(namespace, id);
+  reloadWorkspace(namespace, id): Promise<WorkspaceData> {
+    return this.workspaceStorage.reloadWorkspace(namespace, id);
   }
-
-
 }
