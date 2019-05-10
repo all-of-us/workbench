@@ -12,8 +12,8 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit/component';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withRouteConfigData, withUrlParams} from 'app/utils';
+import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {ConceptTable} from 'app/views/concept-table/component';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
@@ -21,7 +21,10 @@ import {Concept, ConceptSet, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = reactStyles({
   conceptSetHeader: {
-    color: '#2F2E7E', fontSize: 20, fontWeight: 600, marginBottom: '1.5rem',
+    display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingBottom: '1.5rem'
+  },
+  conceptSetTitle: {
+    color: '#2F2E7E', fontSize: 20, fontWeight: 600, marginBottom: '0.5rem',
     display: 'flex', flexDirection: 'row'
   },
   conceptSetMetadataWrapper: {
@@ -29,6 +32,9 @@ const styles = reactStyles({
   },
   conceptSetData: {
     display: 'flex', flexDirection: 'row', color: '#000', fontWeight: 600
+  },
+  buttonBoxes: {
+    color: '#2691D0', borderColor: '#2691D0', marginBottom: '0.3rem'
   }
 });
 
@@ -151,51 +157,65 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
     }
 
     render() {
+      const {urlParams: {ns, wsid}} = this.props;
       const {conceptSet, conceptSetDeletionError, editing, editDescription, editName,
         editSaving, deleting, loading, selectedConcepts} = this.state;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         {loading ? <SpinnerOverlay/> :
         <div style={{display: 'flex', flexDirection: 'column'}}>
-          <div style={{display: 'flex', flexDirection: 'row', paddingBottom: '1.5rem'}}>
-            <ConceptSetMenu canDelete={this.isOwner} canEdit={this.canEdit}
-                            disabled={!this.canEdit}
-                            onDelete={() => this.setState({deleting: true})}
-                            onEdit={() => this.setState({editing: true})}/>
-            <div style={styles.conceptSetMetadataWrapper}>
-            {editing ?
-              <div style={{display: 'flex', flexDirection: 'column'}}>
-                <TextInput value={editName} disabled={editSaving}
-                           style={{marginBottom: '0.5rem'}}
-                           onChange={v => this.setState({editName: v})}/>
-                <TextArea value={editDescription} disabled={editSaving}
-                          style={{marginBottom: '0.5rem'}}
-                          onChange={v => this.setState({editDescription: v})}/>
-                <div style={{marginBottom: '0.5rem'}}>
-                  <Button type='primary' style={{marginRight: '0.5rem'}}
-                          disabled={editSaving} onClick={() => this.submitEdits()}>Save</Button>
-                  <Button type='secondary' disabled={editSaving}
-                          onClick={() => this.setState({
-                            editing: false,
-                            editName: conceptSet.name,
-                            editDescription: conceptSet.description
-                          })}>Cancel</Button>
-                </div>
-              </div> :
-              <React.Fragment>
-                <div style={styles.conceptSetHeader}>{conceptSet.name}
-                  <Clickable disabled={!this.canEdit}
-                             onClick={() => this.setState({editing: true})}>
-                    <EditComponentReact disabled={!this.canEdit} style={{marginTop: '0.1rem'}}/>
-                  </Clickable>
-                </div>
-              </React.Fragment>
-                }
-                  <div style={styles.conceptSetData}>
-                      <div>Participant Count: {conceptSet.participantCount}</div>
-                      <div style={{marginLeft: '2rem'}}>
-                          Domain: {fp.capitalize(conceptSet.domain.toString())}</div>
+          <div style={styles.conceptSetHeader}>
+            <div style={{display: 'flex', flexDirection: 'row'}}>
+              <ConceptSetMenu canDelete={this.isOwner} canEdit={this.canEdit}
+                              disabled={!this.canEdit}
+                              onDelete={() => this.setState({deleting: true})}
+                              onEdit={() => this.setState({editing: true})}/>
+              <div style={styles.conceptSetMetadataWrapper}>
+              {editing ?
+                <div style={{display: 'flex', flexDirection: 'column'}}>
+                  <TextInput value={editName} disabled={editSaving}
+                             style={{marginBottom: '0.5rem'}}
+                             onChange={v => this.setState({editName: v})}/>
+                  <TextArea value={editDescription} disabled={editSaving}
+                            style={{marginBottom: '0.5rem'}}
+                            onChange={v => this.setState({editDescription: v})}/>
+                  <div style={{marginBottom: '0.5rem'}}>
+                    <Button type='primary' style={{marginRight: '0.5rem'}}
+                            disabled={editSaving} onClick={() => this.submitEdits()}>Save</Button>
+                    <Button type='secondary' disabled={editSaving}
+                            onClick={() => this.setState({
+                              editing: false,
+                              editName: conceptSet.name,
+                              editDescription: conceptSet.description
+                            })}>Cancel</Button>
                   </div>
+                </div> :
+                <React.Fragment>
+                  <div style={styles.conceptSetTitle}>{conceptSet.name}
+                    <Clickable disabled={!this.canEdit}
+                               onClick={() => this.setState({editing: true})}>
+                      <EditComponentReact disabled={!this.canEdit} style={{marginTop: '0.1rem'}}/>
+                    </Clickable>
+                  </div>
+                  <div style={{marginBottom: '1.5rem', color: '#000'}}>{conceptSet.description}</div>
+                </React.Fragment>}
+                <div style={styles.conceptSetData}>
+                    <div>Participant Count: {conceptSet.participantCount}</div>
+                    <div style={{marginLeft: '2rem'}}>
+                        Domain: {fp.capitalize(conceptSet.domain.toString())}</div>
+                </div>
               </div>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+              <Button type='secondaryLight' style={styles.buttonBoxes}
+                      onClick={() => navigateByUrl('workspaces/' + ns + '/' +
+                        wsid + '/concepts' + '?domain=' + conceptSet.domain)}>
+                <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
+              </Button>
+              <Button type='secondaryLight' style={styles.buttonBoxes}
+                      onClick={() => navigate(['workspaces', ns, wsid, 'concepts', 'sets'])}>
+                <ClrIcon shape='grid-view' style={{marginRight: '0.3rem'}}/>Return to concept sets
+              </Button>
+            </div>
           </div>
           <ConceptTable concepts={conceptSet.concepts} loading={loading}
                         reactKey={conceptSet.domain.toString()}

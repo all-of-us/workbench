@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {AlertClose, AlertDanger} from 'app/components/alert';
@@ -14,6 +15,7 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {ConceptAddModal} from 'app/views/concept-add-modal/component';
 import {ConceptTable} from 'app/views/concept-table/component';
 import {SlidingFabReact} from 'app/views/sliding-fab/component';
+import {queryParamsStore} from 'app/utils/navigation';
 import {
   Concept,
   Domain,
@@ -180,7 +182,18 @@ export const ConceptWrapper = withCurrentWorkspace()(
       } catch (e) {
         console.error(e);
       } finally {
+        this.browseDomainFromQueryParams();
         this.setState({loadingDomains: false});
+      }
+    }
+
+    browseDomainFromQueryParams() {
+      const queryParams = queryParamsStore.getValue();
+      if (queryParams.domain) {
+        console.log(queryParams.domain);
+        console.log(this.state.conceptDomainCounts);
+        this.browseDomain(this.state.conceptDomainList
+          .find(dc => dc.domain === queryParams.domain));
       }
     }
 
@@ -390,10 +403,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
               {conceptDomainList.map((domain, i) => {
                 return <DomainCard conceptDomainInfo={domain}
                                     standardConceptsOnly={standardConceptsOnly}
-                                    browseInDomain={() => {
-                                      this.browseDomain(domain);
-                                      this.setState({searching: true});
-                                    }}
+                                    browseInDomain={() => this.browseDomain(domain)}
                                     key={i} data-test-id='domain-box'/>;
               })}
           </div>
