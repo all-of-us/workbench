@@ -1,17 +1,20 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
 
+import {DetailTabTable} from 'app/cohort-review/detail-tab-table/detail-tab-table.component';
+import {IndividualParticipantsCharts} from 'app/cohort-review/individual-participants-charts/individual-participants-charts';
 import {filterStateStore} from 'app/cohort-review/review-state.service';
 import {typeToTitle} from 'app/cohort-search/utils';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {
-  DomainType,
-  PageFilterType,
-} from 'generated/fetch';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
+import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {urlParamsStore} from 'app/utils/navigation';
+import {DomainType, PageFilterType} from 'generated/fetch';
+import {TabPanel, TabView} from 'primereact/tabview';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
-import {Subscription} from 'rxjs/Subscription';
 
 /* The most common column types */
 const itemDate = {
@@ -95,25 +98,8 @@ const graph = {
   displayName: ' '
 };
 
-@Component({
-  selector: 'app-detail-tabs',
-  templateUrl: './detail-tabs.component.html',
-  styleUrls: ['./detail-tabs.component.css']
-})
-export class DetailTabsComponent implements OnInit, OnDestroy {
-  subscription: Subscription;
-  participantId: any;
-  chartData = {};
-  domainList = [DomainType[DomainType.CONDITION],
-    DomainType[DomainType.PROCEDURE],
-    DomainType[DomainType.DRUG]];
-  conditionTitle: string;
-  summaryActive = false;
-  filterState: any;
-  updateState = 0;
-  vocab: string;
-
-  readonly tabs = [{
+const tabs = [
+  {
     name: 'All Events',
     domain: DomainType.ALLEVENTS,
     filterType: PageFilterType.ReviewFilter,
@@ -222,53 +208,124 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
         itemDate, survey, question, answer
       ],
     }
-  }];
+  }
+];
 
+const domainList = [DomainType[DomainType.CONDITION],
+  DomainType[DomainType.PROCEDURE],
+  DomainType[DomainType.DRUG]];
+
+interface Props {
+  workspace: WorkspaceData;
+}
+
+interface State {
+  chartData: any;
+  conditionTitle: string;
+  filterState: any;
+  participantId: number;
+  updateState: number;
+}
+
+export const DetailTabs = withCurrentWorkspace()(
+  class extends React.Component<Props, State> {
+    constructor(props: any) {
+      super(props);
+      this.state = {
+        chartData: {},
+        conditionTitle: null,
+        filterState: null,
+        participantId: null,
+        updateState: 0,
+      };
+      this.filteredData = this.filteredData.bind(this);
+    }
+
+    componentDidMount() {
+      const {cdrVersionId} = this.props.workspace;
+      urlParamsStore.distinctUntilChanged(fp.isEqual)
+        .switchMap(({ns, wsid, cid, pid}) => {
+          const chartData = {};
+          return Observable.forkJoin(
+            ...domainList.map(domainName => {
+              chartData[domainName] = {
+                loading: true,
+                conditionTitle: '',
+                items: []
+              };
+              this.setState({chartData, participantId: pid});
+              return from(cohortReviewApi()
+                .getParticipantChartData(ns, wsid, cid, +cdrVersionId, pid, domainName, 10))
+                .do(({items}) => {
+                  chartData[domainName] = {
+                    loading: false,
+                    conditionTitle: typeToTitle(domainName),
+                    items
+                  };
+                  this.setState({chartData});
+                });
+            })
+          );
+        })
+        .subscribe();
+
+      filterStateStore.subscribe(filterState => {
+        let {updateState} = this.state;
+        // this.vocab = filterState.vocab;
+        updateState++;
+        this.setState({filterState, updateState});
+      });
+    }
+
+    filteredData(_domain: string, checkedItems: any) {
+      const {filterState} = this.state;
+      filterState[_domain] = checkedItems;
+      filterStateStore.next(filterState);
+    }
+
+    render() {
+      const {chartData, filterState, participantId, updateState} = this.state;
+      return <React.Fragment>
+        <TabView>
+          <TabPanel header='Summary'>
+            {domainList.map((dom, d) => {
+              return <React.Fragment key={d}>
+                {chartData[dom] && <div>
+                  {chartData[dom].loading && <SpinnerOverlay/>}
+                  {!chartData[dom].loading && !chartData[dom].items.length && <div>
+                    There are no {chartData[dom].conditionTitle} to show for this participant.
+                  </div>}
+                  <IndividualParticipantsCharts chartData={chartData[dom]}/>
+                </div>}
+              </React.Fragment>;
+            })}
+          </TabPanel>
+          {tabs.map((tab, t) => {
+            return <TabPanel key={t} header={tab.name}>
+              {filterState && <DetailTabTable
+                getFilteredData={this.filteredData}
+                filterState={filterState}
+                updateState={updateState}
+                tabName={tab.name}
+                columns={tab.columns[filterState.vocab]}
+                filterType={tab.filterType}
+                domain={tab.domain}
+                participantId={participantId}
+              />}
+            </TabPanel>;
+          })}
+        </TabView>
+      </React.Fragment>;
+    }
+  }
+);
+
+@Component({
+  selector: 'app-detail-tabs',
+  template: '<div #root></div>'
+})
+export class DetailTabsComponent extends ReactWrapperBase {
   constructor() {
-    this.filteredData = this.filteredData.bind(this);
-  }
-
-  ngOnInit() {
-    this.subscription = Observable
-      .combineLatest(urlParamsStore, currentWorkspaceStore)
-      .map(([{ns, wsid, cid, pid}, {cdrVersionId}]) => ({ns, wsid, cid, pid, cdrVersionId}))
-      .distinctUntilChanged(fp.isEqual)
-      .switchMap(({ns, wsid, cid, pid, cdrVersionId}) => {
-        this.participantId = pid;
-        return Observable.forkJoin(
-          ...this.domainList.map(domainName => {
-            this.chartData[domainName] = {
-              loading: true,
-              conditionTitle: '',
-              items: []
-            };
-            return from(cohortReviewApi()
-              .getParticipantChartData(ns, wsid, cid, cdrVersionId, pid, domainName, 10))
-              .do(({items}) => {
-                this.chartData[domainName] = {
-                  loading: false,
-                  conditionTitle: typeToTitle(domainName),
-                  items
-                };
-              });
-          })
-        );
-      })
-      .subscribe();
-
-    this.subscription.add(filterStateStore.subscribe(filterState => {
-      this.vocab = filterState.vocab;
-      this.filterState = filterState;
-      this.updateState++;
-    }));
-  }
-
-  filteredData(_domain: string, checkedItems: any) {
-    this.filterState[_domain] = checkedItems;
-    filterStateStore.next(this.filterState);
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
+    super(DetailTabs, []);
   }
 }
