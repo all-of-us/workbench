@@ -79,7 +79,15 @@ export const styles = {
     height: '25px',
     width: '25px',
     borderRadius: '5px',
-    backgroundColor: '#262262'
+    backgroundColor: colors.purple[0]
+  },
+  previewDataHeader: {
+    height: '19px',
+    width: '160px',
+    color: colors.blue[6],
+    fontFamily: 'Montserrat',
+    fontSize: '16px',
+    fontWeight: 600
   }
 };
 
@@ -565,8 +573,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
         <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
           <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row',
             position: 'relative'}}>
-            <div style={{height: '19px', width: '160px',	color: '#2F2E7E',
-              fontFamily: 'Montserrat', fontSize: '16px', fontWeight: 600}}>
+            <div style={styles.previewDataHeader}>
               Preview Data Set
             </div>
             {!defaultPreviewView && <Clickable data-test-id='preview-icon'

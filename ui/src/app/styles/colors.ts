@@ -15,7 +15,8 @@ export default {
     '#85bde4',
     '#afd3ed',
     '#d7eaf6',
-    '#eaf4fb'
+    '#eaf4fb',
+    '#2F2E7E'
   ],
   gray: [
     '#4a4a4a',
