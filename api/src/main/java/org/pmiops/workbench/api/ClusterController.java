@@ -127,12 +127,12 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ClusterListResponse> listClusters(String projectName) {
+  public ResponseEntity<ClusterListResponse> listClusters(String billingProjectId) {
     User user = this.userProvider.get();
     // TODO as part of Billing Project epic RW-1205: enable status checking for arbitrary project
     // until then: continue to check the user's free tier project status
     // because that is the only project we'll pass in here
-    if (!user.getFreeTierBillingProjectName().equals(projectName)) {
+    if (!user.getFreeTierBillingProjectName().equals(billingProjectId)) {
       throw new FailedPreconditionException(
           "NOT YET IMPLEMENTED: Cannot list clusters using arbitrary project name");
     }
@@ -142,11 +142,9 @@ public class ClusterController implements ClusterApiDelegate {
     }
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
-      fcCluster = this.leonardoNotebooksClient.getCluster(projectName,
-              LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      fcCluster = this.leonardoNotebooksClient.getCluster(billingProjectId, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
     } catch (NotFoundException e) {
-      fcCluster = this.leonardoNotebooksClient.createCluster(projectName,
-              LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      fcCluster = this.leonardoNotebooksClient.createCluster(billingProjectId, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
     }
 
     int retries = Optional.ofNullable(user.getClusterCreateRetries()).orElse(0);
@@ -161,8 +159,7 @@ public class ClusterController implements ClusterApiDelegate {
         }
         log.warning("Retrying cluster creation.");
 
-        this.leonardoNotebooksClient.deleteCluster(projectName,
-                LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+        this.leonardoNotebooksClient.deleteCluster(billingProjectId, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
       }
     } else if (
         org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(fcCluster.getStatus()) &&

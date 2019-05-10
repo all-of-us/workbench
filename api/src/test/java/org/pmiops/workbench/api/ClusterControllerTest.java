@@ -74,7 +74,9 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ClusterControllerTest {
-  private static final String WORKSPACE_NS = "proj";
+  private static final String BILLING_PROJECT_ID = "proj";
+  // a workspace's namespace is always its billing project ID
+  private static final String WORKSPACE_NS = BILLING_PROJECT_ID;
   private static final String WORKSPACE_ID = "wsid";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String OTHER_USER_EMAIL = "alice@gmail.com";
@@ -157,7 +159,7 @@ public class ClusterControllerTest {
     User user = new User();
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
-    user.setFreeTierBillingProjectName(WORKSPACE_NS);
+    user.setFreeTierBillingProjectName(BILLING_PROJECT_ID);
     user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.READY);
     when(userProvider.get()).thenReturn(user);
     clusterController.setUserProvider(userProvider);
@@ -178,12 +180,12 @@ public class ClusterControllerTest {
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
     testFcCluster = new org.pmiops.workbench.notebooks.model.Cluster()
         .clusterName("all-of-us")
-        .googleProject(WORKSPACE_NS)
+        .googleProject(BILLING_PROJECT_ID)
         .status(org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING)
         .createdDate(createdDate);
     testCluster = new Cluster()
         .clusterName("all-of-us")
-        .clusterNamespace(WORKSPACE_NS)
+        .clusterNamespace(BILLING_PROJECT_ID)
         .status(ClusterStatus.DELETING)
         .createdDate(createdDate);
   }
@@ -224,42 +226,42 @@ public class ClusterControllerTest {
 
   @Test
   public void testListClusters() throws Exception {
-    when(notebookService.getCluster(WORKSPACE_NS, "all-of-us")).thenReturn(testFcCluster);
+    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us")).thenReturn(testFcCluster);
 
-    assertThat(clusterController.listClusters(WORKSPACE_NS).getBody().getDefaultCluster())
+    assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
   }
 
   @Test
   public void testListClustersUnknownStatus() throws Exception {
-    when(notebookService.getCluster(WORKSPACE_NS, "all-of-us")).thenReturn(
+    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us")).thenReturn(
         testFcCluster.status(null));
 
-    assertThat(clusterController.listClusters(WORKSPACE_NS).getBody().getDefaultCluster().getStatus())
+    assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster().getStatus())
         .isEqualTo(ClusterStatus.UNKNOWN);
   }
 
   @Test(expected = FailedPreconditionException.class)
   public void testListClustersWrongBillingProject() throws Exception {
-    when(notebookService.getCluster(WORKSPACE_NS, "all-of-us")).thenReturn(testFcCluster);
+    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us")).thenReturn(testFcCluster);
 
     clusterController.listClusters("not the right project");
   }
 
   @Test
   public void testListClustersLazyCreate() throws Exception {
-    when(notebookService.getCluster(WORKSPACE_NS, "all-of-us")).thenThrow(new NotFoundException());
-    when(notebookService.createCluster(eq(WORKSPACE_NS), eq("all-of-us")))
+    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us")).thenThrow(new NotFoundException());
+    when(notebookService.createCluster(eq(BILLING_PROJECT_ID), eq("all-of-us")))
         .thenReturn(testFcCluster);
 
-    assertThat(clusterController.listClusters(WORKSPACE_NS).getBody().getDefaultCluster())
+    assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
   }
 
   @Test
   public void testDeleteCluster() throws Exception {
-    clusterController.deleteCluster(WORKSPACE_NS, "cluster");
-    verify(notebookService).deleteCluster(WORKSPACE_NS, "cluster");
+    clusterController.deleteCluster(BILLING_PROJECT_ID, "cluster");
+    verify(notebookService).deleteCluster(BILLING_PROJECT_ID, "cluster");
   }
 
   @Test
@@ -312,10 +314,10 @@ public class ClusterControllerTest {
     req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
-        clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
+        clusterController.localize(BILLING_PROJECT_ID, "cluster", req).getBody();
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
 
-    verify(notebookService).localize(eq(WORKSPACE_NS), eq("cluster"), mapCaptor.capture());
+    verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
     Map<String, String> localizeMap = mapCaptor.getValue();
     assertThat(localizeMap).containsEntry(
         "~/workspaces/wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
@@ -323,7 +325,7 @@ public class ClusterControllerTest {
     assertThat(delocJson.getString("destination")).isEqualTo("gs://workspace-bucket/notebooks");
     JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces/wsid/.all_of_us_config.json"));
     assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
-    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(WORKSPACE_NS);
+    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(BILLING_PROJECT_ID);
     assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
     verify(userRecentResourceService, times(1)).updateNotebookEntry(anyLong(), anyLong() , anyString(), any(Timestamp.class));
   }
@@ -337,13 +339,13 @@ public class ClusterControllerTest {
     req.setPlaygroundMode(true);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
-      clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
+      clusterController.localize(BILLING_PROJECT_ID, "cluster", req).getBody();
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces_playground/wsid");
-    verify(notebookService).localize(eq(WORKSPACE_NS), eq("cluster"), mapCaptor.capture());
+    verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
     Map<String, String> localizeMap = mapCaptor.getValue();
     JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces_playground/wsid/.all_of_us_config.json"));
     assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
-    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(WORKSPACE_NS);
+    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(BILLING_PROJECT_ID);
     assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
   }
 
@@ -375,8 +377,8 @@ public class ClusterControllerTest {
     req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
-        clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
-    verify(notebookService).localize(eq(WORKSPACE_NS), eq("cluster"), mapCaptor.capture());
+        clusterController.localize(BILLING_PROJECT_ID, "cluster", req).getBody();
+    verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
 
     // Config files only.
     assertThat(mapCaptor.getValue().size()).isEqualTo(2);
