@@ -579,8 +579,9 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
             {!defaultPreviewView && <Clickable data-test-id='preview-icon'
                                                onClick={() => this.getPreviewList()}
                                                style={styles.refreshIcon}>
-              <ClrIcon style={{fill: '#F1F1F1', marginLeft: '0.1rem', marginTop: '-1rem'}}
-                       shape='refresh'></ClrIcon>
+              <ClrIcon style={{fill: colors.gray[7], marginLeft: '0.1rem', marginTop: '-1rem'}}
+                       shape='refresh'>
+              </ClrIcon>
             </Clickable>
             }
             <div style={{color: '#000000', fontSize: '14px'}}>A visualization

@@ -25,7 +25,8 @@ export default {
     '#b7b7b7',
     '#c3c3c3',
     '#dbdbdb',
-    '#ededed'
+    '#ededed',
+    '#F1F1F1'
   ],
   white: '#fff',
   black: [
