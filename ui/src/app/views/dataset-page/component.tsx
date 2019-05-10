@@ -302,7 +302,8 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       }
     } else {
       this.setState({selectedCohortIds: toggleIncludes(resource.id,
-        this.state.selectedCohortIds) as unknown as number[]}, () => this.defaultPrviewDataRequest());
+        this.state.selectedCohortIds) as unknown as number[]},
+          () => this.defaultPrviewDataRequest());
     }
   }
 

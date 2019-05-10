@@ -39,6 +39,10 @@ export class DataSetApiStub extends DataSetApi {
 
   previewQuery(workspaceNamespace: string,
     workspaceId: string, dataSet: DataSetRequest): Promise<DataSetPreviewResponse> {
-    return Promise.resolve({domainValue: [{domain: 'CONDITION', values: [{value: 'Value1'}, {value: 'Value2'}]}]});
+    return Promise.resolve({
+      domainValue: [
+          {domain: 'CONDITION', values: [{value: 'Value1'}, {value: 'Value2'}]}
+      ]
+    });
   }
 }
