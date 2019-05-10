@@ -16,12 +16,11 @@ import {
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {WorkspaceAccessLevel} from 'generated';
 import {CohortBuilderApi} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 import {ListNodeComponent} from './list-node.component';
 
 class MockActions {
@@ -63,9 +62,8 @@ describe('ListNodeComponent', () => {
     })
       .compileComponents();
     currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
+      ...workspaceDataStub,
       cdrVersionId: '1',
-      accessLevel: WorkspaceAccessLevel.OWNER,
     });
   }));
 

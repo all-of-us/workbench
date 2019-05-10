@@ -13,7 +13,7 @@ import {navigate} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 
 
-import {FileDetail, Workspace} from 'generated';
+import {FileDetail, Workspace} from 'generated/fetch';
 
 export class NewNotebookModal extends React.Component<
   {onClose: Function, workspace: Workspace, existingNotebooks: FileDetail[]},

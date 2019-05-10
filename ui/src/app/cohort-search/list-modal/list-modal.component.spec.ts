@@ -33,13 +33,13 @@ import {wizardStore} from 'app/cohort-search/search-state.service';
 import {TreeComponent} from 'app/cohort-search/tree/tree.component';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {DomainType, WorkspaceAccessLevel} from 'generated';
+import {DomainType} from 'generated';
 import {CohortBuilderApi} from 'generated/fetch';
 import {fromJS, Map} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 import {ListModalComponent} from './list-modal.component';
 
 class MockActions {
@@ -98,10 +98,7 @@ describe('ListModalComponent', () => {
       ],
     })
       .compileComponents();
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
+    currentWorkspaceStore.next(workspaceDataStub);
     wizardStore.next({
       domain: DomainType.MEASUREMENT,
       item: {modifiers: [], searchParameters: []}

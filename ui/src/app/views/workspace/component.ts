@@ -4,19 +4,23 @@ import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
 
-import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
-  CdrVersion,
+  cohortsApi,
+  profileApi,
+  workspacesApi
+} from 'app/services/swagger-fetch-clients';
+
+import {ToolTipComponent} from 'app/views/tooltip/component';
+import {CdrVersion} from 'generated';
+
+import {
   Cohort,
-  CohortsService,
   FileDetail,
   PageVisit,
-  ProfileService,
   UserRole,
   Workspace,
   WorkspaceAccessLevel,
-  WorkspacesService,
-} from 'generated';
+} from 'generated/fetch';
 
 enum Tabs {
   Cohorts,
@@ -63,10 +67,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   googleBucketModal = false;
 
   constructor(
-    private cohortsService: CohortsService,
-    private workspacesService: WorkspacesService,
     private cdrVersionStorageService: CdrVersionStorageService,
-    private profileService: ProfileService,
   ) {
     this.closeNotebookModal = this.closeNotebookModal.bind(this);
     this.closeBugReport = this.closeBugReport.bind(this);
@@ -96,33 +97,31 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.wsNamespace = ns;
     this.wsId = wsid;
     // TODO: RW-1057
-    this.profileService.getMe().subscribe(
+    profileApi().getMe().then(
       profile => {
         this.username = profile.username;
         if (profile.pageVisits) {
           this.firstVisit = !profile.pageVisits.some(v =>
             v.page === WorkspaceComponent.PAGE_ID);
         }
-      },
-      error => {},
-      () => {
         if (this.firstVisit) {
           this.showTip = true;
         }
-        this.profileService.updatePageVisits(this.newPageVisit).subscribe();
-      });
-    this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
-      .subscribe(
+        profileApi().updatePageVisits(this.newPageVisit);
+      }).catch(
+        error => {});
+    cohortsApi().getCohortsInWorkspace(this.wsNamespace, this.wsId)
+      .then(
         cohortsReceived => {
           for (const coho of cohortsReceived.items) {
             this.cohortList.push(coho);
           }
           this.cohortsLoading = false;
-        },
-        error => {
-          this.cohortsLoading = false;
-          this.cohortsError = true;
-        });
+        }).catch(
+          error => {
+            this.cohortsLoading = false;
+            this.cohortsError = true;
+          });
     this.loadNotebookList();
     this.cdrVersionStorageService.cdrVersions$.subscribe(resp => {
       this.cdrVersion = resp.items.find(v => v.cdrVersionId === this.workspace.cdrVersionId);
@@ -130,16 +129,16 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private loadNotebookList() {
-    this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
-      .subscribe(
+    workspacesApi().getNoteBookList(this.wsNamespace, this.wsId)
+      .then(
         fileList => {
           this.notebookList = fileList;
           this.notebooksLoading = false;
-        },
-        error => {
-          this.notebooksLoading = false;
-          this.notebookError = true;
-        });
+        }).catch(
+          error => {
+            this.notebooksLoading = false;
+            this.notebookError = true;
+          });
   }
 
   ngOnDestroy(): void {

@@ -1,58 +1,59 @@
-import {fakeAsync, TestBed} from '@angular/core/testing';
-import {FormsModule} from '@angular/forms';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {RouterTestingModule} from '@angular/router/testing';
-import {ClarityModule} from '@clr/angular';
-
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {BugReportComponent} from 'app/views/bug-report/component';
-import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
-import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
-import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
-
-import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-
-import {ToolTipComponent} from 'app/views/tooltip/component';
-import {
-  WorkspaceAccessLevel
-} from 'generated';
-
-
-describe('WorkspaceEditComponent', () => {
-  let workspacesService: WorkspacesServiceStub;
-
-  beforeEach(fakeAsync(() => {
-    urlParamsStore.next({
-      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    });
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
-    workspacesService = new WorkspacesServiceStub();
-    TestBed.configureTestingModule({
-      declarations: [
-        BugReportComponent,
-        ConfirmDeleteModalComponent,
-        ToolTipComponent,
-        WorkspaceEditComponent,
-        WorkspaceNavBarComponent,
-        WorkspaceWrapperComponent,
-        WorkspaceShareComponent
-      ],
-      imports: [
-        BrowserAnimationsModule,
-        RouterTestingModule,
-        FormsModule,
-        ClarityModule.forRoot()
-      ],
-      providers: [
-      ]});
-  }));
-
+// import {fakeAsync, TestBed} from '@angular/core/testing';
+// import {FormsModule} from '@angular/forms';
+// import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+// import {RouterTestingModule} from '@angular/router/testing';
+// import {ClarityModule} from '@clr/angular';
+//
+// import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+// import {BugReportComponent} from 'app/views/bug-report/component';
+// import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+// import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
+// import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
+// import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+// import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
+//
+// import {
+// WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+//
+// import {ToolTipComponent} from 'app/views/tooltip/component';
+// import {
+//   WorkspaceAccessLevel
+// } from 'generated';
+//
+//
+// describe('WorkspaceEditComponent', () => {
+//   let workspacesService: WorkspacesServiceStub;
+//
+//   beforeEach(fakeAsync(() => {
+//     urlParamsStore.next({
+//       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+//       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
+//     });
+//     currentWorkspaceStore.next({
+//       ...WorkspacesServiceStub.stubWorkspace(),
+//       accessLevel: WorkspaceAccessLevel.OWNER,
+//     });
+//     workspacesService = new WorkspacesServiceStub();
+//     TestBed.configureTestingModule({
+//       declarations: [
+//         BugReportComponent,
+//         ConfirmDeleteModalComponent,
+//         ToolTipComponent,
+//         WorkspaceEditComponent,
+//         WorkspaceNavBarComponent,
+//         WorkspaceWrapperComponent,
+//         WorkspaceShareComponent
+//       ],
+//       imports: [
+//         BrowserAnimationsModule,
+//         RouterTestingModule,
+//         FormsModule,
+//         ClarityModule.forRoot()
+//       ],
+//       providers: [
+//       ]});
+//   }));
+//
   // it('should show a conflict-specific error when creating a name conflict workspace',
   //   fakeAsync(() => {
   //     setupComponent(WorkspaceEditMode.Create);
@@ -284,4 +285,4 @@ describe('WorkspaceEditComponent', () => {
   //     'You already have a workspace named '
   //       + workspaceName + '. Please choose another name.');
   // }));
-});
+// });

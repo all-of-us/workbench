@@ -7,10 +7,10 @@ import {ClarityModule} from '@clr/angular';
 import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
 import {activeModifierList, CohortSearchActions, previewStatus} from 'app/cohort-search/redux';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortBuilderService, WorkspaceAccessLevel} from 'generated';
+import {CohortBuilderService} from 'generated';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 import {ModifierPageComponent} from './modifier-page.component';
 
 class MockActions {
@@ -46,10 +46,7 @@ describe('ModifierPageComponent', () => {
       ],
     })
       .compileComponents();
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
+    currentWorkspaceStore.next(workspaceDataStub);
   }));
 
   beforeEach(() => {

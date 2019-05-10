@@ -13,7 +13,6 @@ import {Button} from 'app/components/buttons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {
   currentCohortStore,
@@ -21,6 +20,7 @@ import {
   navigateByUrl,
   urlParamsStore
 } from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {
   CohortStatus,

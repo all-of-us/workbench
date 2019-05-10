@@ -20,13 +20,13 @@ import {
   ConceptSet,
   ConceptSetsService,
   Domain,
-  WorkspaceAccessLevel,
 } from 'generated';
 import {ConceptSet as FetchConceptSet} from 'generated/fetch';
 
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-service-stub';
-import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 
 import {
   simulateClick as simulateClickReact,
@@ -70,10 +70,7 @@ describe('ConceptSetDetailsComponent', () => {
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
       csid: 123
     });
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
+    currentWorkspaceStore.next(workspaceDataStub);
   }));
 
   function newConceptSet(): ConceptSet {

@@ -1,6 +1,6 @@
 import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@angular/router';
 
-import {WorkspaceData} from 'app/services/workspace-storage.service';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {Profile} from 'generated';
 import {Cohort, ConceptSet} from 'generated/fetch';
 import * as fp from 'lodash/fp';

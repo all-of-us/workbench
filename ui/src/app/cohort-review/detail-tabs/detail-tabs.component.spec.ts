@@ -8,11 +8,10 @@ import {IndividualParticipantsChartsComponent} from 'app/cohort-review/individua
 import {filterStateStore} from 'app/cohort-review/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {WorkspaceAccessLevel} from 'generated';
-import {CohortReviewApi} from 'generated/fetch';
+import {CohortReviewApi, WorkspaceAccessLevel} from 'generated/fetch';
 import * as highCharts from 'highcharts';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {DetailTabsComponent} from './detail-tabs.component';
 
 
@@ -35,7 +34,7 @@ describe('DetailTabsComponent', () => {
     })
       .compileComponents();
     currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
+      ...workspaceStubs[0],
       cdrVersionId: '1',
       accessLevel: WorkspaceAccessLevel.OWNER,
     });
