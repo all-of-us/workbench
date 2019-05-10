@@ -82,4 +82,5 @@
   <include file="changelog/db.changelog-72-all-participants-data-set.xml"/>
   <include file="changelog/db.changelog-73-add-billing_project_buffer_entry.xml"/>
   <include file="changelog/db.changelog-74-add-last_sync_request_time-billing-buffer.xml"/>
+  <include file="changelog/db.changelog-75-workspace-deletion.xml"/>
 </databaseChangeLog>

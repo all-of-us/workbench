@@ -175,6 +175,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
       }, 10000);
     } else {
 
+      if (!profile.betaAccessRequestTime) {
+        profileApi().requestBetaAccess();
+      }
       if (profile.pageVisits) {
         if (!profile.pageVisits.some(v => v.page === this.pageId)) {
           this.setFirstVisit();

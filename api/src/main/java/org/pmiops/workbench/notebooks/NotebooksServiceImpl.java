@@ -2,14 +2,20 @@ package org.pmiops.workbench.notebooks;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+
+import org.json.JSONObject;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.FileDetail;
@@ -119,6 +125,23 @@ public class NotebooksServiceImpl implements NotebooksService {
     deleteNotebook(workspaceNamespace, workspaceName, originalName);
 
     return fileDetail;
+  }
+
+  @Override
+  public JSONObject getNotebookContents(String bucketName, String notebookName) {
+    try {
+      return cloudStorageService.getFileAsJson(bucketName, "notebooks/".concat(notebookName.concat(".ipynb")));
+    } catch (IOException e) {
+      throw new ServerErrorException("Failed to get notebook " +
+          notebookName + " from bucket " +
+          bucketName);
+    }
+  }
+
+  @Override
+  public void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents) {
+    cloudStorageService.writeFile(bucketName,
+        "notebooks/" + notebookName + ".ipynb", notebookContents.toString().getBytes(StandardCharsets.UTF_8));
   }
 
   private String appendSuffixIfNeeded(String filename) {

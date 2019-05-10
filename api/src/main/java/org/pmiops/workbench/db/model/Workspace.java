@@ -22,6 +22,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UnderservedPopulationEnum;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 @Entity
 @Table(name = "workspace")
@@ -72,8 +73,10 @@ public class Workspace {
   private User creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
+  private Timestamp lastAccessedTime;
   private Set<Cohort> cohorts = new HashSet<Cohort>();
   private Set<ConceptSet> conceptSets = new HashSet<ConceptSet>();
+  private Short activeStatus;
 
   private boolean diseaseFocusedResearch;
   private String diseaseOfFocus;
@@ -93,6 +96,10 @@ public class Workspace {
   private Timestamp timeRequested;
 
   private Set<WorkspaceUserRole> usersWithAccess = new HashSet<WorkspaceUserRole>();
+
+  public Workspace() {
+    setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+  }
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -205,6 +212,11 @@ public class Workspace {
   public void setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
   }
+
+  @Column(name = "last_accessed_time")
+  public Timestamp getLastAccessedTime() { return lastAccessedTime; }
+
+  public void setLastAccessedTime(Timestamp lastAccessedTime) { this.lastAccessedTime = lastAccessedTime; }
 
   @Column(name = "rp_disease_focused_research")
   public boolean getDiseaseFocusedResearch() {
@@ -402,6 +414,22 @@ public class Workspace {
   public String getFirecloudUuid() {return this.firecloudUuid; }
 
   public void setFirecloudUuid(String firecloudUuid) {this.firecloudUuid = firecloudUuid;}
+
+  @Column(name = "active_status")
+  private Short getActiveStatus() { return activeStatus; }
+
+  private void setActiveStatus(Short activeStatus) {
+    this.activeStatus = activeStatus;
+  }
+
+  @Transient
+  public WorkspaceActiveStatus getWorkspaceActiveStatusEnum() {
+    return StorageEnums.workspaceActiveStatusFromStorage(getActiveStatus());
+  }
+
+  public void setWorkspaceActiveStatusEnum(WorkspaceActiveStatus activeStatus) {
+    setActiveStatus(StorageEnums.workspaceActiveStatusToStorage(activeStatus));
+  }
 
   /**
    * Necessary for Spring initialization of the object.

@@ -3,7 +3,7 @@ import {FormControl} from '@angular/forms';
 import {autocompleteStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {TreeSubType} from 'generated';
+import {CriteriaType, DomainType} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
 const trigger = 2;
@@ -26,7 +26,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
   ingredientList = [];
   highlightedOption: number;
   subtype: string;
-  codes: any;
 
   @ViewChild('searchBar') searchBar;
   @HostListener('document:mouseup', ['$event.target'])
@@ -41,9 +40,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
     this.subscription = autocompleteStore.subscribe(searchTerm => {
       this.searchTerm.setValue(searchTerm, {emitEvent: false});
     });
-    // TODO set to false for now, may need to change for conditions/procedures
-    this.codes = false;
-
     this.subscription.add(this.searchTerm.valueChanges
       .debounceTime(300)
       .distinctUntilChanged()
@@ -71,22 +67,25 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
     this.optionSelected = false;
     this.ingredientList = [];
     this.noResults = false;
-    // const subtype = this.codes ? this.subtype : null;
     const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
-    const {domainId, type} = this.node;
-    cohortBuilderApi().getCriteriaAutoComplete(cdrId, domainId, this.searchTerm.value, type)
-      .then(resp => {
-        this.options = [];
-        const optionNames: Array<string> = [];
-        resp.items.forEach(option => {
-          this.highlightedOption = null;
-          if (optionNames.indexOf(option.name) === -1) {
-            optionNames.push(option.name);
-            this.options.push(option);
-          }
-        });
-        this.loading = false;
-      }, (err) => this.error = err);
+    const {domainId, isStandard, type} = this.node;
+    const apiCall = domainId === DomainType.DRUG
+      ? cohortBuilderApi().getDrugBrandOrIngredientByValue(cdrId, this.searchTerm.value)
+      : cohortBuilderApi().getCriteriaAutoComplete(
+        cdrId, domainId, this.searchTerm.value, type, isStandard
+      );
+    apiCall.then(resp => {
+      this.options = [];
+      const optionNames: Array<string> = [];
+      this.highlightedOption = null;
+      resp.items.forEach(option => {
+        if (optionNames.indexOf(option.name) === -1) {
+          optionNames.push(option.name);
+          this.options.push(option);
+        }
+      });
+      this.loading = false;
+    }, (err) => this.error = err);
   }
 
   get showOverflow() {
@@ -98,8 +97,19 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
       this.optionSelected = true;
       this.searchTerm.reset('');
       this.searchTerm.setValue(option.name, {emitEvent: false});
-      if (option.subtype === TreeSubType[TreeSubType.BRAND]) {
-        // TODO call api for ingredients
+      if (option.type === CriteriaType[CriteriaType.BRAND]) {
+        const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
+        cohortBuilderApi().getDrugIngredientByConceptId(cdrId, option.conceptId)
+          .then(resp => {
+            if (resp.items.length) {
+              // TODO check if we need to highlight all ingredients
+              // just grabbing the first one on the list for now
+              const {name, path, id} = resp.items[0];
+              autocompleteStore.next(name);
+              subtreePathStore.next(path.split('.'));
+              subtreeSelectedStore.next(id);
+            }
+          });
       } else {
         autocompleteStore.next(option.name);
         subtreePathStore.next(option.path.split('.'));

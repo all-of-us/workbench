@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
     basePackages = { "org.pmiops.workbench.cdr" }
 )
 /**
- * Spring configuration for connecting to a database with private or public CDR metadata based
+ * Spring configuration for connecting to a database with private CDR metadata based
  * on the context of the current request. Applies to the model and DAO objects within this package.
  */
 public class CdrDbConfig {
@@ -71,9 +71,9 @@ public class CdrDbConfig {
       Long defaultId = null;
       Map<Object, Object> cdrVersionDataSourceMap = new HashMap<>();
       for (CdrVersion cdrVersion : cdrVersionDao.findAll()) {
-        String dbName = "public".equals(dbUser) ? cdrVersion.getPublicDbName() : cdrVersion.getCdrDbName();
         int slashIndex = originalDbUrl.lastIndexOf('/');
-        String dbUrl = originalDbUrl.substring(0, slashIndex + 1) + dbName + "?useSSL=false";
+        String dbUrl = originalDbUrl.substring(0, slashIndex + 1) + cdrVersion.getCdrDbName() +
+            "?useSSL=false";
         DataSource dataSource =
             DataSourceBuilder.create()
             .driverClassName(basePoolConfig.getDriverClassName())

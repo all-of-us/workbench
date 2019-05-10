@@ -204,11 +204,11 @@ public class ClusterController implements ClusterApiDelegate {
     );
     String workspacePath = body.getWorkspaceId();
     if (!projectName.equals(body.getWorkspaceNamespace())) {
-      workspacePath = body.getWorkspaceNamespace() + ":" + body.getWorkspaceId();
+      workspacePath = body.getWorkspaceNamespace() + FireCloudService.WORKSPACE_DELIMITER + body.getWorkspaceId();
     }
     String apiDir = "workspaces/" + workspacePath;
     if (body.getPlaygroundMode()) {
-      apiDir = "workspaces:playground/" + workspacePath;
+      apiDir = "workspaces_playground/" + workspacePath;
     }
     String localDir = "~/" + apiDir;
 

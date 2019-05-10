@@ -212,6 +212,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     setCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
     org.pmiops.workbench.db.model.Workspace reqWorkspace = workspaceMapper.toDbWorkspace(workspace);
@@ -294,15 +295,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(String workspaceNamespace,
       String workspaceId) {
-    //general note. When you delete a workspace the related rows in the following tables will also be deleted
-    //Cohort, cohort review, cohort annotation definition, cohort annotation enum value,
-    //participant cohort annotations, participant cohort status. Please see liquibase/db for more
-    //details on how these tables relate to each other.
+    // This deletes all Firecloud and google resources, however saves all references
+    // to the workspace and its resources in the Workbench database.
+    // This is for auditing purposes and potentially workspace restore.
+    // TODO: do we want to delete workspace resource references and save only metadata?
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
     // This automatically handles access control to the workspace.
     fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
-    workspaceService.getDao().delete(dbWorkspace);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -311,6 +314,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
+
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
 
@@ -461,6 +465,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
 
     dbWorkspace.setName(toWorkspace.getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();

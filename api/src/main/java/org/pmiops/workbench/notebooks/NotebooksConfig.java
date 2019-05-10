@@ -31,10 +31,8 @@ public class NotebooksConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient notebooksApiClient(UserAuthentication userAuthentication,
       WorkbenchConfig workbenchConfig) {
-    ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(workbenchConfig.firecloud.leoBaseUrl);
+    ApiClient apiClient = buildApiClient(workbenchConfig);
     apiClient.setAccessToken(userAuthentication.getCredentials());
-    apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     return apiClient;
   }
 
@@ -43,12 +41,10 @@ public class NotebooksConfig {
   public ApiClient workbenchServiceAccountClient(
       WorkbenchEnvironment workbenchEnvironment, WorkbenchConfig workbenchConfig,
       ServiceAccounts serviceAccounts) {
-    ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(workbenchConfig.firecloud.leoBaseUrl);
+    ApiClient apiClient = buildApiClient(workbenchConfig);
     try {
       apiClient.setAccessToken(
           serviceAccounts.workbenchAccessToken(workbenchEnvironment, NOTEBOOK_SCOPES));
-      apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
@@ -85,5 +81,13 @@ public class NotebooksConfig {
     ClusterApi api = new ClusterApi();
     api.setApiClient(apiClient);
     return api;
+  }
+
+  private ApiClient buildApiClient(WorkbenchConfig workbenchConfig) {
+    return new ApiClient()
+        .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
+        .setDebugging(workbenchConfig.firecloud.debugEndpoints)
+        .addDefaultHeader(org.pmiops.workbench.firecloud.FireCloudConfig.X_APP_ID_HEADER,
+            workbenchConfig.firecloud.xAppIdValue);
   }
 }

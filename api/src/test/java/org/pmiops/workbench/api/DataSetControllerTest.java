@@ -8,6 +8,8 @@ import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import com.google.gson.Gson;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,6 +47,7 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
+import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DataSetQueryList;
 import org.pmiops.workbench.model.Domain;
@@ -103,6 +106,7 @@ public class DataSetControllerTest {
   private static final String CONCEPT_SET_TWO_NAME = "concept set two";
   private static final String WORKSPACE_NAMESPACE = "ns";
   private static final String WORKSPACE_NAME = "name";
+  private static final String WORKSPACE_BUCKET_NAME = "fc://bucket-hash";
   private static final String USER_EMAIL = "bob@gmail.com";
 
   private Long COHORT_ONE_ID;
@@ -189,7 +193,6 @@ public class DataSetControllerTest {
 
   @Import({CohortFactoryImpl.class,
       DataSetServiceImpl.class,
-      NotebooksServiceImpl.class,
       TestBigQueryCdrSchemaConfig.class,
       UserService.class,
       WorkspacesController.class,
@@ -200,7 +203,7 @@ public class DataSetControllerTest {
       CloudStorageService.class, CohortCloningService.class,
       CohortMaterializationService.class, ComplianceService.class,
       ConceptBigQueryService.class, ConceptSetService.class, DataSetService.class,
-      FireCloudService.class, DirectoryService.class,
+      FireCloudService.class, DirectoryService.class, NotebooksService.class,
       ParticipantCounter.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
@@ -219,8 +222,8 @@ public class DataSetControllerTest {
   @Before
   public void setUp() throws Exception {
     dataSetService = new DataSetServiceImpl(bigQueryService, cdrBigQuerySchemaConfigService, cohortDao, conceptSetDao, participantCounter);
-    dataSetController = new DataSetController(bigQueryService, CLOCK, cloudStorageService,
-        cohortDao, conceptDao, conceptSetDao, dataSetService, fireCloudService, userProvider, workspaceService);
+    dataSetController = new DataSetController(bigQueryService, CLOCK, cohortDao, conceptDao, conceptSetDao,
+        dataSetService, fireCloudService, notebooksService, userProvider, workspaceService);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
             userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
@@ -326,7 +329,8 @@ public class DataSetControllerTest {
     return new DataSetRequest()
         .conceptSetIds(new ArrayList<>())
         .cohortIds(new ArrayList<>())
-        .values(new ArrayList<>());
+        .values(new ArrayList<>())
+        .name("blah");
   }
 
   private void stubGetWorkspace(String ns, String name, String creator,
@@ -336,6 +340,7 @@ public class DataSetControllerTest {
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(creator);
+    fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
@@ -472,7 +477,7 @@ public class DataSetControllerTest {
 
   @Test
   public void createDataSetMissingArguments() {
-    DataSetRequest dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSet().name(null);
 
     List<Long> cohortIds = new ArrayList<>();
     cohortIds.add(1l);
@@ -521,5 +526,60 @@ public class DataSetControllerTest {
     expectedException.expectMessage("Missing values");
 
     dataSetController.createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
+  }
+
+  @Test
+  public void exportToNewNotebook() {
+    DataSetRequest dataSet = buildEmptyDataSet().name("blah");
+    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
+    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+    List<DomainValuePair> domainValues = mockDomainValuePair();
+    dataSet.setValues(domainValues);
+
+    ArrayList<String> tables = new ArrayList<>();
+    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
+
+    mockLinkingTableQuery(tables);
+    String notebookName = "Hello World";
+
+    DataSetExportRequest request = new DataSetExportRequest().dataSetRequest(dataSet).newNotebook(true).notebookName(notebookName);
+
+    dataSetController.exportToNotebook(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request).getBody();
+    verify(notebooksService, never()).getNotebookContents(any(), any());
+    // I tried to have this verify against the actual expected contents of the json object, but
+    // java equivalence didn't handle it well.
+    verify(notebooksService, times(1))
+        .saveNotebook(eq(WORKSPACE_BUCKET_NAME), eq(notebookName), any(JSONObject.class));
+  }
+
+  @Test
+  public void exportToExistingNotebook() {
+    DataSetRequest dataSet = buildEmptyDataSet();
+    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
+    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+    List<DomainValuePair> domainValues = mockDomainValuePair();
+    dataSet.setValues(domainValues);
+
+    ArrayList<String> tables = new ArrayList<>();
+    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
+
+    mockLinkingTableQuery(tables);
+
+    String notebookName = "Hello World";
+
+    when(notebooksService.getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName)).thenReturn(new JSONObject()
+        .put("cells", new JSONArray())
+        .put("metadata", new JSONObject())
+        .put("nbformat", 4)
+        .put("nbformat_minor", 2));
+
+    DataSetExportRequest request = new DataSetExportRequest().dataSetRequest(dataSet).newNotebook(false).notebookName(notebookName);
+
+    dataSetController.exportToNotebook(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request).getBody();
+    verify(notebooksService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);
+    // I tried to have this verify against the actual expected contents of the json object, but
+    // java equivalence didn't handle it well.
+    verify(notebooksService, times(1))
+        .saveNotebook(eq(WORKSPACE_BUCKET_NAME), eq(notebookName), any(JSONObject.class));
   }
 }

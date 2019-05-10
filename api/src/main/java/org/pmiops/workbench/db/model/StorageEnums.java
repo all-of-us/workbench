@@ -11,6 +11,7 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.UnderservedPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 /**
  * Static utility for converting between API enums and stored short values. All
@@ -214,6 +215,20 @@ public final class StorageEnums {
 
   public static Short annotationTypeToStorage(AnnotationType t) {
     return CLIENT_TO_STORAGE_ANNOTATION_TYPE.get(t);
+  }
+
+  private static final BiMap<WorkspaceActiveStatus, Short> CLIENT_TO_STORAGE_WORKSPACE_ACTIVE_STATUS =
+          ImmutableBiMap.<WorkspaceActiveStatus, Short>builder()
+          .put(WorkspaceActiveStatus.ACTIVE, (short) 0)
+          .put(WorkspaceActiveStatus.DELETED, (short) 1)
+          .build();
+
+  public static WorkspaceActiveStatus workspaceActiveStatusFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_WORKSPACE_ACTIVE_STATUS.inverse().get(s);
+  }
+
+  public static Short workspaceActiveStatusToStorage(WorkspaceActiveStatus s) {
+    return CLIENT_TO_STORAGE_WORKSPACE_ACTIVE_STATUS.get(s);
   }
 
   /** Utility class. */

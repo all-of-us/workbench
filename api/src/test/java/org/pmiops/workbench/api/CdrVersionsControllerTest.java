@@ -125,7 +125,6 @@ public class CdrVersionsControllerTest {
     cdrVersion.setDataAccessLevelEnum(dataAccessLevel);
     cdrVersion.setName(name);
     cdrVersion.setNumParticipants(123);
-    cdrVersion.setPublicDbName("p");
     cdrVersion.setReleaseNumber((short) 1);
     cdrVersionDao.save(cdrVersion);
     return cdrVersion;

@@ -23,6 +23,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.Workspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
@@ -88,6 +89,7 @@ public class WorkspaceServiceTest {
     doReturn(mock(Timestamp.class)).when(workspace).getLastModifiedTime();
     doReturn(mock(Timestamp.class)).when(workspace).getCreationTime();
     doReturn(name).when(workspace).getName();
+    doReturn(WorkspaceActiveStatus.ACTIVE).when(workspace).getWorkspaceActiveStatusEnum();
     doReturn(mock(FirecloudWorkspaceId.class)).when(workspace).getFirecloudWorkspaceId();
     doReturn(firecloudUuid).when(workspace).getFirecloudUuid();
     return workspace;

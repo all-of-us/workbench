@@ -547,13 +547,9 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
             position: 'relative'}}>
             <div style={{color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
-            <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}}
-                    disabled={this.disableSave()} onClick={() => {this.generateCode(); }}>
-              GENERATE CODE
-            </Button>
-            <Button data-test-id='preview-button' style={{position: 'absolute', right: '16rem',
-              top: '0.25rem'}} onClick={() => {this.getPreviewList(); }}
-              disabled={this.disableSave()} >
+            <Button data-test-id='preview-button' style={{position: 'absolute', right: '8rem',
+              top: '0.25rem'}}
+                    disabled={this.disableSave()} onClick={() => {this.getPreviewList(); }}>
               PREVIEW DATA SET
             </Button>
             <Button data-test-id='save-button' style={{position: 'absolute', right: '1rem',
@@ -564,7 +560,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
           </div>
           {previewDataLoading && <div style={{display: 'flex', flexDirection: 'column'}}>
             <Spinner style={{position: 'relative', top: '2rem',
-              left: '45%'}}></Spinner>
+              left: '45%'}} />
             <div style={{top: '3rem', position: 'relative',
               left: '35%'}}>It may take up to a minute to load the data</div></div>
           }
