@@ -1,8 +1,6 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-
 import {ConceptSetsList} from 'app/views/concept-set-list/component';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -10,11 +8,9 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {ConceptsApi, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
-import {
-    WorkspaceAccessLevel,
-} from 'generated';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 describe('ConceptSetList', () => {
@@ -22,10 +18,7 @@ describe('ConceptSetList', () => {
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(ConceptsApi, new ConceptsApiStub());
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
+    currentWorkspaceStore.next(workspaceDataStub);
   });
   it('should render', () => {
     const wrapper = mount(<ConceptSetsList />);

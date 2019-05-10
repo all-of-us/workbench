@@ -6,9 +6,8 @@ import {ConceptSetsApi} from 'generated/fetch/api';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CreateConceptSetModal} from './component';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-import {WorkspaceAccessLevel} from 'generated';
 import {DomainStubVariables} from 'testing/stubs/concepts-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 
@@ -25,14 +24,11 @@ describe('CreateConceptSetModal', () => {
   beforeEach(() => {
     conceptSetsApi = new ConceptSetsApiStub();
     registerApiClient(ConceptSetsApi, conceptSetsApi);
+    currentWorkspaceStore.next(workspaceDataStub);
   });
 
   it('gets domain list', () => {
     const wrapper = component();
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
     const domains = wrapper.find('[data-test-id="domain-options"]')
         .find('option').map(v => v.text());
     expect(domains).toEqual(stubDomains);
@@ -40,10 +36,6 @@ describe('CreateConceptSetModal', () => {
 
   it('saves concept set information', async () => {
     const wrapper = component();
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
     const csName = 'new-name';
     wrapper.find('[data-test-id="concept-set-name"]').find('input')
         .simulate('change', {target: {value: csName}});
@@ -55,10 +47,6 @@ describe('CreateConceptSetModal', () => {
 
   it('does not allow save for a concept set that already exists', async () => {
     const wrapper = component();
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
     const csName = conceptSetsApi.conceptSets[0].name;
     wrapper.find('[data-test-id="concept-set-name"]').find('input')
         .simulate('change', {target: {value: csName}});

@@ -1,17 +1,13 @@
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
-import {WorkspaceAccessLevel} from 'generated';
 import * as React from 'react';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 
 import {SidebarContent} from './sidebar-content.component';
 
 describe('SidebarContent', () => {
   beforeEach(() => {
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
+    currentWorkspaceStore.next(workspaceDataStub);
   });
 
   it('should render', () => {

@@ -1,18 +1,15 @@
-
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {RecentWork} from 'app/views/recent-work/component';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {RecentWork} from 'app/views/recent-work/component';
 import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generated/fetch';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-import {WorkspaceAccessLevel} from 'generated';
-
 
 describe('RecentWorkComponent', () => {
   beforeEach(() => {
@@ -29,10 +26,7 @@ describe('RecentWorkComponent', () => {
   });
 
   it('should render in a workspace', () => {
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
+    currentWorkspaceStore.next(workspaceDataStub);
     const wrapper = mount(<RecentWork />);
     expect(wrapper.exists()).toBeTruthy();
   });

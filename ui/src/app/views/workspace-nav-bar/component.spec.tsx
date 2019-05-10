@@ -1,16 +1,14 @@
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceNavBarReact} from 'app/views/workspace-nav-bar/component';
 import {mount} from 'enzyme';
-import {WorkspaceAccessLevel} from 'generated';
 import * as React from 'react';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 
 describe('WorkspaceNavBarComponent', () => {
 
   let props: {};
   const workspace = {
-    ...WorkspacesServiceStub.stubWorkspace(),
-    accessLevel: WorkspaceAccessLevel.OWNER,
+    workspaceDataStub
   };
 
   const component = () => {

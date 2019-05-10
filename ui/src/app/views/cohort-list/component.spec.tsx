@@ -9,11 +9,9 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortsApi, WorkspacesApi} from 'generated/fetch';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
-import {
-  WorkspaceAccessLevel,
-} from 'generated';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 describe('CohortList', () => {
@@ -24,10 +22,7 @@ describe('CohortList', () => {
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     });
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
+    currentWorkspaceStore.next(workspaceDataStub);
   });
 
   it('should display cohorts', async () => {
