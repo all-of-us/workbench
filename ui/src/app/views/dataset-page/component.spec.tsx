@@ -97,7 +97,7 @@ describe('DataSet', () => {
     wrapper.find('[data-test-id="value-list-items"]').find('input').first()
       .simulate('change');
 
-    // Buttons should now be enables
+    // Buttons should now be enabled
     const buttons = wrapper.find(Button);
     expect(buttons.find('[data-test-id="preview-button"]').first().prop('disabled'))
       .toBeFalsy();
