@@ -100,6 +100,7 @@ interface State {
   conceptDomainList: DomainInfo[];
   conceptSetList: ConceptSet[];
   creatingConceptSet: boolean;
+  defaultPreviewView: boolean;
   previewList: Array<DataSetPreviewList>;
   editing: boolean;
   includesAllParticipants: boolean;
@@ -125,6 +126,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       conceptDomainList: undefined,
       conceptSetList: [],
       cohortList: [],
+      defaultPreviewView: true,
       loadingResources: true,
       confirmDeleting: false,
       editing: false,
@@ -285,15 +287,15 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
             selectedConceptSetIds: newSelectedConceptSets,
             valueSets: updatedValueSets.concat(newValueSets),
             selectedValues: updatedSelectedValues
-          }));
+          }, () => this.defaultPrviewDataRequest()));
       } else {
         this.setState({selectedConceptSetIds: newSelectedConceptSets,
           valueSets: updatedValueSets,
-          selectedValues: updatedSelectedValues});
+          selectedValues: updatedSelectedValues}, () => this.defaultPrviewDataRequest());
       }
     } else {
       this.setState({selectedCohortIds: toggleIncludes(resource.id,
-        this.state.selectedCohortIds) as unknown as number[]});
+        this.state.selectedCohortIds) as unknown as number[]}, () => this.defaultPrviewDataRequest());
     }
   }
 
@@ -317,7 +319,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
     valuesSelected = valuesSelected.sort((a, b) =>
         valueSets.findIndex(({value}) => a.value === value) -
         valueSets.findIndex(({value}) => b.value === value));
-    this.setState({selectedValues: valuesSelected});
+    this.setState({selectedValues: valuesSelected}, () => this.defaultPrviewDataRequest());
   }
 
   getCurrentResource(): Cohort | ConceptSet {
@@ -331,6 +333,13 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
         ((!this.state.selectedCohortIds ||
         this.state.selectedCohortIds.length === 0) && !this.state.includesAllParticipants) ||
         !this.state.selectedValues || this.state.selectedValues.length === 0;
+  }
+
+  defaultPrviewDataRequest() {
+    if (this.state.defaultPreviewView && !this.disableSave()) {
+      this.getPreviewList();
+      this.setState({defaultPreviewView: false});
+    }
   }
 
   setSelectedPreivewDomain(domain) {
@@ -435,7 +444,8 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       previewList,
       selectedPreviewDomain,
       previewDataLoading,
-      valueSets
+      valueSets,
+      defaultPreviewView
     } = this.state;
     const currentResource = this.getCurrentResource();
     return <React.Fragment>
@@ -546,12 +556,20 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
         <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
           <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row',
             position: 'relative'}}>
+            <div style={{height: '19px', width: '160px',	color: '#2F2E7E',
+              fontFamily: 'Montserrat', fontSize: '16px', fontWeight: 600}}>
+              Preview Data Set
+            </div>
+            {!defaultPreviewView && <Clickable style={{
+              marginRight: '1rem', marginTop: '0.5rem', height: '25px',
+              width: '25px', borderRadius: '5px', backgroundColor: '#262262',
+            }} onClick={() => {this.getPreviewList();}}>
+              <ClrIcon style={{fill: '#F1F1F1', marginLeft: '0.1rem', marginTop: '-1rem'}}
+                       shape='refresh'></ClrIcon>
+            </Clickable>
+            }
             <div style={{color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
-            <Button style={{position: 'absolute', right: '8rem', top: '0.25rem'}}
-                    disabled={this.disableSave()} onClick={() => {this.getPreviewList(); }}>
-              PREVIEW DATA SET
-            </Button>
             <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
                     onClick ={() => this.setState({openSaveModal: true})}
                     disabled={this.disableSave()}>
