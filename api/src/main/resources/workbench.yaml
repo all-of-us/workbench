@@ -505,7 +505,7 @@ paths:
     get:
       summary: List available notebook clusters
       description: >
-        Returns the clusters available to the current user in the giving billing project.
+        Returns the clusters available to the current user in the given billing project.
         Currently there is a single default cluster supported per billing project
         and this cluster should always either exist or be in the process of being
         initialized. In a future where researchers have more control over cluster

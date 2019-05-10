@@ -242,10 +242,10 @@ public class ClusterControllerTest {
   }
 
   @Test(expected = FailedPreconditionException.class)
-  public void testListClustersWrongBillingProject() throws Exception {
+  public void testListClustersNullBillingProject() throws Exception {
     when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us")).thenReturn(testFcCluster);
 
-    clusterController.listClusters("not the right project");
+    clusterController.listClusters(null);
   }
 
   @Test

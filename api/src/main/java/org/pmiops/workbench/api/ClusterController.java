@@ -128,18 +128,21 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Override
   public ResponseEntity<ClusterListResponse> listClusters(String billingProjectId) {
+    if (billingProjectId == null) {
+      throw new FailedPreconditionException("Must specify billing project");
+    }
+
+    // future-proofing the transition from using free-tier projects to using the billing buffer:
+    // verify that the project has been properly initialized if it's the user's free tier project.
+    // billing buffer projects are guaranteed to be initialized at this point.
+
     User user = this.userProvider.get();
-    // TODO as part of Billing Project epic RW-1205: enable status checking for arbitrary project
-    // until then: continue to check the user's free tier project status
-    // because that is the only project we'll pass in here
-    if (!user.getFreeTierBillingProjectName().equals(billingProjectId)) {
+    if (billingProjectId.equals(user.getFreeTierBillingProjectName()) &&
+            user.getFreeTierBillingProjectStatusEnum() != BillingProjectStatus.READY) {
       throw new FailedPreconditionException(
-          "NOT YET IMPLEMENTED: Cannot list clusters using arbitrary project name");
+              "User billing project is not yet initialized, cannot list/create clusters");
     }
-    if (user.getFreeTierBillingProjectStatusEnum() != BillingProjectStatus.READY) {
-      throw new FailedPreconditionException(
-          "User billing project is not yet initialized, cannot list/create clusters");
-    }
+
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
       fcCluster = this.leonardoNotebooksClient.getCluster(billingProjectId, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
