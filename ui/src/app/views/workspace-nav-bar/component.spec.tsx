@@ -7,9 +7,6 @@ import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 describe('WorkspaceNavBarComponent', () => {
 
   let props: {};
-  const workspace = {
-    workspaceDataStub
-  };
 
   const component = () => {
     return mount(<WorkspaceNavBarReact {...props}/>, {attachTo: document.getElementById('root')});
@@ -18,8 +15,8 @@ describe('WorkspaceNavBarComponent', () => {
   beforeEach(() => {
     props = {};
 
-    currentWorkspaceStore.next(workspace);
-    urlParamsStore.next({ns: workspace.namespace, wsid: workspace.id});
+    currentWorkspaceStore.next(workspaceDataStub);
+    urlParamsStore.next({ns: workspaceDataStub.namespace, wsid: workspaceDataStub.id});
   });
 
   it('should render', () => {
@@ -40,7 +37,7 @@ describe('WorkspaceNavBarComponent', () => {
 
     wrapper.find({'data-test-id': 'Cohorts'}).first().simulate('click');
     expect(navSpy).toHaveBeenCalledWith(
-      ['/workspaces', workspace.namespace, workspace.id, 'cohorts']);
+      ['/workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'cohorts']);
   });
 
   it('should call delete method when clicked', () => {
