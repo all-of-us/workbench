@@ -291,31 +291,37 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     overlayTemplate(rowData: any, column: any) {
-      let vl: any;
+      let nl, vl: any;
       const valueField = (rowData.refRange || rowData.unit) && column.field === 'value';
       const nameField = rowData.route && column.field === 'standardName';
-      return <div className={column.field === 'standardName' ? 'name-container' : ''}
-        style={{position: 'relative'}}>
-        {column.field === 'value' && <span>{rowData.value}</span>}
-        {column.field === 'standardName' && <React.Fragment>
-          <div style={styles.nameWrapper}>
-            <p style={styles.nameContent}>{rowData.standardName}</p>
+      return <React.Fragment>
+        <div style={{position: 'relative'}}>
+          {column.field === 'value' && <span>{rowData.value}</span>}
+          {column.field === 'standardName' && <div className='name-container'>
+            <div style={styles.nameWrapper}>
+              <p style={styles.nameContent}>{rowData.standardName}</p>
+            </div>
+            <span style={styles.showMore} onClick={(e) => nl.toggle(e)}>Show more</span>
+            <OverlayPanel className='labOverlay' ref={(el) => nl = el}
+                          showCloseIcon={true} dismissable={true}>
+              <div style={{paddingBottom: '0.2rem'}}>{rowData.standardName}</div>
+            </OverlayPanel>
           </div>
-          <span style={styles.showMore}>Show more</span>
-        </React.Fragment>
-        }
-        {(valueField || nameField)
-        && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => vl.toggle(e)}/>}
-        <OverlayPanel className='labOverlay' ref={(el) => vl = el}
-                      showCloseIcon={true} dismissable={true}>
-          {(rowData.refRange &&  column.field === 'value') &&
-          <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
-          {(rowData.unit && column.field === 'value') &&
-          <div>Units: {rowData.unit}</div>}
-          {nameField &&
-          <div>Route: {rowData.route}</div>}
-        </OverlayPanel>
-      </div>;
+          }
+          {(valueField || nameField)
+          && <i className='pi pi-caret-down' style={styles.caretIcon}
+              onClick={(e) => vl.toggle(e)}/>}
+          <OverlayPanel className='labOverlay' ref={(el) => vl = el}
+                        showCloseIcon={true} dismissable={true}>
+            {(rowData.refRange &&  column.field === 'value') &&
+            <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
+            {(rowData.unit && column.field === 'value') &&
+            <div>Units: {rowData.unit}</div>}
+            {nameField &&
+            <div>Route: {rowData.route}</div>}
+          </OverlayPanel>
+        </div>
+      </React.Fragment>;
     }
 
     updateData = (event, colName, namesArray) => {
