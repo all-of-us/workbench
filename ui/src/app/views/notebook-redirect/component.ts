@@ -6,7 +6,7 @@ import {timer} from 'rxjs/observable/timer';
 import {mapTo} from 'rxjs/operators';
 import {Subscription} from 'rxjs/Subscription';
 
-import {queryParamsStore, urlParamsStore} from 'app/utils/navigation';
+import {queryParamsStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
 
@@ -110,6 +110,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   private cluster: Cluster;
   private progressComplete = new Map<Progress, boolean>();
   private playground = false;
+  private clusterBillingProjectId: string;
 
   constructor(
     private locationService: Location,
@@ -130,7 +131,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.jupyterLabMode = jupyterLabMode === 'true';
     this.setNotebookNames();
 
-    this.loadingSub = this.clusterService.listClusters(this.cluster.clusterNamespace)
+    this.clusterBillingProjectId = userProfileStore.getValue().profile.freeTierBillingProjectName;
+    this.loadingSub = this.clusterService.listClusters(this.clusterBillingProjectId)
       .flatMap((resp) => {
         const c = resp.defaultCluster;
         this.incrementProgress(Progress.Initializing);

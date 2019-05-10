@@ -13,6 +13,7 @@ import {
 } from 'generated/fetch/api';
 
 import {ReactWrapperBase} from 'app/utils/index';
+import {userProfileStore} from '../../utils/navigation';
 
 const styles = {
   notebookSettings: {
@@ -120,7 +121,8 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
     const repoll = () => {
       this.pollClusterTimer = setTimeout(() => this.pollCluster(), 15000);
     };
-    clusterApi().listClusters(this.state.cluster.clusterNamespace)
+    const clusterBillingProjectId = userProfileStore.getValue().profile.freeTierBillingProjectName;
+    clusterApi().listClusters(clusterBillingProjectId)
       .then((body) => {
         const cluster = body.defaultCluster;
         if (SettingsReact.TRANSITIONAL_STATUSES.has(cluster.status)) {
