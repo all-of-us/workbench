@@ -70,8 +70,8 @@ export const datatableStyles = `
     color: #0086C1;
   }
   body .labOverlay.p-overlaypanel {
-    top: 19px!important;
-    left: 0px!important;
+    top: 1.25rem!important;
+    left: -2.75rem!important;
     width:9.5rem;
   }
   body .labOverlay.p-overlaypanel .p-overlaypanel-close:hover {
