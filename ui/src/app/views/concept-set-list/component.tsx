@@ -19,6 +19,8 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 import {ResourceCard} from 'app/views/resource-card/component';
+import {FadeBox} from "../../components/containers";
+import {ConceptNavigationBar} from "../concept-navigation-bar/component";
 
 const styles = reactStyles({
   pageArea: {
@@ -78,37 +80,38 @@ export const ConceptSetsList = withCurrentWorkspace()(
 
     render() {
       const {conceptSetsLoading, conceptSetsList, conceptDomainList, createModalOpen} = this.state;
+      const {namespace, id} = this.props.workspace;
       const accessLevel = this.props.workspace.accessLevel as unknown as WorkspaceAccessLevel;
       const writePermission = accessLevel === WorkspaceAccessLevel.OWNER ||
           accessLevel === WorkspaceAccessLevel.WRITER;
 
-      return <React.Fragment>
-            <div style={styles.pageArea}>
-              <TooltipTrigger content={!writePermission &&
-              `Write permission required to create cohorts`} side='top'>
-                <CardButton type='small'
-                            onClick={() => this.setState({createModalOpen: true})}
-                            disabled={!writePermission}>
-                  Create a <br/>Concept Set
-                  <ClrIcon shape='plus-circle' size={21} style={{marginTop: 5}}/>
-                </CardButton>
-              </TooltipTrigger>
-              <div style={styles.resourceCardArea}>
-                {conceptSetsList && conceptSetsList.map((conceptSet: RecentResource) => {
-                  return <ResourceCard resourceCard={conceptSet} key={conceptSet.conceptSet.name}
-                                       onUpdate={() => this.loadConceptSets()}>
-                  </ResourceCard>;
-                })}
-              </div>
-              {conceptSetsLoading && <SpinnerOverlay />}
-            </div>
-
+      return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
+        <ConceptNavigationBar wsId={id} ns={namespace} showConcepts={false}/>
+        <div style={styles.pageArea}>
+          <TooltipTrigger content={!writePermission &&
+          `Write permission required to create cohorts`} side='top'>
+            <CardButton type='small'
+                        onClick={() => this.setState({createModalOpen: true})}
+                        disabled={!writePermission}>
+              Create a <br/>Concept Set
+              <ClrIcon shape='plus-circle' size={21} style={{marginTop: 5}}/>
+            </CardButton>
+          </TooltipTrigger>
+          <div style={styles.resourceCardArea}>
+            {conceptSetsList && conceptSetsList.map((conceptSet: RecentResource) => {
+              return <ResourceCard resourceCard={conceptSet} key={conceptSet.conceptSet.name}
+                                   onUpdate={() => this.loadConceptSets()}>
+              </ResourceCard>;
+            })}
+          </div>
+          {conceptSetsLoading && <SpinnerOverlay />}
+        </div>
         {createModalOpen &&
         <CreateConceptSetModal onCreate={() => this.loadConceptSets()}
                                onClose={() => this.setState({createModalOpen: false})}
                                conceptDomainList={conceptDomainList}
                                existingConceptSets={conceptSetsList}/>}
-          </React.Fragment>;
+      </FadeBox>;
     }
 
   });
