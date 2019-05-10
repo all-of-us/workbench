@@ -52,7 +52,7 @@ describe('DataSet', () => {
       .toBe(exampleCohortStubs.length);
   });
 
-  it('should display views based on Domain of Concept selected in workspace', async() => {
+  it('should display values based on Domain of Concept selected in workspace', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -83,7 +83,7 @@ describe('DataSet', () => {
         .first();
     expect(previewButton.prop('disabled')).toBeTruthy();
 
-    // After all cohort concept and views are selected all the buttons will be enabled
+    // After all cohort concept and values are selected all the buttons will be enabled
 
     wrapper.find('[data-test-id="cohort-list-item"]').first()
       .find('input').first().simulate('click');
