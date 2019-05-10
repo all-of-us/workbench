@@ -1,4 +1,12 @@
-import {DataSet, DataSetApi, DataSetExportRequest, DataSetQueryList, DataSetRequest, EmptyResponse} from 'generated/fetch';
+import {
+  DataSet,
+  DataSetApi,
+  DataSetExportRequest,
+  DataSetPreviewResponse,
+  DataSetQueryList,
+  DataSetRequest,
+  EmptyResponse
+} from 'generated/fetch';
 
 export class DataSetApiStub extends DataSetApi {
   constructor() {
@@ -27,5 +35,10 @@ export class DataSetApiStub extends DataSetApi {
     return new Promise<EmptyResponse>(resolve => {
       resolve({});
     });
+  }
+
+  previewQuery(workspaceNamespace: string,
+    workspaceId: string, dataSet: DataSetRequest): Promise<DataSetPreviewResponse> {
+    return Promise.resolve({domainValue: [{domain: 'CONDITION', values: [{value: 'Value1'}, {value: 'Value2'}]}]});
   }
 }

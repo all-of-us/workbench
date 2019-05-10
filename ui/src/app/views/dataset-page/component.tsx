@@ -428,7 +428,8 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
     return <DataTable key={this.state.selectedPreviewDomain}
                       value={this.getDataTableValue(filteredPreviewData.values)}>
       {filteredPreviewData.values.map(value =>
-          <Column header={value.value} headerStyle={{textAlign: 'left'}} field={value.value}/>
+          <Column key={value.value} header={value.value} headerStyle={{textAlign: 'left'}}
+                  field={value.value}/>
       )}
     </DataTable>;
   }
@@ -567,8 +568,9 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
               fontFamily: 'Montserrat', fontSize: '16px', fontWeight: 600}}>
               Preview Data Set
             </div>
-            {!defaultPreviewView && <Clickable style={styles.refreshIcon}
-                                               onClick={() => {this.getPreviewList();}}>
+            {!defaultPreviewView && <Clickable data-test-id='preview-icon'
+                                               onClick={() => this.getPreviewList()}
+                                               style={styles.refreshIcon}>
               <ClrIcon style={{fill: '#F1F1F1', marginLeft: '0.1rem', marginTop: '-1rem'}}
                        shape='refresh'></ClrIcon>
             </Clickable>
