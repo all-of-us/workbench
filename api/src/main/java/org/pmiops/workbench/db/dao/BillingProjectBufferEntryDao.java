@@ -15,5 +15,7 @@ public interface BillingProjectBufferEntryDao  extends CrudRepository<BillingPro
 
   BillingProjectBufferEntry findFirstByStatusOrderByLastSyncRequestTimeAsc(short status);
 
+  BillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
+
   Long countByStatus(short status);
 }

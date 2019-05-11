@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
@@ -11,6 +12,7 @@ import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingPro
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
 
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -25,6 +27,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
@@ -284,4 +287,30 @@ public class BillingProjectBufferServiceTest {
     assertThat(billingProjectBufferEntryDao.findByFireCloudProjectName(capturedProjectNames.get(2)).getStatusEnum())
         .isEqualTo(AVAILABLE);
   }
+
+  @Test
+  public void assignBillingProject() {
+    BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
+    entry.setStatusEnum(AVAILABLE);
+    entry.setFireCloudProjectName("test-project-name");
+    entry.setCreationTime(new Timestamp(NOW.toEpochMilli()));
+    billingProjectBufferEntryDao.save(entry);
+
+    User user = mock(User.class);
+    doReturn("fake-email@aou.org").when(user).getEmail();
+
+    BillingProjectBufferEntry assignedEntry = billingProjectBufferService.assignBillingProject(user);
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> secondCaptor = ArgumentCaptor.forClass(String.class);
+    verify(fireCloudService).addUserToBillingProject(captor.capture(), secondCaptor.capture());
+    String invokedEmail = captor.getValue();
+    String invokedProjectName = secondCaptor.getValue();
+
+    assertThat(invokedEmail).isEqualTo("fake-email@aou.org");
+    assertThat(invokedProjectName).isEqualTo("test-project-name");
+
+    assertThat(billingProjectBufferEntryDao.findOne(assignedEntry.getId()).getStatusEnum()).isEqualTo(ASSIGNED);
+  }
+
 }

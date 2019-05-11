@@ -1,5 +1,7 @@
 package org.pmiops.workbench.billing;
 
+import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
+import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNING;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
@@ -15,6 +17,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,6 +95,19 @@ public class BillingProjectBufferService {
 
       billingProjectBufferEntryDao.save(entry);
     }
+  }
+
+  public BillingProjectBufferEntry assignBillingProject(User user) {
+    BillingProjectBufferEntry entry = billingProjectBufferEntryDao.findFirstByStatusOrderByCreationTimeAsc(
+        StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE));
+    entry.setStatusEnum(ASSIGNING);
+    billingProjectBufferEntryDao.save(entry);
+
+    fireCloudService.addUserToBillingProject(user.getEmail(), entry.getFireCloudProjectName());
+    entry.setStatusEnum(ASSIGNED);
+    billingProjectBufferEntryDao.save(entry);
+
+    return entry;
   }
 
   private String createBillingProjectName() {
