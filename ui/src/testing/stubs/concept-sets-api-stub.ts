@@ -1,12 +1,12 @@
 
+import {UpdateConceptSetRequest} from 'generated';
 import {
   ConceptSet,
   ConceptSetListResponse,
   Domain
 } from 'generated/fetch';
 import {ConceptSetsApi, CreateConceptSetRequest, EmptyResponse} from 'generated/fetch/api';
-import {ConceptStubVariables, ConceptsApiStub} from "./concepts-api-stub";
-import {UpdateConceptSetRequest} from 'generated';
+import {ConceptsApiStub, ConceptStubVariables} from './concepts-api-stub';
 
 export class ConceptSetsApiStub extends ConceptSetsApi {
   public conceptSets: ConceptSet[];

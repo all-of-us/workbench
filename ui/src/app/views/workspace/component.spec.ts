@@ -27,7 +27,6 @@ import {WorkspaceComponent} from 'app/views/workspace/component';
 import {
   ClusterService,
   CohortsService,
-  ConceptSetsService,
   DataAccessLevel,
   ProfileService,
   UserMetricsService,
