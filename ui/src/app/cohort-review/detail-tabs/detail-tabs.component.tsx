@@ -9,12 +9,78 @@ import {typeToTitle} from 'app/cohort-search/utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {DomainType, PageFilterType} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
+
+const styles = reactStyles({
+  container: {
+    width: '100%',
+    margin: '0.5rem 0',
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem',
+  },
+  row: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    marginRight: '-.5rem',
+    marginLeft: '-.5rem',
+  },
+  col: {
+    position: 'relative',
+    minHeight: '8rem',
+    width: '100%',
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem',
+    flex: '0 0 33.33333%',
+    maxWidth: '33.33333%',
+  },
+});
+
+const css = `
+  body .p-tabview .p-tabview-panels {
+    background-color: transparent;
+    border: 0;
+    padding: 0;
+  }
+  body .p-tabview.p-tabview-top .p-tabview-nav li,
+  body .p-tabview.p-tabview-top .p-tabview-nav li:focus {
+    padding: 0.571em 1em;
+    box-shadow: none;
+  }
+  body .p-tabview.p-tabview-top .p-tabview-nav li a {
+    padding: 0;
+  }
+  body .p-tabview.p-tabview-top .p-tabview-nav li:hover,
+  body .p-tabview.p-tabview-top .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
+  body .p-tabview.p-tabview-top .p-tabview-nav li a,
+  body .p-tabview.p-tabview-top .p-tabview-nav li a:hover {
+    background-color: transparent;
+    color: #2691D0;
+    font-size: 14px;
+    border: 0;
+  }
+  body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight:hover,
+  body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight:hover a,
+  body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight a,
+  body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight a:hover,
+  body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight a:focus {
+    background: transparent;
+    color: #2691D0;
+    font-weight: bold;
+    border: 0;
+    box-shadow: none;
+  }
+  body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight:hover a,
+  body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight a,
+  body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight a:hover,
+  body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight a:focus {
+    border-bottom: 3px solid #2691D0;
+  }
+`;
 
 /* The most common column types */
 const itemDate = {
@@ -286,19 +352,24 @@ export const DetailTabs = withCurrentWorkspace()(
     render() {
       const {chartData, filterState, participantId, updateState} = this.state;
       return <React.Fragment>
-        <TabView>
+        <style>{css}</style>
+        <TabView style={{padding: 0}}>
           <TabPanel header='Summary'>
-            {domainList.map((dom, d) => {
-              return <React.Fragment key={d}>
-                {chartData[dom] && <div>
-                  {chartData[dom].loading && <SpinnerOverlay/>}
-                  {!chartData[dom].loading && !chartData[dom].items.length && <div>
-                    There are no {chartData[dom].conditionTitle} to show for this participant.
-                  </div>}
-                  <IndividualParticipantsCharts chartData={chartData[dom]}/>
-                </div>}
-              </React.Fragment>;
-            })}
+            <div style={styles.container}>
+              <div style={styles.row}>
+                {domainList.map((dom, d) => {
+                  return <div key={d} style={styles.col}>
+                    {chartData[dom] && <div>
+                      {chartData[dom].loading && <SpinnerOverlay/>}
+                      {!chartData[dom].loading && !chartData[dom].items.length && <div>
+                        There are no {chartData[dom].conditionTitle} to show for this participant.
+                      </div>}
+                      <IndividualParticipantsCharts chartData={chartData[dom]}/>
+                    </div>}
+                  </div>;
+                })}
+              </div>
+            </div>
           </TabPanel>
           {tabs.map((tab, t) => {
             return <TabPanel key={t} header={tab.name}>
