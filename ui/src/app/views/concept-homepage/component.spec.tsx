@@ -9,7 +9,7 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 describe('ConceptHomepage', () => {
 

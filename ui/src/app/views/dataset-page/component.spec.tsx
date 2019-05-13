@@ -10,8 +10,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
-import {WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
 describe('DataSet', () => {
   beforeEach(() => {

@@ -39,7 +39,7 @@ import {fromJS, Map} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {ListModalComponent} from './list-modal.component';
 
 class MockActions {

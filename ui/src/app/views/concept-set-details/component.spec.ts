@@ -26,7 +26,7 @@ import {ConceptSet as FetchConceptSet} from 'generated/fetch';
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 import {
   simulateClick as simulateClickReact,

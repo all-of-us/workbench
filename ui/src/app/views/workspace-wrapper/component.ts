@@ -1,6 +1,7 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import * as fp from 'lodash/fp';
+import {Observable} from 'rxjs/Observable';
 
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, navigate, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
@@ -66,11 +67,11 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         // do not render the child component with a stale workspace.
         this.workspace = undefined;
         this.accessLevel = undefined;
-        // This needs to happen for testing. Otherwise it tries to make an api
-        // call with undefined, because the component initializes before we have
-        // access to the route.
+        // This needs to happen for testing because we seed the urlParamsStore with {}.
+        // Otherwise it tries to make an api call with undefined, because the component
+        // initializes before we have access to the route.
         if (ns === undefined || wsid === undefined) {
-          return Promise.resolve({name: '', accessLevel: WorkspaceAccessLevel.NOACCESS});
+          return Observable.empty();
         }
         return workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
           return {

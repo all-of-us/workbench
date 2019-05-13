@@ -7,8 +7,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ProfileApi, WorkspacesApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {WorkspacesApiStub, workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 describe('NotebookList', () => {
   beforeEach(() => {

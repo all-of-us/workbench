@@ -10,7 +10,7 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderService} from 'generated';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {ModifierPageComponent} from './modifier-page.component';
 
 class MockActions {

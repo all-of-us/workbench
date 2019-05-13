@@ -8,8 +8,7 @@ import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generat
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {WorkspacesApiStub, workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 describe('RecentWorkComponent', () => {
   beforeEach(() => {

@@ -1,7 +1,7 @@
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
 import * as React from 'react';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 import {SidebarContent} from './sidebar-content.component';
 

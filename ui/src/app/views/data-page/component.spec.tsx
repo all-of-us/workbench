@@ -12,8 +12,7 @@ import {CohortsApi, ConceptsApi, ConceptSetsApi, WorkspacesApi} from 'generated/
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {WorkspacesApiStub, workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 

@@ -8,7 +8,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptAddModal} from './component';
 import {ConceptSetsApi} from 'generated/fetch/api';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 
 describe('ConceptAddModal', () => {

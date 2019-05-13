@@ -23,7 +23,7 @@ import {CohortBuilderService} from 'generated';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {ListTreeComponent} from './list-tree.component';
 
 class MockActions {

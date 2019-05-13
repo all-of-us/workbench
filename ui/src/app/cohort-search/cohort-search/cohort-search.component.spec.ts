@@ -56,7 +56,7 @@ import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {CohortSearchComponent} from './cohort-search.component';
 
 class MockActions {

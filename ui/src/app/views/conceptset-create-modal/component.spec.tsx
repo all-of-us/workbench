@@ -7,7 +7,7 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CreateConceptSetModal} from './component';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {DomainStubVariables} from 'testing/stubs/concepts-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 

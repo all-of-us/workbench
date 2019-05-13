@@ -20,7 +20,7 @@ import {CohortBuilderApi} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {ListNodeComponent} from './list-node.component';
 
 class MockActions {

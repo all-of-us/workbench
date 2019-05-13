@@ -10,7 +10,7 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {DomainInfo} from 'generated/fetch';
 import {ConceptsApiStub, ConceptStubVariables, DomainStubVariables} from 'testing/stubs/concepts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 
 function isSelectedDomain(

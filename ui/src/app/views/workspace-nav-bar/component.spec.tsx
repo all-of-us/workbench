@@ -2,7 +2,7 @@ import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigat
 import {WorkspaceNavBarReact} from 'app/views/workspace-nav-bar/component';
 import {mount} from 'enzyme';
 import * as React from 'react';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 describe('WorkspaceNavBarComponent', () => {
 
