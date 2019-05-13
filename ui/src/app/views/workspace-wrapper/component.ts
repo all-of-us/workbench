@@ -70,7 +70,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         // Otherwise it tries to make an api call with undefined, because the component
         // initializes before we have access to the route.
         if (ns === undefined || wsid === undefined) {
-          return null;
+          return Promise.resolve(null);
         }
         return workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
           return {
