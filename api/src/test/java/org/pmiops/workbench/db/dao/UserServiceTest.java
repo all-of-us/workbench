@@ -48,7 +48,7 @@ public class UserServiceTest {
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final long TIMESTAMP_MSECS = 100;
-  private static final FakeClock CLOCK = new FakeClock(Instant.ofEpochMilli(TIMESTAMP_MSECS));
+  private static final FakeClock CLOCK = new FakeClock();
 
   @Autowired
   private UserDao userDao;
@@ -67,6 +67,7 @@ public class UserServiceTest {
 
   @Before
   public void setUp() {
+    CLOCK.setInstant(Instant.ofEpochMilli(TIMESTAMP_MSECS));
     Provider<WorkbenchConfig> configProvider = Providers.of(WorkbenchConfig.createEmptyConfig());
     testUser = insertUser(EMAIL_ADDRESS);
 
@@ -102,6 +103,7 @@ public class UserServiceTest {
         new Timestamp(12345));
 
     // Completion timestamp should not change when the method is called again.
+    CLOCK.increment(1000);
     Timestamp completionTime = user.getComplianceTrainingCompletionTime();
     userService.syncComplianceTrainingStatus();
     assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(completionTime);
@@ -160,6 +162,7 @@ public class UserServiceTest {
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
 
     // Completion timestamp should not change when the method is called again.
+    CLOCK.increment(1000);
     Timestamp completionTime = user.getEraCommonsCompletionTime();
     userService.syncEraCommonsStatus();
     assertThat(user.getEraCommonsCompletionTime()).isEqualTo(completionTime);
@@ -194,6 +197,7 @@ public class UserServiceTest {
     assertThat(user.getTwoFactorAuthCompletionTime()).isNotNull();
 
     // twoFactorAuthCompletionTime should not change when already set
+    CLOCK.increment(1000);
     Timestamp twoFactorAuthCompletionTime = user.getTwoFactorAuthCompletionTime();
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByEmail(EMAIL_ADDRESS);

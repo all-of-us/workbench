@@ -422,17 +422,21 @@ public class UserService {
       List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
       // The assumption here is that the User will always get 1 badge which will be AoU
       if (badgeResponse != null && badgeResponse.size() > 0) {
+        BadgeDetails badge = badgeResponse.get(0);
+        Timestamp badgeExpiration = badge.getDateexpire() == null ? null :
+            new Timestamp(Long.parseLong(badge.getDateexpire()));
+
         if (user.getComplianceTrainingCompletionTime() == null) {
+          // This is the user's first time with a Moodle badge response, so we reset the completion
+          // time.
+          user.setComplianceTrainingCompletionTime(now);
+        } else if (badgeExpiration != null && !badgeExpiration.equals(user.getComplianceTrainingExpirationTime())) {
+          // The badge has a new expiration date, suggesting some sort of course completion change.
+          // Reset the completion time.
           user.setComplianceTrainingCompletionTime(now);
         }
 
-        BadgeDetails badge = badgeResponse.get(0);
-        if (badge.getDateexpire() == null) {
-          // This can happen if date expire is set to never
-          user.setComplianceTrainingExpirationTime(null);
-        } else {
-          user.setComplianceTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
-        }
+        user.setComplianceTrainingExpirationTime(badgeExpiration);
       } else {
         // Moodle has returned zero badges for the given user -- we should clear the user's
         // training completion & expiration time.
