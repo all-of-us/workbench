@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
 import {vocabOptions} from 'app/cohort-review/review-state.service';
 import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
@@ -6,7 +5,7 @@ import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -164,6 +163,7 @@ const filterIcons = {
     color: '#262262',
   }
 };
+
 const rows = 25;
 const domains = [
   DomainType.CONDITION,
@@ -702,31 +702,3 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
   }
 );
-
-@Component ({
-  selector : 'app-detail-tab-table',
-  template: '<div #root></div>'
-})
-export class DetailTabTableComponent extends ReactWrapperBase {
-  @Input('tabName') tabName: DetailTabTableProps['tabName'];
-  @Input('columns') columns: DetailTabTableProps['columns'];
-  @Input('domain') domain: DetailTabTableProps['domain'];
-  @Input('filterType') filterType: DetailTabTableProps['filterType'];
-  @Input('participantId') participantId: DetailTabTableProps['participantId'];
-  @Input('filterState') filterState: DetailTabTableProps['filterState'];
-  @Input('getFilteredData') getFilteredData: DetailTabTableProps['getFilteredData'];
-  @Input('updateState') updateState: DetailTabTableProps['updateState'];
-
-  constructor() {
-    super(DetailTabTable, [
-      'tabName',
-      'columns',
-      'domain',
-      'filterType',
-      'participantId',
-      'filterState',
-      'getFilteredData',
-      'updateState',
-    ]);
-  }
-}
