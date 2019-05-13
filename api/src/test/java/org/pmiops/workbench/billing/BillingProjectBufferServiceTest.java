@@ -55,6 +55,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -351,6 +354,7 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
+  @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   public void assignBillingProject_locking() throws InterruptedException, ExecutionException {
     BillingProjectBufferEntry firstEntry = new BillingProjectBufferEntry();
     firstEntry.setStatusEnum(AVAILABLE);
@@ -386,12 +390,6 @@ public class BillingProjectBufferServiceTest {
 
     assertThat(futures.get(0).get().getFireCloudProjectName())
         .isNotEqualTo(futures.get(1).get().getFireCloudProjectName());
-
-    // Need to clean up entities since they actually get committed to the database because we're not running within a transaction
-    billingProjectBufferEntryDao.delete(firstEntry);
-    billingProjectBufferEntryDao.delete(secondEntry);
-    userDao.delete(firstUser);
-    userDao.delete(secondUser);
   }
 
 }
