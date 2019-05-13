@@ -42,8 +42,8 @@ public class BillingProjectBufferService {
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.billingProjectBufferEntryDao = billingProjectBufferEntryDao;
     this.clock = clock;
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.fireCloudService = fireCloudService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   public void bufferBillingProject() {
@@ -111,12 +111,17 @@ public class BillingProjectBufferService {
   private BillingProjectBufferEntry consumeBufferEntryForAssignment() {
     while (billingProjectBufferEntryDao.acquireAssigningLock() != 1) {}
 
-    BillingProjectBufferEntry entry = billingProjectBufferEntryDao.findFirstByStatusOrderByCreationTimeAsc(
-        StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE));
-    entry.setStatusEnum(ASSIGNING);
-    billingProjectBufferEntryDao.save(entry);
+    BillingProjectBufferEntry entry;
+    try {
+      entry = billingProjectBufferEntryDao
+          .findFirstByStatusOrderByCreationTimeAsc(
+              StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE));
+      entry.setStatusEnum(ASSIGNING);
+      billingProjectBufferEntryDao.save(entry);
+    } finally {
+      billingProjectBufferEntryDao.releaseAssigningLock();
+    }
 
-    billingProjectBufferEntryDao.releaseAssigningLock();
     return entry;
   }
 

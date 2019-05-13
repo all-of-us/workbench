@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import javax.inject.Provider;
+import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -89,6 +90,8 @@ public class BillingProjectBufferServiceTest {
   }
 
   @Autowired
+  EntityManager entityManager;
+  @Autowired
   private Clock clock;
   @Autowired
   private UserDao userDao;
@@ -110,6 +113,18 @@ public class BillingProjectBufferServiceTest {
     workbenchConfig.firecloud = new FireCloudConfig();
     workbenchConfig.firecloud.billingProjectPrefix = "test-prefix";
     workbenchConfig.firecloud.billingProjectBufferCapacity = (int) BUFFER_CAPACITY;
+
+    billingProjectBufferEntryDao = spy(billingProjectBufferEntryDao);
+    TestLock lock = new TestLock();
+    doAnswer(invocation -> lock.lock()).when(billingProjectBufferEntryDao).acquireAssigningLock();
+    doAnswer(invocation -> lock.release()).when(billingProjectBufferEntryDao).releaseAssigningLock();
+
+    billingProjectBufferService = new BillingProjectBufferService(
+        billingProjectBufferEntryDao,
+        clock,
+        fireCloudService,
+        workbenchConfigProvider
+    );
   }
 
   @Test
@@ -357,17 +372,10 @@ public class BillingProjectBufferServiceTest {
     secondUser.setEmail("fake-email-2@aou.org");
     userDao.save(secondUser);
 
-    BillingProjectBufferEntryDao dao = spy(billingProjectBufferEntryDao);
-    TestLock lock = new TestLock();
-    doAnswer(invocation -> lock.lock()).when(dao).acquireAssigningLock();
-    doAnswer(invocation -> lock.release()).when(dao).releaseAssigningLock();
-    doAnswer(new CallsRealMethodsWithDelay(500)).when(dao).save(any(BillingProjectBufferEntry.class));
+    doAnswer(new CallsRealMethodsWithDelay(500)).when(billingProjectBufferEntryDao).save(any(BillingProjectBufferEntry.class));
 
-    BillingProjectBufferService newService = new BillingProjectBufferService(dao,
-        clock, fireCloudService, workbenchConfigProvider);
-
-    Callable<BillingProjectBufferEntry> t1 = () -> newService.assignBillingProject(firstUser);
-    Callable<BillingProjectBufferEntry> t2 = () -> newService.assignBillingProject(secondUser);
+    Callable<BillingProjectBufferEntry> t1 = () -> billingProjectBufferService.assignBillingProject(firstUser);
+    Callable<BillingProjectBufferEntry> t2 = () -> billingProjectBufferService.assignBillingProject(secondUser);
 
     List<Callable<BillingProjectBufferEntry>> callableTasks = new ArrayList<>();
     callableTasks.add(t1);
@@ -378,6 +386,12 @@ public class BillingProjectBufferServiceTest {
 
     assertThat(futures.get(0).get().getFireCloudProjectName())
         .isNotEqualTo(futures.get(1).get().getFireCloudProjectName());
+
+    // Need to clean up entities since they actually get committed to the database because we're not running within a transaction
+    billingProjectBufferEntryDao.delete(firstEntry);
+    billingProjectBufferEntryDao.delete(secondEntry);
+    userDao.delete(firstUser);
+    userDao.delete(secondUser);
   }
 
 }
