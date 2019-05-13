@@ -44,7 +44,6 @@ import {
 import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
-import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
 import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
 import {NotebooksServiceStub} from 'testing/stubs/notebooks-service-stub';
@@ -91,7 +90,6 @@ describe('WorkspaceComponent', () => {
         { provide: NotebooksService, useValue: new NotebooksServiceStub() },
         { provide: JupyterService, useValue: new JupyterServiceStub() },
         { provide: Http, useValue: new HttpStub() },
-        { provide: ConceptSetsService, useValue: new ConceptSetsServiceStub() },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
