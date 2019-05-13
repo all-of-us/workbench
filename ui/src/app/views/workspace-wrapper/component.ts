@@ -5,6 +5,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, navigate, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -81,13 +82,16 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         });
       })
       .subscribe(workspace => {
-        if (workspace === {}) {
+        if (workspace === Observable.empty()) {
           // This handles the empty urlParamsStore story.
           return;
         }
-        this.workspace = workspace;
-        this.accessLevel = workspace.accessLevel;
-        currentWorkspaceStore.next(workspace);
+        // We need to cast the workspace so the empty observable
+        // doesn't make the type checker unhappy.
+        const workspaceCasted = workspace as WorkspaceData;
+        this.workspace = workspaceCasted;
+        this.accessLevel = workspaceCasted.accessLevel;
+        currentWorkspaceStore.next(workspaceCasted);
       })
     );
   }
