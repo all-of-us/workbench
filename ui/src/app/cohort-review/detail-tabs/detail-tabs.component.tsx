@@ -310,6 +310,7 @@ export const DetailTabs = withCurrentWorkspace()(
     componentDidMount() {
       const {cdrVersionId} = this.props.workspace;
       urlParamsStore.distinctUntilChanged(fp.isEqual)
+        .filter(({pid}) => !!pid)
         .switchMap(({ns, wsid, cid, pid}) => {
           const chartData = {};
           return Observable.forkJoin(
