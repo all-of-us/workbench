@@ -36,9 +36,10 @@ buildscript {    // Configuration for building
     }
   }
   dependencies {
-    classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
+    classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.1.0.RELEASE'
     classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
     classpath 'io.swagger:swagger-codegen:2.2.3'
+    classpath 'io.spring.gradle:dependency-management-plugin:1.0.7.RELEASE'
   }
 }
 
@@ -47,8 +48,11 @@ ext['hibernate.version'] = '5.2.10.Final'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
+
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'org.hidetake.swagger.generator'
+apply plugin: 'org.springframework.boot'
+
 
 configurations {
   generatedCompile
@@ -81,8 +85,20 @@ clean.doFirst {
   delete("${projectDir}/$swaggerTargetFolder")
 }
 
+// These lines use the Spring Dependency Management Gradle plugin to declare the Spring version we'd like to depend
+// on. This allows us to declare all Spring dependencies below without an explicit version; they are auto-resolved
+// by the Spring plugin.
+dependencyManagement {
+  imports {
+    mavenBom 'org.springframework.cloud:spring-cloud-gcp-dependencies:1.1.1.RELEASE'
+    mavenBom 'org.springframework.cloud:spring-cloud-dependencies:Finchley.SR1'
+    mavenBom 'org.springframework:spring-core:5.1.7.RELEASE'
+  }
+}
+
 repositories {   // repositories for Jar's you access in your code
   jcenter()
+  mavenCentral()
 }
 
 dependencies {
@@ -115,7 +131,7 @@ dependencies {
   // For Swagger generation. These should include dependencies found in the Swagger codegen
   // example here:
   // https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml
-  generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'
+  generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest:2.1.0.RELEASE'
   generatedCompile 'io.springfox:springfox-swagger2:2.6.1'
   generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
   generatedCompile 'com.squareup.okhttp:okhttp:2.7.5'
