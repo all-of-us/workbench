@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BillingProjectBufferEntryDao  extends CrudRepository<BillingProjectBufferEntry, Long> {
 
+  String ASSIGNING_LOCK = "ASSIGNING_LOCK";
+
   BillingProjectBufferEntry findByFireCloudProjectName(String fireCloudProjectName);
 
   @Query("SELECT COUNT(*) FROM BillingProjectBufferEntry WHERE status IN (0, 2)")
@@ -18,4 +20,10 @@ public interface BillingProjectBufferEntryDao  extends CrudRepository<BillingPro
   BillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
 
   Long countByStatus(short status);
+
+  @Query(value = "SELECT GET_LOCK('" + ASSIGNING_LOCK + "', 1)", nativeQuery = true)
+  int acquireAssigningLock();
+
+  @Query(value = "SELECT RELEASE_LOCK('" + ASSIGNING_LOCK + "')", nativeQuery = true)
+  int releaseAssigningLock();
 }

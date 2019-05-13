@@ -30,10 +30,10 @@ public class BillingProjectBufferService {
   private static final int PROJECT_BILLING_ID_SIZE = 8;
   private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
 
-  private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
-  private final Clock clock;
-  private final FireCloudService fireCloudService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
+  private Clock clock;
+  private FireCloudService fireCloudService;
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public BillingProjectBufferService(BillingProjectBufferEntryDao billingProjectBufferEntryDao,
@@ -98,15 +98,25 @@ public class BillingProjectBufferService {
   }
 
   public BillingProjectBufferEntry assignBillingProject(User user) {
+    BillingProjectBufferEntry entry = consumeBufferEntryForAssignment();
+
+    fireCloudService.addUserToBillingProject(user.getEmail(), entry.getFireCloudProjectName());
+    entry.setStatusEnum(ASSIGNED);
+    entry.setAssignedUser(user);
+    billingProjectBufferEntryDao.save(entry);
+
+    return entry;
+  }
+
+  private BillingProjectBufferEntry consumeBufferEntryForAssignment() {
+    while (billingProjectBufferEntryDao.acquireAssigningLock() != 1) {}
+
     BillingProjectBufferEntry entry = billingProjectBufferEntryDao.findFirstByStatusOrderByCreationTimeAsc(
         StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE));
     entry.setStatusEnum(ASSIGNING);
     billingProjectBufferEntryDao.save(entry);
 
-    fireCloudService.addUserToBillingProject(user.getEmail(), entry.getFireCloudProjectName());
-    entry.setStatusEnum(ASSIGNED);
-    billingProjectBufferEntryDao.save(entry);
-
+    billingProjectBufferEntryDao.releaseAssigningLock();
     return entry;
   }
 
