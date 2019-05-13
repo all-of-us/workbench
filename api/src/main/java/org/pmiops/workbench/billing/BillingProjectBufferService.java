@@ -30,10 +30,10 @@ public class BillingProjectBufferService {
   private static final int PROJECT_BILLING_ID_SIZE = 8;
   private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
 
-  private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
-  private Clock clock;
-  private FireCloudService fireCloudService;
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
+  private final Clock clock;
+  private final FireCloudService fireCloudService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public BillingProjectBufferService(BillingProjectBufferEntryDao billingProjectBufferEntryDao,
@@ -109,6 +109,7 @@ public class BillingProjectBufferService {
   }
 
   private BillingProjectBufferEntry consumeBufferEntryForAssignment() {
+    // Each call to acquire the lock will timeout in 1s if it is currently held
     while (billingProjectBufferEntryDao.acquireAssigningLock() != 1) {}
 
     BillingProjectBufferEntry entry;
