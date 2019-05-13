@@ -81,6 +81,10 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         });
       })
       .subscribe(workspace => {
+        if (workspace === {}) {
+          // This handles the empty urlParamsStore story.
+          return;
+        }
         this.workspace = workspace;
         this.accessLevel = workspace.accessLevel;
         currentWorkspaceStore.next(workspace);
