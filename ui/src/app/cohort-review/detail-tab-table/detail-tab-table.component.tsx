@@ -602,6 +602,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       </TabView>
       </React.Fragment>;
     }
+
     hideGraphIcon = (rowData: any) => {
       const {filterState: {vocab}} = this.props;
       const noConcept = rowData[`${vocab}Name`]
