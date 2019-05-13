@@ -1,11 +1,9 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import * as fp from 'lodash/fp';
-import {Observable} from 'rxjs/Observable';
 
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, navigate, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
-import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -72,7 +70,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         // Otherwise it tries to make an api call with undefined, because the component
         // initializes before we have access to the route.
         if (ns === undefined || wsid === undefined) {
-          return Observable.empty();
+          return null;
         }
         return workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
           return {
@@ -82,16 +80,13 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         });
       })
       .subscribe(workspace => {
-        if (workspace === Observable.empty()) {
+        if (workspace === null) {
           // This handles the empty urlParamsStore story.
           return;
         }
-        // We need to cast the workspace so the empty observable
-        // doesn't make the type checker unhappy.
-        const workspaceCasted = workspace as WorkspaceData;
-        this.workspace = workspaceCasted;
-        this.accessLevel = workspaceCasted.accessLevel;
-        currentWorkspaceStore.next(workspaceCasted);
+        this.workspace = workspace;
+        this.accessLevel = workspace.accessLevel;
+        currentWorkspaceStore.next(workspace);
       })
     );
   }
