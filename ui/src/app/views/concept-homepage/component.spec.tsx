@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {ConceptWrapper} from 'app/views/concept-homepage/component';
+import {ConceptHomepage} from 'app/views/concept-homepage/component';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {conceptsApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ConceptsApi, ConceptSetsApi, StandardConceptFilter, WorkspacesApi} from 'generated/fetch';
@@ -37,7 +37,7 @@ function searchTable(searchTerm: string, wrapper) {
     .find('input').simulate('keydown', {keyCode: 13});
 }
 
-describe('ConceptWrapper', () => {
+describe('ConceptHomepage', () => {
 
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
@@ -50,12 +50,12 @@ describe('ConceptWrapper', () => {
   });
 
   it('should render', () => {
-    const wrapper = mount(<ConceptWrapper />);
+    const wrapper = mount(<ConceptHomepage />);
     expect(wrapper).toBeTruthy();
   });
 
   it('should have one card per domain.', async() => {
-    const wrapper = mount(<ConceptWrapper />);
+    const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="domain-box-name"]').length)
       .toBe(DomainStubVariables.STUB_DOMAINS.length);
@@ -64,7 +64,7 @@ describe('ConceptWrapper', () => {
   it('should default to standard concepts only, and performs a full search', async() => {
     const searchTerm = 'test';
     const spy = jest.spyOn(conceptsApi(), 'searchConcepts');
-    const wrapper = mount(<ConceptWrapper />);
+    const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
     searchTable(searchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -108,7 +108,7 @@ describe('ConceptWrapper', () => {
     const spy = jest.spyOn(conceptsApi(), 'searchConcepts');
     const searchTerm = 'test';
     const selectedDomain = DomainStubVariables.STUB_DOMAINS[1];
-    const wrapper = mount(<ConceptWrapper />);
+    const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="standardConceptsCheckBox"]').first()
@@ -140,7 +140,7 @@ describe('ConceptWrapper', () => {
   });
 
   it('should display the selected concepts on header', async() => {
-    const wrapper = mount(<ConceptWrapper />);
+    const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
     searchTable('test', wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -151,7 +151,7 @@ describe('ConceptWrapper', () => {
   });
 
   it('should display the selected concepts on sliding button', async () => {
-    const wrapper = mount(<ConceptWrapper />);
+    const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
     searchTable('test', wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -168,7 +168,7 @@ describe('ConceptWrapper', () => {
   });
 
   it('should clear search and selected concepts', async() => {
-    const wrapper = mount(<ConceptWrapper />);
+    const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
     searchTable('test', wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -182,7 +182,7 @@ describe('ConceptWrapper', () => {
   });
 
   it('should clear selected concepts after adding', async() => {
-    const wrapper = mount(<ConceptWrapper />);
+    const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
     searchTable('test', wrapper);
     await waitOneTickAndUpdate(wrapper);

@@ -1,11 +1,12 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as validate from 'validate.js';
 
 import {Button, Clickable, MenuItem} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
-import {TextArea, TextInput} from 'app/components/inputs';
+import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -14,7 +15,7 @@ import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {
   reactStyles,
-  ReactWrapperBase,
+  ReactWrapperBase, summarizeErrors,
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
@@ -191,6 +192,10 @@ export const ConceptSetDetails =
       const {conceptSet, deletingConcepts, editing, editDescription, editName,
         error, errorMessage, editSaving, deleting, deleteSubmitting, loading,
         selectedConcepts} = this.state;
+      const errors = validate({editName: editName}, {editName: {
+        presence: {allowEmpty: false}
+      }});
+
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         {loading ? <SpinnerOverlay/> :
         <div style={{display: 'flex', flexDirection: 'column'}}>
@@ -204,15 +209,22 @@ export const ConceptSetDetails =
               {editing ?
                 <div style={{display: 'flex', flexDirection: 'column'}}>
                   <TextInput value={editName} disabled={editSaving}
-                             style={{marginBottom: '0.5rem'}}
+                             id='edit-name'
+                             style={{marginBottom: '0.5rem'}} data-test-id='edit-name'
                              onChange={v => this.setState({editName: v})}/>
+                  {errors && <ValidationError>
+                    {summarizeErrors( errors && errors.editName)}
+                  </ValidationError>}
                   <TextArea value={editDescription} disabled={editSaving}
-                            style={{marginBottom: '0.5rem'}}
+                            style={{marginBottom: '0.5rem'}} data-test-id='edit-description'
                             onChange={v => this.setState({editDescription: v})}/>
                   <div style={{marginBottom: '0.5rem'}}>
                     <Button type='primary' style={{marginRight: '0.5rem'}}
-                            disabled={editSaving} onClick={() => this.submitEdits()}>Save</Button>
+                            data-test-id='save-edit-concept-set'
+                            disabled={editSaving || errors}
+                            onClick={() => this.submitEdits()}>Save</Button>
                     <Button type='secondary' disabled={editSaving}
+                            data-test-id='cancel-edit-concept-set'
                             onClick={() => this.setState({
                               editing: false,
                               editName: conceptSet.name,
@@ -221,18 +233,21 @@ export const ConceptSetDetails =
                   </div>
                 </div> :
                 <React.Fragment>
-                  <div style={styles.conceptSetTitle}>{conceptSet.name}
-                    <Clickable disabled={!this.canEdit}
+                  <div style={styles.conceptSetTitle} data-test-id='concept-set-title'>
+                    {conceptSet.name}
+                    <Clickable disabled={!this.canEdit} data-test-id='edit-concept-set'
                                onClick={() => this.setState({editing: true})}>
                       <EditComponentReact disabled={!this.canEdit} style={{marginTop: '0.1rem'}}/>
                     </Clickable>
                   </div>
-                  <div style={{marginBottom: '1.5rem', color: '#000'}}>
+                  <div style={{marginBottom: '1.5rem', color: '#000'}}
+                       data-test-id='concept-set-description'>
                     {conceptSet.description}</div>
                 </React.Fragment>}
                 <div style={styles.conceptSetData}>
-                    <div>Participant Count: {conceptSet.participantCount}</div>
-                    <div style={{marginLeft: '2rem'}}>
+                    <div data-test-id='participant-count'>
+                      Participant Count: {conceptSet.participantCount}</div>
+                    <div style={{marginLeft: '2rem'}} data-test-id='concept-set-domain'>
                         Domain: {fp.capitalize(conceptSet.domain.toString())}</div>
                 </div>
               </div>
@@ -255,7 +270,7 @@ export const ConceptSetDetails =
                         onSelectConcepts={this.onSelectConcepts.bind(this)}
                         placeholderValue={'No Concepts Found'}
                         selectedConcepts={selectedConcepts}/> :
-          <Button type='secondaryLight'
+          <Button type='secondaryLight' data-test-id='add-concepts'
                   style={{...styles.buttonBoxes, marginLeft: '0.5rem', maxWidth: '22%'}}
                   onClick={() => navigateByUrl('workspaces/' + ns + '/' +
                     wsid + '/concepts' + '?domain=' + conceptSet.domain)}>
@@ -287,7 +302,7 @@ export const ConceptSetDetails =
                       onClick={() => this.setState({deletingConcepts: false})}>
                   Cancel</Button>
               <Button type='primary' onClick={() => this.onDeleteConcepts()}
-                      disabled={deleteSubmitting}>
+                      disabled={deleteSubmitting} data-test-id='confirm-delete-concept'>
                   Remove concepts</Button>
           </ModalFooter>
         </Modal>}
