@@ -1,9 +1,8 @@
 package org.pmiops.workbench;
 
 public class TestLock {
+  
   private boolean locked = false;
-
-  public TestLock() {}
 
   public int lock() {
     if (locked) {
