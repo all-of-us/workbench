@@ -354,6 +354,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
             this.closeConfirmDelete();
             this.props.onUpdate();
           });
+        break;
       }
       case ResourceType.DATA_SET: {
         dataSetApi().deleteDataSet(
@@ -364,6 +365,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
             this.closeConfirmDelete();
             this.props.onUpdate();
           });
+        break
       }
     }
   }

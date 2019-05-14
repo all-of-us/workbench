@@ -188,7 +188,7 @@ const routes: Routes = [
                     }
                   },
                   {
-                    path: 'data-sets/:dsid',
+                    path: 'data-sets/:dataSetId',
                     component: DataSetPageComponent,
                     data: {
                       title: 'Edit Data Set',

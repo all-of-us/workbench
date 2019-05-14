@@ -144,7 +144,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     }
 
     get editing() {
-      return this.props.urlParams.dsid !== undefined
+      return this.props.urlParams.dataSetId !== undefined;
     }
 
     componentDidMount() {
@@ -301,7 +301,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           selectedValues: updatedSelectedValues,
         });
         if (newDomains.length > 0) {
-          this.setState({valuesLoading: true})
+          this.setState({valuesLoading: true});
           this.getValuesList(newDomains)
             .then(newValueSets => this.setState({
               valueSets: updatedValueSets.concat(newValueSets),
