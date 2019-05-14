@@ -13,7 +13,7 @@ import {
 } from 'generated/fetch/api';
 
 import {ReactWrapperBase} from 'app/utils/index';
-import {userProfileStore} from '../../utils/navigation';
+import {userProfileStore} from 'app/utils/navigation';
 
 const styles = {
   notebookSettings: {
