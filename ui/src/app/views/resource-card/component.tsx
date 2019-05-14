@@ -365,7 +365,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
             this.closeConfirmDelete();
             this.props.onUpdate();
           });
-        break
+        break;
       }
     }
   }

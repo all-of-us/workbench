@@ -32,6 +32,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.ConceptSetService;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -157,6 +158,9 @@ public class DataSetControllerTest {
   ConceptSetDao conceptSetDao;
 
   @Autowired
+  DataSetDao dataSetDao;
+
+  @Autowired
   DataSetService dataSetService;
 
   @Autowired
@@ -223,7 +227,7 @@ public class DataSetControllerTest {
   public void setUp() throws Exception {
     dataSetService = new DataSetServiceImpl(bigQueryService, cdrBigQuerySchemaConfigService, cohortDao, conceptSetDao, participantCounter);
     dataSetController = new DataSetController(bigQueryService, CLOCK, cohortDao, conceptDao, conceptSetDao,
-        dataSetService, fireCloudService, notebooksService, userProvider, workspaceService);
+        dataSetDao, dataSetService, fireCloudService, notebooksService, userProvider, workspaceService);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
             userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
