@@ -80,9 +80,9 @@ const ConceptSetMenu: React.FunctionComponent<{
 export const ConceptSetDetails =
   fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<{
     urlParams: any, workspace: WorkspaceData}, {
-      conceptSet: ConceptSet, deleting: boolean, deletingConcepts: boolean,
-      deleteSubmitting: boolean, editName: string, editDescription: string, editSaving: boolean,
-      error: boolean, errorMessage: string, editing: boolean, loading: boolean,
+      conceptSet: ConceptSet, deleting: boolean, editName: string, editDescription: string,
+      editSaving: boolean, error: boolean, errorMessage: string, editing: boolean,
+      loading: boolean, removingConcepts: boolean, removeSubmitting: boolean,
       selectedConcepts: Concept[]}> {
     constructor(props) {
       super(props);
@@ -94,10 +94,10 @@ export const ConceptSetDetails =
         error: false,
         errorMessage: '',
         deleting: false,
-        deletingConcepts: false,
-        deleteSubmitting: false,
         editing: false,
         loading: true,
+        removingConcepts: false,
+        removeSubmitting: false,
         selectedConcepts: []
       };
     }
@@ -128,9 +128,9 @@ export const ConceptSetDetails =
         await conceptSetsApi().updateConceptSet(ns, wsid, csid,
           {...conceptSet, name: editName, description: editDescription});
         await this.getConceptSet();
-        this.setState({editing: false, editSaving: false});
       } catch (error) {
         console.log(error);
+      } finally {
         this.setState({editing: false, editSaving: false});
       }
     }
@@ -139,10 +139,10 @@ export const ConceptSetDetails =
       this.setState({selectedConcepts: concepts});
     }
 
-    async onDeleteConcepts() {
+    async onRemoveConcepts() {
       const {urlParams: {ns, wsid, csid}} = this.props;
       const {selectedConcepts, conceptSet} = this.state;
-      this.setState({deleteSubmitting: true});
+      this.setState({removeSubmitting: true});
       try {
         const updatedSet = await conceptSetsApi().updateConceptSetConcepts(ns, wsid, csid,
           {etag: conceptSet.etag, removedIds: selectedConcepts.map(c => c.conceptId)});
@@ -151,7 +151,7 @@ export const ConceptSetDetails =
         console.log(error);
         this.setState({error: true, errorMessage: 'Could not delete concepts.'});
       } finally {
-        this.setState({deleteSubmitting: false, deletingConcepts: false});
+        this.setState({removeSubmitting: false, removingConcepts: false});
       }
     }
 
@@ -163,7 +163,7 @@ export const ConceptSetDetails =
       } catch (error) {
         console.log(error);
         this.setState({error: true,
-          errorMessage: 'Could not concept set \'' + this.state.conceptSet.name + '\''});
+          errorMessage: 'Could not delete concept set \'' + this.state.conceptSet.name + '\''});
       } finally {
         this.setState({deleting: false});
       }
@@ -189,8 +189,8 @@ export const ConceptSetDetails =
 
     render() {
       const {urlParams: {ns, wsid}} = this.props;
-      const {conceptSet, deletingConcepts, editing, editDescription, editName,
-        error, errorMessage, editSaving, deleting, deleteSubmitting, loading,
+      const {conceptSet, removingConcepts, editing, editDescription, editName,
+        error, errorMessage, editSaving, deleting, removeSubmitting, loading,
         selectedConcepts} = this.state;
       const errors = validate({editName: editName}, {editName: {
         presence: {allowEmpty: false}
@@ -277,7 +277,7 @@ export const ConceptSetDetails =
             <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
           </Button>}
           {this.canEdit && this.selectedConceptsCount > 0 &&
-            <SlidingFabReact submitFunction={() => this.setState({deletingConcepts: true})}
+            <SlidingFabReact submitFunction={() => this.setState({removingConcepts: true})}
                              iconShape='trash' expanded='Remove from set'
                              disable={!this.canEdit || this.selectedConceptsCount === 0}/>}
         </div>}
@@ -294,15 +294,15 @@ export const ConceptSetDetails =
                           this.setState({error: false})}>Close</Button>
             </ModalFooter>
         </Modal>}
-        {deletingConcepts && <Modal>
+        {removingConcepts && <Modal>
           <ModalTitle>Are you sure you want to remove {this.selectedConceptsCount}
           {this.selectedConceptsCount > 1 ? ' concepts' : ' concept'} from this set?</ModalTitle>
           <ModalFooter>
-              <Button type='secondary' style={{marginRight: '0.5rem'}} disabled={deleteSubmitting}
-                      onClick={() => this.setState({deletingConcepts: false})}>
+              <Button type='secondary' style={{marginRight: '0.5rem'}} disabled={removeSubmitting}
+                      onClick={() => this.setState({removingConcepts: false})}>
                   Cancel</Button>
-              <Button type='primary' onClick={() => this.onDeleteConcepts()}
-                      disabled={deleteSubmitting} data-test-id='confirm-delete-concept'>
+              <Button type='primary' onClick={() => this.onRemoveConcepts()}
+                      disabled={removeSubmitting} data-test-id='confirm-remove-concept'>
                   Remove concepts</Button>
           </ModalFooter>
         </Modal>}

@@ -128,7 +128,7 @@ describe('ConceptSetDetails', () => {
     expect(wrapper.find('[data-test-id="sliding-button"]').text()).toBe('Remove from set');
     wrapper.find('[data-test-id="sliding-button"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="confirm-delete-concept"]').first().simulate('click');
+    wrapper.find('[data-test-id="confirm-remove-concept"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('span.p-checkbox-icon.p-clickable').length)
       .toEqual(numConceptsPlusHeader - 1);
