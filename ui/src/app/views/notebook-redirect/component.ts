@@ -110,7 +110,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   private cluster: Cluster;
   private progressComplete = new Map<Progress, boolean>();
   private playground = false;
-  private clusterBillingProjectId: string;
+  //private clusterBillingProjectId: string;
 
   constructor(
     private locationService: Location,
@@ -130,9 +130,13 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.playground = playgroundMode === 'true';
     this.jupyterLabMode = jupyterLabMode === 'true';
     this.setNotebookNames();
-
-    this.clusterBillingProjectId = userProfileStore.getValue().profile.freeTierBillingProjectName;
-    this.loadingSub = this.clusterService.listClusters(this.clusterBillingProjectId)
+// debug
+    console.log('userProfileStore = ' + userProfileStore.getValue());
+    console.log('userProfileStore.profile = ' + userProfileStore.getValue().profile);
+    console.log('userProfileStore.profile.freeTierBillingProjectName = ' +
+        userProfileStore.getValue().profile.freeTierBillingProjectName);
+    const clusterBillingProjectId = userProfileStore.getValue().profile.freeTierBillingProjectName;
+    this.loadingSub = this.clusterService.listClusters(clusterBillingProjectId)
       .flatMap((resp) => {
         const c = resp.defaultCluster;
         this.incrementProgress(Progress.Initializing);
