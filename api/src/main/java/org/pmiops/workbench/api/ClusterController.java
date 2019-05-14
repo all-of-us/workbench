@@ -138,9 +138,9 @@ public class ClusterController implements ClusterApiDelegate {
 
     User user = this.userProvider.get();
     if (billingProjectId.equals(user.getFreeTierBillingProjectName()) &&
-            user.getFreeTierBillingProjectStatusEnum() != BillingProjectStatus.READY) {
+        user.getFreeTierBillingProjectStatusEnum() != BillingProjectStatus.READY) {
       throw new FailedPreconditionException(
-              "User billing project is not yet initialized, cannot list/create clusters");
+          "User billing project is not yet initialized, cannot list/create clusters");
     }
 
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
@@ -166,7 +166,7 @@ public class ClusterController implements ClusterApiDelegate {
       }
     } else if (
         org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(fcCluster.getStatus()) &&
-        retries != 0) {
+            retries != 0) {
       this.userService.setClusterRetryCount(0);
     }
     ClusterListResponse resp = new ClusterListResponse();
