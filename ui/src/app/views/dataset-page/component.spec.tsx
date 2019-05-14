@@ -104,4 +104,40 @@ describe('DataSet', () => {
     expect(buttons.find('[data-test-id="save-button"]').first().prop('disabled'))
       .toBeFalsy();
   });
+
+  it('should select all values one Select All is selected', async() => {
+    const wrapper = mount(<DataSetPage />);
+    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    // Preview Button by default should be disabled
+    const previewButton = wrapper.find(Button).find('[data-test-id="preview-button"]')
+        .first();
+    expect(previewButton.prop('disabled')).toBeTruthy();
+
+    // After all cohort concept and values are selected all the buttons will be enabled
+
+    wrapper.find('[data-test-id="cohort-list-item"]').first()
+      .find('input').first().simulate('click');
+    wrapper.update();
+
+    wrapper.find('[data-test-id="concept-set-list-item"]').first()
+      .find('input').first().simulate('click');
+
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find('[data-test-id="value-list-items"]').find('input')
+      .first().prop('checked')).toBeFalsy();
+
+    expect(wrapper.find('[data-test-id="value-list-items"]').find('input')
+      .at(1).prop('checked')).toBeFalsy();
+
+    wrapper.find('[data-test-id="select-all"]').find('div').simulate('click');
+
+    expect(wrapper.find('[data-test-id="value-list-items"]').find('input').first()
+      .prop('checked')).toBeTruthy();
+    expect(wrapper.find('[data-test-id="value-list-items"]').find('input').at(1)
+      .prop('checked')).toBeTruthy();
+
+  });
 });

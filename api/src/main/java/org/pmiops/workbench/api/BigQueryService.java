@@ -47,12 +47,19 @@ public class BigQueryService {
      * Execute the provided query using bigquery.
      */
     public TableResult executeQuery(QueryJobConfiguration query) {
+        return executeQuery(query, 60000L);
+    }
+
+    /**
+     * Execute the provided query using bigquery.
+     */
+    public TableResult executeQuery(QueryJobConfiguration query, long waitTime) {
         if (workbenchConfigProvider.get().cdr.debugQueries) {
             logger.log(Level.INFO, "Executing query ({0}) with parameters ({1})",
                 new Object[] { query.getQuery(), query.getNamedParameters()});
         }
         try {
-          return bigquery.create(JobInfo.of(query)).getQueryResults(BigQuery.QueryResultsOption.maxWaitTime(60000L));
+          return bigquery.create(JobInfo.of(query)).getQueryResults(BigQuery.QueryResultsOption.maxWaitTime(waitTime));
         } catch (InterruptedException e) {
             throw new BigQueryException(500, "Something went wrong with BigQuery: " + e.getMessage());
         } catch (BigQueryException e) {
@@ -68,7 +75,7 @@ public class BigQueryService {
             }
         }
     }
-
+    
     public QueryJobConfiguration filterBigQueryConfig(QueryJobConfiguration queryJobConfiguration) {
         CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
         if (cdrVersion == null) {

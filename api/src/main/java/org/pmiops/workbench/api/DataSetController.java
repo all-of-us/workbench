@@ -233,7 +233,7 @@ public class DataSetController implements DataSetApiDelegate {
       queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
       TableResult queryResponse = bigQueryService.executeQuery(bigQueryService
-          .filterBigQueryConfig(queryJobConfiguration));
+          .filterBigQueryConfig(queryJobConfiguration), 42000l);
 
       List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
       queryResponse.getSchema().getFields().forEach(fields -> {

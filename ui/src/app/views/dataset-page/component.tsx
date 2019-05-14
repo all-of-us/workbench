@@ -2,7 +2,6 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
@@ -113,6 +112,7 @@ interface State {
   selectedValues: DomainValuePair[];
   valueSets: ValueSet[];
   queries: Array<DataSetQuery>;
+  selectAll: boolean
 }
 
 const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, State> {
@@ -138,7 +138,8 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       previewList: [],
       selectedPreviewDomain: '',
       previewDataLoading: false,
-      includesAllParticipants: false
+      includesAllParticipants: false,
+      selectAll: false
     };
   }
 
@@ -319,6 +320,21 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
     this.setState({selectedValues: valuesSelected});
   }
 
+  selectAllValues() {
+    if (this.state.selectAll) {
+      this.setState({selectedValues: [], selectAll: !this.state.selectAll});
+      return;
+    }
+
+    let allValuesSelected = [];
+    this.state.valueSets.map(valueSet => {
+      valueSet.values.items.map(value => {
+        allValuesSelected.push({domain: valueSet.domain, value: value.value});
+      });
+    });
+    this.setState({selectedValues: allValuesSelected, selectAll: !this.state.selectAll});
+  }
+
   getCurrentResource(): Cohort | ConceptSet {
     if (this.state.resource) {
       return fp.compact([this.state.resource.cohort, this.state.resource.conceptSet])[0];
@@ -370,6 +386,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       name: '',
       description: '',
       conceptSetIds: this.state.selectedConceptSetIds,
+      includesAllParticipants: this.state.includesAllParticipants,
       cohortIds: this.state.selectedCohortIds,
       values: this.state.selectedValues
     };
@@ -408,10 +425,10 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
         this.state.previewList.filter(
           preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
 
-    return <DataTable key={this.state.selectedPreviewDomain}
+    return <DataTable key={this.state.selectedPreviewDomain} scrollable={true} style={{width: '100%'}}
                       value={this.getDataTableValue(filteredPreviewData.values)}>
       {filteredPreviewData.values.map(value =>
-          <Column header={value.value} headerStyle={{textAlign: 'left'}} field={value.value}/>
+          <Column header={value.value} headerStyle={{textAlign: 'left', width: '5rem', wordBreak: 'break-all'}} style={{width: '5rem'}} field={value.value}/>
       )}
     </DataTable>;
   }
@@ -517,8 +534,15 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
                 </div>
               </div>
               <div style={{width: '40%'}}>
-                <div style={styles.selectBoxHeader}>
-                  Values
+                <div style={{...styles.selectBoxHeader, display: 'flex'}}>
+                  <div>
+                    Values
+                  </div>
+                  <Clickable data-test-id='select-all'
+                             style={{marginLeft: 'auto', marginRight: '0.5rem'}}
+                             onClick={() => this.selectAllValues()}>
+                    Select All
+                  </Clickable>
                 </div>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
                   {valueSets.map(valueSet =>
