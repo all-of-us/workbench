@@ -1,5 +1,7 @@
 package org.pmiops.workbench.billing;
 
+import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
+import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNING;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
@@ -15,6 +17,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +42,8 @@ public class BillingProjectBufferService {
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.billingProjectBufferEntryDao = billingProjectBufferEntryDao;
     this.clock = clock;
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.fireCloudService = fireCloudService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   public void bufferBillingProject() {
@@ -92,6 +95,35 @@ public class BillingProjectBufferService {
 
       billingProjectBufferEntryDao.save(entry);
     }
+  }
+
+  public BillingProjectBufferEntry assignBillingProject(User user) {
+    BillingProjectBufferEntry entry = consumeBufferEntryForAssignment();
+
+    fireCloudService.addUserToBillingProject(user.getEmail(), entry.getFireCloudProjectName());
+    entry.setStatusEnum(ASSIGNED);
+    entry.setAssignedUser(user);
+    billingProjectBufferEntryDao.save(entry);
+
+    return entry;
+  }
+
+  private BillingProjectBufferEntry consumeBufferEntryForAssignment() {
+    // Each call to acquire the lock will timeout in 1s if it is currently held
+    while (billingProjectBufferEntryDao.acquireAssigningLock() != 1) {}
+
+    BillingProjectBufferEntry entry;
+    try {
+      entry = billingProjectBufferEntryDao
+          .findFirstByStatusOrderByCreationTimeAsc(
+              StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE));
+      entry.setStatusEnum(ASSIGNING);
+      billingProjectBufferEntryDao.save(entry);
+    } finally {
+      billingProjectBufferEntryDao.releaseAssigningLock();
+    }
+
+    return entry;
   }
 
   private String createBillingProjectName() {
