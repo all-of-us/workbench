@@ -71,8 +71,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import java.sql.Timestamp;
 import java.util.ArrayList;
