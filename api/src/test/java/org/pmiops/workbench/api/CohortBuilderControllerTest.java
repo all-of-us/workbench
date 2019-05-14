@@ -222,7 +222,7 @@ public class CohortBuilderControllerTest {
       .count("0")
       .hierarchy(true)
       .standard(true)
-      .synonyms("LP12*[measurement_rank1]");
+      .synonyms("LP12*[MEASUREMENT_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -267,7 +267,7 @@ public class CohortBuilderControllerTest {
       .count("0")
       .hierarchy(true)
       .standard(true)
-      .synonyms("LP12*[condition_rank1]");
+      .synonyms("LP12*[CONDITION_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -487,7 +487,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.LOINC.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("LP12*[condition_rank1]");
+      .synonyms("LP12*[CONDITION_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -515,7 +515,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.ATC.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("LP12*[drug_rank1]");
+      .synonyms("LP12*[DRUG_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(

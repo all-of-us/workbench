@@ -210,8 +210,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     if (configProvider.get().cohortbuilder.enableListSearch) {
       validateDomainAndType(domain, type);
-      String domainRank = "+[" + domain.toLowerCase() + "_rank1]";
-      String matchExp = modifyTermMatch(term) + domainRank;
+      String matchExp = modifyTermMatch(term);
       List<CBCriteria> criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(domain, type, standard, matchExp, new PageRequest(0, resultLimit.intValue()));
       if (criteriaList.isEmpty()) {
         criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(domain, type, standard, term, new PageRequest(0, resultLimit.intValue()));
@@ -295,13 +294,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                                 String term,
                                                                                 Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    String domainRank = "+[" + domain.toLowerCase() + "_rank1]";
     List<CBCriteria> criteriaList = new ArrayList<>();
     int resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT).intValue();
     List<StandardProjection> projections = cbCriteriaDao.findStandardProjectionByCode(domain, term);
     boolean isStandard = projections.isEmpty() || projections.get(0).getStandard();
     if (projections.isEmpty()) {
-      String modTerm = modifyTermMatch(term) + domainRank;
+      String modTerm = modifyTermMatch(term);
       criteriaList = cbCriteriaDao.findCriteriaByDomainAndSynonyms(domain, isStandard, modTerm, new PageRequest(0, resultLimit));
     }
     if (criteriaList.isEmpty()) {
