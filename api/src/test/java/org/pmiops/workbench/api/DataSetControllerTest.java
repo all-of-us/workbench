@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
@@ -59,7 +59,6 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
@@ -163,7 +162,7 @@ public class DataSetControllerTest {
   FireCloudService fireCloudService;
 
   @Autowired
-  ParticipantCounter participantCounter;
+  CohortQueryBuilder cohortQueryBuilder;
 
   @Autowired
   TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
@@ -204,7 +203,7 @@ public class DataSetControllerTest {
       CohortMaterializationService.class, ComplianceService.class,
       ConceptBigQueryService.class, ConceptSetService.class, DataSetService.class,
       FireCloudService.class, DirectoryService.class, NotebooksService.class,
-      ParticipantCounter.class, UserRecentResourceService.class})
+      CohortQueryBuilder.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
     Clock clock() {
@@ -221,7 +220,7 @@ public class DataSetControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    dataSetService = new DataSetServiceImpl(bigQueryService, cdrBigQuerySchemaConfigService, cohortDao, conceptSetDao, participantCounter);
+    dataSetService = new DataSetServiceImpl(bigQueryService, cdrBigQuerySchemaConfigService, cohortDao, conceptSetDao, cohortQueryBuilder);
     dataSetController = new DataSetController(bigQueryService, CLOCK, cohortDao, conceptDao, conceptSetDao,
         dataSetService, fireCloudService, notebooksService, userProvider, workspaceService);
     WorkspacesController workspacesController =
@@ -319,7 +318,7 @@ public class DataSetControllerTest {
         WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSetTwoRequest).getBody();
     CONCEPT_SET_TWO_ID = conceptSetTwo.getId();
 
-    when(participantCounter.buildParticipantIdQuery(any())).thenReturn(
+    when(cohortQueryBuilder.buildParticipantIdQuery(any())).thenReturn(
         QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person").build());
     when(bigQueryService.filterBigQueryConfig(any())).thenReturn(
         QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person").build());

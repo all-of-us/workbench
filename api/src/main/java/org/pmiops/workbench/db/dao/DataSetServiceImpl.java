@@ -7,7 +7,7 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -85,7 +85,7 @@ public class DataSetServiceImpl implements DataSetService {
     }
   }
 
-  private ParticipantCounter participantCounter;
+  private CohortQueryBuilder cohortQueryBuilder;
   private BigQueryService bigQueryService;
   private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
 
@@ -104,13 +104,13 @@ public class DataSetServiceImpl implements DataSetService {
       CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
-      ParticipantCounter participantCounter
+      CohortQueryBuilder cohortQueryBuilder
       ) {
     this.bigQueryService = bigQueryService;
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
-    this.participantCounter = participantCounter;
+    this.cohortQueryBuilder = cohortQueryBuilder;
   }
 
   @Override
@@ -157,7 +157,7 @@ public class DataSetServiceImpl implements DataSetService {
             String.format("Not Found: No Cohort definition matching cohortId: %s", c.getCohortId()));
       }
       SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
-      QueryJobConfiguration participantIdQuery = participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
+      QueryJobConfiguration participantIdQuery = cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
       QueryJobConfiguration participantQueryConfig = bigQueryService.filterBigQueryConfig(participantIdQuery);
       AtomicReference<String> participantQuery = new AtomicReference<>(participantQueryConfig.getQuery());
 

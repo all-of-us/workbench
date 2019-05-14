@@ -33,7 +33,7 @@ import org.pmiops.workbench.cdr.model.CBCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cdr.model.StandardProjection;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -68,7 +68,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private static final String BAD_REQUEST_MESSAGE = "Bad Request: Please provide a valid %s. %s is not valid.";
 
   private BigQueryService bigQueryService;
-  private ParticipantCounter participantCounter;
+  private CohortQueryBuilder cohortQueryBuilder;
   private CriteriaDao criteriaDao;
   private CBCriteriaDao cbCriteriaDao;
   private CriteriaAttributeDao criteriaAttributeDao;
@@ -175,7 +175,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Autowired
   CohortBuilderController(BigQueryService bigQueryService,
-                          ParticipantCounter participantCounter,
+                          CohortQueryBuilder cohortQueryBuilder,
                           CriteriaDao criteriaDao,
                           CBCriteriaDao cbCriteriaDao,
                           CriteriaAttributeDao criteriaAttributeDao,
@@ -186,7 +186,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                           ElasticSearchService elasticSearchService,
                           Provider<WorkbenchConfig> configProvider) {
     this.bigQueryService = bigQueryService;
-    this.participantCounter = participantCounter;
+    this.cohortQueryBuilder = cohortQueryBuilder;
     this.criteriaDao = criteriaDao;
     this.cbCriteriaDao = cbCriteriaDao;
     this.criteriaAttributeDao = criteriaAttributeDao;
@@ -279,7 +279,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       }
     }
     QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(
-      participantCounter.buildParticipantCounterQuery(new ParticipantCriteria(request))
+      cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request))
     );
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -341,7 +341,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
       }
     }
-    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildDemoChartInfoCounterQuery(
+    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(cohortQueryBuilder.buildDemoChartInfoCounterQuery(
       new ParticipantCriteria(request)));
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
