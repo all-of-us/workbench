@@ -2,7 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {ResourceCard} from './component';
-import {ConceptSetsServiceStub} from "testing/stubs/concept-sets-service-stub";
+import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import { WorkspaceAccessLevel } from 'generated';
 
@@ -20,7 +20,7 @@ const ResourceCardWrapper = {
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
-    conceptSet: new ConceptSetsServiceStub().conceptSets[0],
+    conceptSet: new ConceptSetsApiStub().conceptSets[0],
     modifiedTime: Date.now().toString()
   },
   notebookCard: {
