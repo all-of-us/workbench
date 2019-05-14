@@ -26,6 +26,7 @@ export interface SettingsState {
   resetClusterPending: boolean;
   resetClusterModal: boolean;
   clusterDeletionFailure: boolean;
+  waitingForUserProfile: boolean;
 }
 
 export class SettingsReact extends React.Component<{}, SettingsState> {
@@ -42,7 +43,8 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
       cluster: null,
       resetClusterPending: false,
       resetClusterModal: false,
-      clusterDeletionFailure: true
+      clusterDeletionFailure: true,
+      waitingForUserProfile: true
     };
   }
 
@@ -50,6 +52,7 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
     userProfileStore.asObservable().subscribe((profileStore) => {
       const billingProjectId = profileStore.profile.freeTierBillingProjectName;
       if (billingProjectId) {
+        this.setState({waitingForUserProfile: false});
         this.pollCluster(billingProjectId);
       }
     });
@@ -67,8 +70,8 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
       <h3>Notebooks</h3>
       <div style={styles.notebookSettings}>
         <TooltipTrigger content={
-                          (!this.state.cluster) ?
-                            'Your notebook server is still being created' : undefined}
+          this.state.waitingForUserProfile ? 'Waiting for notebook server status' :
+              (!this.state.cluster) ? 'Your notebook server is still being created' : undefined}
                         side='right'>
           <Button disabled={!this.state.cluster} onClick={() => this.openResetClusterModal()}
                   data-test-id='reset-notebook-button' type='secondary'>
