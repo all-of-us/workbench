@@ -73,4 +73,12 @@ export class PageLayout implements OnInit, OnDestroy {
     const {ns, wsid} = urlParamsStore.getValue();
     navigate(['workspaces', ns, wsid, 'cohorts']);
   }
+
+  get ableToReview() {
+    return this.cohortLoaded && this.reviewPresent === false && !this.readonly;
+  }
+
+  get unableToReview() {
+    return this.cohortLoaded && this.reviewPresent === false && this.readonly;
+  }
 }

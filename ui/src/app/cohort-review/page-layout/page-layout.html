@@ -6,8 +6,8 @@
   <router-outlet></router-outlet>
 </div>
 
-<app-create-review-page *ngIf="cohortLoaded && !reviewPresent && !readonly" (created)="reviewCreated($event)"></app-create-review-page>
-<clr-modal [(clrModalOpen)]="cohortLoaded && !reviewPresent && readonly" [clrModalSize]="'md'" [clrModalClosable]="false">
+<app-create-review-page *ngIf="ableToReview" (created)="reviewCreated($event)"></app-create-review-page>
+<clr-modal [(clrModalOpen)]="unableToReview" [clrModalSize]="'md'" [clrModalClosable]="false">
   <div class="modal-title" style="color: #302973">
     Users with read-only access cannot create cohort reviews
   </div>
