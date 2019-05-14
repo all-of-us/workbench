@@ -16,8 +16,8 @@ import {CardButton} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceCard} from 'app/views/resource-card/component';
 
 const styles = reactStyles({

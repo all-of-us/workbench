@@ -8,7 +8,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
-import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
@@ -16,13 +16,14 @@ import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 
-import {UserService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
+import {UserService, WorkspaceAccessLevel} from 'generated';
+import {WorkspacesApi} from 'generated/fetch';
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {WorkspaceStorageServiceStub} from 'testing/stubs/workspace-storage-service-stub';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 import {updateAndTick} from 'testing/test-helpers';
 
@@ -70,10 +71,9 @@ describe('WorkspaceWrapperComponent', () => {
             gsuiteDomain: 'fake-research-aou.org'
           })
         },
-        {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
-        {provide: WorkspaceStorageService, useValue: new WorkspaceStorageServiceStub()},
       ]
     }).compileComponents().then(() => {
+      registerApiClient(WorkspacesApi, new WorkspacesApiStub());
       fixture = TestBed.createComponent(FakeAppComponent);
       router = TestBed.get(Router);
 

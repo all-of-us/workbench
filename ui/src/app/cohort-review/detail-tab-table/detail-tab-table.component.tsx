@@ -5,9 +5,9 @@ import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.util
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';

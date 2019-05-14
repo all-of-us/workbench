@@ -5,14 +5,12 @@ import {Button} from 'app/components/buttons';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {DataSetPage} from 'app/views/dataset-page/component';
-import {WorkspaceAccessLevel} from 'generated';
 import {CohortsApi, ConceptsApi, ConceptSetsApi, DataSet} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-import {WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
 describe('DataSet', () => {
   beforeEach(() => {
@@ -23,10 +21,7 @@ describe('DataSet', () => {
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     });
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
+    currentWorkspaceStore.next(workspaceDataStub);
   });
 
   it('should render', async() => {

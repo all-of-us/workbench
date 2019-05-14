@@ -10,13 +10,10 @@ import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {ResourceCard} from 'app/views/resource-card/component';
 import {CohortsApi, ConceptsApi, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
-import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
+import {WorkspacesApiStub, workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
-import {
-  WorkspaceAccessLevel,
-} from 'generated';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 describe('DataPage', () => {
@@ -29,10 +26,7 @@ describe('DataPage', () => {
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     });
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
+    currentWorkspaceStore.next(workspaceDataStub);
   });
 
   it('should render', async() => {

@@ -7,9 +7,9 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {Scroll} from 'app/icons/scroll/component';
 import {cohortsApi, conceptSetsApi, userMetricsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
-import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils/index';
 import {convertToResources, ResourceType} from 'app/utils/resourceActionsReact';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceCard} from 'app/views/resource-card/component';
 import {RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
 

@@ -18,7 +18,9 @@ import {
 } from 'generated';
 import {UserServiceStub} from './user-service-stub';
 
-import {WorkspaceData} from 'app/services/workspace-storage.service';
+import {WorkspaceAccessLevel as WorkspaceAccessLevelFetch} from 'generated/fetch';
+
+import {WorkspaceData} from 'app/utils/workspace-data';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
@@ -116,7 +118,7 @@ export class WorkspacesServiceStub {
   static stubWorkspaceData(): WorkspaceData {
     return {
       name: WorkspacesServiceStub.stubWorkspace().name,
-      accessLevel: WorkspaceAccessLevel.OWNER
+      accessLevel: WorkspaceAccessLevelFetch.OWNER
     };
   }
 

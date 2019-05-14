@@ -4,8 +4,8 @@ import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import * as React from 'react';
 
 const styles = reactStyles({

@@ -7,7 +7,6 @@ import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {
@@ -15,6 +14,7 @@ import {
   mapAndFilterResourceList,
   ResourceType
 } from 'app/utils/resourceActionsReact';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
 import {ResourceCard} from 'app/views/resource-card/component';
 import {DomainInfo, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';

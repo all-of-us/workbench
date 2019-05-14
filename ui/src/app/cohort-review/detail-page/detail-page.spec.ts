@@ -16,7 +16,7 @@ import {SidebarContentComponent} from 'app/cohort-review/sidebar-content/sidebar
 import {CohortSearchActions} from 'app/cohort-search/redux';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
-import {WorkspaceAccessLevel} from 'generated';
+import {WorkspaceAccessLevel} from 'generated/fetch';
 import {CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
 import * as highCharts from 'highcharts';
 import {NgxPopperModule} from 'ngx-popper';
@@ -24,7 +24,7 @@ import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annota
 import {cohortStub} from 'testing/stubs/cohort-builder-service-stub';
 import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {DetailPage} from './detail-page';
 
 
@@ -64,7 +64,7 @@ describe('DetailPage', () => {
     })
       .compileComponents();
     currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
+      ...workspaceStubs[0],
       accessLevel: WorkspaceAccessLevel.OWNER,
     });
     currentCohortStore.next(cohortStub);

@@ -26,16 +26,17 @@ import {WorkspaceComponent} from 'app/views/workspace/component';
 
 import {
   ClusterService,
-  CohortsService,
   ConceptSetsService,
   DataAccessLevel,
-  ProfileService,
   UserMetricsService,
   UserService,
-  WorkspaceAccessLevel,
-  WorkspacesService
 } from 'generated';
-import {UserMetricsApi} from 'generated/fetch';
+import {
+  CohortsApi,
+  ProfileApi,
+  UserMetricsApi,
+  WorkspacesApi
+} from 'generated/fetch';
 import {
   JupyterService,
   NotebooksService,
@@ -43,18 +44,19 @@ import {
 
 import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
-import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
 import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
 import {NotebooksServiceStub} from 'testing/stubs/notebooks-service-stub';
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {workspaceDataStub, WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {updateAndTick} from 'testing/test-helpers';
@@ -87,16 +89,13 @@ describe('WorkspaceComponent', () => {
       ],
       providers: [
         { provide: ClusterService, useValue: new ClusterServiceStub() },
-        { provide: CohortsService, useValue: new CohortsServiceStub() },
         { provide: NotebooksService, useValue: new NotebooksServiceStub() },
         { provide: JupyterService, useValue: new JupyterServiceStub() },
         { provide: Http, useValue: new HttpStub() },
         { provide: ConceptSetsService, useValue: new ConceptSetsServiceStub() },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         { provide: SignInService, useValue: SignInService },
-        { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: UserMetricsService, useValue: new UserMetricsServiceStub() },
-        { provide: ProfileService, useValue: new ProfileServiceStub() },
         { provide: UserService, useValue: new UserServiceStub() },
         {
           provide: CdrVersionStorageService,
@@ -120,11 +119,11 @@ describe('WorkspaceComponent', () => {
         fixture = TestBed.createComponent(WorkspaceComponent);
         updateAndTick(fixture);
       });
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
+    currentWorkspaceStore.next(workspaceDataStub);
+    registerApiClient(CohortsApi, new CohortsApiStub());
+    registerApiClient(ProfileApi, new ProfileApiStub());
     registerApiClient(UserMetricsApi, new UserMetricsApiStub());
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
   }));
 
   it('displays research purpose', fakeAsync(() => {

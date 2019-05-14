@@ -4,9 +4,9 @@ import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore, filterStateStore, visitsFilterOptions} from 'app/cohort-review/review-state.service';
 import {DatePicker, Select, TextInput, ValidationError} from 'app/components/inputs';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {
   CohortReview,
