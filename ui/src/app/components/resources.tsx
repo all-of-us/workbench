@@ -72,6 +72,11 @@ export const ResourceCardMenu: React.FunctionComponent<{
             <MenuItem icon='pencil' onClick={onEditConceptSet}>Edit</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
           </React.Fragment>;
+        }],
+        ['dataSet', () => {
+          return <React.Fragment>
+            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
+          </React.Fragment>;
         }]
       )
     }
@@ -86,10 +91,10 @@ export const ResourceCardMenu: React.FunctionComponent<{
 
 export const ResourceListItem: React.FunctionComponent <
   {resource: ConceptSet | Cohort, openConfirmDelete: Function, edit: Function,
-    rType: ResourceType, onSelect: Function,
-    onClone?: Function, onReview?: Function}
-    > = ({resource, openConfirmDelete, edit, rType, onSelect, onClone = () => {},
-                                          onReview = () => {}}) => {
+    rType: ResourceType, onChange: Function,
+    onClone?: Function, onReview?: Function, checked: boolean}
+    > = ({resource, openConfirmDelete, edit, rType, onChange, onClone = () => {},
+                                          onReview = () => {}, checked}) => {
       return<div style={styles.listItem}>
       <div style={{width: '.75rem', paddingTop: 5, paddingLeft: 10}}>
         <ResourceCardMenu disabled={false}
@@ -101,17 +106,17 @@ export const ResourceListItem: React.FunctionComponent <
                           onReviewCohort={onReview}/>
 
       </div>
-      <input type='checkbox' value={resource.name} onClick={() => onSelect()}
-             style={styles.listItemCheckbox}/>
+      <input type='checkbox' value={resource.name} onChange={() => onChange()}
+             style={styles.listItemCheckbox} checked={checked}/>
       <div style={{lineHeight: '1.5rem'}}>{resource.name}</div>
     </div>;
     };
 
 export const ImmutableListItem: React.FunctionComponent <{
-  name: string, onSelect: Function}> = ({name, onSelect}) => {
+  name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
     return <div style={styles.listItem}>
-    <input type='checkbox' value={name} onClick={() => onSelect()}
-           style={styles.listItemCheckbox}/>
+    <input type='checkbox' value={name} onChange={() => onChange()}
+           style={styles.listItemCheckbox} checked={checked}/>
     <div style={{lineHeight: '1.5rem'}}>{name}</div>
   </div>;
   };

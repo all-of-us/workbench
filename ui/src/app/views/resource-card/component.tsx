@@ -6,6 +6,7 @@ import {Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {ResourceCardMenu} from 'app/components/resources';
 import {TextModal} from 'app/components/text-modal';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
@@ -15,8 +16,8 @@ import {EditModal} from 'app/views/edit-modal/component';
 import {RenameModal} from 'app/views/rename-modal/component';
 import {Domain, RecentResource} from 'generated/fetch';
 
-import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import { CopyNotebookModal } from 'app/views/copy-notebook-modal/component';
+import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {CopyNotebookModal} from 'app/views/copy-notebook-modal/component';
 
 
 @Component({
@@ -90,13 +91,16 @@ const styles = reactStyles({
 
 const resourceTypeStyles = reactStyles({
   cohort: {
-    backgroundColor: '#F8C954'
+    backgroundColor: colors.yellow[0]
   },
   conceptSet: {
-    backgroundColor: '#AB87B3'
+    backgroundColor: colors.purple[2]
   },
   notebook: {
-    backgroundColor: '#8BC990'
+    backgroundColor: colors.green[0]
+  },
+  dataSet: {
+    backgroundColor: colors.blue[2]
   }
 });
 
@@ -130,7 +134,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       confirmDeleting: false,
       invalidResourceError: !(props.resourceCard.notebook ||
         props.resourceCard.cohort ||
-        props.resourceCard.conceptSet),
+        props.resourceCard.conceptSet ||
+        props.resourceCard.dataSet),
       showErrorModal: false,
       errorModalTitle: 'Error Title',
       errorModalBody: 'Error Body',
@@ -165,6 +170,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       return ResourceType.COHORT;
     } else if (this.props.resourceCard.conceptSet) {
       return ResourceType.CONCEPT_SET;
+    } else if (this.props.resourceCard.dataSet) {
+      return ResourceType.DATA_SET;
     } else {
       return ResourceType.INVALID;
     }
@@ -180,6 +187,10 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
 
   get isNotebook(): boolean {
     return this.resourceType === ResourceType.NOTEBOOK;
+  }
+
+  get isDataSet(): boolean {
+    return this.resourceType === ResourceType.DATA_SET;
   }
 
   get actionsDisabled(): boolean {
@@ -203,6 +214,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       return this.props.resourceCard.cohort.name;
     } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.name;
+    } else if (this.isDataSet) {
+      return this.props.resourceCard.dataSet.name;
     }
   }
 
@@ -217,6 +230,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       return this.props.resourceCard.cohort.description;
     } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.description;
+    } else if (this.isDataSet) {
+      return this.props.resourceCard.dataSet.description;
     }
   }
 
@@ -340,6 +355,16 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
             this.props.onUpdate();
           });
       }
+      case ResourceType.DATA_SET: {
+        dataSetApi().deleteDataSet(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.dataSet.id)
+          .then(() => {
+            this.closeConfirmDelete();
+            this.props.onUpdate();
+          });
+      }
     }
   }
 
@@ -399,6 +424,14 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
               queryParams,
               relativeTo: null,
             });
+        break;
+      }
+      case ResourceType.DATA_SET: {
+        console.log('hello');
+        navigate(['/workspaces', this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName, 'data', 'data-sets',
+          this.props.resourceCard.dataSet.id]);
+        break;
       }
     }
   }

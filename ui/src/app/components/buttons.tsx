@@ -63,7 +63,7 @@ const buttonVariants = {
       borderColor: colors.gray[4],
       backgroundColor: colors.backgroundGrey, color: colors.gray[4]
     },
-    hover: {backgroundColor: colors.blue[4], color: '#000'}
+    hover: {backgroundColor: colors.blue[5], color: '#000'}
   },
   darklingPrimary: {
     style: {
@@ -147,7 +147,7 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...pro
         padding: '0 12px',
         cursor: disabled ? 'not-allowed' : 'pointer'
       }}
-      hover={!disabled ? {backgroundColor: colors.blue[3]} : undefined}
+      hover={!disabled ? {backgroundColor: colors.blue[4]} : undefined}
       {...props}
     >
       <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>
