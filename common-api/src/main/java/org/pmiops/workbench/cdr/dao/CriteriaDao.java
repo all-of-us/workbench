@@ -119,6 +119,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "select cr.concept_id_2 from criteria_relationship cr " +
     "join concept c1 on (cr.concept_id_2 = c1.concept_id " +
     "and cr.concept_id_1 = :conceptId " +
-    "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2", nativeQuery = true)
+    "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2" +
+    "and c.type = 'DRUG' and c.subtype = 'ATC'", nativeQuery = true)
   List<Criteria> findDrugIngredientByConceptId(@Param("conceptId") Long conceptId);
 }
