@@ -599,6 +599,9 @@ definitions:
       value:
         description: The Criteria code (or name if querying for Deceased)
         type: string
+      domain:
+        description: The omop domain that this criteria belongs to
+        type: string
       type:
         description: The type of the generating Criterion
         type: string
@@ -607,6 +610,12 @@ definitions:
         type: string
       group:
         description: Specifies if the generating Criterion is a leaf or node in its Criteria tree
+        type: boolean
+      ancestorData:
+        description: flag that determines if concept ids need to be looked up in the ancestor table
+        type: boolean
+      standard:
+        description: flag that determines standard or source
         type: boolean
       conceptId:
         description: The concept id that maps to concept table, if any.
