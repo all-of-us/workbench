@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohorts.CohortFactory;
@@ -146,6 +147,9 @@ public class ConceptSetsControllerTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @Autowired
+  BillingProjectBufferService billingProjectBufferService;
+
+  @Autowired
   WorkspaceService workspaceService;
 
   @Autowired
@@ -199,7 +203,7 @@ public class ConceptSetsControllerTest {
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, WorkspaceMapper.class, CohortCloningService.class, CohortFactoryImpl.class,
       UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptSetService.class})
-  @MockBean({ConceptBigQueryService.class, FireCloudService.class, CloudStorageService.class,
+  @MockBean({BillingProjectBufferService.class, ConceptBigQueryService.class, FireCloudService.class, CloudStorageService.class,
       ConceptSetService.class, NotebooksService.class, UserRecentResourceService.class, ComplianceService.class, DirectoryService.class})
   static class Configuration {
     @Bean
@@ -219,7 +223,7 @@ public class ConceptSetsControllerTest {
     conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao,
         conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
     WorkspacesController workspacesController =
-        new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao,
+        new WorkspacesController(billingProjectBufferService, workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao,
                 userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
 
     User user = new User();
