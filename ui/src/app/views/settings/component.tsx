@@ -47,7 +47,12 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
   }
 
   componentDidMount() {
-    this.pollCluster();
+    userProfileStore.asObservable().subscribe((profileStore) => {
+      const billingProjectId = profileStore.profile.freeTierBillingProjectName;
+      if (billingProjectId) {
+        this.pollCluster(billingProjectId);
+      }
+    });
   }
 
   componentWillUnmount() {
@@ -107,22 +112,22 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
   }
 
   resetCluster(): void {
+    const clusterBillingProjectId = this.state.cluster.clusterNamespace;
     clusterApi().deleteCluster(this.state.cluster.clusterNamespace, this.state.cluster.clusterName)
       .then(() => {
         this.setState({cluster: null, resetClusterPending: false, resetClusterModal: false});
-        this.pollCluster();
+        this.pollCluster(clusterBillingProjectId);
       })
       .catch((error) => {
         this.setState({resetClusterPending: false, clusterDeletionFailure: true});
       });
   }
 
-  private pollCluster(): void {
+  private pollCluster(billingProjectId): void {
     const repoll = () => {
-      this.pollClusterTimer = setTimeout(() => this.pollCluster(), 15000);
+      this.pollClusterTimer = setTimeout(() => this.pollCluster(billingProjectId), 15000);
     };
-    const clusterBillingProjectId = userProfileStore.getValue().profile.freeTierBillingProjectName;
-    clusterApi().listClusters(clusterBillingProjectId)
+    clusterApi().listClusters(billingProjectId)
       .then((body) => {
         const cluster = body.defaultCluster;
         if (SettingsReact.TRANSITIONAL_STATUSES.has(cluster.status)) {
