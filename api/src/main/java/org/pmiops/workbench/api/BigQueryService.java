@@ -75,7 +75,7 @@ public class BigQueryService {
             }
         }
     }
-    
+
     public QueryJobConfiguration filterBigQueryConfig(QueryJobConfiguration queryJobConfiguration) {
         CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
         if (cdrVersion == null) {

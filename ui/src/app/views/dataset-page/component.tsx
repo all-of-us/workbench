@@ -112,7 +112,7 @@ interface State {
   selectedValues: DomainValuePair[];
   valueSets: ValueSet[];
   queries: Array<DataSetQuery>;
-  selectAll: boolean
+  selectAll: boolean;
 }
 
 const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, State> {
@@ -326,7 +326,7 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
       return;
     }
 
-    let allValuesSelected = [];
+    const allValuesSelected = [];
     this.state.valueSets.map(valueSet => {
       valueSet.values.items.map(value => {
         allValuesSelected.push({domain: valueSet.domain, value: value.value});
@@ -425,10 +425,13 @@ const DataSetPage = withCurrentWorkspace()(class extends React.Component<Props, 
         this.state.previewList.filter(
           preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
 
-    return <DataTable key={this.state.selectedPreviewDomain} scrollable={true} style={{width: '100%'}}
+    return <DataTable key={this.state.selectedPreviewDomain} scrollable={true}
+                      style={{width: '100%'}}
                       value={this.getDataTableValue(filteredPreviewData.values)}>
       {filteredPreviewData.values.map(value =>
-          <Column header={value.value} headerStyle={{textAlign: 'left', width: '5rem', wordBreak: 'break-all'}} style={{width: '5rem'}} field={value.value}/>
+         <Column header={value.value}
+                 headerStyle={{textAlign: 'left', width: '5rem', wordBreak: 'break-all'}}
+                 style={{width: '5rem'}} field={value.value}/>
       )}
     </DataTable>;
   }
