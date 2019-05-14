@@ -221,7 +221,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
             this.setState({
               activeTab: Tabs.DATASETS
             });
-          }}>Datasets</TabButton>
+          }} data-test-id='view-only-data-sets'>Datasets</TabButton>
         </div>
         <div style={{
           borderBottom: '1px solid #525A65',
