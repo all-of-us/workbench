@@ -361,12 +361,12 @@ public class ProfileController implements ProfileApiDelegate {
 
     try {
       this.leonardoNotebooksClient.createCluster(billingProjectName,
-              LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+          LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
       log.log(Level.INFO, String.format("created cluster %s/%s", billingProjectName,
-              LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
+          LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
     } catch (ConflictException e) {
       log.log(Level.INFO, String.format("Cluster %s/%s already exists", billingProjectName,
-              LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
+          LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
     } catch (GatewayTimeoutException e) {
       log.log(Level.WARNING, "Socket Timeout creating cluster.");
     }
