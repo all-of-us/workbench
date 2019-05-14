@@ -8,13 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyListOf;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.cloud.bigquery.FieldValue;
@@ -44,6 +38,8 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -281,9 +277,26 @@ public class WorkspacesControllerTest {
 
     CLOCK.setInstant(NOW);
 
-    BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
-    doReturn("namespace").when(entry).getFireCloudProjectName();
-    doReturn(entry).when(billingProjectBufferService).assignBillingProject(any());
+    doAnswer(invocation -> {
+      BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
+      doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
+      return entry;
+    }).when(billingProjectBufferService).assignBillingProject(any());
+
+    doAnswer(invocation -> {
+      org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+              new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+      String capturedWorkspaceName = (String) invocation.getArguments()[1];
+      String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
+      fcResponse.setWorkspace(createFcWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null));
+      fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+      doReturn(fcResponse).when(fireCloudService).getWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName);
+      // List?
+//      List<WorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
+//      workspaceResponses.add(fcResponse);
+//      doReturn(workspaceResponses).when(fireCloudService).getWorkspaces();
+      return null;
+    }).when(fireCloudService).createWorkspace(anyString(), anyString());
   }
 
   private User createUser(String email) {
@@ -340,11 +353,10 @@ public class WorkspacesControllerTest {
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
-    when(fireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))
-        .thenReturn(fcResponse);
+    doReturn(fcResponse).when(fireCloudService).getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
     List<WorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
     workspaceResponses.add(fcResponse);
-    when(fireCloudService.getWorkspaces()).thenReturn(workspaceResponses);
+    doReturn(workspaceResponses).when(fireCloudService).getWorkspaces();
   }
 
   private void stubBigQueryCohortCalls() {
@@ -437,7 +449,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testCreateWorkspace() throws Exception {
     Workspace workspace = createStubbedWorkspace();
-    workspacesController.createWorkspace(workspace);
+    workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
@@ -463,7 +475,7 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getPopulation()).isTrue();
     assertThat(workspace2.getResearchPurpose().getPopulationOfFocus()).isEqualTo("population");
     assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
-    assertThat(workspace2.getNamespace()).isEqualTo("namespace");
+    assertThat(workspace2.getNamespace()).isEqualTo(workspace.getNamespace());
     assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
     assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
 
