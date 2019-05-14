@@ -183,21 +183,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspaceNamespace,
         workspace.getName());
     FirecloudWorkspaceId fcWorkspaceId = workspaceId;
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = null;
-    for (int attemptValue = 0; attemptValue < MAX_FC_CREATION_ATTEMPT_VALUES; attemptValue++) {
-      try {
-        fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
-        break;
-      } catch (ConflictException e) {
-        if (attemptValue >= 5) {
-          throw e;
-        } else {
-          fcWorkspaceId =
-              new FirecloudWorkspaceId(workspaceId.getWorkspaceNamespace(),
-                  workspaceId.getWorkspaceName() + Integer.toString(attemptValue));
-        }
-      }
-    }
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
 
     cloudStorageService.copyAllDemoNotebooks(fcWorkspace.getBucketName());
 
