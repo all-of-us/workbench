@@ -44,6 +44,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -62,6 +63,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.CopyNotebookRequest;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
@@ -167,6 +169,8 @@ public class WorkspacesControllerTest {
       makeConcept(CLIENT_CONCEPT_2);
 
   @Autowired
+  BillingProjectBufferService billingProjectBufferService;
+  @Autowired
   private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired
   private WorkspacesController workspacesController;
@@ -189,6 +193,7 @@ public class WorkspacesControllerTest {
     ConceptSetsController.class
   })
   @MockBean({
+          BillingProjectBufferService.class,
           ConceptBigQueryService.class,
           FireCloudService.class,
           CohortMaterializationService.class,
@@ -275,6 +280,10 @@ public class WorkspacesControllerTest {
     doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
 
     CLOCK.setInstant(NOW);
+
+    BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
+    doReturn("namespace").when(entry).getFireCloudProjectName();
+    doReturn(entry).when(billingProjectBufferService).assignBillingProject(any());
   }
 
   private User createUser(String email) {
