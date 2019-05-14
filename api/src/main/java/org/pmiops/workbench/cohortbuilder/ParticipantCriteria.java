@@ -1,9 +1,14 @@
 package org.pmiops.workbench.cohortbuilder;
 
 import com.google.common.collect.ImmutableSet;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
+
+import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 
 /**
@@ -25,26 +30,40 @@ public class ParticipantCriteria {
   private final SearchRequest searchRequest;
   private final Set<Long> participantIdsToInclude;
   private final Set<Long> participantIdsToExclude;
+  private final Map<SearchParameter, Set<Long>> criteriaLookupMap;
 
   public ParticipantCriteria(SearchRequest searchRequest) {
     this(searchRequest, NO_PARTICIPANTS_TO_EXCLUDE);
+  }
+
+  public ParticipantCriteria(SearchRequest searchRequest, Map<SearchParameter, Set<Long>> criteriaLookupMap) {
+    this.searchRequest = searchRequest;
+    this.participantIdsToExclude = NO_PARTICIPANTS_TO_EXCLUDE;
+    this.participantIdsToInclude = null;
+    this.criteriaLookupMap = criteriaLookupMap;
   }
 
   public ParticipantCriteria(SearchRequest searchRequest, Set<Long> participantIdsToExclude) {
     this.searchRequest = searchRequest;
     this.participantIdsToExclude = participantIdsToExclude;
     this.participantIdsToInclude = null;
+    this.criteriaLookupMap = new HashMap<>();
   }
 
   public ParticipantCriteria(Set<Long> participantIdsToInclude) {
     this.participantIdsToInclude = participantIdsToInclude;
     this.searchRequest = null;
     this.participantIdsToExclude = null;
+    this.criteriaLookupMap = new HashMap<>();
   }
 
   @Nullable
   public SearchRequest getSearchRequest() {
     return searchRequest;
+  }
+
+  public Map<SearchParameter, Set<Long>> getCriteriaLookupMap() {
+    return criteriaLookupMap;
   }
 
   @Nullable
@@ -59,7 +78,7 @@ public class ParticipantCriteria {
 
   @Override
   public int hashCode() {
-    return Objects.hash(searchRequest, participantIdsToExclude, participantIdsToExclude);
+    return Objects.hash(searchRequest, participantIdsToExclude, participantIdsToExclude, criteriaLookupMap);
   }
 
   @Override
@@ -69,7 +88,8 @@ public class ParticipantCriteria {
     }
     ParticipantCriteria that = (ParticipantCriteria) obj;
     return Objects.equals(this.searchRequest, that.searchRequest)
-        && Objects.equals(this.participantIdsToExclude, that.participantIdsToExclude)
-        && Objects.equals(this.participantIdsToInclude, that.participantIdsToInclude);
+      && Objects.equals(this.participantIdsToExclude, that.participantIdsToExclude)
+      && Objects.equals(this.participantIdsToInclude, that.participantIdsToInclude)
+      && Objects.equals(this.criteriaLookupMap, that.criteriaLookupMap);
   }
 }

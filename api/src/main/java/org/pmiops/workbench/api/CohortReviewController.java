@@ -22,7 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
@@ -92,7 +92,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   private CohortReviewService cohortReviewService;
   private BigQueryService bigQueryService;
-  private ParticipantCounter participantCounter;
+  private CohortQueryBuilder cohortQueryBuilder;
   private ReviewQueryBuilder reviewQueryBuilder;
   private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
   private UserRecentResourceService userRecentResourceService;
@@ -192,7 +192,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   @Autowired
   CohortReviewController(CohortReviewService cohortReviewService,
                          BigQueryService bigQueryService,
-                         ParticipantCounter participantCounter,
+                         CohortQueryBuilder cohortQueryBuilder,
                          ReviewQueryBuilder reviewQueryBuilder,
                          Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
                          UserRecentResourceService userRecentResourceService,
@@ -200,7 +200,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                          Clock clock) {
     this.cohortReviewService = cohortReviewService;
     this.bigQueryService = bigQueryService;
-    this.participantCounter = participantCounter;
+    this.cohortQueryBuilder = cohortQueryBuilder;
     this.reviewQueryBuilder = reviewQueryBuilder;
     this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     this.userRecentResourceService = userRecentResourceService;
@@ -257,7 +257,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
     TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      participantCounter.buildRandomParticipantQuery(new ParticipantCriteria(searchRequest),
+      cohortQueryBuilder.buildRandomParticipantQuery(new ParticipantCriteria(searchRequest),
         request.getSize(), 0L)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
@@ -366,7 +366,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
     TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      participantCounter.buildDomainChartInfoCounterQuery(new ParticipantCriteria(searchRequest), DomainType.fromValue(domain), chartLimit)));
+      cohortQueryBuilder.buildDomainChartInfoCounterQuery(new ParticipantCriteria(searchRequest), DomainType.fromValue(domain), chartLimit)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     CohortChartDataListResponse response = new CohortChartDataListResponse();
@@ -605,7 +605,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
     TableResult result = bigQueryService.executeQuery(
-      bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
+      bigQueryService.filterBigQueryConfig(cohortQueryBuilder.buildParticipantCounterQuery(
         new ParticipantCriteria(request))));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
     List<FieldValue> row = result.iterateAll().iterator().next();

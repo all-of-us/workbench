@@ -4,16 +4,22 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.pmiops.workbench.api.CohortBuilderController;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.MENTION;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
@@ -37,7 +43,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
  * is here: https://docs.google.com/document/d/1OFrG7htm8gT0QOOvzHa7l3C3Qs0JnoENuK1TDAB_1A8
  */
 @Service
-public class TemporalQueryBuilder {
+public class BaseQueryBuilder {
 
   private static final String UNION_TEMPLATE = "union all\n";
   private static final String SAME_ENC =
@@ -50,21 +56,45 @@ public class TemporalQueryBuilder {
   private static final String WITHIN_X_DAYS_OF =
     "temp1.person_id = temp2.person_id and temp1.entry_date between " +
       "DATE_SUB(temp2.entry_date, INTERVAL ${timeValue} DAY) and DATE_ADD(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
-  private static final String TEMPORAL_EXIST_TEMPLATE =
-    "select temp1.person_id\n" +
+  private static final String TEMPORAL_EXIST_TEMPLATE = "select temp1.person_id\n" +
       "from (${query1}) temp1\n" +
       "where exists (select 1\n" +
       "from (${query2}) temp2\n" +
       "where (${conditions}))\n";
-  private static final String TEMPORAL_JOIN_TEMPLATE =
-    "select temp1.person_id\n" +
+  private static final String TEMPORAL_JOIN_TEMPLATE = "select temp1.person_id\n" +
       "from (${query1}) temp1\n" +
       "join (select person_id, visit_occurrence_id, entry_date\n" +
       "from (${query2})\n" +
       ") temp2 on (${conditions})\n";
 
-  public String buildQuery(Map<String, QueryParameterValue> params,
-                           SearchGroup includeGroup) {
+  private static final Logger log = Logger.getLogger(BaseQueryBuilder.class.getName());
+  private Provider<WorkbenchConfig> configProvider;
+
+  @Autowired
+  public BaseQueryBuilder(Provider<WorkbenchConfig> configProvider) {
+    this.configProvider = configProvider;
+  }
+
+  public void buildQuery(Map<String, QueryParameterValue> params, List<String> queryParts, SearchGroup searchGroup) {
+    if (searchGroup.getTemporal()) {
+      String query = buildTemporalQuery(params, searchGroup);
+      queryParts.add(query);
+    } else {
+      if (configProvider.get().cohortbuilder.enableListSearch) {
+        log.log(Level.INFO, "new search here!");
+      } else {
+        for (SearchGroupItem includeItem : searchGroup.getItems()) {
+          String query = QueryBuilderFactory
+            .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
+            .buildQuery(params, includeItem, searchGroup.getMention());
+          queryParts.add(query);
+        }
+      }
+    }
+  }
+
+  public String buildTemporalQuery(Map<String, QueryParameterValue> params,
+                                   SearchGroup includeGroup) {
     validateSearchGroup(includeGroup);
     List<String> temporalQueryParts1 = new ArrayList<>();
     List<String> temporalQueryParts2 = new ArrayList<>();
@@ -74,11 +104,16 @@ public class TemporalQueryBuilder {
       //key of zero indicates belonging to the first temporal group
       //key of one indicates belonging to the second temporal group
       boolean isFirstGroup = key == 0;
+      String query = "";
       for (SearchGroupItem tempGroup : tempGroups) {
-        String query = QueryBuilderFactory
-          .getQueryBuilder(FactoryKey.getType(tempGroup.getType()))
-          .buildQuery(params, tempGroup,
-            isFirstGroup ? includeGroup.getMention() : TemporalMention.ANY_MENTION);
+        if (configProvider.get().cohortbuilder.enableListSearch) {
+          log.log(Level.INFO, "new search here!");
+        } else {
+          query = QueryBuilderFactory
+            .getQueryBuilder(FactoryKey.getType(tempGroup.getType()))
+            .buildQuery(params, tempGroup,
+              isFirstGroup ? includeGroup.getMention() : TemporalMention.ANY_MENTION);
+        }
         if (isFirstGroup) {
           temporalQueryParts1.add(query);
         } else {

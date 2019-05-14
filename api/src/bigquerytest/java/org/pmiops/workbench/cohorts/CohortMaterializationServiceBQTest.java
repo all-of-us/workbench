@@ -26,14 +26,11 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Concept;
-import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.TemporalQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.BaseQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.querybuilder.DemoQueryBuilder;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -70,11 +67,11 @@ import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({DemoQueryBuilder.class, QueryBuilderFactory.class,
-        BigQueryService.class, ParticipantCounter.class, CohortQueryBuilder.class,
+        BigQueryService.class, CohortQueryBuilder.class, CohortQueryBuilder.class,
         FieldSetQueryBuilder.class, QueryBuilderFactory.class, TestJpaConfig.class,
         ConceptCacheConfiguration.class, TestBigQueryCdrSchemaConfig.class,
         AnnotationQueryBuilder.class, CdrBigQuerySchemaConfigService.class,
-        TemporalQueryBuilder.class})
+        BaseQueryBuilder.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 

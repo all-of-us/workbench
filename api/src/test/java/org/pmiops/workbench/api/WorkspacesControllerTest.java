@@ -45,7 +45,7 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
@@ -194,7 +194,7 @@ public class WorkspacesControllerTest {
           CohortMaterializationService.class,
           CloudStorageService.class,
           BigQueryService.class,
-          ParticipantCounter.class,
+          CohortQueryBuilder.class,
           UserService.class,
           UserRecentResourceService.class,
           ConceptService.class
