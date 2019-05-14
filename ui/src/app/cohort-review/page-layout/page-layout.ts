@@ -25,7 +25,7 @@ export class PageLayout implements OnInit, OnDestroy {
   ngOnInit() {
     const {ns, wsid, cid} = urlParamsStore.getValue();
     const {accessLevel, cdrVersionId} = currentWorkspaceStore.getValue();
-    this.readonly = accessLevel === WorkspaceAccessLevel[WorkspaceAccessLevel.READER];
+    this.readonly = accessLevel === WorkspaceAccessLevel.READER;
     cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
       page: 0,
       pageSize: 25,
