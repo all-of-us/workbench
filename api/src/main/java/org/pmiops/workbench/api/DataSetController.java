@@ -45,7 +45,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
-import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
