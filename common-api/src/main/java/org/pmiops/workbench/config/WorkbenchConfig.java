@@ -29,6 +29,7 @@ public class WorkbenchConfig {
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new FireCloudConfig();
     config.auth = new AuthConfig();
+    config.auth.serviceAccountApiUsers = new ArrayList();
     config.cdr = new CdrConfig();
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
