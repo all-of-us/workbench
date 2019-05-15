@@ -9,22 +9,12 @@
     <app-detail-header [participant]="participant">
     </app-detail-header>
 
-    <!-- Tab data stubbed in detail-tabs class -->
-    <app-detail-tabs>
-    </app-detail-tabs>
+    <app-detail-tabs></app-detail-tabs>
   </div>
-  <!--<div class="sidebar-handle" (click)="toggleSidebar()">-->
-    <!--<clr-icon class= "angle-icon"shape="angle-double" [dir]="angleDir" size="29"></clr-icon>-->
-  <!--</div>-->
   <div class="detail-sidebar">
     <div class="sidebar-handle" (click)="toggleSidebar()">
       <clr-icon class= "angle-icon"shape="angle-double" [dir]="angleDir" size="29"></clr-icon>
     </div>
-    <!-- Sidebar left column (always visible) -->
-    <!--<div class="sidebar-handle" (click)="toggleSidebar()">-->
-      <!--<clr-icon class= "angle-icon"shape="angle-double" [dir]="angleDir" size="29"></clr-icon>-->
-    <!--</div>-->
-    <!-- Sidebar content -->
     <div class="sidebar-content" id="review-sidebar-content" [class.sidebar-open]="sidebarOpen">
       <app-sidebar-content
         [participant]="participant"
@@ -38,10 +28,6 @@
     </div>
   </div>
 
-  <!--
-    set-annotation-modal: A manager for creating, updating, removing annotation
-    definitions (i.e. set wide annotations)
-  -->
   <app-edit-annotation-definitions-modal
     *ngIf="editingDefinitions"
     [onClose]="closeEditDefinitionsModal"

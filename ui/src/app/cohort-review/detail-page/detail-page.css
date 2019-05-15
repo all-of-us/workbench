@@ -2,7 +2,6 @@
   position: absolute;
   top: 1px;
   right: 0px;
-  /*border: 1px solid rgb(86, 86, 86);*/
   border-radius: 2px;
   height: 100%;
   background-color: #E2E2EA;
@@ -12,7 +11,6 @@
 }
 
 .sidebar-handle {
-  /*min-width: 24px;*/
   background-color: #728FA3;
   padding:0.6rem;
   position: absolute;
@@ -43,23 +41,15 @@
 }
 
 .sidebar-content.sidebar-open {
-  /*margin-left: 0.25rem;*/
   width: 385px;
   border-left: 1rem solid #728FA3;
   padding-left: 0.5rem;
   padding-right: 1rem;
 }
-
 .sidebar-handle.sidebar-open {
   margin-left: 0.25rem;
   width: 359px;
 }
-/*.detail-sidebar::before {*/
-  /*content: "\00BB";*/
-  /*background-color: yellow;*/
-  /*color: red;*/
-  /*font-weight: bold;*/
-/*}*/
 .angle-icon {
   color: white;
 }

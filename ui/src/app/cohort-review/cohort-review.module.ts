@@ -17,7 +17,7 @@ import {AddAnnotationDefinitionModalComponent, EditAnnotationDefinitionsModalCom
 import {CreateReviewPage} from './create-review-page/create-review-page';
 // This is a temporary measure until we have specs and APIs for overview specific charts
 import {DetailHeaderComponent} from './detail-header/detail-header.component';
-import {DetailPage} from './detail-page/detail-page';
+import {DetailPageComponent} from './detail-page/detail-page';
 import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
 import {PageLayout} from './page-layout/page-layout';
 import {CohortReviewRoutingModule} from './routing/routing.module';
@@ -47,7 +47,7 @@ import {TablePage} from './table-page/table-page';
   declarations: [
     /* Scaffolding and Pages */
     CreateReviewPage,
-    DetailPage,
+    DetailPageComponent,
     PageLayout,
     TablePage,
 
