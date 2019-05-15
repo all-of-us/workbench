@@ -352,7 +352,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           !this.state.selectedValues || this.state.selectedValues.length === 0;
     }
 
-    setSelectedPreivewDomain(domain) {
+    setSelectedPreviewDomain(domain) {
       this.setState({selectedPreviewDomain: domain});
     }
 
@@ -555,18 +555,20 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 {this.editing ? 'UPDATE DATA SET' : 'SAVE DATA SET'}
               </Button>
             </div>
-            {previewDataLoading && <div style={{display: 'flex', flexDirection: 'column'}}>
-              <Spinner style={{position: 'relative', top: '2rem',
-                left: '45%'}} />
-              <div style={{top: '3rem', position: 'relative',
-                left: '35%'}}>It may take up to a minute to load the data</div></div>
-            }
+            {previewDataLoading && <div style={{display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'}}>
+              <Spinner style={{position: 'relative', top: '2rem'}} />
+              <div style={{top: '3rem', position: 'relative'}}>
+                It may take up to a minute to load the data
+              </div>
+            </div>}
             {previewList.length > 0 &&
               <div style={{display: 'flex', flexDirection: 'column'}}>
                 <div style={{display: 'flex', flexDirection: 'row'}}>
                   {previewList.map(previewRow =>
                      <Clickable key={previewRow.domain}
-                               onClick={() => this.setSelectedPreivewDomain(previewRow.domain)}
+                               onClick={() => this.setSelectedPreviewDomain(previewRow.domain)}
                                style={{
                                  lineHeight: '32px', fontSize: '18px',
                                  fontWeight: (selectedPreviewDomain === previewRow.domain)
