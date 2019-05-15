@@ -1,6 +1,4 @@
-import {Component, Input} from '@angular/core';
 import {getChartObj} from 'app/cohort-search/utils';
-import {ReactWrapperBase} from 'app/utils/index';
 import {ParticipantChartData} from 'generated/fetch';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -130,18 +128,5 @@ export class IndividualParticipantsCharts extends React.Component<{
       />;
     }
     return null;
-  }
-}
-
-@Component({
-  selector: 'app-individual-participants-charts',
-  template: '<div #root></div>',
-  styleUrls: ['./individual-participants-charts.css']
-})
-export class IndividualParticipantsChartsComponent extends ReactWrapperBase {
-  @Input() chartData;
-
-  constructor() {
-    super(IndividualParticipantsCharts, ['chartData']);
   }
 }

@@ -8,9 +8,7 @@ import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/valid
 import {AddAnnotationDefinitionModalComponent, EditAnnotationDefinitionsModalComponent} from 'app/cohort-review/annotation-definition-modals/annotation-definition-modals.component';
 import {CreateReviewPage} from 'app/cohort-review/create-review-page/create-review-page';
 import {DetailHeaderComponent} from 'app/cohort-review/detail-header/detail-header.component';
-import {DetailTabTableComponent} from 'app/cohort-review/detail-tab-table/detail-tab-table.component';
 import {DetailTabsComponent} from 'app/cohort-review/detail-tabs/detail-tabs.component';
-import {IndividualParticipantsChartsComponent} from 'app/cohort-review/individual-participants-charts/individual-participants-charts';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {SidebarContentComponent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
 import {CohortSearchActions} from 'app/cohort-search/redux';
@@ -42,8 +40,6 @@ describe('DetailPage', () => {
         DetailHeaderComponent,
         DetailPage,
         DetailTabsComponent,
-        IndividualParticipantsChartsComponent,
-        DetailTabTableComponent,
         AddAnnotationDefinitionModalComponent,
         EditAnnotationDefinitionsModalComponent,
         SidebarContentComponent,

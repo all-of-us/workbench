@@ -42,7 +42,8 @@ export class WorkbenchRouteReuseStrategy extends RouteReuseStrategy {
   retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle|null { return null; }
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
-    return future.routeConfig === curr.routeConfig && fp.isEqual(future.params, curr.params);
+    return future.routeConfig === curr.routeConfig
+      && (fp.isEqual(future.params, curr.params) || curr.data.shouldReuse);
   }
 }
 
