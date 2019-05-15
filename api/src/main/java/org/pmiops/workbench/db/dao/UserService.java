@@ -324,7 +324,7 @@ public class UserService {
     });
   }
 
-  public User setBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
+  public User setFreeTierBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
     return updateUserWithRetries((user) -> {
       user.setFreeTierBillingProjectName(name);
       user.setFreeTierBillingProjectStatusEnum(status);

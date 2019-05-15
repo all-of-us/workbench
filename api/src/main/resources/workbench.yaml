@@ -507,18 +507,24 @@ paths:
 
   # Notebook clusters ####################################################################
 
-  /v1/clusters:
+  /v1/clusters/{billingProjectId}:
     get:
       summary: List available notebook clusters
       description: >
-        Returns the clusters available to the current user. Currently there is a
-        single default cluster supported per researcher and this cluster should
-        always either exist or be in the process of being initialized. In a
-        future where researchers have more control over cluster creation, this
-        endpoint would be extended to return all clusters.
+        Returns the clusters available to the current user in the given billing project.
+        Currently there is a single default cluster supported per billing project
+        and this cluster should always either exist or be in the process of being
+        initialized. In a future where researchers have more control over cluster
+        creation, this endpoint would be extended to return all clusters.
       operationId: listClusters
       tags:
         - cluster
+      parameters:
+        - in: path
+          name: billingProjectId
+          description: The unique identifier of the Google Billing Project containing the clusters
+          required: true
+          type: string
       responses:
         200:
           description: Available clusters
