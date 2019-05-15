@@ -245,6 +245,13 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         this.props.onUpdate();
         break;
       }
+      case ResourceType.DATA_SET: {
+        navigate([currentWorkspaceRoute.concat(['workspaces',
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          'data', 'data-sets', this.props.dataSet.id])]);
+        break;
+      }
       default: {
         this.setState({editing: true});
       }
@@ -471,8 +478,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                               onDeleteResource={() => this.openConfirmDelete()}
                               onRenameNotebook={() => this.renameNotebook()}
                               onRenameCohort={() => this.renameCohort()}
-                              onEditCohort={() => this.edit()}
-                              onEditConceptSet={() => this.edit()}
+                              onEdit={() => this.edit()}
                               onReviewCohort={() => this.reviewCohort()}
                               onOpenJupyterLabNotebook={() => this.openResource(true)}/>
             <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>

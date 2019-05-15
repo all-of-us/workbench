@@ -93,16 +93,18 @@ interface Props {
 }
 
 interface State {
-  confirmDeleting: boolean;
   cohortList: Cohort[];
+  confirmDeleting: boolean;
   conceptDomainList: DomainInfo[];
   conceptSetList: ConceptSet[];
   creatingConceptSet: boolean;
-  previewList: Array<DataSetPreviewList>;
-  editing: boolean;
+  dataSet: DataSet;
+  dataSetTouched: boolean;
+  editingResource: boolean;
   includesAllParticipants: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
+  previewList: Array<DataSetPreviewList>;
   previewDataLoading: boolean;
   resource: RecentResource;
   rType: ResourceType;
@@ -111,7 +113,6 @@ interface State {
   selectedPreviewDomain: string;
   selectedValues: DomainValuePair[];
   valueSets: ValueSet[];
-  dataSet: DataSet;
   valuesLoading: boolean;
 }
 
@@ -120,25 +121,26 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     constructor(props) {
       super(props);
       this.state = {
-        creatingConceptSet: false,
+        cohortList: [],
+        confirmDeleting: false,
         conceptDomainList: undefined,
         conceptSetList: [],
-        cohortList: [],
-        loadingResources: true,
-        confirmDeleting: false,
+        creatingConceptSet: false,
+        dataSet: undefined,
+        dataSetTouched: false,
         editing: false,
-        resource: undefined,
-        rType: undefined,
-        selectedConceptSetIds: [],
-        selectedCohortIds: [],
-        valueSets: [],
-        selectedValues: [],
+        includesAllParticipants: false,
+        loadingResources: true,
         openSaveModal: false,
         previewList: [],
-        selectedPreviewDomain: '',
         previewDataLoading: false,
-        includesAllParticipants: false,
-        dataSet: undefined,
+        resource: undefined,
+        rType: undefined,
+        selectedCohortIds: [],
+        selectedConceptSetIds: [],
+        selectedPreviewDomain: '',
+        selectedValues: [],
+        valueSets: [],
         valuesLoading: false
       };
     }
@@ -154,15 +156,17 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         this.setState({conceptDomainList: response.items});
       });
       if (this.editing) {
-        dataSetApi().getDataSet(namespace, id, this.props.urlParams.dsid).then((response) => {
+        dataSetApi().getDataSet(namespace, id, this.props.urlParams.dataSetId).then((response) => {
           this.setState({
             dataSet: response,
+            includesAllParticipants: response.includesAllParticipants,
             selectedConceptSetIds: response.conceptSets.map(cs => cs.id),
             selectedCohortIds: response.cohorts.map(c => c.id),
-            selectedValues: response.values
+            selectedValues: response.values,
+            valuesLoading: true,
           });
           this.getValuesList(this.getDomainsFromConceptIds(response.conceptSets.map(cs => cs.id)))
-            .then(valueSets => this.setState({valueSets: valueSets}));
+            .then(valueSets => this.setState({valueSets: valueSets, valuesLoading: false}));
         });
       }
     }
@@ -198,7 +202,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
 
     edit(r: Cohort | ConceptSet, rType: ResourceType): void {
       const rc = this.convertResource(r, rType);
-      this.setState({editing: true, resource: rc});
+      this.setState({editingResource: true, resource: rc});
     }
 
     receiveDelete() {
@@ -251,7 +255,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     }
 
     closeEditModal(): void {
-      this.setState({editing: false});
+      this.setState({editingResource: false});
     }
 
     clone(cohort: Cohort): void {
@@ -282,6 +286,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     }
 
     select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
+      this.setState({dataSetTouched: true});
       if (rtype === ResourceType.CONCEPT_SET) {
         const {valueSets, selectedValues} = this.state;
         const origSelected = this.state.selectedConceptSetIds;
@@ -336,7 +341,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       valuesSelected = valuesSelected.sort((a, b) =>
           valueSets.findIndex(({value}) => a.value === value) -
           valueSets.findIndex(({value}) => b.value === value));
-      this.setState({selectedValues: valuesSelected});
+      this.setState({selectedValues: valuesSelected, dataSetTouched: true});
     }
 
     getCurrentResource(): Cohort | ConceptSet {
@@ -404,6 +409,23 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       </DataTable>;
     }
 
+    updateDataSet() {
+      const {namespace, id} = this.props.workspace;
+      const {dataSet} = this.state;
+      console.log('hello world');
+      const request = {
+        name: dataSet.name,
+        description: dataSet.description,
+        includesAllParticipants: this.state.includesAllParticipants,
+        conceptSetIds: this.state.selectedConceptSetIds,
+        cohortIds: this.state.selectedCohortIds,
+        values: this.state.selectedValues,
+        etag: dataSet.etag
+      };
+      dataSetApi().updateDataSet(namespace, id, dataSet.id, request)
+        .then(() => window.history.back());
+    }
+
     render() {
       const {namespace, id} = this.props.workspace;
       const {
@@ -411,6 +433,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         conceptDomainList,
         conceptSetList,
         dataSet,
+        dataSetTouched,
         includesAllParticipants,
         loadingResources,
         openSaveModal,
@@ -447,7 +470,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   <ImmutableListItem name='All AoU Participants' checked={includesAllParticipants}
                                      onChange={
                                        () => this.setState({
-                                         includesAllParticipants: !includesAllParticipants
+                                         includesAllParticipants: !includesAllParticipants,
+                                         dataSetTouched: true
                                        })}/>
                   <Subheader>Workspace Cohorts</Subheader>
                   {!loadingResources && this.state.cohortList.map(cohort =>
@@ -463,7 +487,15 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                       onChange={
                                         () => this.select(cohort, ResourceType.COHORT)
                                       }
-                                      edit={
+                                      onEdit={
+                                        () => {
+                                          const url =
+                                            '/workspaces/' + namespace + '/' +
+                                            id + '/cohorts/build?cohortId=';
+                                          navigateByUrl(url + cohort.id);
+                                        }
+                                      }
+                                      onRenameCohort={
                                         () => this.edit(cohort, ResourceType.COHORT)
                                       }
                                       onClone={
@@ -503,7 +535,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                           onChange={
                                             () => this.select(conceptSet, ResourceType.CONCEPT_SET)
                                           }
-                                          edit={
+                                          onEdit={
                                             () => this.edit(conceptSet, ResourceType.CONCEPT_SET)
                                           }/>)
                     }
@@ -550,8 +582,9 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 PREVIEW DATA SET
               </Button>
               <Button data-test-id='save-button' style={{position: 'absolute', right: '1rem',
-                top: '.25rem'}} onClick ={() => this.setState({openSaveModal: true})}
-                disabled={this.disableSave() || this.editing}>
+                top: '.25rem'}} onClick ={this.editing ? () => this.updateDataSet() :
+                () => this.setState({openSaveModal: true})}
+                disabled={this.disableSave() || (this.editing && !dataSetTouched)}>
                 {this.editing ? 'UPDATE DATA SET' : 'SAVE DATA SET'}
               </Button>
             </div>
@@ -605,7 +638,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                             resourceType={rType}
                             receiveDelete={() => this.receiveDelete()}
                             closeFunction={() => this.closeConfirmDelete()}/>}
-        {this.state.editing && resource &&
+        {this.state.editingResource && resource &&
         <EditModal resource={resource}
                    onEdit={e => this.receiveEdit(e)}
                    onCancel={() => this.closeEditModal()}/>}

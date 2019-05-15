@@ -23,13 +23,12 @@ const styles = {
 export const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook?: Function,
   onRenameCohort?: Function, onOpenJupyterLabNotebook?: any, onCloneResource?: Function,
-  onCopyResource?: Function, onDeleteResource?: Function, onEditCohort?: Function,
-  onReviewCohort?: Function, onEditConceptSet?: Function
+  onCopyResource?: Function, onDeleteResource?: Function, onEdit?: Function,
+  onReviewCohort?: Function
 }> = ({
         disabled, resourceType, onRenameNotebook = () => {}, onRenameCohort = () => {},
         onOpenJupyterLabNotebook = () => {}, onCloneResource = () => {}, onCopyResource = () => {},
-        onDeleteResource = () => {}, onEditCohort = () => {}, onReviewCohort = () => {},
-        onEditConceptSet = () => {}
+        onDeleteResource = () => {}, onEdit = () => {}, onReviewCohort = () => {}
       }) => {
   return <PopupTrigger
     data-test-id='resource-card-menu'
@@ -62,19 +61,20 @@ export const ResourceCardMenu: React.FunctionComponent<{
           return <React.Fragment>
             <MenuItem icon='note' onClick={onRenameCohort}>Rename</MenuItem>
             <MenuItem icon='copy' onClick={onCloneResource}>Duplicate</MenuItem>
-            <MenuItem icon='pencil' onClick={onEditCohort}>Edit</MenuItem>
+            <MenuItem icon='pencil' onClick={onEdit}>Edit</MenuItem>
             <MenuItem icon='grid-view' onClick={onReviewCohort}>Review</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
           </React.Fragment>;
         }],
         ['conceptSet', () => {
           return <React.Fragment>
-            <MenuItem icon='pencil' onClick={onEditConceptSet}>Edit</MenuItem>
+            <MenuItem icon='pencil' onClick={onEdit}>Edit</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
           </React.Fragment>;
         }],
         ['dataSet', () => {
           return <React.Fragment>
+            <MenuItem icon='pencil' onClick={onEdit}>Edit</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
           </React.Fragment>;
         }]
@@ -90,18 +90,19 @@ export const ResourceCardMenu: React.FunctionComponent<{
 };
 
 export const ResourceListItem: React.FunctionComponent <
-  {resource: ConceptSet | Cohort, openConfirmDelete: Function, edit: Function,
-    rType: ResourceType, onChange: Function,
+  {resource: ConceptSet | Cohort, openConfirmDelete: Function, onEdit: Function,
+    onRenameCohort?: Function, rType: ResourceType, onChange: Function,
     onClone?: Function, onReview?: Function, checked: boolean}
-    > = ({resource, openConfirmDelete, edit, rType, onChange, onClone = () => {},
+    > = ({resource, openConfirmDelete, onEdit, onRenameCohort, rType,
+                                          onChange, onClone = () => {},
                                           onReview = () => {}, checked}) => {
       return<div style={styles.listItem}>
       <div style={{width: '.75rem', paddingTop: 5, paddingLeft: 10}}>
         <ResourceCardMenu disabled={false}
                           resourceType={rType}
                           onDeleteResource={openConfirmDelete}
-                          onEditConceptSet={edit}
-                          onEditCohort={edit}
+                          onEdit={onEdit}
+                          onRenameCohort={onRenameCohort}
                           onCloneResource={onClone}
                           onReviewCohort={onReview}/>
 

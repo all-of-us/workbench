@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 @Entity
 @Table(name = "data_set")
@@ -19,6 +20,7 @@ public class DataSet {
   private long dataSetId;
   private long workspaceId;
   private String name;
+  private int version;
   private String description;
   private long creatorId;
   private Timestamp creationTime;
@@ -50,6 +52,14 @@ public class DataSet {
   public void setDataSetId(long dataSetId) {
     this.dataSetId = dataSetId;
   }
+
+  @Version
+  @Column(name = "version")
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) { this.version = version; }
 
   @Column(name = "workspace_id")
   public long getWorkspaceId() {

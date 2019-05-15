@@ -119,6 +119,7 @@ public class DataSetServiceImpl implements DataSetService {
       Timestamp creationTime) {
     DataSet dataSetDb = new DataSet();
     dataSetDb.setName(name);
+    dataSetDb.setVersion(1);
     dataSetDb.setIncludesAllParticipants(includesAllParticipants);
     dataSetDb.setDescription(description);
     dataSetDb.setWorkspaceId(workspaceId);

@@ -27,6 +27,7 @@ import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -35,7 +36,6 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
@@ -45,6 +45,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
@@ -164,23 +165,23 @@ public class DataSetController implements DataSetApiDelegate {
       new Function<org.pmiops.workbench.db.model.DataSet, DataSet>() {
         @Override
         public DataSet apply(org.pmiops.workbench.db.model.DataSet dataSet) {
-          DataSet result = new DataSet();
-          result.setName(dataSet.getName());
-          result.setIncludesAllParticipants(dataSet.getIncludesAllParticipants());
-          result.setId(dataSet.getDataSetId());
+          DataSet result = new DataSet()
+              .name(dataSet.getName())
+              .includesAllParticipants(dataSet.getIncludesAllParticipants())
+              .id(dataSet.getDataSetId())
+              .etag(Etags.fromVersion(dataSet.getVersion()))
+              .description(dataSet.getDescription());
           if (dataSet.getLastModifiedTime() != null) {
             result.setLastModifiedTime(dataSet.getLastModifiedTime().getTime());
           }
-          Iterable<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
-              conceptSetDao.findAll(dataSet.getConceptSetId());
-          result.setConceptSets(StreamSupport.stream(conceptSets.spliterator(), false)
-              .map(conceptSet -> toClientConceptSet(conceptSet)).collect(Collectors.toList()));
-
-          Iterable<Cohort> cohorts = cohortDao.findAll(dataSet.getCohortSetId());
-          result.setCohorts(StreamSupport.stream(cohorts.spliterator(), false)
+          result.setConceptSets(StreamSupport
+              .stream(conceptSetDao.findAll(dataSet.getConceptSetId()).spliterator(), false)
+              .map(conceptSet -> toClientConceptSet(conceptSet))
+              .collect(Collectors.toList()));
+          result.setCohorts(StreamSupport
+                .stream(cohortDao.findAll(dataSet.getCohortSetId()).spliterator(), false)
                 .map(CohortsController.TO_CLIENT_COHORT)
                 .collect(Collectors.toList()));
-          result.setDescription(dataSet.getDescription());
           result.setValues(dataSet.getValues()
                   .stream()
                   .map(TO_CLIENT_DOMAIN_VALUE)
@@ -336,7 +337,7 @@ public class DataSetController implements DataSetApiDelegate {
 
     response.setItems(dataSets.stream()
         .map(TO_CLIENT_DATA_SET)
-        .sorted(Comparator.comparing(c -> c.getName()))
+        .sorted(Comparator.comparing(DataSet::getName))
         .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
@@ -350,6 +351,44 @@ public class DataSetController implements DataSetApiDelegate {
         getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
     dataSetDao.delete(dataSet.getDataSetId());
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<DataSet> updateDataSet(
+      String workspaceNamespace,
+      String workspaceId,
+      Long dataSetId,
+      DataSetRequest request) {
+    org.pmiops.workbench.db.model.DataSet dbDataSet =
+        getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
+    if(Strings.isNullOrEmpty(request.getEtag())) {
+      throw new BadRequestException("missing required update field 'etag'");
+    }
+    int version = Etags.toVersion(request.getEtag());
+    if (dbDataSet.getVersion() != version) {
+      throw new ConflictException("Attempted to modify outdated data set version");
+    }
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    dbDataSet.setLastModifiedTime(now);
+    dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
+    dbDataSet.setCohortSetId(request.getCohortIds());
+    dbDataSet.setConceptSetId(request.getConceptSetIds());
+    dbDataSet.setDescription(request.getDescription());
+    dbDataSet.setName(request.getName());
+    dbDataSet.setValues(request.getValues().stream().map(
+        (domainValueSet) -> {
+          DataSetValues dataSetValues = new DataSetValues(domainValueSet.getDomain().name(), domainValueSet.getValue());
+          dataSetValues.setDomainEnum(domainValueSet.getDomain());
+          return dataSetValues;
+        }).collect(Collectors.toList()));
+    try {
+      dbDataSet = dataSetDao.save(dbDataSet);
+      // TODO: add recent resource entry for data sets
+    } catch (OptimisticLockException e) {
+      throw new ConflictException("Failed due to concurrent concept set modification");
+    }
+
+    return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dbDataSet));
   }
 
   @Override
