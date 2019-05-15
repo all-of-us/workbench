@@ -429,7 +429,6 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         break;
       }
       case ResourceType.DATA_SET: {
-        console.log('hello');
         navigate(['/workspaces', this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName, 'data', 'data-sets',
           this.props.resourceCard.dataSet.id]);

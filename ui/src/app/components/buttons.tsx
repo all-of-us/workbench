@@ -63,13 +63,13 @@ const buttonVariants = {
       borderColor: colors.gray[4],
       backgroundColor: colors.backgroundGrey, color: colors.gray[4]
     },
-    hover: {backgroundColor: colors.blue[5], color: '#000'}
+    hover: {backgroundColor: colors.blue[5], color: colors.black[0]}
   },
   darklingPrimary: {
     style: {
       ...styles.base,
       borderRadius: '0.2rem',
-      backgroundColor: colors.purple[0], color: '#ffffff'
+      backgroundColor: colors.purple[0], color: colors.white
     },
     disabledStyle: {backgroundColor: colors.gray[4]},
     hover: {backgroundColor: 'rgba(255,255,255,0.3)'}
@@ -86,7 +86,7 @@ const buttonVariants = {
   purplePrimary: {
     style: {
       ...styles.baseNew,
-      backgroundColor: colors.purple[0], color: '#fff',
+      backgroundColor: colors.purple[0], color: colors.white,
     },
     disabledStyle: {backgroundColor: colors.gray[4]},
     hover: {backgroundColor: colors.purple[1]}

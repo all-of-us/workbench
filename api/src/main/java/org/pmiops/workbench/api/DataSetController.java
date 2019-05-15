@@ -168,6 +168,7 @@ public class DataSetController implements DataSetApiDelegate {
           result.setName(dataSet.getName());
           result.setIncludesAllParticipants(dataSet.getIncludesAllParticipants());
           result.setId(dataSet.getDataSetId());
+          result.setLastModifiedTime(dataSet.getLastModifiedTime().getTime());
           Iterable<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
               conceptSetDao.findAll(dataSet.getConceptSetId());
           result.setConceptSets(StreamSupport.stream(conceptSets.spliterator(), false)
