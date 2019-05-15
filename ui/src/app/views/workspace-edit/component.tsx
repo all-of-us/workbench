@@ -375,13 +375,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         if (error.status === 409) {
           this.setState({workspaceCreationConflictError: true});
         } else {
-          var errorMsg;
+          let errorMsg;
           if (error.status === 429) {
-            errorMsg = "Server is overloaded. Please try again in a few minutes."
+            errorMsg = 'Server is overloaded. Please try again in a few minutes.';
           } else {
             errorMsg = `Could not
             ${this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
-              ' create ' : ' update '} workspace.`
+              ' create ' : ' update '} workspace.`;
           }
 
           this.setState({
