@@ -4,7 +4,6 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import org.pmiops.workbench.api.CohortBuilderController;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.SearchGroup;
