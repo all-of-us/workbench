@@ -90,7 +90,7 @@ export const DetailPage = withCurrentWorkspace()(
         participant: null,
         annotations: null,
         annotationDefinitions: null
-      }
+      };
       this.setAnnotations = this.setAnnotations.bind(this);
       this.openCreateDefinitionModal = this.openCreateDefinitionModal.bind(this);
       this.closeCreateDefinitionModal = this.closeCreateDefinitionModal.bind(this);
