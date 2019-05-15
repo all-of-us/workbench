@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -8,7 +7,7 @@ import {filterStateStore} from 'app/cohort-review/review-state.service';
 import {typeToTitle} from 'app/cohort-search/utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, PageFilterType} from 'generated/fetch';
@@ -48,7 +47,7 @@ const css = `
   }
   body .p-tabview.p-tabview-top .p-tabview-nav li,
   body .p-tabview.p-tabview-top .p-tabview-nav li:focus {
-    padding: 0.571em 0.75em;
+    padding: 0.571em 0.7em;
     box-shadow: none;
   }
   body .p-tabview.p-tabview-top .p-tabview-nav li a {
@@ -391,13 +390,3 @@ export const DetailTabs = withCurrentWorkspace()(
     }
   }
 );
-
-@Component({
-  selector: 'app-detail-tabs',
-  template: '<div #root></div>'
-})
-export class DetailTabsComponent extends ReactWrapperBase {
-  constructor() {
-    super(DetailTabs, []);
-  }
-}

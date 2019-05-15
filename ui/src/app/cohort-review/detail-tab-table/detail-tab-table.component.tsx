@@ -420,7 +420,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             }
           }
         }
-        if (data.length < start + rows) {
+        if (data && data.length < start + rows) {
           start = Math.floor(data.length / rows) * rows;
         }
         this.setState({filteredData: data, start: start});
