@@ -232,8 +232,9 @@ public class DataSetController implements DataSetApiDelegate {
       String query = queryJobConfiguration.getQuery().concat(" LIMIT "+ NO_OF_PREVIEW_ROWS);
       queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
+      // Select all value can take up to a minute to return the results
       TableResult queryResponse = bigQueryService.executeQuery(bigQueryService
-          .filterBigQueryConfig(queryJobConfiguration), 42000l);
+          .filterBigQueryConfig(queryJobConfiguration), 60000l);
 
       List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
       queryResponse.getSchema().getFields().forEach(fields -> {
