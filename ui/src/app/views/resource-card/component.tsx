@@ -246,10 +246,10 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         break;
       }
       case ResourceType.DATA_SET: {
-        navigate([currentWorkspaceRoute.concat(['workspaces',
+        navigate(['workspaces',
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
-          'data', 'data-sets', this.props.dataSet.id])]);
+          'data', 'data-sets', this.props.resourceCard.dataSet.id]);
         break;
       }
       default: {
