@@ -81,7 +81,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final NotebooksService notebooksService;
   private final UserService userService;
-  private final Provider<WorkbenchConfig> workbenchConfig;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   WorkspacesController(
@@ -99,7 +99,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Clock clock,
       NotebooksService notebooksService,
       UserService userService,
-      Provider<WorkbenchConfig> workbenchConfig) {
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.workspaceMapper = workspaceMapper;
@@ -114,7 +114,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.clock = clock;
     this.notebooksService = notebooksService;
     this.userService = userService;
-    this.workbenchConfig = workbenchConfig;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @VisibleForTesting
@@ -179,8 +179,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("Workspace name must be 80 characters or less");
     }
 
-    final boolean useBillingProjectBuffer = workbenchConfig.get().featureFlags.useBillingProjectBuffer;
-    if (useBillingProjectBuffer) {
+    final boolean useBillingProjectBuffer = workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer;
+    if (!useBillingProjectBuffer) {
       if (Strings.isNullOrEmpty(workspace.getNamespace())) {
         throw new BadRequestException("missing required field 'namespace'");
       }
@@ -428,7 +428,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'workspace.researchPurpose'");
     }
 
-    final boolean useBillingProjectBuffer = workbenchConfig.get().featureFlags.useBillingProjectBuffer;
+    final boolean useBillingProjectBuffer = workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer;
     if (!useBillingProjectBuffer) {
       if (Strings.isNullOrEmpty(toWorkspace.getNamespace())) {
         throw new BadRequestException("missing required field 'workspace.namespace'");
