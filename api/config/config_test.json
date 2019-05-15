@@ -64,6 +64,6 @@
     "enableListSearch": false
   },
   "featureFlags": {
-    "useBillingProjectBuffer": true
+    "useBillingProjectBuffer": false
   }
 }
