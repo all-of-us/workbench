@@ -176,11 +176,7 @@ public class UserService {
     }
   }
 
-  /**
-   * Determines whether the given user is a service account based on the whitelisted set of allowed
-   * service account user emails.
-   */
-  public boolean isServiceAccount(User user) {
+  private boolean isServiceAccount(User user) {
     return configProvider.get().auth.serviceAccountApiUsers.contains(user.getEmail());
   }
 
