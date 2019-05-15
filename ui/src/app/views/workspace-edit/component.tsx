@@ -238,6 +238,7 @@ export interface WorkspaceEditState {
   workspace: Workspace;
   workspaceCreationConflictError: boolean;
   workspaceCreationError: boolean;
+  workspaceCreationErrorMessage: string;
   cloneUserRole: boolean;
   loading: boolean;
 }
@@ -270,6 +271,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         },
         workspaceCreationConflictError: false,
         workspaceCreationError: false,
+        workspaceCreationErrorMessage: '',
         cloneUserRole: false,
         loading: false
       };
@@ -373,7 +375,19 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         if (error.status === 409) {
           this.setState({workspaceCreationConflictError: true});
         } else {
-          this.setState({workspaceCreationError: true});
+          var errorMsg;
+          if (error.status === 429) {
+            errorMsg = "Server is overloaded. Please try again in a few minutes."
+          } else {
+            errorMsg = `Could not
+            ${this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
+              ' create ' : ' update '} workspace.`
+          }
+
+          this.setState({
+            workspaceCreationError: true,
+            workspaceCreationErrorMessage: errorMsg
+          });
         }
       }
     }
@@ -547,9 +561,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         {this.state.workspaceCreationError &&
         <Modal>
           <ModalTitle>Error:</ModalTitle>
-          <ModalBody>Could not
-            {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? ' create ' : ' update '}
-            workspace.
+          <ModalBody>
+            { this.state.workspaceCreationErrorMessage }
           </ModalBody>
           <ModalFooter>
             <Button onClick = {() => this.props.cancel()}
