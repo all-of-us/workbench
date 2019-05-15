@@ -64,9 +64,15 @@ parameters:
     format: int64
     required: true
     description: Concept set ID
+  dataSetId:
+    in: path
+    name: dataSetId
+    type: integer
+    format: int64
+    required: true
+    description: Data set ID
 
 paths:
-
   /v1/status:
     get:
       tags:
@@ -1451,36 +1457,6 @@ paths:
               $ref: "#/definitions/DomainValuesResponse"
 
 ### Data set ############################################
-
-  /v1/{workspaceNamespace}/{workspaceId}/data-set/create:
-    post:
-      tags:
-        - dataSet
-      description: >
-        Creates Data Set
-      operationId: "createDataSet"
-      parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-        - in: body
-          name: dataSetRequest
-          required: true
-          schema:
-            $ref: "#/definitions/DataSetRequest"
-      responses:
-        200:
-          description: Data set has been created successfully
-          schema:
-            $ref: "#/definitions/DataSet"
-        400:
-          description: Invalid data set request
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-        409:
-          description: Data set with same name exist
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateQuery:
     post:
       tags:
@@ -1502,6 +1478,73 @@ paths:
             A SQL query for each domain in the Data Set
           schema:
             $ref: "#/definitions/DataSetQueryList"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets:
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+      get:
+        tags:
+          - dataSet
+        description: Returns all data sets in a workspace
+        operationId: "getDataSetsInWorkspace"
+        responses:
+          200:
+            description: A list of data sets.
+            schema:
+              $ref: "#/definitions/DataSetListResponse"
+      post:
+        tags:
+          - dataSet
+        description: >
+          Creates Data Set
+        operationId: "createDataSet"
+        parameters:
+          - $ref: '#/parameters/workspaceNamespace'
+          - $ref: '#/parameters/workspaceId'
+          - in: body
+            name: dataSetRequest
+            required: true
+            schema:
+              $ref: "#/definitions/DataSetRequest"
+        responses:
+          200:
+            description: Data set has been created successfully
+            schema:
+              $ref: "#/definitions/DataSet"
+          400:
+            description: Invalid data set request
+            schema:
+              $ref: "#/definitions/ErrorResponse"
+          409:
+            description: Data set with same name exist
+            schema:
+              $ref: "#/definitions/ErrorResponse"
+
+  /v1/{workspaceNamespace}/{workspaceId}/data-sets/{dataSetId}/delete:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/dataSetId'
+    get:
+      tags:
+        - dataSet
+      operationId: "getDataSet"
+      responses:
+        200:
+          description: The data set with the specified ID
+          schema:
+            $ref: "#/definitions/DataSet"
+    delete:
+      tags:
+        - dataSet
+      description: Deletes the data set with the specified ID
+      operationId: "deleteDataSet"
+      responses:
+        202:
+          description: ACCEPTED
+          schema:
+            $ref: '#/definitions/EmptyResponse'
 
   /v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook:
     post:
@@ -2279,6 +2322,9 @@ definitions:
   DataSet:
     type: object
     properties:
+      id:
+        type: integer
+        format: int64
       name:
         type: string
       includesAllParticipants:
@@ -2288,6 +2334,10 @@ definitions:
       workspaceId:
         type: integer
         format: int64
+      lastModifiedTime:
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
       conceptSets:
         type: array
         description: >
@@ -2306,6 +2356,14 @@ definitions:
           All the selected values in the data set
         items:
           $ref: "#/definitions/DomainValuePair"
+
+  DataSetListResponse:
+    type: object
+    properties:
+      items:
+        type: "array"
+        items:
+           $ref: "#/definitions/DataSet"
 
 
   DataSetQueryList:
@@ -2912,6 +2970,8 @@ definitions:
         $ref: '#/definitions/FileDetail'
       conceptSet:
         $ref: '#/definitions/ConceptSet'
+      dataSet:
+        $ref: '#/definitions/DataSet'
       modifiedTime:
         type: string
 

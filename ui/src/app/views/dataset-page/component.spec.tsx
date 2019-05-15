@@ -55,14 +55,14 @@ describe('DataSet', () => {
     // First Concept set in concept set list has domain "Condition"
     const condition_concept = wrapper.find('[data-test-id="concept-set-list-item"]').first()
         .find('input').first();
-    condition_concept.simulate('click');
+    condition_concept.simulate('change');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="value-list-items"]').length).toBe(2);
 
     // Second Concept set in concept set list has domain "Measurement"
     const measurement_concept = wrapper.find('[data-test-id="concept-set-list-item"]').at(1)
         .find('input').first();
-    measurement_concept.simulate('click');
+    measurement_concept.simulate('change');
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="value-list-items"]').length).toBe(5);
@@ -81,11 +81,11 @@ describe('DataSet', () => {
     // After all cohort concept and values are selected all the buttons will be enabled
 
     wrapper.find('[data-test-id="cohort-list-item"]').first()
-      .find('input').first().simulate('click');
+      .find('input').first().simulate('change');
     wrapper.update();
 
     wrapper.find('[data-test-id="concept-set-list-item"]').first()
-      .find('input').first().simulate('click');
+      .find('input').first().simulate('change');
 
     await waitOneTickAndUpdate(wrapper);
 

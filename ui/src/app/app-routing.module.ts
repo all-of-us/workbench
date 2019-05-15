@@ -180,13 +180,21 @@ const routes: Routes = [
                     }
                   },
                   {
-                    path: 'datasets',
+                    path: 'data-sets',
                     component: DataSetPageComponent,
                     data: {
-                      title: 'Dataset Page',
+                      title: 'Data Set Page',
                       breadcrumb: BreadcrumbType.Dataset
                     }
                   },
+                  {
+                    path: 'data-sets/:dataSetId',
+                    component: DataSetPageComponent,
+                    data: {
+                      title: 'Edit Data Set',
+                      breadcrumb: BreadcrumbType.Dataset
+                    }
+                  }
                 ]
               },
               {

@@ -25,7 +25,8 @@ const routes: Routes = [{
     path: 'participants/:pid',
     component: DetailPage,
     data: {
-      breadcrumb: BreadcrumbType.Participant
+      breadcrumb: BreadcrumbType.Participant,
+      shouldReuse: true
     }
   }],
 }];

@@ -22,6 +22,7 @@ public class DataSet {
   private String description;
   private long creatorId;
   private Timestamp creationTime;
+  private Timestamp lastModifiedTime;
   private Boolean invalid;
   private Boolean includesAllParticipants;
   private List<Long> conceptSetId;
@@ -93,6 +94,15 @@ public class DataSet {
 
   public void setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+  }
+
+  @Column(name = "last_modified_time")
+  public Timestamp getLastModifiedTime() {
+    return lastModifiedTime;
+  }
+
+  public void setLastModifiedTime(Timestamp lastModifiedTime) {
+    this.lastModifiedTime = lastModifiedTime;
   }
 
   @Column(name = "invalid")
