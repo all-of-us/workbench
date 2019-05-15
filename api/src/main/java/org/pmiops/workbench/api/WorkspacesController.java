@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -30,6 +31,8 @@ import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.exceptions.*;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -38,11 +41,6 @@ import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.FailedPreconditionException;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.*;
@@ -196,7 +194,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     User user = userProvider.get();
     String workspaceNamespace;
     if (useBillingProjectBuffer) {
-      BillingProjectBufferEntry bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      BillingProjectBufferEntry bufferedBillingProject;
+      try {
+        bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      } catch (EmptyBufferException e) {
+        throw new TooManyRequestsException();
+      }
       workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
     } else {
       workspaceNamespace = workspace.getNamespace();
@@ -444,7 +447,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     String toWorkspaceName;
     if (useBillingProjectBuffer) {
-      BillingProjectBufferEntry bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      BillingProjectBufferEntry bufferedBillingProject;
+      try {
+        bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      } catch (EmptyBufferException e) {
+        throw new TooManyRequestsException();
+      }
       toWorkspaceName = bufferedBillingProject.getFireCloudProjectName();
     } else {
       toWorkspaceName = toWorkspace.getNamespace();

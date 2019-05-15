@@ -198,7 +198,6 @@ public class DataSetControllerTest {
   WorkspaceMapper workspaceMapper;
 
   @TestConfiguration
-
   @Import({CohortFactoryImpl.class,
       DataSetServiceImpl.class,
       TestBigQueryCdrSchemaConfig.class,
@@ -206,7 +205,6 @@ public class DataSetControllerTest {
       WorkspacesController.class,
       WorkspaceMapper.class,
       WorkspaceServiceImpl.class})
-
   @MockBean({BillingProjectBufferService.class, BigQueryService.class, CdrBigQuerySchemaConfigService.class, CdrVersionService.class,
       CloudStorageService.class, CohortCloningService.class,
       CohortMaterializationService.class, ComplianceService.class,

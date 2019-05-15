@@ -21,6 +21,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -47,7 +48,7 @@ public class BillingProjectBufferService {
   }
 
   public void bufferBillingProject() {
-    if (getCurrentBufferSize() >= getBufferCapacity()) {
+    if (getRemainingBufferSlotsSize() <= 0) {
       return;
     }
 
@@ -117,6 +118,14 @@ public class BillingProjectBufferService {
       entry = billingProjectBufferEntryDao
           .findFirstByStatusOrderByCreationTimeAsc(
               StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE));
+
+      // attempt to quickly fill the buffer since this means it is empty
+      if (entry == null) {
+        log.log(Level.SEVERE, "Consume Buffer call made while Billing Project Buffer was empty");
+        fillBufferAsync();
+        throw new EmptyBufferException();
+      }
+
       entry.setStatusEnum(ASSIGNING);
       billingProjectBufferEntryDao.save(entry);
     } finally {
@@ -124,6 +133,27 @@ public class BillingProjectBufferService {
     }
 
     return entry;
+  }
+
+  private void fillBufferAsync() {
+    final int numBufferCalls = getBufferMaxCapacity() / 2;
+
+    new Thread(() -> {
+      for (int i = 0; i < numBufferCalls; i++) {
+        bufferBillingProject();
+      }
+    }).start();
+
+    new Thread(() -> {
+      for (int i = 0; i < 5; i++) {
+        syncBillingProjectStatus();
+        try {
+          Thread.sleep(5000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    }).start();
   }
 
   private String createBillingProjectName() {
@@ -138,11 +168,15 @@ public class BillingProjectBufferService {
     return prefix + randomString;
   }
 
+  private int getRemainingBufferSlotsSize() {
+    return getBufferMaxCapacity() - (int) getCurrentBufferSize();
+  }
+
   private long getCurrentBufferSize() {
     return billingProjectBufferEntryDao.getCurrentBufferSize();
   }
 
-  private int getBufferCapacity() {
+  private int getBufferMaxCapacity() {
     return workbenchConfigProvider.get().firecloud.billingProjectBufferCapacity;
   }
 

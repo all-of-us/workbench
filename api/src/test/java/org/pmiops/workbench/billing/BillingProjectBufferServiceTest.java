@@ -1,15 +1,10 @@
 package org.pmiops.workbench.billing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
@@ -27,10 +22,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.CallsRealMethodsWithDelay;
@@ -69,7 +67,8 @@ public class BillingProjectBufferServiceTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
-  private static WorkbenchConfig workbenchConfig;
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @TestConfiguration
   @Import({
@@ -90,6 +89,8 @@ public class BillingProjectBufferServiceTest {
       return workbenchConfig;
     }
   }
+
+  private static WorkbenchConfig workbenchConfig;
 
   @Autowired
   EntityManager entityManager;
@@ -389,6 +390,28 @@ public class BillingProjectBufferServiceTest {
 
     assertThat(futures.get(0).get().getFireCloudProjectName())
         .isNotEqualTo(futures.get(1).get().getFireCloudProjectName());
+  }
+
+  @Test(timeout = 2000)
+  public void assignBillingProject_emptyBuffer() {
+    User user = mock(User.class);
+    doReturn("fake-email@aou.org").when(user).getEmail();
+
+    billingProjectBufferService = spy(billingProjectBufferService);
+
+    AtomicInteger expectedBufferCalls = new AtomicInteger(workbenchConfig.firecloud.billingProjectBufferCapacity / 2);
+    AtomicInteger expectedSyncCalls = new AtomicInteger(1);
+    doAnswer(invocation -> expectedBufferCalls.getAndDecrement()).when(billingProjectBufferService).bufferBillingProject();
+    doAnswer(invocation -> expectedSyncCalls.getAndDecrement()).when(billingProjectBufferService).syncBillingProjectStatus();
+
+    try {
+      billingProjectBufferService.assignBillingProject(user);
+      fail("Exception should have been thrown");
+    } catch (Exception e) {
+      assertThat(e.getClass()).isEqualTo(EmptyBufferException.class);
+    }
+
+    while(expectedBufferCalls.get() > 0 && expectedSyncCalls.get() > 0) {}
   }
 
 }
