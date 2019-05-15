@@ -6,6 +6,7 @@ import {from} from 'rxjs/observable/from';
 
 import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/cohort-review/annotation-definition-modals/annotation-definition-modals.component';
 import {DetailHeader} from 'app/cohort-review/detail-header/detail-header.component';
+import {DetailTabs} from 'app/cohort-review/detail-tabs/detail-tabs.component';
 import {Participant} from 'app/cohort-review/participant.model';
 import {SidebarContent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
 import {ClrIcon} from 'app/components/icons';
@@ -19,7 +20,7 @@ import {CohortAnnotationDefinition, ParticipantCohortAnnotation} from 'generated
 const styles = reactStyles({
   detailSidebar: {
     position: 'absolute',
-    top: 'px',
+    top: '1px',
     right: '0px',
     borderRadius: '2px',
     height: '100%',
@@ -177,16 +178,15 @@ export const DetailPage = withCurrentWorkspace()(
       return <React.Fragment>
         {!(participant && annotations && annotationDefinitions) && <SpinnerOverlay />}
         {participant && annotations && annotationDefinitions && <React.Fragment>
-          <div style={{...styles.detailPage, ...(sidebarOpen ? styles.detailPageOpen : {})}}>
+          <div className={'detail-page ' + (sidebarOpen ? 'sidebar-open' : '')}
+               style={{...styles.detailPage, ...(sidebarOpen ? styles.detailPageOpen : {})}}>
             <DetailHeader participant={participant}>
             </DetailHeader>
-            {/*TODO uncomment when PR for below component is done*/}
-            {/*<app-detail-tabs></app-detail-tabs>*/}
+            <DetailTabs>
+            </DetailTabs>
           </div>
           <div style={styles.detailSidebar}>
-            <div style={
-              {...styles.sidebarHandle, ...(sidebarOpen ? styles.sidebarHandleOpen : {})}
-            } onClick={() => this.toggleSidebar()}>
+            <div style={styles.sidebarHandle} onClick={() => this.toggleSidebar()}>
               <ClrIcon style={{color: 'white'}} shape='angle-double' dir={this.angleDir} size='29'/>
             </div>
             <div id='review-sidebar-content'

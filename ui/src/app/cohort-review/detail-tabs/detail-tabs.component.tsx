@@ -48,7 +48,7 @@ const css = `
   }
   body .p-tabview.p-tabview-top .p-tabview-nav li,
   body .p-tabview.p-tabview-top .p-tabview-nav li:focus {
-    padding: 0.571em 1em;
+    padding: 0.571em 0.75em;
     box-shadow: none;
   }
   body .p-tabview.p-tabview-top .p-tabview-nav li a {
