@@ -1,16 +1,21 @@
 package org.pmiops.workbench.api;
 
+import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 
 import com.google.common.base.Strings;
 
-import java.io.IOException;
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Clock;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.List;
 
@@ -230,10 +235,10 @@ public class DataSetController implements DataSetApiDelegate {
       TableResult queryResponse = bigQueryService.executeQuery(bigQueryService
           .filterBigQueryConfig(queryJobConfiguration));
 
-      // Construct a list of all values with empty results.
-      List<DataSetPreviewValueList> valuePreviewList =
-          dataSet.getValues().stream().filter(value -> value.getDomain().toString().equals(domain))
-              .map(value -> new DataSetPreviewValueList().value(value.getValue())).collect(Collectors.toList());
+      List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
+      queryResponse.getSchema().getFields().forEach(fields -> {
+        valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
+      });
 
       queryResponse.getValues().forEach(fieldValueList -> {
         IntStream.range(0, fieldValueList.size()).forEach(columnNumber -> {
@@ -247,7 +252,28 @@ public class DataSetController implements DataSetApiDelegate {
           }
         });
       });
-      previewQueryResponse.addDomainValueItem(new DataSetPreviewList().domain(domain).values(valuePreviewList));
+      queryResponse.getSchema().getFields().forEach(fields -> {
+        DataSetPreviewValueList previewValue = valuePreviewList.stream()
+            .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName())).findFirst().get();
+        if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
+          List<String> queryValues = new ArrayList<String>();
+          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+          previewValue.getQueryValue().forEach(value -> {
+            try {
+              Double fieldValue = Double.parseDouble(value);
+              queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
+            } catch (NumberFormatException ex) {
+              queryValues.add("");
+            }
+          });
+          previewValue.setQueryValue(queryValues);
+        }
+      });
+
+      Collections.sort(valuePreviewList,
+          Comparator.comparing(item -> dataSet.getValues().indexOf(item.getValue())));
+
+     previewQueryResponse.addDomainValueItem(new DataSetPreviewList().domain(domain).values(valuePreviewList));
     });
     return ResponseEntity.ok(previewQueryResponse);
   }
