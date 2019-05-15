@@ -239,15 +239,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void grantGoogleRoleToUser(String projectName, String role, String email) {
-    BillingApi billingApi = billingApiProvider.get();
-    retryHandler.run((context) -> {
-      billingApi.grantGoogleRoleToUser(projectName, role, email);
-      return null;
-    });
-  }
-
-  @Override
   public void cloneWorkspace(String fromProject, String fromName, String toProject, String toName) {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     WorkspaceIngest workspaceIngest = new WorkspaceIngest();

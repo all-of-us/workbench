@@ -338,6 +338,7 @@ public class ProfileController implements ProfileApiDelegate {
           return userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, status);
         }
       case READY:
+        log.log(Level.INFO, "free tier project initialized");
         break;
 
       default:
@@ -345,20 +346,7 @@ public class ProfileController implements ProfileApiDelegate {
         return user;
     }
 
-    // Grant the user BQ job access on the billing project so that they can run BQ queries from
-    // notebooks. Granting of this role is idempotent.
     String billingProjectName = user.getFreeTierBillingProjectName();
-    try {
-      fireCloudService.grantGoogleRoleToUser(billingProjectName,
-          FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
-    } catch (WorkbenchException e) {
-      log.log(Level.WARNING,
-          "granting BigQuery role on created free tier billing project failed", e);
-      // Allow the user to continue, as most workbench functionality will still be usable.
-      return user;
-    }
-    log.log(Level.INFO, "free tier project initialized and BigQuery role granted");
-
     try {
       this.leonardoNotebooksClient.createCluster(billingProjectName,
           LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
