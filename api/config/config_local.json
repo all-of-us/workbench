@@ -62,5 +62,8 @@
   },
   "cohortbuilder": {
     "enableListSearch": false
+  },
+  "featureFlags": {
+    "useBillingProjectBuffer": true
   }
 }

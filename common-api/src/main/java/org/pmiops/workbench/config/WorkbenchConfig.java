@@ -21,6 +21,7 @@ public class WorkbenchConfig {
   public MoodleConfig moodle;
   public AccessConfig access;
   public CohortBuilderConfig cohortbuilder;
+  public FeatureFlagsConfig featureFlags;
 
   /**
    * Creates a config with non-null-but-empty member variables, for use in testing.
@@ -127,5 +128,9 @@ public class WorkbenchConfig {
 
   public static class CohortBuilderConfig {
     public boolean enableListSearch;
+  }
+
+  public static class FeatureFlagsConfig {
+    public boolean useBillingProjectBuffer = false;
   }
 }

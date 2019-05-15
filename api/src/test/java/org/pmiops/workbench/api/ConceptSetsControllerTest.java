@@ -27,6 +27,7 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortCloningService;
@@ -199,6 +200,9 @@ public class ConceptSetsControllerTest {
   @Mock
   Provider<User> userProvider;
 
+  @Autowired
+  Provider<WorkbenchConfig> workbenchConfigProvider;
+
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, WorkspaceMapper.class, CohortCloningService.class, CohortFactoryImpl.class,
@@ -215,6 +219,14 @@ public class ConceptSetsControllerTest {
     Random random() {
       return new FakeLongRandom(123);
     }
+
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.featureFlags.useBillingProjectBuffer = false;
+      return workbenchConfig;
+    }
   }
 
   @Before
@@ -224,7 +236,7 @@ public class ConceptSetsControllerTest {
         conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
     WorkspacesController workspacesController =
         new WorkspacesController(billingProjectBufferService, workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao,
-                userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
+                userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService, workbenchConfigProvider);
 
     User user = new User();
     user.setEmail(USER_EMAIL);

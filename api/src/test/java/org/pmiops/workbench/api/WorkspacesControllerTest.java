@@ -50,6 +50,7 @@ import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
@@ -218,6 +219,14 @@ public class WorkspacesControllerTest {
     User user() {
       return currentUser;
     }
+
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.featureFlags.useBillingProjectBuffer = false;
+      return workbenchConfig;
+    }
   }
 
   private static User currentUser;
@@ -289,10 +298,6 @@ public class WorkspacesControllerTest {
       fcResponse.setWorkspace(createFcWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null));
       fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
       doReturn(fcResponse).when(fireCloudService).getWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName);
-
-//      List<WorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
-//      workspaceResponses.add(fcResponse);
-//      doReturn(workspaceResponses).when(fireCloudService).getWorkspaces();
       return null;
     }).when(fireCloudService).createWorkspace(anyString(), anyString());
 

@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cohorts.CohortFactory;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
@@ -80,6 +81,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final NotebooksService notebooksService;
   private final UserService userService;
+  private final Provider<WorkbenchConfig> workbenchConfig;
 
   @Autowired
   WorkspacesController(
@@ -96,7 +98,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       CloudStorageService cloudStorageService,
       Clock clock,
       NotebooksService notebooksService,
-      UserService userService) {
+      UserService userService,
+      Provider<WorkbenchConfig> workbenchConfig) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.workspaceMapper = workspaceMapper;
@@ -111,6 +114,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.clock = clock;
     this.notebooksService = notebooksService;
     this.userService = userService;
+    this.workbenchConfig = workbenchConfig;
   }
 
   @VisibleForTesting
@@ -175,15 +179,54 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("Workspace name must be 80 characters or less");
     }
 
+    final boolean useBillingProjectBuffer = workbenchConfig.get().featureFlags.useBillingProjectBuffer;
+    if (useBillingProjectBuffer) {
+      if (Strings.isNullOrEmpty(workspace.getNamespace())) {
+        throw new BadRequestException("missing required field 'namespace'");
+      }
+      org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.getByName(
+              workspace.getNamespace(), workspace.getName());
+      if (existingWorkspace != null) {
+        throw new ConflictException(String.format(
+                "Workspace %s/%s already exists",
+                workspace.getNamespace(), workspace.getName()));
+      }
+    }
+
     User user = userProvider.get();
-    BillingProjectBufferEntry bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
-    String workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+    String workspaceNamespace;
+    if (useBillingProjectBuffer) {
+      BillingProjectBufferEntry bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+    } else {
+      workspaceNamespace = workspace.getNamespace();
+    }
 
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspaceNamespace,
         workspace.getName());
     FirecloudWorkspaceId fcWorkspaceId = workspaceId;
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
+
+    if (useBillingProjectBuffer) {
+      fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
+    } else {
+      fcWorkspace = null;
+      for (int attemptValue = 1; attemptValue < MAX_FC_CREATION_ATTEMPT_VALUES; attemptValue++) {
+        try {
+          fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
+          break;
+        } catch (ConflictException e) {
+          if (attemptValue >= 5) {
+            throw e;
+          } else {
+            fcWorkspaceId =
+                    new FirecloudWorkspaceId(workspaceId.getWorkspaceNamespace(),
+                            workspaceId.getWorkspaceName() + Integer.toString(attemptValue));
+          }
+        }
+      }
+    }
 
     cloudStorageService.copyAllDemoNotebooks(fcWorkspace.getBucketName());
 
@@ -385,8 +428,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'workspace.researchPurpose'");
     }
 
+    final boolean useBillingProjectBuffer = workbenchConfig.get().featureFlags.useBillingProjectBuffer;
+    if (!useBillingProjectBuffer) {
+      if (Strings.isNullOrEmpty(toWorkspace.getNamespace())) {
+        throw new BadRequestException("missing required field 'workspace.namespace'");
+      }
+      if (workspaceService.getByName(toWorkspace.getNamespace(), toWorkspace.getName()) != null) {
+        throw new ConflictException(String.format(
+                "Workspace %s/%s already exists",
+                toWorkspace.getNamespace(), toWorkspace.getName()));
+      }
+    }
+
     User user = userProvider.get();
-    BillingProjectBufferEntry bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+
+    String toWorkspaceName;
+    if (useBillingProjectBuffer) {
+      BillingProjectBufferEntry bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      toWorkspaceName = bufferedBillingProject.getFireCloudProjectName();
+    } else {
+      toWorkspaceName = toWorkspace.getNamespace();
+    }
 
     // Retrieving the workspace is done first, which acts as an access check.
     String fromBucket = fireCloudService.getWorkspace(fromWorkspaceNamespace, fromWorkspaceId)
@@ -400,7 +462,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           "Workspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceId));
     }
 
-    FirecloudWorkspaceId toFcWorkspaceId = generateFirecloudWorkspaceId(bufferedBillingProject.getFireCloudProjectName(),
+    FirecloudWorkspaceId toFcWorkspaceId = generateFirecloudWorkspaceId(toWorkspaceName,
         toWorkspace.getName());
     fireCloudService.cloneWorkspace(fromWorkspaceNamespace, fromWorkspaceId,
         toFcWorkspaceId.getWorkspaceNamespace(), toFcWorkspaceId.getWorkspaceName());
