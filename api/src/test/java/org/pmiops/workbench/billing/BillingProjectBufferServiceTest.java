@@ -1,7 +1,6 @@
 package org.pmiops.workbench.billing;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -22,7 +21,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import org.junit.Before;
@@ -66,9 +64,6 @@ public class BillingProjectBufferServiceTest {
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @TestConfiguration
   @Import({
@@ -390,28 +385,6 @@ public class BillingProjectBufferServiceTest {
 
     assertThat(futures.get(0).get().getFireCloudProjectName())
         .isNotEqualTo(futures.get(1).get().getFireCloudProjectName());
-  }
-
-  @Test(timeout = 2000)
-  public void assignBillingProject_emptyBuffer() {
-    User user = mock(User.class);
-    doReturn("fake-email@aou.org").when(user).getEmail();
-
-    billingProjectBufferService = spy(billingProjectBufferService);
-
-    AtomicInteger expectedBufferCalls = new AtomicInteger(workbenchConfig.firecloud.billingProjectBufferCapacity / 2);
-    AtomicInteger expectedSyncCalls = new AtomicInteger(1);
-    doAnswer(invocation -> expectedBufferCalls.getAndDecrement()).when(billingProjectBufferService).bufferBillingProject();
-    doAnswer(invocation -> expectedSyncCalls.getAndDecrement()).when(billingProjectBufferService).syncBillingProjectStatus();
-
-    try {
-      billingProjectBufferService.assignBillingProject(user);
-      fail("Exception should have been thrown");
-    } catch (Exception e) {
-      assertThat(e.getClass()).isEqualTo(EmptyBufferException.class);
-    }
-
-    while(expectedBufferCalls.get() > 0 && expectedSyncCalls.get() > 0) {}
   }
 
 }

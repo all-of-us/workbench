@@ -456,6 +456,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       toWorkspaceName = bufferedBillingProject.getFireCloudProjectName();
     } else {
       toWorkspaceName = toWorkspace.getNamespace();
+
     }
 
     // Retrieving the workspace is done first, which acts as an access check.

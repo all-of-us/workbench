@@ -119,10 +119,8 @@ public class BillingProjectBufferService {
           .findFirstByStatusOrderByCreationTimeAsc(
               StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE));
 
-      // attempt to quickly fill the buffer since this means it is empty
       if (entry == null) {
         log.log(Level.SEVERE, "Consume Buffer call made while Billing Project Buffer was empty");
-        fillBufferAsync();
         throw new EmptyBufferException();
       }
 
@@ -133,27 +131,6 @@ public class BillingProjectBufferService {
     }
 
     return entry;
-  }
-
-  private void fillBufferAsync() {
-    final int numBufferCalls = getBufferMaxCapacity() / 2;
-
-    new Thread(() -> {
-      for (int i = 0; i < numBufferCalls; i++) {
-        bufferBillingProject();
-      }
-    }).start();
-
-    new Thread(() -> {
-      for (int i = 0; i < 5; i++) {
-        syncBillingProjectStatus();
-        try {
-          Thread.sleep(5000);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
-    }).start();
   }
 
   private String createBillingProjectName() {
