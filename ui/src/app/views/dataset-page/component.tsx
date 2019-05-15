@@ -128,7 +128,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         creatingConceptSet: false,
         dataSet: undefined,
         dataSetTouched: false,
-        editing: false,
+        editingResource: false,
         includesAllParticipants: false,
         loadingResources: true,
         openSaveModal: false,
