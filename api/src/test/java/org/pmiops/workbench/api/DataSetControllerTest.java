@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -26,6 +27,7 @@ import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -122,6 +124,9 @@ public class DataSetControllerTest {
   SearchRequest searchRequest;
 
   @Autowired
+  BillingProjectBufferService billingProjectBufferService;
+
+  @Autowired
   BigQueryService bigQueryService;
 
   @Autowired
@@ -179,6 +184,9 @@ public class DataSetControllerTest {
   Provider<User> userProvider;
 
   @Autowired
+  Provider<WorkbenchConfig> workbenchConfigProvider;
+
+  @Autowired
   NotebooksService notebooksService;
 
   @Autowired
@@ -203,7 +211,7 @@ public class DataSetControllerTest {
       WorkspaceMapper.class,
       WorkspaceServiceImpl.class})
 
-  @MockBean({BigQueryService.class, CdrBigQuerySchemaConfigService.class, CdrVersionService.class,
+  @MockBean({BillingProjectBufferService.class, BigQueryService.class, CdrBigQuerySchemaConfigService.class, CdrVersionService.class,
       CloudStorageService.class, CohortCloningService.class,
       CohortMaterializationService.class, ComplianceService.class,
       ConceptBigQueryService.class, ConceptSetService.class, DataSetService.class,
@@ -219,6 +227,14 @@ public class DataSetControllerTest {
     Random random() {
       return new FakeLongRandom(123);
     }
+
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.featureFlags.useBillingProjectBuffer = false;
+      return workbenchConfig;
+    }
   }
 
   private DataSetController dataSetController;
@@ -229,8 +245,8 @@ public class DataSetControllerTest {
     dataSetController = new DataSetController(bigQueryService, CLOCK, cohortDao, conceptDao, conceptSetDao,
         dataSetDao, dataSetService, fireCloudService, notebooksService, userProvider, workspaceService);
     WorkspacesController workspacesController =
-        new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
-            userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
+        new WorkspacesController(billingProjectBufferService, workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
+            userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService, workbenchConfigProvider);
     CohortsController cohortsController = new CohortsController(workspaceService, cohortDao, cdrVersionDao, cohortFactory,
         cohortReviewDao, conceptSetDao, cohortMaterializationService, userProvider, CLOCK,
         cdrVersionService, userRecentResourceService);
