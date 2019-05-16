@@ -1527,7 +1527,7 @@ paths:
             schema:
               $ref: "#/definitions/ErrorResponse"
 
-  /v1/{workspaceNamespace}/{workspaceId}/data-sets/{dataSetId}/delete:
+  /v1/{workspaceNamespace}/{workspaceId}/data-sets/{dataSetId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -1539,6 +1539,23 @@ paths:
       responses:
         200:
           description: The data set with the specified ID
+          schema:
+            $ref: "#/definitions/DataSet"
+    patch:
+      tags:
+        - dataSet
+      consumes:
+        - application/json
+      operationId: "updateDataSet"
+      parameters:
+        - in: body
+          name: dataSet
+          description: data set definition
+          schema:
+            $ref: "#/definitions/DataSetRequest"
+      responses:
+        200:
+          description: The updated data set.
           schema:
             $ref: "#/definitions/DataSet"
     delete:
@@ -2272,6 +2289,12 @@ definitions:
         type: string
       description:
         type: string
+      etag:
+        type: string
+        description: >
+          Entity tag for optimistic concurrency control. To be set during a
+          read-modify-write to ensure that the client has not attempted to
+          modify a changed resource.
       workspaceId:
         type: integer
         format: int64
@@ -2333,6 +2356,12 @@ definitions:
         format: int64
       name:
         type: string
+      etag:
+        type: string
+        description: >
+          Entity tag for optimistic concurrency control. To be set during a
+          read-modify-write to ensure that the client has not attempted to
+          modify a changed resource.
       includesAllParticipants:
         type: boolean
       description:
