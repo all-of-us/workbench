@@ -67,16 +67,18 @@ As code snippets are updated in the source repository, we will want to
 periocially update the menus in the Workbench. For now, this process is fairly
 manual and can be improved going forwards:
 
-Prerequisite: Must have `jq` installed.
+Prerequisite: Must have `jq` installed (for pretty printing).
 
 1. In a separate directory, clone the snippets repo and build the menu config:
     https://github.com/all-of-us/workbench-snippets#auto-generation-of-jupyter-snippets-menu-configuration
 1. Pull the updated JSON into the Workbench repo
 
     ```
-    export SNIPPETS_JSON="<path to above generated JSON>"
-    jq '."sub-menu"[0]' "${SNIPPETS_JSON}" > $(git rev-parse --show-toplevel)/api/cluster-resources/r-snippets-menu.json
-    jq '."sub-menu"[1]' "${SNIPPETS_JSON}" > $(git rev-parse --show-toplevel)/api/cluster-resources/py-snippets-menu.json
+    export SNIPPETS_BUILD_DIR="<path to build dir of workbench-snippets repo (no trailing /)>"
+    for lang in py r; do
+      jq '.' "${SNIPPETS_BUILD_DIR}/${lang}_jupyter_snippets_menu_extension_config.json" > \
+        "$(git rev-parse --show-toplevel)/api/cluster-resources/${lang}-snippets-menu.json"
+    done
     ```
 1. Commit changes and go through normal pull request process.
 1. Wait for a release; note that changes are only visible for clusters started
@@ -88,6 +90,18 @@ The snippets menu extension Javascript is generated dynamically at deploy time
 by `./build.rb` under the `./generated` subdirectory and is not checked into
 source. This process takes as inputs the templated extension
 `snippets-menu.js.template` and the per-language collocated menu JSON files.
+
+## Local testing
+
+See instructions for playground-extension.js above.
+
+To test the menu contents JSON alone:
+
+- Click the "Jupyter" logo from a Workbench notebook.
+- Click the "Nbextensions" tab
+- Click on "Snippets Menu"
+- Check "Include custom menu content parsed from JSON string below"
+- Paste menu JSON into text field
 
 # Releasing
 

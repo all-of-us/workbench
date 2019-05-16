@@ -21,6 +21,17 @@ define([
     snippets_menu.options['menus'] = snippets_menu.default_menus;
     snippets_menu.options['menus'][0]['sub-menu'].splice(0, 0, ...customMenus);
 
+    // Include custom menu content from the nbconfigurator UI extension, if any.
+    // We primarily expect this to be used for manual testing of
+    // workbench-snippets code, so prefix it to differentiate from the menus
+    // installed by this extension.
+    const snippetsConfig = Jupyter.notebook.config.data.snippets;
+    if (snippetsConfig.include_custom_menu) {
+      const customExtMenu = JSON.parse(snippetsConfig.custom_menu_content);
+      customExtMenu['name'] = '[Custom] ' + customExtMenu['name'];
+      snippets_menu.options['menus'][0]['sub-menu'].splice(0, 0, customExtMenu);
+    }
+
     console.log('loaded custom AoU snippet-menus');
   };
 
