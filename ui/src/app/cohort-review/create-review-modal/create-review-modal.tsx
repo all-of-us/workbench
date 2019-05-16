@@ -1,11 +1,13 @@
 import {Component, Input} from '@angular/core';
 import * as React from 'react';
+import {validate} from 'validate.js';
 
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {Button} from 'app/components/buttons';
+import {ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
@@ -36,6 +38,12 @@ const styles = reactStyles({
   create: {
     background: '#302C71',
     marginLeft: '0.5rem',
+  },
+  disabled: {
+    background: '#9b9b9b',
+    color: '#c9c8c8',
+    border: '1px soilid #9b9b9b',
+    marginLeft: '0.5rem',
   }
 });
 
@@ -49,7 +57,7 @@ interface State {
   review: CohortReview;
   create: boolean;
   creating: boolean;
-  inputValue: number;
+  numberOfParticipants: string;
 }
 
 export const CreateReviewModal = withCurrentWorkspace()(
@@ -62,16 +70,8 @@ export const CreateReviewModal = withCurrentWorkspace()(
         cohort: currentCohortStore.getValue(),
         create: true,
         creating: false,
-        inputValue: null
+        numberOfParticipants: '',
       };
-    }
-
-    get numParticipants() {
-      return 0;
-    }
-
-    get maxParticipants() {
-      return Math.min(this.state.review.matchedParticipantCount, 10000);
     }
 
     cancelReview() {
@@ -94,7 +94,19 @@ export const CreateReviewModal = withCurrentWorkspace()(
     }
 
     render() {
-      const {cohort, inputValue, review} = this.state;
+      const {cohort, numberOfParticipants, review} = this.state;
+      const max = Math.min(this.state.review.matchedParticipantCount, 10000);
+      const errors = validate({numberOfParticipants}, {
+        numberOfParticipants: {
+          numericality: {
+            onlyInteger: true,
+            greaterThan: 0,
+            lessThanOrEqualTo: max,
+            message: 'must be a whole number 1 - ' + max.toLocaleString()
+          }
+        }
+      });
+      const disabled = !numberOfParticipants || errors;
       return <Modal onRequestClose={() => this.cancelReview()}>
         <ModalTitle style={styles.title}>Create Review Set</ModalTitle>
         <ModalBody style={styles.body}>
@@ -103,17 +115,25 @@ export const CreateReviewModal = withCurrentWorkspace()(
             participants for possible review.  How many would you like to review?
             {review.matchedParticipantCount > 10000 && <span> (max 10,000)</span>}
           </div>
+          <ValidationError>
+            {summarizeErrors(numberOfParticipants && errors && errors.numberOfParticipants)}
+          </ValidationError>
           <input type='number'
-            value={inputValue}
+            value={numberOfParticipants}
             style={styles.input}
             placeholder='NUMBER OF PARTICIPANTS'
-            onChange={e => this.setState({inputValue: parseInt(e.target.value, 10)})}/>
+            onChange={e => this.setState(
+              {numberOfParticipants: e.target.value}
+            )}/>
         </ModalBody>
         <ModalFooter>
           <Button style={styles.cancel} type='link' onClick={() => this.cancelReview()}>
             CANCEL
           </Button>
-          <Button style={styles.create} type='primary' onClick={() => this.createReview()}>
+          <Button style={disabled ? styles.disabled : styles.create}
+            type='primary'
+            disabled={disabled}
+            onClick={() => this.createReview()}>
             CREATE SET
           </Button>
         </ModalFooter>
