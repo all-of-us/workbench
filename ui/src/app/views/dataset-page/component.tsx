@@ -153,23 +153,20 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       const {namespace, id} = this.props.workspace;
       const allPromises = [];
       allPromises.push(this.loadResources());
-      conceptsApi().getDomainInfo(namespace, id).then((response) => {
-        this.setState({conceptDomainList: response.items});
-      });
       if (this.editing) {
         allPromises.push(dataSetApi().getDataSet(
           namespace, id, this.props.urlParams.dataSetId).then((response) => {
-          this.setState({
-            dataSet: response,
-            includesAllParticipants: response.includesAllParticipants,
-            selectedConceptSetIds: response.conceptSets.map(cs => cs.id),
-            selectedCohortIds: response.cohorts.map(c => c.id),
-            selectedValues: response.values,
-            valuesLoading: true,
-          });
-          return response;
-        }));
-        const [sentinelValue, dataSet] = await Promise.all(allPromises);
+            this.setState({
+              dataSet: response,
+              includesAllParticipants: response.includesAllParticipants,
+              selectedConceptSetIds: response.conceptSets.map(cs => cs.id),
+              selectedCohortIds: response.cohorts.map(c => c.id),
+              selectedValues: response.values,
+              valuesLoading: true,
+            });
+            return response;
+          }));
+        const [, dataSet] = await Promise.all(allPromises);
         // We can only run this command once both the data set fetch and the
         // load resources have concluded. However, we want those to happen in
         // parallel, and one is conditional, so we add them to an array to await
@@ -182,11 +179,12 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     async loadResources(): Promise<void> {
       try {
         const {namespace, id} = this.props.workspace;
-        const [conceptSets, cohorts] = await Promise.all([
+        const [conceptSets, cohorts, domainInfo] = await Promise.all([
           conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
-          cohortsApi().getCohortsInWorkspace(namespace, id)]);
+          cohortsApi().getCohortsInWorkspace(namespace, id),
+          conceptsApi().getDomainInfo(namespace, id)]);
         this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
-          loadingResources: false});
+          loadingResources: false, conceptDomainList: domainInfo.items});
         return Promise.resolve();
       } catch (error) {
         console.error(error);
