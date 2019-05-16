@@ -266,7 +266,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
     TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      participantCounter.buildRandomParticipantQuery(new ParticipantCriteria(searchRequest),
+      cohortQueryBuilder.buildRandomParticipantQuery(new ParticipantCriteria(searchRequest, configProvider.get().cohortbuilder.enableListSearch),
         request.getSize(), 0L)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 

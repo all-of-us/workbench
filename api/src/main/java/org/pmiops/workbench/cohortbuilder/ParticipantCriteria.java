@@ -31,6 +31,7 @@ public class ParticipantCriteria {
   private final Set<Long> participantIdsToInclude;
   private final Set<Long> participantIdsToExclude;
   private Map<SearchParameter, Set<Long>> criteriaLookupMap;
+  // TODO:Remove freemabd once universal search is in place this can be removed.
   private boolean enableListSearch;
 
   public ParticipantCriteria(SearchRequest searchRequest, boolean enableListSearch) {
