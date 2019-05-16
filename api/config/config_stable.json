@@ -22,6 +22,7 @@
     "debugQueries": true
   },
   "googleCloudStorageService": {
+    "clusterResourcesBucketName": "all-of-us-rw-stable-cluster-resources",
     "credentialsBucketName": "all-of-us-rw-stable-credentials",
     "emailImagesBucketName": "all-of-us-workbench-test-email-images",
     "demosBucketName": "all-of-us-rw-stable-demos"

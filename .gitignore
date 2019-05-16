@@ -6,6 +6,7 @@
 .externalToolBuilders
 .settings
 /api/?/
+/api/cluster-resources/generated/*
 /api/db/?/
 /api/db-cdr/csv
 /api/.project/common/
