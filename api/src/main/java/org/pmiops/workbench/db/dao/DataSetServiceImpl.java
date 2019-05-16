@@ -125,7 +125,6 @@ public class DataSetServiceImpl implements DataSetService {
     dataSetDb.setInvalid(false);
     dataSetDb.setCreatorId(creatorId);
     dataSetDb.setCreationTime(creationTime);
-    dataSetDb.setLastModifiedTime(creationTime);
     dataSetDb.setCohortSetId(cohortIdList);
     dataSetDb.setConceptSetId(conceptIdList);
     dataSetDb.setValues(values);
