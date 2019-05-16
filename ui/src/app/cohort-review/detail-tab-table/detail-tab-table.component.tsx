@@ -432,7 +432,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (data && data.length === 0) {
         return  'No ' + this.props.tabName + ' Data';
       } else if (data && data.length > 0 && filteredData && filteredData.length === 0) {
-        return 'There is data, but it is currently hidden. Please check your filters';
+        return 'Data does not match the specified filters';
       }
     }
 
