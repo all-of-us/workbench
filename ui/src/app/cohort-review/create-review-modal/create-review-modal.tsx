@@ -8,7 +8,7 @@ import {ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortStore, navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import {CohortReview} from 'generated/fetch';
@@ -75,21 +75,21 @@ export const CreateReviewModal = withCurrentWorkspace()(
     }
 
     cancelReview() {
-      const {ns, wsid} = urlParamsStore.getValue();
-      navigate(['workspaces', ns, wsid, 'cohorts']);
+      const {workspace: {id, namespace}} = this.props;
+      navigate(['workspaces', namespace, id, 'cohorts']);
     }
 
     createReview() {
       this.setState({creating: true});
-      const {ns, wsid, cid} = urlParamsStore.getValue();
-      const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-      const request = {size: 0};
+      const {workspace: {cdrVersionId, id, namespace}} = this.props;
+      const {cohort, numberOfParticipants} = this.state;
+      const request = {size: parseInt(numberOfParticipants, 10)};
 
-      cohortReviewApi().createCohortReview(ns, wsid, cid, cdrid, request)
+      cohortReviewApi().createCohortReview(namespace, id, cohort.id, +cdrVersionId, request)
         .then(_ => {
           this.setState({creating: false});
           this.props.created(true);
-          navigate(['workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);
+          navigate(['workspaces', namespace, id, 'cohorts', cohort.id, 'review', 'participants']);
         });
     }
 

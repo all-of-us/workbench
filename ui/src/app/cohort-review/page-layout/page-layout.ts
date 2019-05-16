@@ -65,7 +65,7 @@ export class PageLayout implements OnInit, OnDestroy {
     filterStateStore.next(JSON.parse(JSON.stringify(initialFilterState)));
   }
 
-  reviewCreated() {
+  reviewCreated = () => {
     this.reviewPresent = true;
   }
 
