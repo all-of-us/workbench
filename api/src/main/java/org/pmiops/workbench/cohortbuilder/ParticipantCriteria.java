@@ -30,40 +30,30 @@ public class ParticipantCriteria {
   private final SearchRequest searchRequest;
   private final Set<Long> participantIdsToInclude;
   private final Set<Long> participantIdsToExclude;
-  private final Map<SearchParameter, Set<Long>> criteriaLookupMap;
+  private Map<SearchParameter, Set<Long>> criteriaLookupMap;
+  private boolean enableListSearch;
 
-  public ParticipantCriteria(SearchRequest searchRequest) {
-    this(searchRequest, NO_PARTICIPANTS_TO_EXCLUDE);
+  public ParticipantCriteria(SearchRequest searchRequest, boolean enableListSearch) {
+    this(searchRequest, NO_PARTICIPANTS_TO_EXCLUDE, enableListSearch);
   }
 
-  public ParticipantCriteria(SearchRequest searchRequest, Map<SearchParameter, Set<Long>> criteriaLookupMap) {
-    this.searchRequest = searchRequest;
-    this.participantIdsToExclude = NO_PARTICIPANTS_TO_EXCLUDE;
-    this.participantIdsToInclude = null;
-    this.criteriaLookupMap = criteriaLookupMap;
-  }
-
-  public ParticipantCriteria(SearchRequest searchRequest, Set<Long> participantIdsToExclude) {
+  public ParticipantCriteria(SearchRequest searchRequest, Set<Long> participantIdsToExclude, boolean enableListSearch) {
     this.searchRequest = searchRequest;
     this.participantIdsToExclude = participantIdsToExclude;
     this.participantIdsToInclude = null;
-    this.criteriaLookupMap = new HashMap<>();
+    this.enableListSearch = enableListSearch;
   }
 
   public ParticipantCriteria(Set<Long> participantIdsToInclude) {
     this.participantIdsToInclude = participantIdsToInclude;
     this.searchRequest = null;
     this.participantIdsToExclude = null;
-    this.criteriaLookupMap = new HashMap<>();
+    this.enableListSearch = false;
   }
 
   @Nullable
   public SearchRequest getSearchRequest() {
     return searchRequest;
-  }
-
-  public Map<SearchParameter, Set<Long>> getCriteriaLookupMap() {
-    return criteriaLookupMap;
   }
 
   @Nullable
@@ -74,6 +64,17 @@ public class ParticipantCriteria {
   @Nullable
   public Set<Long> getParticipantIdsToExclude() {
     return participantIdsToExclude;
+  }
+
+  public Map<SearchParameter, Set<Long>> fetchCriteriaLookupMap() {
+    if (this.criteriaLookupMap == null) {
+      this.criteriaLookupMap = new HashMap<>();
+    }
+    return criteriaLookupMap;
+  }
+
+  public boolean isEnableListSearch() {
+    return this.enableListSearch;
   }
 
   @Override

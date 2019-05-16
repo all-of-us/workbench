@@ -158,7 +158,7 @@ public class DataSetServiceImpl implements DataSetService {
             String.format("Not Found: No Cohort definition matching cohortId: %s", c.getCohortId()));
       }
       SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
-      QueryJobConfiguration participantIdQuery = cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
+      QueryJobConfiguration participantIdQuery = cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest, false));
       QueryJobConfiguration participantQueryConfig = bigQueryService.filterBigQueryConfig(participantIdQuery);
       AtomicReference<String> participantQuery = new AtomicReference<>(participantQueryConfig.getQuery());
 

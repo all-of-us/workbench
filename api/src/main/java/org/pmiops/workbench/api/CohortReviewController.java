@@ -27,6 +27,7 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -98,6 +99,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private UserRecentResourceService userRecentResourceService;
   private Provider<User> userProvider;
   private final Clock clock;
+  private Provider<WorkbenchConfig> configProvider;
 
   /**
    * Converter function from backend representation (used with Hibernate) to
@@ -197,7 +199,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                          Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
                          UserRecentResourceService userRecentResourceService,
                          Provider<User> userProvider,
-                         Clock clock) {
+                         Clock clock,
+                         Provider<WorkbenchConfig> configProvider) {
     this.cohortReviewService = cohortReviewService;
     this.bigQueryService = bigQueryService;
     this.cohortQueryBuilder = cohortQueryBuilder;
@@ -206,11 +209,17 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
     this.clock = clock;
+    this.configProvider = configProvider;
   }
 
   @VisibleForTesting
   public void setUserProvider(Provider<User> userProvider) {
     this.userProvider = userProvider;
+  }
+
+  @VisibleForTesting
+  public void setConfigProvider(Provider<WorkbenchConfig> configProvider) {
+    this.configProvider = configProvider;
   }
 
   /**
@@ -257,7 +266,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
     TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      cohortQueryBuilder.buildRandomParticipantQuery(new ParticipantCriteria(searchRequest),
+      cohortQueryBuilder.buildRandomParticipantQuery(new ParticipantCriteria(searchRequest, configProvider.get().cohortbuilder.enableListSearch),
         request.getSize(), 0L)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
@@ -366,7 +375,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
     TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      cohortQueryBuilder.buildDomainChartInfoCounterQuery(new ParticipantCriteria(searchRequest), DomainType.fromValue(domain), chartLimit)));
+      cohortQueryBuilder.buildDomainChartInfoCounterQuery(new ParticipantCriteria(searchRequest,
+        configProvider.get().cohortbuilder.enableListSearch), DomainType.fromValue(domain), chartLimit)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     CohortChartDataListResponse response = new CohortChartDataListResponse();
@@ -606,7 +616,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     TableResult result = bigQueryService.executeQuery(
       bigQueryService.filterBigQueryConfig(cohortQueryBuilder.buildParticipantCounterQuery(
-        new ParticipantCriteria(request))));
+        new ParticipantCriteria(request, configProvider.get().cohortbuilder.enableListSearch))));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
     List<FieldValue> row = result.iterateAll().iterator().next();
     long cohortCount = bigQueryService.getLong(row, rm.get("count"));
