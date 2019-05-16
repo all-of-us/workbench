@@ -59,6 +59,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -102,16 +103,18 @@ public class CohortMaterializationServiceTest {
   @TestConfiguration
   static class Configuration {
 
+    @Bean
     public WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.cdr = new CdrConfig();
       workbenchConfig.cdr.debugQueries = false;
+      workbenchConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
+      workbenchConfig.cohortbuilder.enableListSearch = false;
       return workbenchConfig;
     }
   }
 
   private CohortReview cohortReview;
-
 
   @Before
   public void setUp() {
@@ -120,7 +123,6 @@ public class CohortMaterializationServiceTest {
     cdrVersion.setBigqueryProject(PROJECT_ID);
     cdrVersionDao.save(cdrVersion);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
-
 
     Workspace workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
