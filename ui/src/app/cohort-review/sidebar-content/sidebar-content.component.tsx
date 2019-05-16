@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
@@ -12,7 +11,7 @@ import {CheckBox, DatePicker, NumberInput, Select, TextArea} from 'app/component
 import {Spinner} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils/index';
+import {withCurrentWorkspace, withUrlParams} from 'app/utils/index';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {AnnotationType, CohortAnnotationDefinition, CohortStatus, ParticipantCohortAnnotation, WorkspaceAccessLevel} from 'generated/fetch';
 
@@ -294,24 +293,3 @@ export const SidebarContent = fp.flow(
     </div>;
   }
 });
-
-@Component({
-  selector: 'app-sidebar-content',
-  template: '<div #root></div>',
-})
-export class SidebarContentComponent extends ReactWrapperBase {
-  @Input() participant: Participant;
-  @Input() setParticipant: Function;
-  @Input() annotations: ParticipantCohortAnnotation[];
-  @Input() annotationDefinitions: CohortAnnotationDefinition[];
-  @Input() setAnnotations: Function;
-  @Input() openCreateDefinitionModal: Function;
-  @Input() openEditDefinitionsModal: Function;
-
-  constructor() {
-    super(SidebarContent, [
-      'participant', 'setParticipant', 'annotations', 'annotationDefinitions', 'setAnnotations',
-      'openCreateDefinitionModal', 'openEditDefinitionsModal',
-    ]);
-  }
-}

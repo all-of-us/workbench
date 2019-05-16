@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {validate} from 'validate.js';
@@ -10,7 +9,7 @@ import {Select, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, summarizeErrors, withUrlParams} from 'app/utils/index';
+import {reactStyles, summarizeErrors, withUrlParams} from 'app/utils/index';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -140,20 +139,6 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
   }
 });
 
-@Component({
-  selector: 'app-add-annotation-definition-modal',
-  template: '<div #root></div>'
-})
-export class AddAnnotationDefinitionModalComponent extends ReactWrapperBase {
-  @Input() annotationDefinitions;
-  @Input() onCancel;
-  @Input() onCreate;
-
-  constructor() {
-    super(AddAnnotationDefinitionModal, ['annotationDefinitions', 'onCancel', 'onCreate']);
-  }
-}
-
 export const EditAnnotationDefinitionsModal = withUrlParams()(class extends React.Component<
   {
     onClose: Function,
@@ -265,19 +250,3 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
     </Modal>;
   }
 });
-
-@Component({
-  selector: 'app-edit-annotation-definitions-modal',
-  template: '<div #root></div>'
-})
-export class EditAnnotationDefinitionsModalComponent extends ReactWrapperBase {
-  @Input() onClose;
-  @Input() annotationDefinitions;
-  @Input() setAnnotationDefinitions;
-
-  constructor() {
-    super(EditAnnotationDefinitionsModal, [
-      'onClose', 'annotationDefinitions', 'setAnnotationDefinitions'
-    ]);
-  }
-}

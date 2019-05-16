@@ -176,6 +176,10 @@ public class UserService {
     }
   }
 
+  private boolean isServiceAccount(User user) {
+    return configProvider.get().auth.serviceAccountApiUsers.contains(user.getEmail());
+  }
+
   public User createServiceAccountUser(String email) {
     User user = new User();
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
@@ -324,7 +328,7 @@ public class UserService {
     });
   }
 
-  public User setBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
+  public User setFreeTierBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
     return updateUserWithRetries((user) -> {
       user.setFreeTierBillingProjectName(name);
       user.setFreeTierBillingProjectStatusEnum(status);
@@ -407,6 +411,11 @@ public class UserService {
    * 3. If there are no badges for a user set training completion time and expiration date as null
    */
   public User syncComplianceTrainingStatus(User user) throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+    if (isServiceAccount(user)) {
+      // Skip sync for service account user rows.
+      return user;
+    }
+
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     try {
       Integer moodleId = user.getMoodleId();
@@ -524,8 +533,15 @@ public class UserService {
    *
    * This uses impersonated credentials and should only be called in the context of a cron job or a
    * request from a user with elevated privileges.
+   *
+   * Returns the updated User object.
    */
   public User syncEraCommonsStatusUsingImpersonation(User user) throws IOException, org.pmiops.workbench.firecloud.ApiException {
+    if (isServiceAccount(user)) {
+      // Skip sync for service account user rows.
+      return user;
+    }
+
     ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
     NihApi api = new NihApi(apiClient);
     try {
@@ -547,7 +563,15 @@ public class UserService {
     syncTwoFactorAuthStatus(userProvider.get());
   }
 
+  /**
+   *
+   */
   public User syncTwoFactorAuthStatus(User targetUser) {
+    if (isServiceAccount(targetUser)) {
+      // Skip sync for service account user rows.
+      return targetUser;
+    }
+
     return updateUserWithRetries(user -> {
       boolean isEnrolledIn2FA = directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv();
       if (isEnrolledIn2FA) {
