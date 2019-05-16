@@ -19,7 +19,7 @@ import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-import {workspacesApi, configApi} from 'app/services/swagger-fetch-clients';
+import {configApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
   displayDate,
   reactStyles,

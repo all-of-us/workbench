@@ -6,7 +6,7 @@ import {timer} from 'rxjs/observable/timer';
 import {mapTo} from 'rxjs/operators';
 import {Subscription} from 'rxjs/Subscription';
 
-import {queryParamsStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
+import {queryParamsStore, urlParamsStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
 

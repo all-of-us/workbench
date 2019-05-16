@@ -266,10 +266,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
 
   render() {
-    const {billingProjectInitialized, useBillingProjectBuffer, betaAccessGranted, videoOpen, accessTasksLoaded,
-        accessTasksRemaining, eraCommonsLinked, eraCommonsError, firstVisitTraining,
-        trainingCompleted, quickTour, videoLink, twoFactorAuthCompleted,
-      dataUseAgreementCompleted} = this.state;
+    const {billingProjectInitialized, useBillingProjectBuffer, betaAccessGranted,
+      videoOpen, accessTasksLoaded, accessTasksRemaining, eraCommonsLinked,
+      eraCommonsError, firstVisitTraining, trainingCompleted, quickTour, videoLink,
+      twoFactorAuthCompleted, dataUseAgreementCompleted
+    } = this.state;
     const canCreateWorkspaces = billingProjectInitialized || useBillingProjectBuffer;
     const quickTourResources = [
       {
