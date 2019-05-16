@@ -50,8 +50,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({QueryBuilderFactory.class, BigQueryService.class, CloudStorageServiceImpl.class,
-  CohortQueryBuilder.class, BaseQueryBuilder.class,
-  TestJpaConfig.class, CdrVersionService.class, BaseQueryBuilder.class})
+  CohortQueryBuilder.class, BaseQueryBuilder.class, TestJpaConfig.class, CdrVersionService.class})
 @MockBean({FireCloudService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
