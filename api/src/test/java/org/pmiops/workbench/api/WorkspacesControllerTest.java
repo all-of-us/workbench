@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyListOf;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.cloud.bigquery.FieldValue;
@@ -38,6 +39,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -120,6 +122,8 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.inject.Provider;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -255,6 +259,9 @@ public class WorkspacesControllerTest {
   CohortReviewController cohortReviewController;
   @Autowired
   ConceptBigQueryService conceptBigQueryService;
+  @Mock
+  private Provider<WorkbenchConfig> configProvider;
+  private WorkbenchConfig testConfig;
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
@@ -284,6 +291,13 @@ public class WorkspacesControllerTest {
 
     CLOCK.setInstant(NOW);
 
+    testConfig = new WorkbenchConfig();
+    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
+    testConfig.cohortbuilder.enableListSearch = false;
+    when(configProvider.get()).thenReturn(testConfig);
+
+    cohortReviewController.setConfigProvider(configProvider);
+
     doAnswer(invocation -> {
       BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
       doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
@@ -294,13 +308,12 @@ public class WorkspacesControllerTest {
       String capturedWorkspaceName = (String) invocation.getArguments()[1];
       String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
       org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-              new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
       fcResponse.setWorkspace(createFcWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null));
       fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
       doReturn(fcResponse).when(fireCloudService).getWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName);
       return null;
     }).when(fireCloudService).createWorkspace(anyString(), anyString());
-
   }
 
   private User createUser(String email) {

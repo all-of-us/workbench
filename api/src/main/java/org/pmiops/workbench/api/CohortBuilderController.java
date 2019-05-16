@@ -279,7 +279,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       }
     }
     QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(
-      cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request))
+      cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request,
+        configProvider.get().cohortbuilder.enableListSearch))
     );
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -342,7 +343,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       }
     }
     QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(cohortQueryBuilder.buildDemoChartInfoCounterQuery(
-      new ParticipantCriteria(request)));
+      new ParticipantCriteria(request, configProvider.get().cohortbuilder.enableListSearch)));
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 

@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohorts;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -15,12 +16,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -35,6 +38,7 @@ import org.pmiops.workbench.cohortbuilder.querybuilder.DemoQueryBuilder;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.ConceptCacheConfiguration;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -111,6 +115,11 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
   @Autowired
   private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
 
+  @Mock
+  private Provider<WorkbenchConfig> configProvider;
+
+  private WorkbenchConfig testConfig;
+
   private ParticipantCohortStatus makeStatus(long cohortReviewId, long participantId, CohortStatus status) {
     ParticipantCohortStatusKey key = new ParticipantCohortStatusKey();
     key.setCohortReviewId(cohortReviewId);
@@ -163,11 +172,14 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
     ConceptService conceptService = new ConceptService(entityManager, conceptDao);
 
+    testConfig = new WorkbenchConfig();
+    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
+    testConfig.cohortbuilder.enableListSearch = false;
+    when(configProvider.get()).thenReturn(testConfig);
+
     this.cohortMaterializationService = new CohortMaterializationService(fieldSetQueryBuilder,
-        annotationQueryBuilder, participantCohortStatusDao, cdrBigQuerySchemaConfigService, conceptService);
+        annotationQueryBuilder, participantCohortStatusDao, cdrBigQuerySchemaConfigService, conceptService, configProvider);
   }
-
-
 
   @Override
   public List<String> getTableNames() {
