@@ -158,7 +158,7 @@ public class CohortQueryBuilder {
       .build();
   }
 
-  //TODO: implemented for use with the Data Set Builder. Please remove it this does not become the preferred solution
+  //TODO: implemented for use with the Data Set Builder. Please remove if this does not become the preferred solution
   //https://docs.google.com/document/d/1-wzSCHDM_LSaBRARyLFbsTGcBaKi5giRs-eDmaMBr0Y/edit#
   public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria) {
     String sqlTemplate = ID_SQL_TEMPLATE.replace("${table}", PERSON_TABLE);
