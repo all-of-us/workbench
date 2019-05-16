@@ -47,7 +47,7 @@ public class BillingProjectBufferService {
   }
 
   public void bufferBillingProject() {
-    if (getRemainingBufferSlotsSize() <= 0) {
+    if (getUnfilledBufferSpace() <= 0) {
       return;
     }
 
@@ -144,7 +144,7 @@ public class BillingProjectBufferService {
     return prefix + randomString;
   }
 
-  private int getRemainingBufferSlotsSize() {
+  private int getUnfilledBufferSpace() {
     return getBufferMaxCapacity() - (int) getCurrentBufferSize();
   }
 
