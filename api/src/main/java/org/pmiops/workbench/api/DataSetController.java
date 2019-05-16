@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.List;
 
 import java.util.Optional;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -230,12 +229,12 @@ public class DataSetController implements DataSetApiDelegate {
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
     bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
-      int retry = 0, defaultRows = NO_OF_PREVIEW_ROWS ;
+      int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS ;
       List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
 
       do {
         try {
-          String query = queryJobConfiguration.getQuery().concat(" LIMIT "+ defaultRows);
+          String query = queryJobConfiguration.getQuery().concat(" LIMIT "+ rowsRequested);
 
           queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
@@ -277,7 +276,7 @@ public class DataSetController implements DataSetApiDelegate {
           retry = 2;
         } catch (ServerErrorException ex) {
           if(ex.getCause().getMessage().contains("Read timed out")) {
-            defaultRows = (defaultRows / 2);
+            rowsRequested = (rowsRequested / 2);
             retry++;
           } else {
             retry = 2;
