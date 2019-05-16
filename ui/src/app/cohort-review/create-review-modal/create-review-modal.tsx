@@ -6,6 +6,7 @@ import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {Button} from 'app/components/buttons';
 import {ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {Spinner} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, navigate} from 'app/utils/navigation';
@@ -94,7 +95,7 @@ export const CreateReviewModal = withCurrentWorkspace()(
     }
 
     render() {
-      const {cohort, numberOfParticipants, review} = this.state;
+      const {cohort, creating, numberOfParticipants, review} = this.state;
       const max = Math.min(this.state.review.matchedParticipantCount, 10000);
       const errors = validate({numberOfParticipants}, {
         numberOfParticipants: {
@@ -127,13 +128,19 @@ export const CreateReviewModal = withCurrentWorkspace()(
             )}/>
         </ModalBody>
         <ModalFooter>
-          <Button style={styles.cancel} type='link' onClick={() => this.cancelReview()}>
+          <Button style={styles.cancel}
+            type='link'
+            disabled={creating}
+            onClick={() => this.cancelReview()}>
             CANCEL
           </Button>
           <Button style={disabled ? styles.disabled : styles.create}
             type='primary'
-            disabled={disabled}
+            disabled={disabled || creating}
             onClick={() => this.createReview()}>
+            {creating &&
+              <Spinner size={16} style={{marginRight: '0.25rem', marginLeft: '-0.25rem'}}/>
+            }
             CREATE SET
           </Button>
         </ModalFooter>
