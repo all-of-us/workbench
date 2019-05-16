@@ -150,8 +150,6 @@ public class CohortReviewControllerTest {
   @Autowired
   private BigQueryService bigQueryService;
 
-  private WorkbenchConfig testConfig;
-
   @Mock
   private Provider<WorkbenchConfig> configProvider;
 
@@ -328,7 +326,7 @@ public class CohortReviewControllerTest {
         .cohortAnnotationDefinitionId(stringAnnotationDefinition.getCohortAnnotationDefinitionId());
     participantCohortAnnotationDao.save(participantAnnotation);
 
-    testConfig = new WorkbenchConfig();
+    WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
     testConfig.cohortbuilder.enableListSearch = false;
     when(configProvider.get()).thenReturn(testConfig);

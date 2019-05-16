@@ -148,8 +148,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Mock
   private Provider<WorkbenchConfig> configProvider;
 
-  private WorkbenchConfig testConfig;
-
   private Cohort cohort;
 
   @TestConfiguration
@@ -615,7 +613,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .participantKey(key2);
     participantCohortStatusDao.save(participantCohortStatus2);
 
-    testConfig = new WorkbenchConfig();
+    WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
     testConfig.cohortbuilder.enableListSearch = false;
     when(configProvider.get()).thenReturn(testConfig);

@@ -118,8 +118,6 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
   @Mock
   private Provider<WorkbenchConfig> configProvider;
 
-  private WorkbenchConfig testConfig;
-
   private ParticipantCohortStatus makeStatus(long cohortReviewId, long participantId, CohortStatus status) {
     ParticipantCohortStatusKey key = new ParticipantCohortStatusKey();
     key.setCohortReviewId(cohortReviewId);
@@ -172,7 +170,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
     ConceptService conceptService = new ConceptService(entityManager, conceptDao);
 
-    testConfig = new WorkbenchConfig();
+    WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
     testConfig.cohortbuilder.enableListSearch = false;
     when(configProvider.get()).thenReturn(testConfig);

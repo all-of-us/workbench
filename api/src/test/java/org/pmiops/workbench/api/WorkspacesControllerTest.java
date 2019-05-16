@@ -261,7 +261,6 @@ public class WorkspacesControllerTest {
   ConceptBigQueryService conceptBigQueryService;
   @Mock
   private Provider<WorkbenchConfig> configProvider;
-  private WorkbenchConfig testConfig;
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
@@ -291,7 +290,7 @@ public class WorkspacesControllerTest {
 
     CLOCK.setInstant(NOW);
 
-    testConfig = new WorkbenchConfig();
+    WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
     testConfig.cohortbuilder.enableListSearch = false;
     when(configProvider.get()).thenReturn(testConfig);
