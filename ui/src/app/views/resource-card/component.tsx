@@ -19,31 +19,6 @@ import {Domain, RecentResource} from 'generated/fetch';
 import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {CopyNotebookModal} from 'app/views/copy-notebook-modal/component';
 
-
-@Component({
-  selector: 'app-resource-card-menu',
-  template: '<div #root></div>'
-})
-export class ResourceCardMenuComponent extends ReactWrapperBase {
-  @Input() disabled;
-  @Input() resourceType;
-  @Input() onRenameNotebook;
-  @Input() onOpenJupyterLabNotebook;
-  @Input() onCloneResource;
-  @Input() onDeleteResource;
-  @Input() onEditCohort;
-  @Input() onReviewCohort;
-  @Input() onEditConceptSet;
-
-  constructor() {
-    super(ResourceCardMenu, [
-      'disabled', 'resourceType', 'onRenameNotebook', 'onOpenJupyterLabNotebook',
-      'onCloneResource', 'onDeleteResource', 'onEditCohort', 'onReviewCohort',
-      'onEditConceptSet'
-    ]);
-  }
-}
-
 const styles = reactStyles({
   card: {
     marginTop: '1rem',

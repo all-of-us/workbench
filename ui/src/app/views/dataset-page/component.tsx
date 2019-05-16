@@ -2,11 +2,8 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {ClrIcon} from 'app/components/icons';
-import {ImmutableListItem, ResourceListItem} from 'app/components/resources';
 import {Spinner} from 'app/components/spinners';
 import {
   cohortsApi,
@@ -16,12 +13,8 @@ import {
 } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace, withUrlParams} from 'app/utils';
-import {navigate, navigateByUrl} from 'app/utils/navigation';
-import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
+import {ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
-import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
-import {EditModal} from 'app/views/edit-modal/component';
 import {NewDataSetModal} from 'app/views/new-dataset-modal/component';
 import {
   Cohort,
@@ -29,13 +22,10 @@ import {
   DataSet,
   DataSetPreviewList,
   Domain,
-  DomainInfo,
   DomainValue,
   DomainValuePair,
   DomainValuesResponse,
-  RecentResource,
   ValueSet,
-  WorkspaceAccessLevel,
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
@@ -56,6 +46,16 @@ export const styles = {
     verticalAlign: '-6%'
   },
 
+  listItem: {
+    border: '0.5px solid #C3C3C3', margin: '.4rem',
+    height: '1.5rem', display: 'flex'
+  },
+
+  listItemCheckbox: {
+    height: 17, width: 17, marginLeft: 10, marginTop: 10,
+    marginRight: 10, backgroundColor: colors.green[1]
+  },
+
   valueListItemCheckboxStyling: {
     height: 17,
     width: 17,
@@ -72,6 +72,15 @@ export const styles = {
     color: colors.purple[0]
   }
 };
+
+const ImmutableListItem: React.FunctionComponent <{
+  name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
+    return <div style={styles.listItem}>
+      <input type='checkbox' value={name} onChange={() => onChange()}
+             style={styles.listItemCheckbox} checked={checked}/>
+      <div style={{lineHeight: '1.5rem'}}>{name}</div>
+    </div>;
+  };
 
 const Subheader = (props) => {
   return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
@@ -95,19 +104,17 @@ interface Props {
 interface State {
   cohortList: Cohort[];
   confirmDeleting: boolean;
-  conceptDomainList: DomainInfo[];
   conceptSetList: ConceptSet[];
   creatingConceptSet: boolean;
   dataSet: DataSet;
   dataSetTouched: boolean;
-  editingResource: boolean;
+  conceptSetList: ConceptSet[];
+  previewList: Array<DataSetPreviewList>;
   includesAllParticipants: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
   previewList: Array<DataSetPreviewList>;
   previewDataLoading: boolean;
-  resource: RecentResource;
-  rType: ResourceType;
   selectedCohortIds: number[];
   selectedConceptSetIds: number[];
   selectedPreviewDomain: string;
@@ -122,8 +129,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       super(props);
       this.state = {
         cohortList: [],
-        confirmDeleting: false,
-        conceptDomainList: undefined,
         conceptSetList: [],
         creatingConceptSet: false,
         dataSet: undefined,
@@ -134,8 +139,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         openSaveModal: false,
         previewList: [],
         previewDataLoading: false,
-        resource: undefined,
-        rType: undefined,
         selectedCohortIds: [],
         selectedConceptSetIds: [],
         selectedPreviewDomain: '',
@@ -190,90 +193,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         console.error(error);
         return Promise.resolve();
       }
-    }
-
-    convertResource(r: ConceptSet | Cohort, rType: ResourceType): RecentResource {
-      const {workspace} = this.props;
-      this.setState({rType: rType});
-      return convertToResource(r, workspace.namespace, workspace.id,
-        workspace.accessLevel as unknown as WorkspaceAccessLevel, rType);
-    }
-
-    openConfirmDelete(r: ConceptSet, rType: ResourceType): void {
-      const rc = this.convertResource(r, rType);
-      this.setState({confirmDeleting: true, resource: rc});
-    }
-
-    closeConfirmDelete(): void {
-      this.setState({confirmDeleting: false});
-    }
-
-    edit(r: Cohort | ConceptSet, rType: ResourceType): void {
-      const rc = this.convertResource(r, rType);
-      this.setState({editingResource: true, resource: rc});
-    }
-
-    receiveDelete() {
-      const {rType} = this.state;
-      const {namespace, id} = this.props.workspace;
-      let call;
-      const resourceId = this.getCurrentResource().id;
-      if (rType === ResourceType.CONCEPT_SET) {
-        call = conceptSetsApi().deleteConceptSet(namespace, id, resourceId);
-      } else {
-        call = cohortsApi().deleteCohort(namespace, id, resourceId);
-      }
-      if (this.state.rType === ResourceType.CONCEPT_SET) {
-        this.setState({conceptSetList: fp.without([this.getCurrentResource() as ConceptSet],
-          this.state.conceptSetList), selectedConceptSetIds: fp.without([resourceId],
-            this.state.selectedConceptSetIds)});
-      } else {
-        this.setState({cohortList: fp.without([this.getCurrentResource() as Cohort],
-          this.state.cohortList), selectedCohortIds: fp.without([resourceId],
-            this.state.selectedCohortIds)});
-      }
-      this.setState({resource: undefined, rType: undefined});
-      call.then(() => this.closeConfirmDelete());
-    }
-
-    receiveEdit(resource: RecentResource): void {
-      const updatedResource = this.getCurrentResource();
-      const {workspaceNamespace, workspaceFirecloudName} = resource;
-      const {id} = updatedResource;
-      let call;
-      let updatedConceptSetList = this.state.conceptSetList;
-      let updatedCohortList = this.state.cohortList;
-      if (resource.cohort) {
-        call = cohortsApi().updateCohort(workspaceNamespace, workspaceFirecloudName,
-          id, updatedResource as Cohort);
-        updatedCohortList = this.state.cohortList.map((cohort) => {
-          return updatedResource.id === cohort.id ? (updatedResource as Cohort) : cohort;
-        });
-      } else if (resource.conceptSet) {
-        call = conceptSetsApi().updateConceptSet(workspaceNamespace, workspaceFirecloudName,
-          id, updatedResource);
-        updatedConceptSetList = this.state.conceptSetList.map((conceptSet) => {
-          return updatedResource.id === conceptSet.id ?
-            (updatedResource as ConceptSet) : conceptSet;
-        });
-      }
-      this.setState({conceptSetList: updatedConceptSetList, cohortList: updatedCohortList,
-        resource: undefined, rType: undefined});
-      call.then(() => this.closeEditModal());
-    }
-
-    closeEditModal(): void {
-      this.setState({editingResource: false});
-    }
-
-    clone(cohort: Cohort): void {
-      const {namespace, id} = this.props.workspace;
-      navigateByUrl(`/workspaces/${namespace}/${id}/cohorts/build?cohortId=${cohort.id}`);
-    }
-
-    review(cohort: Cohort): void {
-      const {namespace, id} = this.props.workspace;
-      navigateByUrl(`/workspaces/${namespace}/${id}/cohorts/${cohort.id}/review`);
     }
 
     getDomainsFromConceptIds(selectedConceptSetIds: number[]): Domain[] {
@@ -345,17 +264,10 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       }
 
       // Sort the values selected as per the order display rather than appending top end
-
       valuesSelected = valuesSelected.sort((a, b) =>
           valueSets.findIndex(({value}) => a.value === value) -
           valueSets.findIndex(({value}) => b.value === value));
       this.setState({selectedValues: valuesSelected, dataSetTouched: true});
-    }
-
-    getCurrentResource(): Cohort | ConceptSet {
-      if (this.state.resource) {
-        return fp.compact([this.state.resource.cohort, this.state.resource.conceptSet])[0];
-      }
     }
 
     disableSave() {
@@ -363,10 +275,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           ((!this.state.selectedCohortIds ||
           this.state.selectedCohortIds.length === 0) && !this.state.includesAllParticipants) ||
           !this.state.selectedValues || this.state.selectedValues.length === 0;
-    }
-
-    setSelectedPreviewDomain(domain) {
-      this.setState({selectedPreviewDomain: domain});
     }
 
     getDataTableValue(data) {
@@ -436,9 +344,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     render() {
       const {namespace, id} = this.props.workspace;
       const {
-        creatingConceptSet,
-        conceptDomainList,
-        conceptSetList,
         dataSet,
         dataSetTouched,
         includesAllParticipants,
@@ -446,8 +351,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         openSaveModal,
         previewDataLoading,
         previewList,
-        resource,
-        rType,
         selectedCohortIds,
         selectedConceptSetIds,
         selectedPreviewDomain,
@@ -455,7 +358,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         valuesLoading,
         valueSets
       } = this.state;
-      const currentResource = this.getCurrentResource();
       return <React.Fragment>
         <FadeBox style={{marginTop: '1rem'}}>
           <h2 style={{marginTop: 0}}>Datasets{this.editing &&
@@ -469,8 +371,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
                 <div style={styles.selectBoxHeader}>
                   Cohorts
-                  <ClrIcon shape='plus-circle' class='is-solid' style={styles.addIcon}
-                    onClick={() => navigate(['workspaces', namespace, id,  'cohorts', 'build'])}/>
                 </div>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
@@ -482,32 +382,11 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                        })}/>
                   <Subheader>Workspace Cohorts</Subheader>
                   {!loadingResources && this.state.cohortList.map(cohort =>
-                    <ResourceListItem key={cohort.id} resource={cohort} rType={ResourceType.COHORT}
+                    <ImmutableListItem key={cohort.id} name={cohort.name}
                                       data-test-id='cohort-list-item'
-                                      openConfirmDelete={
-                                        () => {
-                                          return this.openConfirmDelete(
-                                            cohort, ResourceType.COHORT);
-                                        }
-                                      }
                                       checked={selectedCohortIds.includes(cohort.id)}
                                       onChange={
                                         () => this.select(cohort, ResourceType.COHORT)
-                                      }
-                                      onEdit={
-                                        () => {
-                                          navigateByUrl('/workspaces/' + namespace + '/' +
-                                            id + '/cohorts/build?cohortId=' + cohort.id);
-                                        }
-                                      }
-                                      onRenameCohort={
-                                        () => this.edit(cohort, ResourceType.COHORT)
-                                      }
-                                      onClone={
-                                        () => this.clone(cohort)
-                                      }
-                                      onReview={
-                                        () => this.review(cohort)
                                       }/>
                     )
                   }
@@ -522,26 +401,14 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
                   <div style={styles.selectBoxHeader}>
                     Concept Sets
-                    <ClrIcon shape='plus-circle' class='is-solid' style={styles.addIcon}
-                             onClick={() => navigate(['workspaces', namespace, id,  'concepts'])}/>
                   </div>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
-                        <ResourceListItem key={conceptSet.id} resource={conceptSet}
+                        <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
                                           data-test-id='concept-set-list-item'
-                                          rType={ResourceType.CONCEPT_SET}
                                           checked={selectedConceptSetIds.includes(conceptSet.id)}
-                                          openConfirmDelete={
-                                            () => {
-                                              return this.openConfirmDelete(conceptSet,
-                                                ResourceType.CONCEPT_SET);
-                                            }
-                                          }
                                           onChange={
                                             () => this.select(conceptSet, ResourceType.CONCEPT_SET)
-                                          }
-                                          onEdit={
-                                            () => this.edit(conceptSet, ResourceType.CONCEPT_SET)
                                           }/>)
                     }
                     {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
@@ -606,7 +473,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 <div style={{display: 'flex', flexDirection: 'row'}}>
                   {previewList.map(previewRow =>
                      <Clickable key={previewRow.domain}
-                               onClick={() => this.setSelectedPreviewDomain(previewRow.domain)}
+                               onClick={() =>
+                                 this.setState({selectedPreviewDomain: previewRow.domain})}
                                style={{
                                  lineHeight: '32px', fontSize: '18px',
                                  fontWeight: (selectedPreviewDomain === previewRow.domain)
@@ -629,24 +497,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             }
           </div>
         </FadeBox>
-        {creatingConceptSet &&
-        <CreateConceptSetModal onCreate={() => {
-          this.loadResources().then(() => {
-            this.setState({creatingConceptSet: false});
-          });
-        }}
-        onClose={() => {this.setState({ creatingConceptSet: false}); }}
-        conceptDomainList={conceptDomainList}
-        existingConceptSets={conceptSetList}/>}
-        {this.state.confirmDeleting && currentResource &&
-        <ConfirmDeleteModal resourceName={currentResource.name}
-                            resourceType={rType}
-                            receiveDelete={() => this.receiveDelete()}
-                            closeFunction={() => this.closeConfirmDelete()}/>}
-        {this.state.editingResource && resource &&
-        <EditModal resource={resource}
-                   onEdit={e => this.receiveEdit(e)}
-                   onCancel={() => this.closeEditModal()}/>}
         {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
                                            selectedConceptSetIds={selectedConceptSetIds}
                                            selectedCohortIds={selectedCohortIds}
