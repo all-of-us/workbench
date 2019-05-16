@@ -3,14 +3,41 @@ import * as React from 'react';
 
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {Button} from 'app/components/buttons';
-import {TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import {CohortReview} from 'generated/fetch';
+
+const styles = reactStyles({
+  title: {
+    color: '#302973',
+    fontSize: '0.9rem',
+    fontWeight: 200,
+  },
+  body: {
+    lineHeight: '1rem',
+  },
+  input: {
+    height: '1.25rem',
+    width: '10rem',
+    border: '1px solid #c5c5c5',
+    borderRadius: '3px',
+  },
+  cancel: {
+    color: '#000000',
+    fontWeight: 'bold',
+    marginRight: '1rem',
+    padding: '0.25rem 0.5rem',
+    letterSpacing: '1.25px',
+  },
+  create: {
+    background: '#302C71',
+    marginLeft: '0.5rem',
+  }
+});
 
 interface Props {
   created: Function;
@@ -22,6 +49,7 @@ interface State {
   review: CohortReview;
   create: boolean;
   creating: boolean;
+  inputValue: number;
 }
 
 export const CreateReviewModal = withCurrentWorkspace()(
@@ -33,7 +61,8 @@ export const CreateReviewModal = withCurrentWorkspace()(
         review: cohortReviewStore.getValue(),
         cohort: currentCohortStore.getValue(),
         create: true,
-        creating: false
+        creating: false,
+        inputValue: null
       };
     }
 
@@ -65,19 +94,27 @@ export const CreateReviewModal = withCurrentWorkspace()(
     }
 
     render() {
-      const {cohort, review} = this.state;
+      const {cohort, inputValue, review} = this.state;
       return <Modal onRequestClose={() => this.cancelReview()}>
-        <ModalTitle>Create Review Set</ModalTitle>
-        <ModalBody>
-          Cohort {cohort.name} has {review.matchedParticipantCount.toLocaleString()}
-          participants for possible review.  How many would you like to review?
-          {review.matchedParticipantCount > 10000 && <span>(max 10,000)</span>}
-          <TextInput/>
+        <ModalTitle style={styles.title}>Create Review Set</ModalTitle>
+        <ModalBody style={styles.body}>
+          <div style={{marginBottom: '0.5rem'}}>
+            Cohort {cohort.name} has {review.matchedParticipantCount.toLocaleString() + ' '}
+            participants for possible review.  How many would you like to review?
+            {review.matchedParticipantCount > 10000 && <span> (max 10,000)</span>}
+          </div>
+          <input type='number'
+            value={inputValue}
+            style={styles.input}
+            placeholder='NUMBER OF PARTICIPANTS'
+            onChange={e => this.setState({inputValue: parseInt(e.target.value, 10)})}/>
         </ModalBody>
         <ModalFooter>
-          <Button type='secondary' onClick={() => this.cancelReview()}>Cancel</Button>
-          <Button style={{marginLeft: '0.5rem'}} onClick={() => this.createReview()}>
-            Create set
+          <Button style={styles.cancel} type='link' onClick={() => this.cancelReview()}>
+            CANCEL
+          </Button>
+          <Button style={styles.create} type='primary' onClick={() => this.createReview()}>
+            CREATE SET
           </Button>
         </ModalFooter>
       </Modal>;
