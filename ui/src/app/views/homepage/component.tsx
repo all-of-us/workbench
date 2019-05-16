@@ -96,6 +96,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     accessTasksRemaining: boolean,
     betaAccessGranted: boolean,
     billingProjectInitialized: boolean,
+    useBillingProjectBuffer: boolean,
     dataUseAgreementCompleted: boolean,
     eraCommonsError: string,
     eraCommonsLinked: boolean,
@@ -117,6 +118,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       accessTasksRemaining: undefined,
       betaAccessGranted: undefined,
       billingProjectInitialized: false,
+      useBillingProjectBuffer: false,
       dataUseAgreementCompleted: undefined,
       eraCommonsError: '',
       eraCommonsLinked: undefined,
@@ -134,6 +136,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     this.validateNihToken();
     this.callProfile();
     this.checkBillingProjectStatus();
+    this.checkUseBillingProjectBufferFeatureFlag();
   }
 
   componentDidUpdate(prevProps) {
@@ -252,16 +255,22 @@ export const Homepage = withUserProfile()(class extends React.Component<
     }
   }
 
+  async checkUseBillingProjectBufferFeatureFlag() {
+    const config = await configApi().getConfig();
+    this.setState({useBillingProjectBuffer: config.useBillingProjectBuffer});
+  }
+
   openVideo(videoLink: string): void {
     this.setState({videoOpen: true, videoLink: videoLink});
   }
 
 
   render() {
-    const {billingProjectInitialized, betaAccessGranted, videoOpen, accessTasksLoaded,
+    const {billingProjectInitialized, useBillingProjectBuffer, betaAccessGranted, videoOpen, accessTasksLoaded,
         accessTasksRemaining, eraCommonsLinked, eraCommonsError, firstVisitTraining,
         trainingCompleted, quickTour, videoLink, twoFactorAuthCompleted,
       dataUseAgreementCompleted} = this.state;
+    const canCreateWorkspaces = billingProjectInitialized || useBillingProjectBuffer;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -315,8 +324,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
                       <div style={styles.mainHeader}>Researcher Workbench</div>
                       <TooltipTrigger content={<div>Your Firecloud billing project is still being
                         initialized. Workspace creation will be available in a few minutes.</div>}
-                                      disabled={billingProjectInitialized}>
-                        <CardButton disabled={!billingProjectInitialized}
+                                      disabled={canCreateWorkspaces}>
+                        <CardButton disabled={!canCreateWorkspaces}
                                     onClick={() => navigate(['workspaces/build'])}
                                     style={{margin: '1.9rem 106px 0 3%'}}>
                           Create a <br/> New Workspace
