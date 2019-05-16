@@ -149,14 +149,16 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       return this.props.urlParams.dataSetId !== undefined;
     }
 
-    componentDidMount() {
+    async componentDidMount() {
       const {namespace, id} = this.props.workspace;
-      this.loadResources();
+      const allPromises = [];
+      allPromises.push(this.loadResources());
       conceptsApi().getDomainInfo(namespace, id).then((response) => {
         this.setState({conceptDomainList: response.items});
       });
       if (this.editing) {
-        dataSetApi().getDataSet(namespace, id, this.props.urlParams.dataSetId).then((response) => {
+        allPromises.push(dataSetApi().getDataSet(
+          namespace, id, this.props.urlParams.dataSetId).then((response) => {
           this.setState({
             dataSet: response,
             includesAllParticipants: response.includesAllParticipants,
@@ -165,13 +167,19 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             selectedValues: response.values,
             valuesLoading: true,
           });
-          this.getValuesList(this.getDomainsFromConceptIds(response.conceptSets.map(cs => cs.id)))
-            .then(valueSets => this.setState({valueSets: valueSets, valuesLoading: false}));
-        });
+          return response;
+        }));
+        const [sentinelValue, dataSet] = await Promise.all(allPromises);
+        // We can only run this command once both the data set fetch and the
+        // load resources have concluded. However, we want those to happen in
+        // parallel, and one is conditional, so we add them to an array to await
+        // and only run once both have finished.
+        this.getValuesList(this.getDomainsFromConceptIds(dataSet.conceptSets.map(cs => cs.id)))
+          .then(valueSets => this.setState({valueSets: valueSets, valuesLoading: false}));
       }
     }
 
-    async loadResources() {
+    async loadResources(): Promise<void> {
       try {
         const {namespace, id} = this.props.workspace;
         const [conceptSets, cohorts] = await Promise.all([
@@ -179,8 +187,10 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           cohortsApi().getCohortsInWorkspace(namespace, id)]);
         this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
           loadingResources: false});
+        return Promise.resolve();
       } catch (error) {
-        console.log(error);
+        console.error(error);
+        return Promise.resolve();
       }
     }
 
@@ -390,7 +400,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         this.setState({previewList: dataSetPreviewResp.domainValue,
           selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain});
       } catch (ex) {
-        console.log(ex);
+        console.error(ex);
       } finally {
         this.setState({previewDataLoading: false});
       }
@@ -412,7 +422,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     updateDataSet() {
       const {namespace, id} = this.props.workspace;
       const {dataSet} = this.state;
-      console.log('hello world');
       const request = {
         name: dataSet.name,
         description: dataSet.description,
