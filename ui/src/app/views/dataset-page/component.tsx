@@ -103,13 +103,10 @@ interface Props {
 
 interface State {
   cohortList: Cohort[];
-  confirmDeleting: boolean;
   conceptSetList: ConceptSet[];
   creatingConceptSet: boolean;
   dataSet: DataSet;
   dataSetTouched: boolean;
-  conceptSetList: ConceptSet[];
-  previewList: Array<DataSetPreviewList>;
   includesAllParticipants: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
@@ -133,7 +130,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         creatingConceptSet: false,
         dataSet: undefined,
         dataSetTouched: false,
-        editingResource: false,
         includesAllParticipants: false,
         loadingResources: true,
         openSaveModal: false,
@@ -182,12 +178,11 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     async loadResources(): Promise<void> {
       try {
         const {namespace, id} = this.props.workspace;
-        const [conceptSets, cohorts, domainInfo] = await Promise.all([
+        const [conceptSets, cohorts] = await Promise.all([
           conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
-          cohortsApi().getCohortsInWorkspace(namespace, id),
-          conceptsApi().getDomainInfo(namespace, id)]);
+          cohortsApi().getCohortsInWorkspace(namespace, id)]);
         this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
-          loadingResources: false, conceptDomainList: domainInfo.items});
+          loadingResources: false});
         return Promise.resolve();
       } catch (error) {
         console.error(error);
