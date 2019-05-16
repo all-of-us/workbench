@@ -19,7 +19,7 @@ import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {workspacesApi, configApi} from 'app/services/swagger-fetch-clients';
 import {
   displayDate,
   reactStyles,
@@ -224,9 +224,12 @@ export class WorkspaceCard extends React.Component<
 export const WorkspaceList = withUserProfile()
 (class extends React.Component<
   { profileState: { profile: Profile, reload: Function } },
-  { workspacesLoading: boolean, billingProjectInitialized: boolean,
-    workspaceList: WorkspacePermissions[], errorText: string,
-    firstSignIn: Date
+  { workspacesLoading: boolean,
+    billingProjectInitialized: boolean,
+    useBillingProjectBuffer: boolean,
+    workspaceList: WorkspacePermissions[],
+    errorText: string,
+    firstSignIn: Date,
   }> {
   private timer: NodeJS.Timer;
 
@@ -235,6 +238,7 @@ export const WorkspaceList = withUserProfile()
     this.state = {
       workspacesLoading: true,
       billingProjectInitialized: false,
+      useBillingProjectBuffer: false,
       workspaceList: [],
       errorText: '',
       firstSignIn: undefined
@@ -243,6 +247,7 @@ export const WorkspaceList = withUserProfile()
 
   componentDidMount() {
     this.checkBillingProjectStatus();
+    this.checkUseBillingProjectBufferFeatureFlag();
     this.reloadWorkspaces();
   }
 
@@ -282,10 +287,22 @@ export const WorkspaceList = withUserProfile()
     }
   }
 
+  async checkUseBillingProjectBufferFeatureFlag() {
+    const config = await configApi().getConfig();
+    this.setState({ useBillingProjectBuffer: config.useBillingProjectBuffer });
+  }
+
   render() {
     const {profileState: {profile}} = this.props;
-    const {billingProjectInitialized, errorText,
-      workspaceList, workspacesLoading} = this.state;
+    const {
+      billingProjectInitialized,
+      useBillingProjectBuffer,
+      errorText,
+      workspaceList,
+      workspacesLoading
+    } = this.state;
+
+    const canCreateWorkspaces = billingProjectInitialized || useBillingProjectBuffer;
 
     return <React.Fragment>
       <FadeBox style={styles.fadeBox}>
@@ -299,7 +316,7 @@ export const WorkspaceList = withUserProfile()
             {workspacesLoading ?
               (<Spinner style={{width: '100%', marginTop: '1.5rem'}}/>) :
               (<div style={{display: 'flex', marginTop: '1.5rem', flexWrap: 'wrap'}}>
-                <CardButton disabled={!billingProjectInitialized}
+                <CardButton disabled={!canCreateWorkspaces}
                             onClick={() => navigate(['workspaces/build'])}
                             style={styles.addCard}>
                   Create a <br/> New Workspace
