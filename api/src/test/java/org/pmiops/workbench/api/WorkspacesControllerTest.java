@@ -234,7 +234,6 @@ public class WorkspacesControllerTest {
   }
 
   private static User currentUser;
-
   @Autowired
   FireCloudService fireCloudService;
   @Autowired
