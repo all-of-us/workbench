@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.List;
 
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -229,47 +230,61 @@ public class DataSetController implements DataSetApiDelegate {
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
     bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
-      String query = queryJobConfiguration.getQuery().concat(" LIMIT "+ NO_OF_PREVIEW_ROWS);
-      queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
-
-      // Select all value can take up to a minute to return the results
-      TableResult queryResponse = bigQueryService.executeQuery(bigQueryService
-          .filterBigQueryConfig(queryJobConfiguration), 60000l);
-
+      int retry = 0, defaultRows = NO_OF_PREVIEW_ROWS ;
       List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
-      queryResponse.getSchema().getFields().forEach(fields -> {
-        valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
-      });
 
-      queryResponse.getValues().forEach(fieldValueList -> {
-        IntStream.range(0, fieldValueList.size()).forEach(columnNumber -> {
-          try {
-            valuePreviewList.get(columnNumber).addQueryValueItem(
-                fieldValueList.get(columnNumber).getValue().toString());
-          } catch (NullPointerException ex) {
-            log.severe(
-                String.format("Null pointer exception while retriving value for query: Column %s ", columnNumber));
-            valuePreviewList.get(columnNumber).addQueryValueItem("");
-          }
-        });
-      });
-      queryResponse.getSchema().getFields().forEach(fields -> {
-        DataSetPreviewValueList previewValue = valuePreviewList.stream()
-            .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName())).findFirst().get();
-        if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
-          List<String> queryValues = new ArrayList<String>();
-          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-          previewValue.getQueryValue().forEach(value -> {
-            try {
-              Double fieldValue = Double.parseDouble(value);
-              queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
-            } catch (NumberFormatException ex) {
-              queryValues.add("");
+      do {
+        try {
+          String query = queryJobConfiguration.getQuery().concat(" LIMIT "+ defaultRows);
+
+          queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
+
+          TableResult queryResponse = bigQueryService.executeQuery(bigQueryService
+              .filterBigQueryConfig(queryJobConfiguration), 60000l);
+          queryResponse.getSchema().getFields().forEach(fields -> {
+            valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
+          });
+
+          queryResponse.getValues().forEach(fieldValueList -> {
+            IntStream.range(0, fieldValueList.size()).forEach(columnNumber -> {
+              try {
+                valuePreviewList.get(columnNumber).addQueryValueItem(
+                    fieldValueList.get(columnNumber).getValue().toString());
+              } catch (NullPointerException ex) {
+                log.severe(
+                    String.format("Null pointer exception while retriving value for query: Column %s ", columnNumber));
+                valuePreviewList.get(columnNumber).addQueryValueItem("");
+              }
+            });
+          });
+          queryResponse.getSchema().getFields().forEach(fields -> {
+            DataSetPreviewValueList previewValue = valuePreviewList.stream()
+                .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName())).findFirst().get();
+            if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
+              List<String> queryValues = new ArrayList<String>();
+              DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+              previewValue.getQueryValue().forEach(value -> {
+                try {
+                  Double fieldValue = Double.parseDouble(value);
+                  queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
+                } catch (NumberFormatException ex) {
+                  queryValues.add("");
+                }
+              });
+              previewValue.setQueryValue(queryValues);
             }
           });
-          previewValue.setQueryValue(queryValues);
+          retry = 2;
+        } catch (ServerErrorException ex) {
+          if(ex.getCause().getMessage().contains("Read timed out")) {
+            defaultRows = (defaultRows / 2);
+            retry++;
+          } else {
+            retry = 2;
+          }
         }
-      });
+      }  while (retry < 2);
+
 
       Collections.sort(valuePreviewList,
           Comparator.comparing(item -> dataSet.getValues().indexOf(item.getValue())));
