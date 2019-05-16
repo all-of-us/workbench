@@ -66,8 +66,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .jupyterUserScriptUri(config.firecloud.jupyterUserScriptUri)
         .userJupyterExtensionConfig(new UserJupyterExtensionConfig()
             .nbExtensions(ImmutableMap.of(
-                "playground-extension", config.firecloud.jupyterPlaygroundExtensionUri,
-                "snippets-menu", gcsPrefix + "/snippets-menu.js"))
+                "aou-playground-extension", config.firecloud.jupyterPlaygroundExtensionUri,
+                "aou-snippets-menu", gcsPrefix + "/snippets-menu.js"))
             .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
             .combinedExtensions(ImmutableMap.<String, String>of())
             .labExtensions(ImmutableMap.<String, String>of()))
