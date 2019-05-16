@@ -496,10 +496,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                       }
                                       onEdit={
                                         () => {
-                                          const url =
-                                            '/workspaces/' + namespace + '/' +
-                                            id + '/cohorts/build?cohortId=';
-                                          navigateByUrl(url + cohort.id);
+                                          navigateByUrl('/workspaces/' + namespace + '/' +
+                                            id + '/cohorts/build?cohortId=' + cohort.id);
                                         }
                                       }
                                       onRenameCohort={
