@@ -9,15 +9,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cohortbuilder.BaseQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.TemporalQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -66,6 +67,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.inject.Provider;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -148,6 +150,9 @@ public class CohortReviewControllerTest {
   @Autowired
   private BigQueryService bigQueryService;
 
+  @Mock
+  private Provider<WorkbenchConfig> configProvider;
+
   private enum TestDemo {
     ASIAN("Asian", 8515),
     WHITE("White", 8527),
@@ -177,11 +182,11 @@ public class CohortReviewControllerTest {
     CdrVersionService.class,
     CohortReviewController.class,
     CohortReviewServiceImpl.class,
-    ParticipantCounter.class,
     CohortQueryBuilder.class,
+    BaseQueryBuilder.class,
     ReviewQueryBuilder.class,
     QueryBuilderFactory.class,
-    TemporalQueryBuilder.class
+    BaseQueryBuilder.class
   })
   @MockBean({
     BigQueryService.class,
@@ -320,6 +325,12 @@ public class CohortReviewControllerTest {
         .annotationValueString("test")
         .cohortAnnotationDefinitionId(stringAnnotationDefinition.getCohortAnnotationDefinitionId());
     participantCohortAnnotationDao.save(participantAnnotation);
+
+    WorkbenchConfig testConfig = new WorkbenchConfig();
+    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
+    testConfig.cohortbuilder.enableListSearch = false;
+    when(configProvider.get()).thenReturn(testConfig);
+    cohortReviewController.setConfigProvider(configProvider);
   }
 
   @After
