@@ -47,7 +47,7 @@ public class BillingProjectBufferService {
   }
 
   public void bufferBillingProject() {
-    if (getCurrentBufferSize() >= getBufferCapacity()) {
+    if (getUnfilledBufferSpace() <= 0) {
       return;
     }
 
@@ -117,6 +117,12 @@ public class BillingProjectBufferService {
       entry = billingProjectBufferEntryDao
           .findFirstByStatusOrderByCreationTimeAsc(
               StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE));
+
+      if (entry == null) {
+        log.log(Level.SEVERE, "Consume Buffer call made while Billing Project Buffer was empty");
+        throw new EmptyBufferException();
+      }
+
       entry.setStatusEnum(ASSIGNING);
       billingProjectBufferEntryDao.save(entry);
     } finally {
@@ -138,11 +144,15 @@ public class BillingProjectBufferService {
     return prefix + randomString;
   }
 
+  private int getUnfilledBufferSpace() {
+    return getBufferMaxCapacity() - (int) getCurrentBufferSize();
+  }
+
   private long getCurrentBufferSize() {
     return billingProjectBufferEntryDao.getCurrentBufferSize();
   }
 
-  private int getBufferCapacity() {
+  private int getBufferMaxCapacity() {
     return workbenchConfigProvider.get().firecloud.billingProjectBufferCapacity;
   }
 

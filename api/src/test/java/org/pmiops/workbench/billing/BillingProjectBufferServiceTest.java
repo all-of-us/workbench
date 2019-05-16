@@ -69,8 +69,6 @@ public class BillingProjectBufferServiceTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
-  private static WorkbenchConfig workbenchConfig;
-
   @TestConfiguration
   @Import({
       BillingProjectBufferService.class
@@ -90,6 +88,8 @@ public class BillingProjectBufferServiceTest {
       return workbenchConfig;
     }
   }
+
+  private static WorkbenchConfig workbenchConfig;
 
   @Autowired
   EntityManager entityManager;
