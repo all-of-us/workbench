@@ -4,11 +4,14 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +39,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
  * for BigQuery for the Temporal criteria groups. The temporal group functionality description
  * is here: https://docs.google.com/document/d/1OFrG7htm8gT0QOOvzHa7l3C3Qs0JnoENuK1TDAB_1A8
  */
+@Service
 public class BaseQueryBuilder {
 
   private static final String UNION_TEMPLATE = "union all\n";
@@ -61,8 +65,14 @@ public class BaseQueryBuilder {
       ") temp2 on (${conditions})\n";
 
   private static final Logger log = Logger.getLogger(BaseQueryBuilder.class.getName());
+  private CBCriteriaDao cbCriteriaDao;
 
-  public static void buildQuery(ParticipantCriteria participantCriteria,
+  @Autowired
+  public BaseQueryBuilder(CBCriteriaDao cbCriteriaDao) {
+    this.cbCriteriaDao = cbCriteriaDao;
+  }
+
+  public void buildQuery(ParticipantCriteria participantCriteria,
                                 Map<String, QueryParameterValue> params,
                                 List<String> queryParts,
                                 SearchGroup searchGroup) {
@@ -84,7 +94,7 @@ public class BaseQueryBuilder {
     }
   }
 
-  private static String buildTemporalQuery(Map<String, QueryParameterValue> params,
+  private String buildTemporalQuery(Map<String, QueryParameterValue> params,
                                            SearchGroup searchGroup,
                                            boolean isEnableListSearch) {
     validateSearchGroup(searchGroup);
@@ -134,7 +144,7 @@ public class BaseQueryBuilder {
       .replace("${conditions}", conditions);
   }
 
-  private static ListMultimap<Integer, SearchGroupItem> getTemporalGroups(SearchGroup searchGroup) {
+  private ListMultimap<Integer, SearchGroupItem> getTemporalGroups(SearchGroup searchGroup) {
     ListMultimap<Integer, SearchGroupItem> itemMap = ArrayListMultimap.create();
     searchGroup.getItems()
       .forEach(item -> {
@@ -146,7 +156,7 @@ public class BaseQueryBuilder {
     return itemMap;
   }
 
-  private static void validateSearchGroup(SearchGroup searchGroup) {
+  private void validateSearchGroup(SearchGroup searchGroup) {
     from(mentionInvalid()).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, MENTION, searchGroup.getMention());
     from(timeInvalid()).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, TIME, searchGroup.getTime());
     from(timeValueNull().and(timeValueRequired())).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, TIME_VALUE, searchGroup.getTimeValue());

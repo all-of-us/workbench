@@ -7,6 +7,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -79,6 +80,13 @@ public class CohortQueryBuilder {
   private static final String EXCLUDE_SQL_TEMPLATE =
       "${mainTable}.person_id not in\n" +
           "(${excludeSql})\n";
+
+  private BaseQueryBuilder baseQueryBuilder;
+
+  @Autowired
+  public CohortQueryBuilder(BaseQueryBuilder baseQueryBuilder) {
+    this.baseQueryBuilder = baseQueryBuilder;
+  }
 
   /**
    * Provides counts of unique subjects
@@ -211,7 +219,7 @@ public class CohortQueryBuilder {
     StringJoiner joiner = new StringJoiner("and ");
     List<String> queryParts = new ArrayList<>();
     for (SearchGroup searchGroup : participantCriteria.getSearchRequest().getIncludes()) {
-      BaseQueryBuilder.buildQuery(participantCriteria, params, queryParts, searchGroup);
+      baseQueryBuilder.buildQuery(participantCriteria, params, queryParts, searchGroup);
       joiner.add(INCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)
         .replace("${includeSql}", String.join(UNION_TEMPLATE, queryParts)));
       queryParts = new ArrayList<>();
@@ -226,7 +234,7 @@ public class CohortQueryBuilder {
     StringJoiner joiner = new StringJoiner("and ");
     List<String> queryParts = new ArrayList<>();
     for (SearchGroup searchGroup : participantCriteria.getSearchRequest().getExcludes()) {
-      BaseQueryBuilder.buildQuery(participantCriteria, params, queryParts, searchGroup);
+      baseQueryBuilder.buildQuery(participantCriteria, params, queryParts, searchGroup);
       String sqlTemplate = excludeSQL ? EXCLUDE_SQL_TEMPLATE : INCLUDE_SQL_TEMPLATE;
       joiner.add(sqlTemplate.replace("${mainTable}", mainTable)
             .replace("${excludeSql}", String.join(UNION_TEMPLATE, queryParts)));
