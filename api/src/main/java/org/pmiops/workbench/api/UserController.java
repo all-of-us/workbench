@@ -8,6 +8,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
+import javax.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -36,10 +38,12 @@ public class UserController implements UserApiDelegate {
   };
 
   private final UserService userService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
-  public UserController(UserService userService) {
+  public UserController(UserService userService, Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.userService = userService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -63,11 +67,17 @@ public class UserController implements UserApiDelegate {
         .ofNullable(Sort.Direction.fromStringOrNull(sortOrder))
         .orElse(Sort.Direction.ASC);
     Sort sort = new Sort(new Sort.Order(direction, DEFAULT_SORT_FIELD));
+
+    List<User> users = userService.findUsersBySearchString(term, sort);
+
     // We want to filter out users not initialized in firecloud yet to avoid sharing with a not yet existent user.
-    List<User> users = userService.findUsersBySearchString(term, sort)
-        .stream()
-        .filter(user -> user.getFreeTierBillingProjectName() != null)
-        .collect(Collectors.toList());
+    // This is no longer relevant if we create new workspaces with new billing projects
+    if (!workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer) {
+      users = users.stream()
+          .filter(user -> user.getFreeTierBillingProjectName() != null)
+          .collect(Collectors.toList());
+    }
+
     int pageSize = Optional.ofNullable(size).orElse(DEFAULT_PAGE_SIZE);
     List<List<User>> pagedUsers = Lists.partition(users, pageSize);
 

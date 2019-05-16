@@ -33,6 +33,7 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
@@ -133,6 +134,8 @@ public class ProfileControllerTest {
   @Before
   public void setUp() throws MessagingException {
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
+    config.featureFlags = new FeatureFlagsConfig();
+    config.featureFlags.useBillingProjectBuffer = false;
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
     config.firecloud.billingRetryCount = 2;
     config.firecloud.registeredDomainName = "";

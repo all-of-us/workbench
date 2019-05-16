@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -85,10 +86,12 @@ public class UserControllerTest {
     WorkbenchConfig config =  new WorkbenchConfig();
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.enforceRegistered = false;
+    config.featureFlags = new FeatureFlagsConfig();
+    config.featureFlags.useBillingProjectBuffer = false;
     configProvider = Providers.of(config);
     this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock(),
         new Random(), fireCloudService, configProvider, complianceService, directoryService);
-    this.userController = new UserController(userService);
+    this.userController = new UserController(userService, configProvider);
     saveFamily();
   }
 
@@ -102,7 +105,7 @@ public class UserControllerTest {
     configProvider.get().firecloud.enforceRegistered = true;
     this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock(),
         new Random(), fireCloudService, configProvider, complianceService, directoryService);
-    this.userController = new UserController(userService);
+    this.userController = new UserController(userService, configProvider);
     User john = userDao.findUserByEmail("john@lis.org");
 
     UserResponse response = userController.user("Robinson", null, null, null).getBody();
