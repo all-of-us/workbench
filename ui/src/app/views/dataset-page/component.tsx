@@ -118,6 +118,7 @@ interface State {
   selectedValues: DomainValuePair[];
   valueSets: ValueSet[];
   valuesLoading: boolean;
+  selectAll: boolean;
 }
 
 const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
@@ -140,7 +141,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         selectedPreviewDomain: '',
         selectedValues: [],
         valueSets: [],
-        valuesLoading: false
+        valuesLoading: false,
+        selectAll: false
       };
     }
 
@@ -257,12 +259,26 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       } else {
         valuesSelected = (origSelected).concat(selectObj);
       }
-
       // Sort the values selected as per the order display rather than appending top end
       valuesSelected = valuesSelected.sort((a, b) =>
           valueSets.findIndex(({value}) => a.value === value) -
           valueSets.findIndex(({value}) => b.value === value));
       this.setState({selectedValues: valuesSelected, dataSetTouched: true});
+    }
+
+    selectAllValues() {
+      if (this.state.selectAll) {
+        this.setState({selectedValues: [], selectAll: !this.state.selectAll});
+        return;
+      }
+
+      const allValuesSelected = [];
+      this.state.valueSets.map(valueSet => {
+        valueSet.values.items.map(value => {
+          allValuesSelected.push({domain: valueSet.domain, value: value.value});
+        });
+      });
+      this.setState({selectedValues: allValuesSelected, selectAll: !this.state.selectAll});
     }
 
     disableSave() {
@@ -293,13 +309,16 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         name: '',
         description: '',
         conceptSetIds: this.state.selectedConceptSetIds,
+        includesAllParticipants: this.state.includesAllParticipants,
         cohortIds: this.state.selectedCohortIds,
         values: this.state.selectedValues
       };
       try {
         const dataSetPreviewResp = await dataSetApi().previewQuery(namespace, id, request);
-        this.setState({previewList: dataSetPreviewResp.domainValue,
-          selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain});
+        this.setState({
+          previewList: dataSetPreviewResp.domainValue,
+          selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain
+        });
       } catch (ex) {
         console.error(ex);
       } finally {
@@ -312,10 +331,13 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           this.state.previewList.filter(
             preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
 
-      return <DataTable key={this.state.selectedPreviewDomain}
+      return <DataTable key={this.state.selectedPreviewDomain} scrollable={true}
+                        style={{width: '100%'}}
                         value={this.getDataTableValue(filteredPreviewData.values)}>
         {filteredPreviewData.values.map(value =>
-            <Column header={value.value} headerStyle={{textAlign: 'left'}} field={value.value}/>
+            <Column header={value.value}
+                    headerStyle={{textAlign: 'left', width: '5rem', wordBreak: 'break-all'}}
+                    style={{width: '5rem'}} field={value.value}/>
         )}
       </DataTable>;
     }
@@ -411,8 +433,15 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   </div>
                 </div>
                 <div style={{width: '40%'}}>
-                  <div style={styles.selectBoxHeader}>
-                    Values
+                  <div style={{...styles.selectBoxHeader, display: 'flex'}}>
+                    <div>
+                      Values
+                    </div>
+                    <Clickable data-test-id='select-all'
+                               style={{marginLeft: 'auto', marginRight: '0.5rem'}}
+                               onClick={() => this.selectAllValues()}>
+                      Select All
+                    </Clickable>
                   </div>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {valuesLoading && <Spinner style={{position: 'relative',
