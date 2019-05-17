@@ -93,7 +93,7 @@ public class UserControllerTest {
     configProvider = Providers.of(config);
     this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock(),
         new Random(), fireCloudService, configProvider, complianceService, directoryService);
-    this.userController = new UserController(userService, configProvider);
+    this.userController = new UserController(userService);
     saveFamily();
   }
 
@@ -107,7 +107,7 @@ public class UserControllerTest {
     configProvider.get().firecloud.enforceRegistered = true;
     this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock(),
         new Random(), fireCloudService, configProvider, complianceService, directoryService);
-    this.userController = new UserController(userService, configProvider);
+    this.userController = new UserController(userService);
     User john = userDao.findUserByEmail("john@lis.org");
 
     UserResponse response = userController.user("Robinson", null, null, null).getBody();

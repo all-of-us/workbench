@@ -38,12 +38,10 @@ public class UserController implements UserApiDelegate {
   };
 
   private final UserService userService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
-  public UserController(UserService userService, Provider<WorkbenchConfig> workbenchConfigProvider) {
+  public UserController(UserService userService) {
     this.userService = userService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
