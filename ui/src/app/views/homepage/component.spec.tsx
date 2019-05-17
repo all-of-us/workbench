@@ -2,11 +2,10 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {ConfigApi, DataAccessLevel, ProfileApi} from 'generated/fetch';
+import {DataAccessLevel, ProfileApi} from 'generated/fetch';
 import {Profile} from 'generated';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {userProfileStore} from 'app/utils/navigation';
-import {ConfigApiStub} from 'testing/stubs/config-api-stub';
+import {configDataStore, userProfileStore} from 'app/utils/navigation';
 
 import {Homepage} from './component';
 import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generated/fetch/api';
@@ -33,7 +32,6 @@ describe('HomepageComponent', () => {
     profileApi = new ProfileApiStub();
 
     registerApiClient(ProfileApi, profileApi);
-    registerApiClient(ConfigApi, new ConfigApiStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
@@ -81,6 +79,7 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
+    configDataStore.next({enforceRegistered: true})
     userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -92,6 +91,7 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
+    configDataStore.next({enforceRegistered: true})
     userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

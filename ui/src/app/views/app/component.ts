@@ -9,16 +9,15 @@ import {
   Router,
 } from '@angular/router';
 
+
+import {configApi} from 'app/services/swagger-fetch-clients';
 import {cookiesEnabled} from 'app/utils';
-import { configApi } from 'app/services/swagger-fetch-clients';
 import {configDataStore, queryParamsStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
 
-
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
-
 
 @Component({
   selector: 'app-aou',
