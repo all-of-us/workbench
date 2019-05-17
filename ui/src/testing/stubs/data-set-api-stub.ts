@@ -1,6 +1,30 @@
-import {DataSet, DataSetApi, DataSetExportRequest, DataSetQueryList, DataSetRequest, EmptyResponse} from 'generated/fetch';
+import {
+  DataSet,
+  DataSetApi,
+  DataSetExportRequest,
+  DataSetListResponse,
+  DataSetQueryList,
+  DataSetRequest,
+  EmptyResponse
+} from 'generated/fetch';
 
 export class DataSetApiStub extends DataSetApi {
+  static stubDataSets(): DataSet[] {
+    return [
+      {
+        id: 0,
+        name: 'Stub Data Set',
+        description: 'Stub Data Set',
+        includesAllParticipants: false,
+        workspaceId: 0,
+        lastModifiedTime: 10000,
+        conceptSets: [],
+        cohorts: [],
+        values: []
+      }
+    ];
+  }
+
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
   }
@@ -26,6 +50,14 @@ export class DataSetApiStub extends DataSetApi {
     dataSetExportRequest: DataSetExportRequest): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(resolve => {
       resolve({});
+    });
+  }
+
+  getDataSetsInWorkspace(
+    workspaceNamespace: string,
+    workspaceId: string): Promise<DataSetListResponse> {
+    return new Promise<DataSetListResponse>(resolve => {
+      resolve({items: DataSetApiStub.stubDataSets()});
     });
   }
 }

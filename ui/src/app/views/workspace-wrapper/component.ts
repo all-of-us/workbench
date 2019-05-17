@@ -2,15 +2,14 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import * as fp from 'lodash/fp';
 
-import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, navigate, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
   Workspace,
   WorkspaceAccessLevel,
-  WorkspacesService,
-} from 'generated';
+} from 'generated/fetch';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -39,8 +38,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private workspacesService: WorkspacesService,
-    private workspaceStorageService: WorkspaceStorageService
   ) {
     this.share = this.share.bind(this);
     this.closeShare = this.closeShare.bind(this);
@@ -69,9 +66,24 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         // do not render the child component with a stale workspace.
         this.workspace = undefined;
         this.accessLevel = undefined;
-        return this.workspaceStorageService.getWorkspace(ns, wsid);
+        // This needs to happen for testing because we seed the urlParamsStore with {}.
+        // Otherwise it tries to make an api call with undefined, because the component
+        // initializes before we have access to the route.
+        if (ns === undefined || wsid === undefined) {
+          return Promise.resolve(null);
+        }
+        return workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
+          return {
+            ...wsResponse.workspace,
+            accessLevel: wsResponse.accessLevel
+          };
+        });
       })
       .subscribe(workspace => {
+        if (workspace === null) {
+          // This handles the empty urlParamsStore story.
+          return;
+        }
         this.workspace = workspace;
         this.accessLevel = workspace.accessLevel;
         currentWorkspaceStore.next(workspace);
@@ -100,10 +112,10 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   delete(workspace: Workspace): void {
     this.deleting = true;
-    this.workspacesService.deleteWorkspace(
-      workspace.namespace, workspace.id).subscribe(() => {
+    workspacesApi().deleteWorkspace(
+      workspace.namespace, workspace.id).then(() => {
         navigate(['/workspaces']);
-      }, () => {
+      }).catch(() => {
         this.workspaceDeletionError = true;
       });
   }

@@ -7,10 +7,9 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ConceptsApi, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-import {WorkspaceAccessLevel} from 'generated';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 describe('ConceptHomepage', () => {
 
@@ -18,10 +17,7 @@ describe('ConceptHomepage', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(ConceptsApi, new ConceptsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
+    currentWorkspaceStore.next(workspaceDataStub);
   });
 
   it('should render', () => {

@@ -26,7 +26,7 @@ const styles = reactStyles({
   akaIcon: {
     marginLeft: 10,
     verticalAlign: 'middle',
-    color: colors.blue[2]
+    color: colors.blue[3]
   }
 });
 

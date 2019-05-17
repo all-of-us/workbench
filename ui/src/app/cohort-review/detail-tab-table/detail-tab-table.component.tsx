@@ -1,13 +1,12 @@
-import {Component, Input} from '@angular/core';
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
 import {vocabOptions} from 'app/cohort-review/review-state.service';
-import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
+import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
@@ -17,6 +16,18 @@ import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
 
+const css = `
+  .name-container {
+    overflow: hidden;
+    height: 1.2rem;
+  }
+  .name-container:before {
+    content:"";
+    float: left;
+    width: 1px;
+    height: 100%;
+  }
+`;
 
 const styles = reactStyles({
   container: {
@@ -115,6 +126,31 @@ const styles = reactStyles({
     lineHeight: '1.25rem',
     opacity: 0.5,
   },
+  nameWrapper: {
+    float: 'right',
+    width: '100%',
+    marginLeft: '-1px',
+  },
+  nameContent: {
+    margin: 0,
+    fontSize: '12px',
+    lineHeight: '0.6rem',
+  },
+  showMore: {
+    width: '70px',
+    marginLeft: '-80px',
+    bottom: '14px',
+    left: '100%',
+    background: '#ffffff',
+    color: '#2691d0',
+    boxSizing: 'content-box',
+    float: 'right',
+    position: 'relative',
+    marginRight: '1px',
+    paddingLeft: '10px',
+    textAlign: 'left',
+    cursor: 'pointer',
+  }
 });
 const filterIcons = {
   active: {
@@ -127,6 +163,7 @@ const filterIcons = {
     color: '#262262',
   }
 };
+
 const rows = 25;
 const domains = [
   DomainType.CONDITION,
@@ -253,25 +290,39 @@ export const DetailTabTable = withCurrentWorkspace()(
       this.setState({start: event.first});
     }
 
-    overlayTemplate(rowData: any, column: any) {
-      let vl: any;
-      const valueField = (rowData.refRange || rowData.unit ) && column.field === 'value';
-      const nameField = rowData.route && column.field === 'standardName';
-      return <div style={{position: 'relative'}}>
-        { column.field === 'value' && <span>{rowData.value}</span>}
-        { column.field === 'standardName' && <span>{rowData.standardName}</span>}
-        {(valueField || nameField)
-        && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => vl.toggle(e)}/>}
-        <OverlayPanel className='labOverlay' ref={(el) => vl = el}
-                      showCloseIcon={true} dismissable={true}>
-          {(rowData.refRange &&  column.field === 'value') &&
-          <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
-          {(rowData.unit && column.field === 'value') &&
-          <div>Units: {rowData.unit}</div>}
-          {nameField &&
-          <div>Route: {rowData.route}</div>}
-        </OverlayPanel>
-      </div>;
+    overlayTemplate = (rowData: any, column: any) => {
+      let nl: any, vl: any;
+      const {filterState: {vocab}} = this.props;
+      const valueField = (rowData.refRange || rowData.unit) && column.field === 'value';
+      const nameField = rowData.route && column.field === `${vocab}Name`;
+      return <React.Fragment>
+        <div style={{position: 'relative'}}>
+          {column.field === 'value' && <span>{rowData.value}</span>}
+          {column.field === `${vocab}Name` && <div className='name-container'>
+            <div style={styles.nameWrapper}>
+              <p style={styles.nameContent}>{rowData[`${vocab}Name`]}</p>
+            </div>
+            <span style={styles.showMore} onClick={(e) => nl.toggle(e)}>Show more</span>
+            <OverlayPanel className='labOverlay' ref={(el) => nl = el}
+                          showCloseIcon={true} dismissable={true}>
+              <div style={{paddingBottom: '0.2rem'}}>{rowData[`${vocab}Name`]}</div>
+            </OverlayPanel>
+          </div>
+          }
+          {(valueField || nameField)
+          && <i className='pi pi-caret-down' style={styles.caretIcon}
+              onClick={(e) => vl.toggle(e)}/>}
+          <OverlayPanel className='labOverlay' ref={(el) => vl = el}
+                        showCloseIcon={true} dismissable={true}>
+            {(rowData.refRange &&  column.field === 'value') &&
+            <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
+            {(rowData.unit && column.field === 'value') &&
+            <div>Units: {rowData.unit}</div>}
+            {nameField &&
+            <div>Route: {rowData.route}</div>}
+          </OverlayPanel>
+        </div>
+      </React.Fragment>;
     }
 
     updateData = (event, colName, namesArray) => {
@@ -369,7 +420,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             }
           }
         }
-        if (data.length < start + rows) {
+        if (data && data.length < start + rows) {
           start = Math.floor(data.length / rows) * rows;
         }
         this.setState({filteredData: data, start: start});
@@ -381,7 +432,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (data && data.length === 0) {
         return  'No ' + this.props.tabName + ' Data';
       } else if (data && data.length > 0 && filteredData && filteredData.length === 0) {
-        return 'There is data, but it is currently hidden. Please check your filters';
+        return 'Data does not match the specified filters';
       }
     }
 
@@ -528,12 +579,13 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     rowExpansionTemplate = (rowData: any) => {
       const {data} = this.state;
+      const {filterState: {vocab}} = this.props;
       const conceptIdBasedData = fp.groupBy('standardConceptId', data);
       const unitsObj = fp.groupBy( 'unit', conceptIdBasedData[rowData.standardConceptId]);
       const unitKey = Object.keys(unitsObj);
       let valueArray;
       return <React.Fragment>
-        <div style={styles.headerStyle}>{rowData.standardName}</div>
+        <div style={styles.headerStyle}>{rowData[`${vocab}Name`]}</div>
       <TabView className='unitTab'>
         {unitKey.map((k, i) => {
           const name = k === 'null' ? 'No Unit' : k;
@@ -550,13 +602,17 @@ export const DetailTabTable = withCurrentWorkspace()(
       </TabView>
       </React.Fragment>;
     }
+
     hideGraphIcon = (rowData: any) => {
-      const noConcept = rowData.standardName && rowData.standardName === 'No matching concept';
+      const {filterState: {vocab}} = this.props;
+      const noConcept = rowData[`${vocab}Name`]
+        && rowData[`${vocab}Name`] === 'No matching concept';
       return {'graphExpander' : noConcept};
     }
 
     render() {
       const {filteredData, loading, start, sortField, sortOrder} = this.state;
+      const {filterState: {vocab}, tabName} = this.props;
       let pageReportTemplate;
       if (filteredData !== null) {
         const lastRowOfPage = (start + rows) > filteredData.length
@@ -570,7 +626,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const columns = this.props.columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
-        const colName = col.name === 'value' || col.name === 'standardName';
+        const colName = col.name === 'value' || col.name === `${vocab}Name`;
         const hasCheckboxFilter = [
           'domain',
           'sourceVocabulary',
@@ -589,7 +645,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           'survey'
         ].includes(col.name);
         const isExpanderNeeded = col.name === 'graph' &&
-          (this.props.tabName === 'Vitals' || this.props.tabName === 'Labs');
+          (tabName === 'Vitals' || tabName === 'Labs');
         const overlayTemplate = colName && this.overlayTemplate;
         const header = <React.Fragment>
           <span
@@ -617,7 +673,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       });
 
       return <div style={styles.container}>
-        <style>{css}</style>
+        <style>{datatableStyles + css}</style>
         {filteredData && <DataTable
           expandedRows={this.state.expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
@@ -646,31 +702,3 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
   }
 );
-
-@Component ({
-  selector : 'app-detail-tab-table',
-  template: '<div #root></div>'
-})
-export class DetailTabTableComponent extends ReactWrapperBase {
-  @Input('tabName') tabName: DetailTabTableProps['tabName'];
-  @Input('columns') columns: DetailTabTableProps['columns'];
-  @Input('domain') domain: DetailTabTableProps['domain'];
-  @Input('filterType') filterType: DetailTabTableProps['filterType'];
-  @Input('participantId') participantId: DetailTabTableProps['participantId'];
-  @Input('filterState') filterState: DetailTabTableProps['filterState'];
-  @Input('getFilteredData') getFilteredData: DetailTabTableProps['getFilteredData'];
-  @Input('updateState') updateState: DetailTabTableProps['updateState'];
-
-  constructor() {
-    super(DetailTabTable, [
-      'tabName',
-      'columns',
-      'domain',
-      'filterType',
-      'participantId',
-      'filterState',
-      'getFilteredData',
-      'updateState',
-    ]);
-  }
-}

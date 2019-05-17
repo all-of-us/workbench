@@ -19,11 +19,11 @@ isCriteriaLoading,
 } from 'app/cohort-search/redux';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortBuilderService, WorkspaceAccessLevel} from 'generated';
+import {CohortBuilderService} from 'generated';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {ListTreeComponent} from './list-tree.component';
 
 class MockActions {
@@ -74,9 +74,8 @@ describe('ListTreeComponent', () => {
     })
       .compileComponents();
     currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
+      ...workspaceDataStub,
       cdrVersionId: '1',
-      accessLevel: WorkspaceAccessLevel.OWNER,
     });
   }));
 

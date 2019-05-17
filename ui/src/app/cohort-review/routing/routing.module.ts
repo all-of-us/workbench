@@ -1,7 +1,7 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {DetailPage} from 'app/cohort-review/detail-page/detail-page';
+import {DetailPageComponent} from 'app/cohort-review/detail-page/detail-page';
 import {PageLayout} from 'app/cohort-review/page-layout/page-layout';
 import {TablePage} from 'app/cohort-review/table-page/table-page';
 
@@ -23,9 +23,10 @@ const routes: Routes = [{
     }
   }, {
     path: 'participants/:pid',
-    component: DetailPage,
+    component: DetailPageComponent,
     data: {
-      breadcrumb: BreadcrumbType.Participant
+      breadcrumb: BreadcrumbType.Participant,
+      shouldReuse: true
     }
   }],
 }];

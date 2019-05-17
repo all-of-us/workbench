@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
@@ -175,6 +176,10 @@ public class UserService {
     }
   }
 
+  private boolean isServiceAccount(User user) {
+    return configProvider.get().auth.serviceAccountApiUsers.contains(user.getEmail());
+  }
+
   public User createServiceAccountUser(String email) {
     User user = new User();
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
@@ -323,7 +328,7 @@ public class UserService {
     });
   }
 
-  public User setBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
+  public User setFreeTierBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
     return updateUserWithRetries((user) -> {
       user.setFreeTierBillingProjectName(name);
       user.setFreeTierBillingProjectStatusEnum(status);
@@ -406,6 +411,11 @@ public class UserService {
    * 3. If there are no badges for a user set training completion time and expiration date as null
    */
   public User syncComplianceTrainingStatus(User user) throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+    if (isServiceAccount(user)) {
+      // Skip sync for service account user rows.
+      return user;
+    }
+
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     try {
       Integer moodleId = user.getMoodleId();
@@ -421,15 +431,21 @@ public class UserService {
       List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
       // The assumption here is that the User will always get 1 badge which will be AoU
       if (badgeResponse != null && badgeResponse.size() > 0) {
-        user.setComplianceTrainingCompletionTime(now);
-
         BadgeDetails badge = badgeResponse.get(0);
-        if (badge.getDateexpire() == null) {
-          //This can happen if date expire is set to never
-          user.setComplianceTrainingExpirationTime(null);
-        } else {
-          user.setComplianceTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
+        Timestamp badgeExpiration = badge.getDateexpire() == null ? null :
+            new Timestamp(Long.parseLong(badge.getDateexpire()));
+
+        if (user.getComplianceTrainingCompletionTime() == null) {
+          // This is the user's first time with a Moodle badge response, so we reset the completion
+          // time.
+          user.setComplianceTrainingCompletionTime(now);
+        } else if (badgeExpiration != null && !badgeExpiration.equals(user.getComplianceTrainingExpirationTime())) {
+          // The badge has a new expiration date, suggesting some sort of course completion change.
+          // Reset the completion time.
+          user.setComplianceTrainingCompletionTime(now);
         }
+
+        user.setComplianceTrainingExpirationTime(badgeExpiration);
       } else {
         // Moodle has returned zero badges for the given user -- we should clear the user's
         // training completion & expiration time.
@@ -459,6 +475,8 @@ public class UserService {
 
   /**
    * Updates the given user's eraCommons-related fields with the NihStatus object returned from FC.
+   *
+   * This method saves the updated user object to the database and returns it.
    */
   private User setEraCommonsStatus(User targetUser, NihStatus nihStatus) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
@@ -466,18 +484,31 @@ public class UserService {
     return updateUserWithRetries(user -> {
       if (nihStatus != null) {
         Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
+        Timestamp nihLinkExpireTime = Timestamp.from(Instant.ofEpochSecond(
+            nihStatus.getLinkExpireTime()));
+
         // NihStatus should never come back from firecloud with an empty linked username.
         // If that is the case, there is an error with FC, because we should get a 404
         // in that case. Leaving the null checking in for code safety reasons
-        if ((nihStatus.getLinkedNihUsername() != null &&
-            !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
-            nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
-          eraCommonsCompletionTime = now;
-        } else if (nihStatus.getLinkedNihUsername() == null) {
+
+        if (nihStatus.getLinkedNihUsername() == null) {
+          // If FireCloud says we have no NIH link, always clear the completion time.
           eraCommonsCompletionTime = null;
+        } else if (!nihLinkExpireTime.equals(user.getEraCommonsLinkExpireTime())) {
+          // If the link expiration time has changed, we treat this as a "new" completion of the
+          // access requirement.
+          eraCommonsCompletionTime = now;
+        } else if (nihStatus.getLinkedNihUsername() != null &&
+            !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) {
+          // If the linked username has changed, we treat this as a new completion time.
+          eraCommonsCompletionTime = now;
+        } else if (eraCommonsCompletionTime == null) {
+          // If the user hasn't yet completed this access requirement, set the time to now.
+          eraCommonsCompletionTime = now;
         }
+
         user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
-        user.setEraCommonsLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
+        user.setEraCommonsLinkExpireTime(nihLinkExpireTime);
         user.setEraCommonsCompletionTime(eraCommonsCompletionTime);
       } else {
         user.setEraCommonsLinkedNihUsername(null);
@@ -502,8 +533,15 @@ public class UserService {
    *
    * This uses impersonated credentials and should only be called in the context of a cron job or a
    * request from a user with elevated privileges.
+   *
+   * Returns the updated User object.
    */
   public User syncEraCommonsStatusUsingImpersonation(User user) throws IOException, org.pmiops.workbench.firecloud.ApiException {
+    if (isServiceAccount(user)) {
+      // Skip sync for service account user rows.
+      return user;
+    }
+
     ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
     NihApi api = new NihApi(apiClient);
     try {
@@ -525,7 +563,15 @@ public class UserService {
     syncTwoFactorAuthStatus(userProvider.get());
   }
 
+  /**
+   *
+   */
   public User syncTwoFactorAuthStatus(User targetUser) {
+    if (isServiceAccount(targetUser)) {
+      // Skip sync for service account user rows.
+      return targetUser;
+    }
+
     return updateUserWithRetries(user -> {
       boolean isEnrolledIn2FA = directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv();
       if (isEnrolledIn2FA) {

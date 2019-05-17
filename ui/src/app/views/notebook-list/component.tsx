@@ -10,8 +10,8 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {NewNotebookModal} from 'app/views/new-notebook-modal/component';
 import {ResourceCard} from 'app/views/resource-card/component';
 

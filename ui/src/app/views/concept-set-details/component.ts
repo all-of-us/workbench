@@ -51,8 +51,7 @@ export class ConceptSetDetailsComponent implements OnInit, OnDestroy {
     const {ns, wsid, csid} = urlParamsStore.getValue();
     this.wsNamespace = ns;
     this.wsId = wsid;
-    const {accessLevel} = currentWorkspaceStore.getValue();
-    this.accessLevel = accessLevel;
+    this.accessLevel = currentWorkspaceStore.getValue() as unknown as WorkspaceAccessLevel;
     this.conceptSetsService.getConceptSet(ns, wsid, csid).subscribe(conceptSet => {
       currentConceptSetStore.next(conceptSet as unknown as FetchConceptSet);
       this.conceptSet = conceptSet;

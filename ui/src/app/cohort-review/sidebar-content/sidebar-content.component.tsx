@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
@@ -11,9 +10,9 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, DatePicker, NumberInput, Select, TextArea} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils/index';
+import {withCurrentWorkspace, withUrlParams} from 'app/utils/index';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {AnnotationType, CohortAnnotationDefinition, CohortStatus, ParticipantCohortAnnotation, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {
@@ -108,8 +107,8 @@ const AnnotationItem = fp.flow(
     const value = fp.pull(undefined,
       [savingValue, editValue, readValue(annotationType, annotation)]
     )[0];
-    const disabled = accessLevel === WorkspaceAccessLevel[WorkspaceAccessLevel.NOACCESS] ||
-      accessLevel === WorkspaceAccessLevel[WorkspaceAccessLevel.READER];
+    const disabled = accessLevel === WorkspaceAccessLevel.NOACCESS ||
+      accessLevel === WorkspaceAccessLevel.READER;
     switch (annotationType) {
       case AnnotationType.INTEGER:
         return <NumberInput
@@ -237,8 +236,8 @@ export const SidebarContent = fp.flow(
       openCreateDefinitionModal, openEditDefinitionsModal, workspace: {accessLevel}
     } = this.props;
     const {savingStatus} = this.state;
-    const disabled = accessLevel === WorkspaceAccessLevel[WorkspaceAccessLevel.NOACCESS] ||
-      accessLevel === WorkspaceAccessLevel[WorkspaceAccessLevel.READER];
+    const disabled = accessLevel === WorkspaceAccessLevel.NOACCESS ||
+      accessLevel === WorkspaceAccessLevel.READER;
     return <div>
       <div style={styles.header}>Participant {participantId}</div>
       <div><span style={{fontWeight: 'bold'}}>DOB:</span> {birthDate}</div>
@@ -294,24 +293,3 @@ export const SidebarContent = fp.flow(
     </div>;
   }
 });
-
-@Component({
-  selector: 'app-sidebar-content',
-  template: '<div #root></div>',
-})
-export class SidebarContentComponent extends ReactWrapperBase {
-  @Input() participant: Participant;
-  @Input() setParticipant: Function;
-  @Input() annotations: ParticipantCohortAnnotation[];
-  @Input() annotationDefinitions: CohortAnnotationDefinition[];
-  @Input() setAnnotations: Function;
-  @Input() openCreateDefinitionModal: Function;
-  @Input() openEditDefinitionsModal: Function;
-
-  constructor() {
-    super(SidebarContent, [
-      'participant', 'setParticipant', 'annotations', 'annotationDefinitions', 'setAnnotations',
-      'openCreateDefinitionModal', 'openEditDefinitionsModal',
-    ]);
-  }
-}

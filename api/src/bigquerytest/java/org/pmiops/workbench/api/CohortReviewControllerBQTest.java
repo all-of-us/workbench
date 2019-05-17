@@ -6,14 +6,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.TemporalQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.BaseQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortFactory;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -72,6 +73,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
+import javax.inject.Provider;
 import java.time.*;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -143,6 +145,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Autowired
   private FireCloudService mockFireCloudService;
 
+  @Mock
+  private Provider<WorkbenchConfig> configProvider;
+
   private Cohort cohort;
 
   @TestConfiguration
@@ -154,11 +159,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     BigQueryService.class,
     ReviewQueryBuilder.class,
     CohortCloningService.class,
-    ParticipantCounter.class,
     CohortQueryBuilder.class,
-    TemporalQueryBuilder.class,
-    QueryBuilderFactory.class,
-    ParticipantCounter.class
+    BaseQueryBuilder.class,
+    QueryBuilderFactory.class
   })
   @MockBean({
     FireCloudService.class,
@@ -609,6 +612,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantCohortStatus participantCohortStatus2 = new ParticipantCohortStatus()
       .participantKey(key2);
     participantCohortStatusDao.save(participantCohortStatus2);
+
+    WorkbenchConfig testConfig = new WorkbenchConfig();
+    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
+    testConfig.cohortbuilder.enableListSearch = false;
+    when(configProvider.get()).thenReturn(testConfig);
+
+    controller.setConfigProvider(configProvider);
   }
 
   @After

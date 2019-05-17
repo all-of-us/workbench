@@ -20,6 +20,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UnderservedPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -74,8 +75,9 @@ public class Workspace {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Timestamp lastAccessedTime;
-  private Set<Cohort> cohorts = new HashSet<Cohort>();
-  private Set<ConceptSet> conceptSets = new HashSet<ConceptSet>();
+  private Set<Cohort> cohorts = new HashSet<>();
+  private Set<ConceptSet> conceptSets = new HashSet<>();
+  private Set<DataSet> dataSets = new HashSet<>();
   private Short activeStatus;
 
   private boolean diseaseFocusedResearch;
@@ -398,6 +400,19 @@ public class Workspace {
 
   public void setConceptSets(Set<ConceptSet> conceptSets) {
     this.conceptSets = conceptSets;
+  }
+
+  @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
+  public Set<DataSet> getDataSets() {
+    return dataSets;
+  }
+
+  public void setDataSets(Set<DataSet> dataSets) {
+    this.dataSets = dataSets;
+  }
+
+  public void addDataSet(DataSet dataSet) {
+    this.dataSets.add(dataSet);
   }
 
   @Transient

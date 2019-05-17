@@ -27,24 +27,28 @@ import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
+import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewList;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
@@ -88,6 +92,9 @@ public class DataSetController implements DataSetApiDelegate {
   private ConceptSetDao conceptSetDao;
 
   @Autowired
+  private DataSetDao dataSetDao;
+
+  @Autowired
   private FireCloudService fireCloudService;
 
   @Autowired
@@ -100,6 +107,7 @@ public class DataSetController implements DataSetApiDelegate {
       CohortDao cohortDao,
       ConceptDao conceptDao,
       ConceptSetDao conceptSetDao,
+      DataSetDao dataSetDao,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
@@ -110,6 +118,7 @@ public class DataSetController implements DataSetApiDelegate {
     this.cohortDao = cohortDao;
     this.conceptDao = conceptDao;
     this.conceptSetDao = conceptSetDao;
+    this.dataSetDao = dataSetDao;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
     this.notebooksService = notebooksService;
@@ -155,19 +164,23 @@ public class DataSetController implements DataSetApiDelegate {
       new Function<org.pmiops.workbench.db.model.DataSet, DataSet>() {
         @Override
         public DataSet apply(org.pmiops.workbench.db.model.DataSet dataSet) {
-          DataSet result = new DataSet();
-          result.setName(dataSet.getName());
-          result.setIncludesAllParticipants(dataSet.getIncludesAllParticipants());
-          Iterable<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
-              conceptSetDao.findAll(dataSet.getConceptSetId());
-          result.setConceptSets(StreamSupport.stream(conceptSets.spliterator(), false)
-              .map(conceptSet -> toClientConceptSet(conceptSet)).collect(Collectors.toList()));
-
-          Iterable<Cohort> cohorts = cohortDao.findAll(dataSet.getCohortSetId());
-          result.setCohorts(StreamSupport.stream(cohorts.spliterator(), false)
+          DataSet result = new DataSet()
+              .name(dataSet.getName())
+              .includesAllParticipants(dataSet.getIncludesAllParticipants())
+              .id(dataSet.getDataSetId())
+              .etag(Etags.fromVersion(dataSet.getVersion()))
+              .description(dataSet.getDescription());
+          if (dataSet.getLastModifiedTime() != null) {
+            result.setLastModifiedTime(dataSet.getLastModifiedTime().getTime());
+          }
+          result.setConceptSets(StreamSupport
+              .stream(conceptSetDao.findAll(dataSet.getConceptSetId()).spliterator(), false)
+              .map(conceptSet -> toClientConceptSet(conceptSet))
+              .collect(Collectors.toList()));
+          result.setCohorts(StreamSupport
+                .stream(cohortDao.findAll(dataSet.getCohortSetId()).spliterator(), false)
                 .map(CohortsController.TO_CLIENT_COHORT)
                 .collect(Collectors.toList()));
-          result.setDescription(dataSet.getDescription());
           result.setValues(dataSet.getValues()
                   .stream()
                   .map(TO_CLIENT_DOMAIN_VALUE)
@@ -229,12 +242,12 @@ public class DataSetController implements DataSetApiDelegate {
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
     bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
-      int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS ;
+      int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS;
       List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
 
       do {
         try {
-          String query = queryJobConfiguration.getQuery().concat(" LIMIT "+ rowsRequested);
+          String query = queryJobConfiguration.getQuery().concat(" LIMIT " + rowsRequested);
 
           queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
@@ -273,17 +286,16 @@ public class DataSetController implements DataSetApiDelegate {
               previewValue.setQueryValue(queryValues);
             }
           });
-          retry = 2;
-        } catch (ServerErrorException ex) {
-          if(ex.getCause().getMessage().contains("Read timed out")) {
+          break;
+        } catch (Exception ex) {
+          if (ex.getCause().getMessage().contains("Read timed out")) {
             rowsRequested = (rowsRequested / 2);
             retry++;
           } else {
-            retry = 2;
+           break;
           }
         }
-      }  while (retry < 2);
-
+      } while (retry < 2);
 
       Collections.sort(valuePreviewList,
           Comparator.comparing(item -> dataSet.getValues().indexOf(item.getValue())));
@@ -323,6 +335,81 @@ public class DataSetController implements DataSetApiDelegate {
         dataSetExportRequest.getNotebookName(), notebookFile);
 
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<DataSetListResponse> getDataSetsInWorkspace(String workspaceNamespace,
+                                                                    String workspaceId) {
+    Workspace workspace =
+        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId,
+            WorkspaceAccessLevel.READER);
+
+    List<org.pmiops.workbench.db.model.DataSet> dataSets =
+        dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+    DataSetListResponse response = new DataSetListResponse();
+
+    response.setItems(dataSets.stream()
+        .map(TO_CLIENT_DATA_SET)
+        .sorted(Comparator.comparing(DataSet::getName))
+        .collect(Collectors.toList()));
+    return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> deleteDataSet(
+      String workspaceNamespace,
+      String workspaceId,
+      Long dataSetId) {
+    org.pmiops.workbench.db.model.DataSet dataSet =
+        getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
+    dataSetDao.delete(dataSet.getDataSetId());
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<DataSet> updateDataSet(
+      String workspaceNamespace,
+      String workspaceId,
+      Long dataSetId,
+      DataSetRequest request) {
+    org.pmiops.workbench.db.model.DataSet dbDataSet =
+        getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
+    if(Strings.isNullOrEmpty(request.getEtag())) {
+      throw new BadRequestException("missing required update field 'etag'");
+    }
+    int version = Etags.toVersion(request.getEtag());
+    if (dbDataSet.getVersion() != version) {
+      throw new ConflictException("Attempted to modify outdated data set version");
+    }
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    dbDataSet.setLastModifiedTime(now);
+    dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
+    dbDataSet.setCohortSetId(request.getCohortIds());
+    dbDataSet.setConceptSetId(request.getConceptSetIds());
+    dbDataSet.setDescription(request.getDescription());
+    dbDataSet.setName(request.getName());
+    dbDataSet.setValues(request.getValues().stream().map(
+        (domainValueSet) -> {
+          DataSetValues dataSetValues = new DataSetValues(domainValueSet.getDomain().name(), domainValueSet.getValue());
+          dataSetValues.setDomainEnum(domainValueSet.getDomain());
+          return dataSetValues;
+        }).collect(Collectors.toList()));
+    try {
+      dbDataSet = dataSetDao.save(dbDataSet);
+      // TODO: add recent resource entry for data sets
+    } catch (OptimisticLockException e) {
+      throw new ConflictException("Failed due to concurrent concept set modification");
+    }
+
+    return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dbDataSet));
+  }
+
+  @Override
+  public ResponseEntity<DataSet> getDataSet(String workspaceNamespace, String workspaceId, Long dataSetId) {
+    org.pmiops.workbench.db.model.DataSet dataSet =
+        getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.READER);
+
+    return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dataSet));
   }
 
   private JSONObject createNotebookCodeCellWithString(String cellInformation) {
@@ -406,5 +493,20 @@ public class DataSetController implements DataSetApiDelegate {
     } else {
       throw new ServerErrorException("Unsupported query parameter type in query generation: " + value.getType().toString());
     }
+  }
+
+  private org.pmiops.workbench.db.model.DataSet getDbDataSet(String workspaceNamespace,
+                                                             String workspaceId, Long dataSetId,
+                                                             WorkspaceAccessLevel workspaceAccessLevel) {
+    Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, workspaceAccessLevel);
+
+    org.pmiops.workbench.db.model.DataSet dataSet =
+        dataSetDao.findOne(dataSetId);
+    if (dataSet == null || workspace.getWorkspaceId() != dataSet.getWorkspaceId()) {
+      throw new NotFoundException(String.format(
+          "No data set with ID %s in workspace %s.", dataSet, workspace.getFirecloudName()));
+    }
+    return dataSet;
   }
 }

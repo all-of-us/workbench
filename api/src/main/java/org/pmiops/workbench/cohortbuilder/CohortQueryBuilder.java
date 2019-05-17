@@ -2,15 +2,16 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
+import org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,51 @@ import java.util.StringJoiner;
 
 @Service
 public class CohortQueryBuilder {
+  private static final String COUNT_SQL_TEMPLATE = "select count(*) as count\n" +
+      "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
+      "where\n";
+
+  private static final String SEARCH_PERSON_TABLE = "search_person";
+  private static final String PERSON_TABLE = "person";
+
+  private static final String DEMO_CHART_INFO_SQL_TEMPLATE = "select gender, \n" +
+      "race, \n" +
+      "case " + getAgeRangeSql(0, 18) + "\n" +
+      getAgeRangeSql(19, 44) + "\n" +
+      getAgeRangeSql(45, 64) + "\n" +
+      "else '> 65'\n" +
+      "end as ageRange,\n" +
+      "count(*) as count\n" +
+      "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
+      "where\n";
+
+  private static final String DEMO_CHART_INFO_SQL_GROUP_BY = "group by gender, race, ageRange\n" +
+      "order by gender, race, ageRange\n";
+
+  private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
+    "select standard_name as name, standard_concept_id as conceptId, count(distinct person_id) as count\n" +
+      "from `${projectId}.${dataSetId}." + QueryBuilderConstants.REVIEW_TABLE + "` " + QueryBuilderConstants.REVIEW_TABLE + "\n" +
+      "where\n";
+
+  private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY = "and domain = '${domain}'\n" +
+      "and standard_concept_id != 0 \n" +
+      "group by name, conceptId\n" +
+      "order by count desc, name asc\n" +
+      "limit ${limit}\n";
+
+  private static final String RANDOM_SQL_TEMPLATE =
+    "select rand() as x, ${table}.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime, case when death.person_id is null then false else true end as deceased\n" +
+      "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
+      "left join `${projectId}.${dataSetId}.death` death on (${table}.person_id = death.person_id)\n" +
+      "where\n";
+
+  private static final String RANDOM_SQL_ORDER_BY = "order by x\nlimit";
+
+  private static final String OFFSET_SUFFIX = " offset ";
+
+  private static final String ID_SQL_TEMPLATE = "select person_id\n" +
+      "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
+      "where\n";
 
   private static final String UNION_TEMPLATE = "union all\n";
 
@@ -35,25 +81,104 @@ public class CohortQueryBuilder {
       "${mainTable}.person_id not in\n" +
           "(${excludeSql})\n";
 
-  private final TemporalQueryBuilder temporalQueryBuilder;
+  private BaseQueryBuilder baseQueryBuilder;
 
   @Autowired
-  public CohortQueryBuilder(TemporalQueryBuilder temporalQueryBuilder) {
-    this.temporalQueryBuilder = temporalQueryBuilder;
+  public CohortQueryBuilder(BaseQueryBuilder baseQueryBuilder) {
+    this.baseQueryBuilder = baseQueryBuilder;
   }
 
-  public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
-      String sqlTemplate, String endSql, String mainTable,
-      Map<String, QueryParameterValue> params) {
-    StringBuilder queryBuilder = new StringBuilder(sqlTemplate.replace("${mainTable}", mainTable));
-    addWhereClause(participantCriteria, mainTable, queryBuilder, params);
-    queryBuilder.append(endSql.replace("${mainTable}", mainTable));
+  /**
+   * Provides counts of unique subjects
+   * defined by the provided {@link ParticipantCriteria}.
+   */
+  public QueryJobConfiguration buildParticipantCounterQuery(ParticipantCriteria participantCriteria) {
+    String sqlTemplate = COUNT_SQL_TEMPLATE.replace("${table}", SEARCH_PERSON_TABLE);
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    StringBuilder queryBuilder = new StringBuilder(sqlTemplate.replace("${mainTable}", SEARCH_PERSON_TABLE));
+    addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
 
     return QueryJobConfiguration
-        .newBuilder(queryBuilder.toString())
-        .setNamedParameters(params)
-        .setUseLegacySql(false)
-        .build();
+      .newBuilder(queryBuilder.toString())
+      .setNamedParameters(params)
+      .setUseLegacySql(false)
+      .build();
+  }
+
+  /**
+   * Provides counts with demographic info for charts
+   * defined by the provided {@link ParticipantCriteria}.
+   */
+  public QueryJobConfiguration buildDemoChartInfoCounterQuery(ParticipantCriteria participantCriteria) {
+    String sqlTemplate = DEMO_CHART_INFO_SQL_TEMPLATE.replace("${table}", SEARCH_PERSON_TABLE);
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    StringBuilder queryBuilder = new StringBuilder(sqlTemplate.replace("${mainTable}", SEARCH_PERSON_TABLE));
+    addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
+    queryBuilder.append(DEMO_CHART_INFO_SQL_GROUP_BY.replace("${mainTable}", SEARCH_PERSON_TABLE));
+
+    return QueryJobConfiguration
+      .newBuilder(queryBuilder.toString())
+      .setNamedParameters(params)
+      .setUseLegacySql(false)
+      .build();
+  }
+
+  /**
+   * Provides counts with domain info for charts
+   * defined by the provided {@link ParticipantCriteria}.
+   */
+  public QueryJobConfiguration buildDomainChartInfoCounterQuery(ParticipantCriteria participantCriteria,
+                                                                DomainType domainType,
+                                                                int chartLimit) {
+    String endSqlTemplate = DOMAIN_CHART_INFO_SQL_GROUP_BY
+      .replace("${limit}", Integer.toString(chartLimit))
+      .replace("${tableId}", "standard_concept_id")
+      .replace("${domain}", domainType.name());
+    StringBuilder queryBuilder = new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE.replace("${mainTable}", QueryBuilderConstants.REVIEW_TABLE));
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    addWhereClause(participantCriteria, QueryBuilderConstants.REVIEW_TABLE, queryBuilder, params);
+    queryBuilder.append(endSqlTemplate.replace("${mainTable}", QueryBuilderConstants.REVIEW_TABLE));
+
+    return QueryJobConfiguration
+      .newBuilder(queryBuilder.toString())
+      .setNamedParameters(params)
+      .setUseLegacySql(false)
+      .build();
+  }
+
+  public QueryJobConfiguration buildRandomParticipantQuery(ParticipantCriteria participantCriteria,
+                                                           long resultSize,
+                                                           long offset) {
+    String endSql = RANDOM_SQL_ORDER_BY + " " + resultSize;
+    if (offset > 0) {
+      endSql += OFFSET_SUFFIX + offset;
+    }
+    String sqlTemplate = RANDOM_SQL_TEMPLATE.replace("${table}", PERSON_TABLE);
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    StringBuilder queryBuilder = new StringBuilder(sqlTemplate.replace("${mainTable}", PERSON_TABLE));
+    addWhereClause(participantCriteria, PERSON_TABLE, queryBuilder, params);
+    queryBuilder.append(endSql.replace("${mainTable}", PERSON_TABLE));
+
+    return QueryJobConfiguration
+      .newBuilder(queryBuilder.toString())
+      .setNamedParameters(params)
+      .setUseLegacySql(false)
+      .build();
+  }
+
+  //implemented for use with the Data Set Builder. Please remove if this does not become the preferred solution
+  //https://docs.google.com/document/d/1-wzSCHDM_LSaBRARyLFbsTGcBaKi5giRs-eDmaMBr0Y/edit#
+  public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria) {
+    String sqlTemplate = ID_SQL_TEMPLATE.replace("${table}", PERSON_TABLE);
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    StringBuilder queryBuilder = new StringBuilder(sqlTemplate.replace("${mainTable}", PERSON_TABLE));
+    addWhereClause(participantCriteria, PERSON_TABLE, queryBuilder, params);
+
+    return QueryJobConfiguration
+      .newBuilder(queryBuilder.toString())
+      .setNamedParameters(params)
+      .setUseLegacySql(false)
+      .build();
   }
 
   public void addWhereClause(ParticipantCriteria participantCriteria, String mainTable,
@@ -70,13 +195,13 @@ public class CohortQueryBuilder {
       }
 
       // build query for included search groups
-      StringJoiner joiner = buildQuery(request.getIncludes(), mainTable, params, false);
+      StringJoiner joiner = buildQueryWithIncludes(participantCriteria, mainTable, params);
 
       // if includes is empty then don't add the excludes clause
       if (joiner.toString().isEmpty()) {
-        joiner.merge(buildQuery(request.getExcludes(), mainTable, params, false));
+        joiner.merge(buildQueryWithExcludes(participantCriteria, mainTable, params, false));
       } else {
-        joiner.merge(buildQuery(request.getExcludes(), mainTable, params, true));
+        joiner.merge(buildQueryWithExcludes(participantCriteria, mainTable, params, true));
       }
       Set<Long> participantIdsToExclude = participantCriteria.getParticipantIdsToExclude();
       if (!participantIdsToExclude.isEmpty()) {
@@ -88,32 +213,44 @@ public class CohortQueryBuilder {
     }
   }
 
-  private StringJoiner buildQuery(List<SearchGroup> groups, String mainTable,
-      Map<String, QueryParameterValue> params, Boolean excludeSQL) {
+  private StringJoiner buildQueryWithIncludes(ParticipantCriteria participantCriteria,
+                                              String mainTable,
+                                              Map<String, QueryParameterValue> params) {
     StringJoiner joiner = new StringJoiner("and ");
     List<String> queryParts = new ArrayList<>();
-    for (SearchGroup includeGroup : groups) {
-      if (includeGroup.getTemporal()) {
-        String query = temporalQueryBuilder.buildQuery(params, includeGroup);
-        queryParts.add(query);
-      } else {
-        for (SearchGroupItem includeItem : includeGroup.getItems()) {
-          String query = QueryBuilderFactory
-            .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
-            .buildQuery(params, includeItem, includeGroup.getMention());
-          queryParts.add(query);
-        }
-      }
-
-      if (excludeSQL) {
-        joiner.add(EXCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)
-            .replace("${excludeSql}", String.join(UNION_TEMPLATE, queryParts)));
-      } else {
-        joiner.add(INCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)
-            .replace("${includeSql}", String.join(UNION_TEMPLATE, queryParts)));
-      }
+    for (SearchGroup searchGroup : participantCriteria.getSearchRequest().getIncludes()) {
+      baseQueryBuilder.buildQuery(participantCriteria, params, queryParts, searchGroup);
+      joiner.add(INCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)
+        .replace("${includeSql}", String.join(UNION_TEMPLATE, queryParts)));
       queryParts = new ArrayList<>();
     }
     return joiner;
+  }
+
+  private StringJoiner buildQueryWithExcludes(ParticipantCriteria participantCriteria,
+                                              String mainTable,
+                                              Map<String, QueryParameterValue> params,
+                                              Boolean excludeSQL) {
+    StringJoiner joiner = new StringJoiner("and ");
+    List<String> queryParts = new ArrayList<>();
+    for (SearchGroup searchGroup : participantCriteria.getSearchRequest().getExcludes()) {
+      baseQueryBuilder.buildQuery(participantCriteria, params, queryParts, searchGroup);
+      String sqlTemplate = excludeSQL ? EXCLUDE_SQL_TEMPLATE : INCLUDE_SQL_TEMPLATE;
+      joiner.add(sqlTemplate.replace("${mainTable}", mainTable)
+            .replace("${excludeSql}", String.join(UNION_TEMPLATE, queryParts)));
+      queryParts = new ArrayList<>();
+    }
+    return joiner;
+  }
+
+  /**
+   * Helper method to build sql snippet.
+   * @param lo - lower bound of the age range
+   * @param hi - upper bound of the age range
+   * @return
+   */
+  private static String getAgeRangeSql(int lo, int hi) {
+    return "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(" + SEARCH_PERSON_TABLE + ".dob), MONTH)/12) as INT64) >= " + lo +
+      " and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(" + SEARCH_PERSON_TABLE + ".dob), MONTH)/12) as INT64) <= " + hi + " then '" + lo + "-" + hi + "'";
   }
 }

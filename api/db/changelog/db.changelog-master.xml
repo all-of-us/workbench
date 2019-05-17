@@ -83,4 +83,7 @@
   <include file="changelog/db.changelog-73-add-billing_project_buffer_entry.xml"/>
   <include file="changelog/db.changelog-74-add-last_sync_request_time-billing-buffer.xml"/>
   <include file="changelog/db.changelog-75-workspace-deletion.xml"/>
+  <include file="changelog/db.changelog-76-add-assigned_user-billing-buffer.xml"/>
+  <include file="changelog/db.changelog-77-data-set-last-modified.xml"/>
+  <include file="changelog/db.changelog-78-data-set-etag.xml"/>
 </databaseChangeLog>
