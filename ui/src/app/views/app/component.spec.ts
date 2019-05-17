@@ -5,6 +5,7 @@ import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
+import {ServerConfigService} from "app/services/server-config.service";
 import {SignInService} from 'app/services/sign-in.service';
 import {AppComponent} from 'app/views/app/component';
 import {PageTemplateSignedOutComponent} from 'app/views/page-template-signed-out/component';
@@ -31,6 +32,7 @@ describe('AppComponent', () => {
         { provide: AuthDomainService, useValue: {} },
         { provide: SignInService, useValue: {} },
         { provide: CohortsService, useValue: {} },
+        { provide: ServerConfigService, useValue: {} },
         { provide: ProfileService, useValue: new ProfileServiceStub() }
       ] }).compileComponents();
   }));
