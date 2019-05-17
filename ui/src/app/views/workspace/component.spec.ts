@@ -19,11 +19,11 @@ import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
+import {ResetClusterButtonComponent} from 'app/views/reset-cluster-button/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
-
 import {
   ClusterService,
   ConceptSetsService,
@@ -32,6 +32,7 @@ import {
   UserService,
 } from 'generated';
 import {
+  ClusterApi,
   CohortsApi,
   ProfileApi,
   UserMetricsApi,
@@ -60,6 +61,7 @@ import {workspaceDataStub, WorkspacesApiStub} from 'testing/stubs/workspaces-api
 
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {updateAndTick} from 'testing/test-helpers';
+import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
 
 describe('WorkspaceComponent', () => {
   let fixture: ComponentFixture<WorkspaceComponent>;
@@ -78,6 +80,7 @@ describe('WorkspaceComponent', () => {
         ConfirmDeleteModalComponent,
         NewNotebookModalComponent,
         RecentWorkComponent,
+        ResetClusterButtonComponent,
         ResourceCardComponent,
         ResourceCardMenuComponent,
         ToolTipComponent,
@@ -112,7 +115,8 @@ describe('WorkspaceComponent', () => {
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
-            gsuiteDomain: 'fake-research-aou.org'
+            gsuiteDomain: 'fake-research-aou.org',
+            useBillingProjectBuffer: false
           })
         }
       ]}).compileComponents().then(() => {
@@ -120,6 +124,7 @@ describe('WorkspaceComponent', () => {
         updateAndTick(fixture);
       });
     currentWorkspaceStore.next(workspaceDataStub);
+    registerApiClient(ClusterApi, new ClusterApiStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ProfileApi, new ProfileApiStub());
     registerApiClient(UserMetricsApi, new UserMetricsApiStub());
