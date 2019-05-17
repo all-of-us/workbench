@@ -10,9 +10,9 @@ import {
 } from '@angular/router';
 
 
-import {configApi} from 'app/services/swagger-fetch-clients';
+import {ServerConfigService} from 'app/services/server-config.service';
 import {cookiesEnabled} from 'app/utils';
-import {configDataStore, queryParamsStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
+import {queryParamsStore, routeConfigDataStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
@@ -35,6 +35,7 @@ export class AppComponent implements OnInit {
   constructor(
     @Inject(DOCUMENT) private doc: any,
     private activatedRoute: ActivatedRoute,
+    private serverConfigService: ServerConfigService,
     private router: Router,
     private titleService: Title
   ) {}
@@ -192,9 +193,10 @@ export class AppComponent implements OnInit {
     });
   }
 
-  private async loadConfig() {
-    const config = await configApi().getConfig();
-    configDataStore.next(config);
+  private loadConfig() {
+    this.serverConfigService.getConfig().subscribe((config) => {
+      serverConfigStore.next(config);
+    });
   }
 
 }

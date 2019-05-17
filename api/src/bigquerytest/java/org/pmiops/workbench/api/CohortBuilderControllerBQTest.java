@@ -15,10 +15,9 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
+import org.pmiops.workbench.cohortbuilder.BaseQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.TemporalQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -51,8 +50,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({QueryBuilderFactory.class, BigQueryService.class, CloudStorageServiceImpl.class,
-  ParticipantCounter.class, CohortQueryBuilder.class,
-  TestJpaConfig.class, CdrVersionService.class, TemporalQueryBuilder.class})
+  CohortQueryBuilder.class, BaseQueryBuilder.class, TestJpaConfig.class, CdrVersionService.class})
 @MockBean({FireCloudService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
@@ -68,7 +66,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private CloudStorageService cloudStorageService;
 
   @Autowired
-  private ParticipantCounter participantCounter;
+  private CohortQueryBuilder cohortQueryBuilder;
 
   @Autowired
   private CdrVersionDao cdrVersionDao;
@@ -119,12 +117,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.elasticsearch = new WorkbenchConfig.ElasticsearchConfig();
     testConfig.elasticsearch.enableElasticsearchBackend = false;
+    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
+    testConfig.cohortbuilder.enableListSearch = false;
     when(configProvider.get()).thenReturn(testConfig);
 
     ElasticSearchService elasticSearchService =
         new ElasticSearchService(criteriaDao, cloudStorageService, configProvider);
 
-    controller = new CohortBuilderController(bigQueryService, participantCounter,
+    controller = new CohortBuilderController(bigQueryService, cohortQueryBuilder,
       criteriaDao, cbCriteriaDao, criteriaAttributeDao, cbCriteriaAttributeDao,
       cdrVersionDao, genderRaceEthnicityConceptProvider, cdrVersionService,
       elasticSearchService, configProvider);

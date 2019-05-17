@@ -19,31 +19,6 @@ import {Domain, RecentResource} from 'generated/fetch';
 import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {CopyNotebookModal} from 'app/views/copy-notebook-modal/component';
 
-
-@Component({
-  selector: 'app-resource-card-menu',
-  template: '<div #root></div>'
-})
-export class ResourceCardMenuComponent extends ReactWrapperBase {
-  @Input() disabled;
-  @Input() resourceType;
-  @Input() onRenameNotebook;
-  @Input() onOpenJupyterLabNotebook;
-  @Input() onCloneResource;
-  @Input() onDeleteResource;
-  @Input() onEditCohort;
-  @Input() onReviewCohort;
-  @Input() onEditConceptSet;
-
-  constructor() {
-    super(ResourceCardMenu, [
-      'disabled', 'resourceType', 'onRenameNotebook', 'onOpenJupyterLabNotebook',
-      'onCloneResource', 'onDeleteResource', 'onEditCohort', 'onReviewCohort',
-      'onEditConceptSet'
-    ]);
-  }
-}
-
 const styles = reactStyles({
   card: {
     marginTop: '1rem',
@@ -243,6 +218,13 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           this.props.resourceCard.workspaceFirecloudName + '/cohorts/build?cohortId=';
         navigateByUrl(url + this.props.resourceCard.cohort.id);
         this.props.onUpdate();
+        break;
+      }
+      case ResourceType.DATA_SET: {
+        navigate(['workspaces',
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          'data', 'data-sets', this.props.resourceCard.dataSet.id]);
         break;
       }
       default: {
@@ -471,8 +453,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                               onDeleteResource={() => this.openConfirmDelete()}
                               onRenameNotebook={() => this.renameNotebook()}
                               onRenameCohort={() => this.renameCohort()}
-                              onEditCohort={() => this.edit()}
-                              onEditConceptSet={() => this.edit()}
+                              onEdit={() => this.edit()}
                               onReviewCohort={() => this.reviewCohort()}
                               onOpenJupyterLabNotebook={() => this.openResource(true)}/>
             <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>

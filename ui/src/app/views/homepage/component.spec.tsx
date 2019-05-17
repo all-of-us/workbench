@@ -5,7 +5,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {DataAccessLevel, ProfileApi} from 'generated/fetch';
 import {Profile} from 'generated';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {configDataStore, userProfileStore} from 'app/utils/navigation';
+import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
 
 import {Homepage} from './component';
 import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generated/fetch/api';
@@ -44,6 +44,7 @@ describe('HomepageComponent', () => {
     });
 
     userProfileStore.next({profile, reload, updateCache: () => {}});
+    serverConfigStore.next({useBillingProjectBuffer: false, gsuiteDomain: "abc"})
   });
 
   it('should render the homepage', () => {
@@ -79,7 +80,7 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
-    configDataStore.next({enforceRegistered: true})
+    serverConfigStore.next({...serverConfigStore.getValue(), enforceRegistered: true})
     userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -91,7 +92,7 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
-    configDataStore.next({enforceRegistered: true})
+    serverConfigStore.next({...serverConfigStore.getValue(), enforceRegistered: true})
     userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

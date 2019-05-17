@@ -85,4 +85,5 @@
   <include file="changelog/db.changelog-75-workspace-deletion.xml"/>
   <include file="changelog/db.changelog-76-add-assigned_user-billing-buffer.xml"/>
   <include file="changelog/db.changelog-77-data-set-last-modified.xml"/>
+  <include file="changelog/db.changelog-78-data-set-etag.xml"/>
 </databaseChangeLog>

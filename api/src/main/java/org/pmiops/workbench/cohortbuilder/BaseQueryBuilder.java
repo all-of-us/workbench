@@ -1,19 +1,20 @@
 package org.pmiops.workbench.cohortbuilder;
 
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
+import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.MENTION;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
@@ -32,12 +33,9 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPr
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 /**
- * TemporalQueryBuilder is an object that builds {@link QueryJobConfiguration}
- * for BigQuery for the Temporal criteria groups. The temporal group functionality description
- * is here: https://docs.google.com/document/d/1OFrG7htm8gT0QOOvzHa7l3C3Qs0JnoENuK1TDAB_1A8
+ * BaseQueryBuilder is an object that builds BigQuery queries for criteria groups.
  */
-@Service
-public class TemporalQueryBuilder {
+public final class BaseQueryBuilder {
 
   private static final String UNION_TEMPLATE = "union all\n";
   private static final String SAME_ENC =
@@ -50,35 +48,72 @@ public class TemporalQueryBuilder {
   private static final String WITHIN_X_DAYS_OF =
     "temp1.person_id = temp2.person_id and temp1.entry_date between " +
       "DATE_SUB(temp2.entry_date, INTERVAL ${timeValue} DAY) and DATE_ADD(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
-  private static final String TEMPORAL_EXIST_TEMPLATE =
-    "select temp1.person_id\n" +
+  private static final String TEMPORAL_EXIST_TEMPLATE = "select temp1.person_id\n" +
       "from (${query1}) temp1\n" +
       "where exists (select 1\n" +
       "from (${query2}) temp2\n" +
       "where (${conditions}))\n";
-  private static final String TEMPORAL_JOIN_TEMPLATE =
-    "select temp1.person_id\n" +
+  private static final String TEMPORAL_JOIN_TEMPLATE = "select temp1.person_id\n" +
       "from (${query1}) temp1\n" +
       "join (select person_id, visit_occurrence_id, entry_date\n" +
       "from (${query2})\n" +
       ") temp2 on (${conditions})\n";
 
-  public String buildQuery(Map<String, QueryParameterValue> params,
-                           SearchGroup includeGroup) {
-    validateSearchGroup(includeGroup);
+  private static final Logger log = Logger.getLogger(BaseQueryBuilder.class.getName());
+
+  public static void buildQuery(Map<SearchParameter, Set<Long>> criteriaLookup,
+                         Map<String, QueryParameterValue> params,
+                         List<String> queryParts,
+                         SearchGroup searchGroup,
+                         boolean isEnableListSearch) {
+    if (searchGroup.getTemporal()) {
+      String query = buildTemporalQuery(params, searchGroup, isEnableListSearch);
+      queryParts.add(query);
+    } else {
+      for (SearchGroupItem includeItem : searchGroup.getItems()) {
+        String query = "";
+        if (isEnableListSearch) {
+          log.info("new search!!");
+        } else {
+          query = QueryBuilderFactory
+            .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
+            .buildQuery(params, includeItem, searchGroup.getMention());
+        }
+        queryParts.add(query);
+      }
+    }
+  }
+
+  /**
+   * The temporal group functionality description
+   * is here: https://docs.google.com/document/d/1OFrG7htm8gT0QOOvzHa7l3C3Qs0JnoENuK1TDAB_1A8
+   * @param params
+   * @param searchGroup
+   * @param isEnableListSearch
+   * @return
+   */
+  private static String buildTemporalQuery(Map<String, QueryParameterValue> params,
+                                           SearchGroup searchGroup,
+                                           boolean isEnableListSearch) {
+    validateSearchGroup(searchGroup);
     List<String> temporalQueryParts1 = new ArrayList<>();
     List<String> temporalQueryParts2 = new ArrayList<>();
-    ListMultimap<Integer, SearchGroupItem> temporalGroups = getTemporalGroups(includeGroup);
+    ListMultimap<Integer, SearchGroupItem> temporalGroups = getTemporalGroups(searchGroup);
     for (Integer key : temporalGroups.keySet()) {
       List<SearchGroupItem> tempGroups = temporalGroups.get(key);
       //key of zero indicates belonging to the first temporal group
       //key of one indicates belonging to the second temporal group
       boolean isFirstGroup = key == 0;
       for (SearchGroupItem tempGroup : tempGroups) {
-        String query = QueryBuilderFactory
-          .getQueryBuilder(FactoryKey.getType(tempGroup.getType()))
-          .buildQuery(params, tempGroup,
-            isFirstGroup ? includeGroup.getMention() : TemporalMention.ANY_MENTION);
+        String query = "";
+        if (isEnableListSearch) {
+          log.info("new search!!");
+        } else {
+          query = QueryBuilderFactory
+            .getQueryBuilder(FactoryKey.getType(tempGroup.getType()))
+            .buildQuery(params, tempGroup,
+              isFirstGroup ? searchGroup.getMention() : TemporalMention.ANY_MENTION);
+        }
         if (isFirstGroup) {
           temporalQueryParts1.add(query);
         } else {
@@ -87,17 +122,17 @@ public class TemporalQueryBuilder {
       }
     }
     String conditions = SAME_ENC;
-    if (TemporalTime.WITHIN_X_DAYS_OF.equals(includeGroup.getTime())) {
+    if (TemporalTime.WITHIN_X_DAYS_OF.equals(searchGroup.getTime())) {
       String parameterName = "p" + params.size();
-      params.put(parameterName, QueryParameterValue.int64(includeGroup.getTimeValue()));
+      params.put(parameterName, QueryParameterValue.int64(searchGroup.getTimeValue()));
       conditions = WITHIN_X_DAYS_OF.replace("${timeValue}", "@" + parameterName);
-    } else if (TemporalTime.X_DAYS_BEFORE.equals(includeGroup.getTime())) {
+    } else if (TemporalTime.X_DAYS_BEFORE.equals(searchGroup.getTime())) {
       String parameterName = "p" + params.size();
-      params.put(parameterName, QueryParameterValue.int64(includeGroup.getTimeValue()));
+      params.put(parameterName, QueryParameterValue.int64(searchGroup.getTimeValue()));
       conditions = X_DAYS_BEFORE.replace("${timeValue}", "@" + parameterName);
-    } else if (TemporalTime.X_DAYS_AFTER.equals(includeGroup.getTime())) {
+    } else if (TemporalTime.X_DAYS_AFTER.equals(searchGroup.getTime())) {
       String parameterName = "p" + params.size();
-      params.put(parameterName, QueryParameterValue.int64(includeGroup.getTimeValue()));
+      params.put(parameterName, QueryParameterValue.int64(searchGroup.getTimeValue()));
       conditions = X_DAYS_AFTER.replace("${timeValue}", "@" + parameterName);
     }
     return (temporalQueryParts2.size() == 1 ?
@@ -107,7 +142,7 @@ public class TemporalQueryBuilder {
       .replace("${conditions}", conditions);
   }
 
-  private ListMultimap<Integer, SearchGroupItem> getTemporalGroups(SearchGroup searchGroup) {
+  private static ListMultimap<Integer, SearchGroupItem> getTemporalGroups(SearchGroup searchGroup) {
     ListMultimap<Integer, SearchGroupItem> itemMap = ArrayListMultimap.create();
     searchGroup.getItems()
       .forEach(item -> {
@@ -119,7 +154,7 @@ public class TemporalQueryBuilder {
     return itemMap;
   }
 
-  private void validateSearchGroup(SearchGroup searchGroup) {
+  private static void validateSearchGroup(SearchGroup searchGroup) {
     from(mentionInvalid()).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, MENTION, searchGroup.getMention());
     from(timeInvalid()).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, TIME, searchGroup.getTime());
     from(timeValueNull().and(timeValueRequired())).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, TIME_VALUE, searchGroup.getTimeValue());

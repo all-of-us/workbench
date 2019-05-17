@@ -27,6 +27,7 @@ import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -35,7 +36,6 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
@@ -164,23 +164,23 @@ public class DataSetController implements DataSetApiDelegate {
       new Function<org.pmiops.workbench.db.model.DataSet, DataSet>() {
         @Override
         public DataSet apply(org.pmiops.workbench.db.model.DataSet dataSet) {
-          DataSet result = new DataSet();
-          result.setName(dataSet.getName());
-          result.setIncludesAllParticipants(dataSet.getIncludesAllParticipants());
-          result.setId(dataSet.getDataSetId());
+          DataSet result = new DataSet()
+              .name(dataSet.getName())
+              .includesAllParticipants(dataSet.getIncludesAllParticipants())
+              .id(dataSet.getDataSetId())
+              .etag(Etags.fromVersion(dataSet.getVersion()))
+              .description(dataSet.getDescription());
           if (dataSet.getLastModifiedTime() != null) {
             result.setLastModifiedTime(dataSet.getLastModifiedTime().getTime());
           }
-          Iterable<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
-              conceptSetDao.findAll(dataSet.getConceptSetId());
-          result.setConceptSets(StreamSupport.stream(conceptSets.spliterator(), false)
-              .map(conceptSet -> toClientConceptSet(conceptSet)).collect(Collectors.toList()));
-
-          Iterable<Cohort> cohorts = cohortDao.findAll(dataSet.getCohortSetId());
-          result.setCohorts(StreamSupport.stream(cohorts.spliterator(), false)
+          result.setConceptSets(StreamSupport
+              .stream(conceptSetDao.findAll(dataSet.getConceptSetId()).spliterator(), false)
+              .map(conceptSet -> toClientConceptSet(conceptSet))
+              .collect(Collectors.toList()));
+          result.setCohorts(StreamSupport
+                .stream(cohortDao.findAll(dataSet.getCohortSetId()).spliterator(), false)
                 .map(CohortsController.TO_CLIENT_COHORT)
                 .collect(Collectors.toList()));
-          result.setDescription(dataSet.getDescription());
           result.setValues(dataSet.getValues()
                   .stream()
                   .map(TO_CLIENT_DOMAIN_VALUE)
@@ -242,46 +242,60 @@ public class DataSetController implements DataSetApiDelegate {
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
     bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
-      String query = queryJobConfiguration.getQuery().concat(" LIMIT "+ NO_OF_PREVIEW_ROWS);
-      queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
-
-      TableResult queryResponse = bigQueryService.executeQuery(bigQueryService
-          .filterBigQueryConfig(queryJobConfiguration));
-
+      int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS;
       List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
-      queryResponse.getSchema().getFields().forEach(fields -> {
-        valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
-      });
 
-      queryResponse.getValues().forEach(fieldValueList -> {
-        IntStream.range(0, fieldValueList.size()).forEach(columnNumber -> {
-          try {
-            valuePreviewList.get(columnNumber).addQueryValueItem(
-                fieldValueList.get(columnNumber).getValue().toString());
-          } catch (NullPointerException ex) {
-            log.severe(
-                String.format("Null pointer exception while retriving value for query: Column %s ", columnNumber));
-            valuePreviewList.get(columnNumber).addQueryValueItem("");
-          }
-        });
-      });
-      queryResponse.getSchema().getFields().forEach(fields -> {
-        DataSetPreviewValueList previewValue = valuePreviewList.stream()
-            .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName())).findFirst().get();
-        if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
-          List<String> queryValues = new ArrayList<String>();
-          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-          previewValue.getQueryValue().forEach(value -> {
-            try {
-              Double fieldValue = Double.parseDouble(value);
-              queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
-            } catch (NumberFormatException ex) {
-              queryValues.add("");
+      do {
+        try {
+          String query = queryJobConfiguration.getQuery().concat(" LIMIT " + rowsRequested);
+
+          queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
+
+          TableResult queryResponse = bigQueryService.executeQuery(bigQueryService
+              .filterBigQueryConfig(queryJobConfiguration), 60000l);
+          queryResponse.getSchema().getFields().forEach(fields -> {
+            valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
+          });
+
+          queryResponse.getValues().forEach(fieldValueList -> {
+            IntStream.range(0, fieldValueList.size()).forEach(columnNumber -> {
+              try {
+                valuePreviewList.get(columnNumber).addQueryValueItem(
+                    fieldValueList.get(columnNumber).getValue().toString());
+              } catch (NullPointerException ex) {
+                log.severe(
+                    String.format("Null pointer exception while retriving value for query: Column %s ", columnNumber));
+                valuePreviewList.get(columnNumber).addQueryValueItem("");
+              }
+            });
+          });
+          queryResponse.getSchema().getFields().forEach(fields -> {
+            DataSetPreviewValueList previewValue = valuePreviewList.stream()
+                .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName())).findFirst().get();
+            if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
+              List<String> queryValues = new ArrayList<String>();
+              DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+              previewValue.getQueryValue().forEach(value -> {
+                try {
+                  Double fieldValue = Double.parseDouble(value);
+                  queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
+                } catch (NumberFormatException ex) {
+                  queryValues.add("");
+                }
+              });
+              previewValue.setQueryValue(queryValues);
             }
           });
-          previewValue.setQueryValue(queryValues);
+          break;
+        } catch (Exception ex) {
+          if (ex.getCause().getMessage().contains("Read timed out")) {
+            rowsRequested = (rowsRequested / 2);
+            retry++;
+          } else {
+           break;
+          }
         }
-      });
+      } while (retry < 2);
 
       Collections.sort(valuePreviewList,
           Comparator.comparing(item -> dataSet.getValues().indexOf(item.getValue())));
@@ -336,7 +350,7 @@ public class DataSetController implements DataSetApiDelegate {
 
     response.setItems(dataSets.stream()
         .map(TO_CLIENT_DATA_SET)
-        .sorted(Comparator.comparing(c -> c.getName()))
+        .sorted(Comparator.comparing(DataSet::getName))
         .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
@@ -350,6 +364,44 @@ public class DataSetController implements DataSetApiDelegate {
         getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
     dataSetDao.delete(dataSet.getDataSetId());
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<DataSet> updateDataSet(
+      String workspaceNamespace,
+      String workspaceId,
+      Long dataSetId,
+      DataSetRequest request) {
+    org.pmiops.workbench.db.model.DataSet dbDataSet =
+        getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
+    if(Strings.isNullOrEmpty(request.getEtag())) {
+      throw new BadRequestException("missing required update field 'etag'");
+    }
+    int version = Etags.toVersion(request.getEtag());
+    if (dbDataSet.getVersion() != version) {
+      throw new ConflictException("Attempted to modify outdated data set version");
+    }
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    dbDataSet.setLastModifiedTime(now);
+    dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
+    dbDataSet.setCohortSetId(request.getCohortIds());
+    dbDataSet.setConceptSetId(request.getConceptSetIds());
+    dbDataSet.setDescription(request.getDescription());
+    dbDataSet.setName(request.getName());
+    dbDataSet.setValues(request.getValues().stream().map(
+        (domainValueSet) -> {
+          DataSetValues dataSetValues = new DataSetValues(domainValueSet.getDomain().name(), domainValueSet.getValue());
+          dataSetValues.setDomainEnum(domainValueSet.getDomain());
+          return dataSetValues;
+        }).collect(Collectors.toList()));
+    try {
+      dbDataSet = dataSetDao.save(dbDataSet);
+      // TODO: add recent resource entry for data sets
+    } catch (OptimisticLockException e) {
+      throw new ConflictException("Failed due to concurrent concept set modification");
+    }
+
+    return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dbDataSet));
   }
 
   @Override

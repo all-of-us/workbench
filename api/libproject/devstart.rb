@@ -1380,20 +1380,26 @@ def deploy_gcs_artifacts(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
-  run_inline_or_log(op.opts.dry_run, %W{
-    gsutil cp
-    cluster-resources/setup_notebook_cluster.sh
-    cluster-resources/playground-extension.js
-    gs://#{gcc.project}-cluster-resources/
-  })
-  # This file must be readable by all AoU researchers and the Leonardo service
-  # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make
-  # these public since these assets are public in GitHub anyways.
-  run_inline_or_log(op.opts.dry_run, %W{
-    gsutil acl ch -u AllUsers:R
-    gs://#{gcc.project}-cluster-resources/setup_notebook_cluster.sh
-    gs://#{gcc.project}-cluster-resources/playground-extension.js
-  })
+
+  Dir.chdir("cluster-resources") do
+    common.run_inline(%W{./build.rb build-snippets-menu})
+    run_inline_or_log(op.opts.dry_run, %W{
+      gsutil cp
+      setup_notebook_cluster.sh
+      playground-extension.js
+      generated/aou-snippets-menu.js
+      gs://#{gcc.project}-cluster-resources/
+    })
+    # This file must be readable by all AoU researchers and the Leonardo service
+    # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make
+    # these public since these assets are public in GitHub anyways.
+    run_inline_or_log(op.opts.dry_run, %W{
+      gsutil acl ch -u AllUsers:R
+      gs://#{gcc.project}-cluster-resources/setup_notebook_cluster.sh
+      gs://#{gcc.project}-cluster-resources/playground-extension.js
+      gs://#{gcc.project}-cluster-resources/aou-snippets-menu.js
+    })
+  end
 end
 
 Common.register_command({
