@@ -36,7 +36,7 @@ interface State {
   clusterDeletionFailure: boolean;
 }
 
-export class ResetClusterButton extends React.Component<Props, State> {
+class ResetClusterButton extends React.Component<Props, State> {
 
   private pollClusterTimer: NodeJS.Timer;
 
@@ -147,10 +147,16 @@ export class ResetClusterButton extends React.Component<Props, State> {
   selector: 'react-cluster-button',
   template: '<div #root></div>'
 })
-export class ResetClusterButtonComponent extends ReactWrapperBase {
+class ResetClusterButtonComponent extends ReactWrapperBase {
   @Input() billingProjectId;
 
   constructor() {
     super(ResetClusterButton, ['billingProjectId']);
   }
+}
+
+export {
+  Props as ResetClusterButtonProps,
+  ResetClusterButton,
+  ResetClusterButtonComponent
 }
