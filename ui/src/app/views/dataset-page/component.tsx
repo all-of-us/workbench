@@ -413,7 +413,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       return <React.Fragment>
         <FadeBox style={{marginTop: '1rem'}}>
           <h2 style={{marginTop: 0}}>Datasets{this.editing &&
-          dataSet !== undefined && ' - ' + dataSet.name}</h2>
+            dataSet !== undefined && ' - ' + dataSet.name}</h2>
           <div style={{color: '#000000', fontSize: '14px'}}>Build a dataset by selecting the
             variables and values for one or more of your cohorts. Then export the completed dataset
             to Notebooks where you can perform your analysis</div>
@@ -434,13 +434,12 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                        })}/>
                   <Subheader>Workspace Cohorts</Subheader>
                   {!loadingResources && this.state.cohortList.map(cohort =>
-                      <ImmutableListItem key={cohort.id} name={cohort.name}
-                                         data-test-id='cohort-list-item'
-                                         checked={selectedCohortIds.includes(cohort.id)}
-                                         onChange={
-                                           () => this.select(cohort, ResourceType.COHORT)
-                                         }/>
-                  )
+                    <ImmutableListItem key={cohort.id} name={cohort.name}
+                                       data-test-id='cohort-list-item'
+                                       checked={selectedCohortIds.includes(cohort.id)}
+                                       onChange={
+                                         () => this.select(cohort, ResourceType.COHORT)}/>
+                    )
                   }
                   {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
                     left: '10rem'}}/>}
@@ -457,11 +456,11 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
                         <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
-                                           data-test-id='concept-set-list-item'
-                                           checked={selectedConceptSetIds.includes(conceptSet.id)}
-                                           onChange={
-                                             () => this.select(conceptSet, ResourceType.CONCEPT_SET)
-                                           }/>)
+                                          data-test-id='concept-set-list-item'
+                                          checked={selectedConceptSetIds.includes(conceptSet.id)}
+                                          onChange={
+                                            () => this.select(conceptSet, ResourceType.CONCEPT_SET)
+                                          }/>)
                     }
                     {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
                       left: '10rem'}}/>}
@@ -482,19 +481,18 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                     {valuesLoading && <Spinner style={{position: 'relative',
                       top: '2rem', left: 'calc(50% - 36px)'}}/>}
                     {valueSets.map(valueSet =>
-                        <div key={valueSet.domain} style={{marginLeft: '0.5rem'}}>
-                          <div style={{fontSize: '13px', fontWeight: 600, color: 'black'}}>
-                            {fp.capitalize(valueSet.domain.toString())}
-                          </div>
-                          {valueSet.values.items.map(domainValue =>
-                              <ValueListItem data-test-id='value-list-items'
-                                key={domainValue.value} domainValue={domainValue}
-                                onChange={() => this.selectDomainValue(valueSet.domain, domainValue)
-                                }
-                                checked={fp.some({domain: valueSet.domain, value: domainValue.value}
-                                  , selectedValues)}/>
-                          )}
-                        </div>)
+                      <div key={valueSet.domain} style={{marginLeft: '0.5rem'}}>
+                        <div style={{fontSize: '13px', fontWeight: 600, color: 'black'}}>
+                          {fp.capitalize(valueSet.domain.toString())}
+                        </div>
+                        {valueSet.values.items.map(domainValue =>
+                          <ValueListItem data-test-id='value-list-items'
+                            key={domainValue.value} domainValue={domainValue}
+                            onChange={() => this.selectDomainValue(valueSet.domain, domainValue)}
+                            checked={fp.some({domain: valueSet.domain, value: domainValue.value},
+                              selectedValues)}/>
+                        )}
+                      </div>)
                     }
                   </div>
                 </div>
@@ -503,38 +501,36 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           </div>
         </FadeBox>
         <FadeBox style={{marginTop: '1rem'}}>
-            <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-              <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row',
-                position: 'relative'}}>
-                <div style={styles.previewDataHeader}>
-                  Preview Data Set
-                </div>
-                {!defaultPreviewView && <Clickable data-test-id='preview-icon'
-                                                   onClick={() => this.getPreviewList()}
-                                                   style={styles.refreshIcon}>
-                  <ClrIcon style={{fill: colors.gray[7]}}
-                           shape='refresh'>
-                  </ClrIcon>
-                </Clickable>
-                }
-                <div style={{color: '#000000', fontSize: '14px'}}>A visualization
-                  of your data table based on the variable and value you selected above</div>
-                <Button data-test-id='save-button' style={{position: 'absolute', right: '1rem',
-                  top: '.25rem'}} onClick ={this.editing ? () => this.updateDataSet() :
-                    () => this.setState({openSaveModal: true})}
-                        disabled={this.disableSave() || (this.editing && !dataSetTouched)}>
-                  {this.editing ? 'UPDATE DATA SET' : 'SAVE DATA SET'}
-                </Button>
+          <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
+            <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row',
+              position: 'relative'}}>
+              <div style={styles.previewDataHeader}>
+                Preview Data Set
               </div>
-              {previewDataLoading && <div style={{display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center', height: '10rem'}}>
-                <Spinner style={{position: 'relative', top: '2rem'}} />
-                <div style={{top: '3rem', position: 'relative'}}>
-                  It may take up to few minutes to load the data
-                </div>
-              </div>}
-              {previewList.length > 0 &&
+              {!defaultPreviewView && <Clickable data-test-id='preview-icon'
+                                                 onClick={() => this.getPreviewList()}
+                                                 style={styles.refreshIcon}>
+                  <ClrIcon style={{fill: colors.gray[7]}} shape='refresh'/>
+                </Clickable>
+              }
+              <div style={{color: '#000000', fontSize: '14px'}}>A visualization of your data table
+                based on the variable and value you selected above
+              </div>
+              <Button data-test-id='save-button' style={{position: 'absolute', right: '1rem',
+                top: '.25rem'}} onClick ={this.editing ? () => this.updateDataSet() :
+                () => this.setState({openSaveModal: true})}
+                disabled={this.disableSave() || (this.editing && !dataSetTouched)}>
+                  {this.editing ? 'UPDATE DATA SET' : 'SAVE DATA SET'}
+              </Button>
+            </div>
+            {previewDataLoading && <div style={{display: 'flex', flexDirection: 'column',
+              alignItems: 'center', height: '10rem'}}>
+              <Spinner style={{position: 'relative', top: '2rem'}} />
+              <div style={{top: '3rem', position: 'relative'}}>
+                It may take up to few minutes to load the data
+              </div>
+            </div>}
+            {previewList.length > 0 &&
               <div style={{display: 'flex', flexDirection: 'column'}}>
                 <div style={{display: 'flex', flexDirection: 'row'}}>
                   {previewList.map(previewRow =>
