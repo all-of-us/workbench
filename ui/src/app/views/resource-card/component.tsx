@@ -13,6 +13,7 @@ import {ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
+import {ExportDataSetModal} from 'app/views/export-data-set-modal/component';
 import {RenameModal} from 'app/views/rename-modal/component';
 import {Domain, RecentResource} from 'generated/fetch';
 
@@ -80,20 +81,21 @@ const resourceTypeStyles = reactStyles({
 });
 
 export interface ResourceCardProps {
+  marginTop: string;
   resourceCard: RecentResource;
   onUpdate: Function;
-  marginTop: string;
 }
 
 export interface ResourceCardState {
-  renaming: boolean;
-  editing: boolean;
   confirmDeleting: boolean;
-  invalidResourceError: boolean;
-  showErrorModal: boolean;
-  errorModalTitle: string;
+  editing: boolean;
   errorModalBody: string;
+  errorModalTitle: string;
+  exportingDataSet: boolean;
+  invalidResourceError: boolean;
+  renaming: boolean;
   showCopyNotebookModal: boolean;
+  showErrorModal: boolean;
 }
 
 export class ResourceCard extends React.Component<ResourceCardProps, ResourceCardState> {
@@ -104,17 +106,18 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   constructor(props: ResourceCardProps) {
     super(props);
     this.state = {
-      editing: false,
-      renaming: false,
       confirmDeleting: false,
+      editing: false,
+      errorModalTitle: 'Error Title',
+      errorModalBody: 'Error Body',
+      exportingDataSet: false,
       invalidResourceError: !(props.resourceCard.notebook ||
         props.resourceCard.cohort ||
         props.resourceCard.conceptSet ||
         props.resourceCard.dataSet),
-      showErrorModal: false,
-      errorModalTitle: 'Error Title',
-      errorModalBody: 'Error Body',
+      renaming: false,
       showCopyNotebookModal: false,
+      showErrorModal: false,
     };
   }
 
@@ -419,6 +422,10 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     }
   }
 
+  exportDataSet(): void {
+    this.setState({exportingDataSet: true});
+  }
+
   render() {
     const marginTop = this.props.marginTop;
     return <React.Fragment>
@@ -454,6 +461,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                               onRenameNotebook={() => this.renameNotebook()}
                               onRenameCohort={() => this.renameCohort()}
                               onEdit={() => this.edit()}
+                              onExportDataSet={() => this.exportDataSet()}
                               onReviewCohort={() => this.reviewCohort()}
                               onOpenJupyterLabNotebook={() => this.openResource(true)}/>
             <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>
@@ -490,6 +498,11 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                           resourceType={this.resourceType}
                           receiveDelete={() => this.receiveDelete()}
                           closeFunction={() => this.closeConfirmDelete()}/>}
+      {this.state.exportingDataSet &&
+      <ExportDataSetModal dataSet={this.props.resourceCard.dataSet}
+                          workspaceNamespace={this.props.resourceCard.workspaceNamespace}
+                          workspaceFirecloudName={this.props.resourceCard.workspaceFirecloudName}
+                          closeFunction={() => this.setState({exportingDataSet: false})}/>}
     </React.Fragment>;
   }
 }

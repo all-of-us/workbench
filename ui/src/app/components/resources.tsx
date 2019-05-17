@@ -11,11 +11,12 @@ export const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook?: Function,
   onRenameCohort?: Function, onOpenJupyterLabNotebook?: any, onCloneResource?: Function,
   onCopyResource?: Function, onDeleteResource?: Function, onEdit?: Function,
-  onReviewCohort?: Function
+  onExportDataSet: Function, onReviewCohort?: Function
 }> = ({
         disabled, resourceType, onRenameNotebook = () => {}, onRenameCohort = () => {},
         onOpenJupyterLabNotebook = () => {}, onCloneResource = () => {}, onCopyResource = () => {},
-        onDeleteResource = () => {}, onEdit = () => {}, onReviewCohort = () => {}
+        onDeleteResource = () => {}, onEdit = () => {}, onExportDataSet = () => {},
+        onReviewCohort = () => {}
       }) => {
   return <PopupTrigger
     data-test-id='resource-card-menu'
@@ -62,6 +63,7 @@ export const ResourceCardMenu: React.FunctionComponent<{
         ['dataSet', () => {
           return <React.Fragment>
             <MenuItem icon='pencil' onClick={onEdit}>Edit</MenuItem>
+            <MenuItem icon='clipboard' onClick={onExportDataSet}>Export to Notebook</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
           </React.Fragment>;
         }]
