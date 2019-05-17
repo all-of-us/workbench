@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {navigate, queryParamsStore} from 'app/utils/navigation';
+import {navigate, queryParamsStore, serverConfigStore} from 'app/utils/navigation';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -13,7 +13,7 @@ import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalFooter} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-import {configApi, profileApi} from 'app/services/swagger-fetch-clients';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWork} from 'app/views/recent-work/component';
@@ -222,8 +222,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
         this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
       } else {
         try {
-          const config = await configApi().getConfig();
-          if (config.enforceRegistered) {
+          if (serverConfigStore.getValue().enforceRegistered) {
             this.setState({
               accessTasksRemaining: !hasRegisteredAccessFetch(profile.dataAccessLevel),
               accessTasksLoaded: true
@@ -258,10 +257,15 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
 
   render() {
-    const {billingProjectInitialized, betaAccessGranted, videoOpen, accessTasksLoaded,
-        accessTasksRemaining, eraCommonsLinked, eraCommonsError, firstVisitTraining,
-        trainingCompleted, quickTour, videoLink, twoFactorAuthCompleted,
-      dataUseAgreementCompleted} = this.state;
+    const {billingProjectInitialized, betaAccessGranted,
+      videoOpen, accessTasksLoaded, accessTasksRemaining, eraCommonsLinked,
+      eraCommonsError, firstVisitTraining, trainingCompleted, quickTour, videoLink,
+      twoFactorAuthCompleted, dataUseAgreementCompleted
+    } = this.state;
+
+    const canCreateWorkspaces = billingProjectInitialized ||
+      serverConfigStore.getValue().useBillingProjectBuffer;
+
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -315,8 +319,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
                       <div style={styles.mainHeader}>Researcher Workbench</div>
                       <TooltipTrigger content={<div>Your Firecloud billing project is still being
                         initialized. Workspace creation will be available in a few minutes.</div>}
-                                      disabled={billingProjectInitialized}>
-                        <CardButton disabled={!billingProjectInitialized}
+                                      disabled={canCreateWorkspaces}>
+                        <CardButton disabled={!canCreateWorkspaces}
                                     onClick={() => navigate(['workspaces/build'])}
                                     style={{margin: '1.9rem 106px 0 3%'}}>
                           Create a <br/> New Workspace

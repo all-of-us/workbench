@@ -25,6 +25,7 @@ public class ConfigController implements ConfigApiDelegate {
         .gsuiteDomain(config.googleDirectoryService.gSuiteDomain)
         .projectId(config.server.projectId)
         .enforceRegistered(config.firecloud.enforceRegistered)
+        .useBillingProjectBuffer(config.featureFlags.useBillingProjectBuffer)
         .publicApiKeyForErrorReports(config.server.publicApiKeyForErrorReports));
   }
 }

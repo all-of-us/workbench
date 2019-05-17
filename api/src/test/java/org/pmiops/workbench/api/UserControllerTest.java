@@ -8,6 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
+
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -22,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -85,6 +88,8 @@ public class UserControllerTest {
     WorkbenchConfig config =  new WorkbenchConfig();
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.enforceRegistered = false;
+    config.featureFlags = new FeatureFlagsConfig();
+    config.featureFlags.useBillingProjectBuffer = false;
     configProvider = Providers.of(config);
     this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock(),
         new Random(), fireCloudService, configProvider, complianceService, directoryService);
@@ -127,12 +132,7 @@ public class UserControllerTest {
     UserResponse response = userController.user("obin", null, null, null).getBody();
 
     // We only want to include users that have active billing projects to avoid users not initialized in FC.
-    assertThat(response.getUsers()).hasSize(
-        allUsers
-            .stream()
-            .filter(user -> user.getFreeTierBillingProjectName() != null)
-            .collect(Collectors.toList())
-            .size());
+    assertThat(response.getUsers()).hasSize(5);
   }
 
   @Test
@@ -244,7 +244,7 @@ public class UserControllerTest {
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
-    user.setFreeTierBillingProjectName(givenName + familyName);
+    user.setFirstSignInTime(new Timestamp(clock().instant().toEpochMilli()));
     if (registered) {
       user.setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
     } else {

@@ -7,7 +7,7 @@ import {WorkspacesApi, ProfileApi} from "generated/fetch/api";
 import {Profile} from 'generated';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
-import {navigate, userProfileStore} from 'app/utils/navigation';
+import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {
   WorkspacesApiStub,
   workspaceStubs,
@@ -42,6 +42,7 @@ describe('WorkspaceList', () => {
     });
 
     userProfileStore.next({profile, reload, updateCache});
+    serverConfigStore.next({useBillingProjectBuffer: false, gsuiteDomain: "abc"});
   });
 
   it('displays the correct number of workspaces', async () => {
