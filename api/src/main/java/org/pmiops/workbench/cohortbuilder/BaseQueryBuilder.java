@@ -65,12 +65,6 @@ public class BaseQueryBuilder {
       ") temp2 on (${conditions})\n";
 
   private static final Logger log = Logger.getLogger(BaseQueryBuilder.class.getName());
-  private CBCriteriaDao cbCriteriaDao;
-
-  @Autowired
-  public BaseQueryBuilder(CBCriteriaDao cbCriteriaDao) {
-    this.cbCriteriaDao = cbCriteriaDao;
-  }
 
   public void buildQuery(ParticipantCriteria participantCriteria,
                                 Map<String, QueryParameterValue> params,
