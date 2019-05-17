@@ -435,10 +435,10 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   <Subheader>Workspace Cohorts</Subheader>
                   {!loadingResources && this.state.cohortList.map(cohort =>
                     <ImmutableListItem key={cohort.id} name={cohort.name}
-                                       data-test-id='cohort-list-item'
-                                       checked={selectedCohortIds.includes(cohort.id)}
-                                       onChange={
-                                         () => this.select(cohort, ResourceType.COHORT)}/>
+                                      data-test-id='cohort-list-item'
+                                      checked={selectedCohortIds.includes(cohort.id)}
+                                      onChange={
+                                        () => this.select(cohort, ResourceType.COHORT)}/>
                     )
                   }
                   {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
@@ -520,7 +520,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 top: '.25rem'}} onClick ={this.editing ? () => this.updateDataSet() :
                 () => this.setState({openSaveModal: true})}
                 disabled={this.disableSave() || (this.editing && !dataSetTouched)}>
-                  {this.editing ? 'UPDATE DATA SET' : 'SAVE DATA SET'}
+                {this.editing ? 'UPDATE DATA SET' : 'SAVE DATA SET'}
               </Button>
             </div>
             {previewDataLoading && <div style={{display: 'flex', flexDirection: 'column',
@@ -544,13 +544,12 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                  textDecoration:
                                     (selectedPreviewDomain === previewRow.domain) ? 'underline' : ''
                                }}>
-                        <div key={previewRow.domain}
-                             style={{
-                               marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'
-                             }}>
-                          {previewRow.domain}
-                        </div>
-                      </Clickable>
+                       <div key={previewRow.domain}
+                           style={{
+                             marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'}}>
+                         {previewRow.domain}
+                       </div>
+                     </Clickable>
                   )}
                 </div>
                 {this.renderPreviewDataTable()}
