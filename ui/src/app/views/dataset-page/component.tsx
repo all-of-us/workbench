@@ -95,26 +95,26 @@ export const styles = {
 
 const ImmutableListItem: React.FunctionComponent <{
   name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
-  return <div style={styles.listItem}>
-    <input type='checkbox' value={name} onChange={() => onChange()}
-           style={styles.listItemCheckbox} checked={checked}/>
-    <div style={{lineHeight: '1.5rem'}}>{name}</div>
-  </div>;
-};
+    return <div style={styles.listItem}>
+      <input type='checkbox' value={name} onChange={() => onChange()}
+             style={styles.listItemCheckbox} checked={checked}/>
+      <div style={{lineHeight: '1.5rem'}}>{name}</div>
+    </div>;
+  };
 
 const Subheader = (props) => {
   return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
 };
 
 export const ValueListItem: React.FunctionComponent <
-    {domainValue: DomainValue, onChange: Function, checked: boolean}> =
-    ({domainValue, onChange, checked}) => {
-      return <div style={{display: 'flex', color: 'black', height: '1.2rem'}}>
-        <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
-               style={styles.valueListItemCheckboxStyling} checked={checked}/>
-        <div style={{lineHeight: '1.5rem', wordWrap: 'break-word'}}>{domainValue.value}</div>
-      </div>;
-    };
+  {domainValue: DomainValue, onChange: Function, checked: boolean}> =
+  ({domainValue, onChange, checked}) => {
+    return <div style={{display: 'flex', color: 'black', height: '1.2rem'}}>
+      <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
+             style={styles.valueListItemCheckboxStyling} checked={checked}/>
+      <div style={{lineHeight: '1.5rem', wordWrap: 'break-word'}}>{domainValue.value}</div>
+    </div>;
+  };
 
 interface Props {
   workspace: WorkspaceData;
@@ -178,24 +178,24 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       allPromises.push(this.loadResources());
       if (this.editing) {
         allPromises.push(dataSetApi().getDataSet(
-              namespace, id, this.props.urlParams.dataSetId).then((response) => {
-                this.setState({
-                  dataSet: response,
-                  includesAllParticipants: response.includesAllParticipants,
-                  selectedConceptSetIds: response.conceptSets.map(cs => cs.id),
-                  selectedCohortIds: response.cohorts.map(c => c.id),
-                  selectedValues: response.values,
-                  valuesLoading: true,
-                });
-                return response;
-              }));
+          namespace, id, this.props.urlParams.dataSetId).then((response) => {
+            this.setState({
+              dataSet: response,
+              includesAllParticipants: response.includesAllParticipants,
+              selectedConceptSetIds: response.conceptSets.map(cs => cs.id),
+              selectedCohortIds: response.cohorts.map(c => c.id),
+              selectedValues: response.values,
+              valuesLoading: true,
+            });
+            return response;
+          }));
         const [, dataSet] = await Promise.all(allPromises);
-          // We can only run this command once both the data set fetch and the
-          // load resources have concluded. However, we want those to happen in
-          // parallel, and one is conditional, so we add them to an array to await
-          // and only run once both have finished.
+        // We can only run this command once both the data set fetch and the
+        // load resources have concluded. However, we want those to happen in
+        // parallel, and one is conditional, so we add them to an array to await
+        // and only run once both have finished.
         this.getValuesList(this.getDomainsFromConceptIds(dataSet.conceptSets.map(cs => cs.id)))
-              .then(valueSets => this.setState({valueSets: valueSets, valuesLoading: false}));
+          .then(valueSets => this.setState({valueSets: valueSets, valuesLoading: false}));
       }
     }
 
@@ -217,17 +217,17 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     getDomainsFromConceptIds(selectedConceptSetIds: number[]): Domain[] {
       const {conceptSetList} = this.state;
       return fp.uniq(conceptSetList.filter((conceptSet: ConceptSet) =>
-            selectedConceptSetIds.includes(conceptSet.id))
-            .map((conceptSet: ConceptSet) => conceptSet.domain));
+        selectedConceptSetIds.includes(conceptSet.id))
+        .map((conceptSet: ConceptSet) => conceptSet.domain));
     }
 
     async getValuesList(domains: Domain[]): Promise<ValueSet[]> {
       const {namespace, id} = this.props.workspace;
       const valueSets = fp.zipWith((domain: Domain, valueSet: DomainValuesResponse) =>
-                ({domain: domain, values: valueSet}),
+          ({domain: domain, values: valueSet}),
         domains,
         await Promise.all(domains.map((domain) =>
-                conceptsApi().getValuesFromDomain(namespace, id, domain.toString()))));
+          conceptsApi().getValuesFromDomain(namespace, id, domain.toString()))));
       return valueSets;
     }
 
@@ -237,26 +237,26 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         const {valueSets, selectedValues} = this.state;
         const origSelected = this.state.selectedConceptSetIds;
         const newSelectedConceptSets =
-              toggleIncludes(resource.id, origSelected)as unknown as number[];
+          toggleIncludes(resource.id, origSelected)as unknown as number[];
         const currentDomains = this.getDomainsFromConceptIds(newSelectedConceptSets);
         const origDomains = valueSets.map(valueSet => valueSet.domain);
         const newDomains = fp.without(origDomains, currentDomains) as unknown as Domain[];
         const removedDomains = fp.without(currentDomains, origDomains);
         const updatedValueSets =
-              valueSets.filter(valueSet => !(fp.contains(valueSet.domain, removedDomains)));
+          valueSets.filter(valueSet => !(fp.contains(valueSet.domain, removedDomains)));
         const updatedSelectedValues =
-              selectedValues.filter(selectedValue =>
-                  !fp.contains(selectedValue.domain, removedDomains));
+          selectedValues.filter(selectedValue =>
+            !fp.contains(selectedValue.domain, removedDomains));
         this.setState({
           selectedConceptSetIds: newSelectedConceptSets,
           selectedValues: updatedSelectedValues});
         if (newDomains.length > 0) {
           this.setState({valuesLoading: true});
           this.getValuesList(newDomains)
-                .then(newValueSets => this.setState({
-                  valueSets: updatedValueSets.concat(newValueSets),
-                  valuesLoading: false
-                }));
+            .then(newValueSets => this.setState({
+              valueSets: updatedValueSets.concat(newValueSets),
+              valuesLoading: false
+            }));
         } else {
           this.setState({valueSets: updatedValueSets});
         }
@@ -269,22 +269,22 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
 
     selectDomainValue(domain: Domain, domainValue: DomainValue): void {
       const valueSets = this.state.valueSets
-            .filter(value => value.domain === domain)
-            .map(valueSet => valueSet.values.items)[0];
+          .filter(value => value.domain === domain)
+          .map(valueSet => valueSet.values.items)[0];
       const origSelected = this.state.selectedValues;
       const selectObj = {domain: domain, value: domainValue.value};
       let valuesSelected = [];
       if (fp.some(selectObj, origSelected)) {
         valuesSelected = fp.remove((dv) => dv.domain === selectObj.domain
-              && dv.value === selectObj.value, origSelected);
+            && dv.value === selectObj.value, origSelected);
 
       } else {
         valuesSelected = (origSelected).concat(selectObj);
       }
-        // Sort the values selected as per the order display rather than appending top end
+      // Sort the values selected as per the order display rather than appending top end
       valuesSelected = valuesSelected.sort((a, b) =>
-            valueSets.findIndex(({value}) => a.value === value) -
-            valueSets.findIndex(({value}) => b.value === value));
+          valueSets.findIndex(({value}) => a.value === value) -
+          valueSets.findIndex(({value}) => b.value === value));
       this.setState({selectedValues: valuesSelected, dataSetTouched: true},
         () => this.defaultPreviewDataRequest());
     }
@@ -310,7 +310,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
 
     disableSave() {
       return !this.state.selectedConceptSetIds || this.state.selectedConceptSetIds.length === 0 ||
-            ((!this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0)
+          ((!this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0)
                 && !this.state.includesAllParticipants) ||
             !this.state.selectedValues || this.state.selectedValues.length === 0;
     }
@@ -323,16 +323,16 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     }
 
     getDataTableValue(data) {
-        // convert data model from api :
-        // [{value[0]: '', queryValue: []}, {value[1]: '', queryValue: []}]
-        // to compatible with DataTable
-        // {value[0]: queryValue[0], value[1]: queryValue[1]}
+      // convert data model from api :
+      // [{value[0]: '', queryValue: []}, {value[1]: '', queryValue: []}]
+      // to compatible with DataTable
+      // {value[0]: queryValue[0], value[1]: queryValue[1]}
 
       const tableData = fp.flow(
         fp.map(({value, queryValue}) => fp.map(v => [value, v], queryValue)),
         fp.unzip,
         fp.map(fp.fromPairs)
-        )(data);
+      )(data);
       return tableData;
     }
 
@@ -362,18 +362,18 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
 
     renderPreviewDataTable() {
       const filteredPreviewData =
-            this.state.previewList.filter(
-              preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
+          this.state.previewList.filter(
+            preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
 
       return <DataTable key={this.state.selectedPreviewDomain} scrollable={true}
-                          style={{width: '100%'}}
-                          value={this.getDataTableValue(filteredPreviewData.values)}>
-          {filteredPreviewData.values.map(value =>
-              <Column header={value.value}
-                      headerStyle={{textAlign: 'left', width: '5rem', wordBreak: 'break-all'}}
-                      style={{width: '5rem'}} field={value.value}/>
-          )}
-        </DataTable>;
+                        style={{width: '100%'}}
+                        value={this.getDataTableValue(filteredPreviewData.values)}>
+        {filteredPreviewData.values.map(value =>
+            <Column header={value.value}
+                    headerStyle={{textAlign: 'left', width: '5rem', wordBreak: 'break-all'}}
+                    style={{width: '5rem'}} field={value.value}/>
+        )}
+      </DataTable>;
     }
 
     updateDataSet() {
@@ -389,30 +389,30 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         etag: dataSet.etag
       };
       dataSetApi().updateDataSet(namespace, id, dataSet.id, request)
-            .then(() => window.history.back());
+        .then(() => window.history.back());
     }
 
     render() {
       const {namespace, id} = this.props.workspace;
       const {
-          dataSet,
-          dataSetTouched,
-          defaultPreviewView,
-          includesAllParticipants,
-          loadingResources,
-          openSaveModal,
-          previewDataLoading,
-          previewList,
-          selectedCohortIds,
-          selectedConceptSetIds,
-          selectedPreviewDomain,
-          selectedValues,
-          valuesLoading,
-          valueSets
-        } = this.state;
+        dataSet,
+        dataSetTouched,
+        defaultPreviewView,
+        includesAllParticipants,
+        loadingResources,
+        openSaveModal,
+        previewDataLoading,
+        previewList,
+        selectedCohortIds,
+        selectedConceptSetIds,
+        selectedPreviewDomain,
+        selectedValues,
+        valuesLoading,
+        valueSets
+      } = this.state;
       return <React.Fragment>
-          <FadeBox style={{marginTop: '1rem'}}>
-            <h2 style={{marginTop: 0}}>Datasets{this.editing &&
+        <FadeBox style={{marginTop: '1rem'}}>
+          <h2 style={{marginTop: 0}}>Datasets{this.editing &&
             dataSet !== undefined && ' - ' + dataSet.name}</h2>
             <div style={{color: '#000000', fontSize: '14px'}}>Build a dataset by selecting the
               variables and values for one or more of your cohorts. Then export the completed
