@@ -13,7 +13,6 @@ public class TestBigQueryCdrSchemaConfig {
   @Bean
   CdrBigQuerySchemaConfig provideCdrSchemaConfig() throws IOException {
     Gson gson = new Gson();
-    return gson.fromJson(new FileReader("config/cdm/cdm_5_2.json"),
-          CdrBigQuerySchemaConfig.class);
+    return gson.fromJson(new FileReader("config/cdm/cdm_5_2.json"), CdrBigQuerySchemaConfig.class);
   }
 }

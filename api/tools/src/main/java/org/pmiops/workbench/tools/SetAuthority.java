@@ -49,7 +49,7 @@ public class SetAuthority {
       if (args.length != 4) {
         throw new IllegalArgumentException(
             "Expected 4 args (email_list, authorities, remove, dry_run). Got "
-            + Arrays.asList(args));
+                + Arrays.asList(args));
       }
       Set<String> emails = commaDelimitedStringToSet(args[0]);
       Set<Authority> authorities = commaDelimitedStringToAuthoritySet(args[1]);

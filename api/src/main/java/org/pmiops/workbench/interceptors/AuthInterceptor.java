@@ -21,7 +21,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -36,13 +35,11 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-
 /**
  * Intercepts all non-OPTIONS API requests to ensure they have an appropriate auth token.
  *
- * Checks handler methods for annotations like
- *     @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
- * to enforce granular permissions.
+ * <p>Checks handler methods for annotations
+ * like @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE}) to enforce granular permissions.
  */
 @Service
 public class AuthInterceptor extends HandlerInterceptorAdapter {
@@ -56,8 +53,12 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   private final UserService userService;
 
   @Autowired
-  public AuthInterceptor(UserInfoService userInfoService, FireCloudService fireCloudService,
-      Provider<WorkbenchConfig> workbenchConfigProvider, UserDao userDao, UserService userService) {
+  public AuthInterceptor(
+      UserInfoService userInfoService,
+      FireCloudService fireCloudService,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      UserDao userDao,
+      UserService userService) {
     this.userInfoService = userInfoService;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -68,6 +69,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   /**
    * Returns true iff the request is auth'd and should proceed. Publishes authenticated user info
    * using Spring's SecurityContext.
+   *
    * @param handler The Swagger-generated ApiController. It contains our handler as a private
    *     delegate.
    */
@@ -122,25 +124,28 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       if (user == null) {
         user = userService.createServiceAccountUser(userEmail);
       }
-      SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
-          token, UserType.SERVICE_ACCOUNT));
+      SecurityContextHolder.getContext()
+          .setAuthentication(
+              new UserAuthentication(user, userInfo, token, UserType.SERVICE_ACCOUNT));
       log.log(Level.INFO, "{0} service account in use", userInfo.getEmail());
       return true;
     }
-    String gsuiteDomainSuffix =
-        "@" + workbenchConfig.googleDirectoryService.gSuiteDomain;
+    String gsuiteDomainSuffix = "@" + workbenchConfig.googleDirectoryService.gSuiteDomain;
     if (!userEmail.endsWith(gsuiteDomainSuffix)) {
       // Temporarily set the authentication with no user, so we can look up what user this
       // corresponds to in FireCloud.
-      SecurityContextHolder.getContext().setAuthentication(
-          new UserAuthentication(null, userInfo, token, UserType.SERVICE_ACCOUNT));
+      SecurityContextHolder.getContext()
+          .setAuthentication(
+              new UserAuthentication(null, userInfo, token, UserType.SERVICE_ACCOUNT));
       // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a
       // pet service account. In both AofU and FireCloud, the pet SA is treated as if it were
       // the user it was created for.
       userEmail = fireCloudService.getMe().getUserInfo().getUserEmail();
       if (!userEmail.endsWith(gsuiteDomainSuffix)) {
-        log.log(Level.INFO, "User {0} isn't in domain {1}, can't access the workbench",
-            new Object[] { userEmail, gsuiteDomainSuffix });
+        log.log(
+            Level.INFO,
+            "User {0} isn't in domain {1}, can't access the workbench",
+            new Object[] {userEmail, gsuiteDomainSuffix});
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         return false;
       }
@@ -148,17 +153,25 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     User user = userDao.findUserByEmail(userEmail);
     if (user == null) {
       // TODO(danrodney): start populating contact email in Google account, use it here.
-      user = userService.createUser(userInfo.getGivenName(), userInfo.getFamilyName(),
-            userInfo.getEmail(), null, null, null, null);
+      user =
+          userService.createUser(
+              userInfo.getGivenName(),
+              userInfo.getFamilyName(),
+              userInfo.getEmail(),
+              null,
+              null,
+              null,
+              null);
     } else {
       if (user.getDisabled()) {
-        throw new ForbiddenException(WorkbenchException
-            .errorResponse(ErrorCode.USER_DISABLED, "This user account has been disabled."));
+        throw new ForbiddenException(
+            WorkbenchException.errorResponse(
+                ErrorCode.USER_DISABLED, "This user account has been disabled."));
       }
     }
 
-    SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
-        token, UserType.RESEARCHER));
+    SecurityContextHolder.getContext()
+        .setAuthentication(new UserAuthentication(user, userInfo, token, UserType.RESEARCHER));
 
     // TODO: setup this in the context, get rid of log statement
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
@@ -172,8 +185,12 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   }
 
   @Override
-  public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-      ModelAndView modelAndView) throws Exception {
+  public void postHandle(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Object handler,
+      ModelAndView modelAndView)
+      throws Exception {
     // Clear the security context, just to make sure nothing subsequently uses the credentials
     // set up in here.
     SecurityContextHolder.clearContext();
@@ -182,14 +199,12 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   /**
    * Checks any @AuthorityRequired annotation on the controller's handler method.
    *
-   * There is a hierarchy of Swagger-generated interfaces/wrappers around our controllers:
-   *     FooApi (interface generated by Swagger)
-   *     FooApiController (generated by Swagger, handed to AuthInterceptor)
-   *       private FooApiDelegate delegate;
-   *     FooApiDelegate (interface generated by Swagger)
-   *     FooController implements FooApiDelegate (we implement this)
-   * We can only annotate FooController methods, but are given a FooApiController, so we use
-   * reflection to hack our way to FooController's method.
+   * <p>There is a hierarchy of Swagger-generated interfaces/wrappers around our controllers: FooApi
+   * (interface generated by Swagger) FooApiController (generated by Swagger, handed to
+   * AuthInterceptor) private FooApiDelegate delegate; FooApiDelegate (interface generated by
+   * Swagger) FooController implements FooApiDelegate (we implement this) We can only annotate
+   * FooController methods, but are given a FooApiController, so we use reflection to hack our way
+   * to FooController's method.
    *
    * @param handlerMethod The HandlerMethod for this request.
    * @param user Database details of the authenticated user.
@@ -211,20 +226,19 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       Collection<Authority> granted = user.getAuthoritiesEnum();
 
       // DEVELOPER subsumes all other authorities.
-      if (granted.contains(Authority.DEVELOPER) ||
-          granted.containsAll(Arrays.asList(req.value()))) {
+      if (granted.contains(Authority.DEVELOPER)
+          || granted.containsAll(Arrays.asList(req.value()))) {
         return true;
       } else {
         log.log(
             Level.INFO,
             "{0} required authorities {1} but user had only {2}.",
             new Object[] {
-                controllerMethodName,
-                Arrays.toString(req.value()),
-                Arrays.toString(granted.toArray())});
+              controllerMethodName, Arrays.toString(req.value()), Arrays.toString(granted.toArray())
+            });
         return false;
       }
     }
-    return true;  // No @AuthorityRequired annotation found at runtime, default to allowed.
+    return true; // No @AuthorityRequired annotation found at runtime, default to allowed.
   }
 }

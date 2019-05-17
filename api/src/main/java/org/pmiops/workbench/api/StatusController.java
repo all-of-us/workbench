@@ -14,8 +14,8 @@ public class StatusController implements StatusApiDelegate {
   private final LeonardoNotebooksClient leonardoNotebooksClient;
 
   @Autowired
-  StatusController(FireCloudService fireCloudService,
-      LeonardoNotebooksClient leonardoNotebooksClient) {
+  StatusController(
+      FireCloudService fireCloudService, LeonardoNotebooksClient leonardoNotebooksClient) {
     this.fireCloudService = fireCloudService;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
   }

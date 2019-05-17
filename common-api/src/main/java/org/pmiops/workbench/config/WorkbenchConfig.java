@@ -4,7 +4,8 @@ import java.util.ArrayList;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
- * See {@link CacheSpringConfiguration}. This should be kept in sync with files in the config/ directory.
+ * See {@link CacheSpringConfiguration}. This should be kept in sync with files in the config/
+ * directory.
  */
 public class WorkbenchConfig {
 
@@ -17,15 +18,13 @@ public class WorkbenchConfig {
   public AdminConfig admin;
   public JiraConfig jira;
   public MandrillConfig mandrill;
-  public ElasticsearchConfig elasticsearch; 
+  public ElasticsearchConfig elasticsearch;
   public MoodleConfig moodle;
   public AccessConfig access;
   public CohortBuilderConfig cohortbuilder;
   public FeatureFlagsConfig featureFlags;
 
-  /**
-   * Creates a config with non-null-but-empty member variables, for use in testing.
-   */
+  /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new FireCloudConfig();

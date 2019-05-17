@@ -27,5 +27,4 @@ public class BillingController implements BillingApiDelegate {
     billingProjectBufferService.syncBillingProjectStatus();
     return ResponseEntity.status(HttpStatus.OK).build();
   }
-
 }

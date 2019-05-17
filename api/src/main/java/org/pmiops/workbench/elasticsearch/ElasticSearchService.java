@@ -46,50 +46,59 @@ public class ElasticSearchService {
   private Provider<WorkbenchConfig> configProvider;
 
   @Autowired
-  public ElasticSearchService(CriteriaDao criteriaDao, CloudStorageService cloudStorageService,
+  public ElasticSearchService(
+      CriteriaDao criteriaDao,
+      CloudStorageService cloudStorageService,
       Provider<WorkbenchConfig> configProvider) {
     this.criteriaDao = criteriaDao;
     this.cloudStorageService = cloudStorageService;
     this.configProvider = configProvider;
   }
 
-  /**
-   * Get the total participant count matching the given search criteria.
-   */
+  /** Get the total participant count matching the given search criteria. */
   public Long count(SearchRequest req) throws IOException {
     String personIndex =
         ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getElasticIndexBaseName());
     QueryBuilder filter = ElasticFilters.fromCohortSearch(criteriaDao, req);
-    log.info("Elastic filter: "  + filter.toString());
-    long count = client().count(new CountRequest(personIndex)
-        .source(SearchSourceBuilder.searchSource().query(filter)), RequestOptions.DEFAULT).getCount();
+    log.info("Elastic filter: " + filter.toString());
+    long count =
+        client()
+            .count(
+                new CountRequest(personIndex)
+                    .source(SearchSourceBuilder.searchSource().query(filter)),
+                RequestOptions.DEFAULT)
+            .getCount();
     return count;
   }
 
-  /**
-   * Get the demographic data info for the given search criteria.
-   */
+  /** Get the demographic data info for the given search criteria. */
   public List<DemoChartInfo> demoChartInfo(SearchRequest req) throws IOException {
     String personIndex =
         ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getElasticIndexBaseName());
     QueryBuilder filter = ElasticFilters.fromCohortSearch(criteriaDao, req);
-    log.info("Elastic filter: "  + filter.toString());
+    log.info("Elastic filter: " + filter.toString());
     SearchResponse searchResponse =
-      client().search(new org.elasticsearch.action.search.SearchRequest(personIndex).source(
-        SearchSourceBuilder
-          .searchSource()
-          .size(0)//reduce the payload since were only interested in the aggregations
-          .query(filter)
-          .aggregation(buildDemoChartAggregation(RANGE_19_44))
-          .aggregation(buildDemoChartAggregation(RANGE_45_64))
-          .aggregation(buildDemoChartAggregation(RANGE_GT_65))), RequestOptions.DEFAULT);
+        client()
+            .search(
+                new org.elasticsearch.action.search.SearchRequest(personIndex)
+                    .source(
+                        SearchSourceBuilder.searchSource()
+                            .size(
+                                0) // reduce the payload since were only interested in the
+                                   // aggregations
+                            .query(filter)
+                            .aggregation(buildDemoChartAggregation(RANGE_19_44))
+                            .aggregation(buildDemoChartAggregation(RANGE_45_64))
+                            .aggregation(buildDemoChartAggregation(RANGE_GT_65))),
+                RequestOptions.DEFAULT);
     return unwrapDemoChartBuckets(searchResponse, RANGE_19_44, RANGE_45_64, RANGE_GT_65);
   }
 
   /**
-   * Implementing RestHighLevelClient init here because injecting Provider<WorkbenchConfig> into a Configuration
-   * singleton class was causing a BeanInstantiationException due to WorkbenchConfig being request scoped. This
-   * works but need to add Synchronized annotation to make this method thread safe.
+   * Implementing RestHighLevelClient init here because injecting Provider<WorkbenchConfig> into a
+   * Configuration singleton class was causing a BeanInstantiationException due to WorkbenchConfig
+   * being request scoped. This works but need to add Synchronized annotation to make this method
+   * thread safe.
    */
   @Synchronized
   private RestHighLevelClient client() throws IOException {
@@ -101,12 +110,13 @@ public class ElasticSearchService {
       if (esConfig.enableBasicAuth) {
         JSONObject creds = cloudStorageService.getElasticCredentials();
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY,
+        credentialsProvider.setCredentials(
+            AuthScope.ANY,
             new UsernamePasswordCredentials(
                 creds.getString("username"), creds.getString("password")));
-        builder.setHttpClientConfigCallback((httpClientBuilder) ->
-            httpClientBuilder
-                .setDefaultCredentialsProvider(credentialsProvider));
+        builder.setHttpClientConfigCallback(
+            (httpClientBuilder) ->
+                httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
       }
       client = new RestHighLevelClient(builder);
     }

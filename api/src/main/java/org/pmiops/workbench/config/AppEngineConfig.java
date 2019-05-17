@@ -8,9 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AppEngineConfig {
 
-    @Bean
-    HttpTransport httpTransport() {
-      return UrlFetchTransport.getDefaultInstance();
-    }
-
+  @Bean
+  HttpTransport httpTransport() {
+    return UrlFetchTransport.getDefaultInstance();
+  }
 }

@@ -1,19 +1,16 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
 
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-
 public class AttributePredicates {
 
   public static Predicate<Attribute> categoricalAndNotIn() {
-    return a -> AttrName.CAT.equals(a.getName()) &&
-      !a.getOperator().equals(Operator.IN);
+    return a -> AttrName.CAT.equals(a.getName()) && !a.getOperator().equals(Operator.IN);
   }
 
   public static Predicate<Attribute> betweenOperator() {
@@ -53,10 +50,10 @@ public class AttributePredicates {
   }
 
   public static Predicate<Attribute> operandsNotNumbers() {
-    return a -> !a
-      .getOperands()
-      .stream()
-      .filter(o -> !NumberUtils.isNumber(o))
-      .collect(Collectors.toList()).isEmpty();
+    return a ->
+        !a.getOperands().stream()
+            .filter(o -> !NumberUtils.isNumber(o))
+            .collect(Collectors.toList())
+            .isEmpty();
   }
 }

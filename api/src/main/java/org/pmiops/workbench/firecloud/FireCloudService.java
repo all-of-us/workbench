@@ -13,66 +13,53 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 
 /**
- * Encapsulate Firecloud API interaction details and provide a simple/mockable interface
- * for internal use.
+ * Encapsulate Firecloud API interaction details and provide a simple/mockable interface for
+ * internal use.
  */
 public interface FireCloudService {
 
   String WORKSPACE_DELIMITER = "__";
 
-  /**
-   * @return true if firecloud is okay, false if firecloud is down.
-   */
+  /** @return true if firecloud is okay, false if firecloud is down. */
   boolean getFirecloudStatus();
 
-  /**
-   * @return the FireCloud profile for the requesting user.
-   */
+  /** @return the FireCloud profile for the requesting user. */
   Me getMe();
 
   /**
    * Registers the user in Firecloud.
+   *
    * @param contactEmail an email address that can be used to contact this user
    * @param firstName the user's first name
    * @param lastName the user's last name
    */
   void registerUser(String contactEmail, String firstName, String lastName);
 
-  /**
-   * Creates a billing project owned by AllOfUs.
-   */
+  /** Creates a billing project owned by AllOfUs. */
   void createAllOfUsBillingProject(String projectName);
 
-  /**
-   * Get Billing Project Status
-   */
+  /** Get Billing Project Status */
   BillingProjectStatus getBillingProjectStatus(String projectName);
 
-  /**
-   * Adds the specified user to the specified billing project.
-   */
+  /** Adds the specified user to the specified billing project. */
   void addUserToBillingProject(String email, String projectName);
 
   /**
-   * Removes the specified user from the specified billing project.
-   * Only used for errored billing projects
+   * Removes the specified user from the specified billing project. Only used for errored billing
+   * projects
    */
   void removeUserFromBillingProject(String email, String projectName);
 
-  /**
-   * Creates a new FC workspace.
-   */
+  /** Creates a new FC workspace. */
   void createWorkspace(String projectName, String workspaceName);
 
   void cloneWorkspace(String fromProject, String fromName, String toProject, String toName);
 
-  /**
-   * Retrieves all billing project memberships for the user from FireCloud.
-   */
+  /** Retrieves all billing project memberships for the user from FireCloud. */
   List<BillingProjectMembership> getBillingProjectMemberships();
 
-  WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName,
-      List<WorkspaceACLUpdate> aclUpdates);
+  WorkspaceACLUpdateResponseList updateWorkspaceACL(
+      String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates);
 
   WorkspaceResponse getWorkspace(String projectName, String workspaceName);
 
@@ -91,7 +78,7 @@ public interface FireCloudService {
   /**
    * Fetches the status of the currently-authenticated user's linkage to NIH's eRA Commons system.
    *
-   * Returns null if the FireCloud user is not found or if the user has no NIH linkage.
+   * <p>Returns null if the FireCloud user is not found or if the user has no NIH linkage.
    */
   NihStatus getNihStatus();
 

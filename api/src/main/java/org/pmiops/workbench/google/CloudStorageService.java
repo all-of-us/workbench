@@ -3,16 +3,13 @@ package org.pmiops.workbench.google;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONObject;
 import org.pmiops.workbench.model.Cohort;
 
-/**
- * Encapsulate Google APIs for interfacing with Google Cloud Storage.
- */
+/** Encapsulate Google APIs for interfacing with Google Cloud Storage. */
 public interface CloudStorageService {
 
   String readInvitationKey();
@@ -50,5 +47,4 @@ public interface CloudStorageService {
   void deleteBlob(BlobId blobId);
 
   String getMoodleApiKey();
-
 }

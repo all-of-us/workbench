@@ -18,14 +18,14 @@ public class ConceptSetService {
   @Autowired private ConceptBigQueryService conceptBigQueryService;
 
   @Transactional
-  public ConceptSet cloneConceptSetAndConceptIds(ConceptSet conceptSet, Workspace targetWorkspace,
-      boolean cdrVersionChanged) {
+  public ConceptSet cloneConceptSetAndConceptIds(
+      ConceptSet conceptSet, Workspace targetWorkspace, boolean cdrVersionChanged) {
     ConceptSet c = new ConceptSet(conceptSet);
     if (cdrVersionChanged) {
       String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(conceptSet.getDomainEnum());
       c.setParticipantCount(
-          conceptBigQueryService.getParticipantCountForConcepts(omopTable,
-              conceptSet.getConceptIds()));
+          conceptBigQueryService.getParticipantCountForConcepts(
+              omopTable, conceptSet.getConceptIds()));
     }
     c.setWorkspaceId(targetWorkspace.getWorkspaceId());
     c.setCreator(targetWorkspace.getCreator());

@@ -20,7 +20,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UnderservedPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -120,7 +119,9 @@ public class Workspace {
     return version;
   }
 
-  public void setVersion(int version) { this.version = version; }
+  public void setVersion(int version) {
+    this.version = version;
+  }
 
   @Column(name = "name")
   public String getName() {
@@ -148,7 +149,6 @@ public class Workspace {
   public void setWorkspaceNamespace(String workspaceNamespace) {
     this.workspaceNamespace = workspaceNamespace;
   }
-
 
   @Column(name = "firecloud_name")
   public String getFirecloudName() {
@@ -216,9 +216,13 @@ public class Workspace {
   }
 
   @Column(name = "last_accessed_time")
-  public Timestamp getLastAccessedTime() { return lastAccessedTime; }
+  public Timestamp getLastAccessedTime() {
+    return lastAccessedTime;
+  }
 
-  public void setLastAccessedTime(Timestamp lastAccessedTime) { this.lastAccessedTime = lastAccessedTime; }
+  public void setLastAccessedTime(Timestamp lastAccessedTime) {
+    this.lastAccessedTime = lastAccessedTime;
+  }
 
   @Column(name = "rp_disease_focused_research")
   public boolean getDiseaseFocusedResearch() {
@@ -320,7 +324,9 @@ public class Workspace {
   }
 
   @ElementCollection(fetch = FetchType.LAZY)
-  @CollectionTable(name = "underserved_populations", joinColumns = @JoinColumn(name = "workspace_id"))
+  @CollectionTable(
+      name = "underserved_populations",
+      joinColumns = @JoinColumn(name = "workspace_id"))
   @Column(name = "underserved_population")
   public Set<Short> getUnderservedPopulations() {
     return underservedPopulationSet;
@@ -336,18 +342,17 @@ public class Workspace {
     if (from == null) {
       return null;
     }
-    return from
-        .stream()
+    return from.stream()
         .map(StorageEnums::underservedPopulationFromStorage)
         .collect(Collectors.toSet());
   }
 
-  public void setUnderservedPopulationsEnum(Set<UnderservedPopulationEnum> newUnderservedPopulations) {
+  public void setUnderservedPopulationsEnum(
+      Set<UnderservedPopulationEnum> newUnderservedPopulations) {
     setUnderservedPopulations(
-        newUnderservedPopulations
-        .stream()
-        .map(StorageEnums::underservedPopulationToStorage)
-        .collect(Collectors.toSet()));
+        newUnderservedPopulations.stream()
+            .map(StorageEnums::underservedPopulationToStorage)
+            .collect(Collectors.toSet()));
   }
 
   @Column(name = "rp_review_requested")
@@ -420,18 +425,28 @@ public class Workspace {
     return new FirecloudWorkspaceId(workspaceNamespace, firecloudName);
   }
 
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "workspace", orphanRemoval = true, cascade = CascadeType.ALL)
+  @OneToMany(
+      fetch = FetchType.EAGER,
+      mappedBy = "workspace",
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
   public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
     return usersWithAccess;
   }
 
   @Column(name = "firecloud_uuid")
-  public String getFirecloudUuid() {return this.firecloudUuid; }
+  public String getFirecloudUuid() {
+    return this.firecloudUuid;
+  }
 
-  public void setFirecloudUuid(String firecloudUuid) {this.firecloudUuid = firecloudUuid;}
+  public void setFirecloudUuid(String firecloudUuid) {
+    this.firecloudUuid = firecloudUuid;
+  }
 
   @Column(name = "active_status")
-  private Short getActiveStatus() { return activeStatus; }
+  private Short getActiveStatus() {
+    return activeStatus;
+  }
 
   private void setActiveStatus(Short activeStatus) {
     this.activeStatus = activeStatus;
@@ -447,8 +462,8 @@ public class Workspace {
   }
 
   /**
-   * Necessary for Spring initialization of the object.
-   * Not actually supported because it won't delete old entries.
+   * Necessary for Spring initialization of the object. Not actually supported because it won't
+   * delete old entries.
    */
   public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
     this.usersWithAccess = userRoles;

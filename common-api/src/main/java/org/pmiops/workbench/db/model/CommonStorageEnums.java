@@ -62,5 +62,4 @@ public class CommonStorageEnums {
   public static Short dataAccessLevelToStorage(DataAccessLevel level) {
     return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.get(level);
   }
-
 }

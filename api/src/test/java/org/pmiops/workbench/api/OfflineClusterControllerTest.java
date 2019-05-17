@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class OfflineClusterControllerTest {
@@ -50,9 +50,7 @@ public class OfflineClusterControllerTest {
   private static final Duration IDLE_MAX_AGE = Duration.ofDays(7);
 
   @TestConfiguration
-  @Import({
-    OfflineClusterController.class
-  })
+  @Import({OfflineClusterController.class})
   static class Configuration {
     @MockBean
     @Qualifier(NotebooksConfig.SERVICE_CLUSTER_API)
@@ -73,10 +71,8 @@ public class OfflineClusterControllerTest {
     }
   }
 
-  @Autowired
-  ClusterApi clusterApi;
-  @Autowired
-  OfflineClusterController controller;
+  @Autowired ClusterApi clusterApi;
+  @Autowired OfflineClusterController controller;
   private int projectIdIndex = 0;
 
   @Before
@@ -134,8 +130,9 @@ public class OfflineClusterControllerTest {
   @Test
   public void testCheckClustersIdleYoung() throws Exception {
     // Running for under the IDLE_MAX_AGE, idle for 10 hours
-    stubClusters(ImmutableList.of(
-        clusterWithAgeAndIdle(IDLE_MAX_AGE.minusMinutes(10), Duration.ofHours(10))));
+    stubClusters(
+        ImmutableList.of(
+            clusterWithAgeAndIdle(IDLE_MAX_AGE.minusMinutes(10), Duration.ofHours(10))));
     assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
 
     verify(clusterApi, never()).deleteCluster(any(), any());
@@ -144,8 +141,9 @@ public class OfflineClusterControllerTest {
   @Test
   public void testCheckClustersIdleOld() throws Exception {
     // Running for >IDLE_MAX_AGE, idle for 10 hours
-    stubClusters(ImmutableList.of(
-        clusterWithAgeAndIdle(IDLE_MAX_AGE.plusMinutes(15), Duration.ofHours(10))));
+    stubClusters(
+        ImmutableList.of(
+            clusterWithAgeAndIdle(IDLE_MAX_AGE.plusMinutes(15), Duration.ofHours(10))));
     assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(1);
 
     verify(clusterApi, times(1)).deleteCluster(any(), any());
@@ -154,8 +152,9 @@ public class OfflineClusterControllerTest {
   @Test
   public void testCheckClustersBrieflyIdleOld() throws Exception {
     // Running for >IDLE_MAX_AGE, idle for only 15 minutes
-    stubClusters(ImmutableList.of(
-        clusterWithAgeAndIdle(IDLE_MAX_AGE.plusMinutes(15), Duration.ofMinutes(15))));
+    stubClusters(
+        ImmutableList.of(
+            clusterWithAgeAndIdle(IDLE_MAX_AGE.plusMinutes(15), Duration.ofMinutes(15))));
     assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
 
     verify(clusterApi, never()).deleteCluster(any(), any());
@@ -163,8 +162,8 @@ public class OfflineClusterControllerTest {
 
   @Test
   public void testCheckClustersOtherStatusFiltered() throws Exception {
-    stubClusters(ImmutableList.of(
-        clusterWithAge(MAX_AGE.plusDays(10)).status(ClusterStatus.DELETING)));
+    stubClusters(
+        ImmutableList.of(clusterWithAge(MAX_AGE.plusDays(10)).status(ClusterStatus.DELETING)));
     assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
 
     verify(clusterApi, never()).deleteCluster(any(), any());

@@ -36,7 +36,7 @@ public class User {
    * represents cluster configuration overrides we support on a per-user basis for their notebook
    * cluster. Corresponds to Leonardo's MachineConfig model. All fields are optional.
    *
-   * Any changes to this class should produce backwards-compatible JSON.
+   * <p>Any changes to this class should produce backwards-compatible JSON.
    */
   public static class ClusterConfig {
     // Master persistent disk size in GB.
@@ -112,14 +112,22 @@ public class User {
 
   @Version
   @Column(name = "version")
-  public int getVersion() { return version; }
+  public int getVersion() {
+    return version;
+  }
 
-  public void setVersion(int version) { this.version = version; }
+  public void setVersion(int version) {
+    this.version = version;
+  }
 
   @Column(name = "creation_nonce")
-  public Long getCreationNonce() { return creationNonce; }
+  public Long getCreationNonce() {
+    return creationNonce;
+  }
 
-  public void setCreationNonce(Long creationNonce) { this.creationNonce = creationNonce; }
+  public void setCreationNonce(Long creationNonce) {
+    this.creationNonce = creationNonce;
+  }
 
   @Column(name = "email")
   public String getEmail() {
@@ -259,22 +267,20 @@ public class User {
     if (from == null) {
       return null;
     }
-    return from
-        .stream()
-        .map(StorageEnums::authorityFromStorage)
-        .collect(Collectors.toSet());
+    return from.stream().map(StorageEnums::authorityFromStorage).collect(Collectors.toSet());
   }
 
   public void setAuthoritiesEnum(Set<Authority> newAuthorities) {
     this.setAuthorities(
-        newAuthorities
-        .stream()
-        .map(StorageEnums::authorityToStorage)
-        .collect(Collectors.toSet()));
+        newAuthorities.stream().map(StorageEnums::authorityToStorage).collect(Collectors.toSet()));
   }
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "user")
-  @Column(name="page_id")
+  @OneToMany(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  @Column(name = "page_id")
   public Set<PageVisit> getPageVisits() {
     return pageVisits;
   }
@@ -289,8 +295,8 @@ public class User {
   }
 
   /**
-   * Necessary for Spring initialization of the object.
-   * Not actually supported because it won't delete old entries.
+   * Necessary for Spring initialization of the object. Not actually supported because it won't
+   * delete old entries.
    */
   public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
     this.workspaceUserRoles = userRoles;
@@ -300,6 +306,7 @@ public class User {
   public Boolean getIdVerificationIsValid() {
     return idVerificationIsValid;
   }
+
   public void setIdVerificationIsValid(Boolean value) {
     idVerificationIsValid = value;
   }
@@ -308,6 +315,7 @@ public class User {
   public String getClusterConfigDefaultRaw() {
     return clusterConfigDefault;
   }
+
   public void setClusterConfigDefaultRaw(String value) {
     clusterConfigDefault = value;
   }
@@ -319,6 +327,7 @@ public class User {
     }
     return new Gson().fromJson(clusterConfigDefault, ClusterConfig.class);
   }
+
   public void setClusterConfigDefault(ClusterConfig value) {
     String rawValue = null;
     if (value != null) {
@@ -373,13 +382,18 @@ public class User {
         StorageEnums.emailVerificationStatusToStorage(emailVerificationStatus));
   }
 
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "userId", orphanRemoval = true, cascade = CascadeType.ALL)
-  @OrderColumn(name="order_index")
+  @OneToMany(
+      fetch = FetchType.EAGER,
+      mappedBy = "userId",
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
+  @OrderColumn(name = "order_index")
   public List<InstitutionalAffiliation> getInstitutionalAffiliations() {
     return institutionalAffiliations;
   }
 
-  public void setInstitutionalAffiliations(List<InstitutionalAffiliation> newInstitutionalAffiliations) {
+  public void setInstitutionalAffiliations(
+      List<InstitutionalAffiliation> newInstitutionalAffiliations) {
     this.institutionalAffiliations = newInstitutionalAffiliations;
   }
 
@@ -437,122 +451,155 @@ public class User {
   }
 
   @Column(name = "moodle_id")
-  public Integer getMoodleId() { return moodleId; }
+  public Integer getMoodleId() {
+    return moodleId;
+  }
 
   public void setMoodleId(Integer moodleId) {
     this.moodleId = moodleId;
   }
 
   @Column(name = "era_commons_linked_nih_username")
-  public String getEraCommonsLinkedNihUsername() { return eraCommonsLinkedNihUsername; }
+  public String getEraCommonsLinkedNihUsername() {
+    return eraCommonsLinkedNihUsername;
+  }
 
-  public void setEraCommonsLinkedNihUsername( String eraCommonsLinkedNihUsername) {
+  public void setEraCommonsLinkedNihUsername(String eraCommonsLinkedNihUsername) {
     this.eraCommonsLinkedNihUsername = eraCommonsLinkedNihUsername;
   }
 
   @Column(name = "era_commons_link_expire_time")
-  public Timestamp getEraCommonsLinkExpireTime() { return eraCommonsLinkExpireTime; }
+  public Timestamp getEraCommonsLinkExpireTime() {
+    return eraCommonsLinkExpireTime;
+  }
 
-  public void setEraCommonsLinkExpireTime( Timestamp eraCommonsLinkExpireTime) {
+  public void setEraCommonsLinkExpireTime(Timestamp eraCommonsLinkExpireTime) {
     this.eraCommonsLinkExpireTime = eraCommonsLinkExpireTime;
   }
 
   @Column(name = "era_commons_completion_time")
-  public Timestamp getEraCommonsCompletionTime() { return eraCommonsCompletionTime; }
+  public Timestamp getEraCommonsCompletionTime() {
+    return eraCommonsCompletionTime;
+  }
 
   public void setEraCommonsCompletionTime(Timestamp eraCommonsCompletionTime) {
     this.eraCommonsCompletionTime = eraCommonsCompletionTime;
   }
 
   @Column(name = "data_use_agreement_completion_time")
-  public Timestamp getDataUseAgreementCompletionTime() {return dataUseAgreementCompletionTime; }
+  public Timestamp getDataUseAgreementCompletionTime() {
+    return dataUseAgreementCompletionTime;
+  }
 
   public void setDataUseAgreementCompletionTime(Timestamp dataUseAgreementCompletionTime) {
     this.dataUseAgreementCompletionTime = dataUseAgreementCompletionTime;
   }
 
   @Column(name = "data_use_agreement_bypass_time")
-  public Timestamp getDataUseAgreementBypassTime() {return dataUseAgreementBypassTime; }
+  public Timestamp getDataUseAgreementBypassTime() {
+    return dataUseAgreementBypassTime;
+  }
 
   public void setDataUseAgreementBypassTime(Timestamp dataUseAgreementBypassTime) {
     this.dataUseAgreementBypassTime = dataUseAgreementBypassTime;
   }
 
   @Column(name = "compliance_training_completion_time")
-  public Timestamp getComplianceTrainingCompletionTime() {return complianceTrainingCompletionTime; }
+  public Timestamp getComplianceTrainingCompletionTime() {
+    return complianceTrainingCompletionTime;
+  }
 
   public void setComplianceTrainingCompletionTime(Timestamp complianceTrainingCompletionTime) {
     this.complianceTrainingCompletionTime = complianceTrainingCompletionTime;
   }
 
   @Column(name = "compliance_training_bypass_time")
-  public Timestamp getComplianceTrainingBypassTime() {return complianceTrainingBypassTime; }
+  public Timestamp getComplianceTrainingBypassTime() {
+    return complianceTrainingBypassTime;
+  }
 
   public void setComplianceTrainingBypassTime(Timestamp complianceTrainingBypassTime) {
     this.complianceTrainingBypassTime = complianceTrainingBypassTime;
   }
 
   @Column(name = "compliance_training_expiration_time")
-  public Timestamp getComplianceTrainingExpirationTime() {return complianceTrainingExpirationTime; }
+  public Timestamp getComplianceTrainingExpirationTime() {
+    return complianceTrainingExpirationTime;
+  }
 
   public void setComplianceTrainingExpirationTime(Timestamp complianceTrainingExpirationTime) {
     this.complianceTrainingExpirationTime = complianceTrainingExpirationTime;
   }
 
   @Column(name = "beta_access_bypass_time")
-  public Timestamp getBetaAccessBypassTime() {return betaAccessBypassTime; }
+  public Timestamp getBetaAccessBypassTime() {
+    return betaAccessBypassTime;
+  }
 
   public void setBetaAccessBypassTime(Timestamp betaAccessBypassTime) {
     this.betaAccessBypassTime = betaAccessBypassTime;
   }
 
   @Column(name = "email_verification_completion_time")
-  public Timestamp getEmailVerificationCompletionTime() {return emailVerificationCompletionTime; }
+  public Timestamp getEmailVerificationCompletionTime() {
+    return emailVerificationCompletionTime;
+  }
 
   public void setEmailVerificationCompletionTime(Timestamp emailVerificationCompletionTime) {
     this.emailVerificationCompletionTime = emailVerificationCompletionTime;
   }
 
   @Column(name = "email_verification_bypass_time")
-  public Timestamp getEmailVerificationBypassTime() {return emailVerificationBypassTime; }
+  public Timestamp getEmailVerificationBypassTime() {
+    return emailVerificationBypassTime;
+  }
 
   public void setEmailVerificationBypassTime(Timestamp emailVerificationBypassTime) {
     this.emailVerificationBypassTime = emailVerificationBypassTime;
   }
 
   @Column(name = "era_commons_bypass_time")
-  public Timestamp getEraCommonsBypassTime() {return eraCommonsBypassTime; }
+  public Timestamp getEraCommonsBypassTime() {
+    return eraCommonsBypassTime;
+  }
 
   public void setEraCommonsBypassTime(Timestamp eraCommonsBypassTime) {
     this.eraCommonsBypassTime = eraCommonsBypassTime;
   }
 
   @Column(name = "id_verification_completion_time")
-  public Timestamp getIdVerificationCompletionTime() {return idVerificationCompletionTime;}
+  public Timestamp getIdVerificationCompletionTime() {
+    return idVerificationCompletionTime;
+  }
 
   public void setIdVerificationCompletionTime(Timestamp idVerificationCompletionTime) {
     this.idVerificationCompletionTime = idVerificationCompletionTime;
   }
 
   @Column(name = "id_verification_bypass_time")
-  public Timestamp getIdVerificationBypassTime() {return idVerificationBypassTime; }
+  public Timestamp getIdVerificationBypassTime() {
+    return idVerificationBypassTime;
+  }
 
   public void setIdVerificationBypassTime(Timestamp idVerificationBypassTime) {
     this.idVerificationBypassTime = idVerificationBypassTime;
   }
 
   @Column(name = "two_factor_auth_completion_time")
-  public Timestamp getTwoFactorAuthCompletionTime() {return twoFactorAuthCompletionTime; }
+  public Timestamp getTwoFactorAuthCompletionTime() {
+    return twoFactorAuthCompletionTime;
+  }
 
   public void setTwoFactorAuthCompletionTime(Timestamp twoFactorAuthCompletionTime) {
     this.twoFactorAuthCompletionTime = twoFactorAuthCompletionTime;
   }
 
   @Column(name = "two_factor_auth_bypass_time")
-  public Timestamp getTwoFactorAuthBypassTime() {return twoFactorAuthBypassTime; }
+  public Timestamp getTwoFactorAuthBypassTime() {
+    return twoFactorAuthBypassTime;
+  }
 
   public void setTwoFactorAuthBypassTime(Timestamp twoFactorAuthBypassTime) {
     this.twoFactorAuthBypassTime = twoFactorAuthBypassTime;
   }
-
 }

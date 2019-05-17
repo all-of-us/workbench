@@ -1,8 +1,8 @@
 package org.pmiops.workbench.api;
 
+import com.google.cloud.bigquery.FieldList;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.google.cloud.bigquery.FieldList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -14,7 +14,6 @@ import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.DomainVocabularyInfoDao;
 import org.pmiops.workbench.cdr.model.DomainInfo;
 import org.pmiops.workbench.cdr.model.DomainVocabularyInfo;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
@@ -28,6 +27,7 @@ import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.VocabularyCount;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
@@ -47,41 +47,51 @@ public class ConceptsController implements ConceptsApiDelegate {
   private final ConceptDao conceptDao;
 
   static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
-      (concept) ->  new Concept()
-            .conceptClassId(concept.getConceptClassId())
-            .conceptCode(concept.getConceptCode())
-            .conceptName(concept.getConceptName())
-            .conceptId(concept.getConceptId())
-            .countValue(concept.getCountValue())
-            .domainId(concept.getDomainId())
-            .prevalence(concept.getPrevalence())
-            .standardConcept(ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept()))
-            .vocabularyId(concept.getVocabularyId())
-            .conceptSynonyms(concept.getSynonyms());
+      (concept) ->
+          new Concept()
+              .conceptClassId(concept.getConceptClassId())
+              .conceptCode(concept.getConceptCode())
+              .conceptName(concept.getConceptName())
+              .conceptId(concept.getConceptId())
+              .countValue(concept.getCountValue())
+              .domainId(concept.getDomainId())
+              .prevalence(concept.getPrevalence())
+              .standardConcept(
+                  ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept()))
+              .vocabularyId(concept.getVocabularyId())
+              .conceptSynonyms(concept.getSynonyms());
 
-  static final Function<DomainVocabularyInfo, VocabularyCount> TO_VOCABULARY_STANDARD_CONCEPT_COUNT =
-      (domainVocabularyInfo) -> new VocabularyCount()
-          .conceptCount(domainVocabularyInfo.getStandardConceptCount())
-          .vocabularyId(domainVocabularyInfo.getId().getVocabularyId());
+  static final Function<DomainVocabularyInfo, VocabularyCount>
+      TO_VOCABULARY_STANDARD_CONCEPT_COUNT =
+          (domainVocabularyInfo) ->
+              new VocabularyCount()
+                  .conceptCount(domainVocabularyInfo.getStandardConceptCount())
+                  .vocabularyId(domainVocabularyInfo.getId().getVocabularyId());
 
   static final Function<DomainVocabularyInfo, VocabularyCount> TO_VOCABULARY_ALL_CONCEPT_COUNT =
-      (domainVocabularyInfo) -> new VocabularyCount()
-          .conceptCount(domainVocabularyInfo.getAllConceptCount())
-          .vocabularyId(domainVocabularyInfo.getId().getVocabularyId());
+      (domainVocabularyInfo) ->
+          new VocabularyCount()
+              .conceptCount(domainVocabularyInfo.getAllConceptCount())
+              .vocabularyId(domainVocabularyInfo.getId().getVocabularyId());
 
   private static final Function<org.pmiops.workbench.cdr.model.VocabularyCount, VocabularyCount>
       TO_CLIENT_VOCAB_COUNT =
-      (vocabCount) -> new VocabularyCount()
-          .conceptCount(vocabCount.getConceptCount())
-          .vocabularyId(vocabCount.getVocabularyId());
+          (vocabCount) ->
+              new VocabularyCount()
+                  .conceptCount(vocabCount.getConceptCount())
+                  .vocabularyId(vocabCount.getVocabularyId());
 
   private static final Predicate<VocabularyCount> NOT_ZERO =
       (vocabCount) -> vocabCount.getConceptCount() > 0;
 
   @Autowired
-  public ConceptsController(BigQueryService bigQueryService, ConceptService conceptService,
-                            WorkspaceService workspaceService, DomainInfoDao domainInfoDao,
-                            DomainVocabularyInfoDao domainVocabularyInfoDao, ConceptDao conceptDao) {
+  public ConceptsController(
+      BigQueryService bigQueryService,
+      ConceptService conceptService,
+      WorkspaceService workspaceService,
+      DomainInfoDao domainInfoDao,
+      DomainVocabularyInfoDao domainVocabularyInfoDao,
+      ConceptDao conceptDao) {
     this.bigQueryService = bigQueryService;
     this.conceptService = conceptService;
     this.workspaceService = workspaceService;
@@ -91,20 +101,26 @@ public class ConceptsController implements ConceptsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<DomainInfoResponse> getDomainInfo(String workspaceNamespace,
-      String workspaceId) {
+  public ResponseEntity<DomainInfoResponse> getDomainInfo(
+      String workspaceNamespace, String workspaceId) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     List<org.pmiops.workbench.cdr.model.DomainInfo> domains =
         ImmutableList.copyOf(domainInfoDao.findByOrderByDomainId());
-    DomainInfoResponse response = new DomainInfoResponse().items(
-        domains.stream().map(org.pmiops.workbench.cdr.model.DomainInfo.TO_CLIENT_DOMAIN_INFO)
-            .collect(Collectors.toList()));
+    DomainInfoResponse response =
+        new DomainInfoResponse()
+            .items(
+                domains.stream()
+                    .map(org.pmiops.workbench.cdr.model.DomainInfo.TO_CLIENT_DOMAIN_INFO)
+                    .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
-  private void addDomainCounts(SearchConceptsRequest request, ConceptListResponse response,
-                               String matchExp, StandardConceptFilter standardConceptFilter) {
+  private void addDomainCounts(
+      SearchConceptsRequest request,
+      ConceptListResponse response,
+      String matchExp,
+      StandardConceptFilter standardConceptFilter) {
     if (request.getIncludeDomainCounts() == null || !request.getIncludeDomainCounts()) {
       return;
     }
@@ -121,44 +137,63 @@ public class ConceptsController implements ConceptsApiDelegate {
         return;
       }
     }
-    Map<Domain, DomainInfo> domainCountMap = Maps.uniqueIndex(domainInfos, DomainInfo::getDomainEnum);
+    Map<Domain, DomainInfo> domainCountMap =
+        Maps.uniqueIndex(domainInfos, DomainInfo::getDomainEnum);
     // Loop through all domains to populate the results (so we get zeros for domains with no
     // matches.)
     for (DomainInfo domainInfo : allDomainInfos) {
       Domain domain = domainInfo.getDomainEnum();
       DomainInfo resultInfo = domainCountMap.get(domain);
-      response.addDomainCountsItem(new DomainCount().domain(domain).conceptCount(
-          resultInfo == null ? 0L :
-              (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS ?
-                  resultInfo.getAllConceptCount() : resultInfo.getStandardConceptCount()))
-          .name(domainInfo.getName()));
+      response.addDomainCountsItem(
+          new DomainCount()
+              .domain(domain)
+              .conceptCount(
+                  resultInfo == null
+                      ? 0L
+                      : (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS
+                          ? resultInfo.getAllConceptCount()
+                          : resultInfo.getStandardConceptCount()))
+              .name(domainInfo.getName()));
     }
   }
 
-  private void addVocabularyCounts(SearchConceptsRequest request, ConceptListResponse response,
-                                   String matchExp, StandardConceptFilter standardConceptFilter) {
-    if (request.getDomain() == null || request.getIncludeVocabularyCounts() == null ||
-        !request.getIncludeVocabularyCounts()) {
+  private void addVocabularyCounts(
+      SearchConceptsRequest request,
+      ConceptListResponse response,
+      String matchExp,
+      StandardConceptFilter standardConceptFilter) {
+    if (request.getDomain() == null
+        || request.getIncludeVocabularyCounts() == null
+        || !request.getIncludeVocabularyCounts()) {
       return;
     }
     String domainId = CommonStorageEnums.domainToDomainId(request.getDomain());
     List<VocabularyCount> vocabularyCounts;
     if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
       if (matchExp == null) {
-        vocabularyCounts = domainVocabularyInfoDao.findById_DomainIdOrderById_VocabularyId(domainId)
-            .stream().map(TO_VOCABULARY_ALL_CONCEPT_COUNT).filter(NOT_ZERO).collect(Collectors.toList());
+        vocabularyCounts =
+            domainVocabularyInfoDao.findById_DomainIdOrderById_VocabularyId(domainId).stream()
+                .map(TO_VOCABULARY_ALL_CONCEPT_COUNT)
+                .filter(NOT_ZERO)
+                .collect(Collectors.toList());
       } else {
-        vocabularyCounts = conceptDao.findVocabularyAllConceptCounts(matchExp, domainId)
-            .stream().map(TO_CLIENT_VOCAB_COUNT).collect(Collectors.toList());
+        vocabularyCounts =
+            conceptDao.findVocabularyAllConceptCounts(matchExp, domainId).stream()
+                .map(TO_CLIENT_VOCAB_COUNT)
+                .collect(Collectors.toList());
       }
     } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
       if (matchExp == null) {
-        vocabularyCounts = domainVocabularyInfoDao.findById_DomainIdOrderById_VocabularyId(domainId)
-            .stream().map(TO_VOCABULARY_STANDARD_CONCEPT_COUNT).filter(NOT_ZERO).collect(Collectors.toList());
+        vocabularyCounts =
+            domainVocabularyInfoDao.findById_DomainIdOrderById_VocabularyId(domainId).stream()
+                .map(TO_VOCABULARY_STANDARD_CONCEPT_COUNT)
+                .filter(NOT_ZERO)
+                .collect(Collectors.toList());
       } else {
-        vocabularyCounts = conceptDao
-            .findVocabularyStandardConceptCounts(matchExp, domainId).stream()
-            .map(TO_CLIENT_VOCAB_COUNT).collect(Collectors.toList());
+        vocabularyCounts =
+            conceptDao.findVocabularyStandardConceptCounts(matchExp, domainId).stream()
+                .map(TO_CLIENT_VOCAB_COUNT)
+                .collect(Collectors.toList());
       }
     } else {
       return;
@@ -167,8 +202,8 @@ public class ConceptsController implements ConceptsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ConceptListResponse> searchConcepts(String workspaceNamespace,
-      String workspaceId, SearchConceptsRequest request) {
+  public ResponseEntity<ConceptListResponse> searchConcepts(
+      String workspaceNamespace, String workspaceId, SearchConceptsRequest request) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     Integer maxResults = request.getMaxResults();
@@ -180,7 +215,7 @@ public class ConceptsController implements ConceptsApiDelegate {
     } else if (maxResults > MAX_MAX_RESULTS) {
       maxResults = MAX_MAX_RESULTS;
     }
-    if(minCount == null){
+    if (minCount == null) {
       minCount = 1;
     }
     if (request.getVocabularyIds() != null && request.getVocabularyIds().size() == 0) {
@@ -191,7 +226,9 @@ public class ConceptsController implements ConceptsApiDelegate {
       standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
     }
 
-    String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery(), ConceptService.SearchType.CONCEPT_SEARCH);
+    String matchExp =
+        ConceptService.modifyMultipleMatchKeyword(
+            request.getQuery(), ConceptService.SearchType.CONCEPT_SEARCH);
     // TODO: consider doing these queries in parallel
     ConceptListResponse response = new ConceptListResponse();
     addDomainCounts(request, response, matchExp, standardConceptFilter);
@@ -204,27 +241,35 @@ public class ConceptsController implements ConceptsApiDelegate {
     ConceptService.StandardConceptFilter convertedConceptFilter =
         ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
-    Slice<org.pmiops.workbench.cdr.model.Concept> concepts = conceptService.searchConcepts(
-        request.getQuery(), convertedConceptFilter,
-        request.getVocabularyIds(), domainIds, maxResults, minCount);
+    Slice<org.pmiops.workbench.cdr.model.Concept> concepts =
+        conceptService.searchConcepts(
+            request.getQuery(),
+            convertedConceptFilter,
+            request.getVocabularyIds(),
+            domainIds,
+            maxResults,
+            minCount);
 
-    if(concepts != null){
-      response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT)
-              .collect(Collectors.toList()));
+    if (concepts != null) {
+      response.setItems(
+          concepts.getContent().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
     }
     return ResponseEntity.ok(response);
   }
 
   @Override
-  public ResponseEntity<DomainValuesResponse> getValuesFromDomain(String workspaceNamespace,
-      String workspaceId, String domainValue) {
+  public ResponseEntity<DomainValuesResponse> getValuesFromDomain(
+      String workspaceNamespace, String workspaceId, String domainValue) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     Domain domain = Domain.valueOf(domainValue);
     FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
 
     DomainValuesResponse response = new DomainValuesResponse();
-    response.setItems(fieldList.stream().map(field -> new DomainValue().value(field.getName())).collect(Collectors.toList()));
+    response.setItems(
+        fieldList.stream()
+            .map(field -> new DomainValue().value(field.getName()))
+            .collect(Collectors.toList()));
 
     return ResponseEntity.ok(response);
   }

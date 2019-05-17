@@ -32,25 +32,26 @@ public class CacheSpringConfiguration {
     // Cache configuration in memory for ten minutes.
     return CacheBuilder.newBuilder()
         .expireAfterWrite(10, TimeUnit.MINUTES)
-        .build(new CacheLoader<String, Object>() {
-          @Override
-          public Object load(String key) {
-            Class<?> configClass = CONFIG_CLASS_MAP.get(key);
-            if (configClass == null) {
-              throw new IllegalArgumentException("Invalid config key: " + key);
-            }
-            Config config = configDao.findOne(key);
-            if (config == null) {
-              return null;
-            }
-            Gson gson = new Gson();
-            return gson.fromJson(config.getConfiguration(), configClass);
-          }
-        });
+        .build(
+            new CacheLoader<String, Object>() {
+              @Override
+              public Object load(String key) {
+                Class<?> configClass = CONFIG_CLASS_MAP.get(key);
+                if (configClass == null) {
+                  throw new IllegalArgumentException("Invalid config key: " + key);
+                }
+                Config config = configDao.findOne(key);
+                if (config == null) {
+                  return null;
+                }
+                Gson gson = new Gson();
+                return gson.fromJson(config.getConfiguration(), configClass);
+              }
+            });
   }
 
-  public static WorkbenchConfig lookupWorkbenchConfig(
-          LoadingCache<String, Object> configCache) throws ExecutionException {
+  public static WorkbenchConfig lookupWorkbenchConfig(LoadingCache<String, Object> configCache)
+      throws ExecutionException {
     return (WorkbenchConfig) configCache.get(Config.MAIN_CONFIG_ID);
   }
 
@@ -61,14 +62,16 @@ public class CacheSpringConfiguration {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  WorkbenchConfig getWorkbenchConfig(@Qualifier("configCache") LoadingCache<String, Object> configCache)
+  WorkbenchConfig getWorkbenchConfig(
+      @Qualifier("configCache") LoadingCache<String, Object> configCache)
       throws ExecutionException {
     return lookupWorkbenchConfig(configCache);
   }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  CdrBigQuerySchemaConfig getCdrSchemaConfig(@Qualifier("configCache") LoadingCache<String, Object> configCache)
+  CdrBigQuerySchemaConfig getCdrSchemaConfig(
+      @Qualifier("configCache") LoadingCache<String, Object> configCache)
       throws ExecutionException {
     return lookupBigQueryCdrSchemaConfig(configCache);
   }

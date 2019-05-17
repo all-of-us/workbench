@@ -22,8 +22,7 @@ public class InterceptorUtils {
       controllerClass = Class.forName(controllerName);
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(
-          "Missing " + controllerName + " by name derived from " + apiControllerName + ".",
-          e);
+          "Missing " + controllerName + " by name derived from " + apiControllerName + ".", e);
     }
 
     try {

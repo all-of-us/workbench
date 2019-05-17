@@ -8,10 +8,10 @@ public class WorkbenchEnvironment {
   private final boolean isDevelopment;
   private final String applicationId;
 
-
   public WorkbenchEnvironment() {
-    this(SystemProperty.environment.value().equals(Value.Development),
-         SystemProperty.applicationId.get());
+    this(
+        SystemProperty.environment.value().equals(Value.Development),
+        SystemProperty.applicationId.get());
   }
 
   public WorkbenchEnvironment(boolean isDevelopment, String applicationId) {

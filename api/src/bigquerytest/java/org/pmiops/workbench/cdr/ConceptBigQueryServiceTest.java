@@ -25,24 +25,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({BigQueryService.class, TestBigQueryCdrSchemaConfig.class, TestJpaConfig.class,
-    CdrBigQuerySchemaConfigService.class})
+@Import({
+  BigQueryService.class,
+  TestBigQueryCdrSchemaConfig.class,
+  TestJpaConfig.class,
+  CdrBigQuerySchemaConfigService.class
+})
 public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
-  @Autowired
-  private TestWorkbenchConfig testWorkbenchConfig;
+  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
-  @PersistenceContext
-  private EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
 
-  @Autowired
-  private ConceptDao conceptDao;
+  @Autowired private ConceptDao conceptDao;
 
-  @Autowired
-  private BigQueryService bigQueryService;
+  @Autowired private BigQueryService bigQueryService;
 
-  @Autowired
-  private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
+  @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
 
   private ConceptBigQueryService conceptBigQueryService;
 
@@ -54,16 +53,18 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     ConceptService conceptService = new ConceptService(entityManager, conceptDao);
-    conceptBigQueryService = new ConceptBigQueryService(bigQueryService, cdrBigQuerySchemaConfigService,
-        conceptService);
+    conceptBigQueryService =
+        new ConceptBigQueryService(bigQueryService, cdrBigQuerySchemaConfigService, conceptService);
 
     conceptDao.deleteAll();
   }
 
   @Test
   public void testGetConceptCountNoConceptsSaved() {
-    assertThat(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
-        ImmutableSet.of(1L, 6L, 13L, 192819L))).isEqualTo(0);
+    assertThat(
+            conceptBigQueryService.getParticipantCountForConcepts(
+                "condition_occurrence", ImmutableSet.of(1L, 6L, 13L, 192819L)))
+        .isEqualTo(0);
   }
 
   @Test
@@ -73,8 +74,10 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     saveConcept(13L, null);
     saveConcept(192819L, "C");
 
-    assertThat(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
-        ImmutableSet.of(1L, 6L, 13L, 192819L))).isEqualTo(2);
+    assertThat(
+            conceptBigQueryService.getParticipantCountForConcepts(
+                "condition_occurrence", ImmutableSet.of(1L, 6L, 13L, 192819L)))
+        .isEqualTo(2);
   }
 
   private void saveConcept(long conceptId, String standardConceptValue) {
@@ -92,7 +95,6 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
   public List<String> getTableNames() {
     return Arrays.asList("condition_occurrence");
   }
-
 
   @Override
   public String getTestDataDirectory() {

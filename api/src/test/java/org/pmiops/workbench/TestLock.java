@@ -15,7 +15,7 @@ public class TestLock {
     }
   }
 
-  synchronized public int release() {
+  public synchronized int release() {
     synchronized (this) {
       if (locked) {
         locked = false;
@@ -25,5 +25,4 @@ public class TestLock {
       return 0;
     }
   }
-
 }

@@ -32,14 +32,22 @@ public class UserRecentResource {
   }
 
   @Column(name = "user_id")
-  public long getUserId() {return userId;}
+  public long getUserId() {
+    return userId;
+  }
 
-  public void setUserId(Long userId ) {this.userId = userId;}
+  public void setUserId(Long userId) {
+    this.userId = userId;
+  }
 
   @Column(name = "workspace_id")
-  public long getWorkspaceId() { return workspaceId; }
+  public long getWorkspaceId() {
+    return workspaceId;
+  }
 
-  public void setWorkspaceId(long workspaceId ) {this.workspaceId = workspaceId;}
+  public void setWorkspaceId(long workspaceId) {
+    this.workspaceId = workspaceId;
+  }
 
   /**
    * TODO: Rename this column to reflect reality.
@@ -66,19 +74,28 @@ public class UserRecentResource {
 
   @ManyToOne
   @JoinColumn(name = "cohort_id")
-  public Cohort getCohort() { return cohort;}
+  public Cohort getCohort() {
+    return cohort;
+  }
 
-  public void setCohort(Cohort cohort) {this.cohort = cohort;}
+  public void setCohort(Cohort cohort) {
+    this.cohort = cohort;
+  }
 
   @ManyToOne
   @JoinColumn(name = "concept_set_id")
-  public ConceptSet getConceptSet() { return conceptSet; }
+  public ConceptSet getConceptSet() {
+    return conceptSet;
+  }
 
-  public void setConceptSet(ConceptSet conceptSet) {this.conceptSet = conceptSet;}
+  public void setConceptSet(ConceptSet conceptSet) {
+    this.conceptSet = conceptSet;
+  }
 
   public UserRecentResource() {}
 
-  public UserRecentResource(long workspaceId, long userId, String notebookName, Timestamp lastAccessDate) {
+  public UserRecentResource(
+      long workspaceId, long userId, String notebookName, Timestamp lastAccessDate) {
     this.workspaceId = workspaceId;
     this.userId = userId;
     this.notebookName = notebookName;

@@ -1,9 +1,8 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
-import org.pmiops.workbench.exceptions.BadRequestException;
-
 import java.text.MessageFormat;
 import java.util.function.Predicate;
+import org.pmiops.workbench.exceptions.BadRequestException;
 
 public class Validation<K> {
 
@@ -43,7 +42,4 @@ public class Validation<K> {
       throw new BadRequestException(new MessageFormat(message).format(args));
     }
   }
-
 }
-
-

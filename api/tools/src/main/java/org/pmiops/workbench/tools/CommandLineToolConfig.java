@@ -1,9 +1,12 @@
 package org.pmiops.workbench.tools;
 
+import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.gson.Gson;
+import java.io.IOException;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.CommonConfig;
@@ -23,15 +26,11 @@ import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.backoff.Sleeper;
 import org.springframework.retry.backoff.ThreadWaitSleeper;
 
-import java.io.IOException;
-
-import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
-
 /**
  * Contains Spring beans for dependencies which are different for classes run in the context of a
  * command-line tool versus a WebMVC request handler.
- * <p>
- * The main difference is that request-scoped dependencies cannot be used from a command-line
+ *
+ * <p>The main difference is that request-scoped dependencies cannot be used from a command-line
  * context.
  */
 @Configuration
@@ -48,26 +47,27 @@ import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 // TODO(gjuggler): move ServiceAccounts out of the auth package, or move the more
 // dependency-ridden classes (e.g. ProfileService) out instead.
 @ComponentScan(
-   basePackageClasses = ServiceAccounts.class,
-   useDefaultFilters = false,
-   includeFilters = {
-     @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = ServiceAccounts.class),
-   })
+    basePackageClasses = ServiceAccounts.class,
+    useDefaultFilters = false,
+    includeFilters = {
+      @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = ServiceAccounts.class),
+    })
 public class CommandLineToolConfig {
 
   /**
    * Loads the GSuite admin service account key from GCS.
    *
-   * This needs to be annotated with @Lazy so only classes that use it (e.g. BackfillGSuiteUserData
-   * which requires a WorkbenchConfig instance) will trigger the file load attempt.
+   * <p>This needs to be annotated with @Lazy so only classes that use it (e.g.
+   * BackfillGSuiteUserData which requires a WorkbenchConfig instance) will trigger the file load
+   * attempt.
    *
-   * Any command-line tool which loads this bean needs to be called from a project.rb command
+   * <p>Any command-line tool which loads this bean needs to be called from a project.rb command
    * which is preceded with "get_gsuite_admin_key" to ensure the local key file si populated.
    *
    * @return
    */
   @Lazy
-  @Bean(name= Constants.GSUITE_ADMIN_CREDS)
+  @Bean(name = Constants.GSUITE_ADMIN_CREDS)
   GoogleCredential gsuiteAdminCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getGSuiteAdminCredentials();
@@ -77,7 +77,7 @@ public class CommandLineToolConfig {
   }
 
   @Lazy
-  @Bean(name=Constants.FIRECLOUD_ADMIN_CREDS)
+  @Bean(name = Constants.FIRECLOUD_ADMIN_CREDS)
   GoogleCredential fireCloudCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getFireCloudAdminCredentials();
@@ -102,8 +102,9 @@ public class CommandLineToolConfig {
   }
 
   /**
-   * Returns the Apache HTTP transport. Compare to CommonConfig which returns the App Engine
-   * HTTP transport.
+   * Returns the Apache HTTP transport. Compare to CommonConfig which returns the App Engine HTTP
+   * transport.
+   *
    * @return
    */
   @Bean

@@ -1,5 +1,10 @@
 package org.pmiops.workbench.api;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
+
+import java.util.ArrayList;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -7,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -17,870 +21,873 @@ import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ModifyCohortAnnotationDefinitionRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-
-import java.util.ArrayList;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CohortAnnotationDefinitionControllerTest {
 
-    @Mock
-    CohortDao cohortDao;
+  @Mock CohortDao cohortDao;
 
-    @Mock
-    CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
+  @Mock CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
 
-    @Mock
-    WorkspaceService workspaceService;
+  @Mock WorkspaceService workspaceService;
 
-    @InjectMocks
-    CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
+  @InjectMocks CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
 
-    @Test
-    public void createCohortAnnotationDefinition_BadCohortId() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
+  @Test
+  public void createCohortAnnotationDefinition_BadCohortId() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(null);
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(null);
 
-        try {
-            cohortAnnotationDefinitionController.createCohortAnnotationDefinition(namespace,
-                    name,
-                    cohortId,
-                    new CohortAnnotationDefinition());
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
-        }
-
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
-        verifyNoMoreMockInteractions();
+    try {
+      cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
+          namespace, name, cohortId, new CohortAnnotationDefinition());
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
     }
 
-    @Test
-    public void createCohortAnnotationDefinition_BadWorkspace() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long workspaceId = 1;
-        long badWorkspaceId = 0;
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
+    verifyNoMoreMockInteractions();
+  }
 
-        Cohort cohort = createCohort(workspaceId);
+  @Test
+  public void createCohortAnnotationDefinition_BadWorkspace() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long workspaceId = 1;
+    long badWorkspaceId = 0;
 
-        Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    Cohort cohort = createCohort(workspaceId);
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        try {
-            cohortAnnotationDefinitionController.createCohortAnnotationDefinition(namespace,
-                    name,
-                    cohortId,
-                    new CohortAnnotationDefinition());
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No workspace matching workspaceNamespace: "
-                    + namespace + ", workspaceId: " + name, e.getMessage());
-        }
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
-
-        verifyNoMoreMockInteractions();
+    try {
+      cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
+          namespace, name, cohortId, new CohortAnnotationDefinition());
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals(
+          "Not Found: No workspace matching workspaceNamespace: "
+              + namespace
+              + ", workspaceId: "
+              + name,
+          e.getMessage());
     }
 
-    @Test
-    public void createCohortAnnotationDefinition_NameConflict() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long workspaceId = 1;
-        long annotationDefinitionId = 1;
-        final String columnName = "testing";
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
-        Cohort cohort = createCohort(workspaceId);
+    verifyNoMoreMockInteractions();
+  }
 
-        Workspace workspace = createWorkspace(namespace, name, workspaceId);
+  @Test
+  public void createCohortAnnotationDefinition_NameConflict() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long workspaceId = 1;
+    long annotationDefinitionId = 1;
+    final String columnName = "testing";
 
-        CohortAnnotationDefinition request = createClientCohortAnnotationDefinition(
-                annotationDefinitionId,
-                cohortId,
-                columnName,
-                AnnotationType.STRING);
+    Cohort cohort = createCohort(workspaceId);
 
-        org.pmiops.workbench.db.model.CohortAnnotationDefinition existingDefinition =
-                createDBCohortAnnotationDefinition(
-                        cohortId,
-                        annotationDefinitionId,
-                        request.getAnnotationType(),
-                        request.getColumnName());
+    Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
-
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName)).thenReturn(existingDefinition);
-
+    CohortAnnotationDefinition request =
         createClientCohortAnnotationDefinition(
-                annotationDefinitionId,
-                cohortId,
-                columnName,
-                AnnotationType.STRING);
+            annotationDefinitionId, cohortId, columnName, AnnotationType.STRING);
 
-        try {
-            cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    request);
-            fail("Should have thrown a ConflictException!");
-        } catch (ConflictException e) {
-            assertEquals("Conflict: Cohort Annotation Definition name exists for: " + columnName, e.getMessage());
-        }
+    org.pmiops.workbench.db.model.CohortAnnotationDefinition existingDefinition =
+        createDBCohortAnnotationDefinition(
+            cohortId, annotationDefinitionId, request.getAnnotationType(), request.getColumnName());
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndColumnName(cohortId, columnName);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        verifyNoMoreMockInteractions();
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName))
+        .thenReturn(existingDefinition);
+
+    createClientCohortAnnotationDefinition(
+        annotationDefinitionId, cohortId, columnName, AnnotationType.STRING);
+
+    try {
+      cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
+          namespace, name, cohortId, request);
+      fail("Should have thrown a ConflictException!");
+    } catch (ConflictException e) {
+      assertEquals(
+          "Conflict: Cohort Annotation Definition name exists for: " + columnName, e.getMessage());
     }
 
-    @Test
-    public void createCohortAnnotationDefinition() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long workspaceId = 1;
-        long annotationDefinitionId = 1;
-        final String columnName = "testing";
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(cohortAnnotationDefinitionDao, times(1))
+        .findByCohortIdAndColumnName(cohortId, columnName);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
-        Cohort cohort = createCohort(workspaceId);
+    verifyNoMoreMockInteractions();
+  }
 
-        Workspace workspace = createWorkspace(namespace, name, workspaceId);
+  @Test
+  public void createCohortAnnotationDefinition() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long workspaceId = 1;
+    long annotationDefinitionId = 1;
+    final String columnName = "testing";
 
-        CohortAnnotationDefinition request = createClientCohortAnnotationDefinition(
-                annotationDefinitionId,
-                cohortId,
-                columnName,
-                AnnotationType.STRING);
+    Cohort cohort = createCohort(workspaceId);
 
-        org.pmiops.workbench.db.model.CohortAnnotationDefinition dbCohortAnnotationDefinition =
-                createDBCohortAnnotationDefinition(
-                        cohortId,
-                        annotationDefinitionId,
-                        request.getAnnotationType(),
-                        request.getColumnName());
+    Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    CohortAnnotationDefinition request =
+        createClientCohortAnnotationDefinition(
+            annotationDefinitionId, cohortId, columnName, AnnotationType.STRING);
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.save(dbCohortAnnotationDefinition)).thenReturn(dbCohortAnnotationDefinition);
-        when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName)).thenReturn(null);
+    org.pmiops.workbench.db.model.CohortAnnotationDefinition dbCohortAnnotationDefinition =
+        createDBCohortAnnotationDefinition(
+            cohortId, annotationDefinitionId, request.getAnnotationType(), request.getColumnName());
 
-        CohortAnnotationDefinition expectedResponse = createClientCohortAnnotationDefinition(
-                annotationDefinitionId,
-                cohortId,
-                columnName,
-                AnnotationType.STRING);
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        CohortAnnotationDefinition response =
-                cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
-                        namespace,
-                        name,
-                        cohortId,
-                        request).getBody();
-        assertEquals(expectedResponse, response);
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    when(cohortAnnotationDefinitionDao.save(dbCohortAnnotationDefinition))
+        .thenReturn(dbCohortAnnotationDefinition);
+    when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName))
+        .thenReturn(null);
 
+    CohortAnnotationDefinition expectedResponse =
+        createClientCohortAnnotationDefinition(
+            annotationDefinitionId, cohortId, columnName, AnnotationType.STRING);
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).save(dbCohortAnnotationDefinition);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndColumnName(cohortId, columnName);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
+    CohortAnnotationDefinition response =
+        cohortAnnotationDefinitionController
+            .createCohortAnnotationDefinition(namespace, name, cohortId, request)
+            .getBody();
+    assertEquals(expectedResponse, response);
 
-        verifyNoMoreMockInteractions();
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(cohortAnnotationDefinitionDao, times(1)).save(dbCohortAnnotationDefinition);
+    verify(cohortAnnotationDefinitionDao, times(1))
+        .findByCohortIdAndColumnName(cohortId, columnName);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
+
+    verifyNoMoreMockInteractions();
+  }
+
+  @Test
+  public void updateCohortAnnotationDefinition_BadCohortId() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long annotationDefinitionId = 1;
+
+    ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
+    request.setColumnName("ignore");
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(null);
+
+    try {
+      cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
+          namespace, name, cohortId, annotationDefinitionId, request);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
     }
 
-    @Test
-    public void updateCohortAnnotationDefinition_BadCohortId() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long annotationDefinitionId = 1;
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
-        ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
-        request.setColumnName("ignore");
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    verifyNoMoreMockInteractions();
+  }
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(null);
+  @Test
+  public void updateCohortAnnotationDefinition_BadWorkspace() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long annotationDefinitionId = 1;
+    long workspaceId = 1;
+    long badWorkspaceId = 0;
 
-        try {
-            cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    annotationDefinitionId,
-                    request);
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
-        }
+    Cohort cohort = createCohort(workspaceId);
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
+    Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
 
-        verifyNoMoreMockInteractions();
+    ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
+    request.setColumnName("ignore");
+
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+
+    try {
+      cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
+          namespace, name, cohortId, annotationDefinitionId, request);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals(
+          "Not Found: No workspace matching workspaceNamespace: "
+              + namespace
+              + ", workspaceId: "
+              + name,
+          e.getMessage());
     }
 
-    @Test
-    public void updateCohortAnnotationDefinition_BadWorkspace() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long annotationDefinitionId = 1;
-        long workspaceId = 1;
-        long badWorkspaceId = 0;
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
-        Cohort cohort = createCohort(workspaceId);
+    verifyNoMoreMockInteractions();
+  }
 
-        Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
+  @Test
+  public void updateCohortAnnotationDefinition_BadAnnotationDefinitionId() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long workspaceId = 1;
+    long annotationDefinitionId = 1;
 
-        ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
-        request.setColumnName("ignore");
+    Cohort cohort = createCohort(workspaceId);
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
+    request.setColumnName("ignore");
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        try {
-            cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    annotationDefinitionId,
-                    request);
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No workspace matching workspaceNamespace: "
-                    + namespace + ", workspaceId: " + name, e.getMessage());
-        }
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
+            cohortId, annotationDefinitionId))
+        .thenReturn(null);
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
-
-        verifyNoMoreMockInteractions();
+    try {
+      cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
+          namespace, name, cohortId, annotationDefinitionId, request);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals(
+          "Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: "
+              + annotationDefinitionId,
+          e.getMessage());
     }
 
-    @Test
-    public void updateCohortAnnotationDefinition_BadAnnotationDefinitionId() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long workspaceId = 1;
-        long annotationDefinitionId = 1;
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(cohortAnnotationDefinitionDao, times(1))
+        .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
-        Cohort cohort = createCohort(workspaceId);
+    verifyNoMoreMockInteractions();
+  }
 
-        Workspace workspace = createWorkspace(namespace, name, workspaceId);
+  @Test
+  public void updateCohortAnnotationDefinition_NameConflict() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long workspaceId = 1;
+    long annotationDefinitionId = 1;
+    final String columnName = "new-name";
 
-        ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
-        request.setColumnName("ignore");
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    Cohort cohort = createCohort(workspaceId);
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId)).thenReturn(null);
+    Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-        try {
-            cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    annotationDefinitionId,
-                    request);
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: "
-                    + annotationDefinitionId, e.getMessage());
-        }
+    ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
+    request.setColumnName(columnName);
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
+    org.pmiops.workbench.db.model.CohortAnnotationDefinition definition =
+        createDBCohortAnnotationDefinition(
+            cohortId, annotationDefinitionId, AnnotationType.STRING, "name1");
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        verifyNoMoreMockInteractions();
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
+            cohortId, annotationDefinitionId))
+        .thenReturn(definition);
+    when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName))
+        .thenReturn(definition);
+
+    try {
+      cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
+          namespace, name, cohortId, annotationDefinitionId, request);
+      fail("Should have thrown a ConflictException!");
+    } catch (ConflictException e) {
+      assertEquals(
+          "Conflict: Cohort Annotation Definition name exists for: " + columnName, e.getMessage());
     }
 
-    @Test
-    public void updateCohortAnnotationDefinition_NameConflict() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long workspaceId = 1;
-        long annotationDefinitionId = 1;
-        final String columnName = "new-name";
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(cohortAnnotationDefinitionDao, times(1))
+        .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
+    verify(cohortAnnotationDefinitionDao, times(1))
+        .findByCohortIdAndColumnName(cohortId, columnName);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
-        Cohort cohort = createCohort(workspaceId);
+    verifyNoMoreMockInteractions();
+  }
 
-        Workspace workspace = createWorkspace(namespace, name, workspaceId);
+  @Test
+  public void updateCohortAnnotationDefinition() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long workspaceId = 1;
+    long annotationDefinitionId = 1;
+    final String columnName = "new-name";
 
-        ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
-        request.setColumnName(columnName);
+    Cohort cohort = createCohort(workspaceId);
 
-        org.pmiops.workbench.db.model.CohortAnnotationDefinition definition =
-                createDBCohortAnnotationDefinition(
-                        cohortId,
-                        annotationDefinitionId,
-                        AnnotationType.STRING,
-                        "name1");
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId)).thenReturn(definition);
-        when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName)).thenReturn(definition);
+    ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
+    request.setColumnName(columnName);
 
-        try {
-            cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    annotationDefinitionId,
-                    request);
-            fail("Should have thrown a ConflictException!");
-        } catch (ConflictException e) {
-            assertEquals("Conflict: Cohort Annotation Definition name exists for: "
-                    + columnName, e.getMessage());
-        }
+    org.pmiops.workbench.db.model.CohortAnnotationDefinition definition =
+        createDBCohortAnnotationDefinition(
+            cohortId, annotationDefinitionId, AnnotationType.STRING, "name1");
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndColumnName(cohortId, columnName);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
+    CohortAnnotationDefinition expectedResponse =
+        createClientCohortAnnotationDefinition(
+            annotationDefinitionId, cohortId, request.getColumnName(), AnnotationType.STRING);
 
-        verifyNoMoreMockInteractions();
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
+            cohortId, annotationDefinitionId))
+        .thenReturn(definition);
+    when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName))
+        .thenReturn(null);
+    when(cohortAnnotationDefinitionDao.save(definition)).thenReturn(definition);
+
+    CohortAnnotationDefinition responseDefinition =
+        cohortAnnotationDefinitionController
+            .updateCohortAnnotationDefinition(
+                namespace, name, cohortId, annotationDefinitionId, request)
+            .getBody();
+
+    assertEquals(expectedResponse, responseDefinition);
+
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(cohortAnnotationDefinitionDao, times(1))
+        .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
+    verify(cohortAnnotationDefinitionDao, times(1))
+        .findByCohortIdAndColumnName(cohortId, columnName);
+    verify(cohortAnnotationDefinitionDao, times(1)).save(definition);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
+
+    verifyNoMoreMockInteractions();
+  }
+
+  @Test
+  public void deleteCohortAnnotationDefinition_BadCohortId() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long annotationDefinitionId = 1;
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(null);
+
+    try {
+      cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
+          namespace, name, cohortId, annotationDefinitionId);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
     }
 
-    @Test
-    public void updateCohortAnnotationDefinition() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long workspaceId = 1;
-        long annotationDefinitionId = 1;
-        final String columnName = "new-name";
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
-        Cohort cohort = createCohort(workspaceId);
+    verifyNoMoreMockInteractions();
+  }
 
-        Workspace workspace = createWorkspace(namespace, name, workspaceId);
+  @Test
+  public void deleteCohortAnnotationDefinition_BadWorkspace() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long annotationDefinitionId = 1;
+    long workspaceId = 1;
+    long badWorkspaceId = 0;
 
-        ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
-        request.setColumnName(columnName);
+    Cohort cohort = createCohort(workspaceId);
 
-        org.pmiops.workbench.db.model.CohortAnnotationDefinition definition =
-                createDBCohortAnnotationDefinition(
-                        cohortId,
-                        annotationDefinitionId,
-                        AnnotationType.STRING,
-                        "name1");
+    Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
 
-        CohortAnnotationDefinition expectedResponse = createClientCohortAnnotationDefinition(
-                annotationDefinitionId,
-                cohortId,
-                request.getColumnName(),
-                AnnotationType.STRING);
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId)).thenReturn(definition);
-        when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName)).thenReturn(null);
-        when(cohortAnnotationDefinitionDao.save(definition)).thenReturn(definition);
-
-        CohortAnnotationDefinition responseDefinition =
-        cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    annotationDefinitionId,
-                    request).getBody();
-
-        assertEquals(expectedResponse, responseDefinition);
-
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndColumnName(cohortId, columnName);
-        verify(cohortAnnotationDefinitionDao, times(1)).save(definition);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
-
-        verifyNoMoreMockInteractions();
+    try {
+      cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
+          namespace, name, cohortId, annotationDefinitionId);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals(
+          "Not Found: No workspace matching workspaceNamespace: "
+              + namespace
+              + ", workspaceId: "
+              + name,
+          e.getMessage());
     }
 
-    @Test
-    public void deleteCohortAnnotationDefinition_BadCohortId() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long annotationDefinitionId = 1;
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(null);
+    verifyNoMoreMockInteractions();
+  }
 
-        try {
-            cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    annotationDefinitionId);
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
-        }
+  @Test
+  public void deleteCohortAnnotationDefinition_BadAnnotationDefinitionId() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long workspaceId = 1;
+    long annotationDefinitionId = 1;
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
+    Cohort cohort = createCohort(workspaceId);
 
-        verifyNoMoreMockInteractions();
+    Workspace workspace = createWorkspace(namespace, name, workspaceId);
+
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
+            cohortId, annotationDefinitionId))
+        .thenReturn(null);
+
+    try {
+      cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
+          namespace, name, cohortId, annotationDefinitionId);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals(
+          "Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: "
+              + annotationDefinitionId,
+          e.getMessage());
     }
 
-    @Test
-    public void deleteCohortAnnotationDefinition_BadWorkspace() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long annotationDefinitionId = 1;
-        long workspaceId = 1;
-        long badWorkspaceId = 0;
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(cohortAnnotationDefinitionDao, times(1))
+        .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
-        Cohort cohort = createCohort(workspaceId);
+    verifyNoMoreMockInteractions();
+  }
 
-        Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
+  @Test
+  public void deleteCohortAnnotationDefinition() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long workspaceId = 1;
+    long annotationDefinitionId = 1;
+    String columnName = "name";
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    Cohort cohort = createCohort(workspaceId);
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-        try {
-            cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    annotationDefinitionId);
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No workspace matching workspaceNamespace: "
-                    + namespace + ", workspaceId: " + name, e.getMessage());
-        }
+    org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
+        createDBCohortAnnotationDefinition(
+            cohortId, annotationDefinitionId, AnnotationType.STRING, columnName);
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        verifyNoMoreMockInteractions();
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
+            cohortId, annotationDefinitionId))
+        .thenReturn(cohortAnnotationDefinition);
+    doNothing().when(cohortAnnotationDefinitionDao).delete(annotationDefinitionId);
+
+    EmptyResponse response =
+        cohortAnnotationDefinitionController
+            .deleteCohortAnnotationDefinition(namespace, name, cohortId, annotationDefinitionId)
+            .getBody();
+
+    assertEquals(new EmptyResponse(), response);
+
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(cohortAnnotationDefinitionDao, times(1))
+        .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
+    verify(cohortAnnotationDefinitionDao, times(1)).delete(annotationDefinitionId);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
+
+    verifyNoMoreMockInteractions();
+  }
+
+  @Test
+  public void getCohortAnnotationDefinition_NotFoundCohort() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long annotationDefinitionId = 1;
+
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(null);
+
+    try {
+      cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
+          namespace, name, cohortId, annotationDefinitionId);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
     }
 
-    @Test
-    public void deleteCohortAnnotationDefinition_BadAnnotationDefinitionId() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long workspaceId = 1;
-        long annotationDefinitionId = 1;
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
-        Cohort cohort = createCohort(workspaceId);
+    verifyNoMoreMockInteractions();
+  }
 
-        Workspace workspace = createWorkspace(namespace, name, workspaceId);
+  @Test
+  public void getCohortAnnotationDefinition_NotFoundWorkspace() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long annotationDefinitionId = 1;
+    long workspaceId = 1;
+    long badWorkspaceId = 0;
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    Cohort cohort = createCohort(workspaceId);
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId)).thenReturn(null);
+    Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
 
-        try {
-            cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    annotationDefinitionId);
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: "
-                    + annotationDefinitionId, e.getMessage());
-        }
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
 
-        verifyNoMoreMockInteractions();
+    try {
+      cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
+          namespace, name, cohortId, annotationDefinitionId);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals(
+          "Not Found: No workspace matching workspaceNamespace: "
+              + namespace
+              + ", workspaceId: "
+              + name,
+          e.getMessage());
     }
 
-    @Test
-    public void deleteCohortAnnotationDefinition() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long workspaceId = 1;
-        long annotationDefinitionId = 1;
-        String columnName = "name";
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
-        Cohort cohort = createCohort(workspaceId);
+    verifyNoMoreMockInteractions();
+  }
 
-        Workspace workspace = createWorkspace(namespace, name, workspaceId);
+  @Test
+  public void getCohortAnnotationDefinition_NotFoundAnnotationDefinition() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long workspaceId = 1;
+    long annotationDefinitionId = 1;
 
-        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                createDBCohortAnnotationDefinition(
-                        cohortId,
-                        annotationDefinitionId,
-                        AnnotationType.STRING,
-                        columnName);
+    Cohort cohort = createCohort(workspaceId);
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId)).thenReturn(cohortAnnotationDefinition);
-        doNothing().when(cohortAnnotationDefinitionDao).delete(annotationDefinitionId);
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        EmptyResponse response = cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    annotationDefinitionId).getBody();
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
+            cohortId, annotationDefinitionId))
+        .thenReturn(null);
 
-        assertEquals(new EmptyResponse(), response);
-
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
-        verify(cohortAnnotationDefinitionDao, times(1)).delete(annotationDefinitionId);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
-
-        verifyNoMoreMockInteractions();
+    try {
+      cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
+          namespace, name, cohortId, annotationDefinitionId);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals(
+          "Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: "
+              + annotationDefinitionId,
+          e.getMessage());
     }
 
-    @Test
-    public void getCohortAnnotationDefinition_NotFoundCohort() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long annotationDefinitionId = 1;
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(cohortAnnotationDefinitionDao, times(1))
+        .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    verifyNoMoreMockInteractions();
+  }
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(null);
+  @Test
+  public void getCohortAnnotationDefinition() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long workspaceId = 1;
+    long annotationDefinitionId = 1;
+    String columnName = "name";
 
-        try {
-            cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    annotationDefinitionId);
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
-        }
+    Cohort cohort = createCohort(workspaceId);
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
+    Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-        verifyNoMoreMockInteractions();
+    org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
+        createDBCohortAnnotationDefinition(
+            cohortId, annotationDefinitionId, AnnotationType.STRING, columnName);
+
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
+            cohortId, annotationDefinitionId))
+        .thenReturn(cohortAnnotationDefinition);
+
+    CohortAnnotationDefinition responseDefinition =
+        cohortAnnotationDefinitionController
+            .getCohortAnnotationDefinition(namespace, name, cohortId, annotationDefinitionId)
+            .getBody();
+
+    CohortAnnotationDefinition expectedResponse =
+        createClientCohortAnnotationDefinition(
+            annotationDefinitionId, cohortId, columnName, AnnotationType.STRING);
+    assertEquals(expectedResponse, responseDefinition);
+
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(cohortAnnotationDefinitionDao, times(1))
+        .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
+
+    verifyNoMoreMockInteractions();
+  }
+
+  @Test
+  public void getCohortAnnotationDefinitions_NotFoundCohort() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
+        .thenReturn(owner);
+    when(cohortDao.findOne(cohortId)).thenReturn(null);
+
+    try {
+      cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
+          namespace, name, cohortId);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
     }
 
-    @Test
-    public void getCohortAnnotationDefinition_NotFoundWorkspace() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long annotationDefinitionId = 1;
-        long workspaceId = 1;
-        long badWorkspaceId = 0;
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
-        Cohort cohort = createCohort(workspaceId);
+    verifyNoMoreMockInteractions();
+  }
 
-        Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
+  @Test
+  public void getCohortAnnotationDefinitions_NotFoundWorkspace() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long workspaceId = 1;
+    long badWorkspaceId = 0;
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    Cohort cohort = createCohort(workspaceId);
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
 
-        try {
-            cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    annotationDefinitionId);
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No workspace matching workspaceNamespace: "
-                    + namespace + ", workspaceId: " + name, e.getMessage());
-        }
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
+        .thenReturn(owner);
 
-        verifyNoMoreMockInteractions();
+    try {
+      cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
+          namespace, name, cohortId);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException e) {
+      assertEquals(
+          "Not Found: No workspace matching workspaceNamespace: "
+              + namespace
+              + ", workspaceId: "
+              + name,
+          e.getMessage());
     }
 
-    @Test
-    public void getCohortAnnotationDefinition_NotFoundAnnotationDefinition() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long workspaceId = 1;
-        long annotationDefinitionId = 1;
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
-        Cohort cohort = createCohort(workspaceId);
+    verifyNoMoreMockInteractions();
+  }
 
-        Workspace workspace = createWorkspace(namespace, name, workspaceId);
+  @Test
+  public void getCohortAnnotationDefinitions() throws Exception {
+    String namespace = "aou-test";
+    String name = "test";
+    long cohortId = 1;
+    long workspaceId = 1;
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    Cohort cohort = createCohort(workspaceId);
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId)).thenReturn(null);
+    Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-        try {
-            cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
-                    namespace,
-                    name,
-                    cohortId,
-                    annotationDefinitionId);
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: "
-                    + annotationDefinitionId, e.getMessage());
-        }
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
+    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+    when(cohortAnnotationDefinitionDao.findByCohortId(cohortId)).thenReturn(new ArrayList<>());
+    when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
+        .thenReturn(owner);
 
-        verifyNoMoreMockInteractions();
-    }
+    cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(namespace, name, cohortId);
 
-    @Test
-    public void getCohortAnnotationDefinition() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long workspaceId = 1;
-        long annotationDefinitionId = 1;
-        String columnName = "name";
+    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(workspaceService, times(1)).getRequired(namespace, name);
+    verify(cohortAnnotationDefinitionDao, times(1)).findByCohortId(cohortId);
+    verify(workspaceService)
+        .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
-        Cohort cohort = createCohort(workspaceId);
+    verifyNoMoreMockInteractions();
+  }
 
-        Workspace workspace = createWorkspace(namespace, name, workspaceId);
+  private CohortAnnotationDefinition createClientCohortAnnotationDefinition(
+      long annotationDefinitionId,
+      long cohortId,
+      String columnName,
+      AnnotationType annotationType) {
+    CohortAnnotationDefinition request = new CohortAnnotationDefinition();
+    request.setCohortAnnotationDefinitionId(annotationDefinitionId);
+    request.setCohortId(cohortId);
+    request.setColumnName(columnName);
+    request.setAnnotationType(annotationType);
+    request.setEnumValues(new ArrayList<>());
+    return request;
+  }
 
-        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                createDBCohortAnnotationDefinition(
-                        cohortId,
-                        annotationDefinitionId,
-                        AnnotationType.STRING,
-                        columnName);
+  private org.pmiops.workbench.db.model.CohortAnnotationDefinition
+      createDBCohortAnnotationDefinition(
+          long cohortId,
+          long annotationDefinitionId,
+          AnnotationType annotationType,
+          String columnName) {
+    return new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
+        .cohortId(cohortId)
+        .cohortAnnotationDefinitionId(annotationDefinitionId)
+        .annotationTypeEnum(annotationType)
+        .columnName(columnName);
+  }
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+  private void verifyNoMoreMockInteractions() {
+    verifyNoMoreInteractions(cohortDao, cohortAnnotationDefinitionDao, workspaceService);
+  }
 
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId)).thenReturn(cohortAnnotationDefinition);
+  private Cohort createCohort(long workspaceId) {
+    Cohort cohort = new Cohort();
+    cohort.setWorkspaceId(workspaceId);
+    return cohort;
+  }
 
-        CohortAnnotationDefinition responseDefinition =
-                cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
-                        namespace,
-                        name,
-                        cohortId,
-                        annotationDefinitionId).getBody();
-
-        CohortAnnotationDefinition expectedResponse = createClientCohortAnnotationDefinition(
-                annotationDefinitionId,
-                cohortId,
-                columnName,
-                AnnotationType.STRING);
-        assertEquals(expectedResponse, responseDefinition);
-
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
-
-        verifyNoMoreMockInteractions();
-    }
-
-    @Test
-    public void getCohortAnnotationDefinitions_NotFoundCohort() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
-
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
-        when(cohortDao.findOne(cohortId)).thenReturn(null);
-
-        try {
-            cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
-                    namespace,
-                    name,
-                    cohortId);
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
-        }
-
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
-
-        verifyNoMoreMockInteractions();
-    }
-
-    @Test
-    public void getCohortAnnotationDefinitions_NotFoundWorkspace() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long workspaceId = 1;
-        long badWorkspaceId = 0;
-
-        Cohort cohort = createCohort(workspaceId);
-
-        Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
-
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
-
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
-
-        try {
-            cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
-                    namespace,
-                    name,
-                    cohortId);
-            fail("Should have thrown a NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: No workspace matching workspaceNamespace: "
-                    + namespace + ", workspaceId: " + name, e.getMessage());
-        }
-
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
-
-        verifyNoMoreMockInteractions();
-    }
-
-    @Test
-    public void getCohortAnnotationDefinitions() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long workspaceId = 1;
-
-        Cohort cohort = createCohort(workspaceId);
-
-        Workspace workspace = createWorkspace(namespace, name, workspaceId);
-
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
-
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findByCohortId(cohortId)).thenReturn(new ArrayList<>());
-        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
-
-        cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
-                namespace,
-                name,
-                cohortId);
-
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortId(cohortId);
-        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
-
-        verifyNoMoreMockInteractions();
-    }
-
-    private CohortAnnotationDefinition createClientCohortAnnotationDefinition(long annotationDefinitionId,
-                                                                              long cohortId,
-                                                                              String columnName,
-                                                                              AnnotationType annotationType) {
-        CohortAnnotationDefinition request = new CohortAnnotationDefinition();
-        request.setCohortAnnotationDefinitionId(annotationDefinitionId);
-        request.setCohortId(cohortId);
-        request.setColumnName(columnName);
-        request.setAnnotationType(annotationType);
-        request.setEnumValues(new ArrayList<>());
-        return request;
-    }
-
-    private org.pmiops.workbench.db.model.CohortAnnotationDefinition createDBCohortAnnotationDefinition(long cohortId,
-                                                                                                      long annotationDefinitionId,
-                                                                                                      AnnotationType annotationType,
-                                                                                                      String columnName) {
-        return new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
-                .cohortId(cohortId)
-                .cohortAnnotationDefinitionId(annotationDefinitionId)
-                .annotationTypeEnum(annotationType)
-                .columnName(columnName);
-    }
-
-    private void verifyNoMoreMockInteractions() {
-        verifyNoMoreInteractions(cohortDao, cohortAnnotationDefinitionDao, workspaceService);
-    }
-
-    private Cohort createCohort(long workspaceId) {
-        Cohort cohort = new Cohort();
-        cohort.setWorkspaceId(workspaceId);
-        return cohort;
-    }
-
-    private Workspace createWorkspace(String namespace, String name, long badWorkspaceId) {
-        Workspace workspace = new Workspace();
-        workspace.setWorkspaceId(badWorkspaceId);
-        workspace.setWorkspaceNamespace(namespace);
-        workspace.setFirecloudName(name);
-        return workspace;
-    }
-
+  private Workspace createWorkspace(String namespace, String name, long badWorkspaceId) {
+    Workspace workspace = new Workspace();
+    workspace.setWorkspaceId(badWorkspaceId);
+    workspace.setWorkspaceNamespace(namespace);
+    workspace.setFirecloudName(name);
+    return workspace;
+  }
 }

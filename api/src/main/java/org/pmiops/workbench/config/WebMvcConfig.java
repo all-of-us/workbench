@@ -2,6 +2,9 @@ package org.pmiops.workbench.config;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.servlet.ServletContext;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.User;
@@ -27,29 +30,20 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import javax.servlet.ServletContext;
-import java.io.IOException;
-import java.io.InputStream;
-
 @EnableWebMvc
 @Configuration
-@ComponentScan(basePackages={"org.pmiops.workbench.interceptors", "org.pmiops.workbench.google"})
+@ComponentScan(basePackages = {"org.pmiops.workbench.interceptors", "org.pmiops.workbench.google"})
 public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
-  @Autowired
-  private AuthInterceptor authInterceptor;
+  @Autowired private AuthInterceptor authInterceptor;
 
-  @Autowired
-  private CorsInterceptor corsInterceptor;
+  @Autowired private CorsInterceptor corsInterceptor;
 
-  @Autowired
-  private ClearCdrVersionContextInterceptor clearCdrVersionInterceptor;
+  @Autowired private ClearCdrVersionContextInterceptor clearCdrVersionInterceptor;
 
-  @Autowired
-  private CronInterceptor cronInterceptor;
+  @Autowired private CronInterceptor cronInterceptor;
 
-  @Autowired
-  private SecurityHeadersInterceptor securityHeadersInterceptor;
+  @Autowired private SecurityHeadersInterceptor securityHeadersInterceptor;
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -76,16 +70,17 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   /**
    * Service account credentials for Gsuite administration. These are derived from a key JSON file
-   * copied from GCS deployed to /WEB-INF/gsuite-admin-sa.json during the build step. They can be used
-   * to make API calls to directory service on behalf of AofU (as opposed to using end user credentials.)
+   * copied from GCS deployed to /WEB-INF/gsuite-admin-sa.json during the build step. They can be
+   * used to make API calls to directory service on behalf of AofU (as opposed to using end user
+   * credentials.)
    *
-   * We may in future rotate key files in production, but will be sure to keep the ones currently
+   * <p>We may in future rotate key files in production, but will be sure to keep the ones currently
    * in use in cloud environments working when that happens.
    *
-   * TODO(gjuggler): should we start pulling this file from GCS instead?
+   * <p>TODO(gjuggler): should we start pulling this file from GCS instead?
    */
   @Lazy
-  @Bean(name= Constants.GSUITE_ADMIN_CREDS)
+  @Bean(name = Constants.GSUITE_ADMIN_CREDS)
   public GoogleCredential gsuiteAdminCredential() {
     ServletContext context = getRequestServletContext();
     InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/gsuite-admin-sa.json");
@@ -101,8 +96,9 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
    * for domain-wide delegation of authority.
    */
   @Lazy
-  @Bean(name= Constants.FIRECLOUD_ADMIN_CREDS)
-  public GoogleCredential firecloudAdminCredential(CloudStorageService cloudStorageService) throws IOException {
+  @Bean(name = Constants.FIRECLOUD_ADMIN_CREDS)
+  public GoogleCredential firecloudAdminCredential(CloudStorageService cloudStorageService)
+      throws IOException {
     return cloudStorageService.getFireCloudAdminCredentials();
   }
 
@@ -122,6 +118,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   static ServletContext getRequestServletContext() {
     return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-      .getRequest().getServletContext();
+        .getRequest()
+        .getServletContext();
   }
 }

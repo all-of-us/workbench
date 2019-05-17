@@ -4,6 +4,8 @@
  */
 package org.pmiops.workbench.google;
 
+import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
@@ -13,14 +15,6 @@ import com.google.api.services.admin.directory.model.User;
 import com.google.api.services.admin.directory.model.UserEmail;
 import com.google.api.services.admin.directory.model.UserName;
 import com.google.common.collect.Lists;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.exceptions.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Provider;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -30,13 +24,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
+import javax.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
 
-  private static final String ALLOWED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+  private static final String ALLOWED =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
   private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
   // Name of the GSuite custom schema containing AOU custom fields.
   private static final String GSUITE_AOU_SCHEMA_NAME = "All_of_Us_Workbench";
@@ -45,7 +45,6 @@ public class DirectoryServiceImpl implements DirectoryService {
   // Name of the "institution" custom field, whose value is the same for all Workbench users.
   private static final String GSUITE_FIELD_INSTITUTION = "Institution";
   private static final String INSTITUTION_FIELD_VALUE = "All of Us Research Workbench";
-
 
   private static SecureRandom rnd = new SecureRandom();
 
@@ -58,10 +57,11 @@ public class DirectoryServiceImpl implements DirectoryService {
   // will accept the email address of the service account and lookup the correct client ID giving
   // the impression that the email address is an acceptable substitute, but testing shows that this
   // doesn't actually work.
-  private static final List<String> SCOPES = Arrays.asList(
-      DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS, DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
-      DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY
-  );
+  private static final List<String> SCOPES =
+      Arrays.asList(
+          DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS,
+              DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
+          DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY);
 
   private final Provider<GoogleCredential> googleCredentialProvider;
   private final Provider<WorkbenchConfig> configProvider;
@@ -72,7 +72,8 @@ public class DirectoryServiceImpl implements DirectoryService {
   public DirectoryServiceImpl(
       @Qualifier("gsuiteAdminCredentials") Provider<GoogleCredential> googleCredentialProvider,
       Provider<WorkbenchConfig> configProvider,
-      HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
+      HttpTransport httpTransport,
+      GoogleRetryHandler retryHandler) {
     this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
@@ -96,8 +97,8 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   private Directory getGoogleDirectoryService() {
-    return new Directory.Builder(httpTransport, getDefaultJsonFactory(),
-        createCredentialWithImpersonation())
+    return new Directory.Builder(
+            httpTransport, getDefaultJsonFactory(), createCredentialWithImpersonation())
         .setApplicationName(APPLICATION_NAME)
         .build();
   }
@@ -112,8 +113,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   /**
    * Fetches a user by their GSuite email address.
-   * <p>
-   * If the user is not found, a null value will be returned (no exception is thrown).
+   *
+   * <p>If the user is not found, a null value will be returned (no exception is thrown).
    *
    * @param email
    * @return
@@ -122,8 +123,9 @@ public class DirectoryServiceImpl implements DirectoryService {
   public User getUser(String email) {
     try {
       // We use the "full" projection to include custom schema fields in the Directory API response.
-      return retryHandler.runAndThrowChecked((context) ->
-          getGoogleDirectoryService().users().get(email).setProjection("full").execute());
+      return retryHandler.runAndThrowChecked(
+          (context) ->
+              getGoogleDirectoryService().users().get(email).setProjection("full").execute());
     } catch (GoogleJsonResponseException e) {
       // Handle the special case where we're looking for a not found user by returning
       // null.
@@ -143,10 +145,11 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   // Returns a user's contact email address via the custom schema in the directory API.
   public String getContactEmailAddress(String username) {
-    return (String) getUserByUsername(username)
-        .getCustomSchemas()
-        .get(GSUITE_AOU_SCHEMA_NAME)
-        .get(GSUITE_FIELD_CONTACT_EMAIL);
+    return (String)
+        getUserByUsername(username)
+            .getCustomSchemas()
+            .get(GSUITE_AOU_SCHEMA_NAME)
+            .get(GSUITE_FIELD_CONTACT_EMAIL);
   }
 
   public static void addCustomSchemaAndEmails(User user, String primaryEmail, String contactEmail) {
@@ -168,8 +171,9 @@ public class DirectoryServiceImpl implements DirectoryService {
     // In addition to the custom schema value, we store each user's contact email as a secondary
     // email address with type "home". This makes it show up nicely in GSuite admin as the
     // user's "Secondary email".
-    List<UserEmail> emails = Lists.newArrayList(
-        new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true));
+    List<UserEmail> emails =
+        Lists.newArrayList(
+            new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true));
     if (contactEmail != null) {
       emails.add(new UserEmail().setType("home").setAddress(contactEmail));
     }
@@ -178,15 +182,17 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   @Override
-  public User createUser(String givenName, String familyName, String username, String contactEmail) {
+  public User createUser(
+      String givenName, String familyName, String username, String contactEmail) {
     String primaryEmail = username + "@" + gSuiteDomain();
     String password = randomString();
 
-    User user = new User()
-        .setPrimaryEmail(primaryEmail)
-        .setPassword(password)
-        .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
-        .setChangePasswordAtNextLogin(true);
+    User user =
+        new User()
+            .setPrimaryEmail(primaryEmail)
+            .setPassword(password)
+            .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
+            .setChangePasswordAtNextLogin(true);
     addCustomSchemaAndEmails(user, primaryEmail, contactEmail);
 
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
@@ -195,8 +201,9 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   @Override
   public User updateUser(User user) {
-    retryHandler.run((context) -> getGoogleDirectoryService().users().update(
-        user.getPrimaryEmail(), user).execute());
+    retryHandler.run(
+        (context) ->
+            getGoogleDirectoryService().users().update(user.getPrimaryEmail(), user).execute());
     return user;
   }
 
@@ -205,15 +212,20 @@ public class DirectoryServiceImpl implements DirectoryService {
     User user = getUser(email);
     String password = randomString();
     user.setPassword(password);
-    retryHandler.run((context) -> getGoogleDirectoryService().users().update(email, user).execute());
+    retryHandler.run(
+        (context) -> getGoogleDirectoryService().users().update(email, user).execute());
     return user;
   }
 
   @Override
   public void deleteUser(String username) {
     try {
-      retryHandler.runAndThrowChecked((context) -> getGoogleDirectoryService().users()
-          .delete(username + "@" + gSuiteDomain()).execute());
+      retryHandler.runAndThrowChecked(
+          (context) ->
+              getGoogleDirectoryService()
+                  .users()
+                  .delete(username + "@" + gSuiteDomain())
+                  .execute());
     } catch (GoogleJsonResponseException e) {
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         // Deleting a user that doesn't exist will have no effect.
@@ -226,10 +238,10 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   private String randomString() {
-    return IntStream.range(0, 17).boxed()
+    return IntStream.range(0, 17)
+        .boxed()
         .map(x -> ALLOWED.charAt(rnd.nextInt(ALLOWED.length())))
         .map(Object::toString)
         .collect(Collectors.joining(""));
   }
-
 }

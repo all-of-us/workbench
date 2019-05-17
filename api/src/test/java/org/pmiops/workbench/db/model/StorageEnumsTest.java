@@ -74,8 +74,7 @@ public class StorageEnumsTest {
     };
   }
 
-  @Parameter()
-  public String description;
+  @Parameter() public String description;
 
   @Parameter(1)
   public Enum<?>[] enumValues;

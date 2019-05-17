@@ -11,9 +11,9 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 
 /**
- * An iterator over a set of new-line delimited files in Google Cloud Storage. Intended to be
- * used in combination with BigQuery export, which can write newline delimited JSON or CSV files
- * when dealing with large result sets.
+ * An iterator over a set of new-line delimited files in Google Cloud Storage. Intended to be used
+ * in combination with BigQuery export, which can write newline delimited JSON or CSV files when
+ * dealing with large result sets.
  */
 public class CloudStorageShardedLineIterator implements Iterator<String> {
 

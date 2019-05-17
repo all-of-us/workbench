@@ -28,16 +28,17 @@ public class WorkspaceMapper {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
 
-    Workspace result = new Workspace()
-        .etag(Etags.fromVersion(workspace.getVersion()))
-        .lastModifiedTime(workspace.getLastModifiedTime().getTime())
-        .creationTime(workspace.getCreationTime().getTime())
-        .dataAccessLevel(workspace.getDataAccessLevelEnum())
-        .name(workspace.getName())
-        .id(workspaceId.getWorkspaceName())
-        .namespace(workspaceId.getWorkspaceNamespace())
-        .description(workspace.getDescription())
-        .researchPurpose(researchPurpose);
+    Workspace result =
+        new Workspace()
+            .etag(Etags.fromVersion(workspace.getVersion()))
+            .lastModifiedTime(workspace.getLastModifiedTime().getTime())
+            .creationTime(workspace.getCreationTime().getTime())
+            .dataAccessLevel(workspace.getDataAccessLevelEnum())
+            .name(workspace.getName())
+            .id(workspaceId.getWorkspaceName())
+            .namespace(workspaceId.getWorkspaceNamespace())
+            .description(workspace.getDescription())
+            .researchPurpose(researchPurpose);
     if (workspace.getCreator() != null) {
       result.setCreator(workspace.getCreator().getEmail());
     }
@@ -45,30 +46,35 @@ public class WorkspaceMapper {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
 
-    result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(this::toApiUserRole)
-        .collect(Collectors.toList()));
+    result.setUserRoles(
+        workspace.getWorkspaceUserRoles().stream()
+            .map(this::toApiUserRole)
+            .collect(Collectors.toList()));
 
     return result;
   }
 
-  public Workspace toApiWorkspace(org.pmiops.workbench.db.model.Workspace workspace, org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
+  public Workspace toApiWorkspace(
+      org.pmiops.workbench.db.model.Workspace workspace,
+      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     if (workspace.getContainsUnderservedPopulation()) {
       researchPurpose.setUnderservedPopulationDetails(
           new ArrayList<>(workspace.getUnderservedPopulationsEnum()));
     }
 
-    Workspace result = new Workspace()
-        .etag(Etags.fromVersion(workspace.getVersion()))
-        .lastModifiedTime(workspace.getLastModifiedTime().getTime())
-        .creationTime(workspace.getCreationTime().getTime())
-        .dataAccessLevel(workspace.getDataAccessLevelEnum())
-        .name(workspace.getName())
-        .id(fcWorkspace.getName())
-        .namespace(fcWorkspace.getNamespace())
-        .description(workspace.getDescription())
-        .researchPurpose(researchPurpose)
-        .googleBucketName(fcWorkspace.getBucketName());
+    Workspace result =
+        new Workspace()
+            .etag(Etags.fromVersion(workspace.getVersion()))
+            .lastModifiedTime(workspace.getLastModifiedTime().getTime())
+            .creationTime(workspace.getCreationTime().getTime())
+            .dataAccessLevel(workspace.getDataAccessLevelEnum())
+            .name(workspace.getName())
+            .id(fcWorkspace.getName())
+            .namespace(fcWorkspace.getNamespace())
+            .description(workspace.getDescription())
+            .researchPurpose(researchPurpose)
+            .googleBucketName(fcWorkspace.getBucketName());
     if (fcWorkspace.getCreatedBy() != null) {
       result.setCreator(fcWorkspace.getCreatedBy());
     }
@@ -76,8 +82,10 @@ public class WorkspaceMapper {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
 
-    result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(this::toApiUserRole)
-        .collect(Collectors.toList()));
+    result.setUserRoles(
+        workspace.getWorkspaceUserRoles().stream()
+            .map(this::toApiUserRole)
+            .collect(Collectors.toList()));
 
     return result;
   }
@@ -96,8 +104,7 @@ public class WorkspaceMapper {
       setResearchPurposeDetails(result, workspace.getResearchPurpose());
       result.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
       if (workspace.getResearchPurpose().getTimeRequested() != null) {
-        result.setTimeRequested(
-            new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
+        result.setTimeRequested(new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
       }
       result.setApproved(workspace.getResearchPurpose().getApproved());
     }
@@ -115,11 +122,11 @@ public class WorkspaceMapper {
   }
 
   /**
-   * This probably doesn't belong in a mapper service but it makes the refactoring easier atm.
-   * Sets user-editable research purpose detail fields.
+   * This probably doesn't belong in a mapper service but it makes the refactoring easier atm. Sets
+   * user-editable research purpose detail fields.
    */
-  public static void setResearchPurposeDetails(org.pmiops.workbench.db.model.Workspace dbWorkspace,
-      ResearchPurpose purpose) {
+  public static void setResearchPurposeDetails(
+      org.pmiops.workbench.db.model.Workspace dbWorkspace, ResearchPurpose purpose) {
     dbWorkspace.setDiseaseFocusedResearch(purpose.getDiseaseFocusedResearch());
     dbWorkspace.setDiseaseOfFocus(purpose.getDiseaseOfFocus());
     dbWorkspace.setMethodsDevelopment(purpose.getMethodsDevelopment());
@@ -132,31 +139,31 @@ public class WorkspaceMapper {
     dbWorkspace.setAdditionalNotes(purpose.getAdditionalNotes());
     dbWorkspace.setContainsUnderservedPopulation(purpose.getContainsUnderservedPopulation());
     if (purpose.getContainsUnderservedPopulation()) {
-      dbWorkspace
-          .setUnderservedPopulationsEnum(new HashSet<>(purpose.getUnderservedPopulationDetails()));
+      dbWorkspace.setUnderservedPopulationsEnum(
+          new HashSet<>(purpose.getUnderservedPopulationDetails()));
     }
   }
 
   private final ResearchPurpose createResearchPurpose(
       org.pmiops.workbench.db.model.Workspace workspace) {
-    ResearchPurpose researchPurpose = new ResearchPurpose()
-        .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
-        .diseaseOfFocus(workspace.getDiseaseOfFocus())
-        .methodsDevelopment(workspace.getMethodsDevelopment())
-        .controlSet(workspace.getControlSet())
-        .aggregateAnalysis(workspace.getAggregateAnalysis())
-        .ancestry(workspace.getAncestry())
-        .commercialPurpose(workspace.getCommercialPurpose())
-        .population(workspace.getPopulation())
-        .populationOfFocus(workspace.getPopulationOfFocus())
-        .additionalNotes(workspace.getAdditionalNotes())
-        .reviewRequested(workspace.getReviewRequested())
-        .approved(workspace.getApproved())
-        .containsUnderservedPopulation(workspace.getContainsUnderservedPopulation());
+    ResearchPurpose researchPurpose =
+        new ResearchPurpose()
+            .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
+            .diseaseOfFocus(workspace.getDiseaseOfFocus())
+            .methodsDevelopment(workspace.getMethodsDevelopment())
+            .controlSet(workspace.getControlSet())
+            .aggregateAnalysis(workspace.getAggregateAnalysis())
+            .ancestry(workspace.getAncestry())
+            .commercialPurpose(workspace.getCommercialPurpose())
+            .population(workspace.getPopulation())
+            .populationOfFocus(workspace.getPopulationOfFocus())
+            .additionalNotes(workspace.getAdditionalNotes())
+            .reviewRequested(workspace.getReviewRequested())
+            .approved(workspace.getApproved())
+            .containsUnderservedPopulation(workspace.getContainsUnderservedPopulation());
     if (workspace.getTimeRequested() != null) {
       researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
     }
     return researchPurpose;
   }
-
 }

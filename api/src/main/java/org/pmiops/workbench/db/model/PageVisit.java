@@ -1,14 +1,13 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.ManyToOne;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -32,19 +31,30 @@ public class PageVisit {
   }
 
   @ManyToOne
-  @JoinColumn(name="user_id")
-  public User getUser() { return user; }
+  @JoinColumn(name = "user_id")
+  public User getUser() {
+    return user;
+  }
 
-  public void setUser(User user) { this.user = user; }
+  public void setUser(User user) {
+    this.user = user;
+  }
 
   @Column(name = "page_id")
-  public String getPageId() { return pageId; }
+  public String getPageId() {
+    return pageId;
+  }
 
-  public void setPageId(String pageId) { this.pageId = pageId; }
+  public void setPageId(String pageId) {
+    this.pageId = pageId;
+  }
 
   @Column(name = "first_visit")
-  public Timestamp getFirstVisit() { return firstVisit; }
+  public Timestamp getFirstVisit() {
+    return firstVisit;
+  }
 
-  public void setFirstVisit(Timestamp firstVisit) { this.firstVisit = firstVisit; }
-
+  public void setFirstVisit(Timestamp firstVisit) {
+    this.firstVisit = firstVisit;
+  }
 }

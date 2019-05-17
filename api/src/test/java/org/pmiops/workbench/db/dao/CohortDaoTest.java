@@ -17,34 +17,36 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 public class CohortDaoTest {
 
-    public static final long WORKSPACE_ID = 9999;
-    @Autowired
-    CohortDao cohortDao;
+  public static final long WORKSPACE_ID = 9999;
+  @Autowired CohortDao cohortDao;
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
+  @Autowired JdbcTemplate jdbcTemplate;
 
-    @Test
-    public void findCohortByCohortId() throws Exception {
-        String cohortJson = "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":" +
-                "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":" +
-                "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
+  @Test
+  public void findCohortByCohortId() throws Exception {
+    String cohortJson =
+        "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":"
+            + "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":"
+            + "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
 
-        Cohort cohort = new Cohort();
-        cohort.setWorkspaceId(WORKSPACE_ID);
-        cohort.setCriteria(cohortJson);
+    Cohort cohort = new Cohort();
+    cohort.setWorkspaceId(WORKSPACE_ID);
+    cohort.setCriteria(cohortJson);
 
-        //need to insert a workspace to satisfy the foreign key contraint of cohort
-        jdbcTemplate.execute("insert into workspace" +
-                "(workspace_id, name, workspace_namespace, firecloud_name, data_access_level, creation_time, last_modified_time)" +
-                "values (" + WORKSPACE_ID + ", 'name', 'name', 'name', 1, sysdate(), sysdate())");
+    // need to insert a workspace to satisfy the foreign key contraint of cohort
+    jdbcTemplate.execute(
+        "insert into workspace"
+            + "(workspace_id, name, workspace_namespace, firecloud_name, data_access_level, creation_time, last_modified_time)"
+            + "values ("
+            + WORKSPACE_ID
+            + ", 'name', 'name', 'name', 1, sysdate(), sysdate())");
 
-        cohortDao.save(cohort);
+    cohortDao.save(cohort);
 
-        assertEquals(cohortJson, cohort.getCriteria());
-    }
+    assertEquals(cohortJson, cohort.getCriteria());
+  }
 }

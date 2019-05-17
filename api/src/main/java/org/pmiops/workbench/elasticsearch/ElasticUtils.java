@@ -29,9 +29,7 @@ import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
-/**
- * Shared utilities for indexing and access All of Us data in Elasticsearch.
- */
+/** Shared utilities for indexing and access All of Us data in Elasticsearch. */
 public final class ElasticUtils {
   private static final Logger log = Logger.getLogger(ElasticUtils.class.getName());
 
@@ -51,9 +49,7 @@ public final class ElasticUtils {
 
   private ElasticUtils() {}
 
-  /**
-   * Returns the canonical person index name for the given CDR version.
-   */
+  /** Returns the canonical person index name for the given CDR version. */
   public static String personIndexName(String cdrVersion) {
     return cdrVersion + "_person";
   }
@@ -62,21 +58,24 @@ public final class ElasticUtils {
    * Creates a new person index and optionally deletes any existing index of the same name. Applies
    * the expected field mapping for the index type.
    */
-  public static void createPersonIndex(RestHighLevelClient client, String indexName,
-      boolean deleteExisting) throws IOException {
-    if (deleteExisting &&
-        client.indices().exists(new GetIndexRequest().indices(indexName), REQ_OPTS)) {
+  public static void createPersonIndex(
+      RestHighLevelClient client, String indexName, boolean deleteExisting) throws IOException {
+    if (deleteExisting
+        && client.indices().exists(new GetIndexRequest().indices(indexName), REQ_OPTS)) {
       client.indices().delete(new DeleteIndexRequest(indexName), REQ_OPTS);
       log.info("deleted existing index: " + indexName);
     }
-    client.indices().create(
-          new CreateIndexRequest(indexName).mapping(
-              INDEX_TYPE, ImmutableMap.of(
-                  // Do not allow new fields to appear in the mapping, this would indicate a
-                  // programming error.
-                  "dynamic", "strict",
-                  "properties", ElasticDocument.PERSON_SCHEMA)),
-          REQ_OPTS);
+    client
+        .indices()
+        .create(
+            new CreateIndexRequest(indexName)
+                .mapping(
+                    INDEX_TYPE,
+                    ImmutableMap.of(
+                        // Do not allow new fields to appear in the mapping, this would indicate a
+                        // programming error.
+                        "dynamic", "strict", "properties", ElasticDocument.PERSON_SCHEMA)),
+            REQ_OPTS);
     log.info("created person index: " + indexName);
   }
 
@@ -85,15 +84,21 @@ public final class ElasticUtils {
    * already exist in the index, they will instead be updated. Uses a threadpool to dispatch
    * multiple batch requests simultaneously.
    */
-  public static void ingestDocuments(RestHighLevelClient client, String indexName,
-      Iterator<ElasticDocument> docs, int numDocs) throws InterruptedException {
+  public static void ingestDocuments(
+      RestHighLevelClient client, String indexName, Iterator<ElasticDocument> docs, int numDocs)
+      throws InterruptedException {
     // Need to define our own blocking queue; the default from Executors.fixedThreadPool() uses
     // an unbounded queue. When the queue is full, we use a CallerRunsPolicy as the simplest
     // fallback (by default, it throws an exception). This shouldn't significantly affect throughput
     // since our queue size is double our thread count.
     BlockingQueue<Runnable> queue = new ArrayBlockingQueue<>(2 * BATCH_POOL_SIZE, /* fair */ true);
     ExecutorService pool =
-        new ThreadPoolExecutor(BATCH_POOL_SIZE, BATCH_POOL_SIZE, 0L, TimeUnit.MILLISECONDS, queue,
+        new ThreadPoolExecutor(
+            BATCH_POOL_SIZE,
+            BATCH_POOL_SIZE,
+            0L,
+            TimeUnit.MILLISECONDS,
+            queue,
             new ThreadPoolExecutor.CallerRunsPolicy());
 
     Stopwatch timer = Stopwatch.createStarted();
@@ -104,51 +109,63 @@ public final class ElasticUtils {
       int j;
       for (j = 0; j < BATCH_SIZE && docs.hasNext(); j++) {
         ElasticDocument doc = docs.next();
-        bulkReq.add(new IndexRequest(indexName, INDEX_TYPE, doc.id)
-            .source(doc.source));
+        bulkReq.add(new IndexRequest(indexName, INDEX_TYPE, doc.id).source(doc.source));
       }
 
       // Adds work to the pool, or runs this callback on the current thread if the queue is full.
-      pool.submit(() -> {
-        BulkResponse response;
-        try {
-          response = retryTemplate().execute((context) -> {
+      pool.submit(
+          () -> {
+            BulkResponse response;
             try {
-              return client.bulk(bulkReq, REQ_OPTS);
+              response =
+                  retryTemplate()
+                      .execute(
+                          (context) -> {
+                            try {
+                              return client.bulk(bulkReq, REQ_OPTS);
+                            } catch (IOException e) {
+                              log.log(
+                                  Level.WARNING,
+                                  "bulk request attempt "
+                                      + context.getRetryCount()
+                                      + " failed, retrying...",
+                                  e);
+                              throw e;
+                            }
+                          });
             } catch (IOException e) {
-              log.log(Level.WARNING,
-                  "bulk request attempt " + context.getRetryCount() + " failed, retrying...", e);
-              throw e;
+              log.log(Level.SEVERE, "bulk insertion failed", e);
+              fails.addAndGet(bulkReq.numberOfActions());
+              return;
             }
-          });
-        } catch (IOException e) {
-          log.log(Level.SEVERE, "bulk insertion failed", e);
-          fails.addAndGet(bulkReq.numberOfActions());
-          return;
-        }
 
-        int numFails = 0;
-        if (response.hasFailures()) {
-          for (BulkItemResponse itemResp : response.getItems()) {
-              if (itemResp.isFailed()) {
-                log.warning(itemResp.getFailureMessage());
-                numFails++;
+            int numFails = 0;
+            if (response.hasFailures()) {
+              for (BulkItemResponse itemResp : response.getItems()) {
+                if (itemResp.isFailed()) {
+                  log.warning(itemResp.getFailureMessage());
+                  numFails++;
+                }
               }
             }
-          }
-          count.addAndGet(bulkReq.numberOfActions() - numFails);
-          fails.addAndGet(numFails);
-        });
+            count.addAndGet(bulkReq.numberOfActions() - numFails);
+            fails.addAndGet(numFails);
+          });
 
       int inserted = count.get();
       int failed = fails.get();
       int submitted = i + j - failed;
       double rate = docsPerMinute(inserted, timer.elapsed().toMillis());
       double hoursRemaining = ((double) (numDocs - inserted - failed)) / rate / 60.0;
-      log.info(String.format(
-          "Submitted %.2f%% of documents (%d/%d) (%d failed) @ %.2f docs/minute [~%.1fh remaining]",
-          ((float) 100 * (submitted)) / numDocs, submitted, numDocs, failed, rate,
-          hoursRemaining));
+      log.info(
+          String.format(
+              "Submitted %.2f%% of documents (%d/%d) (%d failed) @ %.2f docs/minute [~%.1fh remaining]",
+              ((float) 100 * (submitted)) / numDocs,
+              submitted,
+              numDocs,
+              failed,
+              rate,
+              hoursRemaining));
     }
 
     log.info(String.format("All documents submitted, awaiting remaining threads"));
@@ -156,12 +173,17 @@ public final class ElasticUtils {
     pool.awaitTermination(15, TimeUnit.MINUTES);
     timer.stop();
 
-    log.info(String.format("Indexing complete (%d/%d) (%d failed)",
-        numDocs - fails.get(), numDocs, fails.get()));
+    log.info(
+        String.format(
+            "Indexing complete (%d/%d) (%d failed)", numDocs - fails.get(), numDocs, fails.get()));
     Duration t = timer.elapsed();
-    log.info(String.format("Indexing took %dh %dm %ds; average ~%.2f documents indexed per minute",
-        t.toHours(), t.toMinutes() % 60, t.getSeconds() % 60,
-        docsPerMinute(numDocs, t.toMillis())));
+    log.info(
+        String.format(
+            "Indexing took %dh %dm %ds; average ~%.2f documents indexed per minute",
+            t.toHours(),
+            t.toMinutes() % 60,
+            t.getSeconds() % 60,
+            docsPerMinute(numDocs, t.toMillis())));
   }
 
   private static RetryTemplate retryTemplate() {
@@ -177,12 +199,11 @@ public final class ElasticUtils {
   }
 
   private static double docsPerMinute(int processed, long elapsedMillis) {
-    return 60 * 1000 * (((double) processed ) / ((double) elapsedMillis));
+    return 60 * 1000 * (((double) processed) / ((double) elapsedMillis));
   }
 
   public static LocalDate todayMinusYears(int years) {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
     return now.minusYears(years).toLocalDate();
   }
-
 }

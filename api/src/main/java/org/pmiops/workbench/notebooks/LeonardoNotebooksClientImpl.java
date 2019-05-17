@@ -27,7 +27,6 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final String CLUSTER_LABEL_AOU = "all-of-us";
   private static final String CLUSTER_LABEL_CREATED_BY = "created-by";
 
-
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
   private final Provider<ClusterApi> clusterApiProvider;
@@ -40,7 +39,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   public LeonardoNotebooksClientImpl(
       @Qualifier(NotebooksConfig.USER_CLUSTER_API) Provider<ClusterApi> clusterApiProvider,
       Provider<NotebooksApi> notebooksApiProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider, Provider<User> userProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      Provider<User> userProvider,
       NotebooksRetryHandler retryHandler) {
     this.clusterApiProvider = clusterApiProvider;
     this.notebooksApiProvider = notebooksApiProvider;
@@ -59,39 +59,48 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     // TODO(RW-2658): Use gcsPrefix for all cluster resources, remove old config values.
     String gcsPrefix = "gs://" + config.googleCloudStorageService.clusterResourcesBucketName;
     return new ClusterRequest()
-        .labels(ImmutableMap.of(
-            CLUSTER_LABEL_AOU, "true",
-            CLUSTER_LABEL_CREATED_BY, userEmail))
+        .labels(ImmutableMap.of(CLUSTER_LABEL_AOU, "true", CLUSTER_LABEL_CREATED_BY, userEmail))
         .defaultClientId(config.server.oauthClientId)
         .jupyterUserScriptUri(config.firecloud.jupyterUserScriptUri)
-        .userJupyterExtensionConfig(new UserJupyterExtensionConfig()
-            .nbExtensions(ImmutableMap.of(
-                "aou-playground-extension", config.firecloud.jupyterPlaygroundExtensionUri,
-                "aou-snippets-menu", gcsPrefix + "/aou-snippets-menu.js"))
-            .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
-            .combinedExtensions(ImmutableMap.<String, String>of())
-            .labExtensions(ImmutableMap.<String, String>of()))
-        .machineConfig(new MachineConfig()
-            .masterDiskSize(Optional.ofNullable(clusterOverride.masterDiskSize).orElse(20 /* GB */))
-            .masterMachineType(Optional.ofNullable(clusterOverride.machineType).orElse("n1-standard-2")));
+        .userJupyterExtensionConfig(
+            new UserJupyterExtensionConfig()
+                .nbExtensions(
+                    ImmutableMap.of(
+                        "aou-playground-extension",
+                        config.firecloud.jupyterPlaygroundExtensionUri,
+                        "aou-snippets-menu",
+                        gcsPrefix + "/aou-snippets-menu.js"))
+                .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
+                .combinedExtensions(ImmutableMap.<String, String>of())
+                .labExtensions(ImmutableMap.<String, String>of()))
+        .machineConfig(
+            new MachineConfig()
+                .masterDiskSize(
+                    Optional.ofNullable(clusterOverride.masterDiskSize).orElse(20 /* GB */))
+                .masterMachineType(
+                    Optional.ofNullable(clusterOverride.machineType).orElse("n1-standard-2")));
   }
 
   @Override
   public Cluster createCluster(String googleProject, String clusterName) {
     ClusterApi clusterApi = clusterApiProvider.get();
     User user = userProvider.get();
-    return retryHandler.run((context) ->
-        clusterApi.createClusterV2(googleProject, clusterName,
-            createFirecloudClusterRequest(user.getEmail(), user.getClusterConfigDefault())));
+    return retryHandler.run(
+        (context) ->
+            clusterApi.createClusterV2(
+                googleProject,
+                clusterName,
+                createFirecloudClusterRequest(user.getEmail(), user.getClusterConfigDefault())));
   }
 
   @Override
   public void deleteCluster(String googleProject, String clusterName) {
     ClusterApi clusterApi = clusterApiProvider.get();
-    retryHandler.run((context) -> {
-      clusterApi.deleteCluster(googleProject, clusterName);
-      return null;
-    });
+    retryHandler.run(
+        (context) -> {
+          clusterApi.deleteCluster(googleProject, clusterName);
+          return null;
+        });
   }
 
   @Override
@@ -109,10 +118,11 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   @Override
   public void localize(String googleProject, String clusterName, Map<String, String> fileList) {
     NotebooksApi notebooksApi = notebooksApiProvider.get();
-    retryHandler.run((context) -> {
-      notebooksApi.proxyLocalize(googleProject, clusterName, fileList, /* async */ false);
-      return null;
-    });
+    retryHandler.run(
+        (context) -> {
+          notebooksApi.proxyLocalize(googleProject, clusterName, fileList, /* async */ false);
+          return null;
+        });
   }
 
   @Override
