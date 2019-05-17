@@ -78,7 +78,10 @@ export const styles = {
     height: '25px',
     width: '25px',
     borderRadius: '5px',
-    backgroundColor: colors.purple[0]
+    backgroundColor: colors.purple[0],
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   previewDataHeader: {
     height: '19px',
@@ -90,15 +93,14 @@ export const styles = {
   }
 };
 
-const ImmutableListItem:
-    React.FunctionComponent<{ name: string, onChange: Function, checked: boolean }> =
-    ({name, onChange, checked}) => {
-      return <div style={styles.listItem}>
+const ImmutableListItem: React.FunctionComponent <{
+  name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
+  return <div style={styles.listItem}>
     <input type='checkbox' value={name} onChange={() => onChange()}
            style={styles.listItemCheckbox} checked={checked}/>
     <div style={{lineHeight: '1.5rem'}}>{name}</div>
   </div>;
-    };
+};
 
 const Subheader = (props) => {
   return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
@@ -512,7 +514,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 {!defaultPreviewView && <Clickable data-test-id='preview-icon'
                                                    onClick={() => this.getPreviewList()}
                                                    style={styles.refreshIcon}>
-                  <ClrIcon style={{fill: colors.gray[7], marginLeft: '0.1rem', marginTop: '-1rem'}}
+                  <ClrIcon style={{fill: colors.gray[7]}}
                            shape='refresh'>
                   </ClrIcon>
                 </Clickable>
@@ -528,27 +530,26 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               </div>
               {previewDataLoading && <div style={{display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center'}}>
+                alignItems: 'center', height: '10rem'}}>
                 <Spinner style={{position: 'relative', top: '2rem'}} />
                 <div style={{top: '3rem', position: 'relative'}}>
-                  It may take up to a minute to load the data
+                  It may take up to few minutes to load the data
                 </div>
               </div>}
               {previewList.length > 0 &&
               <div style={{display: 'flex', flexDirection: 'column'}}>
                 <div style={{display: 'flex', flexDirection: 'row'}}>
                   {previewList.map(previewRow =>
-                      <Clickable key={previewRow.domain}
-                                 onClick={() =>
-                                     this.setState({selectedPreviewDomain: previewRow.domain})}
-                                 style={{
-                                   lineHeight: '32px', fontSize: '18px',
-                                   fontWeight: (selectedPreviewDomain === previewRow.domain)
-                                       ? 600 : 400,
-                                   textDecoration:
-                                       (selectedPreviewDomain === previewRow.domain) ?
-                                           'underline' : ''
-                                 }}>
+                     <Clickable key={previewRow.domain}
+                               onClick={() =>
+                                 this.setState({selectedPreviewDomain: previewRow.domain})}
+                               style={{
+                                 lineHeight: '32px', fontSize: '18px',
+                                 fontWeight: (selectedPreviewDomain === previewRow.domain)
+                                     ? 600 : 400,
+                                 textDecoration:
+                                    (selectedPreviewDomain === previewRow.domain) ? 'underline' : ''
+                               }}>
                         <div key={previewRow.domain}
                              style={{
                                marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'
@@ -560,20 +561,20 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 </div>
                 {this.renderPreviewDataTable()}
               </div>
-              }
-            </div>
-          </FadeBox>
-          {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
-                                             selectedConceptSetIds={selectedConceptSetIds}
-                                             selectedCohortIds={selectedCohortIds}
-                                             selectedValues={selectedValues}
-                                             workspaceNamespace={namespace}
-                                             workspaceId={id}
-                                             closeFunction={() => {
-                                               this.setState({openSaveModal: false});
-                                             }}
-          />}
-        </React.Fragment>;
+            }
+          </div>
+        </FadeBox>
+        {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
+                                           selectedConceptSetIds={selectedConceptSetIds}
+                                           selectedCohortIds={selectedCohortIds}
+                                           selectedValues={selectedValues}
+                                           workspaceNamespace={namespace}
+                                           workspaceId={id}
+                                           closeFunction={() => {
+                                             this.setState({openSaveModal: false});
+                                           }}
+        />}
+      </React.Fragment>;
     }
   });
 
