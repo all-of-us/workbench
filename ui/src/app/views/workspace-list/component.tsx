@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
-import {navigate} from 'app/utils/navigation';
+import {configDataStore, navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
 import {AlertDanger} from 'app/components/alert';
@@ -19,7 +19,7 @@ import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-import {configApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
   displayDate,
   reactStyles,
@@ -226,7 +226,6 @@ export const WorkspaceList = withUserProfile()
   { profileState: { profile: Profile, reload: Function } },
   { workspacesLoading: boolean,
     billingProjectInitialized: boolean,
-    useBillingProjectBuffer: boolean,
     workspaceList: WorkspacePermissions[],
     errorText: string,
     firstSignIn: Date,
@@ -238,7 +237,6 @@ export const WorkspaceList = withUserProfile()
     this.state = {
       workspacesLoading: true,
       billingProjectInitialized: false,
-      useBillingProjectBuffer: false,
       workspaceList: [],
       errorText: '',
       firstSignIn: undefined
@@ -247,7 +245,6 @@ export const WorkspaceList = withUserProfile()
 
   componentDidMount() {
     this.checkBillingProjectStatus();
-    this.checkUseBillingProjectBufferFeatureFlag();
     this.reloadWorkspaces();
   }
 
@@ -287,22 +284,18 @@ export const WorkspaceList = withUserProfile()
     }
   }
 
-  async checkUseBillingProjectBufferFeatureFlag() {
-    const config = await configApi().getConfig();
-    this.setState({ useBillingProjectBuffer: config.useBillingProjectBuffer });
-  }
 
   render() {
     const {profileState: {profile}} = this.props;
     const {
       billingProjectInitialized,
-      useBillingProjectBuffer,
       errorText,
       workspaceList,
       workspacesLoading
     } = this.state;
 
-    const canCreateWorkspaces = billingProjectInitialized || useBillingProjectBuffer;
+    const canCreateWorkspaces = billingProjectInitialized ||
+      configDataStore.getValue().useBillingProjectBuffer;
 
     return <React.Fragment>
       <FadeBox style={styles.fadeBox}>

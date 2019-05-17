@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {navigate, queryParamsStore} from 'app/utils/navigation';
+import {configDataStore, navigate, queryParamsStore} from 'app/utils/navigation';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -13,7 +13,7 @@ import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalFooter} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-import {configApi, profileApi} from 'app/services/swagger-fetch-clients';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWork} from 'app/views/recent-work/component';
@@ -96,7 +96,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
     accessTasksRemaining: boolean,
     betaAccessGranted: boolean,
     billingProjectInitialized: boolean,
-    useBillingProjectBuffer: boolean,
     dataUseAgreementCompleted: boolean,
     eraCommonsError: string,
     eraCommonsLinked: boolean,
@@ -118,7 +117,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
       accessTasksRemaining: undefined,
       betaAccessGranted: undefined,
       billingProjectInitialized: false,
-      useBillingProjectBuffer: false,
       dataUseAgreementCompleted: undefined,
       eraCommonsError: '',
       eraCommonsLinked: undefined,
@@ -136,7 +134,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
     this.validateNihToken();
     this.callProfile();
     this.checkBillingProjectStatus();
-    this.checkUseBillingProjectBufferFeatureFlag();
   }
 
   componentDidUpdate(prevProps) {
@@ -225,8 +222,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
         this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
       } else {
         try {
-          const config = await configApi().getConfig();
-          if (config.enforceRegistered) {
+          if (configDataStore.getValue().enforceRegistered) {
             this.setState({
               accessTasksRemaining: !hasRegisteredAccessFetch(profile.dataAccessLevel),
               accessTasksLoaded: true
@@ -255,23 +251,21 @@ export const Homepage = withUserProfile()(class extends React.Component<
     }
   }
 
-  async checkUseBillingProjectBufferFeatureFlag() {
-    const config = await configApi().getConfig();
-    this.setState({useBillingProjectBuffer: config.useBillingProjectBuffer});
-  }
-
   openVideo(videoLink: string): void {
     this.setState({videoOpen: true, videoLink: videoLink});
   }
 
 
   render() {
-    const {billingProjectInitialized, useBillingProjectBuffer, betaAccessGranted,
+    const {billingProjectInitialized, betaAccessGranted,
       videoOpen, accessTasksLoaded, accessTasksRemaining, eraCommonsLinked,
       eraCommonsError, firstVisitTraining, trainingCompleted, quickTour, videoLink,
       twoFactorAuthCompleted, dataUseAgreementCompleted
     } = this.state;
-    const canCreateWorkspaces = billingProjectInitialized || useBillingProjectBuffer;
+
+    const canCreateWorkspaces = billingProjectInitialized ||
+      configDataStore.getValue().useBillingProjectBuffer;
+
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',

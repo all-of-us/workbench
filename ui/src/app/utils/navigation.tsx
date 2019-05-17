@@ -17,6 +17,7 @@ export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined)
 export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
+export const configDataStore = new BehaviorSubject<any>({});
 export const userProfileStore =
   new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
     profile: {} as Profile,

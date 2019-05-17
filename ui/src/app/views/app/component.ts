@@ -10,10 +10,12 @@ import {
 } from '@angular/router';
 
 import {cookiesEnabled} from 'app/utils';
-import {queryParamsStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
+import { configApi } from 'app/services/swagger-fetch-clients';
+import {configDataStore, queryParamsStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
+
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 
@@ -40,6 +42,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkBrowserSupport();
+    this.loadConfig();
 
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
@@ -188,6 +191,11 @@ export class AppComponent implements OnInit {
         }
       }
     });
+  }
+
+  private async loadConfig() {
+    const config = await configApi().getConfig();
+    configDataStore.next(config);
   }
 
 }

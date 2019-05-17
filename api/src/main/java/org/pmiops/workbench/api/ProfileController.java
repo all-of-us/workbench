@@ -273,14 +273,16 @@ public class ProfileController implements ProfileApiDelegate {
 
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (user.getFirstSignInTime() == null) {
+      // If the user is already registered, their profile will get updated.
+      fireCloudService.registerUser(user.getContactEmail(),
+          user.getGivenName(), user.getFamilyName());
+
       // TODO(calbach): After the next DB wipe, switch this null check to
       // instead use the freeTierBillingProjectStatus.
       if (!workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer && user.getFreeTierBillingProjectName() == null) {
-        if (user.getFreeTierBillingProjectName() == null) {
-          String billingProjectName = createFirecloudUserAndBillingProject(user);
+          String billingProjectName = createFirecloudBillingProject(user);
           user.setFreeTierBillingProjectName(billingProjectName);
           user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.PENDING);
-        }
       }
 
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));

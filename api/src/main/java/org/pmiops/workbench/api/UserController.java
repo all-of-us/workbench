@@ -68,15 +68,11 @@ public class UserController implements UserApiDelegate {
         .orElse(Sort.Direction.ASC);
     Sort sort = new Sort(new Sort.Order(direction, DEFAULT_SORT_FIELD));
 
-    List<User> users = userService.findUsersBySearchString(term, sort);
-
-    // We want to filter out users not initialized in firecloud yet to avoid sharing with a not yet existent user.
-    // This is no longer relevant if we create new workspaces with new billing projects
-    if (!workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer) {
-      users = users.stream()
-          .filter(user -> user.getFreeTierBillingProjectName() != null)
-          .collect(Collectors.toList());
-    }
+    // What we are really looking for here are users who have a FC account.
+    // This should exist if they have signed in at least once
+    List<User> users = userService.findUsersBySearchString(term, sort).stream()
+        .filter(user -> user.getFirstSignInTime() != null)
+        .collect(Collectors.toList());
 
     int pageSize = Optional.ofNullable(size).orElse(DEFAULT_PAGE_SIZE);
     List<List<User>> pagedUsers = Lists.partition(users, pageSize);
