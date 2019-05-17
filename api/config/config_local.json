@@ -8,8 +8,6 @@
     "clusterIdleMaxAgeDays": 3,
     "debugEndpoints": false,
     "enforceRegistered": false,
-    "jupyterUserScriptUri": "gs:\/\/all-of-us-workbench-test-cluster-resources/setup_notebook_cluster.sh",
-    "jupyterPlaygroundExtensionUri": "gs:\/\/all-of-us-workbench-test-cluster-resources/playground-extension.js",
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-test",
     "billingRetryCount": 2,

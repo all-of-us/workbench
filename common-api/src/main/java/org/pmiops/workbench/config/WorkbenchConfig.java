@@ -15,7 +15,6 @@ public class WorkbenchConfig {
   public GoogleDirectoryServiceConfig googleDirectoryService;
   public ServerConfig server;
   public AdminConfig admin;
-  public JiraConfig jira;
   public MandrillConfig mandrill;
   public ElasticsearchConfig elasticsearch; 
   public MoodleConfig moodle;
@@ -36,7 +35,6 @@ public class WorkbenchConfig {
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
     config.server = new ServerConfig();
     config.admin = new AdminConfig();
-    config.jira = new JiraConfig();
     config.mandrill = new MandrillConfig();
     config.elasticsearch = new ElasticsearchConfig();
     config.moodle = new MoodleConfig();
@@ -54,8 +52,6 @@ public class WorkbenchConfig {
     public Integer clusterIdleMaxAgeDays;
     public String registeredDomainName;
     public boolean enforceRegistered;
-    public String jupyterUserScriptUri;
-    public String jupyterPlaygroundExtensionUri;
     public String leoBaseUrl;
     public Integer billingRetryCount;
     public Integer billingProjectBufferCapacity;
@@ -96,11 +92,6 @@ public class WorkbenchConfig {
   public static class AdminConfig {
     public String adminIdVerification;
     public String loginUrl;
-  }
-
-  public static class JiraConfig {
-    public String projectKey;
-    public String cdrProjectKey;
   }
 
   public static class MandrillConfig {
