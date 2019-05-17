@@ -48,6 +48,7 @@ import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/c
 import {ProfilePageComponent} from './views/profile-page/component';
 import {QuickTourModalComponent} from './views/quick-tour-modal/component';
 import {RecentWorkComponent} from './views/recent-work/component';
+import {ResetClusterButtonComponent} from './views/reset-cluster-button/component';
 import {ResourceCardComponent} from './views/resource-card/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SignInComponent} from './views/sign-in/component';
@@ -83,7 +84,7 @@ import {
 } from 'notebooks-generated';
 import { HighlightSearchComponent } from './highlight-search/highlight-search.component';
 import {ToolTipComponent} from './views/tooltip/component';
-import {ResetClusterButtonComponent} from "./views/reset-cluster-button/component";
+
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:

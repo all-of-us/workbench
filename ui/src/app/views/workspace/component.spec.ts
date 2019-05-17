@@ -16,10 +16,10 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
+import {ResetClusterButtonComponent} from 'app/views/reset-cluster-button/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
-import {ResetClusterButtonComponent} from 'app/views/reset-cluster-button/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
@@ -44,6 +44,7 @@ import {
 } from 'notebooks-generated';
 
 import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
+import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
@@ -61,7 +62,7 @@ import {workspaceDataStub, WorkspacesApiStub} from 'testing/stubs/workspaces-api
 
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {updateAndTick} from 'testing/test-helpers';
-import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
+
 
 describe('WorkspaceComponent', () => {
   let fixture: ComponentFixture<WorkspaceComponent>;

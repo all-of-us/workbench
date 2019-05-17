@@ -1,16 +1,18 @@
+import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {clusterApi} from 'app/services/swagger-fetch-clients';
+import {ReactWrapperBase} from 'app/utils';
 
 import {
   Cluster,
   ClusterStatus,
 } from 'generated/fetch/api';
-import {Component, Input} from "@angular/core";
-import {ReactWrapperBase} from "../../utils";
+
+
 
 const TRANSITIONAL_STATUSES = new Set<ClusterStatus>([
   ClusterStatus.Creating,
@@ -26,7 +28,7 @@ const styles = {
 };
 
 interface Props {
-  billingProjectId: string
+  billingProjectId: string;
 }
 
 interface State {
@@ -80,12 +82,14 @@ class ResetClusterButton extends React.Component<Props, State> {
              loading={this.state.resetClusterPending}>
         <ModalTitle>Reset Notebook Server?</ModalTitle>
         <ModalBody>
-          <strong>Warning:</strong> Any unsaved changes to your notebooks may be lost
-          and your cluster will be offline for 5-10 minutes.
-          <br/><br/>
-          Resetting should not be necessary under normal conditions. Please help us to
-          improve this experience by using "Report a Bug" from the profile drop-down
-          to describe the reason for this reset.
+            <div>
+              <strong>Warning:</strong> Any unsaved changes to your notebooks may be lost
+              and your cluster will be offline for 5-10 minutes.
+              <br/><br/>
+              Resetting should not be necessary under normal conditions. Please help us to
+              improve this experience by using "Report a Bug" from the profile drop-down
+              to describe the reason for this reset.
+            </div>
         </ModalBody>
         <ModalFooter>
           {this.state.clusterDeletionFailure ?
@@ -111,6 +115,8 @@ class ResetClusterButton extends React.Component<Props, State> {
   }
 
   resetCluster(): void {
+    this.setState({ resetClusterPending: true });
+
     const clusterBillingProjectId = this.state.cluster.clusterNamespace;
     clusterApi().deleteCluster(this.state.cluster.clusterNamespace, this.state.cluster.clusterName)
       .then(() => {
@@ -143,7 +149,7 @@ class ResetClusterButton extends React.Component<Props, State> {
 }
 
 @Component({
-  selector: 'react-cluster-button',
+  selector: 'app-react-cluster-button',
   template: '<div #root></div>'
 })
 class ResetClusterButtonComponent extends ReactWrapperBase {
@@ -158,4 +164,4 @@ export {
   Props as ResetClusterButtonProps,
   ResetClusterButton,
   ResetClusterButtonComponent
-}
+};
