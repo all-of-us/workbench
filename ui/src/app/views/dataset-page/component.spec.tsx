@@ -113,11 +113,11 @@ describe('DataSet', () => {
     // After all cohort concept and values are selected all the buttons will be enabled
 
     wrapper.find('[data-test-id="cohort-list-item"]').first()
-      .find('input').first().simulate('click');
+      .find('input').first().simulate('change');
     wrapper.update();
 
     wrapper.find('[data-test-id="concept-set-list-item"]').first()
-      .find('input').first().simulate('click');
+      .find('input').first().simulate('change');
 
     await waitOneTickAndUpdate(wrapper);
 

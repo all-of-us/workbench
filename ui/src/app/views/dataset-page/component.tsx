@@ -320,7 +320,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain
         });
       } catch (ex) {
-        console.log(ex);
+        console.error(ex);
       } finally {
         this.setState({previewDataLoading: false});
       }
