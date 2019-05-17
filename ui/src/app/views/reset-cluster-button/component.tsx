@@ -62,7 +62,6 @@ class ResetClusterButton extends React.Component<Props, State> {
   }
 
   render() {
-    console.log(this.props);
     return <React.Fragment>
       <div style={styles.notebookSettings}>
         <TooltipTrigger content={
