@@ -16,7 +16,7 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
-import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
+import {ResourceCardComponent} from 'app/views/resource-card/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
@@ -79,7 +79,6 @@ describe('WorkspaceComponent', () => {
         NewNotebookModalComponent,
         RecentWorkComponent,
         ResourceCardComponent,
-        ResourceCardMenuComponent,
         ToolTipComponent,
         TopBoxComponent,
         WorkspaceComponent,
