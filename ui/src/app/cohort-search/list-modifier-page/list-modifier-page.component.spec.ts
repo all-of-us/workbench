@@ -6,7 +6,6 @@ import {ClarityModule} from '@clr/angular';
 
 import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
 import {activeModifierList, CohortSearchActions, previewStatus} from 'app/cohort-search/redux';
-import {wizardStore} from 'app/cohort-search/search-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {DomainType} from 'generated';
@@ -51,17 +50,13 @@ describe('ListModifierPageComponent', () => {
     })
       .compileComponents();
     currentWorkspaceStore.next(workspaceDataStub);
-    wizardStore.next({
-      domain: DomainType.MEASUREMENT,
-      item: {modifiers: []}
-    });
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ListModifierPageComponent);
     component = fixture.componentInstance;
     component.disabled = () => {};
-    component.wizard = {domain: DomainType.MEASUREMENT, modifiers: []};
+    component.wizard = {domain: DomainType.MEASUREMENT, item: {modifiers: []}};
     fixture.detectChanges();
   });
 
