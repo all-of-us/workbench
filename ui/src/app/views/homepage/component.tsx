@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {serverConfigStore, navigate, queryParamsStore} from 'app/utils/navigation';
+import {navigate, queryParamsStore, serverConfigStore} from 'app/utils/navigation';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';

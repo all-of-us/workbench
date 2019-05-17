@@ -10,12 +10,12 @@ import {
 } from '@angular/router';
 
 
+import {ServerConfigService} from 'app/services/server-config.service';
 import {cookiesEnabled} from 'app/utils';
-import {serverConfigStore, queryParamsStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
+import {queryParamsStore, routeConfigDataStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
-import {ServerConfigService} from "../../services/server-config.service";
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 
