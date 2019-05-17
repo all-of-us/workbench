@@ -9,7 +9,7 @@ define([
     const pyMenu = {{PY_MENU_JSON}};
     const rMenu = {{R_MENU_JSON}};
 
-    const {session: {kernel_model: {name: kernelName}}} = Jupyter.notebook;
+    const kernelName = Jupyter.notebook.session.kernel_model.name;
 
     // Show the menu which is relevant to the current kernel. Show both as a fallback.
     let customMenus = [pyMenu, rMenu];

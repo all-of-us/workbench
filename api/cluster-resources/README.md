@@ -65,7 +65,7 @@ follows to enable this:
 
 As code snippets are updated in the source repository, we will want to
 periocially update the menus in the Workbench. For now, this process is fairly
-manual and can be improved going forwards:
+manual and can be improved going forwards (see RW-2665):
 
 Prerequisite: Must have `jq` installed (for pretty printing).
 
