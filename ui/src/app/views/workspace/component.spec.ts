@@ -34,6 +34,7 @@ import {
 import {
   ClusterApi,
   CohortsApi,
+  ConceptSetsApi,
   ProfileApi,
   UserMetricsApi,
   WorkspacesApi
@@ -47,6 +48,7 @@ import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-se
 import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
+import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
 import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
@@ -126,6 +128,7 @@ describe('WorkspaceComponent', () => {
     currentWorkspaceStore.next(workspaceDataStub);
     registerApiClient(ClusterApi, new ClusterApiStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
+    registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(ProfileApi, new ProfileApiStub());
     registerApiClient(UserMetricsApi, new UserMetricsApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());

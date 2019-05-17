@@ -50,11 +50,12 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {CohortBuilderService, CohortsService} from 'generated';
-import {CohortsApi} from 'generated/fetch';
+import {CohortBuilderApi, CohortsApi} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
+import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {CohortSearchComponent} from './cohort-search.component';
@@ -73,6 +74,8 @@ describe('CohortSearchComponent', () => {
   let mockReduxInst;
 
   beforeEach(async(() => {
+    registerApiClient(CohortsApi, new CohortsApiStub());
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     mockReduxInst = MockNgRedux.getInstance();
     const _old = mockReduxInst.getState;
     const _wrapped = () => fromJS(_old());
@@ -150,7 +153,6 @@ describe('CohortSearchComponent', () => {
   }));
 
   beforeEach(() => {
-    registerApiClient(CohortsApi, new CohortsApiStub());
     fixture = TestBed.createComponent(CohortSearchComponent);
     component = fixture.componentInstance;
     component.listSearch = false;
