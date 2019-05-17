@@ -44,6 +44,7 @@ describe('HomepageComponent', () => {
     });
 
     userProfileStore.next({profile, reload, updateCache: () => {}});
+    serverConfigStore.next({useBillingProjectBuffer: false, gsuiteDomain: "abc"})
   });
 
   it('should render the homepage', () => {
@@ -79,7 +80,7 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
-    serverConfigStore.next({enforceRegistered: true})
+    serverConfigStore.next({...serverConfigStore.getValue(), enforceRegistered: true})
     userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -91,7 +92,7 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
-    serverConfigStore.next({enforceRegistered: true})
+    serverConfigStore.next({...serverConfigStore.getValue(), enforceRegistered: true})
     userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
