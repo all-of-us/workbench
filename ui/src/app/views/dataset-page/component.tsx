@@ -90,14 +90,15 @@ export const styles = {
   }
 };
 
-const ImmutableListItem: React.FunctionComponent <{
-  name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
-  return <div style={styles.listItem}>
+const ImmutableListItem:
+    React.FunctionComponent<{ name: string, onChange: Function, checked: boolean }> =
+    ({name, onChange, checked}) => {
+      return <div style={styles.listItem}>
     <input type='checkbox' value={name} onChange={() => onChange()}
            style={styles.listItemCheckbox} checked={checked}/>
     <div style={{lineHeight: '1.5rem'}}>{name}</div>
   </div>;
-};
+    };
 
 const Subheader = (props) => {
   return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
@@ -140,228 +141,229 @@ interface State {
 }
 
 const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
-    class extends React.Component<Props, State> {
-      constructor(props) {
-        super(props);
-        this.state = {
-          cohortList: [],
-          conceptSetList: [],
-          creatingConceptSet: false,
-          dataSet: undefined,
-          dataSetTouched: false,
-          defaultPreviewView: true,
-          includesAllParticipants: false,
-          loadingResources: true,
-          openSaveModal: false,
-          previewList: [],
-          previewDataLoading: false,
-          selectedCohortIds: [],
-          selectedConceptSetIds: [],
-          selectedPreviewDomain: '',
-          selectedValues: [],
-          valueSets: [],
-          valuesLoading: false,
-          selectAll: false
-        };
-      }
+  class extends React.Component<Props, State> {
+    constructor(props) {
+      super(props);
+      this.state = {
+        cohortList: [],
+        conceptSetList: [],
+        creatingConceptSet: false,
+        dataSet: undefined,
+        dataSetTouched: false,
+        defaultPreviewView: true,
+        includesAllParticipants: false,
+        loadingResources: true,
+        openSaveModal: false,
+        previewList: [],
+        previewDataLoading: false,
+        selectedCohortIds: [],
+        selectedConceptSetIds: [],
+        selectedPreviewDomain: '',
+        selectedValues: [],
+        valueSets: [],
+        valuesLoading: false,
+        selectAll: false
+      };
+    }
 
-      get editing() {
-        return this.props.urlParams.dataSetId !== undefined;
-      }
+    get editing() {
+      return this.props.urlParams.dataSetId !== undefined;
+    }
 
-      async componentDidMount() {
-        const {namespace, id} = this.props.workspace;
-        const allPromises = [];
-        allPromises.push(this.loadResources());
-        if (this.editing) {
-          allPromises.push(dataSetApi().getDataSet(
+    async componentDidMount() {
+      const {namespace, id} = this.props.workspace;
+      const allPromises = [];
+      allPromises.push(this.loadResources());
+      if (this.editing) {
+        allPromises.push(dataSetApi().getDataSet(
               namespace, id, this.props.urlParams.dataSetId).then((response) => {
-            this.setState({
-              dataSet: response,
-              includesAllParticipants: response.includesAllParticipants,
-              selectedConceptSetIds: response.conceptSets.map(cs => cs.id),
-              selectedCohortIds: response.cohorts.map(c => c.id),
-              selectedValues: response.values,
-              valuesLoading: true,
-            });
-            return response;
-          }));
-          const [, dataSet] = await Promise.all(allPromises);
+                this.setState({
+                  dataSet: response,
+                  includesAllParticipants: response.includesAllParticipants,
+                  selectedConceptSetIds: response.conceptSets.map(cs => cs.id),
+                  selectedCohortIds: response.cohorts.map(c => c.id),
+                  selectedValues: response.values,
+                  valuesLoading: true,
+                });
+                return response;
+              }));
+        const [, dataSet] = await Promise.all(allPromises);
           // We can only run this command once both the data set fetch and the
           // load resources have concluded. However, we want those to happen in
           // parallel, and one is conditional, so we add them to an array to await
           // and only run once both have finished.
-          this.getValuesList(this.getDomainsFromConceptIds(dataSet.conceptSets.map(cs => cs.id)))
+        this.getValuesList(this.getDomainsFromConceptIds(dataSet.conceptSets.map(cs => cs.id)))
               .then(valueSets => this.setState({valueSets: valueSets, valuesLoading: false}));
-        }
       }
+    }
 
-      async loadResources(): Promise<void> {
-        try {
-          const {namespace, id} = this.props.workspace;
-          const [conceptSets, cohorts] = await Promise.all([
-            conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
-            cohortsApi().getCohortsInWorkspace(namespace, id)]);
-          this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
-            loadingResources: false});
-          return Promise.resolve();
-        } catch (error) {
-          console.error(error);
-          return Promise.resolve();
-        }
+    async loadResources(): Promise<void> {
+      try {
+        const {namespace, id} = this.props.workspace;
+        const [conceptSets, cohorts] = await Promise.all([
+          conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
+          cohortsApi().getCohortsInWorkspace(namespace, id)]);
+        this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
+          loadingResources: false});
+        return Promise.resolve();
+      } catch (error) {
+        console.error(error);
+        return Promise.resolve();
       }
+    }
 
-      getDomainsFromConceptIds(selectedConceptSetIds: number[]): Domain[] {
-        const {conceptSetList} = this.state;
-        return fp.uniq(conceptSetList.filter((conceptSet: ConceptSet) =>
+    getDomainsFromConceptIds(selectedConceptSetIds: number[]): Domain[] {
+      const {conceptSetList} = this.state;
+      return fp.uniq(conceptSetList.filter((conceptSet: ConceptSet) =>
             selectedConceptSetIds.includes(conceptSet.id))
             .map((conceptSet: ConceptSet) => conceptSet.domain));
-      }
+    }
 
-      async getValuesList(domains: Domain[]): Promise<ValueSet[]> {
-        const {namespace, id} = this.props.workspace;
-        const valueSets = fp.zipWith((domain: Domain, valueSet: DomainValuesResponse) =>
+    async getValuesList(domains: Domain[]): Promise<ValueSet[]> {
+      const {namespace, id} = this.props.workspace;
+      const valueSets = fp.zipWith((domain: Domain, valueSet: DomainValuesResponse) =>
                 ({domain: domain, values: valueSet}),
-            domains,
-            await Promise.all(domains.map((domain) =>
+        domains,
+        await Promise.all(domains.map((domain) =>
                 conceptsApi().getValuesFromDomain(namespace, id, domain.toString()))));
-        return valueSets;
-      }
+      return valueSets;
+    }
 
-      select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
-        this.setState({dataSetTouched: true});
-        if (rtype === ResourceType.CONCEPT_SET) {
-          const {valueSets, selectedValues} = this.state;
-          const origSelected = this.state.selectedConceptSetIds;
-          const newSelectedConceptSets =
+    select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
+      this.setState({dataSetTouched: true});
+      if (rtype === ResourceType.CONCEPT_SET) {
+        const {valueSets, selectedValues} = this.state;
+        const origSelected = this.state.selectedConceptSetIds;
+        const newSelectedConceptSets =
               toggleIncludes(resource.id, origSelected)as unknown as number[];
-          const currentDomains = this.getDomainsFromConceptIds(newSelectedConceptSets);
-          const origDomains = valueSets.map(valueSet => valueSet.domain);
-          const newDomains = fp.without(origDomains, currentDomains) as unknown as Domain[];
-          const removedDomains = fp.without(currentDomains, origDomains);
-          const updatedValueSets =
+        const currentDomains = this.getDomainsFromConceptIds(newSelectedConceptSets);
+        const origDomains = valueSets.map(valueSet => valueSet.domain);
+        const newDomains = fp.without(origDomains, currentDomains) as unknown as Domain[];
+        const removedDomains = fp.without(currentDomains, origDomains);
+        const updatedValueSets =
               valueSets.filter(valueSet => !(fp.contains(valueSet.domain, removedDomains)));
-          const updatedSelectedValues =
+        const updatedSelectedValues =
               selectedValues.filter(selectedValue =>
                   !fp.contains(selectedValue.domain, removedDomains));
-          this.setState({
-            selectedConceptSetIds: newSelectedConceptSets,
-            selectedValues: updatedSelectedValues});
-          if (newDomains.length > 0) {
-            this.setState({valuesLoading: true});
-            this.getValuesList(newDomains)
+        this.setState({
+          selectedConceptSetIds: newSelectedConceptSets,
+          selectedValues: updatedSelectedValues});
+        if (newDomains.length > 0) {
+          this.setState({valuesLoading: true});
+          this.getValuesList(newDomains)
                 .then(newValueSets => this.setState({
                   valueSets: updatedValueSets.concat(newValueSets),
                   valuesLoading: false
                 }));
-          } else {
-            this.setState({valueSets: updatedValueSets});
-          }
         } else {
-          this.setState({selectedCohortIds: toggleIncludes(resource.id,
-                this.state.selectedCohortIds) as unknown as number[]}, () => this.defaultPreviewDataRequest());
+          this.setState({valueSets: updatedValueSets});
         }
+      } else {
+        this.setState({selectedCohortIds: toggleIncludes(resource.id,
+          this.state.selectedCohortIds) as unknown as number[]},
+          () => this.defaultPreviewDataRequest());
       }
+    }
 
-      selectDomainValue(domain: Domain, domainValue: DomainValue): void {
-        const valueSets = this.state.valueSets
+    selectDomainValue(domain: Domain, domainValue: DomainValue): void {
+      const valueSets = this.state.valueSets
             .filter(value => value.domain === domain)
             .map(valueSet => valueSet.values.items)[0];
-        const origSelected = this.state.selectedValues;
-        const selectObj = {domain: domain, value: domainValue.value};
-        let valuesSelected = [];
-        if (fp.some(selectObj, origSelected)) {
-          valuesSelected = fp.remove((dv) => dv.domain === selectObj.domain
+      const origSelected = this.state.selectedValues;
+      const selectObj = {domain: domain, value: domainValue.value};
+      let valuesSelected = [];
+      if (fp.some(selectObj, origSelected)) {
+        valuesSelected = fp.remove((dv) => dv.domain === selectObj.domain
               && dv.value === selectObj.value, origSelected);
 
-        } else {
-          valuesSelected = (origSelected).concat(selectObj);
-        }
+      } else {
+        valuesSelected = (origSelected).concat(selectObj);
+      }
         // Sort the values selected as per the order display rather than appending top end
-        valuesSelected = valuesSelected.sort((a, b) =>
+      valuesSelected = valuesSelected.sort((a, b) =>
             valueSets.findIndex(({value}) => a.value === value) -
             valueSets.findIndex(({value}) => b.value === value));
-        this.setState({selectedValues: valuesSelected, dataSetTouched: true},
-            () => this.defaultPreviewDataRequest());
+      this.setState({selectedValues: valuesSelected, dataSetTouched: true},
+        () => this.defaultPreviewDataRequest());
+    }
+
+    selectAllValues() {
+      if (this.state.selectAll) {
+        this.setState({
+          selectedValues: [],
+          selectAll: !this.state.selectAll,
+          defaultPreviewView: true});
+        return;
       }
 
-      selectAllValues() {
-        if (this.state.selectAll) {
-          this.setState({
-            selectedValues: [],
-            selectAll: !this.state.selectAll,
-            defaultPreviewView: true});
-          return;
-        }
-
-        const allValuesSelected = [];
-        this.state.valueSets.map(valueSet => {
-          valueSet.values.items.map(value => {
-            allValuesSelected.push({domain: valueSet.domain, value: value.value});
-          });
+      const allValuesSelected = [];
+      this.state.valueSets.map(valueSet => {
+        valueSet.values.items.map(value => {
+          allValuesSelected.push({domain: valueSet.domain, value: value.value});
         });
-        this.setState({selectedValues: allValuesSelected, selectAll: !this.state.selectAll},
-            () => this.defaultPreviewDataRequest());
-      }
+      });
+      this.setState({selectedValues: allValuesSelected, selectAll: !this.state.selectAll},
+        () => this.defaultPreviewDataRequest());
+    }
 
-      disableSave() {
-        return !this.state.selectedConceptSetIds || this.state.selectedConceptSetIds.length === 0 ||
-            ((!this.state.selectedCohortIds ||
-                this.state.selectedCohortIds.length === 0) && !this.state.includesAllParticipants) ||
+    disableSave() {
+      return !this.state.selectedConceptSetIds || this.state.selectedConceptSetIds.length === 0 ||
+            ((!this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0)
+                && !this.state.includesAllParticipants) ||
             !this.state.selectedValues || this.state.selectedValues.length === 0;
-      }
+    }
 
-      defaultPreviewDataRequest() {
-        if (this.state.defaultPreviewView && !this.disableSave()) {
-          this.getPreviewList();
-          this.setState({defaultPreviewView: false});
-        }
+    defaultPreviewDataRequest() {
+      if (this.state.defaultPreviewView && !this.disableSave()) {
+        this.getPreviewList();
+        this.setState({defaultPreviewView: false});
       }
+    }
 
-      getDataTableValue(data) {
+    getDataTableValue(data) {
         // convert data model from api :
         // [{value[0]: '', queryValue: []}, {value[1]: '', queryValue: []}]
         // to compatible with DataTable
         // {value[0]: queryValue[0], value[1]: queryValue[1]}
 
-        const tableData = fp.flow(
-            fp.map(({value, queryValue}) => fp.map(v => [value, v], queryValue)),
-            fp.unzip,
-            fp.map(fp.fromPairs)
+      const tableData = fp.flow(
+        fp.map(({value, queryValue}) => fp.map(v => [value, v], queryValue)),
+        fp.unzip,
+        fp.map(fp.fromPairs)
         )(data);
-        return tableData;
-      }
+      return tableData;
+    }
 
-      async getPreviewList() {
-        this.setState({previewList: [], previewDataLoading: true});
-        const {namespace, id} = this.props.workspace;
-        const request = {
-          name: '',
-          description: '',
-          conceptSetIds: this.state.selectedConceptSetIds,
-          includesAllParticipants: this.state.includesAllParticipants,
-          cohortIds: this.state.selectedCohortIds,
-          values: this.state.selectedValues
-        };
-        try {
-          const dataSetPreviewResp = await dataSetApi().previewQuery(namespace, id, request);
-          this.setState({
-            previewList: dataSetPreviewResp.domainValue,
-            selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain
-          });
-        } catch (ex) {
-          console.error(ex);
-        } finally {
-          this.setState({previewDataLoading: false});
-        }
+    async getPreviewList() {
+      this.setState({previewList: [], previewDataLoading: true});
+      const {namespace, id} = this.props.workspace;
+      const request = {
+        name: '',
+        description: '',
+        conceptSetIds: this.state.selectedConceptSetIds,
+        includesAllParticipants: this.state.includesAllParticipants,
+        cohortIds: this.state.selectedCohortIds,
+        values: this.state.selectedValues
+      };
+      try {
+        const dataSetPreviewResp = await dataSetApi().previewQuery(namespace, id, request);
+        this.setState({
+          previewList: dataSetPreviewResp.domainValue,
+          selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain
+        });
+      } catch (ex) {
+        console.error(ex);
+      } finally {
+        this.setState({previewDataLoading: false});
       }
+    }
 
-      renderPreviewDataTable() {
-        const filteredPreviewData =
+    renderPreviewDataTable() {
+      const filteredPreviewData =
             this.state.previewList.filter(
-                preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
+              preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
 
-        return <DataTable key={this.state.selectedPreviewDomain} scrollable={true}
+      return <DataTable key={this.state.selectedPreviewDomain} scrollable={true}
                           style={{width: '100%'}}
                           value={this.getDataTableValue(filteredPreviewData.values)}>
           {filteredPreviewData.values.map(value =>
@@ -370,27 +372,27 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       style={{width: '5rem'}} field={value.value}/>
           )}
         </DataTable>;
-      }
+    }
 
-      updateDataSet() {
-        const {namespace, id} = this.props.workspace;
-        const {dataSet} = this.state;
-        const request = {
-          name: dataSet.name,
-          description: dataSet.description,
-          includesAllParticipants: this.state.includesAllParticipants,
-          conceptSetIds: this.state.selectedConceptSetIds,
-          cohortIds: this.state.selectedCohortIds,
-          values: this.state.selectedValues,
-          etag: dataSet.etag
-        };
-        dataSetApi().updateDataSet(namespace, id, dataSet.id, request)
+    updateDataSet() {
+      const {namespace, id} = this.props.workspace;
+      const {dataSet} = this.state;
+      const request = {
+        name: dataSet.name,
+        description: dataSet.description,
+        includesAllParticipants: this.state.includesAllParticipants,
+        conceptSetIds: this.state.selectedConceptSetIds,
+        cohortIds: this.state.selectedCohortIds,
+        values: this.state.selectedValues,
+        etag: dataSet.etag
+      };
+      dataSetApi().updateDataSet(namespace, id, dataSet.id, request)
             .then(() => window.history.back());
-      }
+    }
 
-      render() {
-        const {namespace, id} = this.props.workspace;
-        const {
+    render() {
+      const {namespace, id} = this.props.workspace;
+      const {
           dataSet,
           dataSetTouched,
           defaultPreviewView,
@@ -406,13 +408,13 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           valuesLoading,
           valueSets
         } = this.state;
-        return <React.Fragment>
+      return <React.Fragment>
           <FadeBox style={{marginTop: '1rem'}}>
             <h2 style={{marginTop: 0}}>Datasets{this.editing &&
             dataSet !== undefined && ' - ' + dataSet.name}</h2>
             <div style={{color: '#000000', fontSize: '14px'}}>Build a dataset by selecting the
-              variables and values for one or more of your cohorts. Then export the completed dataset
-              to Notebooks where you can perform your analysis</div>
+              variables and values for one or more of your cohorts. Then export the completed
+              dataset to Notebooks where you can perform your analysis</div>
             <div style={{display: 'flex'}}>
               <div style={{width: '33%'}}>
                 <h2>Select Cohorts</h2>
@@ -445,7 +447,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               </div>
               <div style={{marginLeft: '1.5rem', width: '65%'}}>
                 <h2>Select Concept Sets</h2>
-                <div style={{display: 'flex', backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
+                <div style={{display: 'flex', backgroundColor: 'white',
+                  border: '1px solid #E5E5E5'}}>
                   <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
                     <div style={styles.selectBoxHeader}>
                       Concept Sets
@@ -455,8 +458,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                           <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
                                              data-test-id='concept-set-list-item'
                                              checked={selectedConceptSetIds.includes(conceptSet.id)}
-                                             onChange={
-                                               () => this.select(conceptSet, ResourceType.CONCEPT_SET)
+                                             onChange={() =>
+                                                 this.select(conceptSet, ResourceType.CONCEPT_SET)
                                              }/>)
                       }
                       {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
@@ -484,10 +487,12 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                             </div>
                             {valueSet.values.items.map(domainValue =>
                                 <ValueListItem data-test-id='value-list-items'
-                                               key={domainValue.value} domainValue={domainValue}
-                                               onChange={() => this.selectDomainValue(valueSet.domain, domainValue)}
-                                               checked={fp.some({domain: valueSet.domain, value: domainValue.value},
-                                                   selectedValues)}/>
+                                    key={domainValue.value} domainValue={domainValue}
+                                    onChange={
+                                      () => this.selectDomainValue(valueSet.domain, domainValue)}
+                                    checked={
+                                      fp.some({domain: valueSet.domain, value: domainValue.value},
+                                        selectedValues)}/>
                             )}
                           </div>)
                       }
@@ -569,8 +574,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                              }}
           />}
         </React.Fragment>;
-      }
-    });
+    }
+  });
 
 export {
   DataSetPage,
