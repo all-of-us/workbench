@@ -2,12 +2,14 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchGroupItem;
+import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -80,13 +82,6 @@ public class CohortQueryBuilder {
   private static final String EXCLUDE_SQL_TEMPLATE =
       "${mainTable}.person_id not in\n" +
           "(${excludeSql})\n";
-
-  private BaseQueryBuilder baseQueryBuilder;
-
-  @Autowired
-  public CohortQueryBuilder(BaseQueryBuilder baseQueryBuilder) {
-    this.baseQueryBuilder = baseQueryBuilder;
-  }
 
   /**
    * Provides counts of unique subjects
@@ -194,14 +189,17 @@ public class CohortQueryBuilder {
             "Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
       }
 
+      // produces a map of matching child concept ids.
+      Map<SearchParameter, Set<Long>> criteriaLookup = new HashMap<>();
+      boolean isEnableListSearch = participantCriteria.isEnableListSearch();
       // build query for included search groups
-      StringJoiner joiner = buildQueryWithIncludes(participantCriteria, mainTable, params);
+      StringJoiner joiner = buildQuery(criteriaLookup, request.getIncludes(), mainTable, params, false, isEnableListSearch);
 
       // if includes is empty then don't add the excludes clause
       if (joiner.toString().isEmpty()) {
-        joiner.merge(buildQueryWithExcludes(participantCriteria, mainTable, params, false));
+        joiner.merge(buildQuery(criteriaLookup, request.getExcludes(), mainTable, params, false, isEnableListSearch));
       } else {
-        joiner.merge(buildQueryWithExcludes(participantCriteria, mainTable, params, true));
+        joiner.merge(buildQuery(criteriaLookup, request.getExcludes(), mainTable, params, true, isEnableListSearch));
       }
       Set<Long> participantIdsToExclude = participantCriteria.getParticipantIdsToExclude();
       if (!participantIdsToExclude.isEmpty()) {
@@ -213,31 +211,29 @@ public class CohortQueryBuilder {
     }
   }
 
-  private StringJoiner buildQueryWithIncludes(ParticipantCriteria participantCriteria,
-                                              String mainTable,
-                                              Map<String, QueryParameterValue> params) {
+  private StringJoiner buildQuery(Map<SearchParameter, Set<Long>> criteriaLookup, List<SearchGroup> groups, String mainTable,
+                                  Map<String, QueryParameterValue> params, Boolean excludeSQL, Boolean isEnableListSearch) {
     StringJoiner joiner = new StringJoiner("and ");
     List<String> queryParts = new ArrayList<>();
-    for (SearchGroup searchGroup : participantCriteria.getSearchRequest().getIncludes()) {
-      baseQueryBuilder.buildQuery(participantCriteria, params, queryParts, searchGroup);
-      joiner.add(INCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)
-        .replace("${includeSql}", String.join(UNION_TEMPLATE, queryParts)));
-      queryParts = new ArrayList<>();
-    }
-    return joiner;
-  }
+    for (SearchGroup includeGroup : groups) {
+      if (includeGroup.getTemporal()) {
+        BaseQueryBuilder.buildQuery(criteriaLookup, params, queryParts, includeGroup, isEnableListSearch);
+      } else {
+        for (SearchGroupItem includeItem : includeGroup.getItems()) {
+          String query = QueryBuilderFactory
+            .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
+            .buildQuery(params, includeItem, includeGroup.getMention());
+          queryParts.add(query);
+        }
+      }
 
-  private StringJoiner buildQueryWithExcludes(ParticipantCriteria participantCriteria,
-                                              String mainTable,
-                                              Map<String, QueryParameterValue> params,
-                                              Boolean excludeSQL) {
-    StringJoiner joiner = new StringJoiner("and ");
-    List<String> queryParts = new ArrayList<>();
-    for (SearchGroup searchGroup : participantCriteria.getSearchRequest().getExcludes()) {
-      baseQueryBuilder.buildQuery(participantCriteria, params, queryParts, searchGroup);
-      String sqlTemplate = excludeSQL ? EXCLUDE_SQL_TEMPLATE : INCLUDE_SQL_TEMPLATE;
-      joiner.add(sqlTemplate.replace("${mainTable}", mainTable)
+      if (excludeSQL) {
+        joiner.add(EXCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)
             .replace("${excludeSql}", String.join(UNION_TEMPLATE, queryParts)));
+      } else {
+        joiner.add(INCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)
+            .replace("${includeSql}", String.join(UNION_TEMPLATE, queryParts)));
+      }
       queryParts = new ArrayList<>();
     }
     return joiner;
