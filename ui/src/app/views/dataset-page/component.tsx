@@ -413,98 +413,96 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       return <React.Fragment>
         <FadeBox style={{marginTop: '1rem'}}>
           <h2 style={{marginTop: 0}}>Datasets{this.editing &&
-            dataSet !== undefined && ' - ' + dataSet.name}</h2>
-            <div style={{color: '#000000', fontSize: '14px'}}>Build a dataset by selecting the
-              variables and values for one or more of your cohorts. Then export the completed
-              dataset to Notebooks where you can perform your analysis</div>
-            <div style={{display: 'flex'}}>
-              <div style={{width: '33%'}}>
-                <h2>Select Cohorts</h2>
-                <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
+          dataSet !== undefined && ' - ' + dataSet.name}</h2>
+          <div style={{color: '#000000', fontSize: '14px'}}>Build a dataset by selecting the
+            variables and values for one or more of your cohorts. Then export the completed dataset
+            to Notebooks where you can perform your analysis</div>
+          <div style={{display: 'flex'}}>
+            <div style={{width: '33%'}}>
+              <h2>Select Cohorts</h2>
+              <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
+                <div style={styles.selectBoxHeader}>
+                  Cohorts
+                </div>
+                <div style={{height: '10rem', overflowY: 'auto'}}>
+                  <Subheader>Prepackaged Cohorts</Subheader>
+                  <ImmutableListItem name='All AoU Participants' checked={includesAllParticipants}
+                                     onChange={
+                                       () => this.setState({
+                                         includesAllParticipants: !includesAllParticipants,
+                                         dataSetTouched: true
+                                       })}/>
+                  <Subheader>Workspace Cohorts</Subheader>
+                  {!loadingResources && this.state.cohortList.map(cohort =>
+                      <ImmutableListItem key={cohort.id} name={cohort.name}
+                                         data-test-id='cohort-list-item'
+                                         checked={selectedCohortIds.includes(cohort.id)}
+                                         onChange={
+                                           () => this.select(cohort, ResourceType.COHORT)
+                                         }/>
+                  )
+                  }
+                  {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
+                    left: '10rem'}}/>}
+                </div>
+              </div>
+            </div>
+            <div style={{marginLeft: '1.5rem', width: '65%'}}>
+              <h2>Select Concept Sets</h2>
+              <div style={{display: 'flex', backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
+                <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
                   <div style={styles.selectBoxHeader}>
-                    Cohorts
+                    Concept Sets
                   </div>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
-                    <Subheader>Prepackaged Cohorts</Subheader>
-                    <ImmutableListItem name='All AoU Participants' checked={includesAllParticipants}
-                                       onChange={
-                                         () => this.setState({
-                                           includesAllParticipants: !includesAllParticipants,
-                                           dataSetTouched: true
-                                         })}/>
-                    <Subheader>Workspace Cohorts</Subheader>
-                    {!loadingResources && this.state.cohortList.map(cohort =>
-                        <ImmutableListItem key={cohort.id} name={cohort.name}
-                                           data-test-id='cohort-list-item'
-                                           checked={selectedCohortIds.includes(cohort.id)}
+                    {!loadingResources && this.state.conceptSetList.map(conceptSet =>
+                        <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
+                                           data-test-id='concept-set-list-item'
+                                           checked={selectedConceptSetIds.includes(conceptSet.id)}
                                            onChange={
-                                             () => this.select(cohort, ResourceType.COHORT)
-                                           }/>
-                    )
+                                             () => this.select(conceptSet, ResourceType.CONCEPT_SET)
+                                           }/>)
                     }
                     {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
                       left: '10rem'}}/>}
                   </div>
                 </div>
-              </div>
-              <div style={{marginLeft: '1.5rem', width: '65%'}}>
-                <h2>Select Concept Sets</h2>
-                <div style={{display: 'flex', backgroundColor: 'white',
-                  border: '1px solid #E5E5E5'}}>
-                  <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
-                    <div style={styles.selectBoxHeader}>
-                      Concept Sets
+                <div style={{width: '40%'}}>
+                  <div style={{...styles.selectBoxHeader, display: 'flex'}}>
+                    <div>
+                      Values
                     </div>
-                    <div style={{height: '10rem', overflowY: 'auto'}}>
-                      {!loadingResources && this.state.conceptSetList.map(conceptSet =>
-                          <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
-                                             data-test-id='concept-set-list-item'
-                                             checked={selectedConceptSetIds.includes(conceptSet.id)}
-                                             onChange={() =>
-                                                 this.select(conceptSet, ResourceType.CONCEPT_SET)
-                                             }/>)
-                      }
-                      {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
-                        left: '10rem'}}/>}
-                    </div>
+                    <Clickable data-test-id='select-all'
+                               style={{marginLeft: 'auto', marginRight: '0.5rem'}}
+                               onClick={() => this.selectAllValues()}>
+                      Select All
+                    </Clickable>
                   </div>
-                  <div style={{width: '40%'}}>
-                    <div style={{...styles.selectBoxHeader, display: 'flex'}}>
-                      <div>
-                        Values
-                      </div>
-                      <Clickable data-test-id='select-all'
-                                 style={{marginLeft: 'auto', marginRight: '0.5rem'}}
-                                 onClick={() => this.selectAllValues()}>
-                        Select All
-                      </Clickable>
-                    </div>
-                    <div style={{height: '10rem', overflowY: 'auto'}}>
-                      {valuesLoading && <Spinner style={{position: 'relative',
-                        top: '2rem', left: 'calc(50% - 36px)'}}/>}
-                      {valueSets.map(valueSet =>
-                          <div key={valueSet.domain} style={{marginLeft: '0.5rem'}}>
-                            <div style={{fontSize: '13px', fontWeight: 600, color: 'black'}}>
-                              {fp.capitalize(valueSet.domain.toString())}
-                            </div>
-                            {valueSet.values.items.map(domainValue =>
-                                <ValueListItem data-test-id='value-list-items'
-                                    key={domainValue.value} domainValue={domainValue}
-                                    onChange={
-                                      () => this.selectDomainValue(valueSet.domain, domainValue)}
-                                    checked={
-                                      fp.some({domain: valueSet.domain, value: domainValue.value},
-                                        selectedValues)}/>
-                            )}
-                          </div>)
-                      }
-                    </div>
+                  <div style={{height: '10rem', overflowY: 'auto'}}>
+                    {valuesLoading && <Spinner style={{position: 'relative',
+                      top: '2rem', left: 'calc(50% - 36px)'}}/>}
+                    {valueSets.map(valueSet =>
+                        <div key={valueSet.domain} style={{marginLeft: '0.5rem'}}>
+                          <div style={{fontSize: '13px', fontWeight: 600, color: 'black'}}>
+                            {fp.capitalize(valueSet.domain.toString())}
+                          </div>
+                          {valueSet.values.items.map(domainValue =>
+                              <ValueListItem data-test-id='value-list-items'
+                                key={domainValue.value} domainValue={domainValue}
+                                onChange={() => this.selectDomainValue(valueSet.domain, domainValue)
+                                }
+                                checked={fp.some({domain: valueSet.domain, value: domainValue.value}
+                                  , selectedValues)}/>
+                          )}
+                        </div>)
+                    }
                   </div>
                 </div>
               </div>
             </div>
-          </FadeBox>
-          <FadeBox style={{marginTop: '1rem'}}>
+          </div>
+        </FadeBox>
+        <FadeBox style={{marginTop: '1rem'}}>
             <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
               <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row',
                 position: 'relative'}}>
