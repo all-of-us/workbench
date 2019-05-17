@@ -1387,7 +1387,7 @@ def deploy_gcs_artifacts(cmd_name, args)
       gsutil cp
       setup_notebook_cluster.sh
       playground-extension.js
-      generated/snippets-menu.js
+      generated/aou-snippets-menu.js
       gs://#{gcc.project}-cluster-resources/
     })
     # This file must be readable by all AoU researchers and the Leonardo service
@@ -1397,7 +1397,7 @@ def deploy_gcs_artifacts(cmd_name, args)
       gsutil acl ch -u AllUsers:R
       gs://#{gcc.project}-cluster-resources/setup_notebook_cluster.sh
       gs://#{gcc.project}-cluster-resources/playground-extension.js
-      gs://#{gcc.project}-cluster-resources/snippets-menu.js
+      gs://#{gcc.project}-cluster-resources/aou-snippets-menu.js
     })
   end
 end

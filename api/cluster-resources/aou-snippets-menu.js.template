@@ -25,7 +25,7 @@ define([
     // We primarily expect this to be used for manual testing of
     // workbench-snippets code, so prefix it to differentiate from the menus
     // installed by this extension.
-    const snippetsConfig = Jupyter.notebook.config.data.snippets;
+    const snippetsConfig = Jupyter.notebook.config.data.snippets || {};
     if (snippetsConfig.include_custom_menu) {
       const customExtMenu = JSON.parse(snippetsConfig.custom_menu_content);
       customExtMenu['name'] = '[Custom] ' + customExtMenu['name'];

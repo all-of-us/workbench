@@ -51,7 +51,7 @@ Jupyter UI extension for playground mode. Passed via GCS at cluster creation tim
 Tweak the above instructions for testing the user script to push a modified
 extension and modify the cluster controller to use it.
 
-# snippets-menu
+# Snippets Menu
 
 AoU Clusters enable the [Snippets Menu extension](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/snippets_menu/readme.html)
 with custom AoU-specific code snippets. The snippets live in
