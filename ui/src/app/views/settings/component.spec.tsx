@@ -1,13 +1,16 @@
-import { mount } from 'enzyme';
+import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {SettingsReact, SettingsState} from './component';
 
 import {clusterApi, registerApiClient} from 'app/services/swagger-fetch-clients';
+import {userProfileStore} from 'app/utils/navigation';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
+import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 
 import {ClusterApi} from 'generated/fetch/api';
+
 
 describe('SettingsComponent', () => {
   const component = () => {
@@ -16,6 +19,15 @@ describe('SettingsComponent', () => {
 
   beforeEach(() => {
     registerApiClient(ClusterApi, new ClusterApiStub());
+
+    // the user profile is required for retrieving cluster information because we need
+    // the user's free tier billing project
+
+    userProfileStore.next({
+      profile: ProfileStubVariables.PROFILE_STUB,
+      reload: () => {},
+      updateCache: (profile) => {}
+    });
   });
 
   it('should not open the cluster reset modal when no cluster', () => {

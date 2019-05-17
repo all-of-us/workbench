@@ -2,6 +2,7 @@ import {
   DataSet,
   DataSetApi,
   DataSetExportRequest,
+  DataSetListResponse,
   DataSetPreviewResponse,
   DataSetQueryList,
   DataSetRequest,
@@ -9,6 +10,22 @@ import {
 } from 'generated/fetch';
 
 export class DataSetApiStub extends DataSetApi {
+  static stubDataSets(): DataSet[] {
+    return [
+      {
+        id: 0,
+        name: 'Stub Data Set',
+        description: 'Stub Data Set',
+        includesAllParticipants: false,
+        workspaceId: 0,
+        lastModifiedTime: 10000,
+        conceptSets: [],
+        cohorts: [],
+        values: []
+      }
+    ];
+  }
+
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
   }
@@ -41,8 +58,16 @@ export class DataSetApiStub extends DataSetApi {
     workspaceId: string, dataSet: DataSetRequest): Promise<DataSetPreviewResponse> {
     return Promise.resolve({
       domainValue: [
-          {domain: 'CONDITION', values: [{value: 'Value1'}, {value: 'Value2'}]}
+        {domain: 'CONDITION', values: [{value: 'Value1'}, {value: 'Value2'}]}
       ]
+    });
+  }
+
+  getDataSetsInWorkspace(
+    workspaceNamespace: string,
+    workspaceId: string): Promise<DataSetListResponse> {
+    return new Promise<DataSetListResponse>(resolve => {
+      resolve({items: DataSetApiStub.stubDataSets()});
     });
   }
 }

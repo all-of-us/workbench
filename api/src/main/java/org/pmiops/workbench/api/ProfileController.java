@@ -330,14 +330,15 @@ public class ProfileController implements ProfileApiDelegate {
             log.log(Level.INFO, "Failed to remove user from errored billing project");
           }
           String billingProjectName = createFirecloudBillingProject(user);
-          return this.userService.setBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.PENDING);
+          return this.userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.PENDING);
         } else {
           String billingProjectName = user.getFreeTierBillingProjectName();
           log.log(Level.SEVERE, String.format(
               "free tier project %s failed to be created", billingProjectName));
-          return userService.setBillingProjectNameAndStatus(billingProjectName, status);
+          return userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, status);
         }
       case READY:
+        log.log(Level.INFO, "free tier project initialized");
         break;
 
       default:
@@ -345,31 +346,19 @@ public class ProfileController implements ProfileApiDelegate {
         return user;
     }
 
-    // Grant the user BQ job access on the billing project so that they can run BQ queries from
-    // notebooks. Granting of this role is idempotent.
+    String billingProjectName = user.getFreeTierBillingProjectName();
     try {
-      fireCloudService.grantGoogleRoleToUser(user.getFreeTierBillingProjectName(),
-          FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
-    } catch (WorkbenchException e) {
-      log.log(Level.WARNING,
-          "granting BigQuery role on created free tier billing project failed", e);
-      // Allow the user to continue, as most workbench functionality will still be usable.
-      return user;
-    }
-    log.log(Level.INFO, "free tier project initialized and BigQuery role granted");
-
-    try {
-      this.leonardoNotebooksClient.createCluster(
-          user.getFreeTierBillingProjectName(), LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
-      log.log(Level.INFO, String.format("created cluster %s/%s",
-          user.getFreeTierBillingProjectName(), LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
+      this.leonardoNotebooksClient.createCluster(billingProjectName,
+          LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      log.log(Level.INFO, String.format("created cluster %s/%s", billingProjectName,
+          LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
     } catch (ConflictException e) {
-      log.log(Level.INFO, String.format("Cluster %s/%s already exists",
-          user.getFreeTierBillingProjectName(), LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
+      log.log(Level.INFO, String.format("Cluster %s/%s already exists", billingProjectName,
+          LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
     } catch (GatewayTimeoutException e) {
       log.log(Level.WARNING, "Socket Timeout creating cluster.");
     }
-    return userService.setBillingProjectNameAndStatus(user.getFreeTierBillingProjectName(), BillingProjectStatus.READY);
+    return userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.READY);
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {

@@ -2,8 +2,8 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -245,7 +245,6 @@ public class ProfileControllerTest {
         DataAccessLevel.UNREGISTERED, TIMESTAMP, null);
     assertThat(profile.getFreeTierBillingProjectName()).isNotEmpty();
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
-    verify(fireCloudService).createAllOfUsBillingProject(anyString());
     verify(fireCloudService).addUserToBillingProject(
         PRIMARY_EMAIL, profile.getFreeTierBillingProjectName());
   }
@@ -266,9 +265,6 @@ public class ProfileControllerTest {
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
     profile = profileController.getMe().getBody();
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.READY);
-
-    verify(fireCloudService).grantGoogleRoleToUser(
-        projectName, FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, PRIMARY_EMAIL);
   }
 
   @Test
@@ -290,8 +286,6 @@ public class ProfileControllerTest {
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
     profile = profileController.getMe().getBody();
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
-
-    verify(fireCloudService, never()).grantGoogleRoleToUser(any(), any(), any());
   }
 
   @Test
@@ -313,8 +307,6 @@ public class ProfileControllerTest {
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
     profile = profileController.getMe().getBody();
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
-
-    verify(fireCloudService, never()).grantGoogleRoleToUser(any(), any(), any());
   }
 
   @Test
@@ -338,8 +330,6 @@ public class ProfileControllerTest {
       profile = profileController.getMe().getBody();
     }
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.ERROR);
-
-    verify(fireCloudService, never()).grantGoogleRoleToUser(any(), any(), any());
   }
 
   @Test
@@ -357,8 +347,6 @@ public class ProfileControllerTest {
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
     profile = profileController.getMe().getBody();
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
-
-    verify(fireCloudService, never()).grantGoogleRoleToUser(any(), any(), any());
   }
 
   @Test
@@ -375,8 +363,6 @@ public class ProfileControllerTest {
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
     profile = profileController.getMe().getBody();
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
-
-    verify(fireCloudService, never()).grantGoogleRoleToUser(any(), any(), any());
   }
 
   @Test

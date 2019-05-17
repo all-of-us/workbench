@@ -7,7 +7,6 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData, WorkspaceStorageService} from 'app/services/workspace-storage.service';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
@@ -16,6 +15,7 @@ import {CdrVersion, DataAccessLevel, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import WorkspaceUnderservedPopulation from './workspace-edit-underserved';
+
 
 export const ResearchPurposeItems = {
   diseaseFocusedResearch: {
@@ -231,7 +231,6 @@ export interface WorkspaceEditProps {
   routeConfigData: any;
   workspace: Workspace;
   cancel: Function;
-  reloadWorkspace: Function;
 }
 
 export interface WorkspaceEditState {
@@ -239,6 +238,7 @@ export interface WorkspaceEditState {
   workspace: Workspace;
   workspaceCreationConflictError: boolean;
   workspaceCreationError: boolean;
+  workspaceCreationErrorMessage: string;
   cloneUserRole: boolean;
   loading: boolean;
 }
@@ -271,6 +271,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         },
         workspaceCreationConflictError: false,
         workspaceCreationError: false,
+        workspaceCreationErrorMessage: '',
         cloneUserRole: false,
         loading: false
       };
@@ -360,9 +361,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           workspace = await workspacesApi()
               .updateWorkspace(this.state.workspace.namespace, this.state.workspace.id,
                   {workspace: this.state.workspace});
-          await this.props
-            .reloadWorkspace(this.state.workspace.namespace, this.state.workspace.id)
-            .then(ws => currentWorkspaceStore.next(ws));
+          await workspacesApi()
+            .getWorkspace(this.state.workspace.namespace, this.state.workspace.id)
+            .then(ws => currentWorkspaceStore.next({
+              ...ws.workspace,
+              accessLevel: ws.accessLevel
+            }));
         }
         navigate(['workspaces', workspace.namespace, workspace.id]);
       } catch (error) {
@@ -371,7 +375,19 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         if (error.status === 409) {
           this.setState({workspaceCreationConflictError: true});
         } else {
-          this.setState({workspaceCreationError: true});
+          let errorMsg;
+          if (error.status === 429) {
+            errorMsg = 'Server is overloaded. Please try again in a few minutes.';
+          } else {
+            errorMsg = `Could not
+            ${this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
+              ' create ' : ' update '} workspace.`;
+          }
+
+          this.setState({
+            workspaceCreationError: true,
+            workspaceCreationErrorMessage: errorMsg
+          });
         }
       }
     }
@@ -545,9 +561,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         {this.state.workspaceCreationError &&
         <Modal>
           <ModalTitle>Error:</ModalTitle>
-          <ModalBody>Could not
-            {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? ' create ' : ' update '}
-            workspace.
+          <ModalBody>
+            { this.state.workspaceCreationErrorMessage }
           </ModalBody>
           <ModalFooter>
             <Button onClick = {() => this.props.cancel()}
@@ -588,17 +603,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 })
 export class WorkspaceEditComponent extends ReactWrapperBase {
 
-  constructor(private _location: Location, private workspaceStorage: WorkspaceStorageService) {
-    super(WorkspaceEdit, ['cancel', 'reloadWorkspace']);
+  constructor(private _location: Location) {
+    super(WorkspaceEdit, ['cancel']);
     this.cancel = this.cancel.bind(this);
-    this.reloadWorkspace = this.reloadWorkspace.bind(this);
   }
 
   cancel(): void {
     this._location.back();
-  }
-
-  reloadWorkspace(namespace, id): Promise<WorkspaceData> {
-    return this.workspaceStorage.reloadWorkspace(namespace, id);
   }
 }

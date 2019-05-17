@@ -1,9 +1,14 @@
 package org.pmiops.workbench.cohortbuilder;
 
 import com.google.common.collect.ImmutableSet;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
+
+import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 
 /**
@@ -25,21 +30,25 @@ public class ParticipantCriteria {
   private final SearchRequest searchRequest;
   private final Set<Long> participantIdsToInclude;
   private final Set<Long> participantIdsToExclude;
+  // TODO:Remove freemabd once universal search is in place this can be removed.
+  private boolean enableListSearch;
 
-  public ParticipantCriteria(SearchRequest searchRequest) {
-    this(searchRequest, NO_PARTICIPANTS_TO_EXCLUDE);
+  public ParticipantCriteria(SearchRequest searchRequest, boolean enableListSearch) {
+    this(searchRequest, NO_PARTICIPANTS_TO_EXCLUDE, enableListSearch);
   }
 
-  public ParticipantCriteria(SearchRequest searchRequest, Set<Long> participantIdsToExclude) {
+  public ParticipantCriteria(SearchRequest searchRequest, Set<Long> participantIdsToExclude, boolean enableListSearch) {
     this.searchRequest = searchRequest;
     this.participantIdsToExclude = participantIdsToExclude;
     this.participantIdsToInclude = null;
+    this.enableListSearch = enableListSearch;
   }
 
   public ParticipantCriteria(Set<Long> participantIdsToInclude) {
     this.participantIdsToInclude = participantIdsToInclude;
     this.searchRequest = null;
     this.participantIdsToExclude = null;
+    this.enableListSearch = false;
   }
 
   @Nullable
@@ -57,6 +66,10 @@ public class ParticipantCriteria {
     return participantIdsToExclude;
   }
 
+  public boolean isEnableListSearch() {
+    return this.enableListSearch;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(searchRequest, participantIdsToExclude, participantIdsToExclude);
@@ -69,7 +82,7 @@ public class ParticipantCriteria {
     }
     ParticipantCriteria that = (ParticipantCriteria) obj;
     return Objects.equals(this.searchRequest, that.searchRequest)
-        && Objects.equals(this.participantIdsToExclude, that.participantIdsToExclude)
-        && Objects.equals(this.participantIdsToInclude, that.participantIdsToInclude);
+      && Objects.equals(this.participantIdsToExclude, that.participantIdsToExclude)
+      && Objects.equals(this.participantIdsToInclude, that.participantIdsToInclude);
   }
 }

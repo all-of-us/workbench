@@ -9,8 +9,9 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptAddModal} from 'app/views/concept-add-modal/component';
 import {ConceptTable} from 'app/views/concept-table/component';
 import {SlidingFabReact} from 'app/views/sliding-fab/component';
@@ -30,34 +31,34 @@ const styles = reactStyles({
     lineHeight: '19px', paddingLeft: '2rem'
   },
   domainBoxHeader: {
-    color: '#2691D0', fontSize: '18px', lineHeight: '22px'
+    color: colors.blue[0], fontSize: '18px', lineHeight: '22px'
   },
   domainBoxLink: {
-    color: '#2691D0', lineHeight: '18px', fontWeight: 600, letterSpacing: '0.05rem'
+    color: colors.blue[0], lineHeight: '18px', fontWeight: 600, letterSpacing: '0.05rem'
   },
   conceptText: {
     marginTop: '0.3rem', fontSize: '14px', fontWeight: 400, color: '#4A4A4A',
     display: 'flex', flexDirection: 'column', marginBottom: '0.3rem'
   },
   domainHeaderLink: {
-    justifyContent: 'center', padding: '0.1rem 1rem', color: '#2691D0',
+    justifyContent: 'center', padding: '0.1rem 1rem', color: colors.blue[0],
     lineHeight: '18px'
   },
   domainHeaderSelected: {
-    height: '2.5px', width: '100%', backgroundColor: '#2691D0', border: 'none'
+    height: '2.5px', width: '100%', backgroundColor: colors.blue[0], border: 'none'
   },
   conceptCounts: {
-    backgroundColor: '#fff', height: '2rem', border: '1px solid #CCCCCC',
+    backgroundColor: colors.white, height: '2rem', border: '1px solid #CCCCCC',
     marginTop: '-1px', paddingLeft: '0.5rem', display: 'flex',
     justifyContent: 'flex-start', lineHeight: '15px', fontWeight: 600, fontSize: '14px',
-    color: '#262262', alignItems: 'center'
+    color: colors.purple[0], alignItems: 'center'
   },
   selectedConceptsCount: {
-    backgroundColor: '#2691D0', color: '#fff', borderRadius: '20px',
+    backgroundColor: colors.blue[0], color: colors.white, borderRadius: '20px',
     textAlign: 'center', height: '1.5em', padding: '0 5px'
   },
   clearSearchIcon: {
-    fill: '#2691D0', transform: 'translate(-1.5rem)', height: '1rem', width: '1rem'
+    fill: colors.blue[0], transform: 'translate(-1.5rem)', height: '1rem', width: '1rem'
   }
 });
 

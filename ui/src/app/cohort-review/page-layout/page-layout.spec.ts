@@ -12,7 +12,7 @@ import {CohortReviewApi, CohortsApi, CriteriaListResponse} from 'generated/fetch
 import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {PageLayout} from './page-layout';
 class BuilderApiStub {
   getCriteriaBy(): Observable<CriteriaListResponse> {

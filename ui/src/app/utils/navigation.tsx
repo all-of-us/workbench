@@ -1,6 +1,6 @@
 import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@angular/router';
 
-import {WorkspaceData} from 'app/services/workspace-storage.service';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {Profile} from 'generated';
 import {Cohort, ConceptSet} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -42,7 +42,8 @@ export class WorkbenchRouteReuseStrategy extends RouteReuseStrategy {
   retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle|null { return null; }
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
-    return future.routeConfig === curr.routeConfig && fp.isEqual(future.params, curr.params);
+    return future.routeConfig === curr.routeConfig
+      && (fp.isEqual(future.params, curr.params) || curr.data.shouldReuse);
   }
 }
 

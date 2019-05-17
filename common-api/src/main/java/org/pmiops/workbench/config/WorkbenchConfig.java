@@ -21,6 +21,7 @@ public class WorkbenchConfig {
   public MoodleConfig moodle;
   public AccessConfig access;
   public CohortBuilderConfig cohortbuilder;
+  public FeatureFlagsConfig featureFlags;
 
   /**
    * Creates a config with non-null-but-empty member variables, for use in testing.
@@ -29,6 +30,7 @@ public class WorkbenchConfig {
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new FireCloudConfig();
     config.auth = new AuthConfig();
+    config.auth.serviceAccountApiUsers = new ArrayList();
     config.cdr = new CdrConfig();
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
@@ -127,5 +129,9 @@ public class WorkbenchConfig {
 
   public static class CohortBuilderConfig {
     public boolean enableListSearch;
+  }
+
+  public static class FeatureFlagsConfig {
+    public boolean useBillingProjectBuffer = false;
   }
 }

@@ -13,6 +13,7 @@ import {
 } from 'generated/fetch/api';
 
 import {ReactWrapperBase} from 'app/utils/index';
+import {userProfileStore} from 'app/utils/navigation';
 
 const styles = {
   notebookSettings: {
@@ -25,6 +26,7 @@ export interface SettingsState {
   resetClusterPending: boolean;
   resetClusterModal: boolean;
   clusterDeletionFailure: boolean;
+  waitingForUserProfile: boolean;
 }
 
 export class SettingsReact extends React.Component<{}, SettingsState> {
@@ -41,12 +43,19 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
       cluster: null,
       resetClusterPending: false,
       resetClusterModal: false,
-      clusterDeletionFailure: true
+      clusterDeletionFailure: true,
+      waitingForUserProfile: true
     };
   }
 
   componentDidMount() {
-    this.pollCluster();
+    userProfileStore.asObservable().subscribe((profileStore) => {
+      const billingProjectId = profileStore.profile.freeTierBillingProjectName;
+      if (billingProjectId) {
+        this.setState({waitingForUserProfile: false});
+        this.pollCluster(billingProjectId);
+      }
+    });
   }
 
   componentWillUnmount() {
@@ -61,8 +70,8 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
       <h3>Notebooks</h3>
       <div style={styles.notebookSettings}>
         <TooltipTrigger content={
-                          (!this.state.cluster) ?
-                            'Your notebook server is still being created' : undefined}
+          this.state.waitingForUserProfile ? 'Waiting for notebook server status' :
+              (!this.state.cluster) ? 'Your notebook server is still being created' : undefined}
                         side='right'>
           <Button disabled={!this.state.cluster} onClick={() => this.openResetClusterModal()}
                   data-test-id='reset-notebook-button' type='secondary'>
@@ -106,21 +115,22 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
   }
 
   resetCluster(): void {
+    const clusterBillingProjectId = this.state.cluster.clusterNamespace;
     clusterApi().deleteCluster(this.state.cluster.clusterNamespace, this.state.cluster.clusterName)
       .then(() => {
         this.setState({cluster: null, resetClusterPending: false, resetClusterModal: false});
-        this.pollCluster();
+        this.pollCluster(clusterBillingProjectId);
       })
       .catch((error) => {
         this.setState({resetClusterPending: false, clusterDeletionFailure: true});
       });
   }
 
-  private pollCluster(): void {
+  private pollCluster(billingProjectId): void {
     const repoll = () => {
-      this.pollClusterTimer = setTimeout(() => this.pollCluster(), 15000);
+      this.pollClusterTimer = setTimeout(() => this.pollCluster(billingProjectId), 15000);
     };
-    clusterApi().listClusters()
+    clusterApi().listClusters(billingProjectId)
       .then((body) => {
         const cluster = body.defaultCluster;
         if (SettingsReact.TRANSITIONAL_STATUSES.has(cluster.status)) {

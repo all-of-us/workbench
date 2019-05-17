@@ -93,7 +93,7 @@ public class CBCriteriaDaoTest {
       .domainId(domainId)
       .count("100")
       .standard(true)
-      .synonyms("001");
+      .synonyms("001[MEASUREMENT_rank1]");
     cbCriteriaDao.save(criteria);
     PageRequest page = new PageRequest(0, 10);
     List<CBCriteria> measurements =
@@ -203,7 +203,7 @@ public class CBCriteriaDaoTest {
       .count("10")
       .hierarchy(true)
       .standard(true)
-      .synonyms("myMatch");
+      .synonyms("myMatch[CONDITION_rank1]");
     cbCriteriaDao.save(snomedCriteria);
 
     PageRequest page = new PageRequest(0, 10);

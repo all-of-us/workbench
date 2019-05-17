@@ -127,19 +127,27 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ClusterListResponse> listClusters() {
+  public ResponseEntity<ClusterListResponse> listClusters(String billingProjectId) {
+    if (billingProjectId == null) {
+      throw new FailedPreconditionException("Must specify billing project");
+    }
+
+    // future-proofing the transition from using free-tier projects to using the billing buffer:
+    // verify that the project has been properly initialized if it's the user's free tier project.
+    // billing buffer projects are guaranteed to be initialized at this point.
+
     User user = this.userProvider.get();
-    if (user.getFreeTierBillingProjectStatusEnum() != BillingProjectStatus.READY) {
+    if (billingProjectId.equals(user.getFreeTierBillingProjectName()) &&
+        user.getFreeTierBillingProjectStatusEnum() != BillingProjectStatus.READY) {
       throw new FailedPreconditionException(
           "User billing project is not yet initialized, cannot list/create clusters");
     }
-    String project = user.getFreeTierBillingProjectName();
+
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
-      fcCluster = this.leonardoNotebooksClient.getCluster(project, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      fcCluster = this.leonardoNotebooksClient.getCluster(billingProjectId, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
     } catch (NotFoundException e) {
-      fcCluster = this.leonardoNotebooksClient.createCluster(
-          project, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      fcCluster = this.leonardoNotebooksClient.createCluster(billingProjectId, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
     }
 
     int retries = Optional.ofNullable(user.getClusterCreateRetries()).orElse(0);
@@ -154,11 +162,11 @@ public class ClusterController implements ClusterApiDelegate {
         }
         log.warning("Retrying cluster creation.");
 
-        this.leonardoNotebooksClient.deleteCluster(project, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+        this.leonardoNotebooksClient.deleteCluster(billingProjectId, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
       }
     } else if (
         org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(fcCluster.getStatus()) &&
-        retries != 0) {
+            retries != 0) {
       this.userService.setClusterRetryCount(0);
     }
     ClusterListResponse resp = new ClusterListResponse();
@@ -208,6 +216,8 @@ public class ClusterController implements ClusterApiDelegate {
     }
     String apiDir = "workspaces/" + workspacePath;
     if (body.getPlaygroundMode()) {
+      // This prefix must be kept in sync with the Playground mode extension,
+      // see https://github.com/all-of-us/workbench/blob/master/api/cluster-resources/playground-extension.js
       apiDir = "workspaces_playground/" + workspacePath;
     }
     String localDir = "~/" + apiDir;

@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.TestCase.fail;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -36,6 +37,7 @@ import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -185,7 +187,7 @@ public class CohortsControllerTest {
   @Import({WorkspaceServiceImpl.class, CohortCloningService.class, CohortFactoryImpl.class,
       NotebooksServiceImpl.class, UserService.class, WorkspaceMapper.class, WorkspacesController.class,
       CohortsController.class, ConceptSetsController.class})
-  @MockBean({ConceptBigQueryService.class, FireCloudService.class, LeonardoNotebooksClient.class,
+  @MockBean({BillingProjectBufferService.class, ConceptBigQueryService.class, FireCloudService.class, LeonardoNotebooksClient.class,
       CloudStorageService.class, ConceptSetService.class, UserRecentResourceService.class,
       CohortMaterializationService.class, CdrVersionService.class, ConceptService.class,
       ComplianceService.class, DirectoryService.class})
@@ -199,6 +201,14 @@ public class CohortsControllerTest {
     @Bean
     Random random() {
       return new FakeLongRandom(123);
+    }
+
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.featureFlags.useBillingProjectBuffer = false;
+      return workbenchConfig;
     }
   }
 

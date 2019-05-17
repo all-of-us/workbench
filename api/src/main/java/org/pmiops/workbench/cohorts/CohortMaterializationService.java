@@ -23,6 +23,7 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -48,6 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
+import javax.inject.Provider;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,6 +108,7 @@ public class CohortMaterializationService {
   private final ParticipantCohortStatusDao participantCohortStatusDao;
   private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private final ConceptService conceptService;
+  private Provider<WorkbenchConfig> configProvider;
 
   @Autowired
   public CohortMaterializationService(
@@ -113,12 +116,14 @@ public class CohortMaterializationService {
       AnnotationQueryBuilder annotationQueryBuilder,
       ParticipantCohortStatusDao participantCohortStatusDao,
       CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
-      ConceptService conceptService) {
+      ConceptService conceptService,
+      Provider<WorkbenchConfig> configProvider) {
     this.fieldSetQueryBuilder = fieldSetQueryBuilder;
     this.annotationQueryBuilder = annotationQueryBuilder;
     this.participantCohortStatusDao = participantCohortStatusDao;
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.conceptService = conceptService;
+    this.configProvider = configProvider;
   }
 
   private Set<Long> getParticipantIdsWithStatus(@Nullable CohortReview cohortReview, List<CohortStatus> statusFilter) {
@@ -202,7 +207,7 @@ public class CohortMaterializationService {
       } else {
         participantIdsToExclude = ImmutableSet.of();
       }
-      return new ParticipantCriteria(searchRequest, participantIdsToExclude);
+      return new ParticipantCriteria(searchRequest, participantIdsToExclude, configProvider.get().cohortbuilder.enableListSearch);
     } else {
       Set<Long> participantIds = getParticipantIdsWithStatus(cohortReview, statusFilter);
       return new ParticipantCriteria(participantIds);
