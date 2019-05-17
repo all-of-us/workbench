@@ -30,7 +30,6 @@ public class ParticipantCriteria {
   private final SearchRequest searchRequest;
   private final Set<Long> participantIdsToInclude;
   private final Set<Long> participantIdsToExclude;
-  private Map<SearchParameter, Set<Long>> criteriaLookupMap;
   // TODO:Remove freemabd once universal search is in place this can be removed.
   private boolean enableListSearch;
 
@@ -67,20 +66,13 @@ public class ParticipantCriteria {
     return participantIdsToExclude;
   }
 
-  public Map<SearchParameter, Set<Long>> fetchCriteriaLookupMap() {
-    if (this.criteriaLookupMap == null) {
-      this.criteriaLookupMap = new HashMap<>();
-    }
-    return criteriaLookupMap;
-  }
-
   public boolean isEnableListSearch() {
     return this.enableListSearch;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(searchRequest, participantIdsToExclude, participantIdsToExclude, criteriaLookupMap);
+    return Objects.hash(searchRequest, participantIdsToExclude, participantIdsToExclude);
   }
 
   @Override
@@ -91,7 +83,6 @@ public class ParticipantCriteria {
     ParticipantCriteria that = (ParticipantCriteria) obj;
     return Objects.equals(this.searchRequest, that.searchRequest)
       && Objects.equals(this.participantIdsToExclude, that.participantIdsToExclude)
-      && Objects.equals(this.participantIdsToInclude, that.participantIdsToInclude)
-      && Objects.equals(this.criteriaLookupMap, that.criteriaLookupMap);
+      && Objects.equals(this.participantIdsToInclude, that.participantIdsToInclude);
   }
 }
