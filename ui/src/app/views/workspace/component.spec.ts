@@ -32,7 +32,8 @@ import {
   UserService,
 } from 'generated';
 import {
-  CohortsApi, ConceptSetsApi,
+  CohortsApi,
+  ConceptSetsApi,
   ProfileApi,
   UserMetricsApi,
   WorkspacesApi
