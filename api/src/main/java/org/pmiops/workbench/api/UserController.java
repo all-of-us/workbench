@@ -8,18 +8,13 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
-import javax.inject.Provider;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.UserResponse;
-import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
