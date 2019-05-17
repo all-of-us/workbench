@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {configDataStore, navigate, queryParamsStore} from 'app/utils/navigation';
+import {serverConfigStore, navigate, queryParamsStore} from 'app/utils/navigation';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -222,7 +222,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
         this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
       } else {
         try {
-          if (configDataStore.getValue().enforceRegistered) {
+          if (serverConfigStore.getValue().enforceRegistered) {
             this.setState({
               accessTasksRemaining: !hasRegisteredAccessFetch(profile.dataAccessLevel),
               accessTasksLoaded: true
@@ -264,7 +264,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     } = this.state;
 
     const canCreateWorkspaces = billingProjectInitialized ||
-      configDataStore.getValue().useBillingProjectBuffer;
+      serverConfigStore.getValue().useBillingProjectBuffer;
 
     const quickTourResources = [
       {

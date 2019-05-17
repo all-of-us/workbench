@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
-import {configDataStore, navigate} from 'app/utils/navigation';
+import {serverConfigStore, navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
 import {AlertDanger} from 'app/components/alert';
@@ -295,7 +295,7 @@ export const WorkspaceList = withUserProfile()
     } = this.state;
 
     const canCreateWorkspaces = billingProjectInitialized ||
-      configDataStore.getValue().useBillingProjectBuffer;
+      serverConfigStore.getValue().useBillingProjectBuffer;
 
     return <React.Fragment>
       <FadeBox style={styles.fadeBox}>

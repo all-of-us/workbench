@@ -1,7 +1,7 @@
 import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@angular/router';
 
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Profile} from 'generated';
+import {ConfigResponse, Profile} from 'generated';
 import {Cohort, ConceptSet} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
@@ -17,7 +17,7 @@ export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined)
 export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
-export const configDataStore = new BehaviorSubject<any>({});
+export const serverConfigStore = new BehaviorSubject<ConfigResponse>(undefined);
 export const userProfileStore =
   new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
     profile: {} as Profile,
