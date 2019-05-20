@@ -90,6 +90,12 @@ export const styles = {
     fontFamily: 'Montserrat',
     fontSize: '16px',
     fontWeight: 600
+  },
+  warningMessage: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    height: '10rem'
   }
 };
 
@@ -523,8 +529,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 {this.editing ? 'UPDATE DATA SET' : 'SAVE DATA SET'}
               </Button>
             </div>
-            {previewDataLoading && <div style={{display: 'flex', flexDirection: 'column',
-              alignItems: 'center', height: '10rem'}}>
+            {previewDataLoading && <div style={styles.warningMessage}>
               <Spinner style={{position: 'relative', top: '2rem'}} />
               <div style={{top: '3rem', position: 'relative'}}>
                 It may take up to few minutes to load the data

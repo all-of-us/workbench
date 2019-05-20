@@ -76,9 +76,9 @@ describe('DataSet', () => {
     await waitOneTickAndUpdate(wrapper);
 
     // Preview Button by default should be disabled
-    const previewButton = wrapper.find(Button).find('[data-test-id="save-button"]')
+    const saveButton = wrapper.find(Button).find('[data-test-id="save-button"]')
         .first();
-    expect(previewButton.prop('disabled')).toBeTruthy();
+    expect(saveButton.prop('disabled')).toBeTruthy();
 
     // After all cohort concept and values are selected all the buttons will be enabled
 
