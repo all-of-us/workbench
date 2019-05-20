@@ -108,15 +108,6 @@ export class ListModalComponent implements OnInit, OnDestroy {
         this.mode = 'attributes';
       }));
 
-    this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
-
-    this.subscription.add(this.criteriaType$
-      .filter(ctype => !!ctype)
-      .subscribe(ctype => {
-        this.ctype = ctype;
-      })
-    );
-
     this.subscription.add(this.criteriaSubtype$
       .subscribe(subtype => {
         this.subtype = subtype;
