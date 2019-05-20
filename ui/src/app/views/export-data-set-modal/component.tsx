@@ -124,6 +124,7 @@ class ExportDataSetModal extends React.Component<
 
     const errors = validate({name, notebookName}, {
       notebookName: {
+        presence: {allowEmpty: !newNotebook},
         exclusion: {
           within: newNotebook ? existingNotebooks.map(fd => fd.name.slice(0, -6)) : [],
           message: 'already exists'
