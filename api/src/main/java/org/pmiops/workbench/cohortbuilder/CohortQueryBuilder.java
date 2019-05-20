@@ -216,16 +216,7 @@ public class CohortQueryBuilder {
     StringJoiner joiner = new StringJoiner("and ");
     List<String> queryParts = new ArrayList<>();
     for (SearchGroup includeGroup : groups) {
-      if (includeGroup.getTemporal()) {
-        BaseQueryBuilder.buildQuery(criteriaLookup, params, queryParts, includeGroup, isEnableListSearch);
-      } else {
-        for (SearchGroupItem includeItem : includeGroup.getItems()) {
-          String query = QueryBuilderFactory
-            .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
-            .buildQuery(params, includeItem, includeGroup.getMention());
-          queryParts.add(query);
-        }
-      }
+      BaseQueryBuilder.buildQuery(criteriaLookup, params, queryParts, includeGroup, isEnableListSearch);
 
       if (excludeSQL) {
         joiner.add(EXCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)

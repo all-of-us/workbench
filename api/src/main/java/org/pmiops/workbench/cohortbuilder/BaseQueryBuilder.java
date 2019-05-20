@@ -67,7 +67,7 @@ public final class BaseQueryBuilder {
                          SearchGroup searchGroup,
                          boolean isEnableListSearch) {
     if (searchGroup.getTemporal()) {
-      String query = buildTemporalQuery(params, searchGroup, isEnableListSearch);
+      String query = buildOuterTemporalQuery(params, searchGroup, isEnableListSearch);
       queryParts.add(query);
     } else {
       for (SearchGroupItem includeItem : searchGroup.getItems()) {
@@ -92,9 +92,9 @@ public final class BaseQueryBuilder {
    * @param isEnableListSearch
    * @return
    */
-  private static String buildTemporalQuery(Map<String, QueryParameterValue> params,
-                                           SearchGroup searchGroup,
-                                           boolean isEnableListSearch) {
+  private static String buildOuterTemporalQuery(Map<String, QueryParameterValue> params,
+                                                SearchGroup searchGroup,
+                                                boolean isEnableListSearch) {
     validateSearchGroup(searchGroup);
     List<String> temporalQueryParts1 = new ArrayList<>();
     List<String> temporalQueryParts2 = new ArrayList<>();
