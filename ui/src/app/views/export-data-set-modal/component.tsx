@@ -84,6 +84,7 @@ class ExportDataSetModal extends React.Component<
   }
 
   async exportDataSet() {
+    this.setState({loading: true});
     const {dataSet, workspaceNamespace, workspaceFirecloudName} = this.props;
     const request = {
       name: dataSet.name,
@@ -130,10 +131,9 @@ class ExportDataSetModal extends React.Component<
         }
       }
     });
-    return <Modal loading={loading}>
+    return <Modal loading={loading || notebooksLoading}>
       <ModalTitle>Export {dataSet.name} to Python Notebook</ModalTitle>
       <ModalBody>
-        {notebooksLoading && <SpinnerOverlay />}
         <Button data-test-id='code-preview-button'
                 onClick={() => this.setState({seePreview: !seePreview})}>
           {seePreview ? 'Hide Preview' : 'See Code Preview'}
@@ -164,7 +164,7 @@ class ExportDataSetModal extends React.Component<
         </Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
           <Button type='primary' data-test-id='save-data-set'
-                  disabled={errors} onClick={() => this.exportDataSet()}>
+                  disabled={errors || loading} onClick={() => this.exportDataSet()}>
             Export and Open
           </Button>
         </TooltipTrigger>
