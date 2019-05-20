@@ -11,16 +11,8 @@
                  class="btn tab"
                  [disabled]="!noSelection && conceptType === 'standard'"
                  [class.active]="mode === 'list' || mode === 'tree'"
-                 (click)="setMode('tree')">
+                 (click)="mode = 'tree'">
                   {{ title }}
-                </button>
-                <button  *ngIf="isCondOrProc"
-                  type="button"
-                  class="btn tab snomed-tab"
-                  [disabled]="!noSelection && conceptType === 'source'"
-                  [class.active]="mode === 'snomed'"
-                  (click)="setMode('snomed')">
-                  Search SNOMED
                 </button>
                 <button *ngIf="attributesCrit"
                   type="button"
@@ -34,7 +26,7 @@
                   *ngIf="showModifiers"
                   [class.active]="mode === 'modifiers'"
                   [disabled]="noSelection"
-                  (click)="setMode('modifiers')">
+                  (click)="mode = 'modifiers'">
                   Modifiers
                 </button>
               </ng-container>
@@ -63,10 +55,6 @@
                   class="panel"
                   [ngClass]="{'disable-tree':disableCursor}"
                   [class.show]="['tree', 'list', 'modifiers', 'attributes', 'snomed'].includes(mode)">
-                   <!-- SNOMED Search -->
-                  <div *ngIf="isCondOrProc" class="panel-left" [class.show]="mode === 'snomed'">
-                    <crit-tree [node]="snomedNode"></crit-tree>
-                  </div>
                   <!-- Tree Page -->
                   <div class="panel-left" [class.show]="mode === 'tree'">
                     <crit-list-tree *ngIf="hierarchyCrit" [node]="hierarchyCrit"
@@ -129,13 +117,13 @@
                 <button  *ngIf="showNext"
                   type="button"
                   [disabled]="noSelection"
-                  (click)="setMode('modifiers')"
+                  (click)="mode = 'modifiers'"
                   class="btn btn-primary">
                   Next
                 </button>
                 <button *ngIf="showBack"
                   type="button"
-                  (click)="setMode(backMode)"
+                  (click)="mode = backMode"
                   class="btn btn-primary">
                   Back
                 </button>
