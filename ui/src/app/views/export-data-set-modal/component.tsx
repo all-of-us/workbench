@@ -2,19 +2,18 @@ import * as React from 'react';
 import {validate} from 'validate.js';
 
 import {Button} from 'app/components/buttons';
-import {SmallHeader, styles as headerStyles} from 'app/components/headers';
+import {SmallHeader} from 'app/components/headers';
 import {Select, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {convertQueryToText} from 'app/utils/big-query-queries';
 import {summarizeErrors} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
 
 
-import {DataSet, DataSetQuery, FileDetail} from 'generated/fetch';
-import {SpinnerOverlay} from "../../components/spinners";
-import {convertQueryToText} from "../../utils/big-query-queries";
-import {DataSetRequest} from "../../../generated/fetch/api";
+import {DataSet, DataSetQuery, DataSetRequest, FileDetail} from 'generated/fetch';
 
 interface Props {
   closeFunction: Function;
