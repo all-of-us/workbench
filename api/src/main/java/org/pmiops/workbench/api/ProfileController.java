@@ -668,6 +668,36 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, String moduleName, AccessBypassRequest request) {
+    updateBypass(userId, moduleName, request);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirement(String moduleName, AccessBypassRequest request) {
+    if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
+      throw new ForbiddenException("Not allowed to do self bypass.");
+    }
+    long userId = userProvider.get().getUserId();
+    updateBypass(userId, moduleName, request);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<Profile> updateNihToken(NihToken token) {
+    if (token == null || token.getJwt() == null) {
+      throw new BadRequestException("Token is required.");
+    }
+    JWTWrapper wrapper = new JWTWrapper().jwt(token.getJwt());
+    try {
+      fireCloudService.postNihCallback(wrapper);
+      userService.syncEraCommonsStatus();
+      return getProfileResponse(userProvider.get());
+    } catch (WorkbenchException e) {
+      throw e;
+    }
+  }
+
+  private void updateBypass(long userId, String moduleName, AccessBypassRequest request) {
     Timestamp valueToSet;
     Timestamp previousValue;
     Boolean bypassed = request.getIsBypassed();
@@ -715,22 +745,6 @@ public class ProfileController implements ProfileApiDelegate {
         previousValue,
         valueToSet
     );
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  public ResponseEntity<Profile> updateNihToken(NihToken token) {
-    if (token == null || token.getJwt() == null) {
-      throw new BadRequestException("Token is required.");
-    }
-    JWTWrapper wrapper = new JWTWrapper().jwt(token.getJwt());
-    try {
-      fireCloudService.postNihCallback(wrapper);
-      userService.syncEraCommonsStatus();
-      return getProfileResponse(userProvider.get());
-    } catch (WorkbenchException e) {
-      throw e;
-    }
   }
 
 }
