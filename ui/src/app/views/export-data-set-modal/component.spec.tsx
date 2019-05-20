@@ -11,9 +11,9 @@ const workspaceFirecloudName = 'workspaceId';
 const dataSet: DataSet = {
   name: 'hello world',
   description: 'hi',
-  selectedConceptSetIds: [],
-  selectedCohortIds: [],
-  selectedValues: [],
+  conceptSets: [],
+  cohorts: [],
+  values: [],
   includesAllParticipants: false,
 };
 
@@ -38,4 +38,4 @@ describe('ExportDataSetModal', () => {
     const wrapper = mount(createExportDataSetModal());
     expect(wrapper.exists()).toBeTruthy();
   });
-}
+})
