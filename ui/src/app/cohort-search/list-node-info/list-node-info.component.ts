@@ -1,4 +1,4 @@
-import {NgRedux, select} from '@angular-redux/store';
+import {NgRedux} from '@angular-redux/store';
 import {
   AfterViewInit,
   Component,
@@ -13,12 +13,10 @@ import {PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {
   CohortSearchState,
   ppiAnswers,
-  selectedGroups,
 } from 'app/cohort-search/redux';
 import {attributesStore, groupSelectionsStore, selectionsStore, subtreeSelectedStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {stripHtml} from 'app/cohort-search/utils';
 import {AttrName, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
-import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 @Component({
@@ -27,7 +25,6 @@ import {Subscription} from 'rxjs/Subscription';
   styleUrls: ['./list-node-info.component.css']
 })
 export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
-  @select(selectedGroups) groups$: Observable<any>;
   @Input() node: any;
   private isSelected: boolean;
   private isSelectedChild: boolean;
