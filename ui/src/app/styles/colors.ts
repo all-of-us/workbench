@@ -18,6 +18,7 @@ export default {
     '#afd3ed',
     '#d7eaf6',
     '#eaf4fb',
+    '#2F2E7E'
   ],
   gray: [
     '#4a4a4a',
@@ -26,7 +27,8 @@ export default {
     '#b7b7b7',
     '#c3c3c3',
     '#dbdbdb',
-    '#ededed'
+    '#ededed',
+    '#F1F1F1'
   ],
   white: '#fff',
   black: [
