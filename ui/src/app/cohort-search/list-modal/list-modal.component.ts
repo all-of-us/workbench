@@ -10,8 +10,7 @@ import {
   wizardStore
 } from 'app/cohort-search/search-state.service';
 import {stripHtml} from 'app/cohort-search/utils';
-import {TreeSubType, TreeType} from 'generated';
-import {DomainType} from 'generated/fetch';
+import {CriteriaType, DomainType} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
 
@@ -26,11 +25,7 @@ import {Subscription} from 'rxjs/Subscription';
 export class ListModalComponent implements OnInit, OnDestroy {
 
   readonly domainType = DomainType;
-  readonly treeSubType = TreeSubType;
-  ctype: string;
-  subtype: string;
-  itemType: string;
-  fullTree: boolean;
+  readonly criteriaType = CriteriaType;
   subscription: Subscription;
   selections = {};
   selectionIds: Array<string>;
@@ -45,8 +40,8 @@ export class ListModalComponent implements OnInit, OnDestroy {
   modifiersDisabled = false;
   conceptType: string = null;
   wizard: any;
-  attributesCrit: any;
-  hierarchyCrit: any;
+  attributesNode: any;
+  hierarchyNode: any;
 
   constructor() {}
 
@@ -74,7 +69,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
       .filter(crit => !!crit)
       .subscribe(criterion => {
         this.backMode = this.mode;
-        this.attributesCrit = criterion;
+        this.attributesNode = criterion;
         this.mode = 'attributes';
       }));
   }
@@ -104,7 +99,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
     wizardStore.next(undefined);
     selectionsStore.next([]);
     subtreePathStore.next([]);
-    this.hierarchyCrit = null;
+    this.hierarchyNode = null;
     this.open = false;
   }
 
@@ -116,7 +111,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
         break;
       default:
         this.mode = this.backMode;
-        this.attributesCrit = undefined;
+        this.attributesNode = undefined;
         break;
     }
   }
@@ -136,16 +131,16 @@ export class ListModalComponent implements OnInit, OnDestroy {
   }
 
   get attributeTitle() {
-    const domain = this.attributesCrit.domainId;
+    const domain = this.attributesNode.domainId;
     return domain === DomainType[DomainType.PHYSICALMEASUREMENT]
-      ? stripHtml(this.attributesCrit.name)
+      ? stripHtml(this.attributesNode.name)
       : domain + ' Detail';
   }
 
   get showModifiers() {
-    return this.itemType !== TreeType[TreeType.PM] &&
-      this.itemType !== TreeType[TreeType.DEMO] &&
-      this.itemType !== TreeType[TreeType.PPI];
+    return this.wizard.domain !== DomainType.PHYSICALMEASUREMENT &&
+      this.wizard.domain !== DomainType.PERSON &&
+      this.wizard.domain !== DomainType.SURVEY;
   }
 
   get showNext() {
@@ -157,14 +152,14 @@ export class ListModalComponent implements OnInit, OnDestroy {
   }
 
   get treeClass() {
-    if (this.ctype === TreeType.DEMO) {
-      return this.subtype === TreeSubType.AGE ? 'col-md-12' : 'col-md-6';
+    if (this.wizard.domain === DomainType.PERSON) {
+      return this.wizard.type === CriteriaType.AGE ? 'col-md-12' : 'col-md-6';
     }
     return 'col-md-8';
   }
 
   get sidebarClass() {
-    return this.ctype === TreeType.DEMO ? 'col-md-6' : 'col-md-4';
+    return this.wizard.domain === DomainType.PERSON ? 'col-md-6' : 'col-md-4';
   }
 
   setMode(mode: any) {
@@ -178,7 +173,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
     autocompleteStore.next(criterion.name);
     subtreePathStore.next(criterion.path.split('.'));
     subtreeSelectedStore.next(criterion.id);
-    this.hierarchyCrit = {
+    this.hierarchyNode = {
       domainId: criterion.domainId,
       type: criterion.type,
       subtype: criterion.subtype,
