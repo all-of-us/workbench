@@ -13,7 +13,13 @@ import {
   dataSetApi
 } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {
+  reactStyles,
+  ReactWrapperBase,
+  toggleIncludes,
+  withCurrentWorkspace,
+  withUrlParams}
+from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {NewDataSetModal} from 'app/views/new-dataset-modal/component';
@@ -31,30 +37,36 @@ import {
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 
-export const styles = {
+export const styles = reactStyles({
   selectBoxHeader: {
     fontSize: '16px',
     height: '2rem',
     lineHeight: '2rem',
     paddingLeft: '13px',
-    color: '#2F2E7E',
+    color: colors.blue[7],
     borderBottom: '1px solid #E5E5E5'
   },
 
   addIcon: {
     marginLeft: 19,
-    fill: '#2691D0',
+    fill: colors.blue[0],
     verticalAlign: '-6%'
   },
 
   listItem: {
-    border: '0.5px solid #C3C3C3', margin: '.4rem',
-    height: '1.5rem', display: 'flex'
+    border: '0.5px solid #C3C3C3',
+    margin: '.4rem',
+    height: '1.5rem',
+    display: 'flex'
   },
 
   listItemCheckbox: {
-    height: 17, width: 17, marginLeft: 10, marginTop: 10,
-    marginRight: 10, backgroundColor: colors.green[1]
+    height: 17,
+    width: 17,
+    marginLeft: 10,
+    marginTop: 10,
+    marginRight: 10,
+    backgroundColor: colors.green[1]
   },
 
   valueListItemCheckboxStyling: {
@@ -97,7 +109,7 @@ export const styles = {
     alignItems: 'center',
     height: '10rem'
   }
-};
+});
 
 const ImmutableListItem: React.FunctionComponent <{
   name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
