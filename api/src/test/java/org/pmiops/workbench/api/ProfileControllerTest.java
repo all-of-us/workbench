@@ -50,6 +50,7 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
@@ -726,7 +727,8 @@ public class ProfileControllerTest {
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, leonardoNotebooksClient, Providers.of(config), environment,
         Providers.of(mailService));
-    profileController.bypassAccessRequirement(profile.getUserId(), "dataUseAgreement", new AccessBypassRequest().isBypassed(true));
+    profileController.bypassAccessRequirement(profile.getUserId(),
+        new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
     verify(userService, times(1)).setDataUseAgreementBypassTime(any(), any());
   }
 
