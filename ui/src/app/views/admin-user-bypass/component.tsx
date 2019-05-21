@@ -30,11 +30,11 @@ export class AdminUserBypass extends React.Component<
     super(props);
     const {profile} = props;
     const initialModules = [
-      !!profile.betaAccessBypassTime ? AccessModule.BETAACCESS : null,
-      !!profile.complianceTrainingBypassTime ? AccessModule.COMPLIANCETRAINING : null,
-      !!profile.dataUseAgreementBypassTime ? AccessModule.DATAUSEAGREEMENT : null,
-      !!profile.eraCommonsBypassTime ? AccessModule.ERACOMMONS : null,
-      !!profile.twoFactorAuthBypassTime ? AccessModule.TWOFACTORAUTH : null,
+      ...(!!profile.betaAccessBypassTime ? [AccessModule.BETAACCESS] : []),
+      ...(!!profile.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
+      ...(!!profile.dataUseAgreementBypassTime ? [AccessModule.DATAUSEAGREEMENT] : []),
+      ...(!!profile.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
+      ...(!!profile.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
     ];
     this.state = {
       open: false,
@@ -62,7 +62,7 @@ export class AdminUserBypass extends React.Component<
   }
 
   hasEdited(): boolean {
-    return this.state.selectedModules !== this.state.initialModules;
+    return fp.xor(this.state.selectedModules, this.state.initialModules).length !== 0;
   }
 
   render() {

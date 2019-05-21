@@ -750,7 +750,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  /v1/admin/unsafe-self-bypass-access-requirement/:
+  /v1/admin/unsafe-self-bypass-access-requirement:
       post:
         tags:
           - profile
