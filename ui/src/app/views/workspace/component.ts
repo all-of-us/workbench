@@ -195,7 +195,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.bugReportOpen = true;
   }
 
-  workspaceClustersBillingProjectId(): string {
+  workspaceClusterBillingProjectId(): string {
     if (this.workspace.namespace === this.freeTierBillingProject) {
       return this.freeTierBillingProject;
     }

@@ -169,7 +169,7 @@
     <a (click)="googleBucketModal = true">
       Google Bucket
     </a>
-    <app-react-cluster-button *ngIf="!!workspaceClustersBillingProjectId" [billingProjectId]="workspaceClustersBillingProjectId()"></app-react-cluster-button>
+    <app-react-cluster-button *ngIf="!!workspaceClusterBillingProjectId" [billingProjectId]="workspaceClusterBillingProjectId()"></app-react-cluster-button>
   </div>
 </div>
 <app-workspace-share [workspace]="workspace"
