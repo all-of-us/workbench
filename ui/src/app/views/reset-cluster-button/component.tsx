@@ -87,8 +87,8 @@ class ResetClusterButton extends React.Component<Props, State> {
               and your cluster will be offline for 5-10 minutes.
               <br/><br/>
               Resetting should not be necessary under normal conditions. Please help us to
-              improve this experience by using "Report a Bug" from the profile drop-down
-              to describe the reason for this reset.
+              improve this experience by using "Contact Support" from the left side's hamburger
+              menu and describe the reason for this reset.
             </div>
         </ModalBody>
         <ModalFooter>
@@ -153,7 +153,7 @@ class ResetClusterButton extends React.Component<Props, State> {
   template: '<div #root></div>'
 })
 class ResetClusterButtonComponent extends ReactWrapperBase {
-  @Input() billingProjectId;
+  @Input() billingProjectId: string;
 
   constructor() {
     super(ResetClusterButton, ['billingProjectId']);
