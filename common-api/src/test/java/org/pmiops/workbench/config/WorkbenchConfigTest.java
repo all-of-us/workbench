@@ -23,6 +23,12 @@ public class WorkbenchConfigTest {
     assertThat(workbenchConfig.access.unsafeAllowSelfBypass).isFalse();
   }
 
+  @Test
+  public void testUnsafeEndpointsDisabledInStaging() throws FileNotFoundException {
+    WorkbenchConfig workbenchConfig = getConfigFromFile("../api/config/config_staging.json");
+    assertThat(workbenchConfig.access.unsafeAllowSelfBypass).isFalse();
+  }
+
   @Bean
   private WorkbenchConfig getConfigFromFile(String path) throws FileNotFoundException {
     return new Gson().fromJson(new FileReader(path),
