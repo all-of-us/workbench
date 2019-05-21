@@ -714,7 +714,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
     userService.logAdminUserAction(
         userId,
-        "updated user bypass on " + moduleName,
+        "set bypass status for module " + moduleName + " to " + bypassed,
         previousValue,
         valueToSet
     );
