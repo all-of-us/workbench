@@ -26,7 +26,6 @@ import {WorkspaceComponent} from 'app/views/workspace/component';
 
 import {
   ClusterService,
-  ConceptSetsService,
   DataAccessLevel,
   UserMetricsService,
   UserService,
@@ -47,7 +46,6 @@ import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-se
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
 import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
 import {NotebooksServiceStub} from 'testing/stubs/notebooks-service-stub';
@@ -93,7 +91,6 @@ describe('WorkspaceComponent', () => {
         { provide: NotebooksService, useValue: new NotebooksServiceStub() },
         { provide: JupyterService, useValue: new JupyterServiceStub() },
         { provide: Http, useValue: new HttpStub() },
-        { provide: ConceptSetsService, useValue: new ConceptSetsServiceStub() },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         { provide: SignInService, useValue: SignInService },
         { provide: UserMetricsService, useValue: new UserMetricsServiceStub() },

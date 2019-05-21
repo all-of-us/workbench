@@ -1,21 +1,23 @@
 
+import {UpdateConceptSetRequest} from 'generated';
 import {
   ConceptSet,
   ConceptSetListResponse,
   Domain
 } from 'generated/fetch';
 import {ConceptSetsApi, CreateConceptSetRequest, EmptyResponse} from 'generated/fetch/api';
+import {ConceptsApiStub, ConceptStubVariables} from './concepts-api-stub';
 
 export class ConceptSetsApiStub extends ConceptSetsApi {
-  public conceptSets?: ConceptSet[];
+  public conceptSets: ConceptSet[];
   // TODO when this piece is converted
-  // public conceptsStub?: ConceptsServiceStub;
+  public conceptsStub?: ConceptsApiStub;
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
 
     this.conceptSets = ConceptSetsApiStub.stubConceptSets();
-    // this.conceptsStub = new ConceptsServiceStub();
+    this.conceptsStub = new ConceptsApiStub();
 
   }
 
@@ -26,7 +28,9 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         name: 'Mock Concept Set',
         description: 'Mocked for tests',
         domain: Domain.CONDITION,
-        lastModifiedTime: new Date().getTime() - 8000
+        lastModifiedTime: new Date().getTime() - 8000,
+        participantCount: ConceptStubVariables.STUB_CONCEPTS.length,
+        concepts: ConceptStubVariables.STUB_CONCEPTS
       },  {
         id: 346,
         name: 'Mock Concept Set Measurement',
@@ -55,6 +59,13 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
     workspaceNamespace: string, workspaceId: string): Promise<ConceptSetListResponse> {
     return new Promise<ConceptSetListResponse>(resolve => {
       resolve({items: this.conceptSets});
+    });
+  }
+
+  public getConceptSet(workspaceNamespace: string, workspaceId: string, conceptSetId: number):
+  Promise<ConceptSet> {
+    return new Promise<ConceptSet>(resolve => {
+      resolve(this.mustFindConceptSet(conceptSetId));
     });
   }
 
@@ -88,6 +99,34 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
     return new Promise<ConceptSet>(resolve => {
       this.conceptSets.push(conceptSetRequest.conceptSet);
       resolve(conceptSetRequest.conceptSet);
+    });
+  }
+
+  public updateConceptSetConcepts(
+    workspaceNamespace: string, workspaceId: string, conceptSetId: number,
+    req: UpdateConceptSetRequest): Promise<ConceptSet> {
+    return new Promise<ConceptSet>(resolve => {
+      const target = this.conceptSets.find(cs => cs.id === conceptSetId);
+      if (!target) {
+        throw Error(`concept set ${conceptSetId} not found`);
+      }
+      if (!target.concepts) {
+        target.concepts = [];
+      }
+      for (const id of req.removedIds || []) {
+        const index = target.concepts.findIndex(c => c.conceptId === id);
+        if (index >= 0) {
+          target.concepts = target.concepts.filter(concept => concept.conceptId !== id);
+        }
+      }
+      for (const id of req.addedIds || []) {
+        const concept = this.conceptsStub.concepts.find(c => c.conceptId === id);
+        if (!concept) {
+          throw Error(`concept ${id} not found`);
+        }
+        target.concepts.push(concept);
+      }
+      resolve(target);
     });
   }
 

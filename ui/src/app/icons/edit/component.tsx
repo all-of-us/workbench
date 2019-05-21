@@ -17,7 +17,6 @@ const defaultStyle = {
   height: 19,
   width: 19,
   marginLeft: '.5rem',
-  marginTop: '1.1rem',
   fill: '#2691D0',
   cursor: 'pointer'
 };
