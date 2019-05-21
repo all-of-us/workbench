@@ -200,8 +200,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       return this.freeTierBillingProject;
     }
 
-    if (this.accessLevel === WorkspaceAccessLevel.WRITER ||
-      this.accessLevel === WorkspaceAccessLevel.OWNER) {
+    if ([WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.OWNER].includes(this.accessLevel)) {
       return this.workspace.namespace;
     }
 
