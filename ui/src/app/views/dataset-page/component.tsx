@@ -18,8 +18,8 @@ import {
   ReactWrapperBase,
   toggleIncludes,
   withCurrentWorkspace,
-  withUrlParams}
-from 'app/utils';
+  withUrlParams
+} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {NewDataSetModal} from 'app/views/new-dataset-modal/component';
