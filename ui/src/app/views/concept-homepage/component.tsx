@@ -9,7 +9,7 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {queryParamsStore} from 'app/utils/navigation';
 import {ConceptAddModal} from 'app/views/concept-add-modal/component';

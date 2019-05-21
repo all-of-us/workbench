@@ -6,42 +6,19 @@ import {Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {ResourceCardMenu} from 'app/components/resources';
 import {TextModal} from 'app/components/text-modal';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
+import {ExportDataSetModal} from 'app/views/export-data-set-modal/component';
 import {RenameModal} from 'app/views/rename-modal/component';
 import {Domain, RecentResource} from 'generated/fetch';
 
-import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import { CopyNotebookModal } from 'app/views/copy-notebook-modal/component';
-
-
-@Component({
-  selector: 'app-resource-card-menu',
-  template: '<div #root></div>'
-})
-export class ResourceCardMenuComponent extends ReactWrapperBase {
-  @Input() disabled;
-  @Input() resourceType;
-  @Input() onRenameNotebook;
-  @Input() onOpenJupyterLabNotebook;
-  @Input() onCloneResource;
-  @Input() onDeleteResource;
-  @Input() onEditCohort;
-  @Input() onReviewCohort;
-  @Input() onEditConceptSet;
-
-  constructor() {
-    super(ResourceCardMenu, [
-      'disabled', 'resourceType', 'onRenameNotebook', 'onOpenJupyterLabNotebook',
-      'onCloneResource', 'onDeleteResource', 'onEditCohort', 'onReviewCohort',
-      'onEditConceptSet'
-    ]);
-  }
-}
+import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {CopyNotebookModal} from 'app/views/copy-notebook-modal/component';
 
 const styles = reactStyles({
   card: {
@@ -90,31 +67,35 @@ const styles = reactStyles({
 
 const resourceTypeStyles = reactStyles({
   cohort: {
-    backgroundColor: '#F8C954'
+    backgroundColor: colors.yellow[0]
   },
   conceptSet: {
-    backgroundColor: '#AB87B3'
+    backgroundColor: colors.purple[2]
   },
   notebook: {
-    backgroundColor: '#8BC990'
+    backgroundColor: colors.green[0]
+  },
+  dataSet: {
+    backgroundColor: colors.blue[2]
   }
 });
 
 export interface ResourceCardProps {
+  marginTop: string;
   resourceCard: RecentResource;
   onUpdate: Function;
-  marginTop: string;
 }
 
 export interface ResourceCardState {
-  renaming: boolean;
-  editing: boolean;
   confirmDeleting: boolean;
-  invalidResourceError: boolean;
-  showErrorModal: boolean;
-  errorModalTitle: string;
+  editing: boolean;
   errorModalBody: string;
+  errorModalTitle: string;
+  exportingDataSet: boolean;
+  invalidResourceError: boolean;
+  renaming: boolean;
   showCopyNotebookModal: boolean;
+  showErrorModal: boolean;
 }
 
 export class ResourceCard extends React.Component<ResourceCardProps, ResourceCardState> {
@@ -125,16 +106,18 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   constructor(props: ResourceCardProps) {
     super(props);
     this.state = {
-      editing: false,
-      renaming: false,
       confirmDeleting: false,
-      invalidResourceError: !(props.resourceCard.notebook ||
-        props.resourceCard.cohort ||
-        props.resourceCard.conceptSet),
-      showErrorModal: false,
+      editing: false,
       errorModalTitle: 'Error Title',
       errorModalBody: 'Error Body',
+      exportingDataSet: false,
+      invalidResourceError: !(props.resourceCard.notebook ||
+        props.resourceCard.cohort ||
+        props.resourceCard.conceptSet ||
+        props.resourceCard.dataSet),
+      renaming: false,
       showCopyNotebookModal: false,
+      showErrorModal: false,
     };
   }
 
@@ -165,6 +148,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       return ResourceType.COHORT;
     } else if (this.props.resourceCard.conceptSet) {
       return ResourceType.CONCEPT_SET;
+    } else if (this.props.resourceCard.dataSet) {
+      return ResourceType.DATA_SET;
     } else {
       return ResourceType.INVALID;
     }
@@ -180,6 +165,10 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
 
   get isNotebook(): boolean {
     return this.resourceType === ResourceType.NOTEBOOK;
+  }
+
+  get isDataSet(): boolean {
+    return this.resourceType === ResourceType.DATA_SET;
   }
 
   get actionsDisabled(): boolean {
@@ -203,6 +192,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       return this.props.resourceCard.cohort.name;
     } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.name;
+    } else if (this.isDataSet) {
+      return this.props.resourceCard.dataSet.name;
     }
   }
 
@@ -217,6 +208,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       return this.props.resourceCard.cohort.description;
     } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.description;
+    } else if (this.isDataSet) {
+      return this.props.resourceCard.dataSet.description;
     }
   }
 
@@ -228,6 +221,13 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           this.props.resourceCard.workspaceFirecloudName + '/cohorts/build?cohortId=';
         navigateByUrl(url + this.props.resourceCard.cohort.id);
         this.props.onUpdate();
+        break;
+      }
+      case ResourceType.DATA_SET: {
+        navigate(['workspaces',
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          'data', 'data-sets', this.props.resourceCard.dataSet.id]);
         break;
       }
       default: {
@@ -339,6 +339,18 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
             this.closeConfirmDelete();
             this.props.onUpdate();
           });
+        break;
+      }
+      case ResourceType.DATA_SET: {
+        dataSetApi().deleteDataSet(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.dataSet.id)
+          .then(() => {
+            this.closeConfirmDelete();
+            this.props.onUpdate();
+          });
+        break;
       }
     }
   }
@@ -399,8 +411,19 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
               queryParams,
               relativeTo: null,
             });
+        break;
+      }
+      case ResourceType.DATA_SET: {
+        navigate(['/workspaces', this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName, 'data', 'data-sets',
+          this.props.resourceCard.dataSet.id]);
+        break;
       }
     }
+  }
+
+  exportDataSet(): void {
+    this.setState({exportingDataSet: true});
   }
 
   render() {
@@ -437,8 +460,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                               onDeleteResource={() => this.openConfirmDelete()}
                               onRenameNotebook={() => this.renameNotebook()}
                               onRenameCohort={() => this.renameCohort()}
-                              onEditCohort={() => this.edit()}
-                              onEditConceptSet={() => this.edit()}
+                              onEdit={() => this.edit()}
+                              onExportDataSet={() => this.exportDataSet()}
                               onReviewCohort={() => this.reviewCohort()}
                               onOpenJupyterLabNotebook={() => this.openResource(true)}/>
             <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>
@@ -475,6 +498,11 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                           resourceType={this.resourceType}
                           receiveDelete={() => this.receiveDelete()}
                           closeFunction={() => this.closeConfirmDelete()}/>}
+      {this.state.exportingDataSet &&
+      <ExportDataSetModal dataSet={this.props.resourceCard.dataSet}
+                          workspaceNamespace={this.props.resourceCard.workspaceNamespace}
+                          workspaceFirecloudName={this.props.resourceCard.workspaceFirecloudName}
+                          closeFunction={() => this.setState({exportingDataSet: false})}/>}
     </React.Fragment>;
   }
 }

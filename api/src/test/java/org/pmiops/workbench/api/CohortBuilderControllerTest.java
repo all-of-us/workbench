@@ -16,7 +16,7 @@ import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cdr.model.Concept;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
@@ -63,7 +63,7 @@ public class CohortBuilderControllerTest {
   private CloudStorageService cloudStorageService;
 
   @Mock
-  private ParticipantCounter participantCounter;
+  private CohortQueryBuilder cohortQueryBuilder;
 
   @Mock
   private CdrVersionDao cdrVersionDao;
@@ -107,7 +107,7 @@ public class CohortBuilderControllerTest {
     ElasticSearchService elasticSearchService =
         new ElasticSearchService(criteriaDao, cloudStorageService, configProvider);
 
-    controller = new CohortBuilderController(bigQueryService, participantCounter,
+    controller = new CohortBuilderController(bigQueryService, cohortQueryBuilder,
       criteriaDao, cbCriteriaDao, criteriaAttributeDao, cbCriteriaAttributeDao,
       cdrVersionDao, genderRaceEthnicityConceptProvider, cdrVersionService,
       elasticSearchService, configProvider);
@@ -222,7 +222,7 @@ public class CohortBuilderControllerTest {
       .count("0")
       .hierarchy(true)
       .standard(true)
-      .synonyms("LP12*[measurement_rank1]");
+      .synonyms("LP12*[MEASUREMENT_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -267,7 +267,7 @@ public class CohortBuilderControllerTest {
       .count("0")
       .hierarchy(true)
       .standard(true)
-      .synonyms("LP12*[condition_rank1]");
+      .synonyms("LP12*[CONDITION_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -487,7 +487,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.LOINC.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("LP12*[condition_rank1]");
+      .synonyms("LP12*[CONDITION_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(
@@ -515,7 +515,7 @@ public class CohortBuilderControllerTest {
       .type(CriteriaType.ATC.toString())
       .attribute(Boolean.FALSE)
       .standard(true)
-      .synonyms("LP12*[drug_rank1]");
+      .synonyms("LP12*[DRUG_rank1]");
     cbCriteriaDao.save(criteria);
 
     assertEquals(

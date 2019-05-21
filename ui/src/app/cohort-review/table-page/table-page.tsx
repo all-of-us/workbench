@@ -8,12 +8,11 @@ import {
   multiOptions,
   vocabOptions
 } from 'app/cohort-review/review-state.service';
-import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
+import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {Button} from 'app/components/buttons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {
   currentCohortStore,
@@ -21,6 +20,7 @@ import {
   navigateByUrl,
   urlParamsStore
 } from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {
   CohortStatus,
@@ -545,7 +545,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           sortable/>;
       });
       return <div>
-        <style>{css}</style>
+        <style>{datatableStyles}</style>
         {!cohortDescription && <React.Fragment>
           <button
             style={styles.backBtn}

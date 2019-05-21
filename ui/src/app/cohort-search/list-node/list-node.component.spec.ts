@@ -14,12 +14,13 @@ import {
   isCriteriaLoading,
 } from 'app/cohort-search/redux';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortBuilderService, WorkspaceAccessLevel} from 'generated';
+import {CohortBuilderApi} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-import {Observable} from 'rxjs/Observable';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {ListNodeComponent} from './list-node.component';
 
 class MockActions {
@@ -36,6 +37,7 @@ describe('ListNodeComponent', () => {
   let mockReduxInst;
 
   beforeEach(async(() => {
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     mockReduxInst = MockNgRedux.getInstance();
     const _old = mockReduxInst.getState;
     const _wrapped = () => fromJS(_old());
@@ -55,17 +57,13 @@ describe('ListNodeComponent', () => {
       ],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
-        {provide: CohortBuilderService, useValue: {getCriteriaBy: () => {
-          return Observable.of({});
-        }}},
         {provide: CohortSearchActions, useValue: new MockActions()},
       ],
     })
       .compileComponents();
     currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
+      ...workspaceDataStub,
       cdrVersionId: '1',
-      accessLevel: WorkspaceAccessLevel.OWNER,
     });
   }));
 

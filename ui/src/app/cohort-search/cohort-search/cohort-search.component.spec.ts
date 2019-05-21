@@ -46,14 +46,18 @@ import {SearchGroupSelectComponent} from 'app/cohort-search/search-group-select/
 import {SearchGroupComponent} from 'app/cohort-search/search-group/search-group.component';
 import {SelectionInfoComponent} from 'app/cohort-search/selection-info/selection-info.component';
 import {TreeComponent} from 'app/cohort-search/tree/tree.component';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {CohortBuilderService, CohortsService, WorkspaceAccessLevel} from 'generated';
+import {CohortBuilderService, CohortsService} from 'generated';
+import {CohortBuilderApi, CohortsApi} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
+import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {CohortSearchComponent} from './cohort-search.component';
 
 class MockActions {
@@ -70,6 +74,8 @@ describe('CohortSearchComponent', () => {
   let mockReduxInst;
 
   beforeEach(async(() => {
+    registerApiClient(CohortsApi, new CohortsApiStub());
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     mockReduxInst = MockNgRedux.getInstance();
     const _old = mockReduxInst.getState;
     const _wrapped = () => fromJS(_old());
@@ -141,9 +147,8 @@ describe('CohortSearchComponent', () => {
       criteria: '{"excludes":[],"includes":[]}'
     });
     currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
+      ...workspaceDataStub,
       cdrVersionId: '1',
-      accessLevel: WorkspaceAccessLevel.OWNER,
     });
   }));
 

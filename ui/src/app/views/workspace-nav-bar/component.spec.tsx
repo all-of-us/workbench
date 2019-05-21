@@ -1,17 +1,12 @@
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceNavBarReact} from 'app/views/workspace-nav-bar/component';
 import {mount} from 'enzyme';
-import {WorkspaceAccessLevel} from 'generated';
 import * as React from 'react';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 describe('WorkspaceNavBarComponent', () => {
 
   let props: {};
-  const workspace = {
-    ...WorkspacesServiceStub.stubWorkspace(),
-    accessLevel: WorkspaceAccessLevel.OWNER,
-  };
 
   const component = () => {
     return mount(<WorkspaceNavBarReact {...props}/>, {attachTo: document.getElementById('root')});
@@ -20,8 +15,8 @@ describe('WorkspaceNavBarComponent', () => {
   beforeEach(() => {
     props = {};
 
-    currentWorkspaceStore.next(workspace);
-    urlParamsStore.next({ns: workspace.namespace, wsid: workspace.id});
+    currentWorkspaceStore.next(workspaceDataStub);
+    urlParamsStore.next({ns: workspaceDataStub.namespace, wsid: workspaceDataStub.id});
   });
 
   it('should render', () => {
@@ -42,7 +37,7 @@ describe('WorkspaceNavBarComponent', () => {
 
     wrapper.find({'data-test-id': 'Cohorts'}).first().simulate('click');
     expect(navSpy).toHaveBeenCalledWith(
-      ['/workspaces', workspace.namespace, workspace.id, 'cohorts']);
+      ['/workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'cohorts']);
   });
 
   it('should call delete method when clicked', () => {

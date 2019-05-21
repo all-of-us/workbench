@@ -138,10 +138,7 @@ def read_db_vars(gcc)
   return vars.merge({
     'CDR_DB_CONNECTION_STRING' => cdr_vars['DB_CONNECTION_STRING'],
     'CDR_DB_USER' => cdr_vars['WORKBENCH_DB_USER'],
-    'CDR_DB_PASSWORD' => cdr_vars['WORKBENCH_DB_PASSWORD'],
-    'PUBLIC_DB_CONNECTION_STRING' => cdr_vars['PUBLIC_DB_CONNECTION_STRING'],
-    'PUBLIC_DB_USER' => cdr_vars['PUBLIC_DB_USER'],
-    'PUBLIC_DB_PASSWORD' => cdr_vars['PUBLIC_DB_PASSWORD']
+    'CDR_DB_PASSWORD' => cdr_vars['WORKBENCH_DB_PASSWORD']
   })
 end
 
@@ -158,7 +155,7 @@ def dev_up()
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
-  init_new_cdr_db %W{--cdr-db-name cdr --version-flag cdr}
+  init_new_cdr_db %W{--cdr-db-name cdr}
 
   common.status "Updating CDR versions..."
   common.run_inline %W{docker-compose run update-cdr-versions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
@@ -219,7 +216,6 @@ def setup_local_environment()
   ENV["DB_HOST"] = "127.0.0.1"
   ENV["MYSQL_ROOT_PASSWORD"] = root_password
   ENV["DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/workbench?useSSL=false"
-  ENV["PUBLIC_DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/public?useSSL=false"
 end
 
 # TODO(RW-605): This command doesn't actually execute locally as it assumes a docker context.
@@ -233,7 +229,7 @@ def run_local_migrations()
     common.run_inline %W{./run-migrations.sh main}
   end
   Dir.chdir('db-cdr/generate-cdr') do
-    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr --version-flag cdr}
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr}
   end
   common.run_inline %W{gradle :loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json}
   common.run_inline %W{gradle :loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json}
@@ -597,8 +593,8 @@ def run_local_all_migrations()
   common = Common.new
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 
-  init_new_cdr_db %W{--cdr-db-name cdr --version-flag cdr}
-  init_new_cdr_db %W{--cdr-db-name cdr --version-flag cdr --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name cdr}
+  init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
 end
 
 Common.register_command({
@@ -609,7 +605,7 @@ Common.register_command({
 
 
 def run_local_data_migrations()
-  init_new_cdr_db %W{--cdr-db-name cdr --version-flag cdr --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
 end
 
 Common.register_command({
@@ -871,8 +867,7 @@ Common.register_command({
   :fn => ->(*args) { run_cloud_data_migrations("run-cloud-data-migrations", args) }
 })
 
-def write_db_creds_file(project, cdr_db_name, public_db_name,
-                        root_password, workbench_password, public_password=nil)
+def write_db_creds_file(project, cdr_db_name, root_password, workbench_password)
   instance_name = "#{project}:us-central1:workbenchmaindb"
   db_creds_file = Tempfile.new("#{project}-vars.env")
   if db_creds_file
@@ -884,18 +879,12 @@ def write_db_creds_file(project, cdr_db_name, public_db_name,
       # TODO: make our CDR migration scripts update *all* CDR versions listed in the cdr_version
       # table of the workbench DB; then this shouldn't be needed anymore.
       db_creds_file.puts "CDR_DB_NAME=#{cdr_db_name}"
-      db_creds_file.puts "PUBLIC_DB_NAME=#{public_db_name}"
       db_creds_file.puts "CLOUD_SQL_INSTANCE=#{instance_name}"
       db_creds_file.puts "LIQUIBASE_DB_USER=liquibase"
       db_creds_file.puts "LIQUIBASE_DB_PASSWORD=#{workbench_password}"
       db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
       db_creds_file.puts "WORKBENCH_DB_USER=workbench"
       db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
-      if public_password
-        db_creds_file.puts "PUBLIC_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/#{public_db_name}?rewriteBatchedStatements=true"
-        db_creds_file.puts "PUBLIC_DB_USER=public"
-        db_creds_file.puts "PUBLIC_DB_PASSWORD=#{public_password}"
-      end
       db_creds_file.close
 
       copy_file_to_gcs(db_creds_file.path, "#{project}-credentials", "vars.env")
@@ -1391,20 +1380,26 @@ def deploy_gcs_artifacts(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
-  run_inline_or_log(op.opts.dry_run, %W{
-    gsutil cp
-    cluster-resources/setup_notebook_cluster.sh
-    cluster-resources/playground-extension.js
-    gs://#{gcc.project}-cluster-resources/
-  })
-  # This file must be readable by all AoU researchers and the Leonardo service
-  # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make
-  # these public since these assets are public in GitHub anyways.
-  run_inline_or_log(op.opts.dry_run, %W{
-    gsutil acl ch -u AllUsers:R
-    gs://#{gcc.project}-cluster-resources/setup_notebook_cluster.sh
-    gs://#{gcc.project}-cluster-resources/playground-extension.js
-  })
+
+  Dir.chdir("cluster-resources") do
+    common.run_inline(%W{./build.rb build-snippets-menu})
+    run_inline_or_log(op.opts.dry_run, %W{
+      gsutil cp
+      setup_notebook_cluster.sh
+      playground-extension.js
+      generated/aou-snippets-menu.js
+      gs://#{gcc.project}-cluster-resources/
+    })
+    # This file must be readable by all AoU researchers and the Leonardo service
+    # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make
+    # these public since these assets are public in GitHub anyways.
+    run_inline_or_log(op.opts.dry_run, %W{
+      gsutil acl ch -u AllUsers:R
+      gs://#{gcc.project}-cluster-resources/setup_notebook_cluster.sh
+      gs://#{gcc.project}-cluster-resources/playground-extension.js
+      gs://#{gcc.project}-cluster-resources/aou-snippets-menu.js
+    })
+  end
 end
 
 Common.register_command({
@@ -1519,14 +1514,6 @@ Common.register_command({
 def create_workbench_db()
   run_with_redirects(
     "cat db/create_db.sql | envsubst | " \
-    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
-    ENV["MYSQL_ROOT_PASSWORD"]
-  )
-end
-
-def grant_permissions()
-  run_with_redirects(
-    "cat db/grant_permissions.sql | envsubst | " \
     "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
     ENV["MYSQL_ROOT_PASSWORD"]
   )
@@ -1763,20 +1750,13 @@ def create_project_resources(gcc)
   common.run_inline %W{gcloud app create --region us-central --project #{gcc.project}}
 end
 
-def setup_project_data(gcc, cdr_db_name, public_db_name)
+def setup_project_data(gcc, cdr_db_name)
   root_password, workbench_password = random_password(), random_password()
-
-  public_password = nil
-  if gcc.project == get_cdr_sql_project(gcc.project)
-    # Only initialize a public user/pass if this environment will have CDR dbs.
-    public_password = random_password()
-  end
 
   common = Common.new
   # This changes database connection information; don't call this while the server is running!
   common.status "Writing DB credentials file..."
-  write_db_creds_file(gcc.project, cdr_db_name, public_db_name, root_password,
-                      workbench_password, public_password)
+  write_db_creds_file(gcc.project, cdr_db_name, root_password, workbench_password)
   common.status "Setting root password..."
   run_with_redirects("gcloud sql users set-password root % --project #{gcc.project} " +
                      "--instance #{INSTANCE_NAME} --password #{root_password}",
@@ -1803,10 +1783,7 @@ def setup_project_data(gcc, cdr_db_name, public_db_name)
     common.status "Running schema migrations..."
     migrate_database
 
-    # Grants permissions to the public user for specific tables
-    grant_permissions
-
-    # This will insert a CDR version row pointing at the CDR and public DB.
+    # This will insert a CDR version row pointing at the CDR DB.
     migrate_workbench_data
 
   end
@@ -1828,21 +1805,14 @@ def setup_cloud_project(cmd_name, *args)
     "Name of the default CDR db to use; required. (example: cdr20180206) This will subsequently " +
     "be created by cloudsql-import."
   )
-  op.add_option(
-    "--public-db-name [PUBLIC_DB]",
-    ->(opts, v) { opts.public_db_name = v},
-    "Name of the public db to use for the data browser. (example: public20180206) This will " +
-    "subsequently be created by cloudsql-import."
-  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.cdr_db_name}
-  op.add_validator ->(opts) { raise ArgumentError unless opts.public_db_name}
   gcc = GcloudContextV2.new(op)
 
   op.parse.validate
   gcc.validate
 
   create_project_resources(gcc)
-  setup_project_data(gcc, op.opts.cdr_db_name, op.opts.public_db_name)
+  setup_project_data(gcc, op.opts.cdr_db_name)
   deploy_gcs_artifacts(cmd_name, %W{--project #{gcc.project}})
 end
 

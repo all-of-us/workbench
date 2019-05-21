@@ -20,13 +20,23 @@ import javax.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.cohorts.CohortFactory;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -35,11 +45,6 @@ import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.FailedPreconditionException;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.*;
@@ -64,6 +69,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY;
   private static final Pattern NOTEBOOK_PATTERN = NotebooksService.NOTEBOOK_PATTERN;
 
+  private final BillingProjectBufferService billingProjectBufferService;
   private final WorkspaceService workspaceService;
   private final WorkspaceMapper workspaceMapper;
   private final CdrVersionDao cdrVersionDao;
@@ -77,9 +83,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final NotebooksService notebooksService;
   private final UserService userService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   WorkspacesController(
+      BillingProjectBufferService billingProjectBufferService,
       WorkspaceService workspaceService,
       WorkspaceMapper workspaceMapper,
       CdrVersionDao cdrVersionDao,
@@ -92,7 +100,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       CloudStorageService cloudStorageService,
       Clock clock,
       NotebooksService notebooksService,
-      UserService userService) {
+      UserService userService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.workspaceMapper = workspaceMapper;
     this.cdrVersionDao = cdrVersionDao;
@@ -106,6 +116,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.clock = clock;
     this.notebooksService = notebooksService;
     this.userService = userService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @VisibleForTesting
@@ -160,9 +171,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
-    if (Strings.isNullOrEmpty(workspace.getNamespace())) {
-      throw new BadRequestException("missing required field 'namespace'");
-    } else if (Strings.isNullOrEmpty(workspace.getName())) {
+    if (Strings.isNullOrEmpty(workspace.getName())) {
       throw new BadRequestException("missing required field 'name'");
     } else if (workspace.getResearchPurpose() == null) {
       throw new BadRequestException("missing required field 'researchPurpose'");
@@ -171,31 +180,57 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } else if (workspace.getName().length() > 80) {
       throw new BadRequestException("Workspace name must be 80 characters or less");
     }
+
+    final boolean useBillingProjectBuffer = workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer;
+    if (!useBillingProjectBuffer) {
+      if (Strings.isNullOrEmpty(workspace.getNamespace())) {
+        throw new BadRequestException("missing required field 'namespace'");
+      }
+      org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.getByName(
+              workspace.getNamespace(), workspace.getName());
+      if (existingWorkspace != null) {
+        throw new ConflictException(String.format(
+                "Workspace %s/%s already exists",
+                workspace.getNamespace(), workspace.getName()));
+      }
+    }
+
     User user = userProvider.get();
-    org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.getByName(
-        workspace.getNamespace(), workspace.getName());
-    if (existingWorkspace != null) {
-      throw new ConflictException(String.format(
-          "Workspace %s/%s already exists",
-          workspace.getNamespace(), workspace.getName()));
+    String workspaceNamespace;
+    if (useBillingProjectBuffer) {
+      BillingProjectBufferEntry bufferedBillingProject;
+      try {
+        bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      } catch (EmptyBufferException e) {
+        throw new TooManyRequestsException();
+      }
+      workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+    } else {
+      workspaceNamespace = workspace.getNamespace();
     }
 
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
-    FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
+    FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspaceNamespace,
         workspace.getName());
     FirecloudWorkspaceId fcWorkspaceId = workspaceId;
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = null;
-    for (int attemptValue = 0; attemptValue < MAX_FC_CREATION_ATTEMPT_VALUES; attemptValue++) {
-      try {
-        fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
-        break;
-      } catch (ConflictException e) {
-        if (attemptValue >= 5) {
-          throw e;
-        } else {
-          fcWorkspaceId =
-              new FirecloudWorkspaceId(workspaceId.getWorkspaceNamespace(),
-                  workspaceId.getWorkspaceName() + Integer.toString(attemptValue));
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
+
+    if (useBillingProjectBuffer) {
+      fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
+    } else {
+      fcWorkspace = null;
+      for (int attemptValue = 1; attemptValue < MAX_FC_CREATION_ATTEMPT_VALUES; attemptValue++) {
+        try {
+          fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
+          break;
+        } catch (ConflictException e) {
+          if (attemptValue >= 5) {
+            throw e;
+          } else {
+            fcWorkspaceId =
+                    new FirecloudWorkspaceId(workspaceId.getWorkspaceNamespace(),
+                            workspaceId.getWorkspaceName() + Integer.toString(attemptValue));
+          }
         }
       }
     }
@@ -212,6 +247,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     setCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
     org.pmiops.workbench.db.model.Workspace reqWorkspace = workspaceMapper.toDbWorkspace(workspace);
@@ -294,15 +330,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(String workspaceNamespace,
       String workspaceId) {
-    //general note. When you delete a workspace the related rows in the following tables will also be deleted
-    //Cohort, cohort review, cohort annotation definition, cohort annotation enum value,
-    //participant cohort annotations, participant cohort status. Please see liquibase/db for more
-    //details on how these tables relate to each other.
+    // This deletes all Firecloud and google resources, however saves all references
+    // to the workspace and its resources in the Workbench database.
+    // This is for auditing purposes and potentially workspace restore.
+    // TODO: do we want to delete workspace resource references and save only metadata?
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
     // This automatically handles access control to the workspace.
     fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
-    workspaceService.getDao().delete(dbWorkspace);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -311,6 +349,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
+
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
 
@@ -387,43 +426,62 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(String workspaceNamespace,
-      String workspaceId, CloneWorkspaceRequest body) {
-    Workspace workspace = body.getWorkspace();
-    if (Strings.isNullOrEmpty(workspace.getNamespace())) {
-      throw new BadRequestException("missing required field 'workspace.namespace'");
-    } else if (Strings.isNullOrEmpty(workspace.getName())) {
+  public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(String fromWorkspaceNamespace,
+      String fromWorkspaceId, CloneWorkspaceRequest body) {
+    Workspace toWorkspace = body.getWorkspace();
+    if (Strings.isNullOrEmpty(toWorkspace.getName())) {
       throw new BadRequestException("missing required field 'workspace.name'");
-    } else if (workspace.getResearchPurpose() == null) {
+    } else if (toWorkspace.getResearchPurpose() == null) {
       throw new BadRequestException("missing required field 'workspace.researchPurpose'");
     }
+
+    final boolean useBillingProjectBuffer = workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer;
+    if (!useBillingProjectBuffer) {
+      if (Strings.isNullOrEmpty(toWorkspace.getNamespace())) {
+        throw new BadRequestException("missing required field 'workspace.namespace'");
+      }
+      if (workspaceService.getByName(toWorkspace.getNamespace(), toWorkspace.getName()) != null) {
+        throw new ConflictException(String.format(
+                "Workspace %s/%s already exists",
+                toWorkspace.getNamespace(), toWorkspace.getName()));
+      }
+    }
+
     User user = userProvider.get();
-    if (workspaceService.getByName(workspace.getNamespace(), workspace.getName()) != null) {
-      throw new ConflictException(String.format(
-          "Workspace %s/%s already exists",
-          workspace.getNamespace(), workspace.getName()));
+
+    String toWorkspaceName;
+    if (useBillingProjectBuffer) {
+      BillingProjectBufferEntry bufferedBillingProject;
+      try {
+        bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      } catch (EmptyBufferException e) {
+        throw new TooManyRequestsException();
+      }
+      toWorkspaceName = bufferedBillingProject.getFireCloudProjectName();
+    } else {
+      toWorkspaceName = toWorkspace.getNamespace();
     }
 
     // Retrieving the workspace is done first, which acts as an access check.
-    String fromBucket = fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
+    String fromBucket = fireCloudService.getWorkspace(fromWorkspaceNamespace, fromWorkspaceId)
         .getWorkspace()
         .getBucketName();
 
     org.pmiops.workbench.db.model.Workspace fromWorkspace =
-        workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
+        workspaceService.getRequiredWithCohorts(fromWorkspaceNamespace, fromWorkspaceId);
     if (fromWorkspace == null) {
       throw new NotFoundException(String.format(
-          "Workspace %s/%s not found", workspaceNamespace, workspaceId));
+          "Workspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceId));
     }
 
-    FirecloudWorkspaceId fcWorkspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
-        workspace.getName());
-    fireCloudService.cloneWorkspace(workspaceNamespace, workspaceId,
-        fcWorkspaceId.getWorkspaceNamespace(), fcWorkspaceId.getWorkspaceName());
+    FirecloudWorkspaceId toFcWorkspaceId = generateFirecloudWorkspaceId(toWorkspaceName,
+        toWorkspace.getName());
+    fireCloudService.cloneWorkspace(fromWorkspaceNamespace, fromWorkspaceId,
+        toFcWorkspaceId.getWorkspaceNamespace(), toFcWorkspaceId.getWorkspaceName());
 
     org.pmiops.workbench.firecloud.model.Workspace toFcWorkspace =
-        fireCloudService.getWorkspace(fcWorkspaceId.getWorkspaceNamespace(),
-            fcWorkspaceId.getWorkspaceName()).getWorkspace();
+        fireCloudService.getWorkspace(toFcWorkspaceId.getWorkspaceNamespace(),
+            toFcWorkspaceId.getWorkspaceName()).getWorkspace();
 
     // In the future, we may want to allow callers to specify whether notebooks
     // should be cloned at all (by default, yes), else they are currently stuck
@@ -437,7 +495,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw new FailedPreconditionException(String.format(
             "workspace %s/%s contains a notebook larger than %dMB: '%s'; cannot clone - please " +
                 "remove this notebook, reduce its size, or contact the workspace owner",
-            workspaceNamespace, workspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
+            fromWorkspaceNamespace, fromWorkspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
       }
       cloudStorageService.copyBlob(
           b.getBlobId(), BlobId.of(toFcWorkspace.getBucketName(), b.getName()));
@@ -448,21 +506,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Firecloud workspaces / buckets, but a user should not be able to see
     // half-way cloned workspaces via AoU - so it will just appear as a
     // transient failure.
-    org.pmiops.workbench.db.model.Workspace toWorkspace =
+    org.pmiops.workbench.db.model.Workspace toDbWorkspace =
         workspaceMapper.toDbWorkspace(body.getWorkspace());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         new org.pmiops.workbench.db.model.Workspace();
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    dbWorkspace.setFirecloudName(fcWorkspaceId.getWorkspaceName());
-    dbWorkspace.setWorkspaceNamespace(fcWorkspaceId.getWorkspaceNamespace());
+    dbWorkspace.setFirecloudName(toFcWorkspaceId.getWorkspaceName());
+    dbWorkspace.setWorkspaceNamespace(toFcWorkspaceId.getWorkspaceNamespace());
     dbWorkspace.setCreator(user);
     dbWorkspace.setFirecloudUuid(toFcWorkspace.getWorkspaceId());
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
 
-    dbWorkspace.setName(toWorkspace.getName());
+    dbWorkspace.setName(toDbWorkspace.getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
     workspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
@@ -472,10 +531,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
 
     // Clone description/CDR version from the source, by default.
-    if (Strings.isNullOrEmpty(toWorkspace.getDescription())) {
+    if (Strings.isNullOrEmpty(toDbWorkspace.getDescription())) {
       dbWorkspace.setDescription(fromWorkspace.getDescription());
     } else {
-      dbWorkspace.setDescription(toWorkspace.getDescription());
+      dbWorkspace.setDescription(toDbWorkspace.getDescription());
     }
     String reqCdrVersionId = body.getWorkspace().getCdrVersionId();
     if (Strings.isNullOrEmpty(reqCdrVersionId) ||

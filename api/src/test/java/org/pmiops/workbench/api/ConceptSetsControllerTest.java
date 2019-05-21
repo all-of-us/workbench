@@ -21,11 +21,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortCloningService;
@@ -146,6 +148,9 @@ public class ConceptSetsControllerTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @Autowired
+  BillingProjectBufferService billingProjectBufferService;
+
+  @Autowired
   WorkspaceService workspaceService;
 
   @Autowired
@@ -195,11 +200,14 @@ public class ConceptSetsControllerTest {
   @Mock
   Provider<User> userProvider;
 
+  @Autowired
+  Provider<WorkbenchConfig> workbenchConfigProvider;
+
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, WorkspaceMapper.class, CohortCloningService.class, CohortFactoryImpl.class,
       UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptSetService.class})
-  @MockBean({ConceptBigQueryService.class, FireCloudService.class, CloudStorageService.class,
+  @MockBean({BillingProjectBufferService.class, ConceptBigQueryService.class, FireCloudService.class, CloudStorageService.class,
       ConceptSetService.class, NotebooksService.class, UserRecentResourceService.class, ComplianceService.class, DirectoryService.class})
   static class Configuration {
     @Bean
@@ -211,6 +219,14 @@ public class ConceptSetsControllerTest {
     Random random() {
       return new FakeLongRandom(123);
     }
+
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.featureFlags.useBillingProjectBuffer = false;
+      return workbenchConfig;
+    }
   }
 
   @Before
@@ -219,8 +235,8 @@ public class ConceptSetsControllerTest {
     conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao,
         conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
     WorkspacesController workspacesController =
-        new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao,
-                userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
+        new WorkspacesController(billingProjectBufferService, workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao,
+                userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService, workbenchConfigProvider);
 
     User user = new User();
     user.setEmail(USER_EMAIL);

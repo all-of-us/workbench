@@ -23,7 +23,6 @@ import org.springframework.web.context.annotation.RequestScope;
 public class FireCloudConfig {
 
   public static final String X_APP_ID_HEADER = "X-App-ID";
-  public static final String X_APP_ID_HEADER_VALUE = "AoU-RW";
 
   // Bean names used to differentiate between an API client authenticated as the end user (via
   // UserAuthentication) and an API client authenticated as the service account user (via
@@ -32,7 +31,6 @@ public class FireCloudConfig {
   // Some groups of FireCloud APIs will use one, while some will use the other.
   //
   public static final String END_USER_API_CLIENT = "endUserApiClient";
-  public static final String END_USER_GROUPS_API = "endUserGroupsApi";
   public static final String SERVICE_ACCOUNT_API_CLIENT = "serviceAccountApiClient";
   public static final String SERVICE_ACCOUNT_GROUPS_API = "serviceAccountGroupsApi";
 
@@ -45,11 +43,8 @@ public class FireCloudConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient endUserApiClient(UserAuthentication userAuthentication,
       WorkbenchConfig workbenchConfig) {
-    ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
+    ApiClient apiClient = buildApiClient(workbenchConfig);
     apiClient.setAccessToken(userAuthentication.getCredentials());
-    apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
-    addFireCloudDefaultHeader(apiClient);
     return apiClient;
   }
 
@@ -58,12 +53,10 @@ public class FireCloudConfig {
   public ApiClient allOfUsApiClient(WorkbenchEnvironment workbenchEnvironment,
       WorkbenchConfig workbenchConfig,
       ServiceAccounts serviceAccounts) {
-    ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
+    ApiClient apiClient = buildApiClient(workbenchConfig);
     try {
       apiClient.setAccessToken(
           serviceAccounts.workbenchAccessToken(workbenchEnvironment, BILLING_SCOPES));
-      apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
@@ -105,15 +98,6 @@ public class FireCloudConfig {
     return api;
   }
 
-  @Bean(name = END_USER_GROUPS_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public GroupsApi groupApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
-    // When checking for membership in groups, we use the end user credentials.
-    GroupsApi api = new GroupsApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public NihApi nihApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
@@ -125,16 +109,15 @@ public class FireCloudConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public StatusApi statusApi(WorkbenchConfig workbenchConfig) {
     StatusApi statusApi = new StatusApi();
-    ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
-    apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
-    addFireCloudDefaultHeader(apiClient);
-    statusApi.setApiClient(apiClient);
+    statusApi.setApiClient(buildApiClient(workbenchConfig));
     return statusApi;
   }
 
-  private void addFireCloudDefaultHeader(ApiClient apiClient) {
-    apiClient.addDefaultHeader(X_APP_ID_HEADER, X_APP_ID_HEADER_VALUE);
+  static public ApiClient buildApiClient(WorkbenchConfig workbenchConfig) {
+    ApiClient apiClient = new ApiClient();
+    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
+    apiClient.addDefaultHeader(X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
+    apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
+    return apiClient;
   }
-
 }

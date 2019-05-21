@@ -349,6 +349,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
       domainId: criterion.domainId,
       type: criterion.type,
       subtype: criterion.subtype,
+      isStandard: criterion.isStandard,
       id: 0,    // root parent ID is always 0
     };
     this.mode = 'tree';

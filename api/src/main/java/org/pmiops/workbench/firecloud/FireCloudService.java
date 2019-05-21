@@ -18,7 +18,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
  */
 public interface FireCloudService {
 
-  public static final String BIGQUERY_JOB_USER_GOOGLE_ROLE = "bigquery.jobUser";
+  String WORKSPACE_DELIMITER = "__";
 
   /**
    * @return true if firecloud is okay, false if firecloud is down.
@@ -63,8 +63,6 @@ public interface FireCloudService {
    * Creates a new FC workspace.
    */
   void createWorkspace(String projectName, String workspaceName);
-
-  void grantGoogleRoleToUser(String projectName, String role, String email);
 
   void cloneWorkspace(String fromProject, String fromName, String toProject, String toName);
 

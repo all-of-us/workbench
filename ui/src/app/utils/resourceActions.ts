@@ -1,15 +1,17 @@
- import {
-    Cohort,
-    ConceptSet,
-    FileDetail,
-    RecentResource,
-    WorkspaceAccessLevel
-  } from 'generated/fetch';
+import {
+  Cohort,
+  ConceptSet,
+  DataSet,
+  FileDetail,
+  RecentResource,
+  WorkspaceAccessLevel
+} from 'generated/fetch';
 
 export enum ResourceType {
     NOTEBOOK = 'notebook',
     COHORT = 'cohort',
     CONCEPT_SET = 'conceptSet',
+    DATA_SET = 'dataSet',
     INVALID = 'invalid'
   }
 
@@ -47,6 +49,8 @@ export function convertToResource(resource: FileDetail | Cohort | ConceptSet,
     newResource.cohort = <Cohort>resource;
   } else if (resourceType === ResourceType.CONCEPT_SET) {
     newResource.conceptSet = <ConceptSet>resource;
+  } else if (resourceType === ResourceType.DATA_SET) {
+    newResource.dataSet = <DataSet>resource;
   }
   return newResource;
 }

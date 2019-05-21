@@ -9,14 +9,15 @@ import {
   Router,
 } from '@angular/router';
 
+
+import {ServerConfigService} from 'app/services/server-config.service';
 import {cookiesEnabled} from 'app/utils';
-import {queryParamsStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
+import {queryParamsStore, routeConfigDataStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
-
 
 @Component({
   selector: 'app-aou',
@@ -34,12 +35,14 @@ export class AppComponent implements OnInit {
   constructor(
     @Inject(DOCUMENT) private doc: any,
     private activatedRoute: ActivatedRoute,
+    private serverConfigService: ServerConfigService,
     private router: Router,
     private titleService: Title
   ) {}
 
   ngOnInit(): void {
     this.checkBrowserSupport();
+    this.loadConfig();
 
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
@@ -187,6 +190,12 @@ export class AppComponent implements OnInit {
           close: 'Close'
         }
       }
+    });
+  }
+
+  private loadConfig() {
+    this.serverConfigService.getConfig().subscribe((config) => {
+      serverConfigStore.next(config);
     });
   }
 

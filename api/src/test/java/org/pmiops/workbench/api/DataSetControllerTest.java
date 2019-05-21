@@ -16,22 +16,25 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.ConceptSetService;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -59,7 +62,6 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
@@ -121,6 +123,9 @@ public class DataSetControllerTest {
   SearchRequest searchRequest;
 
   @Autowired
+  BillingProjectBufferService billingProjectBufferService;
+
+  @Autowired
   BigQueryService bigQueryService;
 
   @Autowired
@@ -157,13 +162,16 @@ public class DataSetControllerTest {
   ConceptSetDao conceptSetDao;
 
   @Autowired
+  DataSetDao dataSetDao;
+
+  @Autowired
   DataSetService dataSetService;
 
   @Autowired
   FireCloudService fireCloudService;
 
   @Autowired
-  ParticipantCounter participantCounter;
+  CohortQueryBuilder cohortQueryBuilder;
 
   @Autowired
   TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
@@ -173,6 +181,9 @@ public class DataSetControllerTest {
 
   @Mock
   Provider<User> userProvider;
+
+  @Autowired
+  Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   NotebooksService notebooksService;
@@ -190,7 +201,6 @@ public class DataSetControllerTest {
   WorkspaceMapper workspaceMapper;
 
   @TestConfiguration
-
   @Import({CohortFactoryImpl.class,
       DataSetServiceImpl.class,
       TestBigQueryCdrSchemaConfig.class,
@@ -198,13 +208,12 @@ public class DataSetControllerTest {
       WorkspacesController.class,
       WorkspaceMapper.class,
       WorkspaceServiceImpl.class})
-
-  @MockBean({BigQueryService.class, CdrBigQuerySchemaConfigService.class, CdrVersionService.class,
+  @MockBean({BillingProjectBufferService.class, BigQueryService.class, CdrBigQuerySchemaConfigService.class, CdrVersionService.class,
       CloudStorageService.class, CohortCloningService.class,
       CohortMaterializationService.class, ComplianceService.class,
       ConceptBigQueryService.class, ConceptSetService.class, DataSetService.class,
       FireCloudService.class, DirectoryService.class, NotebooksService.class,
-      ParticipantCounter.class, UserRecentResourceService.class})
+      CohortQueryBuilder.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
     Clock clock() {
@@ -215,18 +224,26 @@ public class DataSetControllerTest {
     Random random() {
       return new FakeLongRandom(123);
     }
+
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+      workbenchConfig.featureFlags.useBillingProjectBuffer = false;
+      return workbenchConfig;
+    }
   }
 
   private DataSetController dataSetController;
 
   @Before
   public void setUp() throws Exception {
-    dataSetService = new DataSetServiceImpl(bigQueryService, cdrBigQuerySchemaConfigService, cohortDao, conceptSetDao, participantCounter);
+    dataSetService = new DataSetServiceImpl(bigQueryService, cdrBigQuerySchemaConfigService, cohortDao, conceptSetDao, cohortQueryBuilder);
     dataSetController = new DataSetController(bigQueryService, CLOCK, cohortDao, conceptDao, conceptSetDao,
-        dataSetService, fireCloudService, notebooksService, userProvider, workspaceService);
+        dataSetDao, dataSetService, fireCloudService, notebooksService, userProvider, workspaceService);
     WorkspacesController workspacesController =
-        new WorkspacesController(workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
-            userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService);
+        new WorkspacesController(billingProjectBufferService, workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
+            userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService, workbenchConfigProvider);
     CohortsController cohortsController = new CohortsController(workspaceService, cohortDao, cdrVersionDao, cohortFactory,
         cohortReviewDao, conceptSetDao, cohortMaterializationService, userProvider, CLOCK,
         cdrVersionService, userRecentResourceService);
@@ -319,7 +336,7 @@ public class DataSetControllerTest {
         WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSetTwoRequest).getBody();
     CONCEPT_SET_TWO_ID = conceptSetTwo.getId();
 
-    when(participantCounter.buildParticipantIdQuery(any())).thenReturn(
+    when(cohortQueryBuilder.buildParticipantIdQuery(any())).thenReturn(
         QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person").build());
     when(bigQueryService.filterBigQueryConfig(any())).thenReturn(
         QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person").build());

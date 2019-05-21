@@ -62,6 +62,11 @@ export const workspaceStubs = [
   }
 ];
 
+export const workspaceDataStub = {
+  ...workspaceStubs[0],
+  accessLevel: WorkspaceAccessLevel.OWNER,
+};
+
 export class WorkspacesApiStub extends WorkspacesApi {
   public workspaces: Workspace[];
   workspaceAccess: Map<string, WorkspaceAccessLevel>;

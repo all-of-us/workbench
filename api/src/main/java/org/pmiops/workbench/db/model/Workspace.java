@@ -20,8 +20,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UnderservedPopulationEnum;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 @Entity
 @Table(name = "workspace")
@@ -72,8 +74,11 @@ public class Workspace {
   private User creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
-  private Set<Cohort> cohorts = new HashSet<Cohort>();
-  private Set<ConceptSet> conceptSets = new HashSet<ConceptSet>();
+  private Timestamp lastAccessedTime;
+  private Set<Cohort> cohorts = new HashSet<>();
+  private Set<ConceptSet> conceptSets = new HashSet<>();
+  private Set<DataSet> dataSets = new HashSet<>();
+  private Short activeStatus;
 
   private boolean diseaseFocusedResearch;
   private String diseaseOfFocus;
@@ -93,6 +98,10 @@ public class Workspace {
   private Timestamp timeRequested;
 
   private Set<WorkspaceUserRole> usersWithAccess = new HashSet<WorkspaceUserRole>();
+
+  public Workspace() {
+    setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+  }
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -205,6 +214,11 @@ public class Workspace {
   public void setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
   }
+
+  @Column(name = "last_accessed_time")
+  public Timestamp getLastAccessedTime() { return lastAccessedTime; }
+
+  public void setLastAccessedTime(Timestamp lastAccessedTime) { this.lastAccessedTime = lastAccessedTime; }
 
   @Column(name = "rp_disease_focused_research")
   public boolean getDiseaseFocusedResearch() {
@@ -388,6 +402,19 @@ public class Workspace {
     this.conceptSets = conceptSets;
   }
 
+  @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
+  public Set<DataSet> getDataSets() {
+    return dataSets;
+  }
+
+  public void setDataSets(Set<DataSet> dataSets) {
+    this.dataSets = dataSets;
+  }
+
+  public void addDataSet(DataSet dataSet) {
+    this.dataSets.add(dataSet);
+  }
+
   @Transient
   public FirecloudWorkspaceId getFirecloudWorkspaceId() {
     return new FirecloudWorkspaceId(workspaceNamespace, firecloudName);
@@ -402,6 +429,22 @@ public class Workspace {
   public String getFirecloudUuid() {return this.firecloudUuid; }
 
   public void setFirecloudUuid(String firecloudUuid) {this.firecloudUuid = firecloudUuid;}
+
+  @Column(name = "active_status")
+  private Short getActiveStatus() { return activeStatus; }
+
+  private void setActiveStatus(Short activeStatus) {
+    this.activeStatus = activeStatus;
+  }
+
+  @Transient
+  public WorkspaceActiveStatus getWorkspaceActiveStatusEnum() {
+    return StorageEnums.workspaceActiveStatusFromStorage(getActiveStatus());
+  }
+
+  public void setWorkspaceActiveStatusEnum(WorkspaceActiveStatus activeStatus) {
+    setActiveStatus(StorageEnums.workspaceActiveStatusToStorage(activeStatus));
+  }
 
   /**
    * Necessary for Spring initialization of the object.

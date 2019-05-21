@@ -6,8 +6,7 @@ import {CardButton, TabButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
+import {cohortsApi, conceptsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {
@@ -15,6 +14,7 @@ import {
   mapAndFilterResourceList,
   ResourceType
 } from 'app/utils/resourceActionsReact';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
 import {ResourceCard} from 'app/views/resource-card/component';
 import {DomainInfo, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
@@ -62,7 +62,7 @@ const styles = {
 
 enum Tabs {
   SHOWALL = 'SHOW ALL',
-  DATASETS = 'DATASETS',
+  DATASETS = 'DATA SETS',
   COHORTS = 'COHORTS',
   CONCEPTSETS = 'CONCEPT SETS'
 }
@@ -118,16 +118,18 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       this.setState({
         isLoading: true
       });
-      const [cohorts, conceptSets] = await Promise.all([
+      const [cohorts, conceptSets, dataSets] = await Promise.all([
         cohortsApi().getCohortsInWorkspace(namespace, id),
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
-        // TODO: Load datasets
+        dataSetApi().getDataSetsInWorkspace(namespace, id)
       ]);
       let list: RecentResource[] = [];
       list = list.concat(convertToResources(cohorts.items, namespace,
         id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.COHORT));
       list = list.concat(convertToResources(conceptSets.items, namespace,
         id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.CONCEPT_SET));
+      list = list.concat(convertToResources(dataSets.items, namespace,
+        id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.DATA_SET));
       this.setState({
         resourceList: list
       });
@@ -151,8 +153,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       } else if (activeTab === Tabs.CONCEPTSETS) {
         return resource.conceptSet;
       } else if (activeTab === Tabs.DATASETS) {
-        // TODO: Add datasets
-        return false;
+        return resource.dataSet;
       }
     });
     return <React.Fragment>
@@ -186,7 +187,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           <CardButton
             style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
             onClick={() => {
-              navigate(['workspaces', namespace, id, 'data', 'datasets']);
+              navigate(['workspaces', namespace, id, 'data', 'data-sets']);
             }}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardHeaderText}>Datasets</h2>
@@ -220,7 +221,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
             this.setState({
               activeTab: Tabs.DATASETS
             });
-          }}>Datasets</TabButton>
+          }} data-test-id='view-only-data-sets'>Datasets</TabButton>
         </div>
         <div style={{
           borderBottom: '1px solid #525A65',

@@ -5,9 +5,8 @@
 set -xeuo pipefail
 IFS=$'\n\t'
 
-USAGE="./init-new-cdr-db.sh [--drop-if-exists] --cdr-db-name cdrYYYYMMDD|publicYYYYMMDD> --version-flag cdr|public"
+USAGE="./init-new-cdr-db.sh [--drop-if-exists] --cdr-db-name cdrYYYYMMDD>"
 DROP_IF_EXISTS="N"
-VERSION_FLAG="cdr"
 RUN_LIST="schema"
 CONTEXT=
 
@@ -16,7 +15,6 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --cdr-db-name) CDR_DB_NAME=$2; shift 2;;
     --drop-if-exists) DROP_IF_EXISTS="Y"; shift 1;;
-    --version-flag) VERSION_FLAG=$2; shift 2;;
     --run-list) RUN_LIST=$2; shift 2;;
     --context) CONTEXT="-Pcontexts=$2"; shift 2;;
     -- ) shift; break ;;
@@ -33,14 +31,6 @@ fi
 
 # export for liquibase to use this
 #export CDR_DB_NAME
-
-# If version flag contains public, we want to the public_db_user env var substituted in the create_db.sql
-if [[ $VERSION_FLAG =~ .*public.* ]]
-then
-  echo "Working the public db init cdr"
-  export WORKBENCH_DB_USER=$PUBLIC_DB_USER
-  export WORKBENCH_DB_PASSWORD=$PUBLIC_DB_PASSWORD
-fi
 
 CREATE_DB_FILE=/tmp/create_db.sql
 

@@ -14,6 +14,10 @@ set -x
 jupyter kernelspec uninstall -f pyspark2
 jupyter kernelspec uninstall -f pyspark3
 
+# Enable any built-in extensions. Snippets menu is used for AoU-specific code
+# snippet insertion, see README.md for more details.
+jupyter nbextension enable snippets_menu/main
+
 # reticulate is our preferred access method for the AoU client library - default
 # to python3 as our pyclient has better support for python3. Rprofile is executed
 # each time the R kernel starts.
@@ -30,5 +34,7 @@ apt-get update
 apt-get -t stretch-cran35 install -y --no-install-recommends libmagick++-dev
 
 for v in "2.7" "3"; do
-  "pip${v}" install --upgrade 'https://github.com/all-of-us/pyclient/archive/pyclient-v1-17.zip#egg=aou_workbench_client&subdirectory=py'
+  "pip${v}" install --upgrade \
+    plotnine \
+    'https://github.com/all-of-us/pyclient/archive/pyclient-v1-17.zip#egg=aou_workbench_client&subdirectory=py'
 done

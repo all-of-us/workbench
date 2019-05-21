@@ -10,7 +10,7 @@ import {
 import {cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {CohortBuilderService, TreeType} from 'generated';
-import {PageFilterType, ReviewStatus, SortOrder} from 'generated/fetch';
+import {PageFilterType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 
 @Component({
   templateUrl: './page-layout.html',
@@ -19,22 +19,22 @@ import {PageFilterType, ReviewStatus, SortOrder} from 'generated/fetch';
 export class PageLayout implements OnInit, OnDestroy {
   reviewPresent: boolean;
   cohortLoaded = false;
+  readonly = false;
   constructor(private builderApi: CohortBuilderService) {}
 
   ngOnInit() {
     const {ns, wsid, cid} = urlParamsStore.getValue();
-    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, {
+    const {accessLevel, cdrVersionId} = currentWorkspaceStore.getValue();
+    this.readonly = accessLevel === WorkspaceAccessLevel.READER;
+    cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
       page: 0,
       pageSize: 25,
       sortOrder: SortOrder.Asc,
       pageFilterType: PageFilterType.ParticipantCohortStatuses,
     }).then(review => {
       cohortReviewStore.next(review);
-      if (review.reviewStatus === ReviewStatus.NONE) {
-        this.reviewPresent = false;
-      } else {
-        this.reviewPresent = true;
+      this.reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
+      if (this.reviewPresent) {
         navigate(['workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);
       }
     });
@@ -45,7 +45,7 @@ export class PageLayout implements OnInit, OnDestroy {
       this.cohortLoaded = true;
     });
     if (!visitsFilterOptions.getValue()) {
-      this.builderApi.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, true, 0)
+      this.builderApi.getCriteriaBy(+cdrVersionId, TreeType[TreeType.VISIT], null, true, 0)
         .toPromise()
         .then(response => {
           visitsFilterOptions.next([
@@ -67,5 +67,18 @@ export class PageLayout implements OnInit, OnDestroy {
 
   reviewCreated() {
     this.reviewPresent = true;
+  }
+
+  returnToCohorts() {
+    const {ns, wsid} = urlParamsStore.getValue();
+    navigate(['workspaces', ns, wsid, 'cohorts']);
+  }
+
+  get ableToReview() {
+    return this.cohortLoaded && this.reviewPresent === false && !this.readonly;
+  }
+
+  get unableToReview() {
+    return this.cohortLoaded && this.reviewPresent === false && this.readonly;
   }
 }

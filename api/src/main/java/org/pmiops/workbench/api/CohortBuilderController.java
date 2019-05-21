@@ -33,7 +33,7 @@ import org.pmiops.workbench.cdr.model.CBCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cdr.model.StandardProjection;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -68,7 +68,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private static final String BAD_REQUEST_MESSAGE = "Bad Request: Please provide a valid %s. %s is not valid.";
 
   private BigQueryService bigQueryService;
-  private ParticipantCounter participantCounter;
+  private CohortQueryBuilder cohortQueryBuilder;
   private CriteriaDao criteriaDao;
   private CBCriteriaDao cbCriteriaDao;
   private CriteriaAttributeDao criteriaAttributeDao;
@@ -175,7 +175,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Autowired
   CohortBuilderController(BigQueryService bigQueryService,
-                          ParticipantCounter participantCounter,
+                          CohortQueryBuilder cohortQueryBuilder,
                           CriteriaDao criteriaDao,
                           CBCriteriaDao cbCriteriaDao,
                           CriteriaAttributeDao criteriaAttributeDao,
@@ -186,7 +186,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                           ElasticSearchService elasticSearchService,
                           Provider<WorkbenchConfig> configProvider) {
     this.bigQueryService = bigQueryService;
-    this.participantCounter = participantCounter;
+    this.cohortQueryBuilder = cohortQueryBuilder;
     this.criteriaDao = criteriaDao;
     this.cbCriteriaDao = cbCriteriaDao;
     this.criteriaAttributeDao = criteriaAttributeDao;
@@ -210,8 +210,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     if (configProvider.get().cohortbuilder.enableListSearch) {
       validateDomainAndType(domain, type);
-      String domainRank = "+[" + domain.toLowerCase() + "_rank1]";
-      String matchExp = modifyTermMatch(term) + domainRank;
+      String matchExp = modifyTermMatch(term);
       List<CBCriteria> criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(domain, type, standard, matchExp, new PageRequest(0, resultLimit.intValue()));
       if (criteriaList.isEmpty()) {
         criteriaList = cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(domain, type, standard, term, new PageRequest(0, resultLimit.intValue()));
@@ -280,7 +279,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       }
     }
     QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(
-      participantCounter.buildParticipantCounterQuery(new ParticipantCriteria(request))
+      cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request,
+        configProvider.get().cohortbuilder.enableListSearch))
     );
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -295,13 +295,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                                 String term,
                                                                                 Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    String domainRank = "+[" + domain.toLowerCase() + "_rank1]";
     List<CBCriteria> criteriaList = new ArrayList<>();
     int resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT).intValue();
     List<StandardProjection> projections = cbCriteriaDao.findStandardProjectionByCode(domain, term);
     boolean isStandard = projections.isEmpty() || projections.get(0).getStandard();
     if (projections.isEmpty()) {
-      String modTerm = modifyTermMatch(term) + domainRank;
+      String modTerm = modifyTermMatch(term);
       criteriaList = cbCriteriaDao.findCriteriaByDomainAndSynonyms(domain, isStandard, modTerm, new PageRequest(0, resultLimit));
     }
     if (criteriaList.isEmpty()) {
@@ -343,8 +342,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
       }
     }
-    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildDemoChartInfoCounterQuery(
-      new ParticipantCriteria(request)));
+    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(cohortQueryBuilder.buildDemoChartInfoCounterQuery(
+      new ParticipantCriteria(request, configProvider.get().cohortbuilder.enableListSearch)));
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 

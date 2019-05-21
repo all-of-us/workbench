@@ -1,8 +1,7 @@
-<clr-tree-node *ngIf="!secondLevel">
+<clr-tree-node>
   <div [id]="nodeId" class="clr-treenode-link container" (click)="toggleExpanded()">
     <crit-list-node-info [node]="node"></crit-list-node-info>
   </div>
-
   <ng-template *ngIf="node.group"
     [(clrIfExpanded)]="expanded"
     (clrIfExpandedChange)="loadChildren($event)">
@@ -24,11 +23,4 @@
       </div>
     </ng-container>
   </ng-template>
-
-<!-- Skip first level of the tree and go straight to the second level -->
-<div *ngIf="secondLevel">
-  <crit-list-node *ngFor="let item of children" [node]="item"></crit-list-node>
-  <div *ngIf="loading" class="spinner root-spinner">
-    Loading...
-  </div>
-</div>
+</clr-tree-node>

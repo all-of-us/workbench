@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -18,6 +20,7 @@ public class BillingProjectBufferEntry {
   private Timestamp creationTime;
   private Timestamp lastSyncRequestTime;
   private Short status;
+  private User assignedUser;
 
   public enum BillingProjectBufferStatus {
     CREATING, // Sent a request to FireCloud to create a BillingProject. Status of BillingProject is TBD
@@ -59,6 +62,15 @@ public class BillingProjectBufferEntry {
   }
   public void setLastSyncRequestTime(Timestamp lastSyncRequestTime) {
     this.lastSyncRequestTime = lastSyncRequestTime;
+  }
+
+  @ManyToOne
+  @JoinColumn(name="assigned_user_id")
+  public User getAssignedUser() {
+    return assignedUser;
+  }
+  public void setAssignedUser(User assignedUser) {
+    this.assignedUser = assignedUser;
   }
 
   @Transient

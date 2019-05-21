@@ -12,7 +12,7 @@ define([
     // This prefix must be kept in sync with the Workbench localization API,
     // see https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/api/ClusterController.java
     const nbPath = Jupyter.notebook.notebook_path;
-    if (!nbPath.startsWith('workspaces:playground/')) {
+    if (!nbPath.startsWith('workspaces_playground/')) {
       return;
     }
 

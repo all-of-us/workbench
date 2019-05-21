@@ -103,7 +103,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       await dataSetApi().createDataSet(
         workspaceNamespace, workspaceId, request);
       if (!this.state.exportToNotebook) {
-        this.props.closeFunction();
+        window.history.back();
       } else {
         await dataSetApi().exportToNotebook(
           workspaceNamespace, workspaceId,

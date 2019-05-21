@@ -17,9 +17,9 @@ import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 import {ConceptNavigationBar} from 'app/views/concept-navigation-bar/component';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceCard} from 'app/views/resource-card/component';
 
 const styles = reactStyles({

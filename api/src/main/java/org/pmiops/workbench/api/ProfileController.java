@@ -273,12 +273,16 @@ public class ProfileController implements ProfileApiDelegate {
 
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (user.getFirstSignInTime() == null) {
+      // If the user is already registered, their profile will get updated.
+      fireCloudService.registerUser(user.getContactEmail(),
+          user.getGivenName(), user.getFamilyName());
+
       // TODO(calbach): After the next DB wipe, switch this null check to
       // instead use the freeTierBillingProjectStatus.
-      if (user.getFreeTierBillingProjectName() == null) {
-        String billingProjectName = createFirecloudUserAndBillingProject(user);
-        user.setFreeTierBillingProjectName(billingProjectName);
-        user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.PENDING);
+      if (!workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer && user.getFreeTierBillingProjectName() == null) {
+          String billingProjectName = createFirecloudBillingProject(user);
+          user.setFreeTierBillingProjectName(billingProjectName);
+          user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.PENDING);
       }
 
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
@@ -286,6 +290,11 @@ public class ProfileController implements ProfileApiDelegate {
       // their initial contact email address.
       user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
       return saveUserWithConflictHandling(user);
+    }
+
+    // everything after this if block is code that will be deleted when useBillingProjectBuffer is turned on permanently.
+    if (workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer) {
+      return user;
     }
 
     // Free tier billing project setup is complete; nothing to do.
@@ -330,14 +339,15 @@ public class ProfileController implements ProfileApiDelegate {
             log.log(Level.INFO, "Failed to remove user from errored billing project");
           }
           String billingProjectName = createFirecloudBillingProject(user);
-          return this.userService.setBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.PENDING);
+          return this.userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.PENDING);
         } else {
           String billingProjectName = user.getFreeTierBillingProjectName();
           log.log(Level.SEVERE, String.format(
               "free tier project %s failed to be created", billingProjectName));
-          return userService.setBillingProjectNameAndStatus(billingProjectName, status);
+          return userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, status);
         }
       case READY:
+        log.log(Level.INFO, "free tier project initialized");
         break;
 
       default:
@@ -345,31 +355,19 @@ public class ProfileController implements ProfileApiDelegate {
         return user;
     }
 
-    // Grant the user BQ job access on the billing project so that they can run BQ queries from
-    // notebooks. Granting of this role is idempotent.
+    String billingProjectName = user.getFreeTierBillingProjectName();
     try {
-      fireCloudService.grantGoogleRoleToUser(user.getFreeTierBillingProjectName(),
-          FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
-    } catch (WorkbenchException e) {
-      log.log(Level.WARNING,
-          "granting BigQuery role on created free tier billing project failed", e);
-      // Allow the user to continue, as most workbench functionality will still be usable.
-      return user;
-    }
-    log.log(Level.INFO, "free tier project initialized and BigQuery role granted");
-
-    try {
-      this.leonardoNotebooksClient.createCluster(
-          user.getFreeTierBillingProjectName(), LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
-      log.log(Level.INFO, String.format("created cluster %s/%s",
-          user.getFreeTierBillingProjectName(), LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
+      this.leonardoNotebooksClient.createCluster(billingProjectName,
+          LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      log.log(Level.INFO, String.format("created cluster %s/%s", billingProjectName,
+          LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
     } catch (ConflictException e) {
-      log.log(Level.INFO, String.format("Cluster %s/%s already exists",
-          user.getFreeTierBillingProjectName(), LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
+      log.log(Level.INFO, String.format("Cluster %s/%s already exists", billingProjectName,
+          LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
     } catch (GatewayTimeoutException e) {
       log.log(Level.WARNING, "Socket Timeout creating cluster.");
     }
-    return userService.setBillingProjectNameAndStatus(user.getFreeTierBillingProjectName(), BillingProjectStatus.READY);
+    return userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.READY);
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {

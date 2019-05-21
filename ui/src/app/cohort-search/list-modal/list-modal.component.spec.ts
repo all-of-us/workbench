@@ -29,10 +29,17 @@ wizardOpen
 } from 'app/cohort-search/redux';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {SearchBarComponent} from 'app/cohort-search/search-bar/search-bar.component';
+import {wizardStore} from 'app/cohort-search/search-state.service';
 import {TreeComponent} from 'app/cohort-search/tree/tree.component';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {DomainType} from 'generated';
+import {CohortBuilderApi} from 'generated/fetch';
 import {fromJS, Map} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
+import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {ListModalComponent} from './list-modal.component';
 
 class MockActions {
@@ -49,6 +56,7 @@ describe('ListModalComponent', () => {
   let mockReduxInst;
 
   beforeEach(async(() => {
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     mockReduxInst = MockNgRedux.getInstance();
     const _old = mockReduxInst.getState;
     const _wrapped = () => fromJS(_old());
@@ -90,6 +98,11 @@ describe('ListModalComponent', () => {
       ],
     })
       .compileComponents();
+    currentWorkspaceStore.next(workspaceDataStub);
+    wizardStore.next({
+      domain: DomainType.MEASUREMENT,
+      item: {modifiers: [], searchParameters: []}
+    });
   }));
 
   beforeEach(() => {
@@ -102,5 +115,4 @@ describe('ListModalComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
 });

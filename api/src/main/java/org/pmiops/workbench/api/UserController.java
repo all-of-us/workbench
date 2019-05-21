@@ -11,13 +11,10 @@ import com.google.common.collect.Lists;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.UserResponse;
-import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -63,11 +60,13 @@ public class UserController implements UserApiDelegate {
         .ofNullable(Sort.Direction.fromStringOrNull(sortOrder))
         .orElse(Sort.Direction.ASC);
     Sort sort = new Sort(new Sort.Order(direction, DEFAULT_SORT_FIELD));
-    // We want to filter out users not initialized in firecloud yet to avoid sharing with a not yet existent user.
-    List<User> users = userService.findUsersBySearchString(term, sort)
-        .stream()
-        .filter(user -> user.getFreeTierBillingProjectName() != null)
+
+    // What we are really looking for here are users who have a FC account.
+    // This should exist if they have signed in at least once
+    List<User> users = userService.findUsersBySearchString(term, sort).stream()
+        .filter(user -> user.getFirstSignInTime() != null)
         .collect(Collectors.toList());
+
     int pageSize = Optional.ofNullable(size).orElse(DEFAULT_PAGE_SIZE);
     List<List<User>> pagedUsers = Lists.partition(users, pageSize);
 

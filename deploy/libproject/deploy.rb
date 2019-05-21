@@ -30,9 +30,7 @@ def get_live_gae_version(project, validate_version=true)
     exit 1
   end
 
-  # TODO(RW-1974): Remove public-* services.
-  wb_services = Set["api", "default"]
-  services = wb_services + Set["public-api", "public-ui"]
+  services = Set["api", "default"]
   actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
   active_services = actives.map{|v| v["service"]}.to_set
   if actives.empty?
@@ -44,8 +42,7 @@ def get_live_gae_version(project, validate_version=true)
     return nil
   end
 
-  # TODO(RW-1974): Revert this filtering once public services are gone.
-  versions = actives.select{|v| wb_services.include?(v["service"])}.map{|v| v["id"]}.to_set
+  versions = actives.map{|v| v["id"]}.to_set
   if versions.length != 1
     common.warning "Found varying IDs across GAE services in project '#{project}': " +
                    "[#{versions.to_a.join(', ')}]"

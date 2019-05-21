@@ -1,7 +1,8 @@
 export default {
   purple: [
     '#262262',
-    '#4356a7'
+    '#4356a7',
+    '#AB87B3'
   ],
   backgroundGrey: '#f1f2f2',
   red: '#d0021b',
@@ -12,10 +13,11 @@ export default {
   blue: [
     '#2691d0',
     '#5aa6da',
+    '#6CACE4',
     '#85bde4',
     '#afd3ed',
     '#d7eaf6',
-    '#eaf4fb'
+    '#eaf4fb',
   ],
   gray: [
     '#4a4a4a',
@@ -30,5 +32,8 @@ export default {
   black: [
     '#000',
     '#333333'
+  ],
+  yellow: [
+    '#F8C954'
   ]
 };

@@ -11,14 +11,13 @@ import {
 } from '@angular/core';
 import {PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {
-  CohortSearchActions,
   CohortSearchState,
   ppiAnswers,
   selectedGroups,
 } from 'app/cohort-search/redux';
 import {attributesStore, groupSelectionsStore, selectionsStore, subtreeSelectedStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {stripHtml} from 'app/cohort-search/utils';
-import {AttrName, Operator, TreeSubType, TreeType} from 'generated';
+import {AttrName, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -38,8 +37,7 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   matched = false;
 
   constructor(
-    private ngRedux: NgRedux<CohortSearchState>,
-    private actions: CohortSearchActions
+    private ngRedux: NgRedux<CohortSearchState>
   ) {}
 
   ngOnInit() {
@@ -101,14 +99,6 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.node.code;
   }
 
-  get selectAllChildren() {
-    return (this.isDrug
-      || this.node.type === TreeType.ICD9
-      || this.node.type === TreeType.PPI
-      || this.node.type === TreeType.ICD10)
-      && this.node.group;
-  }
-
   /*
    * On selection, we examine the selected criterion and see if it needs some
    * attributes. If it does, we set the criterion in "focus".  The explorer
@@ -140,12 +130,13 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
           groupSelectionsStore.next(groups);
         }
         let modifiedName = this.node.name;
-        if (this.node.type === TreeType[TreeType.PPI]) {
+        if (this.isPPI) {
+          // TODO need an alternative to pulling from redux store here
           const parent = ppiAnswers(this.node.path)(this.ngRedux.getState()).toJS();
           modifiedName = parent.name + ' - ' + modifiedName;
         }
         let attributes = [];
-        if (this.node.subtype === TreeSubType[TreeSubType.BP]) {
+        if (this.node.subtype === CriteriaSubType[CriteriaSubType.BP]) {
           const name = stripHtml(this.node.name);
           Object.keys(PREDEFINED_ATTRIBUTES).forEach(key => {
             if (name.indexOf(key) === 0) {
@@ -158,7 +149,7 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
             operator: Operator.IN,
             operands: [this.node.code]
           });
-        } else if (this.node.type === TreeType.PPI && !this.node.group) {
+        } else if (this.isPPI && !this.node.group) {
           if (this.node.code === '') {
             attributes.push({
               name: AttrName.NUM,
@@ -188,50 +179,29 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  getAttributes() {
-    if (this.isMeas) {
-      this.actions.fetchAttributes(this.node);
-    } else {
-      const attributes = this.node.subtype === TreeSubType[TreeSubType.BP]
-        ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
-        : [{
-          name: this.node.subtype,
-          operator: null,
-          operands: [null],
-          MIN: 0,
-          MAX: 10000
-        }];
-      this.actions.loadAttributes(this.node, attributes);
-    }
-  }
-
   get showCount() {
     return this.node.count > -1
       && (this.node.selectable
-      || (this.node.subtype === TreeSubType[TreeSubType.LAB]
+      || (this.node.subtype === CriteriaSubType[CriteriaSubType.LAB]
       && this.node.group
       && this.node.code !== null )
-      || this.node.type === TreeType[TreeType.CPT]);
+      || this.node.type === CriteriaType[CriteriaType.CPT4]);
   }
 
   get isPM() {
-    return this.node.type === TreeType[TreeType.PM];
+    return this.node.domainId === DomainType[DomainType.PHYSICALMEASUREMENT];
   }
 
   get isDrug() {
-    return this.node.type === TreeType[TreeType.DRUG];
-  }
-
-  get isMeas() {
-    return this.node.type === TreeType[TreeType.MEAS];
+    return this.node.domainId === DomainType[DomainType.DRUG];
   }
 
   get isPPI() {
-    return this.node.type === TreeType[TreeType.PPI];
+    return this.node.type === CriteriaType[CriteriaType.PPI];
   }
 
   get isSNOMED() {
-    return this.node.type === TreeType[TreeType.SNOMED];
+    return this.node.type === CriteriaType[CriteriaType.SNOMED];
   }
 
   get hasAttributes() {
@@ -243,9 +213,9 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get isPMCat() {
-    return this.node.subtype === TreeSubType.WHEEL ||
-      this.node.subtype === TreeSubType.PREG ||
-      this.node.subtype === TreeSubType.HRIRR ||
-      this.node.subtype === TreeSubType.HRNOIRR;
+    return this.node.subtype === CriteriaSubType[CriteriaSubType.WHEEL] ||
+      this.node.subtype === CriteriaSubType[CriteriaSubType.PREG] ||
+      this.node.subtype === CriteriaSubType[CriteriaSubType.HRIRR] ||
+      this.node.subtype === CriteriaSubType[CriteriaSubType.HRNOIRR];
   }
 }

@@ -56,6 +56,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     }
 
     WorkbenchConfig config = workbenchConfigProvider.get();
+    // TODO(RW-2658): Use gcsPrefix for all cluster resources, remove old config values.
+    String gcsPrefix = "gs://" + config.googleCloudStorageService.clusterResourcesBucketName;
     return new ClusterRequest()
         .labels(ImmutableMap.of(
             CLUSTER_LABEL_AOU, "true",
@@ -64,7 +66,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .jupyterUserScriptUri(config.firecloud.jupyterUserScriptUri)
         .userJupyterExtensionConfig(new UserJupyterExtensionConfig()
             .nbExtensions(ImmutableMap.of(
-                "playground-extension", config.firecloud.jupyterPlaygroundExtensionUri))
+                "aou-playground-extension", config.firecloud.jupyterPlaygroundExtensionUri,
+                "aou-snippets-menu", gcsPrefix + "/aou-snippets-menu.js"))
             .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
             .combinedExtensions(ImmutableMap.<String, String>of())
             .labExtensions(ImmutableMap.<String, String>of()))

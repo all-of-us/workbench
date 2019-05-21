@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
-import {navigate} from 'app/utils/navigation';
+import {navigate, serverConfigStore} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
 import {AlertDanger} from 'app/components/alert';
@@ -224,9 +224,11 @@ export class WorkspaceCard extends React.Component<
 export const WorkspaceList = withUserProfile()
 (class extends React.Component<
   { profileState: { profile: Profile, reload: Function } },
-  { workspacesLoading: boolean, billingProjectInitialized: boolean,
-    workspaceList: WorkspacePermissions[], errorText: string,
-    firstSignIn: Date
+  { workspacesLoading: boolean,
+    billingProjectInitialized: boolean,
+    workspaceList: WorkspacePermissions[],
+    errorText: string,
+    firstSignIn: Date,
   }> {
   private timer: NodeJS.Timer;
 
@@ -244,6 +246,12 @@ export const WorkspaceList = withUserProfile()
   componentDidMount() {
     this.checkBillingProjectStatus();
     this.reloadWorkspaces();
+  }
+
+  componentDidUpdate() {
+    if (!this.state.billingProjectInitialized) {
+      this.checkBillingProjectStatus();
+    }
   }
 
   componentWillUnmount() {
@@ -276,10 +284,18 @@ export const WorkspaceList = withUserProfile()
     }
   }
 
+
   render() {
     const {profileState: {profile}} = this.props;
-    const {billingProjectInitialized, errorText,
-      workspaceList, workspacesLoading} = this.state;
+    const {
+      billingProjectInitialized,
+      errorText,
+      workspaceList,
+      workspacesLoading
+    } = this.state;
+
+    const canCreateWorkspaces = billingProjectInitialized ||
+      serverConfigStore.getValue().useBillingProjectBuffer;
 
     return <React.Fragment>
       <FadeBox style={styles.fadeBox}>
@@ -293,7 +309,7 @@ export const WorkspaceList = withUserProfile()
             {workspacesLoading ?
               (<Spinner style={{width: '100%', marginTop: '1.5rem'}}/>) :
               (<div style={{display: 'flex', marginTop: '1.5rem', flexWrap: 'wrap'}}>
-                <CardButton disabled={!billingProjectInitialized}
+                <CardButton disabled={!canCreateWorkspaces}
                             onClick={() => navigate(['workspaces/build'])}
                             style={styles.addCard}>
                   Create a <br/> New Workspace

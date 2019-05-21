@@ -35,8 +35,8 @@ import java.util.Arrays;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 public class FireCloudServiceImplTest {
@@ -53,8 +53,6 @@ public class FireCloudServiceImplTest {
   private WorkspacesApi workspacesApi;
   @Mock
   private GroupsApi groupsApi;
-  @Mock
-  private GroupsApi endUserGroupsApi;
   @Mock
   private NihApi nihApi;
   @Mock
@@ -78,7 +76,7 @@ public class FireCloudServiceImplTest {
 
     service = new FireCloudServiceImpl(Providers.of(workbenchConfig),
         Providers.of(profileApi), Providers.of(billingApi), Providers.of(groupsApi),
-        Providers.of(endUserGroupsApi), Providers.of(nihApi), Providers.of(workspacesApi),
+        Providers.of(nihApi), Providers.of(workspacesApi),
         Providers.of(statusApi), new FirecloudRetryHandler(new NoBackOffPolicy()),
         serviceAccounts,
         Providers.of(fireCloudCredential));

@@ -1,27 +1,21 @@
-import {NgRedux} from '@angular-redux/store';
-import {MockNgRedux} from '@angular-redux/store/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
-import {fromJS} from 'immutable';
+import {CohortBuilderApi} from 'generated/fetch';
 import {NgxPopperModule} from 'ngx-popper';
+import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 
 import {ListOptionInfoComponent} from 'app/cohort-search/list-option-info/list-option-info.component';
-import {CohortSearchActions} from 'app/cohort-search/redux';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ListSearchBarComponent} from './list-search-bar.component';
 
 describe('ListSearchBarComponent', () => {
   let component: ListSearchBarComponent;
   let fixture: ComponentFixture<ListSearchBarComponent>;
-  let mockReduxInst;
 
   beforeEach(async(() => {
-    mockReduxInst = MockNgRedux.getInstance();
-    const _old = mockReduxInst.getState;
-    const _wrapped = () => fromJS(_old());
-    mockReduxInst.getState = _wrapped;
-
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     TestBed.configureTestingModule({
       declarations: [ ListOptionInfoComponent, ListSearchBarComponent, SafeHtmlPipe ],
       imports: [
@@ -29,10 +23,7 @@ describe('ListSearchBarComponent', () => {
         NgxPopperModule,
         ReactiveFormsModule
       ],
-      providers: [
-        {provide: NgRedux, useValue: mockReduxInst},
-        CohortSearchActions,
-      ],
+      providers: [],
     })
       .compileComponents();
   }));

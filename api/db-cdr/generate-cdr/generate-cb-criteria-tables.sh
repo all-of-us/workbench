@@ -196,9 +196,6 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     domain_id       STRING
 )"
 
-
-
-
 echo "CREATE TABLES - snomed_rel_pcs_in_data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\`
@@ -2804,13 +2801,12 @@ from
     (
         select c.id,
         case
-            when c.code is null and c.name is not null then c.name
-            when c.code is not null and c.name is not null and string_agg(replace(cs.concept_synonym_name,'|','||'),'|') is null then concat(c.code,'|',c.name)
-            else concat(c.code,'|',c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+            when c.name is not null and string_agg(replace(cs.concept_synonym_name,'|','||'),'|') is null then c.name
+            else concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
         end as synonyms
         from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
         left join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs on c.concept_id = cs.concept_id
-        where domain_id not in ('SURVEY', 'PHYSICALMEASUREMENT', 'PERSON')
+        where domain_id not in ('SURVEY', 'PERSON')
         group by c.id, c.name, c.code
     ) y
 where x.id = y.id"
@@ -2836,11 +2832,11 @@ from
     ) y
 where x.id = y.id"
 
-echo "SYNONYMS - add PPI / Physical Measurement synonym data"
+echo "SYNONYMS - add PPI synonym data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 set x.synonyms = x.name
-where domain_id in ('SURVEY', 'PHYSICALMEASUREMENT')"
+where domain_id in ('SURVEY')"
 
 # add [rank1] for all items. this is to deal with the poly-hierarchical issue in many trees
 echo "SYNONYMS - add [rank1]"
@@ -2849,9 +2845,10 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set x.synonyms = CONCAT(x.synonyms, '|', y.rnk)
 from
     (
-        select min(id) as id, '[rank1]' as rnk
+        select min(id) as id, CONCAT('[', LOWER(domain_id), '_rank1]') as rnk
         from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
         where synonyms is not null
+            and (est_count != -1 OR (est_count = -1 AND type = 'BRAND'))
         group by domain_id, is_standard, type, subtype, concept_id, name
     ) y
 where x.id = y.id"
@@ -2972,6 +2969,23 @@ where b.concept_class_id = 'Ingredient'
             from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
             where domain_id = 'DRUG'
                 and type = 'BRAND'
+        )"
+
+echo "CRITERIA_RELATIONSHIP - Source Concept -> Standard Concept Mapping"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
+    (concept_id_1, concept_id_2)
+SELECT a.concept_id_1 as source_concept_id, a.concept_id_2 as standard_concept_id
+FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` a
+JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.concept_id_2 = b.concept_id
+WHERE b.standard_concept = 'S'
+    AND a.relationship_id = 'Maps to'
+    AND a.concept_id_1 in
+        (
+            SELECT DISTINCT concept_id
+            FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+            WHERE concept_id is not null
+                and is_standard = 0
         )"
 
 

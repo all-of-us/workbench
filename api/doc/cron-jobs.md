@@ -42,6 +42,13 @@ You can test a cron endpoint locally with curl:
 curl --header "X-AppEngine-Cron: true" localhost:8081/v1/cron/updateWidgetConfiguration
 ```
 
+Not ideal but you can test the schedule string for your cron by deploying an instance and reading its logs. You should be able to see the cron scheduler hitting the endpoints. Not that useful if your scheduled intervals are long but you can at least verify that the schedule string is deployable. A bad configuration will error out on the deploy-api command with something like `Bad configuration: schedule every 5 seconds failed to parse`
+
+```
+./project.rb deploy-api --no-promote --version songe --project all-of-us-workbench-test
+gcloud app logs tail -s api
+```
+
 ## Viewing logs
 
 One a new cron endpoint has been deployed to test, you should be able to see it in the App Engine "Cron jobs" tab (see
