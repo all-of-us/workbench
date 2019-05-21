@@ -60,6 +60,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
         this.noSelection = this.selectionList.length === 0;
         if (!this.open) {
           this.title = wizard.domain;
+          this.backMode = 'list';
           this.mode = 'list';
           this.open = true;
         }
@@ -109,15 +110,14 @@ export class ListModalComponent implements OnInit, OnDestroy {
 
   back = () => {
     switch (this.mode) {
-      case 'attributes':
+      case 'tree':
+        this.backMode = 'list';
+        this.mode = 'list';
+        break;
+      default:
         this.mode = this.backMode;
         this.attributesCrit = undefined;
         break;
-      case 'tree':
-        this.mode = 'list';
-        break;
-      case 'snomed':
-        this.mode = 'tree';
     }
   }
 
@@ -148,11 +148,6 @@ export class ListModalComponent implements OnInit, OnDestroy {
       this.itemType !== TreeType[TreeType.PPI];
   }
 
-  get isCondOrProc() {
-    return this.itemType === TreeType[TreeType.CONDITION]
-    || this.itemType === TreeType[TreeType.PROCEDURE];
-  }
-
   get showNext() {
     return this.showModifiers && this.mode !== 'modifiers';
   }
@@ -173,7 +168,9 @@ export class ListModalComponent implements OnInit, OnDestroy {
   }
 
   setMode(mode: any) {
-    this.backMode = this.mode;
+    if (this.mode !== 'attributes') {
+      this.backMode = this.mode;
+    }
     this.mode = mode;
   }
 
@@ -188,6 +185,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
       isStandard: criterion.isStandard,
       id: 0,    // root parent ID is always 0
     };
+    this.backMode = 'tree';
     this.mode = 'tree';
   }
 

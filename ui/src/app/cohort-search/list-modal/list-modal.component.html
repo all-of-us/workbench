@@ -1,4 +1,4 @@
-<div class="crit-modal-container" [class.show]="open">
+<div class="crit-modal-container" *ngIf="wizard" [class.show]="open">
   <div class="crit-modal-content" [class.demographics]="wizard.domain === domainType.PERSON">
     <div class="container title-margin">
       <div class="row">
@@ -11,12 +11,14 @@
                  class="btn tab"
                  [disabled]="!noSelection && conceptType === 'standard'"
                  [class.active]="mode === 'list' || mode === 'tree'"
-                 (click)="mode = 'tree'">
+                 (click)="mode = backMode">
                   {{ title }}
                 </button>
                 <button *ngIf="attributesCrit"
                   type="button"
-                  class="btn tab-node">
+                  class="btn tab"
+                  [class.active]="mode === 'attributes'"
+                  (click)="mode = 'attributes'">
                   {{attributeTitle}}
                 </button>
 
@@ -26,7 +28,7 @@
                   *ngIf="showModifiers"
                   [class.active]="mode === 'modifiers'"
                   [disabled]="noSelection"
-                  (click)="mode = 'modifiers'">
+                  (click)="setMode('modifiers')">
                   Modifiers
                 </button>
               </ng-container>
@@ -37,7 +39,7 @@
               </a>
               drugs by brand names outside of All of Us
             </div>
-            <button *ngIf="attributesCrit"
+            <button *ngIf="mode === 'attributes'"
               (click)="back()"
               class="btn btn-link btn-icon">
               <clr-icon size="24" shape="close"></clr-icon>
@@ -74,7 +76,7 @@
                   </div>
                   <!-- Attributes Page -->
                   <div class="panel-left" [class.show]="mode === 'attributes'">
-                    <crit-list-attributes-page *ngIf="mode === 'attributes'"
+                    <crit-list-attributes-page *ngIf="attributesCrit"
                       [criterion]="attributesCrit"
                       [close]="back"></crit-list-attributes-page>
                   </div>
@@ -123,7 +125,7 @@
                 </button>
                 <button *ngIf="showBack"
                   type="button"
-                  (click)="mode = backMode"
+                  (click)="back()"
                   class="btn btn-primary">
                   Back
                 </button>
