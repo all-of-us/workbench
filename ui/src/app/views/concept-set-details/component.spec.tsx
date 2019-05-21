@@ -1,16 +1,16 @@
 import {mount} from 'enzyme';
-import * as React from 'react';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {ConceptsApi, ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
-import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
-import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceAccessLevel} from 'generated';
+import {ConceptsApi, ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
+import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
+import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 import {ConceptSetDetails} from 'app/views/concept-set-details/component';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';

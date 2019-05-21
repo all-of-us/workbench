@@ -1,16 +1,14 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {ConceptHomepage} from 'app/views/concept-homepage/component';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {conceptsApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {ConceptsApi, ConceptSetsApi, StandardConceptFilter, WorkspacesApi} from 'generated/fetch';
-import {WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {DomainInfo} from 'generated/fetch';
-import {ConceptsApiStub, ConceptStubVariables, DomainStubVariables} from 'testing/stubs/concepts-api-stub';
+import {ConceptHomepage} from 'app/views/concept-homepage/component';
+import {ConceptsApi, ConceptSetsApi, DomainInfo, StandardConceptFilter, WorkspacesApi} from 'generated/fetch';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {ConceptsApiStub, ConceptStubVariables, DomainStubVariables} from 'testing/stubs/concepts-api-stub';
+import {workspaceDataStub, WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
 
 function isSelectedDomain(

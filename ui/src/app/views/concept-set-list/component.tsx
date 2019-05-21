@@ -18,8 +18,8 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
-import {ConceptNavigationBar} from 'app/views/concept-navigation-bar/component';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {ConceptNavigationBar} from 'app/views/concept-navigation-bar/component';
 import {ResourceCard} from 'app/views/resource-card/component';
 
 const styles = reactStyles({

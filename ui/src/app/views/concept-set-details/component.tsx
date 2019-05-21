@@ -12,7 +12,6 @@ import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit/component';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   reactStyles,
   ReactWrapperBase, summarizeErrors,
@@ -21,6 +20,7 @@ import {
 } from 'app/utils';
 import {currentConceptSetStore, navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActionsReact';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptTable} from 'app/views/concept-table/component';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {SlidingFabReact} from 'app/views/sliding-fab/component';
