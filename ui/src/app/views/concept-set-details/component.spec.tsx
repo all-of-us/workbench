@@ -2,15 +2,12 @@ import {mount} from 'enzyme';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {WorkspaceAccessLevel} from 'generated';
 import {ConceptsApi, ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub, WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
 import {ConceptSetDetails} from 'app/views/concept-set-details/component';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -22,10 +19,7 @@ describe('ConceptSetDetails', () => {
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(ConceptsApi, new ConceptsApiStub());
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
+    currentWorkspaceStore.next(workspaceDataStub);
     conceptSet = ConceptSetsApiStub.stubConceptSets()[0];
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
