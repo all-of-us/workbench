@@ -672,7 +672,9 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, String moduleName, AccessBypassRequest request) {
     Timestamp valueToSet;
+    Timestamp previousValue;
     Boolean bypassed = request.getIsBypassed();
+    User user = userDao.findUserByUserId(userId);
     if (bypassed) {
       valueToSet = new Timestamp(clock.instant().toEpochMilli());
     } else {
@@ -680,29 +682,42 @@ public class ProfileController implements ProfileApiDelegate {
     }
     switch (moduleName) {
       case "dataUseAgreement":
+        previousValue = user.getDataUseAgreementBypassTime();
         userService.setDataUseAgreementBypassTime(userId, valueToSet);
         break;
       case "complianceTraining":
+        previousValue = user.getComplianceTrainingBypassTime();
         userService.setComplianceTrainingBypassTime(userId, valueToSet);
         break;
       case "betaAccess":
+        previousValue = user.getBetaAccessBypassTime();
         userService.setBetaAccessBypassTime(userId, valueToSet);
         break;
       case "emailVerification":
+        previousValue = user.getEmailVerificationBypassTime();
         userService.setEmailVerificationBypassTime(userId, valueToSet);
         break;
       case "eraCommons":
+        previousValue = user.getEraCommonsBypassTime();
         userService.setEraCommonsBypassTime(userId, valueToSet);
         break;
       case "idVerification":
+        previousValue = user.getIdVerificationBypassTime();
         userService.setIdVerificationBypassTime(userId, valueToSet);
         break;
       case "twoFactorAuth":
+        previousValue = user.getTwoFactorAuthBypassTime();
         userService.setTwoFactorAuthBypassTime(userId, valueToSet);
         break;
       default:
         throw new BadRequestException("There is no access module named: " + moduleName);
     }
+    userService.logAdminUserAction(
+        userId,
+        "set bypass status for module " + moduleName + " to " + bypassed,
+        previousValue,
+        valueToSet
+    );
     return ResponseEntity.ok(new EmptyResponse());
   }
 
