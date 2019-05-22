@@ -739,4 +739,14 @@ public class ProfileController implements ProfileApiDelegate {
     );
   }
 
+  @Override
+  public ResponseEntity<Void> deleteProfile() {
+    User user = userProvider.get();
+    log.log(Level.WARNING, "User email: " + user.getEmail());
+    directoryService.deleteUser(user.getEmail().split("@")[0]);
+    userDao.delete(user.getUserId());
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
 }

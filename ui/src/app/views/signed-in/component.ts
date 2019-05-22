@@ -11,6 +11,7 @@ import {routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget, openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Authority, BillingProjectStatus} from 'generated';
+import {ProfileService} from "../../../generated/api/profile.service";
 
 @Component({
   selector: 'app-signed-in',
@@ -65,6 +66,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     public errorHandlingService: ErrorHandlingService,
     private signInService: SignInService,
     private serverConfigService: ServerConfigService,
+    private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
     /* Angular's */
     private locationService: Location,
@@ -130,6 +132,13 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
+  }
+
+  deleteAccount(): void {
+    this.profileService.deleteProfile()
+      .subscribe(_ => {
+        this.navigateSignOut();
+      });
   }
 
   signOut(): void {

@@ -103,7 +103,7 @@ paths:
 
    # User methods ########################################################################
 
-  /v1/me:
+  /v1/profile:
     get:
       tags:
         - profile
@@ -114,6 +114,35 @@ paths:
           description: The user's profile.
           schema:
             $ref: "#/definitions/Profile"
+    patch:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      description: Updates a users profile
+      operationId: updateProfile
+      parameters:
+        - in: body
+          name: updatedProfile
+          description: the new profile to use
+          schema:
+            $ref: "#/definitions/Profile"
+      responses:
+        204:
+          description: Request received.
+        400:
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      tags:
+        - profile
+      description: Deletes the user's profile and all associated information
+      operationId: deleteProfile
+      responses:
+        204:
+          description: Request Received.
+
 
   # TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
   # Error. It should respond with 400 Bad Request.
@@ -255,27 +284,7 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /v1/update-profile:
-    post:
-      tags:
-        - profile
-      consumes:
-        - application/json
-      description: Updates a users profile
-      operationId: updateProfile
-      parameters:
-        - in: body
-          name: updatedProfile
-          description: the new profile to use
-          schema:
-            $ref: "#/definitions/Profile"
-      responses:
-        204:
-          description: Request received.
-        400:
-          description: Bad request
-          schema:
-            $ref: "#/definitions/ErrorResponse"
+
 
   /v1/update-nih-token:
     post:
