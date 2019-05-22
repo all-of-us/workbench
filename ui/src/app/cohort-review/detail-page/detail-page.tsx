@@ -153,7 +153,7 @@ export const DetailPage = withCurrentWorkspace()(
 
     definitionCreated(ad) {
       const annotationDefinitions = this.state.annotationDefinitions.concat([ad]);
-      this.setState({annotationDefinitions, creatingDefinition: true});
+      this.setState({annotationDefinitions, creatingDefinition: false});
     }
 
     openEditDefinitionsModal() {
