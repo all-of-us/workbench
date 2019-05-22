@@ -62,6 +62,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
+
   private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
   private static final Long DEFAULT_TREE_SEARCH_LIMIT = 100L;
   private static final Long DEFAULT_CRITERIA_SEARCH_LIMIT = 250L;
@@ -327,6 +328,29 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     CriteriaListResponse criteriaResponse = new CriteriaListResponse()
       .items(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
 
+    return ResponseEntity.ok(criteriaResponse);
+  }
+
+  @Override
+  public ResponseEntity<CriteriaListResponse> getStandardCriteriaByDomainAndConceptId(Long cdrVersionId,
+                                                                                      String domain,
+                                                                                      Long conceptId) {
+    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    //These look ups can be done as one dao call but to make this code testable with the mysql
+    //fulltext search match function and H2 in memory database, it's split into 2 separate calls
+    //Each call is sub second, so having 2 calls and being testable is better than having one call
+    //and it being non-testable.
+    List<String> conceptIds =
+      cbCriteriaDao.findConceptId2ByConceptId1(conceptId)
+        .stream()
+        .map(c -> String.valueOf(c))
+        .collect(Collectors.toList());
+    List<CBCriteria> criteriaList = new ArrayList<>();
+    if (!conceptIds.isEmpty()) {
+      criteriaList = cbCriteriaDao.findStandardCriteriaByDomainAndConceptId(domain, true, conceptIds);
+    }
+    CriteriaListResponse criteriaResponse = new CriteriaListResponse()
+      .items(criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
     return ResponseEntity.ok(criteriaResponse);
   }
 

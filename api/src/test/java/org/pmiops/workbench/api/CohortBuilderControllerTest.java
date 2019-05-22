@@ -534,6 +534,29 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
+  public void getStandardCriteriaByDomainAndConceptId() throws Exception {
+    jdbcTemplate.execute("create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
+    jdbcTemplate.execute("insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
+    CBCriteria criteria = new CBCriteria()
+      .domainId(DomainType.CONDITION.toString())
+      .type(CriteriaType.ICD10CM.toString())
+      .standard(true)
+      .count("1")
+      .conceptId("1")
+      .synonyms("[CONDITION_rank1]");
+    cbCriteriaDao.save(criteria);
+    assertEquals(
+      createResponseCriteria(criteria),
+      controller
+        .getStandardCriteriaByDomainAndConceptId(1L, DomainType.CONDITION.toString(),12345L)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+    jdbcTemplate.execute("drop table cb_criteria_relationship");
+  }
+
+  @Test
   public void getDrugBrandOrIngredientByName() throws Exception {
     Criteria drugATCCriteria = criteriaDao.save(
       createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true, true)
