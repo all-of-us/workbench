@@ -65,6 +65,14 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
   @Query(value = "select cr from CBCriteria cr where domain_id = ?1 and type = ?2 and is_group = 0 and is_selectable = 1")
   List<CBCriteria> findCriteriaLeavesByDomainAndType(String domain, String type);
 
+  @Query(value = "select concept_id_2 from cb_criteria_relationship where concept_id_1 = :conceptId", nativeQuery = true)
+  List<Integer> findConceptId2ByConceptId1(@Param("conceptId") Long conceptId);
+
+  @Query(value = "select cr from CBCriteria cr where cr.conceptId = (:conceptIds) and cr.standard = :standard and cr.domainId = :domain and match(cr.synonyms, concat('+[', :domain, '_rank1]')) > 0)")
+  List<CBCriteria> findStandardCriteriaByDomainAndConceptId(@Param("domain") String domain,
+                                                            @Param("standard") Boolean isStandard,
+                                                            @Param("conceptIds") List<String> conceptIds);
+
   @Query(value = "select * from cb_criteria where domain_id=:domain and type=:type and is_standard=:standard and parent_id=:parentId and has_hierarchy = 1 order by id asc", nativeQuery = true)
   List<CBCriteria> findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(@Param("domain") String domain,
                                                                         @Param("type") String type,

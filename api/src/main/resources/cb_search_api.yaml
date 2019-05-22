@@ -71,6 +71,33 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/{conceptId}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: >
+        Returns a collection of criteria per concept id
+      operationId: "getStandardCriteriaByDomainAndConceptId"
+      parameters:
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: the specific type of domain
+        - in: path
+          name: conceptId
+          type: integer
+          format: int64
+          required: true
+          description: the concept id to search for
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
   /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
