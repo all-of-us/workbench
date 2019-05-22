@@ -678,7 +678,6 @@ public class ProfileController implements ProfileApiDelegate {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
     long userId = userProvider.get().getUserId();
-    updateBypass(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
