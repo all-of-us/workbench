@@ -288,7 +288,9 @@ public class DataSetController implements DataSetApiDelegate {
           });
           break;
         } catch (Exception ex) {
-          if (ex.getCause().getMessage().contains("Read timed out")) {
+          if (ex.getCause() != null
+              && ex.getCause().getMessage() != null
+              && ex.getCause().getMessage().contains("Read timed out")) {
             rowsRequested = (rowsRequested / 2);
             retry++;
           } else {
