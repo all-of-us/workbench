@@ -4,23 +4,12 @@ import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
 
-import {
-  cohortsApi,
-  profileApi,
-  workspacesApi
-} from 'app/services/swagger-fetch-clients';
+import {cohortsApi, profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {CdrVersion} from 'generated';
 
-import {
-  Cohort,
-  FileDetail,
-  PageVisit,
-  UserRole,
-  Workspace,
-  WorkspaceAccessLevel,
-} from 'generated/fetch';
+import {Cohort, FileDetail, PageVisit, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
 enum Tabs {
   Cohorts,
@@ -45,6 +34,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   cdrVersion: CdrVersion;
   wsId: string;
   wsNamespace: string;
+  freeTierBillingProject: string;
   cohortsLoading = true;
   cohortsError = false;
   cohortList: Cohort[] = [];
@@ -67,7 +57,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   googleBucketModal = false;
 
   constructor(
-    private cdrVersionStorageService: CdrVersionStorageService,
+    private cdrVersionStorageService: CdrVersionStorageService
   ) {
     this.closeNotebookModal = this.closeNotebookModal.bind(this);
     this.closeBugReport = this.closeBugReport.bind(this);
@@ -100,6 +90,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     profileApi().getMe().then(
       profile => {
         this.username = profile.username;
+        this.freeTierBillingProject = profile.freeTierBillingProjectName;
         if (profile.pageVisits) {
           this.firstVisit = !profile.pageVisits.some(v =>
             v.page === WorkspaceComponent.PAGE_ID);
@@ -202,6 +193,18 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.notebookError = false;
     this.bugReportDescription = 'Could not load notebooks';
     this.bugReportOpen = true;
+  }
+
+  workspaceClusterBillingProjectId(): string {
+    if (this.workspace.namespace === this.freeTierBillingProject) {
+      return this.freeTierBillingProject;
+    }
+
+    if ([WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.OWNER].includes(this.accessLevel)) {
+      return this.workspace.namespace;
+    }
+
+    return null;
   }
 
   closeBugReport(): void {
