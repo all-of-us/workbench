@@ -286,4 +286,23 @@ public class CBCriteriaDaoTest {
     jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
+  @Test
+  public void findConceptId2ByConceptId1() throws Exception {
+    jdbcTemplate.execute("create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
+    jdbcTemplate.execute("insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
+    assertEquals(1, cbCriteriaDao.findConceptId2ByConceptId1(12345L).get(0).intValue());
+  }
+
+  @Test
+  public void findStandardCriteriaByDomainAndConceptId() throws Exception {
+    CBCriteria criteria = new CBCriteria()
+      .domainId(DomainType.CONDITION.toString())
+      .type(CriteriaType.ICD10CM.toString())
+      .standard(true)
+      .conceptId("1")
+      .synonyms("[CONDITION_rank1]");
+    cbCriteriaDao.save(criteria);
+    assertEquals(criteria, cbCriteriaDao.findStandardCriteriaByDomainAndConceptId(DomainType.CONDITION.toString(), true, Arrays.asList("1")).get(0));
+  }
+
 }
