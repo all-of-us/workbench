@@ -1,5 +1,6 @@
 import {
   AccessBypassRequest,
+  AccessModule,
   BillingProjectStatus,
   DataAccessLevel,
   InvitationVerificationRequest,
@@ -88,8 +89,7 @@ export class ProfileApiStub extends ProfileApi {
   }
 
   public bypassAccessRequirement(
-    userId: number, moduleName: string,
-    bypassed?: AccessBypassRequest, options?: any): Promise<EmptyResponse> {
+    userId: number, bypassed?: AccessBypassRequest, options?: any): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(resolve => {
       let valueToSet;
       if (bypassed.isBypassed) {
@@ -97,14 +97,14 @@ export class ProfileApiStub extends ProfileApi {
       } else {
         valueToSet = null;
       }
-      switch (moduleName) {
-        case 'complianceTraining':
+      switch (bypassed.moduleName) {
+        case AccessModule.COMPLIANCETRAINING:
           this.profile.complianceTrainingBypassTime = valueToSet;
           break;
-        case 'betaAccess':
+        case AccessModule.BETAACCESS:
           this.profile.betaAccessBypassTime = valueToSet;
           break;
-        case 'eraCommons':
+        case AccessModule.ERACOMMONS:
           this.profile.eraCommonsBypassTime = valueToSet;
           break;
       }

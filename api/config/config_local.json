@@ -57,7 +57,8 @@
     "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": false,
-    "enableBetaAccess": true
+    "enableBetaAccess": true,
+    "unsafeAllowSelfBypass": true
   },
   "cohortbuilder": {
     "enableListSearch": false
