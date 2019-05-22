@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+    <changeSet author="jroberti" id="db.changelog-79-research-purpose-refactor">
+        <addColumn tableName="workspace">
+            <column name="rp_social_behavior" type="boolean" />
+            <column name="rp_population_health" type="boolean"/>
+            <column name="rp_educational" type="boolean"/>
+            <column name="rp_other_purpose" type="boolean"/>
+            <column name="rp_other_purpose_details" type="varchar(500)"/>
+            <column name="rp_software_choice" type="varchar(500)"/>
+            <column name="rp_intended_study" type="varchar(500)"/>
+            <column name="rp_anticipated_findings" type="varchar(2000)"/>
+        </addColumn>
+        <dropColumn columnName="description" tableName="workspace"/>
+        <dropColumn columnName="rp_population_of_focus" tableName="workspace"/>
+        <dropColumn columnName="rp_aggregate_analysis" tableName="workspace"/>
+        <createTable tableName="specific_populations">
+            <column name="workspace_id" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="specific_population" type="tinyint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="workspace_id"
+                                 baseTableName="specific_populations"
+                                 constraintName="fk_specific_population_workspace_id"
+                                 referencedColumnNames="workspace_id"
+                                 referencedTableName="workspace"/>
+    </changeSet>
+</databaseChangeLog>

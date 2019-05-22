@@ -231,6 +231,29 @@ public final class StorageEnums {
     return CLIENT_TO_STORAGE_WORKSPACE_ACTIVE_STATUS.get(s);
   }
 
+  public static final BiMap<SpecificPopulationEnum, Short> CLIENT_TO_STORAGE_SPECIFIC_POPULATION =
+          ImmutableBiMap.<SpecificPopulationEnum, Short>builder()
+          .put(SpecificPopulationEnum.RACE_ETHNICITY, (short) 0)
+          .put(SpecificPopulationEnum. AGE_GROUPS, (short) 1)
+          .put(SpecificPopulationEnum.SEX, (short) 2)
+          .put(SpecificPopulationEnum.GENDER_IDENTITY, (short) 3)
+          .put(SpecificPopulationEnum.SEXUAL_ORIENTATION, (short) 4)
+          .put(SpecificPopulationEnum.GEOGRAPHY, (short) 5)
+          .put(SpecificPopulationEnum.DISABILITY_STATUS, (short) 6)
+          .put(SpecificPopulationEnum.ACCESS_TO_CARE, (short) 7)
+          .put(SpecificPopulationEnum.EDUCATION_LEVEL, (short) 8)
+          .put(SpecificPopulationEnum.INCOME_LEVEL, (short) 9)
+          .put(SpecificPopulationEnum.OTHER, (short) 10)
+          .build();
+
+  public static SpecificPopulationEnum specificPopulationFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_SPECIFIC_POPULATION.inverse().get(s);
+  }
+
+  public static Short specificPopulationToStorage(SpecificPopulationEnum s) {
+    return CLIENT_TO_STORAGE_SPECIFIC_POPULATION.get(s);
+  }
+
   /** Utility class. */
   private StorageEnums() {}
 }

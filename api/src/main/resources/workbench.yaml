@@ -1772,8 +1772,6 @@ definitions:
         type: string
       namespace:
         type: string
-      description:
-        type: string
       cdrVersionId:
         type: string
       creator:
@@ -1912,60 +1910,87 @@ definitions:
      - diseaseFocusedResearch
      - methodsDevelopment
      - controlSet
-     - aggregateAnalysis
      - ancestry
      - commercialPurpose
      - population
      - reviewRequested
-     - underservedPopulation
+     - containsUnderservedPopulation
+     - socialBehavior
+     - populationHealth
+     - educational
+     - otherPurpose
+     - softwareChoice
+     - intendedStudy
+     - anticipatedFindings
     properties:
-      diseaseFocusedResearch:
-        type: boolean
-        default: false
-      diseaseOfFocus:
+      additionalNotes:
         type: string
-      methodsDevelopment:
+      approved:
         type: boolean
-        default: false
-      controlSet:
-        type: boolean
-        default: false
-      aggregateAnalysis:
-        type: boolean
-        default: false
       ancestry:
         type: boolean
         default: false
-      commercialPurpose:
-        type: boolean
-        default: false
-      population:
-        type: boolean
-        default: false
-      populationOfFocus:
+      anticipatedFindings:
         type: string
-      reviewRequested:
+      commercialPurpose:
         type: boolean
         default: false
       containsUnderservedPopulation:
         type: boolean
         default: false
-      underservedPopulationDetails:
+      controlSet:
+        type: boolean
+        default: false
+      diseaseFocusedResearch:
+        type: boolean
+        default: false
+      diseaseOfFocus:
+        type: string
+      educational:
+        type: boolean
+        default: false
+      intendedStudy:
+        type: string
+      methodsDevelopment:
+        type: boolean
+        default: false
+      otherPurpose:
+        type: boolean
+        default: false
+      otherPurposeDetails:
+        type: string
+      population:
+        type: boolean
+        default: false
+      populationDetails:
         type: array
         items:
-          $ref: "#/definitions/underservedPopulationEnum"
+          $ref: "#/definitions/specificPopulationEnum"
+      populationHealth:
+        type: boolean
+        default: false
+      reviewRequested:
+        type: boolean
+        default: false
+      socialBehavior:
+        type: boolean
+        default: false
+      softwareChoice:
+        type: string
       timeRequested:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
-      approved:
-        type: boolean
       timeReviewed:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
-      additionalNotes:
-        type: string
+      underservedPopulationDetails:
+        type: array
+        items:
+          $ref: "#/definitions/underservedPopulationEnum"
+
+
 
   underservedPopulationEnum:
     type: string
@@ -2011,6 +2036,23 @@ definitions:
       ACCESS_TO_CARE_CANNOT_OBTAIN_OR_PAY_FOR,
       EDUCATION_INCOME_LESS_THAN_HIGH_SCHOOL_GRADUATE,
       EDUCATION_INCOME_LESS_THAN_TWENTY_FIVE_THOUSAND_FOR_FOUR_PEOPLE
+    ]
+
+  specificPopulationEnum:
+    type: string
+    description: Short parsable descriptions of specific population categories
+    enum: [
+      RACE_ETHNICITY,
+      AGE_GROUPS,
+      SEX,
+      GENDER_IDENTITY,
+      SEXUAL_ORIENTATION,
+      GEOGRAPHY,
+      DISABILITY_STATUS,
+      ACCESS_TO_CARE,
+      EDUCATION_LEVEL,
+      INCOME_LEVEL,
+      OTHER
     ]
 
   ResearchPurposeReviewRequest:

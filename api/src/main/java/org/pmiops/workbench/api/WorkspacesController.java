@@ -292,7 +292,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       ConceptSet dbConceptSet = new ConceptSet();
 
       dbConceptSet.setName(conceptSet.getString("name"));
-      dbConceptSet.setDescription(conceptSet.getString("description"));
+//      dbConceptSet.setDescription(conceptSet.getString("description"));
       dbConceptSet.setCreator(userProvider.get());
       dbConceptSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
       dbConceptSet.setCreationTime(now);
