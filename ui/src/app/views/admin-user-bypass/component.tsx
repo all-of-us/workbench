@@ -30,11 +30,11 @@ export class AdminUserBypass extends React.Component<
     super(props);
     const {profile} = props;
     const initialModules = [
-      ...(!!profile.betaAccessBypassTime ? [AccessModule.BETAACCESS] : []),
-      ...(!!profile.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
-      ...(!!profile.dataUseAgreementBypassTime ? [AccessModule.DATAUSEAGREEMENT] : []),
-      ...(!!profile.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
-      ...(!!profile.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
+      ...(profile.betaAccessBypassTime ? [AccessModule.BETAACCESS] : []),
+      ...(profile.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
+      ...(profile.dataUseAgreementBypassTime ? [AccessModule.DATAUSEAGREEMENT] : []),
+      ...(profile.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
+      ...(profile.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
     ];
     this.state = {
       open: false,
