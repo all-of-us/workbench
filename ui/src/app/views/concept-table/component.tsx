@@ -27,12 +27,21 @@ const styles = reactStyles({
     marginLeft: 10,
     verticalAlign: 'middle',
     color: colors.blue[3]
+  },
+  highlighted: {
+    color: colors.green[2],
+    backgroundColor: colors.green[2].alpha(0.2),
+    backgroundOpacity: '0.2',
+    display: 'inline-block'
   }
 });
 
+interface SynonymsObjectState {
+  seeMore: boolean;
+  willOverflow: boolean;
+}
 const ROWS_TO_DISPLAY = 10;
-export class SynonymsObject extends React.Component<{},
-    {seeMore: boolean, willOverflow: boolean}> {
+export class SynonymsObject extends React.Component<{}, SynonymsObjectState> {
   domElement: any;
   constructor(props) {
     super(props);
@@ -88,6 +97,7 @@ interface Props {
   nextPage?: Function;
   placeholderValue: string;
   reactKey: string;
+  searchTerm?: string;
   selectedConcepts: Concept[];
 }
 
@@ -166,8 +176,34 @@ export class ConceptTable extends React.Component<Props, State> {
 
   rowExpansionTemplate(data) {
     return (<SynonymsObject>
-      {fp.uniq(data.conceptSynonyms).join(', ')}
+      {this.highlightWithSearchTerm(fp.uniq(data.conceptSynonyms).join(', '))}
     </SynonymsObject>);
+  }
+
+  highlightWithSearchTerm(stringToHighlight: string) {
+    const {searchTerm} = this.props;
+    if (!searchTerm) {
+      return stringToHighlight;
+
+    }
+    const words: string[] = [];
+    let searchWords = searchTerm.split(new RegExp(',| '));
+    searchWords = searchWords
+      .filter(w => w.length > 0 )
+      .map(word => word.replace(/[&!^\/\\#,+()$~%.'":*?<>{}]/g, ''));
+    const matchString = new RegExp(searchWords.join('|'), 'i');
+    const matches = stringToHighlight.match(new RegExp(matchString, 'gi'));
+    const splits = stringToHighlight.split(new RegExp(matchString, 'gi'));
+    if (matches) {
+      for (let i = 0; i < matches.length; i++) {
+        words.push(splits[i], matches[i]);
+      }
+      words.push(splits[splits.length - 1]);
+    }
+    return words.map(word => <span
+      style={matchString.test(word.toLowerCase()) ? styles.highlighted : {}}>
+        {word}
+      </span>);
   }
 
   async onPage(event) {
@@ -218,7 +254,7 @@ export class ConceptTable extends React.Component<Props, State> {
                  totalRecords={this.state.totalRecords}
                  expandedRows={this.props.concepts
                    .filter(concept => concept.conceptSynonyms.length > 0)}
-                 rowExpansionTemplate={this.rowExpansionTemplate}
+                 rowExpansionTemplate={(data) => this.rowExpansionTemplate(data)}
                  paginator={true} rows={ROWS_TO_DISPLAY}
                  onPage={(event) => this.onPage(event)}
                  loading={pageLoading}
@@ -231,8 +267,8 @@ export class ConceptTable extends React.Component<Props, State> {
               data-test-id='conceptName'/>
       <Column bodyStyle={styles.colStyle} field='conceptCode' header='Code'/>
       <Column field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle}
-              filter={true} headerStyle={{display: 'flex', textAlign: 'center', paddingTop: '0.6rem'
-        , paddingLeft: '5rem'}}
+              filter={true} headerStyle={{display: 'flex', textAlign: 'center',
+                paddingTop: '0.6rem', paddingLeft: '5rem'}}
               filterElement={vocabularyFilter} />
       <Column style={styles.colStyle} field='countValue' header='Count'/>
     </DataTable>
@@ -249,10 +285,11 @@ export class ConceptTableComponent extends ReactWrapperBase {
   @Input() onSelectConcepts;
   @Input() loading = false;
   @Input() placeholderValue = '';
+  @Input() searchTerm;
   @Input() selectedConcepts: Array<any> = [];
 
   constructor() {
     super(ConceptTable, ['concepts', 'loading', 'placeholderValue', 'onSelectConcepts',
-      'selectedConcepts']);
+      'searchTerm', 'selectedConcepts']);
   }
 }

@@ -81,7 +81,6 @@ import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
-import { HighlightSearchComponent } from './highlight-search/highlight-search.component';
 import {ToolTipComponent} from './views/tooltip/component';
 
 
@@ -177,7 +176,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     WorkspaceShareComponent,
     WorkspaceWrapperComponent,
     HomepageComponent,
-    HighlightSearchComponent,
     ResetClusterButtonComponent,
   ],
   providers: [

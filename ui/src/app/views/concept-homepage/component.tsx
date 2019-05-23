@@ -412,6 +412,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                             loading={searchLoading}
                             onSelectConcepts={this.selectConcepts.bind(this)}
                             placeholderValue={this.noConceptsConstant}
+                            searchTerm={this.state.currentSearchString}
                             selectedConcepts={conceptsToAdd}
                             reactKey={selectedDomain.name}
                             nextPage={(page) => this.getNextConceptSet(page)}/>
