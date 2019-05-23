@@ -134,13 +134,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  deleteAccount(): void {
-    this.profileService.deleteProfile()
-      .subscribe(_ => {
-        this.navigateSignOut();
-      });
-  }
-
   signOut(): void {
     this.signInService.signOut();
     this.navigateSignOut();
