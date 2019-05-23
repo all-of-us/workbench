@@ -1915,7 +1915,7 @@ definitions:
      - population
      - reviewRequested
      - containsUnderservedPopulation
-     - socialBehavior
+     - socialBehavioral
      - populationHealth
      - educational
      - otherPurpose
@@ -1972,7 +1972,7 @@ definitions:
       reviewRequested:
         type: boolean
         default: false
-      socialBehavior:
+      socialBehavioral:
         type: boolean
         default: false
       softwareChoice:

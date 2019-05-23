@@ -88,7 +88,7 @@ public class Workspace {
   private boolean commercialPurpose;
   private boolean population;
   private Set<Short> populationDetailsSet = new HashSet<>();
-  private boolean socialBehavior;
+  private boolean socialBehavioral;
   private boolean populationHealth;
   private boolean educational;
   private boolean otherPurpose;
@@ -272,10 +272,10 @@ public class Workspace {
     this.commercialPurpose = commercialPurpose;
   }
 
-  @Column(name = "rp_social_behavior")
-  public boolean getSocialBehavior() { return this.socialBehavior; }
+  @Column(name = "rp_social_behavioral")
+  public boolean getSocialBehavioral() { return this.socialBehavioral; }
 
-  public void setSocialBehavior(boolean socialBehavior) { this.socialBehavior = socialBehavior; }
+  public void setSocialBehavioral(boolean socialBehavioral) { this.socialBehavioral = socialBehavioral; }
 
   @Column(name = "rp_population_health")
   public boolean getPopulationHealth() { return this.populationHealth; }
@@ -312,14 +312,14 @@ public class Workspace {
   public Set<Short> getPopulationDetails() { return populationDetailsSet; }
 
   public void setPopulationDetails(Set<Short> newPopulationDetailsSet) {
-    this.populationDetailsSet = newPopulationDetailsSet
+    this.populationDetailsSet = newPopulationDetailsSet;
   }
 
   @Transient
   public Set<SpecificPopulationEnum> getSpecificPopulationsEnum() {
     Set<Short> from = getPopulationDetails();
     if (from == null) {
-      return null
+      return null;
     }
     return from
             .stream()
@@ -382,6 +382,21 @@ public class Workspace {
         .map(StorageEnums::underservedPopulationToStorage)
         .collect(Collectors.toSet()));
   }
+
+  @Column(name = "rp_software_choice")
+  public String getSoftwareChoice() { return this.softwareChoice; }
+
+  public void setSoftwareChoice(String softwareChoice) { this.softwareChoice = softwareChoice; }
+
+  @Column(name = "rp_intended_study")
+  public String getIntendedStudy() { return this.intendedStudy; }
+
+  public void setIntendedStudy(String intendedStudy) { this.intendedStudy = intendedStudy; }
+
+  @Column(name = "rp_anticipated_findings")
+  public String getAnticipatedFindings() { return this.anticipatedFindings; }
+
+  public void setAnticipatedFindings(String anticipatedFindings) { this.anticipatedFindings = anticipatedFindings; }
 
   @Column(name = "rp_review_requested")
   public Boolean getReviewRequested() {

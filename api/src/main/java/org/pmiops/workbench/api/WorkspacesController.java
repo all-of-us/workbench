@@ -254,7 +254,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // TODO: enforce data access level authorization
     dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
     dbWorkspace.setName(reqWorkspace.getName());
-    dbWorkspace.setDescription(reqWorkspace.getDescription());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
@@ -292,7 +291,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       ConceptSet dbConceptSet = new ConceptSet();
 
       dbConceptSet.setName(conceptSet.getString("name"));
-//      dbConceptSet.setDescription(conceptSet.getString("description"));
       dbConceptSet.setCreator(userProvider.get());
       dbConceptSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
       dbConceptSet.setCreationTime(now);
@@ -403,9 +401,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (workspace.getDataAccessLevel() != null &&
         !dbWorkspace.getDataAccessLevelEnum().equals(workspace.getDataAccessLevel())) {
       throw new BadRequestException("Attempted to change data access level");
-    }
-    if (workspace.getDescription() != null) {
-      dbWorkspace.setDescription(workspace.getDescription());
     }
     if (workspace.getName() != null) {
       dbWorkspace.setName(workspace.getName());
@@ -530,12 +525,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
 
-    // Clone description/CDR version from the source, by default.
-    if (Strings.isNullOrEmpty(toDbWorkspace.getDescription())) {
-      dbWorkspace.setDescription(fromWorkspace.getDescription());
-    } else {
-      dbWorkspace.setDescription(toDbWorkspace.getDescription());
-    }
+    // Clone CDR version from the source, by default.
     String reqCdrVersionId = body.getWorkspace().getCdrVersionId();
     if (Strings.isNullOrEmpty(reqCdrVersionId) ||
         reqCdrVersionId.equals(Long.toString(fromWorkspace.getCdrVersion().getCdrVersionId()))) {

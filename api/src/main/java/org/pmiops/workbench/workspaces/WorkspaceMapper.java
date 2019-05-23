@@ -36,7 +36,6 @@ public class WorkspaceMapper {
         .name(workspace.getName())
         .id(workspaceId.getWorkspaceName())
         .namespace(workspaceId.getWorkspaceNamespace())
-        .description(workspace.getDescription())
         .researchPurpose(researchPurpose);
     if (workspace.getCreator() != null) {
       result.setCreator(workspace.getCreator().getEmail());
@@ -66,7 +65,6 @@ public class WorkspaceMapper {
         .name(workspace.getName())
         .id(fcWorkspace.getName())
         .namespace(fcWorkspace.getNamespace())
-        .description(workspace.getDescription())
         .researchPurpose(researchPurpose)
         .googleBucketName(fcWorkspace.getBucketName());
     if (fcWorkspace.getCreatedBy() != null) {
@@ -89,7 +87,6 @@ public class WorkspaceMapper {
       result.setDataAccessLevelEnum(workspace.getDataAccessLevel());
     }
 
-    result.setDescription(workspace.getDescription());
     result.setName(workspace.getName());
 
     if (workspace.getResearchPurpose() != null) {
@@ -124,17 +121,26 @@ public class WorkspaceMapper {
     dbWorkspace.setDiseaseOfFocus(purpose.getDiseaseOfFocus());
     dbWorkspace.setMethodsDevelopment(purpose.getMethodsDevelopment());
     dbWorkspace.setControlSet(purpose.getControlSet());
-    dbWorkspace.setAggregateAnalysis(purpose.getAggregateAnalysis());
     dbWorkspace.setAncestry(purpose.getAncestry());
     dbWorkspace.setCommercialPurpose(purpose.getCommercialPurpose());
     dbWorkspace.setPopulation(purpose.getPopulation());
-    dbWorkspace.setPopulationOfFocus(purpose.getPopulationOfFocus());
+    if (purpose.getPopulation()) {
+      dbWorkspace.setSpecificPopulationsEnum(new HashSet<>(purpose.getPopulationDetails()));
+    }
+    dbWorkspace.setSocialBehavioral(purpose.getSocialBehavioral());
+    dbWorkspace.setPopulationHealth(purpose.getPopulationHealth());
+    dbWorkspace.setEducational(purpose.getEducational());
+    dbWorkspace.setOtherPurpose(purpose.getOtherPurpose());
+    dbWorkspace.setOtherPurposeDetails(purpose.getOtherPurposeDetails());
     dbWorkspace.setAdditionalNotes(purpose.getAdditionalNotes());
     dbWorkspace.setContainsUnderservedPopulation(purpose.getContainsUnderservedPopulation());
     if (purpose.getContainsUnderservedPopulation()) {
       dbWorkspace
           .setUnderservedPopulationsEnum(new HashSet<>(purpose.getUnderservedPopulationDetails()));
     }
+    dbWorkspace.setSoftwareChoice(purpose.getSoftwareChoice());
+    dbWorkspace.setIntendedStudy(purpose.getIntendedStudy());
+    dbWorkspace.setAnticipatedFindings(purpose.getAnticipatedFindings());
   }
 
   private final ResearchPurpose createResearchPurpose(
@@ -144,11 +150,17 @@ public class WorkspaceMapper {
         .diseaseOfFocus(workspace.getDiseaseOfFocus())
         .methodsDevelopment(workspace.getMethodsDevelopment())
         .controlSet(workspace.getControlSet())
-        .aggregateAnalysis(workspace.getAggregateAnalysis())
         .ancestry(workspace.getAncestry())
         .commercialPurpose(workspace.getCommercialPurpose())
+        .socialBehavioral(workspace.getSocialBehavioral())
+        .educational(workspace.getEducational())
+        .populationHealth(workspace.getPopulationHealth())
+        .otherPurpose(workspace.getOtherPurpose())
+        .otherPurposeDetails(workspace.getOtherPurposeDetails())
         .population(workspace.getPopulation())
-        .populationOfFocus(workspace.getPopulationOfFocus())
+        .softwareChoice(workspace.getSoftwareChoice())
+        .intendedStudy(workspace.getIntendedStudy())
+        .anticipatedFindings(workspace.getAnticipatedFindings())
         .additionalNotes(workspace.getAdditionalNotes())
         .reviewRequested(workspace.getReviewRequested())
         .approved(workspace.getApproved())
