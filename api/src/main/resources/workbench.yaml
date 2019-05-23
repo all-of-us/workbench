@@ -750,7 +750,38 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  /v1/admin/users/{userId}/bypass-access-requirement/{moduleName}:
+  /v1/admin/unsafe-self-bypass-access-requirement:
+      post:
+        tags:
+          - profile
+        consumes:
+          - application/json
+        description: >
+          Updates the given user to bypass the request access requirement
+        parameters:
+          - in: body
+            name: bypassed
+            schema:
+              $ref: '#/definitions/AccessBypassRequest'
+            description: >
+              Whether the requirement should be bypassed or not. Defaults to
+              true, so an empty body  will cause the requirement to be bypassed.
+        operationId: unsafeSelfBypassAccessRequirement
+        responses:
+          200:
+            description: success
+            schema:
+              $ref: "#/definitions/EmptyResponse"
+          403:
+            description: Self bypass is disallowed in this environment
+            schema:
+              $ref: "#/definitions/ErrorResponse"
+          400:
+            description: No module exists with name submitted
+            schema:
+              $ref: "#/definitions/ErrorResponse"
+
+  /v1/admin/users/{userId}/bypass-access-requirement:
     post:
       tags:
         - profile
@@ -761,11 +792,6 @@ paths:
         e.g. "eraCommons", or "twoFactorAuth"
       parameters:
         - $ref: '#/parameters/userId'
-        - in: path
-          name: moduleName
-          description: name of module to be bypassed
-          required: true
-          type: string
         - in: body
           name: bypassed
           schema:
@@ -2046,11 +2072,23 @@ definitions:
       clusterConfig:
         $ref: "#/definitions/ClusterConfig"
 
+  AccessModule:
+    type: string
+    enum: [
+      DATA_USE_AGREEMENT,
+      COMPLIANCE_TRAINING,
+      BETA_ACCESS,
+      ERA_COMMONS,
+      TWO_FACTOR_AUTH
+    ]
+
   AccessBypassRequest:
     type: object
     required:
       - isBypassed
     properties:
+      moduleName:
+        $ref: "#/definitions/AccessModule"
       isBypassed:
         type: boolean
 

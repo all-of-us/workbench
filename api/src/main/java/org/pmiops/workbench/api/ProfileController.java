@@ -268,9 +268,6 @@ public class ProfileController implements ProfileApiDelegate {
       return user;
     }
 
-    // Check if 2FA is set up on account
-    userService.syncTwoFactorAuthStatus(user);
-
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (user.getFirstSignInTime() == null) {
       // If the user is already registered, their profile will get updated.
@@ -670,39 +667,18 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, String moduleName, AccessBypassRequest request) {
-    Timestamp valueToSet;
-    Boolean bypassed = request.getIsBypassed();
-    if (bypassed) {
-      valueToSet = new Timestamp(clock.instant().toEpochMilli());
-    } else {
-      valueToSet = null;
+  public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, AccessBypassRequest request) {
+    updateBypass(userId, request);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirement(AccessBypassRequest request) {
+    if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
+      throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
-    switch (moduleName) {
-      case "dataUseAgreement":
-        userService.setDataUseAgreementBypassTime(userId, valueToSet);
-        break;
-      case "complianceTraining":
-        userService.setComplianceTrainingBypassTime(userId, valueToSet);
-        break;
-      case "betaAccess":
-        userService.setBetaAccessBypassTime(userId, valueToSet);
-        break;
-      case "emailVerification":
-        userService.setEmailVerificationBypassTime(userId, valueToSet);
-        break;
-      case "eraCommons":
-        userService.setEraCommonsBypassTime(userId, valueToSet);
-        break;
-      case "idVerification":
-        userService.setIdVerificationBypassTime(userId, valueToSet);
-        break;
-      case "twoFactorAuth":
-        userService.setTwoFactorAuthBypassTime(userId, valueToSet);
-        break;
-      default:
-        throw new BadRequestException("There is no access module named: " + moduleName);
-    }
+    long userId = userProvider.get().getUserId();
+    updateBypass(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -719,6 +695,48 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (WorkbenchException e) {
       throw e;
     }
+  }
+
+  private void updateBypass(long userId, AccessBypassRequest request) {
+    Timestamp valueToSet;
+    Timestamp previousValue;
+    Boolean bypassed = request.getIsBypassed();
+    User user = userDao.findUserByUserId(userId);
+    if (bypassed) {
+      valueToSet = new Timestamp(clock.instant().toEpochMilli());
+    } else {
+      valueToSet = null;
+    }
+    switch (request.getModuleName()) {
+      case DATA_USE_AGREEMENT:
+        previousValue = user.getDataUseAgreementBypassTime();
+        userService.setDataUseAgreementBypassTime(userId, valueToSet);
+        break;
+      case COMPLIANCE_TRAINING:
+        previousValue = user.getComplianceTrainingBypassTime();
+        userService.setComplianceTrainingBypassTime(userId, valueToSet);
+        break;
+      case BETA_ACCESS:
+        previousValue = user.getBetaAccessBypassTime();
+        userService.setBetaAccessBypassTime(userId, valueToSet);
+        break;
+      case ERA_COMMONS:
+        previousValue = user.getEraCommonsBypassTime();
+        userService.setEraCommonsBypassTime(userId, valueToSet);
+        break;
+      case TWO_FACTOR_AUTH:
+        previousValue = user.getTwoFactorAuthBypassTime();
+        userService.setTwoFactorAuthBypassTime(userId, valueToSet);
+        break;
+      default:
+        throw new BadRequestException("There is no access module named: " + request.getModuleName().toString());
+    }
+    userService.logAdminUserAction(
+        userId,
+        "set bypass status for module " + request.getModuleName().toString() + " to " + bypassed,
+        previousValue,
+        valueToSet
+    );
   }
 
 }

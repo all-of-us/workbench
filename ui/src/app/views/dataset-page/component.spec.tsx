@@ -2,14 +2,15 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {DataSetPage} from 'app/views/dataset-page/component';
-import {CohortsApi, ConceptsApi, ConceptSetsApi, DataSet} from 'generated/fetch';
+import {CohortsApi, ConceptsApi, ConceptSetsApi, DataSet, DataSetApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
+import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
 describe('DataSet', () => {
@@ -17,6 +18,7 @@ describe('DataSet', () => {
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ConceptsApi, new ConceptsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
+    registerApiClient(DataSetApi, new DataSetApiStub());
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
@@ -68,15 +70,15 @@ describe('DataSet', () => {
     expect(wrapper.find('[data-test-id="value-list-items"]').length).toBe(5);
   });
 
-  it('should enable all buttons once cohorts, concepts and values are selected', async() => {
+  it('should enable save button once cohorts, concepts and values are selected', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
     // Preview Button by default should be disabled
-    const previewButton = wrapper.find(Button).find('[data-test-id="preview-button"]')
+    const saveButton = wrapper.find(Button).find('[data-test-id="save-button"]')
         .first();
-    expect(previewButton.prop('disabled')).toBeTruthy();
+    expect(saveButton.prop('disabled')).toBeTruthy();
 
     // After all cohort concept and values are selected all the buttons will be enabled
 
@@ -94,24 +96,17 @@ describe('DataSet', () => {
 
     // Buttons should now be enabled
     const buttons = wrapper.find(Button);
-    expect(buttons.find('[data-test-id="preview-button"]').first().prop('disabled'))
-      .toBeFalsy();
     expect(buttons.find('[data-test-id="save-button"]').first().prop('disabled'))
       .toBeFalsy();
   });
 
-  it('should select all values one Select All is selected', async() => {
+  it('should display preview data only once cohort, concept and value are selected', async() => {
+    const spy = jest.spyOn(dataSetApi(), 'previewQuery');
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    // Preview Button by default should be disabled
-    const previewButton = wrapper.find(Button).find('[data-test-id="preview-button"]')
-        .first();
-    expect(previewButton.prop('disabled')).toBeTruthy();
-
-    // After all cohort concept and values are selected all the buttons will be enabled
-
+    // Select one cohort , concept and value
     wrapper.find('[data-test-id="cohort-list-item"]').first()
       .find('input').first().simulate('change');
     wrapper.update();
@@ -121,18 +116,52 @@ describe('DataSet', () => {
 
     await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.find('[data-test-id="value-list-items"]').find('input')
-      .first().prop('checked')).toBeFalsy();
+    wrapper.find('[data-test-id="value-list-items"]').find('input').first()
+      .simulate('change');
 
-    expect(wrapper.find('[data-test-id="value-list-items"]').find('input')
-      .at(1).prop('checked')).toBeFalsy();
+    await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find('[data-test-id="select-all"]').find('div').simulate('click');
+    // Preview data api has been called
+    expect(spy).toHaveBeenCalledTimes(1);
 
-    expect(wrapper.find('[data-test-id="value-list-items"]').find('input').first()
-      .prop('checked')).toBeTruthy();
-    expect(wrapper.find('[data-test-id="value-list-items"]').find('input').at(1)
-      .prop('checked')).toBeTruthy();
+    // Select another value preview data api should not be called now
+    wrapper.find('[data-test-id="value-list-items"]').at(1)
+      .find('input').first().simulate('click');
 
+    await waitOneTickAndUpdate(wrapper);
+    expect(spy).not.toHaveBeenCalledTimes(2);
+  });
+
+  it('should display preview data once refresh button is clicked', async() => {
+    const spy = jest.spyOn(dataSetApi(), 'previewQuery');
+    const wrapper = mount(<DataSetPage />);
+    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    // Should click one cohort concept and value
+    wrapper.find('[data-test-id="cohort-list-item"]').first()
+      .find('input').first().simulate('change');
+    wrapper.update();
+
+    wrapper.find('[data-test-id="concept-set-list-item"]').first()
+      .find('input').first().simulate('change');
+
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('[data-test-id="value-list-items"]').find('input').first()
+      .simulate('change');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    // After clicking another value preview data api should be called only after
+    // clicking the preview icon
+    wrapper.find('[data-test-id="value-list-items"]').at(1)
+      .find('input').first().simulate('click');
+
+    wrapper.find('[data-test-id="preview-icon"]').find('div').simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(spy).toHaveBeenCalledTimes(2);
   });
 });

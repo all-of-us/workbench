@@ -7,8 +7,6 @@
     "clusterIdleMaxAgeDays": 7,
     "debugEndpoints": false,
     "enforceRegistered": true,
-    "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-stable-cluster-resources/setup_notebook_cluster.sh",
-    "jupyterPlaygroundExtensionUri": "gs:\/\/all-of-us-rw-stable-cluster-resources/playground-extension.js",
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-stable",
     "billingRetryCount": 2,
@@ -58,7 +56,8 @@
     "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": false,
-    "enableBetaAccess": true
+    "enableBetaAccess": true,
+    "unsafeAllowSelfBypass": false
   },
   "cohortbuilder": {
     "enableListSearch": false

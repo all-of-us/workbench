@@ -5,6 +5,8 @@ import com.google.appengine.api.utils.SystemProperty.Environment.Value;
 
 public class WorkbenchEnvironment {
 
+  // This is an appengine property specifying production build or development build.
+  // This is only true when running locally.
   private final boolean isDevelopment;
   private final String applicationId;
 

@@ -15,7 +15,6 @@ import {HomepageComponent} from './views/homepage/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page/component';
-import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
@@ -229,10 +228,6 @@ const routes: Routes = [
         path: 'profile',
         component: ProfilePageComponent,
         data: {title: 'Profile'}
-      }, {
-        path: 'settings',
-        component: SettingsComponent,
-        data: {title: 'Settings'}
       }, {
         path: 'workspaces/build',
         component: WorkspaceEditComponent,

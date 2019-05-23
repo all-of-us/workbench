@@ -3,6 +3,7 @@ import {
   DataSetApi,
   DataSetExportRequest,
   DataSetListResponse,
+  DataSetPreviewResponse,
   DataSetQueryList,
   DataSetRequest,
   EmptyResponse
@@ -50,6 +51,15 @@ export class DataSetApiStub extends DataSetApi {
     dataSetExportRequest: DataSetExportRequest): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(resolve => {
       resolve({});
+    });
+  }
+
+  previewQuery(workspaceNamespace: string,
+    workspaceId: string, dataSet: DataSetRequest): Promise<DataSetPreviewResponse> {
+    return Promise.resolve({
+      domainValue: [
+        {domain: 'CONDITION', values: [{value: 'Value1'}, {value: 'Value2'}]}
+      ]
     });
   }
 

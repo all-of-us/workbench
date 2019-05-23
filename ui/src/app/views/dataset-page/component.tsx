@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
 import {
   cohortsApi,
@@ -12,7 +13,13 @@ import {
   dataSetApi
 } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {
+  reactStyles,
+  ReactWrapperBase,
+  toggleIncludes,
+  withCurrentWorkspace,
+  withUrlParams
+} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {NewDataSetModal} from 'app/views/new-dataset-modal/component';
@@ -30,30 +37,36 @@ import {
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 
-export const styles = {
+export const styles = reactStyles({
   selectBoxHeader: {
     fontSize: '16px',
     height: '2rem',
     lineHeight: '2rem',
     paddingLeft: '13px',
-    color: '#2F2E7E',
+    color: colors.blue[7],
     borderBottom: '1px solid #E5E5E5'
   },
 
   addIcon: {
     marginLeft: 19,
-    fill: '#2691D0',
+    fill: colors.blue[0],
     verticalAlign: '-6%'
   },
 
   listItem: {
-    border: '0.5px solid #C3C3C3', margin: '.4rem',
-    height: '1.5rem', display: 'flex'
+    border: '0.5px solid #C3C3C3',
+    margin: '.4rem',
+    height: '1.5rem',
+    display: 'flex'
   },
 
   listItemCheckbox: {
-    height: 17, width: 17, marginLeft: 10, marginTop: 10,
-    marginRight: 10, backgroundColor: colors.green[1]
+    height: 17,
+    width: 17,
+    marginLeft: 10,
+    marginTop: 10,
+    marginRight: 10,
+    backgroundColor: colors.green[1]
   },
 
   valueListItemCheckboxStyling: {
@@ -70,8 +83,33 @@ export const styles = {
     fontSize: '0.6rem',
     marginTop: '0.5rem',
     color: colors.purple[0]
+  },
+  refreshIcon: {
+    marginRight: '1rem',
+    marginTop: '0.5rem',
+    height: '25px',
+    width: '25px',
+    borderRadius: '5px',
+    backgroundColor: colors.purple[0],
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  previewDataHeader: {
+    height: '19px',
+    width: '160px',
+    color: colors.blue[7],
+    fontFamily: 'Montserrat',
+    fontSize: '16px',
+    fontWeight: 600
+  },
+  warningMessage: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    height: '10rem'
   }
-};
+});
 
 const ImmutableListItem: React.FunctionComponent <{
   name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
@@ -107,6 +145,7 @@ interface State {
   creatingConceptSet: boolean;
   dataSet: DataSet;
   dataSetTouched: boolean;
+  defaultPreviewView: boolean;
   includesAllParticipants: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
@@ -131,6 +170,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         creatingConceptSet: false,
         dataSet: undefined,
         dataSetTouched: false,
+        defaultPreviewView: true,
         includesAllParticipants: false,
         loadingResources: true,
         openSaveModal: false,
@@ -227,8 +267,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             !fp.contains(selectedValue.domain, removedDomains));
         this.setState({
           selectedConceptSetIds: newSelectedConceptSets,
-          selectedValues: updatedSelectedValues,
-        });
+          selectedValues: updatedSelectedValues});
         if (newDomains.length > 0) {
           this.setState({valuesLoading: true});
           this.getValuesList(newDomains)
@@ -241,7 +280,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         }
       } else {
         this.setState({selectedCohortIds: toggleIncludes(resource.id,
-          this.state.selectedCohortIds) as unknown as number[]});
+          this.state.selectedCohortIds) as unknown as number[]},
+          () => this.defaultPreviewDataRequest());
       }
     }
 
@@ -263,12 +303,16 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       valuesSelected = valuesSelected.sort((a, b) =>
           valueSets.findIndex(({value}) => a.value === value) -
           valueSets.findIndex(({value}) => b.value === value));
-      this.setState({selectedValues: valuesSelected, dataSetTouched: true});
+      this.setState({selectedValues: valuesSelected, dataSetTouched: true},
+        () => this.defaultPreviewDataRequest());
     }
 
     selectAllValues() {
       if (this.state.selectAll) {
-        this.setState({selectedValues: [], selectAll: !this.state.selectAll});
+        this.setState({
+          selectedValues: [],
+          selectAll: !this.state.selectAll,
+          defaultPreviewView: true});
         return;
       }
 
@@ -278,14 +322,22 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           allValuesSelected.push({domain: valueSet.domain, value: value.value});
         });
       });
-      this.setState({selectedValues: allValuesSelected, selectAll: !this.state.selectAll});
+      this.setState({selectedValues: allValuesSelected, selectAll: !this.state.selectAll},
+        () => this.defaultPreviewDataRequest());
     }
 
     disableSave() {
       return !this.state.selectedConceptSetIds || this.state.selectedConceptSetIds.length === 0 ||
-          ((!this.state.selectedCohortIds ||
-          this.state.selectedCohortIds.length === 0) && !this.state.includesAllParticipants) ||
-          !this.state.selectedValues || this.state.selectedValues.length === 0;
+          ((!this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0)
+                && !this.state.includesAllParticipants) ||
+            !this.state.selectedValues || this.state.selectedValues.length === 0;
+    }
+
+    defaultPreviewDataRequest() {
+      if (this.state.defaultPreviewView && !this.disableSave()) {
+        this.getPreviewList();
+        this.setState({defaultPreviewView: false});
+      }
     }
 
     getDataTableValue(data) {
@@ -363,6 +415,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       const {
         dataSet,
         dataSetTouched,
+        defaultPreviewView,
         includesAllParticipants,
         loadingResources,
         openSaveModal,
@@ -403,8 +456,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                       data-test-id='cohort-list-item'
                                       checked={selectedCohortIds.includes(cohort.id)}
                                       onChange={
-                                        () => this.select(cohort, ResourceType.COHORT)
-                                      }/>
+                                        () => this.select(cohort, ResourceType.COHORT)}/>
                     )
                   }
                   {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
@@ -470,13 +522,18 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
             <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row',
               position: 'relative'}}>
-              <div style={{color: '#000000', fontSize: '14px'}}>A visualization
-                of your data table based on the variable and value you selected above</div>
-              <Button data-test-id='preview-button' style={{position: 'absolute', right: '8rem',
-                top: '0.25rem'}}
-                      disabled={this.disableSave()} onClick={() => {this.getPreviewList(); }}>
-                PREVIEW DATA SET
-              </Button>
+              <div style={styles.previewDataHeader}>
+                Preview Data Set
+              </div>
+              {!defaultPreviewView && <Clickable data-test-id='preview-icon'
+                                                 onClick={() => this.getPreviewList()}
+                                                 style={styles.refreshIcon}>
+                  <ClrIcon style={{fill: colors.gray[7]}} shape='refresh'/>
+                </Clickable>
+              }
+              <div style={{color: '#000000', fontSize: '14px'}}>A visualization of your data table
+                based on the variable and value you selected above
+              </div>
               <Button data-test-id='save-button' style={{position: 'absolute', right: '1rem',
                 top: '.25rem'}} onClick ={this.editing ? () => this.updateDataSet() :
                 () => this.setState({openSaveModal: true})}
@@ -484,12 +541,10 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 {this.editing ? 'UPDATE DATA SET' : 'SAVE DATA SET'}
               </Button>
             </div>
-            {previewDataLoading && <div style={{display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center'}}>
+            {previewDataLoading && <div style={styles.warningMessage}>
               <Spinner style={{position: 'relative', top: '2rem'}} />
               <div style={{top: '3rem', position: 'relative'}}>
-                It may take up to a minute to load the data
+                It may take up to few minutes to load the data
               </div>
             </div>}
             {previewList.length > 0 &&
@@ -504,13 +559,11 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                  fontWeight: (selectedPreviewDomain === previewRow.domain)
                                      ? 600 : 400,
                                  textDecoration:
-                                     (selectedPreviewDomain === previewRow.domain) ?
-                                       'underline' : ''
+                                    (selectedPreviewDomain === previewRow.domain) ? 'underline' : ''
                                }}>
                        <div key={previewRow.domain}
                            style={{
-                             marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'
-                           }}>
+                             marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'}}>
                          {previewRow.domain}
                        </div>
                      </Clickable>

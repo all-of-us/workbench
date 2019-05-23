@@ -15,7 +15,6 @@ public class WorkbenchConfig {
   public GoogleDirectoryServiceConfig googleDirectoryService;
   public ServerConfig server;
   public AdminConfig admin;
-  public JiraConfig jira;
   public MandrillConfig mandrill;
   public ElasticsearchConfig elasticsearch; 
   public MoodleConfig moodle;
@@ -36,7 +35,6 @@ public class WorkbenchConfig {
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
     config.server = new ServerConfig();
     config.admin = new AdminConfig();
-    config.jira = new JiraConfig();
     config.mandrill = new MandrillConfig();
     config.elasticsearch = new ElasticsearchConfig();
     config.moodle = new MoodleConfig();
@@ -54,8 +52,6 @@ public class WorkbenchConfig {
     public Integer clusterIdleMaxAgeDays;
     public String registeredDomainName;
     public boolean enforceRegistered;
-    public String jupyterUserScriptUri;
-    public String jupyterPlaygroundExtensionUri;
     public String leoBaseUrl;
     public Integer billingRetryCount;
     public Integer billingProjectBufferCapacity;
@@ -98,11 +94,6 @@ public class WorkbenchConfig {
     public String loginUrl;
   }
 
-  public static class JiraConfig {
-    public String projectKey;
-    public String cdrProjectKey;
-  }
-
   public static class MandrillConfig {
     public String fromEmail;
     public int sendRetries;
@@ -122,6 +113,9 @@ public class WorkbenchConfig {
   // The access object specifies whether each of the following access requirements block access
   // to the workbench.
   public static class AccessConfig {
+    // Allows a user to bypass their own access modules. This is used for testing purposes so that
+    // We can give control over 3rd party access modules
+    public boolean unsafeAllowSelfBypass;
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;

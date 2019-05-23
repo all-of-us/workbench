@@ -86,10 +86,10 @@ export const LoginReactComponent: React.FunctionComponent<{
           data processed by this website.
         </div>
         <div style={{...styles.fismaCommon, ...styles.fismaSection}}>
-          Anyone accessing this website expressly consents to monitoring of their actions and all
-          communications or data transiting or stored on related to this website and is advised
-          that if such monitoring reveals possible evidence of criminal activity, NIH may provide
-          that evidence to law enforcement officials.
+          By continuing to log in, anyone accessing this website expressly consents to monitoring
+          of their actions and all communications or data transiting or stored on related to this
+          website and is advised that if such monitoring reveals possible evidence of criminal
+          activity, NIH may provide that evidence to law enforcement officials.
         </div>
       </div>
     </div>;

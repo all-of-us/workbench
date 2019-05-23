@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,6 +49,8 @@ import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
@@ -119,6 +121,8 @@ public class ProfileControllerTest {
   private ComplianceService complianceTrainingService;
   @Mock
   private MailService mailService;
+  @Mock
+  private UserService userService;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
@@ -133,21 +137,7 @@ public class ProfileControllerTest {
 
   @Before
   public void setUp() throws MessagingException {
-    WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.featureFlags = new FeatureFlagsConfig();
-    config.featureFlags.useBillingProjectBuffer = false;
-    config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
-    config.firecloud.billingRetryCount = 2;
-    config.firecloud.registeredDomainName = "";
-    config.access.enableEraCommons = false;
-    config.access.enableComplianceTraining = false;
-    config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
-    // All access modules are enabled for these tests. So completing any one module should maintain
-    // UNREGISTERED status.
-    config.access.enableComplianceTraining = true;
-    config.access.enableBetaAccess = true;
-    config.access.enableEraCommons = true;
-    config.access.enableDataUseAgreement = true;
+    WorkbenchConfig config = generateConfig();
 
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
@@ -173,7 +163,7 @@ public class ProfileControllerTest {
     clock = new FakeClock(NOW);
 
     doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
-    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
+    userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
         new FakeLongRandom(NONCE_LONG), fireCloudService, Providers.of(config),
         complianceTrainingService, directoryService);
     ProfileService profileService = new ProfileService(userDao);
@@ -726,6 +716,22 @@ public class ProfileControllerTest {
     assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
   }
 
+  @Test
+  public void testBypassAccessModule() throws Exception {
+    Profile profile = createUser();
+    userService = spy(userService);
+    WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
+    WorkbenchConfig config = generateConfig();
+    ProfileService profileService = new ProfileService(userDao);
+    this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
+        userDao, clock, userService, fireCloudService, directoryService,
+        cloudStorageService, leonardoNotebooksClient, Providers.of(config), environment,
+        Providers.of(mailService));
+    profileController.bypassAccessRequirement(profile.getUserId(),
+        new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
+    verify(userService, times(1)).setDataUseAgreementBypassTime(any(), any());
+  }
+
   private Profile createUser() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
@@ -763,6 +769,25 @@ public class ProfileControllerTest {
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
     assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
+  }
+
+  private WorkbenchConfig generateConfig() {
+    WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
+    config.featureFlags = new FeatureFlagsConfig();
+    config.featureFlags.useBillingProjectBuffer = false;
+    config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
+    config.firecloud.billingRetryCount = 2;
+    config.firecloud.registeredDomainName = "";
+    config.access.enableEraCommons = false;
+    config.access.enableComplianceTraining = false;
+    config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
+    // All access modules are enabled for these tests. So completing any one module should maintain
+    // UNREGISTERED status.
+    config.access.enableComplianceTraining = true;
+    config.access.enableBetaAccess = true;
+    config.access.enableEraCommons = true;
+    config.access.enableDataUseAgreement = true;
+    return config;
   }
 
 }

@@ -1,19 +1,25 @@
-import {Component} from '@angular/core';
-
+import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {clusterApi} from 'app/services/swagger-fetch-clients';
+import {ReactWrapperBase} from 'app/utils';
 
 import {
   Cluster,
   ClusterStatus,
 } from 'generated/fetch/api';
 
-import {ReactWrapperBase} from 'app/utils/index';
-import {userProfileStore} from 'app/utils/navigation';
+
+
+const TRANSITIONAL_STATUSES = new Set<ClusterStatus>([
+  ClusterStatus.Creating,
+  ClusterStatus.Starting,
+  ClusterStatus.Stopping,
+  ClusterStatus.Deleting,
+]);
 
 const styles = {
   notebookSettings: {
@@ -21,41 +27,34 @@ const styles = {
   },
 };
 
-export interface SettingsState {
+interface Props {
+  billingProjectId: string;
+}
+
+interface State {
   cluster: Cluster;
   resetClusterPending: boolean;
   resetClusterModal: boolean;
   clusterDeletionFailure: boolean;
-  waitingForUserProfile: boolean;
 }
 
-export class SettingsReact extends React.Component<{}, SettingsState> {
-  private static readonly TRANSITIONAL_STATUSES = new Set<ClusterStatus>([
-    ClusterStatus.Deleting, ClusterStatus.Creating,
-    ClusterStatus.Starting, ClusterStatus.Stopping
-  ]);
+class ResetClusterButton extends React.Component<Props, State> {
 
   private pollClusterTimer: NodeJS.Timer;
 
-  constructor(props: {}) {
+  constructor(props) {
     super(props);
+
     this.state = {
       cluster: null,
       resetClusterPending: false,
       resetClusterModal: false,
       clusterDeletionFailure: true,
-      waitingForUserProfile: true
     };
   }
 
   componentDidMount() {
-    userProfileStore.asObservable().subscribe((profileStore) => {
-      const billingProjectId = profileStore.profile.freeTierBillingProjectName;
-      if (billingProjectId) {
-        this.setState({waitingForUserProfile: false});
-        this.pollCluster(billingProjectId);
-      }
-    });
+    this.pollCluster(this.props.billingProjectId);
   }
 
   componentWillUnmount() {
@@ -66,15 +65,14 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
 
   render() {
     return <React.Fragment>
-      <h2>Settings</h2>
-      <h3>Notebooks</h3>
       <div style={styles.notebookSettings}>
         <TooltipTrigger content={
-          this.state.waitingForUserProfile ? 'Waiting for notebook server status' :
-              (!this.state.cluster) ? 'Your notebook server is still being created' : undefined}
+            !this.state.cluster ? 'Your notebook server is still being created' : undefined}
                         side='right'>
-          <Button disabled={!this.state.cluster} onClick={() => this.openResetClusterModal()}
-                  data-test-id='reset-notebook-button' type='secondary'>
+          <Button disabled={!this.state.cluster}
+                  onClick={() => this.openResetClusterModal()}
+                  data-test-id='reset-notebook-button'
+                  type='secondary'>
             Reset Notebook Server
           </Button>
         </TooltipTrigger>
@@ -84,12 +82,14 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
              loading={this.state.resetClusterPending}>
         <ModalTitle>Reset Notebook Server?</ModalTitle>
         <ModalBody>
-          <strong>Warning:</strong> Any unsaved changes to your notebooks may be lost
-          and your cluster will be offline for 5-10 minutes.
-          <br/><br/>
-          Resetting should not be necessary under normal conditions. Please help us to
-          improve this experience by using "Report a Bug" from the profile drop-down
-          to describe the reason for this reset.
+            <div>
+              <strong>Warning:</strong> Any unsaved changes to your notebooks may be lost
+              and your cluster will be offline for 5-10 minutes.
+              <br/><br/>
+              Resetting should not be necessary under normal conditions. Please help us to
+              improve this experience by using "Contact Support" from the left side's hamburger
+              menu and describe the reason for this reset.
+            </div>
         </ModalBody>
         <ModalFooter>
           {this.state.clusterDeletionFailure ?
@@ -115,13 +115,15 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
   }
 
   resetCluster(): void {
+    this.setState({ resetClusterPending: true });
+
     const clusterBillingProjectId = this.state.cluster.clusterNamespace;
     clusterApi().deleteCluster(this.state.cluster.clusterNamespace, this.state.cluster.clusterName)
       .then(() => {
         this.setState({cluster: null, resetClusterPending: false, resetClusterModal: false});
         this.pollCluster(clusterBillingProjectId);
       })
-      .catch((error) => {
+      .catch(() => {
         this.setState({resetClusterPending: false, clusterDeletionFailure: true});
       });
   }
@@ -133,7 +135,7 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
     clusterApi().listClusters(billingProjectId)
       .then((body) => {
         const cluster = body.defaultCluster;
-        if (SettingsReact.TRANSITIONAL_STATUSES.has(cluster.status)) {
+        if (TRANSITIONAL_STATUSES.has(cluster.status)) {
           repoll();
           return;
         }
@@ -147,10 +149,19 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
 }
 
 @Component({
+  selector: 'app-react-cluster-button',
   template: '<div #root></div>'
 })
-export class SettingsComponent extends ReactWrapperBase {
+class ResetClusterButtonComponent extends ReactWrapperBase {
+  @Input() billingProjectId: string;
+
   constructor() {
-    super(SettingsReact, []);
+    super(ResetClusterButton, ['billingProjectId']);
   }
 }
+
+export {
+  Props as ResetClusterButtonProps,
+  ResetClusterButton,
+  ResetClusterButtonComponent
+};
