@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
-import {CohortSearchActions} from 'app/cohort-search/redux';
 import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {generateId} from 'app/cohort-search/utils';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
@@ -48,8 +47,6 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
   demoOpen = false;
   demoMenuHover = false;
   position = 'bottom-left';
-
-  constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
     // TODO move this to the store and remove all Outputs/Event emitters

@@ -243,12 +243,16 @@ export function getChartObj(chartObj: any) {
 
 export function generateId(prefix?: string): string {
   prefix = prefix || 'id';
-  let newId = `${prefix}_${this.genSuffix()}`;
+  let newId = `${prefix}_${genSuffix()}`;
   const ids = idsInUse.getValue();
   while (ids.has(newId)) {
-    newId = `${prefix}_${this.genSuffix()}`;
+    newId = `${prefix}_${genSuffix()}`;
   }
   ids.add(newId);
   idsInUse.next(ids);
   return newId;
+}
+
+function genSuffix(): string {
+  return Math.random().toString(36).substr(2, 9);
 }
