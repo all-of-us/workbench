@@ -2,13 +2,10 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.common.collect.ImmutableSet;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 
-import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 
 /**
