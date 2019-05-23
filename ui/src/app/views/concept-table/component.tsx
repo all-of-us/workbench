@@ -30,6 +30,7 @@ const styles = reactStyles({
   }
 });
 
+const ROWS_TO_DISPLAY = 10;
 export class SynonymsObject extends React.Component<{},
     {seeMore: boolean, willOverflow: boolean}> {
   domElement: any;
@@ -92,8 +93,7 @@ interface Props {
 
 interface State {
   first: number;
-  loading: boolean ;
-  rows: number;
+  pageLoading: boolean;
   selectedConcepts: Concept[];
   selectedVocabularies: string[];
   totalRecords: number;
@@ -111,15 +111,13 @@ export class ConceptTable extends React.Component<Props, State> {
     this.state = {
       selectedConcepts: props.selectedConcepts,
       selectedVocabularies: [],
-      loading: false,
+      pageLoading: false,
       first: 0,
-      rows: 10,
       totalRecords: props.concepts.length,
       pageNumber: 0,
       pageConcepts: props.concepts.slice(0, 10)
     };
     this.filterImageSrc = 'filter';
-    this.onPage = this.onPage.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -173,27 +171,27 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 
   async onPage(event) {
-    this.setState({loading: true});
+    this.setState({pageLoading: true});
 
     // Call next set of concepts only if user is on the last page
     if ((event.page + 1) === event.pageCount) {
       const pageCount = Math.ceil(this.state.totalRecords / 100);
-      this.props.nextPage(pageCount);
-      this.setState({pageNumber: pageCount});
+      await this.props.nextPage(pageCount);
+      this.setState({pageNumber: pageCount, pageLoading: true});
     }
 
     const startIndex = event.first;
-    const endIndex = event.first + this.state.rows;
+    const endIndex = event.first + event.rows;
 
     this.setState({
       first: event.first,
       pageConcepts: this.props.concepts.slice(startIndex, endIndex),
-      loading: false
+      pageLoading: false
     });
   }
 
   render() {
-    const {selectedConcepts, selectedVocabularies, pageConcepts} = this.state;
+    const {pageConcepts, pageLoading, selectedConcepts, selectedVocabularies} = this.state;
     const {placeholderValue, loading, reactKey} = this.props;
     const vocabularyFilter = <PopupTrigger
         side='bottom'
@@ -221,9 +219,9 @@ export class ConceptTable extends React.Component<Props, State> {
                  expandedRows={this.props.concepts
                    .filter(concept => concept.conceptSynonyms.length > 0)}
                  rowExpansionTemplate={this.rowExpansionTemplate}
-                 rowsPerPageOptions={[5, 10, 20]}
-                 paginator={true} rows={10}
-                 onPage={this.onPage}
+                 paginator={true} rows={ROWS_TO_DISPLAY}
+                 onPage={(event) => this.onPage(event)}
+                 loading={pageLoading}
                  lazy={true} first={this.state.first}
                  data-test-id='conceptRow'
                  onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
