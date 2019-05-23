@@ -42,15 +42,18 @@ export class SignInService {
 
   private makeAuth2(config: ConfigResponse): Promise<any> {
     return new Promise((resolve) => {
-      gapi.load('auth2', () => {
-        gapi.auth2.init({
-          client_id: this.clientId,
-          hosted_domain: config.gsuiteDomain,
-          scope: 'https://www.googleapis.com/auth/plus.login openid profile'
-        }).then(() => {
-          this.subscribeToAuth2User();
+      gapi.load('auth2:client', () => {
+        gapi.client.load('storage', 'v1', authResult => {
+          gapi.auth2.init({
+            client_id: this.clientId,
+            hosted_domain: config.gsuiteDomain,
+            scope: 'https://www.googleapis.com/auth/plus.login openid profile https://www.googleapis.com/auth/devstorage.read_only'
+          }).then(() => {
+            this.subscribeToAuth2User();
+          });
+
+          resolve(gapi.auth2);
         });
-        resolve(gapi.auth2);
       });
     });
   }
@@ -87,6 +90,9 @@ export class SignInService {
     } else {
       const authResponse = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true);
       if (authResponse !== null) {
+        console.log(authResponse.access_token);
+        console.log(gapi);
+        // console.log(gapi.client.storage);
         return authResponse.access_token;
       } else {
         return null;

@@ -30,6 +30,7 @@ import {environment} from 'environments/environment';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 import {CohortActionsComponent} from './views/cohort-actions/cohort-actions.component';
 import {SignInComponent} from './views/sign-in/component';
+import {ReadOnlyNotebookComponent} from "./views/read-only-notebook/ReadOnlyNotebookComponent";
 
 declare let gtag: Function;
 
@@ -121,6 +122,14 @@ const routes: Routes = [
                     component: NotebookRedirectComponent,
                     data: {
                       title: 'Notebook',
+                      breadcrumb: BreadcrumbType.Notebook,
+                      minimizeChrome: true
+                    }
+                  }, {
+                    path: 'readonly/:nbName',
+                    component: ReadOnlyNotebookComponent,
+                    data: {
+                      title: 'Read Only Notebook',
                       breadcrumb: BreadcrumbType.Notebook,
                       minimizeChrome: true
                     }

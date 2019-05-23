@@ -190,6 +190,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         } else {
           url = this.notebookUrl(this.cluster, nbName);
         }
+        console.log(url);
         this.leoUrl = this.sanitizer
           .bypassSecurityTrustResourceUrl(url);
 
@@ -232,6 +233,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   }
 
   private notebookUrl(cluster: Cluster, nbName: string): string {
+    console.log(cluster);
     return encodeURI(
       environment.leoApiUrl + '/notebooks/'
         + cluster.clusterNamespace + '/'
