@@ -137,7 +137,7 @@ paths:
     delete:
       tags:
         - profile
-      description: Deletes the user's profile and all associated information
+      description: Deletes the user's profile and gsuite account, does not clean up in firecloud.
       operationId: deleteProfile
       responses:
         204:
