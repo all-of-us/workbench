@@ -128,5 +128,6 @@ public class WorkbenchConfig {
 
   public static class FeatureFlagsConfig {
     public boolean useBillingProjectBuffer = false;
+    public boolean unsafeAllowDeleteUser;
   }
 }

@@ -64,6 +64,7 @@
     "enableListSearch": false
   },
   "featureFlags": {
-    "useBillingProjectBuffer": false
+    "useBillingProjectBuffer": false,
+    "unsafeAllowDeleteUser": false
   }
 }

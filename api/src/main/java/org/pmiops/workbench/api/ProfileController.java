@@ -741,6 +741,9 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> deleteProfile() {
+    if (!workbenchConfigProvider.get().featureFlags.unsafeAllowDeleteUser) {
+      throw new ForbiddenException("Self account deletion is disallowed in this environment.");
+    }
     User user = userProvider.get();
     log.log(Level.WARNING, "User email: " + user.getEmail());
     directoryService.deleteUser(user.getEmail().split("@")[0]);
