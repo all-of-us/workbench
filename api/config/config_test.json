@@ -65,6 +65,6 @@
   },
   "featureFlags": {
     "useBillingProjectBuffer": false,
-    "unsafeAllowDeleteUser": false
+    "unsafeAllowDeleteUser": true
   }
 }
