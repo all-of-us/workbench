@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Objects;
 
 
@@ -160,6 +161,11 @@ public class CBCriteria {
     public CBCriteria count(String count) {
         this.count = count;
         return this;
+    }
+
+    @Transient
+    public long getLongCount() {
+        return Long.valueOf(this.count);
     }
 
     @Column(name = "concept_id")

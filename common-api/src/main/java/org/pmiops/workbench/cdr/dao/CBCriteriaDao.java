@@ -105,13 +105,12 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
                                                                      @Param("term") String term,
                                                                      Pageable page);
 
-  @Query(value = "select * from cb_criteria c where domain_id = 'DRUG' and type in ('ATC', 'BRAND', 'RXNORM') and c.is_selectable = 1 and " +
-    "(upper(c.name) like upper(concat('%',:term,'%')) or upper(c.code) like upper(concat('%',:term,'%'))) order by c.name asc limit :limit", nativeQuery = true)
-  List<CBCriteria> findDrugBrandOrIngredientByValue(@Param("term") String term,
-                                                    @Param("limit") Long limit);
+  @Query(value = "select cr.concept_id_2 from cb_criteria_relationship cr join concept c1 on (cr.concept_id_2 = c1.concept_id and cr.concept_id_1 in (:conceptIds) and c1.concept_class_id = 'Ingredient')", nativeQuery = true)
+  List<Integer> findDrugConceptId2ByConceptId1(@Param("conceptIds") List<Long> conceptIds);
 
-  @Query(value = "select * from cb_criteria c inner join ( select cr.concept_id_2 from cb_criteria_relationship cr join concept c1 on (cr.concept_id_2 = c1.concept_id " +
-    "and cr.concept_id_1 in (:conceptIds) and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2 and c.domain_id = 'DRUG' and c.type = 'RXNORM'", nativeQuery = true)
-  List<CBCriteria> findDrugIngredientByConceptId(@Param("conceptIds") List<Long> conceptIds);
+  @Query(value = "select c from CBCriteria c where conceptId in (:conceptIds) and domainId = :domain and type = :type and match(synonyms, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
+  List<CBCriteria> findDrugIngredientByConceptId(@Param("conceptIds") List<String> conceptIds,
+                                                 @Param("domain") String domain,
+                                                 @Param("type") String type);
 
 }
