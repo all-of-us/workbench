@@ -114,9 +114,9 @@ export class ConceptTable extends React.Component<Props, State> {
       loading: false,
       first: 0,
       rows: 10,
-      totalRecords: 100,
+      totalRecords: props.concepts.length,
       pageNumber: 0,
-      pageConcepts: []
+      pageConcepts: props.concepts.splice(0,10)
     };
     this.filterImageSrc = 'filter';
     this.onPage = this.onPage.bind(this);

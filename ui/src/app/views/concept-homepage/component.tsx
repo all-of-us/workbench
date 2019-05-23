@@ -254,6 +254,25 @@ export const ConceptHomepage = withCurrentWorkspace()(
       });
     }
 
+    async getNextConceptSet(pageNumber) {
+      const {standardConceptsOnly, currentSearchString, selectedDomain} = this.state;
+      const {namespace, id} = this.props.workspace;
+      const standardConceptFilter = standardConceptsOnly ?
+          StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
+
+      const concepts = this.state.concepts;
+      const resp = await conceptsApi().searchConcepts(namespace, id, {
+        query: currentSearchString,
+        standardConceptFilter: standardConceptFilter,
+        domain: selectedDomain.domain,
+        includeDomainCounts: true,
+        includeVocabularyCounts: true,
+        maxResults: this.MAX_CONCEPT_FETCH,
+        pageNumber: pageNumber ? pageNumber : 0
+      });
+      this.setState({concepts: concepts.concat(resp.items)});
+    }
+
     selectConcepts(concepts: Concept[]) {
       const {selectedDomain, selectedConceptDomainMap} = this.state;
       selectedConceptDomainMap[selectedDomain.domain] = concepts.filter(concept => {
@@ -394,7 +413,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
                             onSelectConcepts={this.selectConcepts.bind(this)}
                             placeholderValue={this.noConceptsConstant}
                             selectedConcepts={conceptsToAdd}
-                            reactKey={selectedDomain.name}/>
+                            reactKey={selectedDomain.name}
+                            nextPage={(page) => this.getNextConceptSet(page)}/>
               <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
                                iconShape='plus'
                                expanded={this.addToSetText}
