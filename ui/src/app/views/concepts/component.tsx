@@ -209,6 +209,25 @@ export const ConceptWrapper = withCurrentWorkspace()(
       this.setState({vocabularies: cacheItem.vocabularyList});
     }
 
+    async getNextConceptSet(pageNumber) {
+      const {standardConceptsOnly, currentSearchString, selectedDomain} = this.state;
+      const {namespace, id} = this.props.workspace;
+      const standardConceptFilter = standardConceptsOnly ?
+          StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
+
+      const concepts = this.state.concepts;
+      const resp = await conceptsApi().searchConcepts(namespace, id, {
+        query: currentSearchString,
+        standardConceptFilter: standardConceptFilter,
+        domain: selectedDomain.domain,
+        includeDomainCounts: true,
+        includeVocabularyCounts: true,
+        maxResults: this.MAX_CONCEPT_FETCH,
+        pageNumber: pageNumber ? pageNumber : 0
+      });
+      this.setState({concepts: concepts.concat(resp.items)});
+    }
+
     async searchConcepts() {
       const {standardConceptsOnly, currentSearchString, conceptsCache,
         selectedDomain, completedDomainSearches} = this.state;
@@ -216,7 +235,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
       this.setState({concepts: [], searchLoading: true, searching: true, conceptsToAdd: [],
         selectedConceptDomainMap: new Map<string, number>()});
       const standardConceptFilter = standardConceptsOnly ?
-        StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
+          StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
 
       conceptsCache.forEach(async(cacheItem) => {
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
@@ -381,7 +400,8 @@ export const ConceptWrapper = withCurrentWorkspace()(
                             onSelectConcepts={this.selectConcepts.bind(this)}
                             placeholderValue={this.noConceptsConstant}
                             selectedConcepts={conceptsToAdd}
-                            reactKey={selectedDomain.name}/>
+                            reactKey={selectedDomain.name}
+                            nextPage={(page) => this.getNextConceptSet(page)}/>
               <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
                                iconShape='plus'
                                expanded={this.addToSetText}

@@ -80,11 +80,28 @@ export class SynonymsObject extends React.Component<{},
   }
 }
 
+interface Props {
+  concepts: Concept[];
+  loading: boolean;
+  onSelectConcepts: Function;
+  nextPage: Function;
+  placeholderValue: string;
+  reactKey: string;
+  selectedConcepts: Concept[];
+}
 
-export class ConceptTable extends React.Component<{concepts: Concept[];
-  loading: boolean; placeholderValue: string, onSelectConcepts: Function,
-  selectedConcepts: Concept[], reactKey: string},
-  {selectedConcepts: Concept[]; selectedVocabularies: string[]; }> {
+interface State {
+  first: number;
+  loading: boolean ;
+  rows: number;
+  selectedConcepts: Concept[];
+  selectedVocabularies: string[];
+  totalRecords: number;
+  pageConcepts: Concept[];
+  pageNumber: number;
+}
+
+export class ConceptTable extends React.Component<Props, State> {
 
   private dt: DataTable;
   private filterImageSrc: string;
@@ -93,9 +110,16 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
     super(props);
     this.state = {
       selectedConcepts: props.selectedConcepts,
-      selectedVocabularies: []
+      selectedVocabularies: [],
+      loading: false,
+      first: 0,
+      rows: 10,
+      totalRecords: 100,
+      pageNumber: 0,
+      pageConcepts: []
     };
     this.filterImageSrc = 'filter';
+    this.onPage = this.onPage.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -130,6 +154,12 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
         this.dt.filter([], 'vocabularyId', 'in');
         this.setState({selectedVocabularies : []});
       }
+      if (nextProps.concepts !== this.props.concepts && nextProps.concepts.length > 0 ) {
+        this.setState({totalRecords: nextProps.concepts.length});
+        if (this.state.pageNumber === 0 ) {
+          this.setState({pageConcepts: nextProps.concepts.slice(0, 10)});
+        }
+      }
     }
   }
 
@@ -139,9 +169,29 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
     </SynonymsObject>);
   }
 
+  async onPage(event) {
+    this.setState({loading: true});
+
+    // Call next set of concepts only if user is on the last page
+    if ((event.page + 1) === event.pageCount) {
+      const pageCount = Math.ceil(this.state.totalRecords / 100);
+      this.props.nextPage(pageCount);
+      this.setState({pageNumber: pageCount});
+    }
+
+    const startIndex = event.first;
+    const endIndex = event.first + this.state.rows;
+
+    this.setState({
+      first: event.first,
+      pageConcepts: this.props.concepts.slice(startIndex, endIndex),
+      loading: false
+    });
+  }
+
   render() {
-    const {selectedConcepts, selectedVocabularies} = this.state;
-    const {concepts, placeholderValue, loading, reactKey} = this.props;
+    const {selectedConcepts, selectedVocabularies, pageConcepts} = this.state;
+    const {placeholderValue, loading, reactKey} = this.props;
     const vocabularyFilter = <PopupTrigger
         side='bottom'
         content={
@@ -162,11 +212,16 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
     </PopupTrigger>;
     return <div data-test-id='conceptTable' key={reactKey}>
       <DataTable emptyMessage={loading ? '' : placeholderValue} ref={(el) => this.dt = el}
-                 value={concepts} paginator={true} rows={50} scrollable={true} loading={loading}
+                 value={pageConcepts} scrollable={true}
                  selection={selectedConcepts} style={{minWidth: 1100}}
+                 totalRecords={this.state.totalRecords}
                  expandedRows={this.props.concepts
                    .filter(concept => concept.conceptSynonyms.length > 0)}
                  rowExpansionTemplate={this.rowExpansionTemplate}
+                 rowsPerPageOptions={[5, 10, 20]}
+                 paginator={true} rows={10}
+                 onPage={this.onPage}
+                 lazy={true} first={this.state.first}
                  data-test-id='conceptRow'
                  onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
       <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
