@@ -156,6 +156,9 @@ export class ConceptTable extends React.Component<Props, State> {
       }
       if (nextProps.concepts !== this.props.concepts && nextProps.concepts.length > 0 ) {
         this.setState({totalRecords: nextProps.concepts.length});
+
+        // Update pageConcepts only for the first time/page.
+        // onPage() will update for the rest of the pages
         if (this.state.pageNumber === 0 ) {
           this.setState({pageConcepts: nextProps.concepts.slice(0, 10)});
         }

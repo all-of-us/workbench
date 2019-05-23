@@ -235,7 +235,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
       this.setState({concepts: [], searchLoading: true, searching: true, conceptsToAdd: [],
         selectedConceptDomainMap: new Map<string, number>()});
       const standardConceptFilter = standardConceptsOnly ?
-          StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
+        StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
 
       conceptsCache.forEach(async(cacheItem) => {
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
