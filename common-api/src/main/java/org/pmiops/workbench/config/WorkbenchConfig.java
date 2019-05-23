@@ -128,6 +128,8 @@ public class WorkbenchConfig {
 
   public static class FeatureFlagsConfig {
     public boolean useBillingProjectBuffer = false;
+    // Allows a user to delete their own account. This is used for testing purposes so that
+    // We can clean up after ourselves. This should never go to prod.
     public boolean unsafeAllowDeleteUser;
   }
 }
