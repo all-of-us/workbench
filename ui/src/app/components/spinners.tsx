@@ -16,9 +16,9 @@ const styles = reactStyles({
   }
 });
 
-export const Spinner = ({dark = false, style = {}, ...props}) => {
+export const Spinner = ({dark = false, size = 72, style = {}, ...props}) => {
   return <svg
-    xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72' width={72} height={72}
+    xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72' width={size} height={size}
     style={{animation: '1s linear infinite spin', ...style}} {...props}
   >
     <circle cx='36' cy='36' r='33' stroke={dark ? styles.darkBackground.stroke : '#000'}
