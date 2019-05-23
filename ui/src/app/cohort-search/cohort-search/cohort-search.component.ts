@@ -19,7 +19,7 @@ import {
   isRequstingTotal,
   totalCount,
 } from 'app/cohort-search/redux';
-import {searchRequestStore} from 'app/cohort-search/search-state.service';
+import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 
 const pixel = (n: number) => `${n}px`;
@@ -85,6 +85,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.actions.clearStore();
     this.subscription.unsubscribe();
+    idsInUse.next(new Set());
     currentCohortStore.next(undefined);
   }
 

@@ -11,3 +11,4 @@ export const subtreeSelectedStore = new BehaviorSubject<any>(undefined);
 export const scrollStore = new BehaviorSubject<any>(undefined);
 export const attributesStore = new BehaviorSubject<any>(undefined);
 export const autocompleteStore = new BehaviorSubject<any>('');
+export const idsInUse = new BehaviorSubject<any>(new Set());

@@ -1,6 +1,7 @@
 import {DomainType, TreeSubType, TreeType} from 'generated';
 import {List} from 'immutable';
 import {DOMAIN_TYPES} from './constant';
+import {idsInUse} from './search-state.service';
 
 export function typeDisplay(parameter): string {
   const subtype = parameter.get('subtype', '');
@@ -238,4 +239,16 @@ export function getChartObj(chartObj: any) {
     });
     ro.observe(chartRef);
   }
+}
+
+export function generateId(prefix?: string): string {
+  prefix = prefix || 'id';
+  let newId = `${prefix}_${this.genSuffix()}`;
+  const ids = idsInUse.getValue();
+  while (ids.has(newId)) {
+    newId = `${prefix}_${this.genSuffix()}`;
+  }
+  ids.add(newId);
+  idsInUse.next(ids);
+  return newId;
 }
