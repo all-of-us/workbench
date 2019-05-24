@@ -52,10 +52,6 @@ public class WorkspaceMapper {
 
   public Workspace toApiWorkspace(org.pmiops.workbench.db.model.Workspace workspace, org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
-    if (workspace.getContainsUnderservedPopulation()) {
-      researchPurpose.setUnderservedPopulationDetails(
-          new ArrayList<>(workspace.getUnderservedPopulationsEnum()));
-    }
     if(workspace.getPopulation()) {
       researchPurpose.setPopulationDetails(
           new ArrayList<>(workspace.getSpecificPopulationsEnum()));
@@ -138,11 +134,6 @@ public class WorkspaceMapper {
     dbWorkspace.setOtherPurpose(purpose.getOtherPurpose());
     dbWorkspace.setOtherPurposeDetails(purpose.getOtherPurposeDetails());
     dbWorkspace.setAdditionalNotes(purpose.getAdditionalNotes());
-    dbWorkspace.setContainsUnderservedPopulation(purpose.getContainsUnderservedPopulation());
-    if (purpose.getContainsUnderservedPopulation()) {
-      dbWorkspace
-          .setUnderservedPopulationsEnum(new HashSet<>(purpose.getUnderservedPopulationDetails()));
-    }
     dbWorkspace.setSoftwareChoice(purpose.getSoftwareChoice());
     dbWorkspace.setIntendedStudy(purpose.getIntendedStudy());
     dbWorkspace.setAnticipatedFindings(purpose.getAnticipatedFindings());
@@ -169,8 +160,7 @@ public class WorkspaceMapper {
         .anticipatedFindings(workspace.getAnticipatedFindings())
         .additionalNotes(workspace.getAdditionalNotes())
         .reviewRequested(workspace.getReviewRequested())
-        .approved(workspace.getApproved())
-        .containsUnderservedPopulation(workspace.getContainsUnderservedPopulation());
+        .approved(workspace.getApproved());
     if (workspace.getTimeRequested() != null) {
       researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
     }

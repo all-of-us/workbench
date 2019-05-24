@@ -31,7 +31,6 @@ export const workspaceStubs = [
       ancestry: false,
       anticipatedFindings: '',
       commercialPurpose: false,
-      containsUnderservedPopulation: false,
       controlSet: false,
       diseaseFocusedResearch: false,
       drugDevelopment: false,
@@ -46,7 +45,6 @@ export const workspaceStubs = [
       reviewRequested: false,
       socialBehavioral: false,
       softwareChoice: '',
-      underservedPopulationDetails: []
     },
     userRoles: [
       {

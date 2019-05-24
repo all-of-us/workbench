@@ -80,11 +80,6 @@ export const ResearchPurposeItems = {
       select \"Other Purpose\" and provide details regarding your purpose of data use here \
       (500 character limit).'
   },
-  containsUnderservedPopulation: {
-    shortDescription: 'Focus on an underserved population',
-    longDescription: 'This research will focus on, or include findings on, distinguishing \
-    characteristics related to one or more underserved populations'
-  },
   requestReview: {
     shortDescription: 'Request a review of your research purpose'
   }
@@ -111,13 +106,7 @@ export const toolTipText = {
     Resource Access Board (RAB). The RAB will provide feedback regarding potential for stigmatizing
     specific groups of participants and, if needed, guidance for modifying your research
     purpose/scope. Even if you request a review, you will be able to create a Workspace and proceed
-    with your research.`,
-  underservedPopulation: `A primary mission of the All of Us Research Program is to include
-    populations that are medically underserved and/or historically underrepresented in biomedical
-    research or who, because of systematic social disadvantage, experience disparities in health.
-    As a way to understand how much research is being conducted on these populations, All of Us
-    requests that you mark all options for underserved populations that will be included in your
-    research.`
+    with your research.`
 };
 
 export const researchPurposeQuestions = [
@@ -322,7 +311,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             ancestry: false,
             anticipatedFindings: '',
             commercialPurpose: false,
-            containsUnderservedPopulation: false,
             controlSet: false,
             diseaseFocusedResearch: false,
             drugDevelopment: false,
@@ -337,7 +325,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             reviewRequested: false,
             socialBehavioral: false,
             softwareChoice: '',
-            underservedPopulationDetails: []
           }
         },
         workspaceCreationConflictError: false,

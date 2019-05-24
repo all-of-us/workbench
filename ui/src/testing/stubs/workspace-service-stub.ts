@@ -84,7 +84,6 @@ export class WorkspacesServiceStub {
         ancestry: false,
         anticipatedFindings: '',
         commercialPurpose: false,
-        containsUnderservedPopulation: false,
         controlSet: false,
         diseaseFocusedResearch: false,
         drugDevelopment: false,
@@ -99,7 +98,6 @@ export class WorkspacesServiceStub {
         reviewRequested: false,
         socialBehavioral: false,
         softwareChoice: '',
-        underservedPopulationDetails: []
       },
       userRoles: [
         {

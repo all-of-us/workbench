@@ -23,7 +23,6 @@ import javax.persistence.Version;
 
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
-import org.pmiops.workbench.model.UnderservedPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 @Entity
@@ -95,8 +94,6 @@ public class Workspace {
   private boolean otherPurpose;
   private String otherPurposeDetails;
   private String additionalNotes;
-  private boolean containsUnderservedPopulation;
-  private Set<Short> underservedPopulationSet = new HashSet<>();
   private String softwareChoice;
   private String intendedStudy;
   private String anticipatedFindings;
@@ -347,46 +344,6 @@ public class Workspace {
 
   public void setAdditionalNotes(String additionalNotes) {
     this.additionalNotes = additionalNotes;
-  }
-
-  @Column(name = "rp_contains_underserved_population")
-  public Boolean getContainsUnderservedPopulation() {
-    return this.containsUnderservedPopulation;
-  }
-
-  public void setContainsUnderservedPopulation(Boolean containsUnderservedPopulation) {
-    this.containsUnderservedPopulation = containsUnderservedPopulation;
-  }
-
-  @ElementCollection(fetch = FetchType.LAZY)
-  @CollectionTable(name = "underserved_populations", joinColumns = @JoinColumn(name = "workspace_id"))
-  @Column(name = "underserved_population")
-  public Set<Short> getUnderservedPopulations() {
-    return underservedPopulationSet;
-  }
-
-  public void setUnderservedPopulations(Set<Short> newUnderservedPopulations) {
-    this.underservedPopulationSet = newUnderservedPopulations;
-  }
-
-  @Transient
-  public Set<UnderservedPopulationEnum> getUnderservedPopulationsEnum() {
-    Set<Short> from = getUnderservedPopulations();
-    if (from == null) {
-      return null;
-    }
-    return from
-        .stream()
-        .map(StorageEnums::underservedPopulationFromStorage)
-        .collect(Collectors.toSet());
-  }
-
-  public void setUnderservedPopulationsEnum(Set<UnderservedPopulationEnum> newUnderservedPopulations) {
-    setUnderservedPopulations(
-        newUnderservedPopulations
-        .stream()
-        .map(StorageEnums::underservedPopulationToStorage)
-        .collect(Collectors.toSet()));
   }
 
   @Column(name = "rp_software_choice")
