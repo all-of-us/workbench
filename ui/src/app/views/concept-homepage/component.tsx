@@ -31,7 +31,7 @@ const styles = reactStyles({
   searchBar: {
     marginLeft: '1%', boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)',
     height: '3rem', width: '64.3%',
-    backgroundColor: Color('#A3D3F2').alpha(20).toString(), fontSize: '16px',
+    backgroundColor: Color('#A3D3F2').alpha(0.2).toString(), fontSize: '16px',
     lineHeight: '19px', paddingLeft: '2rem'
   },
   domainBoxHeader: {
