@@ -3,8 +3,8 @@ import {Router} from '@angular/router';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {ReactWrapperBase, withWindowSize} from 'app/utils';
-import {AccountCreationSuccess} from 'app/views/account-creation-success';
 import {AccountCreation} from 'app/views/account-creation';
+import {AccountCreationSuccess} from 'app/views/account-creation-success';
 import {InvitationKey} from 'app/views/invitation-key/component';
 import {LoginReactComponent} from 'app/views/login/component';
 
