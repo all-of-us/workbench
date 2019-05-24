@@ -184,7 +184,6 @@ export class ConceptTable extends React.Component<Props, State> {
     const {searchTerm} = this.props;
     if (!searchTerm) {
       return stringToHighlight;
-
     }
     const words: string[] = [];
     let searchWords = searchTerm.split(new RegExp(',| '));
