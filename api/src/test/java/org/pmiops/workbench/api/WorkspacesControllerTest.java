@@ -32,8 +32,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.assertj.core.util.Sets;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -515,6 +517,20 @@ public class WorkspacesControllerTest {
         workspacesController.getWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody().getWorkspace();
     assertThat(workspace2.getResearchPurpose().getApproved()).isNotEqualTo(true);
+  }
+
+  @Test
+  public void testCreateWorkspace_createDeleteCycleSameName() throws Exception {
+    Workspace workspace = createWorkspace();
+
+    Set<String> uniqueIds = Sets.newHashSet();
+    for (int i = 0; i < 3; i++) {
+      workspace = workspacesController.createWorkspace(workspace).getBody();
+      uniqueIds.add(workspace.getId());
+
+      workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
+    }
+    assertThat(uniqueIds.size()).isEqualTo(1);
   }
 
   @Test
