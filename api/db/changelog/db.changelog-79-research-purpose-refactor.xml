@@ -6,10 +6,11 @@
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
     <changeSet author="jroberti" id="db.changelog-79-research-purpose-refactor">
         <addColumn tableName="workspace">
-            <column name="rp_social_behavioral" type="boolean" />
-            <column name="rp_population_health" type="boolean"/>
-            <column name="rp_educational" type="boolean"/>
-            <column name="rp_other_purpose" type="boolean"/>
+            <column name="rp_social_behavioral" type="boolean" defaultValueBoolean="false"/>
+            <column name="rp_population_health" type="boolean" defaultValueBoolean="false"/>
+            <column name="rp_educational" type="boolean" defaultValueBoolean="false"/>
+            <column name="rp_other_purpose" type="boolean" defaultValueBoolean="false"/>
+            <column name="rp_drug_development" type="boolean" defaultValueBoolean="false"/>
             <column name="rp_other_purpose_details" type="varchar(500)"/>
             <column name="rp_software_choice" type="varchar(500)"/>
             <column name="rp_intended_study" type="varchar(500)"/>

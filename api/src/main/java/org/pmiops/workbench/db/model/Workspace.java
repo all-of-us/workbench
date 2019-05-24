@@ -91,6 +91,7 @@ public class Workspace {
   private boolean socialBehavioral;
   private boolean populationHealth;
   private boolean educational;
+  private boolean drugDevelopment;
   private boolean otherPurpose;
   private String otherPurposeDetails;
   private String additionalNotes;
@@ -286,6 +287,11 @@ public class Workspace {
   public boolean getEducational() { return this.educational; }
 
   public void setEducational(boolean educational) { this.educational = educational; }
+
+  @Column(name = "rp_drug_development")
+  public boolean getDrugDevelopment() { return this.drugDevelopment; }
+
+  public void setDrugDevelopment(boolean drugDevelopment) { this.drugDevelopment = drugDevelopment; }
 
   @Column(name = "rp_other_purpose")
   public boolean getOtherPurpose() { return this.otherPurpose; }

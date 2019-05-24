@@ -1,20 +1,20 @@
 import {Location} from '@angular/common';
 import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
+import {FadeBox} from 'app/components/containers';
 import {InfoIcon} from 'app/components/icons';
-import {CheckBox, TextArea, TextInput} from 'app/components/inputs';
+import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles} from 'app/utils';
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {currentWorkspaceStore, navigate, userProfileStore} from 'app/utils/navigation';
-import {CdrVersion, DataAccessLevel, Workspace} from 'generated/fetch';
+import {CdrVersion, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import WorkspaceUnderservedPopulation from './workspace-edit-underserved';
 
 
 export const ResearchPurposeItems = {
@@ -26,27 +26,37 @@ export const ResearchPurposeItems = {
   },
   methodsDevelopment: {
     shortDescription: 'Methods development/validation study',
-    longDescription: 'The primary purpose of the research is to develop and/or validate new \
-    methods/tools for analyzing or interpreting data (for example, developing more powerful \
-    methods to detect epistatic, gene-environment, or other types of complex interactions in \
-    genome-wide association studies). Data will be used for developing and/or validating new \
-    methods.'
-  },
-  aggregateAnalysis: {
-    shortDescription: 'Aggregate analysis to understand variation in general population',
-    longDescription: 'The primary purpose of the research is to understand variation in the \
-    general population (for example, genetic substructure of a population).'
+    longDescription: 'The primary purpose of the use of AoU data is to develop and/or  \
+    validate specific methods/tools for analyzing or interpreting data (e.g. statistical  \
+    methods for describing data trends, developing more powerful methods to detect \
+    gene-environment or other types of interactions in genome-wide association studies).'
   },
   controlSet: {
-    shortDescription: 'Control set',
-    longDescription: 'All of Us data will be used to increase the number of controls \
-    available for a comparison group (for example, a case-control study) to another \
-    dataset.'
+    shortDescription: 'Research Control',
+    longDescription: 'AoU data will be used as a reference or control dataset \
+      for comparison with another dataset from a different resource (e.g. Case-control \
+      studies).'
   },
   ancestry: {
-    shortDescription: 'Population origins or ancestry',
-    longDescription: 'The primary purpose of the research is to study the ancestry \
-    or origins of a specific population.'
+    shortDescription: 'Genetic Research',
+    longDescription: 'Research concerning genetics (i.e. the study of genes, genetic variations \
+      and heredity) in the context of diseases or ancestry.'
+  },
+  socialBehavioral: {
+    shortDescription: 'Social/Behavioral Research',
+    longDescription: 'The research focuses on the social or behavioral phenomena or determinants \
+      of health.'
+  },
+  populationHealth: {
+    shortDescription: 'Population Health/Public Health Research',
+    longDescription: 'The primary purpose of using AoU data is to investigate health behaviors, \
+      outcomes, access and disparities in populations.'
+  },
+  drugDevelopment: {
+    shortDescription: 'Drug/Therapeutics Development Research',
+    longDescription: 'Primary focus of the research is drug/therapeutics development. The data \
+      will be used to understand treatment-gene interactions or treatment outcomes relevant \
+      to the therapeutic(s) of interest.'
   },
   population: {
     shortDescription: 'Restricted to a specific population',
@@ -54,9 +64,21 @@ export const ResearchPurposeItems = {
     For example: a specific gender, age group or ethnic group.'
   },
   commercialPurpose: {
-    shortDescription: 'Commercial purpose/entity',
-    longDescription: 'The study is conducted by a for-profit entity and/or in \
-    support of a commercial activity.'
+    shortDescription: 'For-Profit Purpose',
+    longDescription: 'The data will be used by a for-profit entity for research or product \
+      or service development (e.g. for understanding drug responses as part of a \
+      pharmaceutical company\'s drug development or market research efforts).'
+  },
+  educational: {
+    shortDescription: 'Educational Purpose',
+    longDescription: 'The data will be used for education purposes (e.g. for a college research \
+      methods course, to educate students on population-based research approaches).'
+  },
+  otherPurpose: {
+    shortDescription: 'Other Purpose',
+    longDescription: 'If your Purpose of Use is different from the options listed above, please \
+      select \"Other Purpose\" and provide details regarding your purpose of data use here \
+      (500 character limit).'
   },
   containsUnderservedPopulation: {
     shortDescription: 'Focus on an underserved population',
@@ -97,6 +119,32 @@ export const toolTipText = {
     requests that you mark all options for underserved populations that will be included in your
     research.`
 };
+
+export const researchPurposeQuestions = [
+  {
+    header: '1. What is the primary purpose of your project?',
+    description: ['(Please select as many options below as describe your \
+      research purpose)']
+  }, {
+    header: '2. Provide the reason for choosing All of Us data for your investigation',
+    description: ['(Free text; 500 Character limit)']
+  }, {
+    header: '3. What are the specific scientific question(s) you intend to study?',
+    description: ['If you are exploring the data at this stage to formalize a specific research \
+      question, please describe the reason for exploring the data, and the scientific \
+      question you hope to be able to answer using the data.', <br/>,
+      '(Free text; 500 Character limit)']
+  }, {
+    header: '4. What are your anticipated findings from this study?',
+    description: ['(Layperson language; 2000 Character limit)']
+  }, {
+    header: '5. Will your study or data analysis focus on specific population(s)? \
+      Or do you intend to study your phenotype, disease, or condition of interest with \
+      a focus on comparative analysis of a specific demographic group (for example \
+      a group based on race/ethnicity, gender, or age)?',
+    description: ['']
+  }
+];
 
 
 const styles = reactStyles({
@@ -172,14 +220,20 @@ const styles = reactStyles({
     display: 'flex',
     flexDirection: 'row',
     padding: '0.6rem 0',
-    width: '50%'
+  },
+  checkBoxStyle: {
+    marginRight: '.31667rem', zoom: '1.5'
+  },
+  checkboxRow: {
+    display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
   }
 });
 
 
 export const WorkspaceEditSection = (props) => {
-  return <div key={props.header}>
-    <div style={{display: 'flex', flexDirection: 'row', marginTop: (props.largeHeader ? 48 : 24)}}>
+  return <div key={props.header} style={{marginBottom: '0.5rem'}}>
+    <div style={{display: 'flex', flexDirection: 'row', marginBottom: (props.largeHeader ? 12 : 0),
+      marginTop: (props.largeHeader ? 12 : 24)}}>
       <div style={{...styles.header,
         fontSize: (props.largeHeader ? 20 : 16)}}>
         {props.header}
@@ -208,19 +262,28 @@ export const WorkspaceEditSection = (props) => {
 
 export const WorkspaceCategory = (props) => {
   return <div style={...fp.merge(styles.categoryRow, props.style)}>
-    <CheckBox style={{height: '.66667rem', marginRight: '.31667rem'}} checked={!!props.value}
+    <CheckBox style={styles.checkBoxStyle} checked={!!props.value}
       onChange={e => props.onChange(e)}/>
     <div style={{display: 'flex', flexDirection: 'column', marginTop: '-0.2rem'}}>
       <label style={styles.shortDescription}>
         {props.item.shortDescription}
       </label>
       <div>
-        <label style={styles.longDescription}>
+        <label style={{...styles.longDescription, ...styles.text}}>
           {props.item.longDescription}
         </label>
         {props.children}
       </div>
     </div>
+  </div>;
+};
+
+export const LabeledCheckBox = (props) => {
+  return <div style={...fp.merge(styles.checkboxRow, props.style)}>
+    <CheckBox style={{...styles.checkBoxStyle, verticalAlign: 'middle'}}
+              checked={!!props.value} disabled={props.disabled}
+              onChange={e => props.onChange(e)}/>
+    <label style={styles.text}>{props.label}</label>
   </div>;
 };
 
@@ -252,20 +315,28 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         cdrVersionItems: [],
         workspace: {
           name: '',
-          description: '',
           dataAccessLevel: DataAccessLevel.Registered,
           namespace: userProfileStore.getValue().profile.freeTierBillingProjectName,
           cdrVersionId: '',
           researchPurpose: {
-            diseaseFocusedResearch: false,
-            methodsDevelopment: false,
-            controlSet: false,
-            aggregateAnalysis: false,
             ancestry: false,
+            anticipatedFindings: '',
             commercialPurpose: false,
-            population: false,
-            reviewRequested: false,
             containsUnderservedPopulation: false,
+            controlSet: false,
+            diseaseFocusedResearch: false,
+            drugDevelopment: false,
+            educational: false,
+            intendedStudy: '',
+            methodsDevelopment: false,
+            otherPurpose: false,
+            otherPurposeDetails: '',
+            population: false,
+            populationDetails: [],
+            populationHealth: false,
+            reviewRequested: false,
+            socialBehavioral: false,
+            softwareChoice: '',
             underservedPopulationDetails: []
           }
         },
@@ -280,6 +351,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     componentDidMount() {
       if (!this.isMode(WorkspaceEditMode.Create)) {
         this.setState({workspace : this.props.workspace});
+        console.log(this.props.workspace);
         if (this.isMode(WorkspaceEditMode.Duplicate)) {
           this.setState({workspace: {
             ...this.props.workspace,
@@ -327,19 +399,27 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     disableButton() {
-      return this.isEmpty('name') || this.isEmpty('description');
+      return this.isEmpty('name');
     }
 
-    updateWorkspaceCategory(category, value) {
+    updateResearchPurpose(category, value) {
       this.setState(fp.set(['workspace', 'researchPurpose', category], value));
     }
 
+    updateSpecificPopulation(populationDetails, value) {
+      console.log(value);
+      const selectedPopulations = this.state.workspace.researchPurpose.populationDetails;
+      if (value) {
+        this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'],
+          selectedPopulations.concat([populationDetails])));
+      } else {
+        this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'],
+          selectedPopulations.filter(v => v !== populationDetails)));
+      }
+    }
 
-    updateUnderservedPopulation(populationDetails) {
-      this.setState(fp.set(['workspace', 'researchPurpose', 'underservedPopulationDetails'],
-        populationDetails));
-      this.setState(fp.set(['workspace', 'researchPurpose', 'containsUnderservedPopulation'],
-        (populationDetails.length > 0)));
+    specificPopulationSelected(populationEnum): boolean {
+      return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
     }
 
     async saveWorkspace() {
@@ -409,8 +489,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     render() {
-      return <React.Fragment>
-        <div style={{width: '60%'}}>
+      return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
+        <div style={{width: '95%'}}>
         <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                               section={{marginTop: '24px'}} largeHeader required>
           <div style={{display: 'flex', flexDirection: 'row'}}>
@@ -449,78 +529,175 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </div>
         }
         <WorkspaceEditSection header='Billing Account' subHeader='National Institutes of Health'
-            tooltip={toolTipText.billingAccount}
-            text='To fulfill program requirements, All of Us requests the following information
-            for each workspace.'/>
-        <WorkspaceEditSection header='Describe your research purpose'
-            tooltip={toolTipText.researchPurpose}
-            text={['Please include the ', <strong key='question'>research question</strong>,
-              '\, the ', <strong key='plan'> plan for use of the data </strong>,
-              'to answer the research question, and the',
-              <strong key = 'benefit'> expected outcome/benefit </strong>,
-              'of the research information will be posted publicly on the All of Us website to ' +
-              'inform the research participants.']} required>
-          <TextArea value={this.state.workspace.description}
-                    onChange={v => this.setState(fp.set(['workspace', 'description'], v))}/>
+            tooltip={toolTipText.billingAccount}/>
+        <WorkspaceEditSection header='Research Use Statement Questions'
+            text={['The AoU Research Program requires each user of AoU data to provide a \
+             meaningful description of the intended purpose of data use for each Workspace they \
+             create. The responses provided below will be posted publicly in the AoU Research Hub \
+             website to inform the AoU Research Participants.  Therefore, please provide \
+             sufficiently detailed responses at a 5th grade reading level.  Your responses will \
+             not be used to make decisions about data access.', <br/>, <br/>,
+              <i>Note that you are required to create separate Workspaces for each project
+              for which you access AoU data, hence the responses below are expected to be specific
+              to the project for which you are creating this particular Workspace.</i>
+            ]}/>
+        <WorkspaceEditSection header={researchPurposeQuestions[0].header}
+            text={researchPurposeQuestions[0].description} required>
+          <div style={{display: 'flex', flexDirection: 'row', flex: '1 1 0'}}>
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+              <WorkspaceCategory style={{width: '100%'}}
+                 item={ResearchPurposeItems.diseaseFocusedResearch}
+                 value={this.state.workspace.researchPurpose.diseaseFocusedResearch}
+                 onChange={v => this.updateResearchPurpose('diseaseFocusedResearch', v)}>
+                <TooltipTrigger
+                  content='You must select disease focused research to enter a disease of focus'
+                  disabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}>
+                  <TextInput value={this.state.workspace.researchPurpose.diseaseOfFocus}
+                             style={{
+                               width: 'calc(50% - 2rem)',
+                               border: '1px solid #9a9a9',
+                               borderRadius: '5px'
+                             }}
+                             placeholder='Name of Disease' onChange={v =>
+                    this.setState(fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], v))}
+                       disabled={!this.state.workspace.researchPurpose.diseaseFocusedResearch}/>
+                </TooltipTrigger>
+              </WorkspaceCategory>
+              <WorkspaceCategory item={ResearchPurposeItems.ancestry}
+                 value={this.state.workspace.researchPurpose.ancestry}
+                 onChange={v => this.updateResearchPurpose('ancestry', v)}/>
+              <WorkspaceCategory item={ResearchPurposeItems.socialBehavioral}
+                 value={this.state.workspace.researchPurpose.socialBehavioral}
+                 onChange={v => this.updateResearchPurpose('socialBehavioral', v)}/>
+              <WorkspaceCategory item={ResearchPurposeItems.populationHealth}
+                 value={this.state.workspace.researchPurpose.populationHealth}
+                 onChange={v => this.updateResearchPurpose('populationHealth', v)}/>
+              <WorkspaceCategory item={ResearchPurposeItems.methodsDevelopment}
+                 value={this.state.workspace.researchPurpose.methodsDevelopment}
+                 onChange={v => this.updateResearchPurpose('methodsDevelopment', v)}/>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+              <WorkspaceCategory item={ResearchPurposeItems.controlSet}
+                 value={this.state.workspace.researchPurpose.controlSet}
+                 onChange={v => this.updateResearchPurpose('controlSet', v)}/>
+              <WorkspaceCategory item={ResearchPurposeItems.educational}
+                 value={this.state.workspace.researchPurpose.educational}
+                 onChange={v => this.updateResearchPurpose('educational', v)}/>
+              <WorkspaceCategory item={ResearchPurposeItems.commercialPurpose}
+                 value={this.state.workspace.researchPurpose.commercialPurpose}
+                 onChange={v => this.updateResearchPurpose('commercialPurpose', v)}/>
+              <WorkspaceCategory item={ResearchPurposeItems.otherPurpose}
+                 value={this.state.workspace.researchPurpose.otherPurpose}
+                 onChange={v => this.updateResearchPurpose('otherPurpose', v)}>
+                <TextArea value={this.state.workspace.researchPurpose.otherPurposeDetails}
+                          onChange={v => this.updateResearchPurpose('otherPurposeDetails', v)}
+                          disabled={!this.state.workspace.researchPurpose.otherPurpose}
+                          style={{marginTop: '0.5rem'}}/>
+              </WorkspaceCategory>
+            </div>
+          </div>
         </WorkspaceEditSection>
         <WorkspaceEditSection
-            header='Please select all data use categories that apply for your current study'
-            text='These are for informational purposes only and do not affect or configure your
-            new workspace.'>
-          <WorkspaceCategory style={{width: '100%'}}
-              item={ResearchPurposeItems.diseaseFocusedResearch}
-              value={this.state.workspace.researchPurpose.diseaseFocusedResearch}
-              onChange={v => this.updateWorkspaceCategory('diseaseFocusedResearch', v)}>
-            <TooltipTrigger
-                content='You must select disease focused research to enter a disease of focus'
-                disabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}>
-              <TextInput value={this.state.workspace.researchPurpose.diseaseOfFocus}
-                         style={{
-                           width: 'calc(50% - 2rem)',
-                           border: '1px solid #9a9a9',
-                           borderRadius: '5px'
-                         }}
-                         placeholder='Name of Disease' onChange={v =>
-                  this.setState(fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], v))}
-                         disabled={!this.state.workspace.researchPurpose.diseaseFocusedResearch}/>
-            </TooltipTrigger>
-          </WorkspaceCategory>
-          <div style={{display: 'inline-block'}}>
-            <div style={{display: 'flex'}}>
-              <WorkspaceCategory item={ResearchPurposeItems.methodsDevelopment}
-                  value={this.state.workspace.researchPurpose.methodsDevelopment}
-                  onChange={v => this.updateWorkspaceCategory('methodsDevelopment', v)}/>
-              <WorkspaceCategory item={ResearchPurposeItems.aggregateAnalysis}
-                  value={!!this.state.workspace.researchPurpose.aggregateAnalysis}
-                  onChange={v => this.updateWorkspaceCategory('aggregateAnalysis', v)}/>
+          header={researchPurposeQuestions[1].header}
+          text={researchPurposeQuestions[1].description} required>
+          <TextArea value={this.state.workspace.researchPurpose.softwareChoice}
+                    onChange={v => this.updateResearchPurpose('softwareChoice', v)}
+                    style={{marginTop: '0.5rem'}}/>
+        </WorkspaceEditSection>
+        <WorkspaceEditSection
+          header={researchPurposeQuestions[2].header}
+          text={researchPurposeQuestions[2].description} required>
+          <TextArea value={this.state.workspace.researchPurpose.intendedStudy}
+                    onChange={v => this.updateResearchPurpose('intendedStudy', v)}
+                    style={{marginTop: '0.5rem'}}/>
+        </WorkspaceEditSection>
+        <WorkspaceEditSection header={researchPurposeQuestions[3].header}
+                              text={researchPurposeQuestions[3].description} required>
+          <TextArea value={this.state.workspace.researchPurpose.anticipatedFindings}
+                    onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
+                    style={{marginTop: '0.5rem'}}/>
+        </WorkspaceEditSection>
+        <WorkspaceEditSection required header={researchPurposeQuestions[4].header}>
+          <div style={{marginTop: '0.5rem'}}>
+            <RadioButton name='population' style={{marginRight: '0.5rem'}}
+              onChange={v => this.updateResearchPurpose('population', true)}
+              checked={this.state.workspace.researchPurpose.population}/>
+            <label style={styles.text}>Yes, I am interested in the focused study of specific
+            population(s), either on their own or in comparison to other groups.</label>
+          </div>
+          <div>
+            <RadioButton name='population' style={{marginRight: '0.5rem'}}
+                         onChange={v => this.updateResearchPurpose('population', false)}
+                         checked={!this.state.workspace.researchPurpose.population}/>
+            <label style={styles.text}>No, I am not interested in focusing on
+              specific population(s) in my research.</label>
+          </div>
+          <div style={{...styles.text, marginLeft: '2rem'}}>
+            <strong>If "Yes": </strong> Please specify the demographic category or categories of the
+            population(s) that you are interested in exploring in your study.
+            Select as many as applicable.
+            <div style={{display: 'flex', flexDirection: 'row', flex: '1 1 0',
+              marginTop: '0.5rem'}}>
+              <div style={{display: 'flex', flexDirection: 'column'}}>
+                <LabeledCheckBox label='Race/Ethnicity'
+                  value={this.specificPopulationSelected(SpecificPopulationEnum.RACEETHNICITY)}
+                  onChange={v =>
+                     this.updateSpecificPopulation(SpecificPopulationEnum.RACEETHNICITY, v)}
+                   disabled={!this.state.workspace.researchPurpose.population}/>
+                <LabeledCheckBox label='Age Groups'
+                   value={this.specificPopulationSelected(SpecificPopulationEnum.AGEGROUPS)}
+                   onChange={v =>
+                     this.updateSpecificPopulation(SpecificPopulationEnum.AGEGROUPS, v)}
+                   disabled={!this.state.workspace.researchPurpose.population}/>
+                <LabeledCheckBox label='Sex'
+                   value={this.specificPopulationSelected(SpecificPopulationEnum.SEX)}
+                   onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.SEX, v)}
+                   disabled={!this.state.workspace.researchPurpose.population}/>
+                <LabeledCheckBox label='Gender Identity'
+                   value={this.specificPopulationSelected(SpecificPopulationEnum.GENDERIDENTITY)}
+                   onChange={v =>
+                     this.updateSpecificPopulation(SpecificPopulationEnum.GENDERIDENTITY, v)}
+                   disabled={!this.state.workspace.researchPurpose.population}/>
+                <LabeledCheckBox label='Sexual Orientation'
+                   value={this.specificPopulationSelected(SpecificPopulationEnum.SEXUALORIENTATION)}
+                   onChange={v =>
+                     this.updateSpecificPopulation(SpecificPopulationEnum.SEXUALORIENTATION, v)}
+                   disabled={!this.state.workspace.researchPurpose.population}/>
+                <LabeledCheckBox label='Geography (e.g. Rural, urban, suburban, etc.)'
+                   value={this.specificPopulationSelected(SpecificPopulationEnum.GEOGRAPHY)}
+                   onChange={v =>
+                     this.updateSpecificPopulation(SpecificPopulationEnum.GEOGRAPHY, v)}
+                   disabled={!this.state.workspace.researchPurpose.population}/>
+              </div>
+              <div style={{display: 'flex', flexDirection: 'column'}}>
+                <LabeledCheckBox label='Disability status'
+                   value={this.specificPopulationSelected(SpecificPopulationEnum.DISABILITYSTATUS)}
+                   onChange={v =>
+                     this.updateSpecificPopulation(SpecificPopulationEnum.DISABILITYSTATUS, v)}
+                   disabled={!this.state.workspace.researchPurpose.population}/>
+                <LabeledCheckBox label='Access to care'
+                   value={this.specificPopulationSelected(SpecificPopulationEnum.ACCESSTOCARE)}
+                   onChange={v =>
+                     this.updateSpecificPopulation(SpecificPopulationEnum.ACCESSTOCARE, v)}
+                   disabled={!this.state.workspace.researchPurpose.population}/>
+                <LabeledCheckBox label='Education level'
+                   value={this.specificPopulationSelected(SpecificPopulationEnum.EDUCATIONLEVEL)}
+                   onChange={v =>
+                     this.updateSpecificPopulation(SpecificPopulationEnum.EDUCATIONLEVEL, v)}
+                   disabled={!this.state.workspace.researchPurpose.population}/>
+                <LabeledCheckBox label='Income level'
+                   value={this.specificPopulationSelected(SpecificPopulationEnum.INCOMELEVEL)}
+                   onChange={v =>
+                     this.updateSpecificPopulation(SpecificPopulationEnum.INCOMELEVEL, v)}
+                   disabled={!this.state.workspace.researchPurpose.population}/>
+                <LabeledCheckBox label='Other'
+                   value={this.specificPopulationSelected(SpecificPopulationEnum.OTHER)}
+                   onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
+                   disabled={!this.state.workspace.researchPurpose.population}/>
+                <TextInput type='text' autofocus placeholder='Please specify'/>
+              </div>
             </div>
           </div>
-          <div style={{display: 'inline-block'}}>
-            <div style={{display: 'flex'}}>
-              <WorkspaceCategory item={ResearchPurposeItems.controlSet}
-                  value={this.state.workspace.researchPurpose.controlSet}
-                  onChange={v => this.updateWorkspaceCategory('controlSet', v)}/>
-              <WorkspaceCategory item={ResearchPurposeItems.ancestry}
-                  value={this.state.workspace.researchPurpose.ancestry}
-                  onChange={v => this.updateWorkspaceCategory('ancestry', v)}/>
-            </div>
-          </div>
-          <div style={{display: 'inline-block'}}>
-            <div style={{display: 'flex'}}>
-              <WorkspaceCategory item={ResearchPurposeItems.population}
-                  value={this.state.workspace.researchPurpose.population}
-                  onChange={v => this.updateWorkspaceCategory('population', v)}/>
-              <WorkspaceCategory item={ResearchPurposeItems.commercialPurpose}
-                  value={this.state.workspace.researchPurpose.commercialPurpose}
-                  onChange={v => this.updateWorkspaceCategory('commercialPurpose', v)}/>
-            </div>
-          </div>
-          <WorkspaceUnderservedPopulation
-            selectedValues={
-              !this.state.workspace.researchPurpose.underservedPopulationDetails ? [] :
-                  this.state.workspace.researchPurpose.underservedPopulationDetails}
-              onChange={v => this.updateUnderservedPopulation(v)}>
-          </WorkspaceUnderservedPopulation>
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Request a review of your research purpose'
                               tooltip={toolTipText.reviewRequest}>
@@ -548,7 +725,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </Button>
             <TooltipTrigger content={[<ul>Missing Required Fields:
               { this.isEmpty('name') && <li> Name </li> }
-              { this.isEmpty('description') && <li> Description </li> }
             </ul>]} disabled={!this.disableButton()}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
                       disabled={this.disableButton() || this.state.loading}>
@@ -594,7 +770,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </Modal>
         }
         </div>
-      </React.Fragment> ;
+      </FadeBox> ;
     }
   });
 

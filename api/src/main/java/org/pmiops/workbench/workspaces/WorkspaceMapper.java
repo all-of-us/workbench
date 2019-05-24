@@ -56,6 +56,10 @@ public class WorkspaceMapper {
       researchPurpose.setUnderservedPopulationDetails(
           new ArrayList<>(workspace.getUnderservedPopulationsEnum()));
     }
+    if(workspace.getPopulation()) {
+      researchPurpose.setPopulationDetails(
+          new ArrayList<>(workspace.getSpecificPopulationsEnum()));
+    }
 
     Workspace result = new Workspace()
         .etag(Etags.fromVersion(workspace.getVersion()))
@@ -130,6 +134,7 @@ public class WorkspaceMapper {
     dbWorkspace.setSocialBehavioral(purpose.getSocialBehavioral());
     dbWorkspace.setPopulationHealth(purpose.getPopulationHealth());
     dbWorkspace.setEducational(purpose.getEducational());
+    dbWorkspace.setDrugDevelopment(purpose.getDrugDevelopment());
     dbWorkspace.setOtherPurpose(purpose.getOtherPurpose());
     dbWorkspace.setOtherPurposeDetails(purpose.getOtherPurposeDetails());
     dbWorkspace.setAdditionalNotes(purpose.getAdditionalNotes());
@@ -154,6 +159,7 @@ public class WorkspaceMapper {
         .commercialPurpose(workspace.getCommercialPurpose())
         .socialBehavioral(workspace.getSocialBehavioral())
         .educational(workspace.getEducational())
+        .drugDevelopment(workspace.getDrugDevelopment())
         .populationHealth(workspace.getPopulationHealth())
         .otherPurpose(workspace.getOtherPurpose())
         .otherPurposeDetails(workspace.getOtherPurposeDetails())

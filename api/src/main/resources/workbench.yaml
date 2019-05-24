@@ -1922,6 +1922,7 @@ definitions:
      - softwareChoice
      - intendedStudy
      - anticipatedFindings
+     - drugDevelopment
     properties:
       additionalNotes:
         type: string
@@ -1946,6 +1947,9 @@ definitions:
         default: false
       diseaseOfFocus:
         type: string
+      drugDevelopment:
+        type: boolean
+        default: false
       educational:
         type: boolean
         default: false
