@@ -4,7 +4,7 @@ import * as React from 'react';
 import {withContentRect} from 'react-measure';
 
 import {SpinnerOverlay} from 'app/components/spinners';
-import {Scroll} from 'app/icons/scroll/component';
+import {Scroll} from 'app/icons/scroll';
 import {cohortsApi, conceptSetsApi, userMetricsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';

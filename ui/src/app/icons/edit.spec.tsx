@@ -4,7 +4,7 @@ import * as React from 'react';
 import {
   EditComponentProps,
   EditComponentReact
-} from './component';
+} from './edit';
 
 // Note that the description is slightly different from the component for easier test filtering.
 describe('EditIconComponent', () => {

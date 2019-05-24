@@ -10,7 +10,7 @@ import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {EditComponentReact} from 'app/icons/edit/component';
+import {EditComponentReact} from 'app/icons/edit';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {
   reactStyles,

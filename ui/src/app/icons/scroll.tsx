@@ -1,5 +1,5 @@
 import {Clickable} from 'app/components/buttons';
-import {ScrollIcon} from 'app/icons/scroll-icon/component';
+import {ScrollIcon} from 'app/icons/scroll-icon';
 import * as React from 'react';
 
 export const Scroll = ({dir, shade, style = {}, ...props}) => {

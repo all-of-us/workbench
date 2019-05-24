@@ -1,7 +1,7 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import {Scroll} from './component';
+import {Scroll} from './scroll';
 
 describe('ScrollComponent', () => {
   it('should render', () => {

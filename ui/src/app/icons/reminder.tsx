@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {ReactWrapperBase} from 'app/utils/index';
+import {ReactWrapperBase} from 'app/utils';
 import * as React from 'react';
 
 // tslint:disable:max-line-length
