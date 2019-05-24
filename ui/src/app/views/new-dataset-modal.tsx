@@ -13,8 +13,8 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors from 'app/styles/colors';
-import {convertQueryToText} from 'app/utils/big-query-queries';
 import {summarizeErrors} from 'app/utils';
+import {convertQueryToText} from 'app/utils/big-query-queries';
 import {navigate} from 'app/utils/navigation';
 import {
   DataSetQuery,

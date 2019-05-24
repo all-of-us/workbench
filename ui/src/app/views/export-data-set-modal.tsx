@@ -8,8 +8,8 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {convertQueryToText} from 'app/utils/big-query-queries';
 import {summarizeErrors} from 'app/utils';
+import {convertQueryToText} from 'app/utils/big-query-queries';
 import {navigate} from 'app/utils/navigation';
 
 
