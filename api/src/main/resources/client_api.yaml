@@ -534,6 +534,10 @@ definitions:
       includeVocabularyCounts:
         type: boolean
         description: True if per-vocabulary counts of concepts matching the criteria in the specified domain should be included in the response
+      pageNumber:
+        type: integer
+        default: 0
+        description: By default it returns the first page and then its next pages from that on.
 
   ConceptListResponse:
     type: object

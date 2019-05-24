@@ -206,7 +206,7 @@ public class ConceptsController implements ConceptsApiDelegate {
 
     Slice<org.pmiops.workbench.cdr.model.Concept> concepts = conceptService.searchConcepts(
         request.getQuery(), convertedConceptFilter,
-        request.getVocabularyIds(), domainIds, maxResults, minCount);
+        request.getVocabularyIds(), domainIds, maxResults, minCount, (request.getPageNumber() == null)? 0: request.getPageNumber());
 
     if(concepts != null){
       response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT)
