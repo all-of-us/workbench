@@ -2,8 +2,6 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.Collection;
 import java.util.List;
-import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -17,18 +15,17 @@ import org.springframework.data.repository.query.Param;
  * Use of @Query is discouraged; if desired, define aliases in WorkspaceService.
  */
 public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
-  Workspace findByWorkspaceNamespaceAndFirecloudName(
-      String workspaceNamespace, String firecloudName);
-  Workspace findByWorkspaceNamespaceAndName(String workspaceNamespace, String name);
+  Workspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+      String workspaceNamespace, String firecloudName, short activeStatus);
+  Workspace findByWorkspaceNamespaceAndNameAndActiveStatus(
+      String workspaceNamespace, String name, short activeStatus);
 
   @Query("SELECT w FROM Workspace w LEFT JOIN FETCH w.cohorts c LEFT JOIN FETCH c.cohortReviews" +
-      " WHERE w.workspaceNamespace = (:ns) AND w.firecloudName = (:fcName)")
-  Workspace findByFirecloudWithEagerCohorts(
-      @Param("ns") String workspaceNamespace, @Param("fcName") String fcName);
+      " WHERE w.workspaceNamespace = (:ns) AND w.firecloudName = (:fcName)" +
+      " AND w.activeStatus = (:status)")
+  Workspace findByFirecloudNameAndActiveStatusWithEagerCohorts(
+      @Param("ns") String workspaceNamespace, @Param("fcName") String fcName, @Param("status") short status);
 
-  List<Workspace> findByWorkspaceNamespace(String workspaceNamespace);
-  List<Workspace> findByCreatorOrderByNameAsc(User creator);
   List<Workspace> findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
   List<Workspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
-  Workspace findFirstByCdrVersion(CdrVersion cdrVersion);
 }

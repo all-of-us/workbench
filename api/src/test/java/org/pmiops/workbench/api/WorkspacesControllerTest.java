@@ -4,12 +4,17 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyListOf;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyListOf;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.cloud.bigquery.FieldValue;
@@ -29,11 +34,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -61,11 +69,6 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
-import org.pmiops.workbench.model.CopyNotebookRequest;
-import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
-import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -76,6 +79,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
@@ -85,6 +89,7 @@ import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.CopyNotebookRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -105,8 +110,11 @@ import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.workspaces.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -122,8 +130,6 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.inject.Provider;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -515,6 +521,20 @@ public class WorkspacesControllerTest {
         workspacesController.getWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody().getWorkspace();
     assertThat(workspace2.getResearchPurpose().getApproved()).isNotEqualTo(true);
+  }
+
+  @Test
+  public void testCreateWorkspace_createDeleteCycleSameName() throws Exception {
+    Workspace workspace = createWorkspace();
+
+    Set<String> uniqueIds = new HashSet<>();
+    for (int i = 0; i < 3; i++) {
+      workspace = workspacesController.createWorkspace(workspace).getBody();
+      uniqueIds.add(workspace.getId());
+
+      workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
+    }
+    assertThat(uniqueIds.size()).isEqualTo(1);
   }
 
   @Test
