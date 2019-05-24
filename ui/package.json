@@ -68,6 +68,7 @@
     "@clr/icons": "^0.11.12",
     "@clr/ui": "^0.11.12",
     "@swimlane/ngx-charts": "^7.1.1",
+    "@types/color": "^3.0.0",
     "@types/core-js": "^2.5.0",
     "@types/geojson": "^1.0.6",
     "@types/lodash": "^4.14.119",

@@ -5,6 +5,7 @@ import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -53,19 +54,19 @@ const styles = reactStyles({
     paddingRight: '0.5rem',
   },
   reportBackground: {
-    backgroundColor: 'white',
+    backgroundColor: colors.white,
     paddingTop: '1rem',
     marginTop: '0.5rem',
   },
   queryTitle: {
     fontSize: '16px',
     fontWeight: 600,
-    color: '#262262',
+    color: colors.purple[0],
     lineHeight: '22px',
   },
   queryContent: {
     fontSize: '13px',
-    color: 'black',
+    color: colors.black[0],
     lineHeight: '30px',
     paddingBottom: '0.6rem',
   },
@@ -78,7 +79,7 @@ const styles = reactStyles({
     paddingBottom: '0.5rem',
     fontSize: '16px',
     fontWeight: 600,
-    color: '#262262',
+    color: colors.purple[0],
     lineHeight: '22px',
   },
   graphBorder: {
@@ -88,7 +89,7 @@ const styles = reactStyles({
   groupHeader: {
     backgroundColor: '#E2E2EA',
     padding: '0.2rem',
-    color: '#262262',
+    color: colors.purple[0],
     marginTop: '1rem'
   },
   groupText: {
@@ -100,11 +101,11 @@ const styles = reactStyles({
   groupContent: {
     paddingTop: '0.2rem',
     paddingLeft: '0.75rem',
-    color: 'black',
+    color: colors.black[0],
     fontSize: '13px'
   },
   print: {
-    color: '#262262',
+    color: colors.purple[0],
     cursor: 'pointer'
   },
   printDisabled: {

@@ -1,21 +1,23 @@
 import * as React from 'react';
 
+import colors from 'app/styles/colors';
+
 export const styles = {
   infoIcon: {
-    color: '#2691D0',
+    color: colors.blue[0],
     height: '22px',
     width: '22px',
     fill: '#2691D0'
   },
 
   successIcon: {
-    color: '#7AC79B',
+    color: colors.green[1],
     width: '20px',
     height: '20px'
   },
 
   warningIcon: {
-    color: '#F68D76',
+    color: colors.yellow[2],
     width: '20px',
     height: '20px'
   }

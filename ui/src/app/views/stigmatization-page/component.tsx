@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import * as React from 'react';
 
@@ -11,20 +12,20 @@ const styles = reactStyles({
     height: '100%'
   },
   header: {
-    color: '#262262',
+    color: colors.purple[0],
     fontSize: 20,
     fontWeight: 600,
     lineHeight: '24px'
   },
   subHeader: {
     fontSize: 16,
-    color: '#262262',
+    color: colors.purple[0],
     fontWeight: 600,
     lineHeight: '24px',
     marginTop: '0.6rem'
   },
   text: {
-    color: '#4A4A4A',
+    color: colors.gray[0],
     fontSize: 14,
     fontWeight: 400,
     lineHeight: '24px'
@@ -32,7 +33,7 @@ const styles = reactStyles({
   list: {
     paddingLeft: '1rem',
     listStylePosition: 'outside',
-    color: '#262262',
+    color: colors.purple[0],
     fontWeight: 600
   }
 });

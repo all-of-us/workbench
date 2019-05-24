@@ -3,6 +3,7 @@ import {Clickable, Link} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
+import * as Color from 'color';
 import colors from 'app/styles/colors';
 import {ReactWrapperBase, toggleIncludes} from 'app/utils';
 import {reactStyles} from 'app/utils';
@@ -11,6 +12,7 @@ import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
+
 
 const styles = reactStyles({
   colStyle: {
@@ -29,8 +31,8 @@ const styles = reactStyles({
     color: colors.blue[3]
   },
   highlighted: {
-    color: colors.green[2],
-    backgroundColor: colors.green[2].alpha(0.2),
+    color: colors.green[3],
+    backgroundColor: Color(colors.green[3]).alpha(0.2).toString(),
     display: 'inline-block'
   }
 });

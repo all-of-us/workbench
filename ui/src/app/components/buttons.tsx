@@ -34,7 +34,7 @@ const buttonVariants = {
     style: {
       ...styles.base,
       borderRadius: '0.3rem',
-      backgroundColor: colors.purple[0], color: '#fff',
+      backgroundColor: colors.purple[0], color: colors.white,
     },
     disabledStyle: {backgroundColor: colors.gray[4]},
     hover: {backgroundColor: colors.purple[1]}

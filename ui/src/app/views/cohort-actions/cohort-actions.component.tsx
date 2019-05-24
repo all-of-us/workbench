@@ -3,6 +3,7 @@ import {Button} from 'app/components/buttons';
 import {CohortActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -12,7 +13,7 @@ import * as React from 'react';
 
 const styles = reactStyles({
   cohortsHeader: {
-    color: '#2F2E7E',
+    color: colors.blue[7],
     fontSize: '20px',
     lineHeight: '24px',
     fontWeight: 600,
@@ -31,7 +32,7 @@ const styles = reactStyles({
     boxShadow: '0 0 0 0'
   },
   cardName: {
-    fontSize: '18px', fontWeight: 600, lineHeight: '22px', color: '#2F2E7E',
+    fontSize: '18px', fontWeight: 600, lineHeight: '22px', color: colors.blue[7],
     wordBreak: 'break-all', textOverflow: 'ellipsis', overflow: 'hidden',
     display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'
   },

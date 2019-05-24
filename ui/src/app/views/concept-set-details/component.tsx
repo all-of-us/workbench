@@ -12,6 +12,7 @@ import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit/component';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {
   reactStyles,
   ReactWrapperBase, summarizeErrors,
@@ -31,17 +32,17 @@ const styles = reactStyles({
     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingBottom: '1.5rem'
   },
   conceptSetTitle: {
-    color: '#2F2E7E', fontSize: 20, fontWeight: 600, marginBottom: '0.5rem',
+    color: colors.blue[7], fontSize: 20, fontWeight: 600, marginBottom: '0.5rem',
     display: 'flex', flexDirection: 'row'
   },
   conceptSetMetadataWrapper: {
     flexDirection: 'column', alignItems: 'space-between', marginLeft: '0.5rem'
   },
   conceptSetData: {
-    display: 'flex', flexDirection: 'row', color: '#000', fontWeight: 600
+    display: 'flex', flexDirection: 'row', color: colors.black[0], fontWeight: 600
   },
   buttonBoxes: {
-    color: '#2691D0', borderColor: '#2691D0', marginBottom: '0.3rem'
+    color: colors.blue[0], borderColor: colors.blue[0], marginBottom: '0.3rem'
   }
 });
 
@@ -240,7 +241,7 @@ export const ConceptSetDetails =
                       <EditComponentReact disabled={!this.canEdit} style={{marginTop: '0.1rem'}}/>
                     </Clickable>
                   </div>
-                  <div style={{marginBottom: '1.5rem', color: '#000'}}
+                  <div style={{marginBottom: '1.5rem', color: colors.black[0]}}
                        data-test-id='concept-set-description'>
                     {conceptSet.description}</div>
                 </React.Fragment>}
