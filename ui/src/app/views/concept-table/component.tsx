@@ -31,7 +31,6 @@ const styles = reactStyles({
   highlighted: {
     color: colors.green[2],
     backgroundColor: colors.green[2].alpha(0.2),
-    backgroundOpacity: '0.2',
     display: 'inline-block'
   }
 });
