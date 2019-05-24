@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
+import {ResearchPurposeItems} from 'app/views/workspace-edit';
 
 import {cohortsApi, profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 

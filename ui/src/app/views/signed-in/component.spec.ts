@@ -18,8 +18,8 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 
-import {BreadcrumbComponent} from 'app/views/breadcrumb/component';
-import {BugReportComponent} from 'app/views/bug-report/component';
+import {BreadcrumbComponent} from 'app/views/breadcrumb';
+import {BugReportComponent} from 'app/views/bug-report';
 import {RoutingSpinnerComponent} from 'app/views/routing-spinner/component';
 import {SignedInComponent} from 'app/views/signed-in/component';
 

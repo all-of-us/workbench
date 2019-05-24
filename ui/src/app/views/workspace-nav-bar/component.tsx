@@ -104,7 +104,7 @@ export const WorkspaceNavBarReact = fp.flow(
           <MenuItem
             icon='copy'
             onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}>
-            Duplicate
+            Duplicate Test
           </MenuItem>
           <MenuItem
             icon='pencil'
