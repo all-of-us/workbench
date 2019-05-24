@@ -15,18 +15,21 @@ public class WorkbenchConfigTest {
   public void testUnsafeEndpointsDisabledInProd() throws FileNotFoundException {
     WorkbenchConfig workbenchConfig = getConfigFromFile("../api/config/config_prod.json");
     assertThat(workbenchConfig.access.unsafeAllowSelfBypass).isFalse();
+    assertThat(workbenchConfig.featureFlags.unsafeAllowDeleteUser).isFalse();
   }
 
   @Test
   public void testUnsafeEndpointsDisabledInStable() throws FileNotFoundException {
     WorkbenchConfig workbenchConfig = getConfigFromFile("../api/config/config_stable.json");
     assertThat(workbenchConfig.access.unsafeAllowSelfBypass).isFalse();
+    assertThat(workbenchConfig.featureFlags.unsafeAllowDeleteUser).isFalse();
   }
 
   @Test
   public void testUnsafeEndpointsDisabledInStaging() throws FileNotFoundException {
     WorkbenchConfig workbenchConfig = getConfigFromFile("../api/config/config_staging.json");
     assertThat(workbenchConfig.access.unsafeAllowSelfBypass).isFalse();
+    assertThat(workbenchConfig.featureFlags.unsafeAllowDeleteUser).isFalse();
   }
 
   @Bean
