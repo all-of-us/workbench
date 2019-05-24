@@ -6,7 +6,7 @@ import {
 import {
   AccountCreationResendModal,
   AccountCreationUpdateModal
-} from 'app/views/account-creation-modals/component';
+} from 'app/views/account-creation-modals';
 
 import {Profile} from 'generated/fetch/api';
 import * as React from 'react';

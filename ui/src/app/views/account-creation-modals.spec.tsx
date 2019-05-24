@@ -5,7 +5,7 @@ import {ProfileApi} from 'generated/fetch';
 import * as React from 'react';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
-import {AccountCreationResendModal, AccountCreationUpdateModal} from './component';
+import {AccountCreationResendModal, AccountCreationUpdateModal} from './account-creation-modals';
 
 beforeEach(() => {
   registerApiClient(ProfileApi, new ProfileApiStub());

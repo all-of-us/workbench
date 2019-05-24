@@ -6,7 +6,7 @@ import {
   AccountCreation,
   AccountCreationProps,
   AccountCreationState
-} from './component';
+} from './account-creation';
 
 let props: AccountCreationProps;
 const component = () => {
