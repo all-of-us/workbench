@@ -66,7 +66,7 @@ export const styles = reactStyles({
     marginLeft: 10,
     marginTop: 10,
     marginRight: 10,
-    backgroundColor: colors.green[1]
+    backgroundColor: colors.green[2]
   },
 
   valueListItemCheckboxStyling: {
@@ -75,7 +75,7 @@ export const styles = reactStyles({
     marginLeft: 10,
     marginTop: 10,
     marginRight: 10,
-    backgroundColor: colors.green[1]
+    backgroundColor: colors.green[2]
   },
 
   subheader: {

@@ -193,7 +193,7 @@ export const WorkspaceEditSection = (props) => {
       </TooltipTrigger>
       }
     </div>
-    {props.subHeader && <div style={{...styles.header, color: '#4A4A4A', fontSize: 14}}>
+    {props.subHeader && <div style={{...styles.header, color: colors.gray[0], fontSize: 14}}>
       {props.subHeader}
     </div>
     }

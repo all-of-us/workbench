@@ -29,7 +29,7 @@ const styles = reactStyles({
     boxShadow: '0 0 0 0'
   },
   cardName: {
-    fontSize: '18px', fontWeight: 500, lineHeight: '22px', color: '#2691D0',
+    fontSize: '18px', fontWeight: 500, lineHeight: '22px', color: colors.blue[0],
     cursor: 'pointer', wordBreak: 'break-all', textOverflow: 'ellipsis',
     overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3,
     WebkitBoxOrient: 'vertical'
@@ -39,7 +39,7 @@ const styles = reactStyles({
     WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'
   },
   lastModified: {
-    color: '#4A4A4A',
+    color: colors.gray[0],
     fontSize: '11px',
     display: 'inline-block',
     lineHeight: '14px',
@@ -54,7 +54,7 @@ const styles = reactStyles({
     borderRadius: '4px 4px 0 0',
     display: 'flex',
     justifyContent: 'center',
-    color: '#FFFFFF',
+    color: colors.white,
     fontFamily: 'Montserrat, sans-serif',
     fontSize: '12px',
     fontWeight: 500
