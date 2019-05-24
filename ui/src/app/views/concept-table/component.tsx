@@ -85,7 +85,7 @@ interface Props {
   concepts: Concept[];
   loading: boolean;
   onSelectConcepts: Function;
-  nextPage: Function;
+  nextPage?: Function;
   placeholderValue: string;
   reactKey: string;
   selectedConcepts: Concept[];
