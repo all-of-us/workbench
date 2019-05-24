@@ -398,8 +398,19 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       }
     }
 
-    disableButton() {
-      return this.isEmpty('name');
+    categoryIsSelected() {
+      const rp = this.state.workspace.researchPurpose;
+      return rp.ancestry || rp.commercialPurpose || rp.controlSet || rp.diseaseFocusedResearch ||
+        rp.drugDevelopment || rp.educational || rp.methodsDevelopment || rp.otherPurpose ||
+        rp.populationHealth || rp.socialBehavioral;
+    }
+
+    disableButton(): boolean {
+      const rp = this.state.workspace.researchPurpose;
+      return this.isEmpty(this.state.workspace, 'name') ||
+        this.isEmpty(rp, 'intendedStudy') ||
+        this.isEmpty(rp, 'anticipatedFindings') ||
+        this.isEmpty(rp, 'softwareChoice') || !this.categoryIsSelected();
     }
 
     updateResearchPurpose(category, value) {
@@ -410,8 +421,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       console.log(value);
       const selectedPopulations = this.state.workspace.researchPurpose.populationDetails;
       if (value) {
-        this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'],
-          selectedPopulations.concat([populationDetails])));
+        if (!!selectedPopulations) {
+          this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'],
+            selectedPopulations.concat([populationDetails])));
+        } else {
+          this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'],
+            [populationDetails]));
+        }
       } else {
         this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'],
           selectedPopulations.filter(v => v !== populationDetails)));
@@ -479,8 +495,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       });
     }
 
-    isEmpty(field) {
-      const fieldValue = this.state.workspace[field];
+    isEmpty(parent, field) {
+      const fieldValue = parent[field];
       return !fieldValue || fieldValue === '';
     }
 
@@ -694,7 +710,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                    value={this.specificPopulationSelected(SpecificPopulationEnum.OTHER)}
                    onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
                    disabled={!this.state.workspace.researchPurpose.population}/>
-                <TextInput type='text' autofocus placeholder='Please specify'/>
+                <TextInput type='text' autoFocus placeholder='Please specify'/>
               </div>
             </div>
           </div>
@@ -724,7 +740,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               Cancel
             </Button>
             <TooltipTrigger content={[<ul>Missing Required Fields:
-              { this.isEmpty('name') && <li> Name </li> }
+              { this.isEmpty(this.state.workspace, 'name') && <li> Name </li> }
+              { this.isEmpty(this.state.workspace.researchPurpose, 'intendedStudy') &&
+              <li>Field of intended study</li>}
+              { this.isEmpty(this.state.workspace.researchPurpose, 'anticipatedFindings') &&
+              <li>Anticipated findings</li>}
+              { this.isEmpty(this.state.workspace.researchPurpose, 'softwareChoice') &&
+              <li>Reason for choosing AoU</li>}
+              { !this.categoryIsSelected() && <li>Research focus</li>}
             </ul>]} disabled={!this.disableButton()}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
                       disabled={this.disableButton() || this.state.loading}>
