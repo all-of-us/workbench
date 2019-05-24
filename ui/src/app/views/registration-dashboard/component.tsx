@@ -8,7 +8,7 @@ import {baseStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
+import {navigate, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import { Profile } from 'generated/fetch';
 
@@ -49,6 +49,19 @@ const styles = reactStyles({
   }
 });
 
+function redirectToGoogleSecurity(): void {
+  let url = 'https://myaccount.google.com/security';
+  const {profile} = userProfileStore.getValue();
+  // The profile should always be available at this point, but avoid making an
+  // implicit hard dependency on that, since the authuser'less URL is still useful.
+  if (profile.username) {
+    // Attach the authuser, in case users are using Google multilogin - their
+    // AoU researcher account is unlikely to be their primary Google login.
+    url += `?authuser=${profile.username}`;
+  }
+  window.open(url, '_blank');
+}
+
 function redirectToNiH(): void {
   const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
           encodeURIComponent(
@@ -73,7 +86,7 @@ export const RegistrationTasks = [
     isComplete: (profile: Profile) => {
       return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
     },
-    onClick: () => window.open('https://myaccount.google.com/security', '_blank')
+    onClick: redirectToGoogleSecurity
   }, {
     key: 'complianceTraining',
     title: 'Complete Online Training',
