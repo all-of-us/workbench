@@ -3,7 +3,7 @@ import {Component, Input} from '@angular/core';
 import {
   Button
 } from 'app/components/buttons';
-import colors from 'app/styles/colors'
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 
 import * as React from 'react';

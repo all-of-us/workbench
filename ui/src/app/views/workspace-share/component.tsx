@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors'
+import colors from 'app/styles/colors';
 import {isBlank, reactStyles, ReactWrapperBase} from 'app/utils';
 
 import * as fp from 'lodash/fp';

@@ -17,6 +17,7 @@ import {ConceptAddModal} from 'app/views/concept-add-modal/component';
 import {ConceptNavigationBar} from 'app/views/concept-navigation-bar/component';
 import {ConceptTable} from 'app/views/concept-table/component';
 import {SlidingFabReact} from 'app/views/sliding-fab/component';
+import * as Color from 'color';
 import {
   Concept,
   Domain,
@@ -25,12 +26,12 @@ import {
   StandardConceptFilter,
   VocabularyCount
 } from 'generated/fetch';
-import * as Color from 'color';
 
 const styles = reactStyles({
   searchBar: {
     marginLeft: '1%', boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)',
-    height: '3rem', width: '64.3%', backgroundColor: Color('#A3D3F2').alpha(20).toString(), fontSize: '16px',
+    height: '3rem', width: '64.3%',
+    backgroundColor: Color('#A3D3F2').alpha(20).toString(), fontSize: '16px',
     lineHeight: '19px', paddingLeft: '2rem'
   },
   domainBoxHeader: {
