@@ -1,8 +1,8 @@
 import {Location} from '@angular/common';
 import {Component} from '@angular/core';
-import {Button} from 'app/components/buttons';
+import {Button, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {InfoIcon} from 'app/components/icons';
+import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
@@ -293,6 +293,7 @@ export interface WorkspaceEditState {
   workspaceCreationErrorMessage: string;
   cloneUserRole: boolean;
   loading: boolean;
+  showUnderservedPopulationDetails: boolean;
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
@@ -331,14 +332,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
         cloneUserRole: false,
-        loading: false
+        loading: false,
+        showUnderservedPopulationDetails: false
       };
     }
 
     componentDidMount() {
       if (!this.isMode(WorkspaceEditMode.Create)) {
         this.setState({workspace : this.props.workspace});
-        console.log(this.props.workspace);
         if (this.isMode(WorkspaceEditMode.Duplicate)) {
           this.setState({workspace: {
             ...this.props.workspace,
@@ -405,7 +406,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     updateSpecificPopulation(populationDetails, value) {
-      console.log(value);
       const selectedPopulations = this.state.workspace.researchPurpose.populationDetails;
       if (value) {
         if (!!selectedPopulations) {
@@ -621,6 +621,20 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     style={{marginTop: '0.5rem'}}/>
         </WorkspaceEditSection>
         <WorkspaceEditSection required header={researchPurposeQuestions[4].header}>
+          <Link onClick={() => this.setState({showUnderservedPopulationDetails:
+              !this.state.showUnderservedPopulationDetails})} style={{marginTop: '0.5rem'}}>
+            More info on underserved populations
+            {this.state.showUnderservedPopulationDetails ? <ClrIcon shape='caret' dir='up'/> :
+              <ClrIcon shape='caret' dir='down'/>}
+          </Link>
+          {this.state.showUnderservedPopulationDetails && <div style={styles.text}>
+            A primary mission of the AoU Research Program is to include research participants
+            who are medically underserved or are historically underrepresented in Biomedical
+            Research, or who, because of systematic social disadvantage, experience health
+            disparities.  As a way to assess the research being conducted with a focus on these
+            populations, AoU requires that you indicate the demographic categories you intend
+            to focus your analysis on.
+          </div>}
           <div style={{marginTop: '0.5rem'}}>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
               onChange={v => this.updateResearchPurpose('population', true)}
