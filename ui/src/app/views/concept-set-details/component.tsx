@@ -147,7 +147,7 @@ export const ConceptSetDetails =
       try {
         const updatedSet = await conceptSetsApi().updateConceptSetConcepts(ns, wsid, csid,
           {etag: conceptSet.etag, removedIds: selectedConcepts.map(c => c.conceptId)});
-        this.setState({conceptSet: updatedSet});
+        this.setState({conceptSet: updatedSet, selectedConcepts: []});
       } catch (error) {
         console.log(error);
         this.setState({error: true, errorMessage: 'Could not delete concepts.'});
@@ -186,6 +186,11 @@ export const ConceptSetDetails =
 
     get selectedConceptsCount(): number {
       return !!this.state.selectedConcepts ? this.state.selectedConcepts.length : 0;
+    }
+
+    get conceptSetConceptsCount(): number {
+      return !!this.state.conceptSet && this.state.conceptSet.concepts ?
+        this.state.conceptSet.concepts.length : 0;
     }
 
     render() {
@@ -278,9 +283,13 @@ export const ConceptSetDetails =
             <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
           </Button>}
           {this.canEdit && this.selectedConceptsCount > 0 &&
-            <SlidingFabReact submitFunction={() => this.setState({removingConcepts: true})}
-                             iconShape='trash' expanded='Remove from set'
-                             disable={!this.canEdit || this.selectedConceptsCount === 0}/>}
+              <SlidingFabReact submitFunction={() => this.setState({removingConcepts: true})}
+                               iconShape='trash' expanded='Remove from set'
+                               tooltip={this.conceptSetConceptsCount === this.selectedConceptsCount}
+                               tooltipContent={
+                                 <div>Concept Sets must include at least one concept</div>}
+                               disable={!this.canEdit || this.selectedConceptsCount === 0 ||
+                               this.conceptSetConceptsCount === this.selectedConceptsCount}/>}
         </div>}
         {!loading && deleting &&
         <ConfirmDeleteModal closeFunction={() => this.setState({deleting: false})}

@@ -10,12 +10,7 @@ import {
 import {conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils/index';
 
-import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
-
-import {CardButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {ClrIcon} from 'app/components/icons';
-import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -48,11 +43,8 @@ export const ConceptSetsList = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      try {
-        this.getDomainInfo();
-      } finally {
-        this.loadConceptSets();
-      }
+      this.getDomainInfo();
+      this.loadConceptSets();
     }
 
     async getDomainInfo() {
@@ -71,7 +63,6 @@ export const ConceptSetsList = withCurrentWorkspace()(
         const resp = await conceptSetsApi().getConceptSetsInWorkspace(namespace, id);
         const conceptSets = convertToResources(resp.items, namespace, id,
           accessLevel as unknown as WorkspaceAccessLevel, ResourceType.CONCEPT_SET);
-
         this.setState({conceptSetsList: conceptSets, conceptSetsLoading: false});
       } catch (error) {
         console.log(error);
@@ -79,24 +70,12 @@ export const ConceptSetsList = withCurrentWorkspace()(
     }
 
     render() {
-      const {conceptSetsLoading, conceptSetsList, conceptDomainList, createModalOpen} = this.state;
+      const {conceptSetsLoading, conceptSetsList} = this.state;
       const {namespace, id} = this.props.workspace;
-      const accessLevel = this.props.workspace.accessLevel as unknown as WorkspaceAccessLevel;
-      const writePermission = accessLevel === WorkspaceAccessLevel.OWNER ||
-          accessLevel === WorkspaceAccessLevel.WRITER;
 
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <ConceptNavigationBar wsId={id} ns={namespace} showConcepts={false}/>
         <div style={styles.pageArea}>
-          <TooltipTrigger content={!writePermission &&
-          `Write permission required to create cohorts`} side='top'>
-            <CardButton type='small'
-                        onClick={() => this.setState({createModalOpen: true})}
-                        disabled={!writePermission}>
-              Create a <br/>Concept Set
-              <ClrIcon shape='plus-circle' size={21} style={{marginTop: 5}}/>
-            </CardButton>
-          </TooltipTrigger>
           <div style={styles.resourceCardArea}>
             {conceptSetsList && conceptSetsList.map((conceptSet: RecentResource) => {
               return <ResourceCard resourceCard={conceptSet} key={conceptSet.conceptSet.name}
@@ -106,11 +85,6 @@ export const ConceptSetsList = withCurrentWorkspace()(
           </div>
           {conceptSetsLoading && <SpinnerOverlay />}
         </div>
-        {createModalOpen &&
-        <CreateConceptSetModal onCreate={() => this.loadConceptSets()}
-                               onClose={() => this.setState({createModalOpen: false})}
-                               conceptDomainList={conceptDomainList}
-                               existingConceptSets={conceptSetsList}/>}
       </FadeBox>;
     }
 
