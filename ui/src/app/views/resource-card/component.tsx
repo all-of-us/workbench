@@ -545,7 +545,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
        <RenameModal onRename={(newName) => this.receiveNotebookRename(newName)}
                     type='Notebook' onCancel={() => this.cancelRename()}
                     oldName={this.props.resourceCard.notebook.name}
-                    existingNames={this.props.existingNameList} nameFormat={(name) => this.fullName(name)}/>
+                    existingNames={this.props.existingNameList}
+                    nameFormat={(name) => this.fullName(name)}/>
       }
       {this.state.confirmDeleting &&
       <ConfirmDeleteModal resourceName={this.displayName}

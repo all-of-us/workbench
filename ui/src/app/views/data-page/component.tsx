@@ -166,17 +166,6 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         return resource.dataSet;
       }
     });
-    const existingList = resourceList.map((resource) => {
-      if (activeTab === Tabs.SHOWALL){
-        return resource;
-      } else if (activeTab === Tabs.COHORTS) {
-        return resource.cohort;
-      } else if (activeTab === Tabs.CONCEPTSETS) {
-        return resource.conceptSet;
-      } else if (activeTab === Tabs.DATASETS) {
-        return resource.dataSet;
-      }
-    });
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
         <h2 style={{marginTop: 0}}>Data</h2>
