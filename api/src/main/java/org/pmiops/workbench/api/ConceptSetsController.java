@@ -8,7 +8,6 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.Streams;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
