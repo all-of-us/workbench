@@ -168,10 +168,23 @@ public class WorkspacesControllerTest {
           .prevalence(0.3F)
           .conceptSynonyms(new ArrayList<String>());
 
+  private static final Concept CLIENT_CONCEPT_3 = new Concept()
+          .conceptId(256L)
+          .standardConcept(true)
+          .conceptName("c concept")
+          .conceptCode("conceptC")
+          .conceptClassId("classId2")
+          .vocabularyId("V3")
+          .domainId("Measurement")
+          .countValue(256L)
+          .prevalence(0.4F)
+          .conceptSynonyms(new ArrayList<String>());
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
       makeConcept(CLIENT_CONCEPT_1);
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
       makeConcept(CLIENT_CONCEPT_2);
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_3 =
+      makeConcept(CLIENT_CONCEPT_3);
 
   @Autowired
   BillingProjectBufferService billingProjectBufferService;
@@ -283,6 +296,7 @@ public class WorkspacesControllerTest {
 
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);
+    conceptDao.save(CONCEPT_3);
 
     Cohort cohort = new Cohort();
     cohort.setName("demo");
@@ -907,11 +921,13 @@ public class WorkspacesControllerTest {
         .thenReturn(123);
     ConceptSet conceptSet1 = conceptSetsController.createConceptSet(workspace.getNamespace(),
         workspace.getId(), new CreateConceptSetRequest().conceptSet(
-            new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION)))
+            new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+            .addAddedIdsItem(CONCEPT_1.getConceptId()))
             .getBody();
     ConceptSet conceptSet2 = conceptSetsController.createConceptSet(workspace.getNamespace(),
         workspace.getId(), new CreateConceptSetRequest().conceptSet(
-            new ConceptSet().name("cs2").description("d2").domain(Domain.MEASUREMENT)))
+            new ConceptSet().name("cs2").description("d2").domain(Domain.MEASUREMENT))
+            .addAddedIdsItem(CONCEPT_3.getConceptId()))
             .getBody();
     conceptSet1 =
         conceptSetsController.updateConceptSetConcepts(workspace.getNamespace(), workspace.getId(),
