@@ -1,4 +1,5 @@
-import {DomainType, TreeSubType, TreeType} from 'generated';
+import {TreeSubType, TreeType} from 'generated';
+import {CriteriaType, DomainType} from 'generated/fetch';
 import {List} from 'immutable';
 import {DOMAIN_TYPES} from './constant';
 import {idsInUse} from './search-state.service';
@@ -20,17 +21,16 @@ export function typeDisplay(parameter): string {
 }
 
 export function listTypeDisplay(parameter): string {
-  const subtype = parameter.subtype;
-  const _type = parameter.type;
-  if (_type.match(/^DEMO.*/i)) {
+  const {domainId, type} = parameter;
+  if (domainId === DomainType.PERSON) {
     return {
       'GEN': 'Gender',
       'RACE': 'Race',
       'ETH': 'Ethnicity',
       'AGE': 'Age',
       'DEC': 'Deceased'
-    }[subtype] || '';
-  } else if (!_type.match(/^SNOMED.*/i)) {
+    }[type] || '';
+  } else if (type === CriteriaType.SNOMED) {
     return parameter.code;
   }
 }
@@ -46,9 +46,7 @@ export function nameDisplay(parameter): string {
 }
 
 export function listNameDisplay(parameter): string {
-  const subtype = parameter.subtype;
-  const _type = parameter.type;
-  if (_type.match(/^DEMO.*/i) && subtype.match(/AGE|DEC/i)) {
+  if (parameter.type === CriteriaType.AGE || parameter.type === CriteriaType.DECEASED) {
     return '';
   } else {
     return stripHtml(parameter.name);
@@ -79,9 +77,8 @@ export function attributeDisplay(parameter): string {
 }
 
 export function listAttributeDisplay(parameter): string {
-  const attrs = parameter.attributes;
-  const kind = `${parameter.type}${parameter.subtype}`;
-  if (kind.match(/^DEMO.*AGE/i)) {
+  if (parameter.type === CriteriaType.AGE) {
+    const attrs = parameter.attributes;
     const display = [];
     attrs.forEach(attr => {
       const op = {
