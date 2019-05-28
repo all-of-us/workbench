@@ -108,6 +108,12 @@ export const styles = reactStyles({
     flexDirection: 'column',
     alignItems: 'center',
     height: '10rem'
+  },
+  previewDataTableHeader: {
+    textAlign: 'left',
+    width: '5rem',
+    wordBreak: 'break-all',
+    wordWrap: 'break-word'
   }
 });
 
@@ -388,7 +394,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                         value={this.getDataTableValue(filteredPreviewData.values)}>
         {filteredPreviewData.values.map(value =>
             <Column header={value.value}
-                    headerStyle={{textAlign: 'left', width: '5rem', wordBreak: 'break-all'}}
+                    headerStyle={styles.previewDataTableHeader}
                     style={{width: '5rem'}} field={value.value}/>
         )}
       </DataTable>;
