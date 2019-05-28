@@ -10,7 +10,6 @@ import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
-import org.pmiops.workbench.model.UnderservedPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 

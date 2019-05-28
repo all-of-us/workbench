@@ -15,7 +15,7 @@ import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
-import org.pmiops.workbench.model.UnderservedPopulationEnum;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 @RunWith(Parameterized.class)
@@ -42,10 +42,10 @@ public class StorageEnumsTest {
         (Function<EmailVerificationStatus, Short>) StorageEnums::emailVerificationStatusToStorage
       },
       {
-        UnderservedPopulationEnum.class.getSimpleName(),
-        UnderservedPopulationEnum.values(),
-        (Function<Short, UnderservedPopulationEnum>) StorageEnums::underservedPopulationFromStorage,
-        (Function<UnderservedPopulationEnum, Short>) StorageEnums::underservedPopulationToStorage
+              SpecificPopulationEnum.class.getSimpleName(),
+              SpecificPopulationEnum.values(),
+        (Function<Short, SpecificPopulationEnum>) StorageEnums::specificPopulationFromStorage,
+        (Function<SpecificPopulationEnum, Short>) StorageEnums::specificPopulationToStorage
       },
       {
         WorkspaceAccessLevel.class.getSimpleName(),

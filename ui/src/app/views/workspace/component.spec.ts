@@ -125,8 +125,5 @@ describe('WorkspaceComponent', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
   }));
 
-  it('displays research purpose', fakeAsync(() => {
-    expect(fixture.debugElement.queryAll(
-      By.css('.research-purpose-item')).length).toEqual(2);
-  }));
+  // TODO [RW-2594] add new tests
 });
