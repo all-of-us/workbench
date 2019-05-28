@@ -122,7 +122,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       CreateConceptSetRequest request) {
     Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    if (request.getAddedIds().size() == 0) {
+    if (request.getAddedIds() == null || request.getAddedIds().size() == 0) {
       throw new BadRequestException("Cannot create a concept set with no concepts");
     }
     org.pmiops.workbench.db.model.ConceptSet dbConceptSet = FROM_CLIENT_CONCEPT_SET.apply(request.getConceptSet());
@@ -260,9 +260,11 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
 
     Set<Long> allConceptSetIds = dbConceptSet.getConceptIds();
-    allConceptSetIds.addAll(request.getAddedIds());
+    if (request.getAddedIds() != null) {
+      allConceptSetIds.addAll(request.getAddedIds());
+    }
     int sizeOfAllConceptSetIds = allConceptSetIds.stream().distinct().collect(Collectors.toSet()).size();
-    if (request.getRemovedIds().size() == sizeOfAllConceptSetIds) {
+    if (request.getRemovedIds() != null && request.getRemovedIds().size() == sizeOfAllConceptSetIds) {
       throw new BadRequestException("Concept Set must have at least one concept");
     }
 
