@@ -6,18 +6,16 @@ import {CardButton, TabButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {cohortsApi, conceptsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {
   convertToResources,
-  mapAndFilterResourceList,
   ResourceType
 } from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
 import {ResourceCard} from 'app/views/resource-card/component';
-import {DomainInfo, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
+import {RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {
   cardButtonArea: {
@@ -101,7 +99,6 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
   }
 
   componentDidMount() {
-    const {namespace, id} = this.props.workspace;
     this.loadResources();
   }
 
