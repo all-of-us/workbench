@@ -127,9 +127,11 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
         dataSetApi().getDataSetsInWorkspace(namespace, id)
       ]);
-      this.setState({existingCohortName: cohorts.items.map(cohort => cohort.name)});
-      this.setState({existingConceptSetName: conceptSets.items.map(conceptSet => conceptSet.name)});
-      this.setState({existingDataSetName: dataSets.items.map(dataSet => dataSet.name)});
+      this.setState({
+        existingCohortName: cohorts.items.map(cohort => cohort.name),
+        existingConceptSetName: conceptSets.items.map(conceptSet => conceptSet.name),
+        existingDataSetName: dataSets.items.map(dataSet => dataSet.name)
+      });
       let list: RecentResource[] = [];
       list = list.concat(convertToResources(cohorts.items, namespace,
         id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.COHORT));

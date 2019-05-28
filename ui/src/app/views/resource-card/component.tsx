@@ -12,7 +12,6 @@ import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
-import {EditModal} from 'app/views/edit-modal/component';
 import {ExportDataSetModal} from 'app/views/export-data-set-modal/component';
 import {Domain, RecentResource} from 'generated/fetch';
 
@@ -541,27 +540,27 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       </ResourceCardBase>
       {this.state.editing && (this.isCohort) &&
         <RenameModal
-                   onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
-                   type='Cohort'
-                   displayDescription={true}
-                   onCancel={() => this.cancelRename()}
-                   oldName={this.props.resourceCard.cohort.name}
-                   existingNames={this.props.existingNameList}/>
+          onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
+          type='Cohort'
+          displayDescription={true}
+          onCancel={() => this.cancelRename()}
+          oldName={this.props.resourceCard.cohort.name}
+          existingNames={this.props.existingNameList}/>
       }
       {this.state.editing && this.isConceptSet &&
         <RenameModal
-                   onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
-                   type='Concept Set'
-                   displayDescription={true}
-                   onCancel={() => this.cancelRename()}
-                   oldName={this.props.resourceCard.conceptSet.name}
-                   existingNames={this.props.existingNameList}/>}
+          onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
+          type='Concept Set'
+          displayDescription={true}
+          onCancel={() => this.cancelRename()}
+          oldName={this.props.resourceCard.conceptSet.name}
+          existingNames={this.props.existingNameList}/>}
       {this.state.renaming && this.isNotebook &&
        <RenameModal onRename={(newName) => this.receiveNotebookRename(newName)}
-                    type='Notebook' onCancel={() => this.cancelRename()}
-                    oldName={this.props.resourceCard.notebook.name}
-                    existingNames={this.props.existingNameList}
-                    nameFormat={(name) => this.fullNotebookName(name)}/>
+          type='Notebook' onCancel={() => this.cancelRename()}
+          oldName={this.props.resourceCard.notebook.name}
+          existingNames={this.props.existingNameList}
+          nameFormat={(name) => this.fullNotebookName(name)}/>
       }
       {this.state.confirmDeleting &&
       <ConfirmDeleteModal resourceName={this.displayName}

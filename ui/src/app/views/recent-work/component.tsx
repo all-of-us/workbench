@@ -61,9 +61,11 @@ export const RecentWork = (fp.flow as any)(
             cohortsApi().getCohortsInWorkspace(namespace, id),
             conceptSetsApi().getConceptSetsInWorkspace(namespace, id)
           ]);
-          this.setState({existingCohortName: cohorts.items.map(cohort => cohort.name)});
-          this.setState({existingConceptName: conceptSets.items.map(conceptSet => conceptSet.name)});
-          this.setState({existingNotebookName: notebooks.map(notebook => notebook.name)});
+          this.setState({
+            existingCohortName: cohorts.items.map(cohort => cohort.name),
+            existingConceptName: conceptSets.items.map(conceptSet => conceptSet.name),
+            existingNotebookName: notebooks.map(notebook => notebook.name)
+          });
           // TODO Remove this cast when we switch to fetch types
           const al = accessLevel as unknown as WorkspaceAccessLevel;
           const convert = (col, type) => convertToResources(col, namespace, id, al, type);
