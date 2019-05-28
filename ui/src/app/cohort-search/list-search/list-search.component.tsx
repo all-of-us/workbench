@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {attributesStore, groupSelectionsStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -53,10 +54,12 @@ const styles = reactStyles({
     cursor: 'pointer',
     fontSize: '1.15rem'
   },
-  table: {
+  listContainer: {
     width: '99%',
     margin: '3rem 0 1rem',
     fontSize: '12px',
+  },
+  table: {
     textAlign: 'left',
     border: '1px solid #c8c8c8',
     borderRadius: '3px',
@@ -96,31 +99,57 @@ const styles = reactStyles({
   }
 });
 
-interface ListSearchProps {
+interface Props {
   hierarchy: Function;
   selections: Array<string>;
   wizard: any;
   workspace: WorkspaceData;
 }
 
+interface State {
+  data: any;
+  loading: boolean;
+  sourceMatch: any;
+}
+
 export const ListSearch = withCurrentWorkspace()(
-  class extends React.Component<ListSearchProps, {data: any, loading: boolean}> {
+  class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
-      this.state = {data: null, loading: false};
+      this.state = {
+        data: null,
+        loading: false,
+        sourceMatch: undefined
+      };
     }
 
     handleInput = (event) => {
-      if (event.key === 'Enter') {
+      const {key, target: {value}} = event;
+      if (key === 'Enter') {
         this.setState({data: null, loading: true});
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
         cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
-          +cdrVersionId, domain, event.target.value
+          +cdrVersionId, domain, value
         ).then(resp => {
-          const data = resp.items.length ? resp.items : null;
-          this.setState({data, loading: false});
+          const data = resp.items;
+          let sourceMatch;
+          if (data.length && !data[0].isStandard) {
+            sourceMatch = data.find(item => item.code === value);
+          }
+          this.setState({data, loading: false, sourceMatch});
         });
       }
+    }
+
+    getStandardResults = () => {
+      const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
+      const {sourceMatch} = this.state;
+      this.setState({loading: true});
+      cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(
+        +cdrVersionId, domain, sourceMatch.conceptId
+      ).then(resp => {
+        this.setState({data: resp.items, loading: false});
+      });
     }
 
     selectItem = (row: any) => {
@@ -158,7 +187,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     render() {
-      const {data, loading} = this.state;
+      const {data, loading, sourceMatch} = this.state;
       return <div style={{overflow: 'auto'}}>
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
@@ -166,51 +195,67 @@ export const ListSearch = withCurrentWorkspace()(
             <TextInput style={styles.searchInput} onKeyPress={this.handleInput} />
           </div>
         </div>
-        {data && <table className='p-datatable' style={styles.table}>
-          <thead className='p-datatable-thead'>
-            <tr>
-              <th style={styles.columnHeader}>Name</th>
-              <th style={{...styles.columnHeader, width: '15%'}}>Vocab</th>
-              <th style={{...styles.columnHeader, width: '15%'}}>Count</th>
-              <th style={{...styles.columnHeader, padding: '0.2rem 0.5rem', width: '10%'}}>
-                More Info
-              </th>
-            </tr>
-          </thead>
-          <tbody className='p-datatable-tbody'>
-            {data.map((row, r) => {
-              return <tr key={r}>
-                <td style={styles.columnBody}>
-                  {row.selectable && <div style={{...styles.selectDiv}}>
-                    {row.hasAttributes &&
-                      <ClrIcon style={styles.attrIcon}
-                        shape='slider' dir='right' size='20'
-                        onClick={() => this.launchAttributes(row)}/>
-                    }
-                    {!row.hasAttributes && this.isSelected(row) &&
-                      <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
-                    }
-                    {!row.hasAttributes && !this.isSelected(row) &&
-                      <ClrIcon style={styles.selectIcon}
-                        shape='plus-circle' size='16'
-                        onClick={() => this.selectItem(row)}/>
-                    }
-                  </div>}
-                  <div style={{...styles.nameDiv}}>{row.name}</div>
-                </td>
-                <td style={styles.columnBody}>{row.type}</td>
-                <td style={styles.columnBody}>{row.count.toLocaleString()}</td>
-                <td style={{...styles.columnBody, padding: '0.2rem'}}>
-                  {row.hasHierarchy &&
-                    <i className='pi pi-sitemap'
-                      style={styles.treeIcon}
-                      onClick={() => this.showHierarchy(row)}/>
-                  }
-                </td>
-              </tr>;
-            })}
-          </tbody>
-        </table>}
+        {!loading && data && <div style={styles.listContainer}>
+          {!!data.length && <React.Fragment>
+            {sourceMatch && <div>
+              There are {sourceMatch.count.toLocaleString()} participants with source code
+              &nbsp;{sourceMatch.code}. For more results, browse
+              &nbsp;<Button type='link'
+                style={{display: 'inline-block'}}
+                onClick={() => this.getStandardResults()}>
+                Standard Vocabulary
+              </Button>.
+            </div>}
+            <table className='p-datatable' style={styles.table}>
+              <thead className='p-datatable-thead'>
+                <tr>
+                  <th style={styles.columnHeader}>Name</th>
+                  <th style={{...styles.columnHeader, width: '15%'}}>Vocab</th>
+                  <th style={{...styles.columnHeader, width: '15%'}}>Count</th>
+                  <th style={{...styles.columnHeader, padding: '0.2rem 0.5rem', width: '10%'}}>
+                    More Info
+                  </th>
+                </tr>
+              </thead>
+              <tbody className='p-datatable-tbody'>
+                {data.map((row, r) => {
+                  return <tr key={r}>
+                    <td style={styles.columnBody}>
+                      {row.selectable && <div style={{...styles.selectDiv}}>
+                        {row.hasAttributes &&
+                          <ClrIcon style={styles.attrIcon}
+                            shape='slider' dir='right' size='20'
+                            onClick={() => this.launchAttributes(row)}/>
+                        }
+                        {!row.hasAttributes && this.isSelected(row) &&
+                          <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
+                        }
+                        {!row.hasAttributes && !this.isSelected(row) &&
+                          <ClrIcon style={styles.selectIcon}
+                            shape='plus-circle' size='16'
+                            onClick={() => this.selectItem(row)}/>
+                        }
+                      </div>}
+                      <div style={{...styles.nameDiv}}>
+                        <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
+                      </div>
+                    </td>
+                    <td style={styles.columnBody}>{row.type}</td>
+                    <td style={styles.columnBody}>{row.count.toLocaleString()}</td>
+                    <td style={{...styles.columnBody, padding: '0.2rem'}}>
+                      {row.hasHierarchy &&
+                        <i className='pi pi-sitemap'
+                          style={styles.treeIcon}
+                          onClick={() => this.showHierarchy(row)}/>
+                      }
+                    </td>
+                  </tr>;
+                })}
+              </tbody>
+            </table>
+          </React.Fragment>}
+          {!data.length && <div>No matches found</div>}
+        </div>}
         {loading && <SpinnerOverlay />}
       </div>;
     }
@@ -222,9 +267,9 @@ export const ListSearch = withCurrentWorkspace()(
   template: '<div #root></div>'
 })
 export class ListSearchComponent extends ReactWrapperBase {
-  @Input('hierarchy') hierarchy: ListSearchProps['hierarchy'];
-  @Input('selections') selections: ListSearchProps['selections'];
-  @Input('wizard') wizard: ListSearchProps['wizard'];
+  @Input('hierarchy') hierarchy: Props['hierarchy'];
+  @Input('selections') selections: Props['selections'];
+  @Input('wizard') wizard: Props['wizard'];
   constructor() {
     super(ListSearch, ['hierarchy', 'selections', 'wizard']);
   }
