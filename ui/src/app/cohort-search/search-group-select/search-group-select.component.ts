@@ -3,6 +3,7 @@ import {AfterViewInit, Component, Input} from '@angular/core';
 import {DOMAIN_TYPES, LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {CohortSearchActions} from 'app/cohort-search/redux';
 import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {generateId} from 'app/cohort-search/utils';
 import {environment} from 'environments/environment';
 
 import {SearchRequest} from 'generated';
@@ -42,13 +43,13 @@ export class SearchGroupSelectComponent implements AfterViewInit {
   }
 
   launchWizard(criteria: any) {
-    const itemId = this.actions.generateId('items');
-    const groupId = this.actions.generateId(this.role);
     const fullTree = criteria.fullTree || false;
     const codes = criteria.codes || false;
     const role = this.role;
     let context: any;
     if (environment.enableCBListSearch) {
+      const itemId = generateId('items');
+      const groupId = generateId(this.role);
       const {domain, type} = criteria;
       const searchRequest = searchRequestStore.getValue();
       const group = this.initGroup(groupId);
@@ -58,6 +59,8 @@ export class SearchGroupSelectComponent implements AfterViewInit {
       context = {item, domain, type, role, groupId, itemId, fullTree, codes};
       wizardStore.next(context);
     } else {
+      const itemId = this.actions.generateId('items');
+      const groupId = this.actions.generateId(this.role);
       this.actions.initGroup(this.role, groupId);
       const criteriaType = criteria.codes ? criteria.codes[0].type : criteria.type;
       const criteriaSubtype = criteria.codes ? criteria.codes[0].subtype : criteria.subtype;
