@@ -426,8 +426,15 @@ public class WorkspacesControllerTest {
     researchPurpose.setControlSet(true);
     researchPurpose.setAncestry(true);
     researchPurpose.setCommercialPurpose(true);
-    researchPurpose.setPopulation(true);
+    researchPurpose.setSocialBehavioral(true);
+    researchPurpose.setPopulationHealth(true);
+    researchPurpose.setEducational(true);
+    researchPurpose.setDrugDevelopment(true);
+    researchPurpose.setPopulation(false);
     researchPurpose.setAdditionalNotes("additional notes");
+    researchPurpose.setSoftwareChoice("software choice");
+    researchPurpose.setIntendedStudy("intended study");
+    researchPurpose.setAnticipatedFindings("anticipated findings");
     researchPurpose.setTimeRequested(1000L);
     researchPurpose.setTimeReviewed(1500L);
     researchPurpose.setReviewRequested(true);
@@ -488,8 +495,15 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getControlSet()).isTrue();
     assertThat(workspace2.getResearchPurpose().getAncestry()).isTrue();
     assertThat(workspace2.getResearchPurpose().getCommercialPurpose()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getPopulation()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getSocialBehavioral()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getPopulationHealth()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getEducational()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getDrugDevelopment()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getPopulation()).isFalse();
     assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
+    assertThat(workspace2.getResearchPurpose().getSoftwareChoice()).isEqualTo("software choice");
+    assertThat(workspace2.getResearchPurpose().getIntendedStudy()).isEqualTo("intended study");
+    assertThat(workspace2.getResearchPurpose().getAnticipatedFindings()).isEqualTo("anticipated findings");
     assertThat(workspace2.getNamespace()).isEqualTo(workspace.getNamespace());
     assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
     assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
@@ -576,7 +590,9 @@ public class WorkspacesControllerTest {
             .controlSet(false)
             .ancestry(false)
             .commercialPurpose(false)
-            .population(false)
+            .populationHealth(false)
+            .socialBehavioral(false)
+            .drugDevelopment(false)
             .additionalNotes(null)
             .reviewRequested(false);
     ws.setResearchPurpose(rp);
@@ -593,6 +609,9 @@ public class WorkspacesControllerTest {
     assertThat(updatedRp.getControlSet()).isFalse();
     assertThat(updatedRp.getAncestry()).isFalse();
     assertThat(updatedRp.getCommercialPurpose()).isFalse();
+    assertThat(updatedRp.getPopulationHealth()).isFalse();
+    assertThat(updatedRp.getSocialBehavioral()).isFalse();
+    assertThat(updatedRp.getDrugDevelopment()).isFalse();
     assertThat(updatedRp.getPopulation()).isFalse();
     assertThat(updatedRp.getAdditionalNotes()).isNull();
     assertThat(updatedRp.getReviewRequested()).isFalse();
@@ -753,9 +772,6 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getName()).isEqualTo(modWorkspace.getName());
     assertThat(workspace2.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(workspace2.getResearchPurpose()).isEqualTo(modPurpose);
-
-    // Original description should have been copied.
-    // assertThat(workspace2.getDescription()).isEqualTo(workspace.getDescription());
 
     // User roles should *not* be copied.
     assertThat(workspace2.getUserRoles().size()).isEqualTo(1);
