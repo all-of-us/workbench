@@ -126,4 +126,7 @@ describe('WorkspaceComponent', () => {
   }));
 
   // TODO [RW-2594] add new tests
+  it('should render', fakeAsync(() => {
+    expect(fixture).toBeTruthy();
+  }));
 });
