@@ -25,8 +25,9 @@ const styles = reactStyles({
 });
 
 interface Props {
-  displayDescription?: boolean;
+  hideDescription?: boolean;
   existingNames: string[];
+  oldDescription?: string;
   oldName: string;
   onCancel: Function;
   onRename: Function;
@@ -46,7 +47,7 @@ export class RenameModal extends React.Component<Props, States> {
     this.state = {
       newName: '',
       nameTouched: false,
-      resourceDescription: '',
+      resourceDescription: this.props.oldDescription,
       saving: false
     };
   }
@@ -57,7 +58,7 @@ export class RenameModal extends React.Component<Props, States> {
   }
 
   render() {
-    const {displayDescription, existingNames, oldName, type} = this.props;
+    const {hideDescription, existingNames, oldName, type} = this.props;
     let {newName, nameTouched, resourceDescription, saving} = this.state;
     if (this.props.nameFormat) {
       newName = this.props.nameFormat(newName);
@@ -77,14 +78,14 @@ export class RenameModal extends React.Component<Props, States> {
       <ModalTitle>Enter new name for {oldName}</ModalTitle>
       <ModalBody>
          <div style={headerStyles.formLabel}>New Name:</div>
-        <TextInput autoFocus id='new-name' style={styles.fieldHeader}
+        <TextInput autoFocus id='new-name'
           onChange={v => this.setState({newName: v, nameTouched: true})}/>
         <ValidationError>
           {summarizeErrors(nameTouched && errors && errors.newName)}
         </ValidationError>
-        {displayDescription && <div style={{marginTop: '1rem'}}>
+        {!hideDescription && <div style={{marginTop: '1rem'}}>
           <label data-test-id='descriptionLabel' style={styles.fieldHeader}>Description: </label>
-          <textarea value={resourceDescription || ''}
+          <textarea value={resourceDescription || ' '}
                     onChange={(e) => this.setState({resourceDescription: e.target.value})}/>
         </div> }
       </ModalBody>

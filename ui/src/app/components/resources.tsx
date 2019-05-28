@@ -56,7 +56,7 @@ export const ResourceCardMenu: React.FunctionComponent<{
         }],
         ['conceptSet', () => {
           return <React.Fragment>
-            <MenuItem icon='pencil' onClick={onEdit}>Edit</MenuItem>
+            <MenuItem icon='pencil' onClick={onEdit}>Rename</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
           </React.Fragment>;
         }],

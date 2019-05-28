@@ -12,19 +12,19 @@ describe('RenameModal', () => {
         type='Notebook' onCancel={() => {}}
         oldName=''
         existingNames={existingNames}
-        nameFormat = {(name) => {}}/>
+        nameFormat = {(name) => {}}
+        hideDescription={true}/>
     );
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should display description if props displayDescription is set to true', () => {
+  it('should display description only if props hideDescription is set to true', () => {
     const wrapper = mount(<RenameModal
         onRename={(newName) => {}}
         type='Notebook' onCancel={() => {}}
         oldName=''
         existingNames={existingNames}
-        nameFormat = {(name) => {}}
-        displayDescription={true}/>
+        nameFormat = {(name) => {}}/>
     );
     expect(wrapper.exists()).toBeTruthy();
     expect(wrapper.find('[data-test-id="descriptionLabel"]')).toBeTruthy();
