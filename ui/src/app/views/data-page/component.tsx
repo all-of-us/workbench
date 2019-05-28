@@ -89,26 +89,20 @@ const descriptions = {
 
 export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
-  {activeTab: Tabs, resourceList: RecentResource[], isLoading: boolean,
-    creatingConceptSet: boolean, conceptDomainList: DomainInfo[]}> {
+  {activeTab: Tabs, resourceList: RecentResource[], isLoading: boolean}> {
 
   constructor(props) {
     super(props);
     this.state = {
       activeTab: Tabs.SHOWALL,
       resourceList: [],
-      isLoading: true,
-      creatingConceptSet: false,
-      conceptDomainList: undefined
+      isLoading: true
     };
   }
 
   componentDidMount() {
     const {namespace, id} = this.props.workspace;
     this.loadResources();
-    conceptsApi().getDomainInfo(namespace, id).then((response) => {
-      this.setState({conceptDomainList: response.items});
-    });
   }
 
   async loadResources() {
@@ -144,7 +138,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
 
   render() {
     const {namespace, id} = this.props.workspace;
-    const {activeTab, isLoading, resourceList, creatingConceptSet, conceptDomainList} = this.state;
+    const {activeTab, isLoading, resourceList} = this.state;
     const filteredList = resourceList.filter((resource) => {
       if (activeTab === Tabs.SHOWALL) {
         return true;
@@ -247,17 +241,6 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           {isLoading && <SpinnerOverlay></SpinnerOverlay>}
         </div>
       </FadeBox>
-      {creatingConceptSet &&
-      <CreateConceptSetModal onCreate={() => {
-        this.loadResources().then(() => {
-          this.setState({creatingConceptSet: false});
-        });
-      }}
-      onClose={() => {
-        this.setState({creatingConceptSet: false});
-      }}
-      conceptDomainList={conceptDomainList}
-      existingConceptSets={mapAndFilterResourceList(resourceList, 'conceptSet')}/>}
     </React.Fragment>;
   }
 });

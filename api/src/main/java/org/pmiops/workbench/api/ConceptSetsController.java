@@ -262,7 +262,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (request.getAddedIds() != null) {
       allConceptSetIds.addAll(request.getAddedIds());
     }
-    int sizeOfAllConceptSetIds = allConceptSetIds.stream().distinct().collect(Collectors.toSet()).size();
+    int sizeOfAllConceptSetIds = allConceptSetIds.stream().collect(Collectors.toSet()).size();
     if (request.getRemovedIds() != null && request.getRemovedIds().size() == sizeOfAllConceptSetIds) {
       throw new BadRequestException("Concept Set must have at least one concept");
     }
