@@ -2,6 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {isBlank, reactStyles, ReactWrapperBase} from 'app/utils';
 
 import * as fp from 'lodash/fp';
@@ -26,7 +27,7 @@ const selectStyles = {
     ...libstyles,
     lineHeight: '1rem',
     fontSize: '12px',
-    color: '#000000',
+    color: colors.black[0],
     backgroundColor: isSelected ? '#E0EAF1' : '#FFFFFF'
   }),
   control: (libstyles, {isDisabled}) => ({
@@ -51,7 +52,7 @@ const selectStyles = {
   }),
   dropdownIndicator: (libstyles, {isDisabled}) => ({
     ...libstyles,
-    color: '#000000',
+    color: colors.black[0],
     paddingTop: '12px',
     display: isDisabled ? 'none' : ''
   }),
@@ -96,7 +97,7 @@ const styles = reactStyles( {
   open: {
     overflow: 'hidden',
     position: 'absolute',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     border: '1px solid'
   },
 
@@ -153,7 +154,7 @@ const styles = reactStyles( {
 
   collaboratorIcon: {
     margin: '0 0 0 5rem',
-    color: '#2691D0',
+    color: colors.blue[0],
     cursor: 'pointer'
   },
 

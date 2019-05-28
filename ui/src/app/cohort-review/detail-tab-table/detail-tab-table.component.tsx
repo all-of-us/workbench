@@ -4,6 +4,7 @@ import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.util
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -43,7 +44,7 @@ const styles = reactStyles({
   },
   columnHeader: {
     background: '#f4f4f4',
-    color: '#262262',
+    color: colors.purple[0],
     fontWeight: 600,
   },
   columnBody: {
@@ -75,7 +76,7 @@ const styles = reactStyles({
   },
   sortIcon: {
     marginTop: '4px',
-    color: '#2691D0',
+    color: colors.blue[0],
     fontSize: '0.5rem',
     float: 'right'
   },
@@ -97,7 +98,7 @@ const styles = reactStyles({
     width: '2rem',
   },
   headerStyle: {
-    color: '#2691D0',
+    color: colors.blue[0],
     fontSize: '14px',
     fontWeight: 'bold',
     width: '20rem',
@@ -142,7 +143,7 @@ const styles = reactStyles({
     bottom: '14px',
     left: '100%',
     background: '#ffffff',
-    color: '#2691d0',
+    color: colors.blue[0],
     boxSizing: 'content-box',
     float: 'right',
     position: 'relative',
@@ -155,12 +156,12 @@ const styles = reactStyles({
 const filterIcons = {
   active: {
     ...styles.filterIcon,
-    background: '#8bc990',
-    color: '#ffffff',
+    background: colors.green[0],
+    color: colors.white,
   },
   default: {
     ...styles.filterIcon,
-    color: '#262262',
+    color: colors.purple[0],
   }
 };
 

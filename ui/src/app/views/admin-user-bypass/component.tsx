@@ -4,6 +4,7 @@ import {ClrIcon} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {profileApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils/index';
 import {AccessModule, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -12,7 +13,7 @@ import * as React from 'react';
 
 const styles = reactStyles({
   infoIcon: {
-    color: '#2691D0',
+    color: colors.blue[0],
     cursor: 'pointer',
     marginBottom: '0.5rem',
     height: '16px',

@@ -3,7 +3,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
-import {CreateReviewPage} from 'app/cohort-review/create-review-page/create-review-page';
+import {CreateReviewModalComponent} from 'app/cohort-review/create-review-modal/create-review-modal';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
@@ -30,7 +30,7 @@ describe('PageLayout', () => {
 
     TestBed.configureTestingModule({
       declarations: [
-        CreateReviewPage,
+        CreateReviewModalComponent,
         PageLayout,
       ],
       imports: [ClarityModule, ReactiveFormsModule, RouterTestingModule],

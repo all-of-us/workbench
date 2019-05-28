@@ -35,7 +35,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {DomainType} from 'generated';
 import {CohortBuilderApi} from 'generated/fetch';
-import {fromJS, Map} from 'immutable';
+import {fromJS} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
@@ -108,7 +108,20 @@ describe('ListModalComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ListModalComponent);
     component = fixture.componentInstance;
-    component.attributesNode = Map();
+    component.attributesNode = {
+      code: '',
+      conceptId: 903133,
+      count: 0,
+      domainId: 'Measurement',
+      group: false,
+      hasAttributes: true,
+      id: 316305,
+      name: 'Height Detail',
+      parentId: 0,
+      selectable: true,
+      subtype: 'HEIGHT',
+      type: 'PM'
+    };
     fixture.detectChanges();
   });
 

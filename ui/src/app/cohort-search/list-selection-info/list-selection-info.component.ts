@@ -1,9 +1,6 @@
 import {Component, Input} from '@angular/core';
-import {
-  groupSelectionsStore,
-  selectionsStore,
-  wizardStore
-} from 'app/cohort-search/search-state.service';
+import {groupSelectionsStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {listAttributeDisplay, listNameDisplay, listTypeDisplay} from 'app/cohort-search/utils';
 import {DomainType} from 'generated/fetch';
 
 @Component({
@@ -14,8 +11,6 @@ import {DomainType} from 'generated/fetch';
 export class ListSelectionInfoComponent {
   @Input() parameter;
   @Input() indexes;
-
-  constructor() {}
 
   remove(): void {
     const {parameterId} = this.parameter;
@@ -32,17 +27,16 @@ export class ListSelectionInfoComponent {
     wizardStore.next(wizard);
   }
 
-  // get _type()     { return typeDisplay(this.parameter); }
-  // get name()      { return nameDisplay(this.parameter); }
-  // get attribute() { return attributeDisplay(this.parameter); }
+  get _type()     { return listTypeDisplay(this.parameter); }
+  get name()      { return listNameDisplay(this.parameter); }
+  get attribute() { return listAttributeDisplay(this.parameter); }
   get showType() {
     return this.parameter.domain !== DomainType.PHYSICALMEASUREMENT
-          && this.parameter.domain !== DomainType.DRUG
-          && this.parameter.domain !== DomainType.SURVEY;
+      && this.parameter.domain !== DomainType.DRUG
+      && this.parameter.domain !== DomainType.SURVEY;
   }
   get showOr() {
-    return (this.indexes && (this.indexes[0] > 0))
-          && this.parameter.domain !== DomainType.PERSON;
+    return (this.indexes && (this.indexes[0] > 0)) && this.parameter.domain !== DomainType.PERSON;
   }
 }
 

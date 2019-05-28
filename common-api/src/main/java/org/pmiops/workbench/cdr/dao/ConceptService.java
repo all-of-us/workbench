@@ -121,7 +121,8 @@ public class ConceptService {
     public static final String STANDARD_CONCEPT_CODE = "S";
     public static final String CLASSIFICATION_CONCEPT_CODE = "C";
 
-    public Slice<Concept> searchConcepts(String query, StandardConceptFilter standardConceptFilter, List<String> vocabularyIds, List<String> domainIds, int limit, int minCount) {
+    public Slice<Concept> searchConcepts(String query, StandardConceptFilter standardConceptFilter,
+        List<String> vocabularyIds, List<String> domainIds, int limit, int minCount, int page) {
 
 
         Specification<Concept> conceptSpecification =
@@ -201,7 +202,7 @@ public class ConceptService {
                 };
         // Return up to limit results, sorted in descending count value order.
 
-        Pageable pageable = new PageRequest(0, limit,
+        Pageable pageable = new PageRequest(page, limit,
                 new Sort(Direction.DESC, "countValue"));
         NoCountFindAllDao<Concept, Long> conceptDao = new NoCountFindAllDao<>(Concept.class,
                 entityManager);

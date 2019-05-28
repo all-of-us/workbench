@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, Input, OnInit, ViewChild} from '@angular/core';
 import {highlightMatches} from 'app/cohort-search/utils';
-import {TreeSubType, TreeType} from 'generated';
+import {CriteriaType, DomainType} from 'generated/fetch';
 
 @Component({
   selector: 'app-list-option-info',
@@ -69,7 +69,9 @@ export class ListOptionInfoComponent implements AfterViewInit, OnInit {
   }
 
   get showCode() {
-    return [TreeType.ICD9, TreeType.ICD10, TreeType.CPT, TreeType.MEAS].includes(this.option.type)
-      || (TreeSubType.ATC === this.option.subtype && !this.option.group);
+    return [
+      DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT
+    ].includes(this.option.domainId)
+      || (CriteriaType.ATC === this.option.type && !this.option.group);
   }
 }

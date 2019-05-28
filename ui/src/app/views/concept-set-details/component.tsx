@@ -12,6 +12,7 @@ import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit/component';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {
   reactStyles,
   ReactWrapperBase, summarizeErrors,
@@ -31,17 +32,17 @@ const styles = reactStyles({
     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingBottom: '1.5rem'
   },
   conceptSetTitle: {
-    color: '#2F2E7E', fontSize: 20, fontWeight: 600, marginBottom: '0.5rem',
+    color: colors.blue[7], fontSize: 20, fontWeight: 600, marginBottom: '0.5rem',
     display: 'flex', flexDirection: 'row'
   },
   conceptSetMetadataWrapper: {
     flexDirection: 'column', alignItems: 'space-between', marginLeft: '0.5rem'
   },
   conceptSetData: {
-    display: 'flex', flexDirection: 'row', color: '#000', fontWeight: 600
+    display: 'flex', flexDirection: 'row', color: colors.black[0], fontWeight: 600
   },
   buttonBoxes: {
-    color: '#2691D0', borderColor: '#2691D0', marginBottom: '0.3rem'
+    color: colors.blue[0], borderColor: colors.blue[0], marginBottom: '0.3rem'
   }
 });
 
@@ -146,7 +147,7 @@ export const ConceptSetDetails =
       try {
         const updatedSet = await conceptSetsApi().updateConceptSetConcepts(ns, wsid, csid,
           {etag: conceptSet.etag, removedIds: selectedConcepts.map(c => c.conceptId)});
-        this.setState({conceptSet: updatedSet});
+        this.setState({conceptSet: updatedSet, selectedConcepts: []});
       } catch (error) {
         console.log(error);
         this.setState({error: true, errorMessage: 'Could not delete concepts.'});
@@ -185,6 +186,11 @@ export const ConceptSetDetails =
 
     get selectedConceptsCount(): number {
       return !!this.state.selectedConcepts ? this.state.selectedConcepts.length : 0;
+    }
+
+    get conceptSetConceptsCount(): number {
+      return !!this.state.conceptSet && this.state.conceptSet.concepts ?
+        this.state.conceptSet.concepts.length : 0;
     }
 
     render() {
@@ -240,7 +246,7 @@ export const ConceptSetDetails =
                       <EditComponentReact disabled={!this.canEdit} style={{marginTop: '0.1rem'}}/>
                     </Clickable>
                   </div>
-                  <div style={{marginBottom: '1.5rem', color: '#000'}}
+                  <div style={{marginBottom: '1.5rem', color: colors.black[0]}}
                        data-test-id='concept-set-description'>
                     {conceptSet.description}</div>
                 </React.Fragment>}
@@ -269,7 +275,7 @@ export const ConceptSetDetails =
                         reactKey={conceptSet.domain.toString()}
                         onSelectConcepts={this.onSelectConcepts.bind(this)}
                         placeholderValue={'No Concepts Found'}
-                        selectedConcepts={selectedConcepts}/> :
+                        selectedConcepts={selectedConcepts} nextPage={(page) => {}}/> :
           <Button type='secondaryLight' data-test-id='add-concepts'
                   style={{...styles.buttonBoxes, marginLeft: '0.5rem', maxWidth: '22%'}}
                   onClick={() => navigateByUrl('workspaces/' + ns + '/' +
@@ -277,9 +283,13 @@ export const ConceptSetDetails =
             <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
           </Button>}
           {this.canEdit && this.selectedConceptsCount > 0 &&
-            <SlidingFabReact submitFunction={() => this.setState({removingConcepts: true})}
-                             iconShape='trash' expanded='Remove from set'
-                             disable={!this.canEdit || this.selectedConceptsCount === 0}/>}
+              <SlidingFabReact submitFunction={() => this.setState({removingConcepts: true})}
+                               iconShape='trash' expanded='Remove from set'
+                               tooltip={this.conceptSetConceptsCount === this.selectedConceptsCount}
+                               tooltipContent={
+                                 <div>Concept Sets must include at least one concept</div>}
+                               disable={!this.canEdit || this.selectedConceptsCount === 0 ||
+                               this.conceptSetConceptsCount === this.selectedConceptsCount}/>}
         </div>}
         {!loading && deleting &&
         <ConfirmDeleteModal closeFunction={() => this.setState({deleting: false})}

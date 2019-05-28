@@ -3,6 +3,8 @@ import * as React from 'react';
 import {Component, Input} from '@angular/core';
 
 import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 
 const styles = reactStyles({
@@ -11,15 +13,19 @@ const styles = reactStyles({
     position: 'fixed',
     bottom: '1rem',
     right: '1rem',
-    color: 'white',
     borderRadius: '3rem',
     backgroundColor: '#2691D0',
     height: '1.8rem',
     minWidth: '1.8rem',
+    cursor: 'pointer'
+  },
+
+  slidingButtonContainer: {
+    color: colors.white,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    cursor: 'pointer'
+    height: '100%'
   },
 
   disable: {
@@ -47,25 +53,43 @@ const styles = reactStyles({
   }
 });
 
-export class SlidingFabReact extends React.Component<{submitFunction: Function,
-  expanded: string, disable: boolean, iconShape: string}, {hovering: boolean}> {
+interface State {
+  hovering: boolean;
+}
 
-  constructor(props: {submitFunction, expanded, disable, iconShape}) {
+interface Props {
+  submitFunction: Function;
+  expanded: string;
+  disable: boolean;
+  iconShape: string;
+  tooltip?: boolean;
+  tooltipContent?: JSX.Element;
+}
+
+export class SlidingFabReact extends React.Component<Props, State> {
+
+  constructor(props) {
     super(props);
     this.state = {hovering: false};
   }
 
   render() {
     const {hovering} = this.state;
-    const {expanded, disable, iconShape} = this.props;
+    const {expanded, disable, iconShape, tooltip, tooltipContent} = this.props;
     return <div data-test-id='sliding-button'
       style={disable ? {...styles.slidingButton, ...styles.disable} : styles.slidingButton}
       onMouseEnter={() => this.setState({hovering: true})}
       onMouseLeave={() => this.setState({hovering: false})}
       onClick={() => disable ? {} : this.props.submitFunction()}>
-      <div style={hovering ? {...styles.text, ...styles.hovering} : styles.text}>{expanded}</div>
-      <ClrIcon shape={iconShape} style={{height: '1.5rem', width: '1.5rem',
-        marginRight: '.145rem'}}/>
+      <TooltipTrigger content={tooltipContent} disabled={!tooltip}>
+        <div style={styles.slidingButtonContainer}>
+          <div style={hovering ? {...styles.text, ...styles.hovering} : styles.text}>
+            {expanded}
+          </div>
+          <ClrIcon shape={iconShape} style={{height: '1.5rem', width: '1.5rem',
+            marginRight: '.145rem'}}/>
+        </div>
+      </TooltipTrigger>
     </div>;
   }
 }

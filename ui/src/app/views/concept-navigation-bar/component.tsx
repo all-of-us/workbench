@@ -1,13 +1,14 @@
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import * as React from 'react';
 
 const styles = reactStyles({
   headerLinks: {
-    color: '#2691D0',
+    color: colors.blue[0],
     fontSize: '20px',
     lineHeight: '24px',
     height: '1.5rem',
@@ -17,7 +18,7 @@ const styles = reactStyles({
     textDecoration: 'none'
   },
   infoIcon: {
-    color: '#2691D0',
+    color: colors.blue[0],
     cursor: 'pointer',
     marginLeft: '0.2rem',
     height: '20px',

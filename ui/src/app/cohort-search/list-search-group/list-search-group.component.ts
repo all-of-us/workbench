@@ -8,8 +8,8 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
-import {CohortSearchActions} from 'app/cohort-search/redux';
 import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {generateId} from 'app/cohort-search/utils';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
 import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated';
 
@@ -47,8 +47,6 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
   demoOpen = false;
   demoMenuHover = false;
   position = 'bottom-left';
-
-  constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
     // TODO move this to the store and remove all Outputs/Event emitters
@@ -197,7 +195,7 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
 
   launchWizard(criteria: any, tempGroup?: number) {
     const {domain, type} = criteria;
-    const itemId = this.actions.generateId('items');
+    const itemId = generateId('items');
     const item = this.initItem(itemId, criteria.type);
     const fullTree = criteria.fullTree || false;
     const codes = criteria.codes || false;
