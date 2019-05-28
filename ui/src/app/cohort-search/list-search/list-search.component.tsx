@@ -109,6 +109,7 @@ interface Props {
 interface State {
   data: any;
   loading: boolean;
+  results: string;
   sourceMatch: any;
 }
 
@@ -119,37 +120,40 @@ export const ListSearch = withCurrentWorkspace()(
       this.state = {
         data: null,
         loading: false,
-        sourceMatch: undefined
+        results: 'all',
+        sourceMatch: undefined,
       };
     }
 
     handleInput = (event) => {
       const {key, target: {value}} = event;
       if (key === 'Enter') {
-        this.setState({data: null, loading: true});
-        const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
-        cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
-          +cdrVersionId, domain, value
-        ).then(resp => {
-          const data = resp.items;
-          let sourceMatch;
-          if (data.length && !data[0].isStandard) {
-            sourceMatch = data.find(item => item.code === value);
-          }
-          this.setState({data, loading: false, sourceMatch});
-        });
+        this.getResults(value);
       }
+    }
+
+    getResults = (value: string) => {
+      this.setState({data: null, loading: true, results: 'all'});
+      const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
+      cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
+        +cdrVersionId, domain, value
+      ).then(resp => {
+        const data = resp.items;
+        let sourceMatch;
+        if (data.length && !data[0].isStandard) {
+          sourceMatch = data.find(item => item.code.toLowerCase() === value.toLowerCase());
+        }
+        this.setState({data, loading: false, sourceMatch});
+      });
     }
 
     getStandardResults = () => {
       const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
       const {sourceMatch} = this.state;
-      this.setState({loading: true});
+      this.setState({loading: true, results: 'standard'});
       cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(
         +cdrVersionId, domain, sourceMatch.conceptId
-      ).then(resp => {
-        this.setState({data: resp.items, loading: false});
-      });
+      ).then(resp => this.setState({data: resp.items, loading: false}));
     }
 
     selectItem = (row: any) => {
@@ -187,7 +191,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     render() {
-      const {data, loading, sourceMatch} = this.state;
+      const {data, loading, results, sourceMatch} = this.state;
       return <div style={{overflow: 'auto'}}>
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
@@ -196,65 +200,77 @@ export const ListSearch = withCurrentWorkspace()(
           </div>
         </div>
         {!loading && data && <div style={styles.listContainer}>
-          {!!data.length && <React.Fragment>
-            {sourceMatch && <div>
-              There are {sourceMatch.count.toLocaleString()} participants with source code
-              &nbsp;{sourceMatch.code}. For more results, browse
-              &nbsp;<Button type='link'
-                style={{display: 'inline-block'}}
-                onClick={() => this.getStandardResults()}>
-                Standard Vocabulary
-              </Button>.
-            </div>}
-            <table className='p-datatable' style={styles.table}>
-              <thead className='p-datatable-thead'>
-                <tr>
-                  <th style={styles.columnHeader}>Name</th>
-                  <th style={{...styles.columnHeader, width: '15%'}}>Vocab</th>
-                  <th style={{...styles.columnHeader, width: '15%'}}>Count</th>
-                  <th style={{...styles.columnHeader, padding: '0.2rem 0.5rem', width: '10%'}}>
-                    More Info
-                  </th>
-                </tr>
-              </thead>
-              <tbody className='p-datatable-tbody'>
-                {data.map((row, r) => {
-                  return <tr key={r}>
-                    <td style={styles.columnBody}>
-                      {row.selectable && <div style={{...styles.selectDiv}}>
-                        {row.hasAttributes &&
-                          <ClrIcon style={styles.attrIcon}
-                            shape='slider' dir='right' size='20'
-                            onClick={() => this.launchAttributes(row)}/>
-                        }
-                        {!row.hasAttributes && this.isSelected(row) &&
-                          <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
-                        }
-                        {!row.hasAttributes && !this.isSelected(row) &&
-                          <ClrIcon style={styles.selectIcon}
-                            shape='plus-circle' size='16'
-                            onClick={() => this.selectItem(row)}/>
-                        }
-                      </div>}
-                      <div style={{...styles.nameDiv}}>
-                        <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
-                      </div>
-                    </td>
-                    <td style={styles.columnBody}>{row.type}</td>
-                    <td style={styles.columnBody}>{row.count.toLocaleString()}</td>
-                    <td style={{...styles.columnBody, padding: '0.2rem'}}>
-                      {row.hasHierarchy &&
-                        <i className='pi pi-sitemap'
-                          style={styles.treeIcon}
-                          onClick={() => this.showHierarchy(row)}/>
+          {results === 'all' && sourceMatch && <div>
+            There are {sourceMatch.count.toLocaleString()} participants with source code
+            &nbsp;{sourceMatch.code}. For more results, browse
+            &nbsp;<Button type='link'
+              style={{display: 'inline-block'}}
+              onClick={() => this.getStandardResults()}>
+              Standard Vocabulary
+            </Button>.
+          </div>}
+          {results === 'standard' && <div>
+            {!!data.length && <span>
+              There are {data[0].count.toLocaleString()} participants for the standard version of
+              &nbsp;the code you searched.
+            </span>}
+            {!data.length && <span>
+              There are no standard matches for source code {sourceMatch.code}.
+            </span>}
+            &nbsp;Return to <Button type='link'
+              style={{display: 'inline-block'}}
+              onClick={() => this.getResults(sourceMatch.code)}>
+              source code
+            </Button>.
+          </div>}
+          {!!data.length && <table className='p-datatable' style={styles.table}>
+            <thead className='p-datatable-thead'>
+              <tr>
+                <th style={styles.columnHeader}>Name</th>
+                <th style={{...styles.columnHeader, width: '15%'}}>Vocab</th>
+                <th style={{...styles.columnHeader, width: '15%'}}>Count</th>
+                <th style={{...styles.columnHeader, padding: '0.2rem 0.5rem', width: '10%'}}>
+                  More Info
+                </th>
+              </tr>
+            </thead>
+            <tbody className='p-datatable-tbody'>
+              {data.map((row, r) => {
+                return <tr key={r}>
+                  <td style={styles.columnBody}>
+                    {row.selectable && <div style={{...styles.selectDiv}}>
+                      {row.hasAttributes &&
+                        <ClrIcon style={styles.attrIcon}
+                          shape='slider' dir='right' size='20'
+                          onClick={() => this.launchAttributes(row)}/>
                       }
-                    </td>
-                  </tr>;
-                })}
-              </tbody>
-            </table>
-          </React.Fragment>}
-          {!data.length && <div>No matches found</div>}
+                      {!row.hasAttributes && this.isSelected(row) &&
+                        <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
+                      }
+                      {!row.hasAttributes && !this.isSelected(row) &&
+                        <ClrIcon style={styles.selectIcon}
+                          shape='plus-circle' size='16'
+                          onClick={() => this.selectItem(row)}/>
+                      }
+                    </div>}
+                    <div style={{...styles.nameDiv}}>
+                      <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
+                    </div>
+                  </td>
+                  <td style={styles.columnBody}>{row.type}</td>
+                  <td style={styles.columnBody}>{row.count.toLocaleString()}</td>
+                  <td style={{...styles.columnBody, padding: '0.2rem'}}>
+                    {row.hasHierarchy &&
+                      <i className='pi pi-sitemap'
+                        style={styles.treeIcon}
+                        onClick={() => this.showHierarchy(row)}/>
+                    }
+                  </td>
+                </tr>;
+              })}
+            </tbody>
+          </table>}
+          {results === 'all' && !data.length && <div>No results found</div>}
         </div>}
         {loading && <SpinnerOverlay />}
       </div>;
