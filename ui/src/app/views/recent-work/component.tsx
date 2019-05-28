@@ -26,6 +26,8 @@ export const RecentWork = (fp.flow as any)(
   loading: boolean,
   offset: number,
   resources: RecentResource[],
+  existingCohortName: string[],
+  existingConceptName: string[],
   existingNotebookName: string[]
 }> {
   public static defaultProps = {
@@ -34,7 +36,13 @@ export const RecentWork = (fp.flow as any)(
 
   constructor(props) {
     super(props);
-    this.state = {loading: false, resources: [], offset: 0, existingNotebookName: []};
+    this.state = {
+      loading: false,
+      resources: [],
+      offset: 0,
+      existingCohortName: [],
+      existingConceptName: [],
+      existingNotebookName: []};
   }
 
   componentDidMount() {
@@ -53,8 +61,9 @@ export const RecentWork = (fp.flow as any)(
             cohortsApi().getCohortsInWorkspace(namespace, id),
             conceptSetsApi().getConceptSetsInWorkspace(namespace, id)
           ]);
-          const notebookName = notebooks.map(notebook => notebook.name);
-          this.setState({existingNotebookName: notebookName});
+          this.setState({existingCohortName: cohorts.items.map(cohort => cohort.name)});
+          this.setState({existingConceptName: conceptSets.items.map(conceptSet => conceptSet.name)});
+          this.setState({existingNotebookName: notebooks.map(notebook => notebook.name)});
           // TODO Remove this cast when we switch to fetch types
           const al = accessLevel as unknown as WorkspaceAccessLevel;
           const convert = (col, type) => convertToResources(col, namespace, id, al, type);
@@ -75,9 +84,13 @@ export const RecentWork = (fp.flow as any)(
     }
   }
 
-  existingName(resource) {
+  getExistingNameList(resource) {
     if (resource.notebook) {
       return this.state.existingNotebookName;
+    } else if (resource.conceptSet) {
+      return this.state.existingConceptName;
+    } else if (resource.cohort) {
+      return this.state.existingCohortName;
     }
     return [];
   }
@@ -93,7 +106,7 @@ export const RecentWork = (fp.flow as any)(
         {resources.slice(offset, offset + limit).map((resource, i) => {
           return <ResourceCard key={i} marginTop={cardMarginTop}
             resourceCard={resource} onUpdate={() => this.loadResources()}
-            existingNameList={this.existingName(resource)}
+            existingNameList={this.getExistingNameList(resource)}
           />;
         })}
         {offset > 0 && <Scroll

@@ -10,11 +10,23 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import {summarizeErrors} from 'app/utils';
+import {SpinnerOverlay} from 'app/components/spinners';
+import colors from 'app/styles/colors';
+import {reactStyles, summarizeErrors} from 'app/utils';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
+const styles = reactStyles({
+  fieldHeader: {
+    fontSize: 14,
+    color: colors.purple[0],
+    fontWeight: 600,
+    display: 'block'
+  }
+});
+
 interface Props {
+  displayDescription?: boolean;
   existingNames: string[];
   oldName: string;
   onCancel: Function;
@@ -26,19 +38,28 @@ interface Props {
 interface States {
   newName: string;
   nameTouched: boolean;
+  resourceDescription: string;
+  saving: boolean;
 }
 export class RenameModal extends React.Component<Props, States> {
   constructor(props) {
     super(props);
     this.state = {
       newName: '',
-      nameTouched: false
+      nameTouched: false,
+      resourceDescription: '',
+      saving: false
     };
   }
 
+  onRename() {
+    this.setState({saving: true});
+    this.props.onRename(this.state.newName, this.state.resourceDescription);
+  }
+
   render() {
-    const {existingNames, oldName, type} = this.props;
-    let {newName, nameTouched} = this.state;
+    const {displayDescription, existingNames, oldName, type} = this.props;
+    let {newName, nameTouched, resourceDescription, saving} = this.state;
     if (this.props.nameFormat) {
       newName = this.props.nameFormat(newName);
     }
@@ -54,21 +75,27 @@ export class RenameModal extends React.Component<Props, States> {
       }
     }});
     return <Modal>
-      <ModalTitle>Please enter new name for {oldName}</ModalTitle>
+      <ModalTitle>Enter new name for {oldName}</ModalTitle>
       <ModalBody>
+        {saving && <SpinnerOverlay/>}
         <div style={headerStyles.formLabel}>New Name:</div>
-        <TextInput autoFocus id='new-name'
+        <TextInput autoFocus id='new-name' style={styles.fieldHeader}
           onChange={v => this.setState({newName: v, nameTouched: true})}/>
         <ValidationError>
           {summarizeErrors(nameTouched && errors && errors.newName)}
         </ValidationError>
+        {displayDescription && <div style={{marginTop: '1rem'}}>
+          <label data-test-id='descriptionLabel' style={styles.fieldHeader}>Description: </label>
+          <textarea value={resourceDescription || ''}
+                    onChange={(e) => this.setState({resourceDescription: e.target.value})}/>
+        </div> }
       </ModalBody>
       <ModalFooter>
         <Button type='secondary' onClick={() => this.props.onCancel()}>Cancel</Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
-          <Button data-test-id='rename-button' disabled={!!errors}
-            style={{marginLeft: '0.5rem'}}
-            onClick={() => this.props.onRename(newName)}>Rename {type}
+          <Button data-test-id='rename-button' disabled={!!errors || saving}
+            style={{marginLeft: '0.5rem'}} onClick={() => this.onRename()}>
+            Rename {type}
           </Button>
         </TooltipTrigger>
       </ModalFooter>

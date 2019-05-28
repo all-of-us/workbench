@@ -90,7 +90,8 @@ const descriptions = {
 export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {activeTab: Tabs, resourceList: RecentResource[], isLoading: boolean,
-    creatingConceptSet: boolean, conceptDomainList: DomainInfo[], existingDataSetName: string[]}> {
+    creatingConceptSet: boolean, conceptDomainList: DomainInfo[], existingDataSetName: string[],
+    existingCohortName: string[], existingConceptSetName: string[]}> {
 
   constructor(props) {
     super(props);
@@ -100,6 +101,8 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       isLoading: true,
       creatingConceptSet: false,
       conceptDomainList: undefined,
+      existingCohortName: [],
+      existingConceptSetName: [],
       existingDataSetName: []
     };
   }
@@ -124,8 +127,9 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
         dataSetApi().getDataSetsInWorkspace(namespace, id)
       ]);
-      const existingDatasetName = dataSets.items.map(dataSet => dataSet.name);
-      this.setState({existingDataSetName: existingDatasetName});
+      this.setState({existingCohortName: cohorts.items.map(cohort => cohort.name)});
+      this.setState({existingConceptSetName: conceptSets.items.map(conceptSet => conceptSet.name)});
+      this.setState({existingDataSetName: dataSets.items.map(dataSet => dataSet.name)});
       let list: RecentResource[] = [];
       list = list.concat(convertToResources(cohorts.items, namespace,
         id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.COHORT));
@@ -145,9 +149,13 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
-  existingList(resource) {
+  getExistingNameList(resource) {
     if (resource.dataSet) {
       return this.state.existingDataSetName;
+    } else if (resource.conceptSet) {
+      return this.state.existingConceptSetName;
+    } else if (resource.cohort) {
+      return this.state.existingCohortName;
     }
     return [];
   }
@@ -252,7 +260,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
             return <ResourceCard key={index}
                                  resourceCard={resource}
                                  onUpdate={() => this.loadResources()}
-                                 existingNameList={this.existingList(resource)}
+                                 existingNameList={this.getExistingNameList(resource)}
             />;
           })}
           {isLoading && <SpinnerOverlay></SpinnerOverlay>}
