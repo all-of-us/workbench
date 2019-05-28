@@ -10,7 +10,6 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import {SpinnerOverlay} from 'app/components/spinners';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
 import * as React from 'react';
@@ -74,11 +73,10 @@ export class RenameModal extends React.Component<Props, States> {
         message: 'already exists'
       }
     }});
-    return <Modal>
+    return <Modal loading={saving}>
       <ModalTitle>Enter new name for {oldName}</ModalTitle>
       <ModalBody>
-        {saving && <SpinnerOverlay/>}
-        <div style={headerStyles.formLabel}>New Name:</div>
+         <div style={headerStyles.formLabel}>New Name:</div>
         <TextInput autoFocus id='new-name' style={styles.fieldHeader}
           onChange={v => this.setState({newName: v, nameTouched: true})}/>
         <ValidationError>
