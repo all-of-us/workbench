@@ -108,7 +108,20 @@ describe('ListModalComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ListModalComponent);
     component = fixture.componentInstance;
-    component.attributesNode = Map();
+    component.attributesNode = {
+      code: '',
+      conceptId: 903133,
+      count: 0,
+      domainId: 'Measurement',
+      group: false,
+      hasAttributes: true,
+      id: 316305,
+      name: 'Height Detail',
+      parentId: 0,
+      selectable: true,
+      subtype: 'HEIGHT',
+      type: 'PM'
+    };
     fixture.detectChanges();
   });
 
