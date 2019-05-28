@@ -1,6 +1,7 @@
 import {
   Button
 } from 'app/components/buttons';
+import {styles as headerStyles} from 'app/components/headers';
 import {TextInput, ValidationError} from 'app/components/inputs';
 import {
   Modal,
@@ -55,9 +56,9 @@ export class RenameModal extends React.Component<Props, States> {
     return <Modal>
       <ModalTitle>Please enter new name for {oldName}</ModalTitle>
       <ModalBody>
-        <div>New Name:</div>
+        <div style={headerStyles.formLabel}>New Name:</div>
         <TextInput autoFocus id='new-name'
-                   onChange={v => this.setState({newName: v, nameTouched: true})}/>
+          onChange={v => this.setState({newName: v, nameTouched: true})}/>
         <ValidationError>
           {summarizeErrors(nameTouched && errors && errors.newName)}
         </ValidationError>
@@ -65,8 +66,9 @@ export class RenameModal extends React.Component<Props, States> {
       <ModalFooter>
         <Button type='secondary' onClick={() => this.props.onCancel()}>Cancel</Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
-          <Button data-test-id='rename-button' style={{marginLeft: '0.5rem'}}
-                  onClick={() => this.props.onRename(newName)}>Rename {type}
+          <Button data-test-id='rename-button' disabled={!!errors || saving}
+            style={{marginLeft: '0.5rem'}}
+            onClick={() => this.props.onRename(newName)}>Rename {type}
           </Button>
         </TooltipTrigger>
       </ModalFooter>
