@@ -1,9 +1,6 @@
-import {validate} from 'validate.js';
-
 import {
   Button
 } from 'app/components/buttons';
-import {styles as headerStyles} from 'app/components/headers';
 import {TextInput, ValidationError} from 'app/components/inputs';
 import {
   Modal,
@@ -12,71 +9,39 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
-
-import {summarizeErrors} from 'app/utils';
-
 import * as React from 'react';
+import {validate} from 'validate.js';
+import {summarizeErrors} from '../../utils';
 
-
-const fullName = name => {
-  return !name || /^.+\.ipynb$/.test(name) ? name : `${name}.ipynb`;
-};
-
-interface RenameModalProps {
-  notebookName: string;
-  workspace: {namespace: string, name: string};
-  onRename: Function;
+interface Props {
+  existingNames: string[];
+  oldName: string;
   onCancel: Function;
+  onRename: Function;
+  nameFormat?: Function;
+  type: string;
 }
 
-export class RenameModal extends React.Component<RenameModalProps, {
-  saving: boolean;
+interface States {
   newName: string;
-  existingNames: string[];
   nameTouched: boolean;
-}> {
-  constructor(props: RenameModalProps) {
+}
+export class RenameModal extends React.Component<Props, States> {
+  constructor(props) {
     super(props);
     this.state = {
-      saving: false,
       newName: '',
-      existingNames: [],
       nameTouched: false
     };
   }
 
-  async componentDidMount() {
-    try {
-      const {workspace} = this.props;
-      const notebooks = await workspacesApi().getNoteBookList(workspace.namespace, workspace.name);
-      this.setState({existingNames: notebooks.map(n => n.name)});
-    } catch (error) {
-      console.error(error); // TODO: better error handling
-    }
-  }
-
-  private async rename() {
-    try {
-      const {onRename, workspace, notebookName} = this.props;
-      const {newName} = this.state;
-      this.setState({saving: true});
-      await workspacesApi().renameNotebook(workspace.namespace, workspace.name, {
-        name: notebookName,
-        newName: fullName(newName)
-      });
-      onRename();
-    } catch (error) {
-      console.error(error); // TODO: better error handling
-    } finally {
-      this.setState({saving: false});
-    }
-  }
-
   render() {
-    const {notebookName, onCancel} = this.props;
-    const {saving, newName, existingNames, nameTouched} = this.state;
-    const errors = validate({newName: fullName(newName)}, {newName: {
+    const {existingNames, oldName, type} = this.props;
+    let {newName, nameTouched} = this.state;
+    if (this.props.nameFormat) {
+      newName = this.props.nameFormat(newName);
+    }
+    const errors = validate({newName: newName}, {newName: {
       presence: {allowEmpty: false},
       format: {
         pattern: /^[^\/]*$/,
@@ -87,26 +52,22 @@ export class RenameModal extends React.Component<RenameModalProps, {
         message: 'already exists'
       }
     }});
-    return <Modal loading={saving}>
-      <ModalTitle>Please enter the new name for {notebookName}</ModalTitle>
+    return <Modal>
+      <ModalTitle>Please enter new name for {oldName}</ModalTitle>
       <ModalBody>
-        <div style={headerStyles.formLabel}>New Name:</div>
+        <div>New Name:</div>
         <TextInput autoFocus id='new-name'
-           onChange={v => this.setState({newName: v, nameTouched: true})}
-        />
+                   onChange={v => this.setState({newName: v, nameTouched: true})}/>
         <ValidationError>
           {summarizeErrors(nameTouched && errors && errors.newName)}
         </ValidationError>
       </ModalBody>
       <ModalFooter>
-        <Button type='secondary' onClick={onCancel}>Cancel</Button>
+        <Button type='secondary' onClick={() => this.props.onCancel()}>Cancel</Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
-          <Button
-            data-test-id='rename-button'
-            disabled={!!errors || saving}
-            style={{marginLeft: '0.5rem'}}
-            onClick={() => this.rename()}
-          >Rename Notebook</Button>
+          <Button data-test-id='rename-button' style={{marginLeft: '0.5rem'}}
+                  onClick={() => this.props.onRename(newName)}>Rename {type}
+          </Button>
         </TooltipTrigger>
       </ModalFooter>
     </Modal>;

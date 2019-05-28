@@ -25,7 +25,8 @@ export const RecentWork = (fp.flow as any)(
 }, {
   loading: boolean,
   offset: number,
-  resources: RecentResource[]
+  resources: RecentResource[],
+  existingNotebookName: string[]
 }> {
   public static defaultProps = {
     cardMarginTop: '1rem'
@@ -33,7 +34,7 @@ export const RecentWork = (fp.flow as any)(
 
   constructor(props) {
     super(props);
-    this.state = {loading: false, resources: [], offset: 0};
+    this.state = {loading: false, resources: [], offset: 0, existingNotebookName: []};
   }
 
   componentDidMount() {
@@ -52,7 +53,9 @@ export const RecentWork = (fp.flow as any)(
             cohortsApi().getCohortsInWorkspace(namespace, id),
             conceptSetsApi().getConceptSetsInWorkspace(namespace, id)
           ]);
-           // TODO Remove this cast when we switch to fetch types
+          const notebookName = notebooks.map(notebook => notebook.name);
+          this.setState({existingNotebookName: notebookName});
+          // TODO Remove this cast when we switch to fetch types
           const al = accessLevel as unknown as WorkspaceAccessLevel;
           const convert = (col, type) => convertToResources(col, namespace, id, al, type);
           return fp.reverse(fp.sortBy('modifiedTime', [
@@ -72,6 +75,13 @@ export const RecentWork = (fp.flow as any)(
     }
   }
 
+  existingName(resource) {
+    if (resource.notebook) {
+      return this.state.existingNotebookName;
+    }
+    return [];
+  }
+
   render() {
     const {contentRect, measureRef, workspace, cardMarginTop} = this.props;
     const {offset, resources, loading} = this.state;
@@ -83,6 +93,7 @@ export const RecentWork = (fp.flow as any)(
         {resources.slice(offset, offset + limit).map((resource, i) => {
           return <ResourceCard key={i} marginTop={cardMarginTop}
             resourceCard={resource} onUpdate={() => this.loadResources()}
+            existingNameList={this.existingName(resource)}
           />;
         })}
         {offset > 0 && <Scroll

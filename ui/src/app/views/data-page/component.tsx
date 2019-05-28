@@ -90,7 +90,7 @@ const descriptions = {
 export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {activeTab: Tabs, resourceList: RecentResource[], isLoading: boolean,
-    creatingConceptSet: boolean, conceptDomainList: DomainInfo[]}> {
+    creatingConceptSet: boolean, conceptDomainList: DomainInfo[], existingDataSetName: string[]}> {
 
   constructor(props) {
     super(props);
@@ -99,7 +99,8 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       resourceList: [],
       isLoading: true,
       creatingConceptSet: false,
-      conceptDomainList: undefined
+      conceptDomainList: undefined,
+      existingDataSetName: []
     };
   }
 
@@ -123,6 +124,8 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
         dataSetApi().getDataSetsInWorkspace(namespace, id)
       ]);
+      const existingDatasetName = dataSets.items.map(dataSet => dataSet.name);
+      this.setState({existingDataSetName: existingDatasetName});
       let list: RecentResource[] = [];
       list = list.concat(convertToResources(cohorts.items, namespace,
         id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.COHORT));
@@ -142,12 +145,30 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
+  existingList(resource) {
+    if (resource.dataSet) {
+      return this.state.existingDataSetName;
+    }
+    return [];
+  }
+
   render() {
     const {namespace, id} = this.props.workspace;
     const {activeTab, isLoading, resourceList, creatingConceptSet, conceptDomainList} = this.state;
     const filteredList = resourceList.filter((resource) => {
       if (activeTab === Tabs.SHOWALL) {
         return true;
+      } else if (activeTab === Tabs.COHORTS) {
+        return resource.cohort;
+      } else if (activeTab === Tabs.CONCEPTSETS) {
+        return resource.conceptSet;
+      } else if (activeTab === Tabs.DATASETS) {
+        return resource.dataSet;
+      }
+    });
+    const existingList = resourceList.map((resource) => {
+      if (activeTab === Tabs.SHOWALL){
+        return resource;
       } else if (activeTab === Tabs.COHORTS) {
         return resource.cohort;
       } else if (activeTab === Tabs.CONCEPTSETS) {
@@ -242,6 +263,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
             return <ResourceCard key={index}
                                  resourceCard={resource}
                                  onUpdate={() => this.loadResources()}
+                                 existingNameList={this.existingList(resource)}
             />;
           })}
           {isLoading && <SpinnerOverlay></SpinnerOverlay>}
