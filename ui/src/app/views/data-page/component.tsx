@@ -87,14 +87,20 @@ const descriptions = {
 
 export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
-  {activeTab: Tabs, resourceList: RecentResource[], isLoading: boolean}> {
+  {activeTab: Tabs, resourceList: RecentResource[], isLoading: boolean,
+    creatingConceptSet: boolean, existingDataSetName: string[],
+    existingCohortName: string[], existingConceptSetName: string[]}> {
 
   constructor(props) {
     super(props);
     this.state = {
       activeTab: Tabs.SHOWALL,
       resourceList: [],
-      isLoading: true
+      isLoading: true,
+      creatingConceptSet: false,
+      existingCohortName: [],
+      existingConceptSetName: [],
+      existingDataSetName: []
     };
   }
 
@@ -114,6 +120,11 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
         dataSetApi().getDataSetsInWorkspace(namespace, id)
       ]);
+      this.setState({
+        existingCohortName: cohorts.items.map(cohort => cohort.name),
+        existingConceptSetName: conceptSets.items.map(conceptSet => conceptSet.name),
+        existingDataSetName: dataSets.items.map(dataSet => dataSet.name)
+      });
       let list: RecentResource[] = [];
       list = list.concat(convertToResources(cohorts.items, namespace,
         id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.COHORT));
@@ -131,6 +142,17 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         isLoading: false
       });
     }
+  }
+
+  getExistingNameList(resource) {
+    if (resource.dataSet) {
+      return this.state.existingDataSetName;
+    } else if (resource.conceptSet) {
+      return this.state.existingConceptSetName;
+    } else if (resource.cohort) {
+      return this.state.existingCohortName;
+    }
+    return [];
   }
 
   render() {
@@ -233,6 +255,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
             return <ResourceCard key={index}
                                  resourceCard={resource}
                                  onUpdate={() => this.loadResources()}
+                                 existingNameList={this.getExistingNameList(resource)}
             />;
           })}
           {isLoading && <SpinnerOverlay></SpinnerOverlay>}

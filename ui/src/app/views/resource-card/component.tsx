@@ -12,13 +12,12 @@ import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
-import {EditModal} from 'app/views/edit-modal/component';
 import {ExportDataSetModal} from 'app/views/export-data-set-modal/component';
-import {RenameModal} from 'app/views/rename-modal/component';
 import {Domain, RecentResource} from 'generated/fetch';
 
 import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {CopyNotebookModal} from 'app/views/copy-notebook-modal/component';
+import {RenameModal} from 'app/views/rename-modal/component';
 
 const styles = reactStyles({
   card: {
@@ -84,11 +83,11 @@ export interface ResourceCardProps {
   marginTop: string;
   resourceCard: RecentResource;
   onUpdate: Function;
+  existingNameList?: string[];
 }
 
 export interface ResourceCardState {
   confirmDeleting: boolean;
-  editing: boolean;
   errorModalBody: string;
   errorModalTitle: string;
   exportingDataSet: boolean;
@@ -107,7 +106,6 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     super(props);
     this.state = {
       confirmDeleting: false,
-      editing: false,
       errorModalTitle: 'Error Title',
       errorModalBody: 'Error Body',
       exportingDataSet: false,
@@ -117,7 +115,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         props.resourceCard.dataSet),
       renaming: false,
       showCopyNotebookModal: false,
-      showErrorModal: false,
+      showErrorModal: false
     };
   }
 
@@ -231,7 +229,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         break;
       }
       default: {
-        this.setState({editing: true});
+        this.setState({renaming: true});
       }
     }
   }
@@ -242,12 +240,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/cohorts/${id}/review`);
   }
 
-  closeEditModal(): void {
-    this.setState({editing: false});
-  }
-
   renameCohort(): void {
-    this.setState({editing: true});
+    this.setState({renaming: true});
   }
 
   renameNotebook(): void {
@@ -255,6 +249,10 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   }
 
   cancelRename(): void {
+    this.setState({renaming: false});
+  }
+
+  cancelRenameDataSet(): void {
     this.setState({renaming: false});
   }
 
@@ -355,33 +353,84 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     }
   }
 
-  receiveEdit(resource: RecentResource): void {
+  fullNotebookName(name) {
+    return !name || /^.+\.ipynb$/.test(name) ? name : `${name}.ipynb`;
+  }
+
+  receiveRename(name, description): void {
     if (this.isCohort) {
+      const request = {
+        ...this.props.resourceCard.cohort,
+        name: name,
+        description: description
+      };
       cohortsApi().updateCohort(
         this.props.resourceCard.workspaceNamespace,
         this.props.resourceCard.workspaceFirecloudName,
         this.props.resourceCard.cohort.id,
-        resource.cohort
-      ).then( () => {
-        this.closeEditModal();
+        request
+      ).then(() => {
+        this.cancelRename();
         this.props.onUpdate();
       });
     } else if (this.isConceptSet) {
+      const request = {
+        ...this.props.resourceCard.conceptSet,
+        name: name,
+        description: description
+      };
       conceptSetsApi().updateConceptSet(
         this.props.resourceCard.workspaceNamespace,
         this.props.resourceCard.workspaceFirecloudName,
         this.props.resourceCard.conceptSet.id,
-        ResourceCard.castConceptSet(resource).conceptSet
-      ).then( () => {
-        this.closeEditModal();
+        request
+      ).then(() => {
+        this.cancelRename();
         this.props.onUpdate();
       });
     }
+
   }
 
-  receiveNotebookRename(): void {
-    this.setState({renaming: false});
-    this.props.onUpdate();
+  async receiveDataSetRename(newName: string, newDescription: string) {
+    const {resourceCard} = this.props;
+    try {
+      const request = {
+        ...resourceCard.dataSet,
+        name: newName,
+        description: newDescription,
+        conceptSetIds: resourceCard.dataSet.conceptSets.map(concept => concept.id),
+        cohortIds: resourceCard.dataSet.cohorts.map(cohort => cohort.id),
+      };
+      await dataSetApi().updateDataSet(
+        resourceCard.workspaceNamespace,
+        resourceCard.workspaceFirecloudName,
+        resourceCard.dataSet.id,
+        request);
+    } catch (error) {
+      console.error(error); // TODO: better error handling
+    } finally {
+      this.setState({renaming: false});
+      this.props.onUpdate();
+    }
+  }
+
+  async receiveNotebookRename(newName) {
+    const {resourceCard} = this.props;
+    try {
+      await workspacesApi().renameNotebook(
+        resourceCard.workspaceNamespace,
+        resourceCard.workspaceFirecloudName,
+        {
+          name: resourceCard.notebook.name,
+          newName: this.fullNotebookName(newName)
+        });
+    } catch (error) {
+      console.error(error); // TODO: better error handling
+    } finally {
+      this.setState({renaming: false});
+      this.props.onUpdate();
+    }
   }
 
   openResource(jupyterLab?: boolean): void {
@@ -426,6 +475,9 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     this.setState({exportingDataSet: true});
   }
 
+  renameDataSet(): void {
+    this.setState({renaming: true});
+  }
   render() {
     const marginTop = this.props.marginTop;
     return <React.Fragment>
@@ -460,6 +512,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                               onDeleteResource={() => this.openConfirmDelete()}
                               onRenameNotebook={() => this.renameNotebook()}
                               onRenameCohort={() => this.renameCohort()}
+                              onRenameDataSet={() => this.renameDataSet()}
                               onEdit={() => this.edit()}
                               onExportDataSet={() => this.exportDataSet()}
                               onReviewCohort={() => this.reviewCohort()}
@@ -481,18 +534,31 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
             {fp.startCase(fp.camelCase(this.resourceType.toString()))}</div>
         </div>
       </ResourceCardBase>
-      {this.state.editing && (this.isCohort  || this.isConceptSet) &&
-      <EditModal resource={ResourceCard.castConceptSet(this.props.resourceCard)}
-                 onEdit={v => this.receiveEdit(v)}
-                 onCancel={() => this.closeEditModal()}/>}
+      {this.state.renaming && this.isCohort &&
+        <RenameModal
+          onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
+          type='Cohort'
+          onCancel={() => this.cancelRename()}
+          oldDescription={this.props.resourceCard.cohort.description}
+          oldName={this.props.resourceCard.cohort.name}
+          existingNames={this.props.existingNameList}/>
+      }
+      {this.state.renaming && this.isConceptSet &&
+        <RenameModal
+          onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
+          type='Concept Set'
+          onCancel={() => this.cancelRename()}
+          oldDescription={this.props.resourceCard.conceptSet.description}
+          oldName={this.props.resourceCard.conceptSet.name}
+          existingNames={this.props.existingNameList}/>}
       {this.state.renaming && this.isNotebook &&
-      <RenameModal notebookName={this.props.resourceCard.notebook.name}
-                   workspace={{
-                     namespace: this.props.resourceCard.workspaceNamespace,
-                     name: this.props.resourceCard.workspaceFirecloudName
-                   }}
-                   onRename={() => this.receiveNotebookRename()}
-                   onCancel={() => this.cancelRename()}/>}
+       <RenameModal onRename={(newName) => this.receiveNotebookRename(newName)}
+          type='Notebook' onCancel={() => this.cancelRename()}
+          hideDescription={true}
+          oldName={this.props.resourceCard.notebook.name}
+          existingNames={this.props.existingNameList}
+          nameFormat={(name) => this.fullNotebookName(name)}/>
+      }
       {this.state.confirmDeleting &&
       <ConfirmDeleteModal resourceName={this.displayName}
                           resourceType={this.resourceType}
@@ -503,6 +569,15 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                           workspaceNamespace={this.props.resourceCard.workspaceNamespace}
                           workspaceFirecloudName={this.props.resourceCard.workspaceFirecloudName}
                           closeFunction={() => this.setState({exportingDataSet: false})}/>}
+      {this.state.renaming && this.isDataSet &&
+        <RenameModal
+          onRename={(newName, newDescription) => this.receiveDataSetRename(newName, newDescription)}
+          type='Data Set'
+          onCancel={() => this.cancelRename()}
+          oldDescription ={this.props.resourceCard.dataSet.description}
+          oldName={this.props.resourceCard.dataSet.name}
+          existingNames={this.props.existingNameList}/>
+      }
     </React.Fragment>;
   }
 }
