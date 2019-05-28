@@ -56,8 +56,9 @@ const styles = reactStyles({
   },
   listContainer: {
     width: '99%',
-    margin: '3rem 0 1rem',
+    margin: '2.75rem 0 1rem',
     fontSize: '12px',
+    color: '#262262',
   },
   table: {
     textAlign: 'left',
@@ -83,6 +84,7 @@ const styles = reactStyles({
     textAlign: 'left',
     border: 0,
     borderBottom: '1px solid #c8c8c8',
+    color: '#262262',
     lineHeight: '0.8rem',
   },
   selectDiv: {
@@ -200,7 +202,7 @@ export const ListSearch = withCurrentWorkspace()(
           </div>
         </div>
         {!loading && data && <div style={styles.listContainer}>
-          {results === 'all' && sourceMatch && <div>
+          {results === 'all' && sourceMatch && <div style={{marginBottom: '0.75rem'}}>
             There are {sourceMatch.count.toLocaleString()} participants with source code
             &nbsp;{sourceMatch.code}. For more results, browse
             &nbsp;<Button type='link'
@@ -209,7 +211,7 @@ export const ListSearch = withCurrentWorkspace()(
               Standard Vocabulary
             </Button>.
           </div>}
-          {results === 'standard' && <div>
+          {results === 'standard' && <div style={{marginBottom: '0.75rem'}}>
             {!!data.length && <span>
               There are {data[0].count.toLocaleString()} participants for the standard version of
               &nbsp;the code you searched.
@@ -217,10 +219,10 @@ export const ListSearch = withCurrentWorkspace()(
             {!data.length && <span>
               There are no standard matches for source code {sourceMatch.code}.
             </span>}
-            &nbsp;Return to <Button type='link'
+            &nbsp;<Button type='link'
               style={{display: 'inline-block'}}
               onClick={() => this.getResults(sourceMatch.code)}>
-              source code
+              Return to source code
             </Button>.
           </div>}
           {!!data.length && <table className='p-datatable' style={styles.table}>
