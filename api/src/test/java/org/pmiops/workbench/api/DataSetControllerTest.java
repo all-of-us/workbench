@@ -91,6 +91,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;
@@ -318,7 +319,8 @@ public class DataSetControllerTest {
         .domain(Domain.CONDITION)
         .concepts(conceptList);
 
-    CreateConceptSetRequest conceptSetRequest = new CreateConceptSetRequest().conceptSet(conceptSet);
+    CreateConceptSetRequest conceptSetRequest = new CreateConceptSetRequest().conceptSet(conceptSet)
+        .addedIds(conceptList.stream().map(concept -> concept.getConceptId()).collect(Collectors.toList()));
 
     conceptSet = conceptSetsController.createConceptSet(
         WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSetRequest).getBody();
@@ -330,7 +332,8 @@ public class DataSetControllerTest {
         .domain(Domain.DRUG)
         .concepts(conceptList);
 
-    CreateConceptSetRequest conceptSetTwoRequest = new CreateConceptSetRequest().conceptSet(conceptSetTwo);
+    CreateConceptSetRequest conceptSetTwoRequest = new CreateConceptSetRequest().conceptSet(conceptSetTwo)
+        .addedIds(conceptList.stream().map(concept -> concept.getConceptId()).collect(Collectors.toList()));
 
     conceptSetTwo = conceptSetsController.createConceptSet(
         WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSetTwoRequest).getBody();
@@ -439,7 +442,7 @@ public class DataSetControllerTest {
     assertThat(response.getQueryList().get(0).getQuery())
         .isEqualTo("SELECT PERSON_ID FROM " +
             "`all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` " +
-            "c_occurrence WHERE \n(condition_concept_id IN () OR \ncondition_source_concept_id IN ()) \n" +
+            "c_occurrence WHERE \n(condition_concept_id IN (123) OR \ncondition_source_concept_id IN (123)) \n" +
             "AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
   }
 

@@ -315,9 +315,10 @@ public class ConceptSetsControllerTest {
     conceptSet.setName("concept set 1");
     conceptSet.setDomain(Domain.CONDITION);
     conceptSet = conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
-        new CreateConceptSetRequest().conceptSet(conceptSet))
+        new CreateConceptSetRequest().conceptSet(conceptSet)
+            .addAddedIdsItem(CLIENT_CONCEPT_1.getConceptId()))
         .getBody();
-    assertThat(conceptSet.getConcepts()).isNull();
+    assertThat(conceptSet.getConcepts()).isNotNull();
     assertThat(conceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(conceptSet.getDescription()).isEqualTo("desc 1");
     assertThat(conceptSet.getDomain()).isEqualTo(Domain.CONDITION);
@@ -328,8 +329,9 @@ public class ConceptSetsControllerTest {
 
     assertThat(conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         conceptSet.getId()).getBody()).isEqualTo(conceptSet);
+    // Get concept sets will not return the full information, because concepts can have a lot of information.
     assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-        .getBody().getItems()).contains(conceptSet);
+        .getBody().getItems()).contains(conceptSet.concepts(null));
     assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
         .getBody().getItems()).isEmpty();
   }
@@ -339,8 +341,9 @@ public class ConceptSetsControllerTest {
     ConceptSet conceptSet = makeConceptSet1();
     assertThat(conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         conceptSet.getId()).getBody()).isEqualTo(conceptSet);
+    // Get concept sets will not return the full information, because concepts can have a lot of information.
     assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-        .getBody().getItems()).contains(conceptSet);
+        .getBody().getItems()).contains(conceptSet.concepts(null));
     assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
         .getBody().getItems()).isEmpty();
   }
@@ -363,7 +366,7 @@ public class ConceptSetsControllerTest {
         conceptSetsController.updateConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId(),
             conceptSet).getBody();
     assertThat(updatedConceptSet.getCreator()).isEqualTo(USER_EMAIL);
-    assertThat(updatedConceptSet.getConcepts()).isNull();
+    assertThat(updatedConceptSet.getConcepts()).isNotNull();
     assertThat(updatedConceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(updatedConceptSet.getDescription()).isEqualTo("new description");
     assertThat(updatedConceptSet.getDomain()).isEqualTo(Domain.CONDITION);
@@ -374,8 +377,9 @@ public class ConceptSetsControllerTest {
 
     assertThat(conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         conceptSet.getId()).getBody()).isEqualTo(updatedConceptSet);
+    // Get concept sets will not return the full information, because concepts can have a lot of information.
     assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-        .getBody().getItems()).contains(updatedConceptSet);
+        .getBody().getItems()).contains(updatedConceptSet.concepts(null));
     assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
         .getBody().getItems()).isEmpty();
   }
@@ -405,23 +409,25 @@ public class ConceptSetsControllerTest {
     saveConcepts();
     when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
         ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId()))).thenReturn(123);
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_3.getConceptId()))).thenReturn(246);
     ConceptSet conceptSet = makeConceptSet1();
     ConceptSet updated =
         conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
             conceptSet.getId(), addConceptsRequest(conceptSet.getEtag(),
-                CLIENT_CONCEPT_1.getConceptId())).getBody();
-    assertThat(updated.getConcepts()).contains(CLIENT_CONCEPT_1);
+                CLIENT_CONCEPT_3.getConceptId())).getBody();
+    assertThat(updated.getConcepts()).contains(CLIENT_CONCEPT_3);
     assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
-    assertThat(updated.getParticipantCount()).isEqualTo(123);
+    assertThat(updated.getParticipantCount()).isEqualTo(246);
 
     ConceptSet removed =
         conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
           conceptSet.getId(), removeConceptsRequest(updated.getEtag(),
-              CLIENT_CONCEPT_1.getConceptId())).getBody();
-    assertThat(removed.getConcepts()).isNull();
+              CLIENT_CONCEPT_3.getConceptId())).getBody();
+    assertThat(removed.getConcepts().size()).isEqualTo(1);
     assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
     assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
-    assertThat(removed.getParticipantCount()).isEqualTo(0);
+    assertThat(removed.getParticipantCount()).isEqualTo(123);
   }
 
   @Test
@@ -555,7 +561,8 @@ public class ConceptSetsControllerTest {
     conceptSet.setDescription("desc 1");
     conceptSet.setName("concept set 1");
     conceptSet.setDomain(Domain.CONDITION);
-    CreateConceptSetRequest request = new CreateConceptSetRequest().conceptSet(conceptSet);
+    CreateConceptSetRequest request = new CreateConceptSetRequest()
+        .conceptSet(conceptSet).addAddedIdsItem(CLIENT_CONCEPT_1.getConceptId());
     if (addedIds.length > 0) {
       request = request.addedIds(ImmutableList.copyOf(addedIds));
     }
@@ -569,7 +576,8 @@ public class ConceptSetsControllerTest {
     conceptSet.setName("concept set 2");
     conceptSet.setDomain(Domain.MEASUREMENT);
     return conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
-        new CreateConceptSetRequest().conceptSet(conceptSet))
+        new CreateConceptSetRequest().conceptSet(conceptSet)
+            .addAddedIdsItem(CLIENT_CONCEPT_2.getConceptId()))
         .getBody();
 
   }
