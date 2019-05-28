@@ -66,7 +66,7 @@ export class RenameModal extends React.Component<Props, States> {
       <ModalFooter>
         <Button type='secondary' onClick={() => this.props.onCancel()}>Cancel</Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
-          <Button data-test-id='rename-button' disabled={!!errors || saving}
+          <Button data-test-id='rename-button' disabled={!!errors}
             style={{marginLeft: '0.5rem'}}
             onClick={() => this.props.onRename(newName)}>Rename {type}
           </Button>
