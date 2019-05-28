@@ -9,9 +9,9 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {summarizeErrors} from 'app/utils';
 import * as React from 'react';
 import {validate} from 'validate.js';
-import {summarizeErrors} from '../../utils';
 
 interface Props {
   existingNames: string[];
