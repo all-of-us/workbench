@@ -434,13 +434,20 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         this.state.workspace.researchPurpose.populationDetails.length === 0;
     }
 
+    noDiseaseOfFocusSpecified(): boolean {
+      return this.state.workspace.researchPurpose.diseaseFocusedResearch &&
+        !! this.state.workspace.researchPurpose.diseaseOfFocus;
+    }
+
     disableButton(): boolean {
       const rp = this.state.workspace.researchPurpose;
       return this.isEmpty(this.state.workspace, 'name') ||
         this.isEmpty(rp, 'intendedStudy') ||
         this.isEmpty(rp, 'anticipatedFindings') ||
         this.isEmpty(rp, 'reasonForAllOfUs') ||
-        !this.categoryIsSelected() || this.noSpecificPopulationSelected();
+        !this.categoryIsSelected() ||
+        this.noSpecificPopulationSelected() ||
+        this.noDiseaseOfFocusSpecified();
     }
 
     updateResearchPurpose(category, value) {
@@ -690,7 +697,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <div style={{display: 'flex', flexDirection: 'row', flex: '1 1 0',
               marginTop: '0.5rem'}}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
-                {specificPopulations.slice(0, specificPopulations.length / 2 + 1).map(i =>
+                {specificPopulations.slice(0, this.sliceLength(specificPopulations)).map(i =>
                   <LabeledCheckBox label={i.label} key={i.label}
                                    value={this.specificPopulationSelected(i.object)}
                                    onChange={v => this.updateSpecificPopulation(i.object, v)}
@@ -698,7 +705,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 )}
               </div>
               <div style={{display: 'flex', flexDirection: 'column'}}>
-                {specificPopulations.slice(specificPopulations.length / 2 + 1).map(i =>
+                {specificPopulations.slice(this.sliceLength(specificPopulations)).map(i =>
                   <LabeledCheckBox label={i.label} key={i.label}
                                    value={this.specificPopulationSelected(i.object)}
                                    onChange={v => this.updateSpecificPopulation(i.object, v)}
@@ -749,6 +756,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <li>Reason for choosing AoU</li>}
               { !this.categoryIsSelected() && <li>Research focus</li>}
               { this.noSpecificPopulationSelected() && <li>Population of study</li>}
+              { this.noDiseaseOfFocusSpecified() && <li>Disease of focus</li>}
             </ul>]} disabled={!this.disableButton()}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
                       disabled={this.disableButton() || this.state.loading}>
