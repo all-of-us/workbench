@@ -107,10 +107,10 @@ export const ConceptAddModal = withCurrentWorkspace()
         addedIds: conceptIds
       };
       try {
-        await conceptSetsApi().updateConceptSetConcepts(
+        const conceptSet = await conceptSetsApi().updateConceptSetConcepts(
           namespace, id, selectedSet.id, updateConceptSetReq);
         this.setState({saving: false});
-        onSave();
+        onSave(conceptSet);
       } catch (error) {
         console.error(error);
       }

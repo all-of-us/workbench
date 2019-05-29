@@ -174,26 +174,4 @@ describe('ConceptHomepage', () => {
     wrapper.find('[data-test-id="clear-search"]').first().simulate('click');
     expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toEqual(0);
   });
-
-  it('should clear selected concepts after adding', async() => {
-    const wrapper = mount(<ConceptHomepage />);
-    await waitOneTickAndUpdate(wrapper);
-    searchTable('test', wrapper);
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper.find('span.p-checkbox-icon.p-clickable').at(1).simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="selectedConcepts"]').text()).toBe('1');
-
-    wrapper.find('[data-test-id="sliding-button"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="toggle-new-set"]').first().simulate('click');
-    wrapper.find('[data-test-id="create-new-set-name"]').first()
-      .simulate('change', {target: {value: 'test-set'}});
-    wrapper.find('[data-test-id="save-concept-set"]').first().simulate('click');
-
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toEqual(0);
-  });
-
 });

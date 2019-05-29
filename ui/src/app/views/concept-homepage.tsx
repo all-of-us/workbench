@@ -370,7 +370,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
             <FadeBox>
               <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
                 {conceptDomainCounts.map((domain) => {
-                  return <div style={{display: 'flex', flexDirection: 'column'}}>
+                  return <div style={{display: 'flex', flexDirection: 'column'}} key={domain.name}>
                     <Clickable style={styles.domainHeaderLink}
                                onClick={() => this.selectDomain(domain)}
                                disabled={this.domainLoading(domain)}
