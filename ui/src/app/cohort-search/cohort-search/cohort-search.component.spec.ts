@@ -74,8 +74,6 @@ describe('CohortSearchComponent', () => {
   let mockReduxInst;
 
   beforeEach(async(() => {
-    registerApiClient(CohortsApi, new CohortsApiStub());
-    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     mockReduxInst = MockNgRedux.getInstance();
     const _old = mockReduxInst.getState;
     const _wrapped = () => fromJS(_old());
@@ -153,6 +151,8 @@ describe('CohortSearchComponent', () => {
   }));
 
   beforeEach(() => {
+    registerApiClient(CohortsApi, new CohortsApiStub());
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     fixture = TestBed.createComponent(CohortSearchComponent);
     component = fixture.componentInstance;
     component.listSearch = false;
