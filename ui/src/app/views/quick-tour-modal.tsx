@@ -3,6 +3,7 @@ import {Component, Input} from '@angular/core';
 import {
   Button
 } from 'app/components/buttons';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 
 import * as React from 'react';
@@ -105,7 +106,7 @@ const styles = reactStyles({
     height: '79.23%',
     width: '80%',
     borderRadius: '8px',
-    backgroundColor: '#262262',
+    backgroundColor: colors.purple[0],
     boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
     position: 'absolute',
     left: '10%',
@@ -113,7 +114,7 @@ const styles = reactStyles({
     zIndex: 1050,
   },
   title: {
-    color: '#FFFFFF',
+    color: colors.white,
     marginTop: '2%',
     marginLeft: '3%',
     fontSize: 21,
@@ -121,7 +122,7 @@ const styles = reactStyles({
     fontWeight: 500
   },
   mainTitle: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 48,
     width: '100%',
     marginTop: '3%',
@@ -153,7 +154,7 @@ const styles = reactStyles({
     minWidth: '12px',
     marginLeft: '3px',
     marginBottom: '2px',
-    backgroundColor: '#2691D0',
+    backgroundColor: colors.blue[0],
     borderRadius: '50%',
     display: 'inline-block'
   },
@@ -169,7 +170,7 @@ const styles = reactStyles({
   breadcrumbTitle: {
     transform: 'translate(-40%)',
     textAlign: 'center',
-    color: '#2691D0'
+    color: colors.blue[0]
   },
 
   divider: {
@@ -189,14 +190,14 @@ const styles = reactStyles({
   panelTitle: {
     width: '100%',
     marginLeft: '5%',
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 28,
     fontWeight: 'bold'
   },
   panelContents: {
     paddingLeft: '5%',
     marginTop: '1%',
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 14,
     textAlign: 'left'
   },

@@ -7,8 +7,9 @@ import {ResourceCardBase} from 'app/components/card';
 import {baseStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {profileApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
+import {navigate, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import { Profile } from 'generated/fetch';
 
@@ -17,23 +18,23 @@ const styles = reactStyles({
     display: 'flex', flexDirection: 'column', paddingTop: '3%', paddingLeft: '3%'
   },
   mainHeader: {
-    color: '#FFFFFF', fontSize: 28, fontWeight: 400,
+    color: colors.white, fontSize: 28, fontWeight: 400,
     letterSpacing: 'normal', marginBottom: '0.2rem'
   },
   cardStyle: {
     boxShadow: '0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12)',
     padding: '0.75rem', minHeight: '305px', maxHeight: '305px', maxWidth: '250px',
-    minWidth: '250px', justifyContent: 'space-between', backgroundColor: '#fff'
+    minWidth: '250px', justifyContent: 'space-between', backgroundColor: colors.white
   },
   cardHeader: {
-    color: '#262262', fontSize: '16px', lineHeight: '19px', fontWeight: 600,
+    color: colors.purple[0], fontSize: '16px', lineHeight: '19px', fontWeight: 600,
     marginBottom: '0.5rem'
   },
   cardDescription: {
-    color: '#262262', fontSize: '14px', lineHeight: '20px'
+    color: colors.purple[0], fontSize: '14px', lineHeight: '20px'
   },
   infoBoxButton: {
-    color: '#FFFFFF', height: '49px', borderRadius: '5px', marginLeft: '1rem',
+    color: colors.white, height: '49px', borderRadius: '5px', marginLeft: '1rem',
     maxWidth: '20rem'
   },
   warningIcon: {
@@ -41,13 +42,26 @@ const styles = reactStyles({
     height: '20px', width: '20px'
   },
   warningModal: {
-    color: '#262262', fontSize: '18px', lineHeight: '28px', flexDirection: 'row',
+    color: colors.purple[0], fontSize: '18px', lineHeight: '28px', flexDirection: 'row',
     boxShadow: 'none', fontWeight: 600, display: 'flex', justifyContent: 'center'
   },
   closeableWarning: {
     margin: '0px 1rem 1rem 0px', display: 'flex', justifyContent: 'space-between'
   }
 });
+
+function redirectToGoogleSecurity(): void {
+  let url = 'https://myaccount.google.com/security';
+  const {profile} = userProfileStore.getValue();
+  // The profile should always be available at this point, but avoid making an
+  // implicit hard dependency on that, since the authuser'less URL is still useful.
+  if (profile.username) {
+    // Attach the authuser, in case users are using Google multilogin - their
+    // AoU researcher account is unlikely to be their primary Google login.
+    url += `?authuser=${profile.username}`;
+  }
+  window.open(url, '_blank');
+}
 
 function redirectToNiH(): void {
   const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
@@ -73,7 +87,7 @@ export const RegistrationTasks = [
     isComplete: (profile: Profile) => {
       return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
     },
-    onClick: () => window.open('https://myaccount.google.com/security', '_blank')
+    onClick: redirectToGoogleSecurity
   }, {
     key: 'complianceTraining',
     title: 'Complete Online Training',

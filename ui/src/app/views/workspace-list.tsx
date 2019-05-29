@@ -20,6 +20,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {
   displayDate,
   reactStyles,
@@ -61,7 +62,7 @@ const styles = reactStyles({
     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
   },
   permissionBox: {
-    color: '#FFFFFF', height: '1rem', width: '3rem', fontSize: 10, textAlign: 'center',
+    color: colors.white, height: '1rem', width: '3rem', fontSize: 10, textAlign: 'center',
     borderRadius: '0.2rem', padding: 0
   }
 });
@@ -173,8 +174,9 @@ export class WorkspaceCard extends React.Component<
               </Clickable>
             </div>
             <div style={styles.workspaceDescription}>{wp.workspace.description}</div>
-            {wp.isPending && <div style={{color: '#f8c954'}}>
-              <ClrIcon shape='exclamation-triangle' className='is-solid' style={{fill: '#f8c954'}}/>
+            {wp.isPending && <div style={{color: colors.yellow[0]}}>
+              <ClrIcon shape='exclamation-triangle' className='is-solid'
+                       style={{fill: colors.yellow[0]}}/>
               Pending Approval
             </div>}
             {wp.isRejected && <div style={{color: '#f58771'}}>

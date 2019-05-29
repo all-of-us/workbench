@@ -17,7 +17,7 @@ const styles = reactStyles({
   header: {
     fontWeight: 600,
     lineHeight: '24px',
-    color: '#262262',
+    color: colors.purple[0],
     fontSize: '16px'
   },
   infoIcon: {
@@ -80,7 +80,7 @@ const styles = reactStyles({
     paddingBottom: '0.5rem',
     borderBottom: '1px solid #4356a7',
     marginBottom: '0.6rem',
-    color: '#262262',
+    color: colors.purple[0],
     fontSize: '16px',
     fontWeight: 600,
     lineHeight: '19px'

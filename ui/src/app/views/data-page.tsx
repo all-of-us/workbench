@@ -6,18 +6,16 @@ import {CardButton, TabButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {cohortsApi, conceptsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {
   convertToResources,
-  mapAndFilterResourceList,
   ResourceType
 } from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CreateConceptSetModal} from 'app/views/concept-set-create-modal';
 import {ResourceCard} from 'app/views/resource-card';
-import {DomainInfo, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
+import {RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {
   cardButtonArea: {
@@ -90,7 +88,8 @@ const descriptions = {
 export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {activeTab: Tabs, resourceList: RecentResource[], isLoading: boolean,
-    creatingConceptSet: boolean, conceptDomainList: DomainInfo[]}> {
+    creatingConceptSet: boolean, existingDataSetName: string[],
+    existingCohortName: string[], existingConceptSetName: string[]}> {
 
   constructor(props) {
     super(props);
@@ -99,16 +98,14 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       resourceList: [],
       isLoading: true,
       creatingConceptSet: false,
-      conceptDomainList: undefined
+      existingCohortName: [],
+      existingConceptSetName: [],
+      existingDataSetName: []
     };
   }
 
   componentDidMount() {
-    const {namespace, id} = this.props.workspace;
     this.loadResources();
-    conceptsApi().getDomainInfo(namespace, id).then((response) => {
-      this.setState({conceptDomainList: response.items});
-    });
   }
 
   async loadResources() {
@@ -123,6 +120,11 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
         dataSetApi().getDataSetsInWorkspace(namespace, id)
       ]);
+      this.setState({
+        existingCohortName: cohorts.items.map(cohort => cohort.name),
+        existingConceptSetName: conceptSets.items.map(conceptSet => conceptSet.name),
+        existingDataSetName: dataSets.items.map(dataSet => dataSet.name)
+      });
       let list: RecentResource[] = [];
       list = list.concat(convertToResources(cohorts.items, namespace,
         id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.COHORT));
@@ -142,9 +144,20 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
+  getExistingNameList(resource) {
+    if (resource.dataSet) {
+      return this.state.existingDataSetName;
+    } else if (resource.conceptSet) {
+      return this.state.existingConceptSetName;
+    } else if (resource.cohort) {
+      return this.state.existingCohortName;
+    }
+    return [];
+  }
+
   render() {
     const {namespace, id} = this.props.workspace;
-    const {activeTab, isLoading, resourceList, creatingConceptSet, conceptDomainList} = this.state;
+    const {activeTab, isLoading, resourceList} = this.state;
     const filteredList = resourceList.filter((resource) => {
       if (activeTab === Tabs.SHOWALL) {
         return true;
@@ -242,22 +255,12 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
             return <ResourceCard key={index}
                                  resourceCard={resource}
                                  onUpdate={() => this.loadResources()}
+                                 existingNameList={this.getExistingNameList(resource)}
             />;
           })}
           {isLoading && <SpinnerOverlay></SpinnerOverlay>}
         </div>
       </FadeBox>
-      {creatingConceptSet &&
-      <CreateConceptSetModal onCreate={() => {
-        this.loadResources().then(() => {
-          this.setState({creatingConceptSet: false});
-        });
-      }}
-      onClose={() => {
-        this.setState({creatingConceptSet: false});
-      }}
-      conceptDomainList={conceptDomainList}
-      existingConceptSets={mapAndFilterResourceList(resourceList, 'conceptSet')}/>}
     </React.Fragment>;
   }
 });

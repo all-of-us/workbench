@@ -191,6 +191,9 @@ public class DataSetServiceImpl implements DataSetService {
           .concat(valuesLinkingPair.getJoins().stream().distinct().collect(Collectors.joining(" ")));
 
       // CONCEPT SETS HERE:
+      if (conceptSetsSelected.stream().map(conceptSet -> conceptSet.getConceptIds()).count() == 0) {
+        throw new BadRequestException("Concept Sets must contain at least one concept");
+      }
       String conceptSetQueries = conceptSetsSelected.stream().filter(cs -> d == cs.getDomainEnum())
           .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
           .collect(Collectors.joining(", "));

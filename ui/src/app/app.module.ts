@@ -32,7 +32,6 @@ import {CohortActionsComponent} from './views/cohort-actions';
 import {CohortListComponent} from './views/cohort-list';
 import {ConceptAddModalComponent} from './views/concept-add-modal';
 import {ConceptHomepageComponent} from './views/concept-homepage';
-import {CreateConceptSetModalComponent} from './views/concept-set-create-modal';
 import {ConceptSetDetailsComponent} from './views/concept-set-details';
 import {ConceptSetListComponent} from './views/concept-set-list';
 import {ConceptTableComponent} from './views/concept-table';
@@ -81,7 +80,6 @@ import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
-import { HighlightSearchComponent } from './highlight-search/highlight-search.component';
 import {ToolTipComponent} from './views/tooltip/component';
 
 
@@ -142,7 +140,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppComponent,
     BreadcrumbComponent,
     BugReportComponent,
-    CreateConceptSetModalComponent,
     CohortActionsComponent,
     CohortListComponent,
     ConceptAddModalComponent,
@@ -177,7 +174,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     WorkspaceShareComponent,
     WorkspaceWrapperComponent,
     HomepageComponent,
-    HighlightSearchComponent,
     ResetClusterButtonComponent,
   ],
   providers: [

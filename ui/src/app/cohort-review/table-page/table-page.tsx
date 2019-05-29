@@ -13,6 +13,7 @@ import {Button} from 'app/components/buttons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {
   currentCohortStore,
@@ -52,7 +53,7 @@ const styles = reactStyles({
     padding: 0,
     border: 0,
     fontSize: '14px',
-    color: '#2691d0',
+    color: colors.blue[0],
     background: 'transparent',
     cursor: 'pointer',
   },

@@ -1,6 +1,7 @@
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -24,7 +25,7 @@ const css = `
 const styles = reactStyles({
   dataBlue: {
     backgroundColor: '#216FB4',
-    color: 'white',
+    color: colors.white,
     height: '24px',
     fontSize: '10px',
     textAlign: 'end',
@@ -64,13 +65,13 @@ const styles = reactStyles({
     whiteSpace: 'nowrap',
     fontSize: '10px',
     fontWeight: 'bold',
-    color: '#4a4a4a',
+    color: colors.gray[0],
   },
   count: {
     paddingLeft: '0.2rem',
     fontSize: '10px',
     fontWeight: 'bold',
-    color: '#4a4a4a',
+    color: colors.gray[0],
   },
   containerMargin: {
     margin: 0,
@@ -83,7 +84,7 @@ const styles = reactStyles({
   },
   chartHeading: {
     textAlign: 'center',
-    color: '#4A4A4A',
+    color: colors.gray[0],
     fontSize: '12px',
     fontWeight: 'bold',
     whiteSpace: 'nowrap',
@@ -92,7 +93,7 @@ const styles = reactStyles({
     paddingBottom: '0.5rem',
     fontSize: '16px',
     fontWeight: 600,
-    color: '#262262',
+    color: colors.purple[0],
     textTransform: 'capitalize',
     lineHeight: '22px',
   }

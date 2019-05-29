@@ -15,12 +15,12 @@
            [popperPlacement]="'bottom'">
       <strong *ngIf="showType">{{ parameter.domain }} </strong>
       <span class="text-size text-muted">{{ parameter.name }} </span>
-      <!--<span class="text-muted">{{ attribute }}</span>-->
+      <span class="text-muted">{{ attribute }}</span>
     </small>
   </span>
   <popper-content #codesPopper>
   <p class="tooltip-text" [style.margin]="'0'">{{parameter.name}}</p>
-  <!--<p class="tooltip-text" [style.margin]="'0'">{{attribute}}</p>-->
-  <!--<p *ngIf="_type==='Deceased'" class="tooltip-text" [style.margin]="'0'">{{ _type }}</p>-->
+  <p class="tooltip-text" [style.margin]="'0'">{{attribute}}</p>
+  <p *ngIf="_type==='Deceased'" class="tooltip-text" [style.margin]="'0'">{{ _type }}</p>
   </popper-content>
 </div>

@@ -2,6 +2,7 @@ import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore, filterStateStore, visitsFilterOptions} from 'app/cohort-review/review-state.service';
 import {DatePicker, Select, TextInput, ValidationError} from 'app/components/inputs';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -45,7 +46,7 @@ const styles = reactStyles({
     padding: 0,
     border: 0,
     fontSize: '14px',
-    color: '#2691d0',
+    color: colors.blue[0],
     background: 'transparent',
     cursor: 'pointer',
   },
@@ -53,11 +54,11 @@ const styles = reactStyles({
     marginTop: 0,
     fontSize: '20px',
     fontWeight: 600,
-    color: '#262262',
+    color: colors.purple[0],
   },
   description: {
     margin: '0.5rem 0',
-    color: '#000000',
+    color: colors.black[0],
   },
   headerSection: {
     float: 'left',
@@ -79,7 +80,7 @@ const styles = reactStyles({
   },
   participantText: {
     fontSize: '14px',
-    color: '#262262',
+    color: colors.purple[0],
   },
   filterHeader: {
     height: '38%',
@@ -91,7 +92,7 @@ const styles = reactStyles({
     margin: '0 4% 0 1%',
     padding: '5px 7px 0',
     fontSize: '12px',
-    color: '#2691d0',
+    color: colors.blue[0],
     border: 0,
     borderBottom: 0,
     background: 'transparent',
@@ -111,8 +112,8 @@ const styles = reactStyles({
     padding: '0.5px 3.5px',
     margin: '6px 5px 0 0',
     fontSize: '10px',
-    color: '#2691d0',
-    border: '1px solid #2691d0',
+    color: colors.blue[0],
+    border: '1px solid ' + colors.blue[0],
     borderRadius: '3px',
     background: 'transparent',
     cursor: 'pointer',
@@ -142,8 +143,8 @@ const otherStyles = {
   },
   navBtnActive: {
     ...styles.navBtn,
-    color: '#2691D0',
-    border: '1px solid #2691d0',
+    color: colors.blue[0],
+    border: '1px solid ' + colors.blue[0],
     cursor: 'pointer',
   },
   navBtnDisabled: {

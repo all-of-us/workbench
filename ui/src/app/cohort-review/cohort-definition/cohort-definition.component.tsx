@@ -1,5 +1,6 @@
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {typeToTitle} from 'app/cohort-search/utils';
+import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import * as React from 'react';
 
@@ -15,7 +16,7 @@ const styles = reactStyles({
   defTitle: {
     fontSize: '16px',
     fontWeight: 600,
-    color: '#262262'
+    color: colors.purple[0]
   },
   wrapper: {
     width: '100%',
@@ -40,7 +41,7 @@ const styles = reactStyles({
   },
   groupBackground: {
     backgroundColor: '#E2E2EA',
-    color: 'black',
+    color: colors.black[0],
     padding: '0.3rem 0.6rem',
     margin: '0.7rem 0rem',
     display: 'inline-block'

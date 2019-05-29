@@ -17,6 +17,7 @@ import {ConceptAddModal} from 'app/views/concept-add-modal';
 import {ConceptNavigationBar} from 'app/views/concept-navigation-bar';
 import {ConceptTable} from 'app/views/concept-table';
 import {SlidingFabReact} from 'app/views/sliding-fab';
+import * as Color from 'color';
 import {
   Concept,
   Domain,
@@ -29,7 +30,8 @@ import {
 const styles = reactStyles({
   searchBar: {
     marginLeft: '1%', boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)',
-    height: '3rem', width: '64.3%', backgroundColor: '#A3D3F232', fontSize: '16px',
+    height: '3rem', width: '64.3%',
+    backgroundColor: Color('#A3D3F2').alpha(0.2).toString(), fontSize: '16px',
     lineHeight: '19px', paddingLeft: '2rem'
   },
   domainBoxHeader: {
@@ -39,7 +41,7 @@ const styles = reactStyles({
     color: colors.blue[0], lineHeight: '18px', fontWeight: 600, letterSpacing: '0.05rem'
   },
   conceptText: {
-    marginTop: '0.3rem', fontSize: '14px', fontWeight: 400, color: '#4A4A4A',
+    marginTop: '0.3rem', fontSize: '14px', fontWeight: 400, color: colors.gray[0],
     display: 'flex', flexDirection: 'column', marginBottom: '0.3rem'
   },
   domainHeaderLink: {
@@ -412,6 +414,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                             loading={searchLoading}
                             onSelectConcepts={this.selectConcepts.bind(this)}
                             placeholderValue={this.noConceptsConstant}
+                            searchTerm={this.state.currentSearchString}
                             selectedConcepts={conceptsToAdd}
                             reactKey={selectedDomain.name}
                             nextPage={(page) => this.getNextConceptSet(page)}/>

@@ -11,12 +11,12 @@ export const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook?: Function,
   onRenameCohort?: Function, onOpenJupyterLabNotebook?: any, onCloneResource?: Function,
   onCopyResource?: Function, onDeleteResource?: Function, onEdit?: Function,
-  onExportDataSet: Function, onReviewCohort?: Function
+  onExportDataSet: Function, onReviewCohort?: Function, onRenameDataSet?: Function
 }> = ({
         disabled, resourceType, onRenameNotebook = () => {}, onRenameCohort = () => {},
         onOpenJupyterLabNotebook = () => {}, onCloneResource = () => {}, onCopyResource = () => {},
         onDeleteResource = () => {}, onEdit = () => {}, onExportDataSet = () => {},
-        onReviewCohort = () => {}
+        onReviewCohort = () => {}, onRenameDataSet = () => {}
       }) => {
   return <PopupTrigger
     data-test-id='resource-card-menu'
@@ -56,12 +56,13 @@ export const ResourceCardMenu: React.FunctionComponent<{
         }],
         ['conceptSet', () => {
           return <React.Fragment>
-            <MenuItem icon='pencil' onClick={onEdit}>Edit</MenuItem>
+            <MenuItem icon='pencil' onClick={onEdit}>Rename</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
           </React.Fragment>;
         }],
         ['dataSet', () => {
           return <React.Fragment>
+            <MenuItem icon='pencil' onClick={onRenameDataSet}>Rename Data Set</MenuItem>
             <MenuItem icon='pencil' onClick={onEdit}>Edit</MenuItem>
             <MenuItem icon='clipboard' onClick={onExportDataSet}>Export to Notebook</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
