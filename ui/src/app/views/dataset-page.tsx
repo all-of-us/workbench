@@ -5,7 +5,9 @@ import * as React from 'react';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
+
 import {
   cohortsApi,
   conceptsApi,
@@ -378,6 +380,33 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       }
     }
 
+    isEllipsisActive(text) {
+      // For Data table with column title as active text, enable the tooltip if column's scroll
+      // width is greater than offsetWidth as that represents the textOverflow style has been
+      // applied and it has ellipsis at the end
+
+      const column = document.getElementsByClassName('p-column-title');
+      for (let i = 0; i < column.length; i++) {
+        const element = column[i].children[0] as HTMLElement;
+        if (element.innerText === text) {
+          if (element.offsetWidth < element.scrollWidth) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    getHeaderValue(value) {
+      const text = value.value;
+      return <TooltipTrigger side='top' content={text} disabled={this.isEllipsisActive(text)}>
+        <div style={{overflow: 'hidden', textOverflow: 'ellipsis'}}>
+          {text}
+        </div>
+      </TooltipTrigger>;
+    }
+
+
     renderPreviewDataTable() {
       const filteredPreviewData =
           this.state.previewList.filter(
@@ -387,9 +416,9 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                         style={{width: '100%'}}
                         value={this.getDataTableValue(filteredPreviewData.values)}>
         {filteredPreviewData.values.map(value =>
-            <Column header={value.value}
-                    headerStyle={{textAlign: 'left', width: '5rem', wordBreak: 'break-all'}}
-                    style={{width: '5rem'}} field={value.value}/>
+          <Column header={this.getHeaderValue(value)}
+                  headerStyle={{textAlign: 'left', width: '5rem'}} style={{width: '5rem'}}
+                  field={value.value}/>
         )}
       </DataTable>;
     }
