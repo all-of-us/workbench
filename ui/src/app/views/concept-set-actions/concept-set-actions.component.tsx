@@ -2,17 +2,17 @@ import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
-import {cohortsApi} from 'app/services/swagger-fetch-clients';
+import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
-import {Cohort} from 'generated/fetch';
+import {ConceptSet} from 'generated/fetch';
 import * as React from 'react';
 
 const styles = reactStyles({
-  cohortsHeader: {
+  conceptSetsHeader: {
     color: colors.blue[7],
     fontSize: '20px',
     lineHeight: '24px',
@@ -53,60 +53,64 @@ const disabledButton = {
 
 const actionCards = [
   {
-    title: 'Create Review Sets',
-    description: `The review set feature allows you to select a subset of your cohort to review
-       participants row-level data and add notes and annotations.`,
-    action: 'review'
-  },
-  {
     title: 'Export to a Notebook',
     description: `Data can be exported to a cloud-based Jupyter notebook for analysis using R or
        Python programming language.`,
     action: 'notebook'
   },
   {
-    title: 'Create a Dataset',
-    description: `Here, you can build and preview a dataset for one or more cohorts by
+    title: 'Create a Data Set',
+    description: `Here, you can build and preview a data set for one or more cohorts by
        selecting the desired concept sets and values for the cohorts.`,
-    action: 'dataset'
+    action: 'dataSet'
+  },
+  {
+    title: 'Create another Concept Set',
+    description: `Here, you can create another concept set for the same or a different domain.`,
+    action: 'conceptSet'
   },
 ];
 
-const CohortActions = withCurrentWorkspace()(
-  class extends React.Component<{workspace: WorkspaceData}, {cohort: Cohort}> {
+interface State {
+  conceptSet: ConceptSet;
+}
+
+interface Props {
+  workspace: WorkspaceData
+}
+
+export const ConceptSetActions = withCurrentWorkspace()(
+  class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
-      this.state = {cohort: currentCohortStore.getValue()};
+      this.state = {
+        conceptSet: undefined
+      };
     }
 
     componentDidMount(): void {
-      const {cohort} = this.state;
-      if (!cohort) {
-        const cid = urlParamsStore.getValue().cid;
-        if (cid) {
+      const {conceptSet} = this.state;
+      if (!conceptSet) {
+        const csid = urlParamsStore.getValue().csid;
+        if (csid) {
           const {namespace, id} = this.props.workspace;
-          cohortsApi().getCohort(namespace, id, cid).then(c => {
-            if (c) {
-              currentCohortStore.next(c);
-              this.setState({cohort: c});
+          conceptSetsApi().getConceptSet(namespace, id, csid).then(cs => {
+            if (cs) {
+              this.setState({conceptSet: cs});
             } else {
-              navigate(['workspaces', namespace, id, 'cohorts']);
+              navigate(['workspaces', namespace, id, 'concepts']);
             }
           });
         }
       }
     }
 
-    navigateTo = (action: string): void => {
-      const {cohort} = this.state;
+    navigateTo(action: string): void {
       const {namespace, id} = this.props.workspace;
       let url = `/workspaces/${namespace}/${id}/`;
       switch (action) {
-        case 'cohort':
-          url += `cohorts/build?cohortId=${cohort.id}`;
-          break;
-        case 'review':
-          url += `cohorts/${cohort.id}/review`;
+        case 'conceptSet':
+          url += `concepts`;
           break;
         case 'notebook':
           url += 'notebooks';
@@ -119,20 +123,18 @@ const CohortActions = withCurrentWorkspace()(
     }
 
     render() {
-      const {cohort} = this.state;
+      const {conceptSet} = this.state;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
-        {cohort && <React.Fragment>
-          <h3 style={styles.cohortsHeader}>Cohort Saved Successfully</h3>
+        {conceptSet && <React.Fragment>
+          <h3 style={styles.conceptSetsHeader}>Concept Set Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
-            The cohort
-             <a
-               style={{color: '#5DAEE1', margin: '0 4px'}}
-               onClick={() => this.navigateTo('cohort')}>
-                {cohort.name}
-             </a>
-             has been saved and can now be used in analysis and concept sets.
+            The concept set
+            <a style={{color: '#5DAEE1', margin: '0 4px'}}>
+              {conceptSet.name}
+            </a>
+            has been saved and can now be used in analysis and concept sets.
           </div>
-          <h3 style={{...styles.cohortsHeader, marginTop: '1.5rem'}}>What Next?</h3>
+          <h3 style={{...styles.conceptSetsHeader, marginTop: '1.5rem'}}>What Next?</h3>
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
               const disabled = card.action === 'notebook' ||
@@ -165,9 +167,9 @@ const CohortActions = withCurrentWorkspace()(
 @Component({
   template: '<div #root></div>'
 })
-export class CohortActionsComponent extends ReactWrapperBase {
+export class ConceptSetActionsComponent extends ReactWrapperBase {
 
   constructor() {
-    super(CohortActions, []);
+    super(ConceptSetActions, []);
   }
 }
