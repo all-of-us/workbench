@@ -94,7 +94,7 @@ public class Workspace {
   private boolean otherPurpose;
   private String otherPurposeDetails;
   private String additionalNotes;
-  private String softwareChoice;
+  private String reasonForAllOfUs;
   private String intendedStudy;
   private String anticipatedFindings;
 
@@ -346,10 +346,10 @@ public class Workspace {
     this.additionalNotes = additionalNotes;
   }
 
-  @Column(name = "rp_software_choice")
-  public String getSoftwareChoice() { return this.softwareChoice; }
+  @Column(name = "rp_reason_for_all_of_us")
+  public String getReasonForAllOfUs() { return this.reasonForAllOfUs; }
 
-  public void setSoftwareChoice(String softwareChoice) { this.softwareChoice = softwareChoice; }
+  public void setReasonForAllOfUs(String reasonForAllOfUs) { this.reasonForAllOfUs = reasonForAllOfUs; }
 
   @Column(name = "rp_intended_study")
   public String getIntendedStudy() { return this.intendedStudy; }

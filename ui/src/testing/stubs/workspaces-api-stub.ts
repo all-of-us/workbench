@@ -44,7 +44,7 @@ export const workspaceStubs = [
       populationHealth: false,
       reviewRequested: false,
       socialBehavioral: false,
-      softwareChoice: '',
+      reasonForAllOfUs: '',
     },
     userRoles: [
       {

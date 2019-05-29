@@ -97,7 +97,7 @@ export class WorkspacesServiceStub {
         populationHealth: false,
         reviewRequested: false,
         socialBehavioral: false,
-        softwareChoice: '',
+        reasonForAllOfUs: '',
       },
       userRoles: [
         {

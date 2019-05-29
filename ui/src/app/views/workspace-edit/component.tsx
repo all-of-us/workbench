@@ -9,81 +9,73 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
-import {reactStyles} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {currentWorkspaceStore, navigate, userProfileStore} from 'app/utils/navigation';
 import {CdrVersion, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 
-export const ResearchPurposeItems = {
-  diseaseFocusedResearch: {
+export const ResearchPurposeItems = [
+  {
+    shortName: 'diseaseFocusedResearch',
     shortDescription: 'Disease-focused research',
     longDescription: 'The primary purpose of the research is to learn more about a particular \
     disease or disorder (for example, type 2 diabetes), a trait (for example, blood pressure), \
     or a set of related conditions (for example, autoimmune diseases, psychiatric disorders).'
-  },
-  methodsDevelopment: {
+  }, {
+    shortName: 'methodsDevelopment',
     shortDescription: 'Methods development/validation study',
     longDescription: 'The primary purpose of the use of AoU data is to develop and/or  \
     validate specific methods/tools for analyzing or interpreting data (e.g. statistical  \
     methods for describing data trends, developing more powerful methods to detect \
     gene-environment or other types of interactions in genome-wide association studies).'
-  },
-  controlSet: {
+  }, {
+    shortName: 'controlSet',
     shortDescription: 'Research Control',
     longDescription: 'AoU data will be used as a reference or control dataset \
       for comparison with another dataset from a different resource (e.g. Case-control \
       studies).'
-  },
-  ancestry: {
+  }, {
+    shortName: 'ancestry',
     shortDescription: 'Genetic Research',
     longDescription: 'Research concerning genetics (i.e. the study of genes, genetic variations \
       and heredity) in the context of diseases or ancestry.'
-  },
-  socialBehavioral: {
+  }, {
+    shortName: 'socialBehavioral',
     shortDescription: 'Social/Behavioral Research',
     longDescription: 'The research focuses on the social or behavioral phenomena or determinants \
       of health.'
-  },
-  populationHealth: {
+  }, {
+    shortName: 'populationHealth',
     shortDescription: 'Population Health/Public Health Research',
     longDescription: 'The primary purpose of using AoU data is to investigate health behaviors, \
       outcomes, access and disparities in populations.'
-  },
-  drugDevelopment: {
+  }, {
+    shortName: 'drugDevelopment',
     shortDescription: 'Drug/Therapeutics Development Research',
     longDescription: 'Primary focus of the research is drug/therapeutics development. The data \
       will be used to understand treatment-gene interactions or treatment outcomes relevant \
       to the therapeutic(s) of interest.'
-  },
-  population: {
-    shortDescription: 'Restricted to a specific population',
-    longDescription: 'This research will focus on a specific population group. \
-    For example: a specific gender, age group or ethnic group.'
-  },
-  commercialPurpose: {
+  },  {
+    shortName: 'commercialPurpose',
     shortDescription: 'For-Profit Purpose',
     longDescription: 'The data will be used by a for-profit entity for research or product \
       or service development (e.g. for understanding drug responses as part of a \
       pharmaceutical company\'s drug development or market research efforts).'
-  },
-  educational: {
+  }, {
+    shortName: 'educational',
     shortDescription: 'Educational Purpose',
     longDescription: 'The data will be used for education purposes (e.g. for a college research \
       methods course, to educate students on population-based research approaches).'
-  },
-  otherPurpose: {
+  }, {
+    shortName: 'otherPurpose',
     shortDescription: 'Other Purpose',
     longDescription: 'If your Purpose of Use is different from the options listed above, please \
       select \"Other Purpose\" and provide details regarding your purpose of data use here \
       (500 character limit).'
-  },
-  requestReview: {
-    shortDescription: 'Request a review of your research purpose'
   }
-};
+];
 
 export const toolTipText = {
   header: `A Workspace is your place to store and analyze data for a specific project.Each
@@ -132,6 +124,40 @@ export const researchPurposeQuestions = [
       a focus on comparative analysis of a specific demographic group (for example \
       a group based on race/ethnicity, gender, or age)?',
     description: ['']
+  }
+];
+
+export const specificPopulations = [
+  {
+    label: 'Race/Ethnicity',
+    object: SpecificPopulationEnum.RACEETHNICITY
+  }, {
+    label: 'Age Groups',
+    object: SpecificPopulationEnum.AGEGROUPS
+  }, {
+    label: 'Sex',
+    object: SpecificPopulationEnum.SEX
+  }, {
+    label: 'Gender Identity',
+    object: SpecificPopulationEnum.GENDERIDENTITY
+  }, {
+    label: 'Sexual Orientation',
+    object: SpecificPopulationEnum.SEXUALORIENTATION
+  }, {
+    label: 'Geography (e.g. Rural, urban, suburban, etc.)',
+    object: SpecificPopulationEnum.GEOGRAPHY
+  }, {
+    label: 'Disability status',
+    object: SpecificPopulationEnum.DISABILITYSTATUS
+  }, {
+    label: 'Access to care',
+    object: SpecificPopulationEnum.ACCESSTOCARE
+  }, {
+    label: 'Education level',
+    object: SpecificPopulationEnum.EDUCATIONLEVEL
+  }, {
+    label: 'Income level',
+    object: SpecificPopulationEnum.INCOMELEVEL
   }
 ];
 
@@ -241,7 +267,7 @@ export const WorkspaceEditSection = (props) => {
     </div>
     }
     <div style={styles.text}>
-      {props.text}
+      {props.description}
     </div>
     <div>
       {props.children}
@@ -255,11 +281,11 @@ export const WorkspaceCategory = (props) => {
       onChange={e => props.onChange(e)}/>
     <div style={{display: 'flex', flexDirection: 'column', marginTop: '-0.2rem'}}>
       <label style={styles.shortDescription}>
-        {props.item.shortDescription}
+        {props.shortDescription}
       </label>
       <div>
         <label style={{...styles.longDescription, ...styles.text}}>
-          {props.item.longDescription}
+          {props.longDescription}
         </label>
         {props.children}
       </div>
@@ -314,6 +340,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             commercialPurpose: false,
             controlSet: false,
             diseaseFocusedResearch: false,
+            diseaseOfFocus: '',
             drugDevelopment: false,
             educational: false,
             intendedStudy: '',
@@ -325,7 +352,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             populationHealth: false,
             reviewRequested: false,
             socialBehavioral: false,
-            softwareChoice: '',
+            reasonForAllOfUs: '',
           }
         },
         workspaceCreationConflictError: false,
@@ -339,7 +366,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     componentDidMount() {
       if (!this.isMode(WorkspaceEditMode.Create)) {
-        this.setState({workspace : this.props.workspace});
+        this.setState({workspace : {
+          ...this.props.workspace,
+            // Replace potential nulls with empty string or empty array
+          researchPurpose: {
+            ...this.props.workspace.researchPurpose,
+            populationDetails: !this.props.workspace.researchPurpose.populationDetails ?
+              [] : this.props.workspace.researchPurpose.populationDetails,
+            diseaseOfFocus: !this.props.workspace.researchPurpose.diseaseOfFocus ?
+              '' : this.props.workspace.researchPurpose.diseaseOfFocus}
+        }});
         if (this.isMode(WorkspaceEditMode.Duplicate)) {
           this.setState({workspace: {
             ...this.props.workspace,
@@ -393,12 +429,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         rp.populationHealth || rp.socialBehavioral;
     }
 
+    noSpecificPopulationSelected(): boolean {
+      return this.state.workspace.researchPurpose.population &&
+        this.state.workspace.researchPurpose.populationDetails.length === 0;
+    }
+
     disableButton(): boolean {
       const rp = this.state.workspace.researchPurpose;
       return this.isEmpty(this.state.workspace, 'name') ||
         this.isEmpty(rp, 'intendedStudy') ||
         this.isEmpty(rp, 'anticipatedFindings') ||
-        this.isEmpty(rp, 'softwareChoice') || !this.categoryIsSelected();
+        this.isEmpty(rp, 'reasonForAllOfUs') ||
+        !this.categoryIsSelected() || this.noSpecificPopulationSelected();
     }
 
     updateResearchPurpose(category, value) {
@@ -491,6 +533,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return this.props.routeConfigData.mode === mode;
     }
 
+    sliceLength(obj) {
+      return obj.length / 2 + 1;
+    }
+
     render() {
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '95%'}}>
@@ -528,13 +574,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                  style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '1.2rem'}}
           onChange={v => this.setState({cloneUserRole: v})}/>
           <WorkspaceEditSection header='Copy Original workspace Collaborators'
-            text='Share cloned workspace with same collaborators'/>
+            description='Share cloned workspace with same collaborators'/>
         </div>
         }
         <WorkspaceEditSection header='Billing Account' subHeader='National Institutes of Health'
             tooltip={toolTipText.billingAccount}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
-            text={['The AoU Research Program requires each user of AoU data to provide a \
+            description={['The AoU Research Program requires each user of AoU data to provide a \
              meaningful description of the intended purpose of data use for each Workspace they \
              create. The responses provided below will be posted publicly in the AoU Research Hub \
              website to inform the AoU Research Participants.  Therefore, please provide \
@@ -545,77 +591,65 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               to the project for which you are creating this particular Workspace.</i>
             ]}/>
         <WorkspaceEditSection header={researchPurposeQuestions[0].header}
-            text={researchPurposeQuestions[0].description} required>
-          <div style={{display: 'flex', flexDirection: 'row', flex: '1 1 0'}}>
-            <div style={{display: 'flex', flexDirection: 'column'}}>
-              <WorkspaceCategory style={{width: '100%'}}
-                 item={ResearchPurposeItems.diseaseFocusedResearch}
-                 value={this.state.workspace.researchPurpose.diseaseFocusedResearch}
-                 onChange={v => this.updateResearchPurpose('diseaseFocusedResearch', v)}>
-                <TooltipTrigger
-                  content='You must select disease focused research to enter a disease of focus'
-                  disabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}>
-                  <TextInput value={this.state.workspace.researchPurpose.diseaseOfFocus}
-                             style={{
-                               width: 'calc(50% - 2rem)',
-                               border: '1px solid #9a9a9',
-                               borderRadius: '5px'
-                             }}
-                             placeholder='Name of Disease' onChange={v =>
-                    this.setState(fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], v))}
-                       disabled={!this.state.workspace.researchPurpose.diseaseFocusedResearch}/>
-                </TooltipTrigger>
-              </WorkspaceCategory>
-              <WorkspaceCategory item={ResearchPurposeItems.ancestry}
-                 value={this.state.workspace.researchPurpose.ancestry}
-                 onChange={v => this.updateResearchPurpose('ancestry', v)}/>
-              <WorkspaceCategory item={ResearchPurposeItems.socialBehavioral}
-                 value={this.state.workspace.researchPurpose.socialBehavioral}
-                 onChange={v => this.updateResearchPurpose('socialBehavioral', v)}/>
-              <WorkspaceCategory item={ResearchPurposeItems.populationHealth}
-                 value={this.state.workspace.researchPurpose.populationHealth}
-                 onChange={v => this.updateResearchPurpose('populationHealth', v)}/>
-              <WorkspaceCategory item={ResearchPurposeItems.methodsDevelopment}
-                 value={this.state.workspace.researchPurpose.methodsDevelopment}
-                 onChange={v => this.updateResearchPurpose('methodsDevelopment', v)}/>
+            description={researchPurposeQuestions[0].description} required>
+          <div style={{display: 'flex', flexDirection: 'row'}}>
+            <div style={{display: 'flex', flexDirection: 'column', flex: '1 1 0'}}>
+              {ResearchPurposeItems.slice(0, this.sliceLength(ResearchPurposeItems))
+                .map((rp, i) =>
+                  <WorkspaceCategory shortDescription={rp.shortDescription} key={i}
+                    longDescription={rp.longDescription}
+                    value={this.state.workspace.researchPurpose[rp.shortName]}
+                    onChange={v => this.updateResearchPurpose(rp.shortName, v)}
+                    children={rp.shortName === 'diseaseFocusedResearch' ?
+                      <TooltipTrigger
+                        content='You must select disease focused research to enter
+                          a disease of focus'
+                        disabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}>
+                        <TextInput value={this.state.workspace.researchPurpose.diseaseOfFocus}
+                          style={{
+                            width: 'calc(50% - 2rem)',
+                            border: '1px solid #9a9a9',
+                            borderRadius: '5px'
+                          }}
+                          placeholder='Name of Disease' onChange={v =>
+                          this.setState(
+                            fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], v))}
+                          disabled={!this.state.workspace.researchPurpose.diseaseFocusedResearch}/>
+                      </TooltipTrigger> : undefined}/>
+              )}
             </div>
-            <div style={{display: 'flex', flexDirection: 'column'}}>
-              <WorkspaceCategory item={ResearchPurposeItems.controlSet}
-                 value={this.state.workspace.researchPurpose.controlSet}
-                 onChange={v => this.updateResearchPurpose('controlSet', v)}/>
-              <WorkspaceCategory item={ResearchPurposeItems.educational}
-                 value={this.state.workspace.researchPurpose.educational}
-                 onChange={v => this.updateResearchPurpose('educational', v)}/>
-              <WorkspaceCategory item={ResearchPurposeItems.commercialPurpose}
-                 value={this.state.workspace.researchPurpose.commercialPurpose}
-                 onChange={v => this.updateResearchPurpose('commercialPurpose', v)}/>
-              <WorkspaceCategory item={ResearchPurposeItems.otherPurpose}
-                 value={this.state.workspace.researchPurpose.otherPurpose}
-                 onChange={v => this.updateResearchPurpose('otherPurpose', v)}>
-                <TextArea value={this.state.workspace.researchPurpose.otherPurposeDetails}
-                          onChange={v => this.updateResearchPurpose('otherPurposeDetails', v)}
-                          disabled={!this.state.workspace.researchPurpose.otherPurpose}
-                          style={{marginTop: '0.5rem'}}/>
-              </WorkspaceCategory>
+            <div style={{display: 'flex', flexDirection: 'column', flex: '1 1 0'}}>
+              {ResearchPurposeItems.slice(this.sliceLength(ResearchPurposeItems))
+                .map((rp, i) =>
+                  <WorkspaceCategory shortDescription={rp.shortDescription}
+                    longDescription={rp.longDescription} key={i}
+                    value={this.state.workspace.researchPurpose[rp.shortName]}
+                    onChange={v => this.updateResearchPurpose(rp.shortName, v)}
+                    children={rp.shortName === 'otherPurpose' ?
+                      <TextArea value={this.state.workspace.researchPurpose.otherPurposeDetails}
+                        onChange={v => this.updateResearchPurpose('otherPurposeDetails', v)}
+                        disabled={!this.state.workspace.researchPurpose.otherPurpose}
+                        style={{marginTop: '0.5rem'}}/> : undefined}/>
+                )}
             </div>
           </div>
         </WorkspaceEditSection>
         <WorkspaceEditSection
           header={researchPurposeQuestions[1].header}
-          text={researchPurposeQuestions[1].description} required>
-          <TextArea value={this.state.workspace.researchPurpose.softwareChoice}
-                    onChange={v => this.updateResearchPurpose('softwareChoice', v)}
+          description={researchPurposeQuestions[1].description} required>
+          <TextArea value={this.state.workspace.researchPurpose.reasonForAllOfUs}
+                    onChange={v => this.updateResearchPurpose('reasonForAllOfUs', v)}
                     style={{marginTop: '0.5rem'}}/>
         </WorkspaceEditSection>
         <WorkspaceEditSection
           header={researchPurposeQuestions[2].header}
-          text={researchPurposeQuestions[2].description} required>
+          description={researchPurposeQuestions[2].description} required>
           <TextArea value={this.state.workspace.researchPurpose.intendedStudy}
                     onChange={v => this.updateResearchPurpose('intendedStudy', v)}
                     style={{marginTop: '0.5rem'}}/>
         </WorkspaceEditSection>
         <WorkspaceEditSection header={researchPurposeQuestions[3].header}
-                              text={researchPurposeQuestions[3].description} required>
+                              description={researchPurposeQuestions[3].description} required>
           <TextArea value={this.state.workspace.researchPurpose.anticipatedFindings}
                     onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
                     style={{marginTop: '0.5rem'}}/>
@@ -644,8 +678,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
-                         onChange={v => this.updateResearchPurpose('population', false)}
-                         checked={!this.state.workspace.researchPurpose.population}/>
+              onChange={v => this.updateResearchPurpose('population', false)}
+              checked={!this.state.workspace.researchPurpose.population}/>
             <label style={styles.text}>No, I am not interested in focusing on
               specific population(s) in my research.</label>
           </div>
@@ -656,62 +690,27 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <div style={{display: 'flex', flexDirection: 'row', flex: '1 1 0',
               marginTop: '0.5rem'}}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
-                <LabeledCheckBox label='Race/Ethnicity'
-                  value={this.specificPopulationSelected(SpecificPopulationEnum.RACEETHNICITY)}
-                  onChange={v =>
-                     this.updateSpecificPopulation(SpecificPopulationEnum.RACEETHNICITY, v)}
-                   disabled={!this.state.workspace.researchPurpose.population}/>
-                <LabeledCheckBox label='Age Groups'
-                   value={this.specificPopulationSelected(SpecificPopulationEnum.AGEGROUPS)}
-                   onChange={v =>
-                     this.updateSpecificPopulation(SpecificPopulationEnum.AGEGROUPS, v)}
-                   disabled={!this.state.workspace.researchPurpose.population}/>
-                <LabeledCheckBox label='Sex'
-                   value={this.specificPopulationSelected(SpecificPopulationEnum.SEX)}
-                   onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.SEX, v)}
-                   disabled={!this.state.workspace.researchPurpose.population}/>
-                <LabeledCheckBox label='Gender Identity'
-                   value={this.specificPopulationSelected(SpecificPopulationEnum.GENDERIDENTITY)}
-                   onChange={v =>
-                     this.updateSpecificPopulation(SpecificPopulationEnum.GENDERIDENTITY, v)}
-                   disabled={!this.state.workspace.researchPurpose.population}/>
-                <LabeledCheckBox label='Sexual Orientation'
-                   value={this.specificPopulationSelected(SpecificPopulationEnum.SEXUALORIENTATION)}
-                   onChange={v =>
-                     this.updateSpecificPopulation(SpecificPopulationEnum.SEXUALORIENTATION, v)}
-                   disabled={!this.state.workspace.researchPurpose.population}/>
-                <LabeledCheckBox label='Geography (e.g. Rural, urban, suburban, etc.)'
-                   value={this.specificPopulationSelected(SpecificPopulationEnum.GEOGRAPHY)}
-                   onChange={v =>
-                     this.updateSpecificPopulation(SpecificPopulationEnum.GEOGRAPHY, v)}
-                   disabled={!this.state.workspace.researchPurpose.population}/>
+                {specificPopulations.slice(0, specificPopulations.length / 2 + 1).map(i =>
+                  <LabeledCheckBox label={i.label} key={i.label}
+                                   value={this.specificPopulationSelected(i.object)}
+                                   onChange={v => this.updateSpecificPopulation(i.object, v)}
+                                   disabled={!this.state.workspace.researchPurpose.population}/>
+                )}
               </div>
               <div style={{display: 'flex', flexDirection: 'column'}}>
-                <LabeledCheckBox label='Disability status'
-                   value={this.specificPopulationSelected(SpecificPopulationEnum.DISABILITYSTATUS)}
-                   onChange={v =>
-                     this.updateSpecificPopulation(SpecificPopulationEnum.DISABILITYSTATUS, v)}
-                   disabled={!this.state.workspace.researchPurpose.population}/>
-                <LabeledCheckBox label='Access to care'
-                   value={this.specificPopulationSelected(SpecificPopulationEnum.ACCESSTOCARE)}
-                   onChange={v =>
-                     this.updateSpecificPopulation(SpecificPopulationEnum.ACCESSTOCARE, v)}
-                   disabled={!this.state.workspace.researchPurpose.population}/>
-                <LabeledCheckBox label='Education level'
-                   value={this.specificPopulationSelected(SpecificPopulationEnum.EDUCATIONLEVEL)}
-                   onChange={v =>
-                     this.updateSpecificPopulation(SpecificPopulationEnum.EDUCATIONLEVEL, v)}
-                   disabled={!this.state.workspace.researchPurpose.population}/>
-                <LabeledCheckBox label='Income level'
-                   value={this.specificPopulationSelected(SpecificPopulationEnum.INCOMELEVEL)}
-                   onChange={v =>
-                     this.updateSpecificPopulation(SpecificPopulationEnum.INCOMELEVEL, v)}
-                   disabled={!this.state.workspace.researchPurpose.population}/>
+                {specificPopulations.slice(specificPopulations.length / 2 + 1).map(i =>
+                  <LabeledCheckBox label={i.label} key={i.label}
+                                   value={this.specificPopulationSelected(i.object)}
+                                   onChange={v => this.updateSpecificPopulation(i.object, v)}
+                                   disabled={!this.state.workspace.researchPurpose.population}/>
+                )}
                 <LabeledCheckBox label='Other'
                    value={this.specificPopulationSelected(SpecificPopulationEnum.OTHER)}
                    onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
                    disabled={!this.state.workspace.researchPurpose.population}/>
-                <TextInput type='text' autoFocus placeholder='Please specify'/>
+                <TextInput type='text' autoFocus placeholder='Please specify'
+                           disabled={!this.state.workspace.researchPurpose.populationDetails
+                             .includes(SpecificPopulationEnum.OTHER)}/>
               </div>
             </div>
           </div>
@@ -746,9 +745,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <li>Field of intended study</li>}
               { this.isEmpty(this.state.workspace.researchPurpose, 'anticipatedFindings') &&
               <li>Anticipated findings</li>}
-              { this.isEmpty(this.state.workspace.researchPurpose, 'softwareChoice') &&
+              { this.isEmpty(this.state.workspace.researchPurpose, 'reasonForAllOfUs') &&
               <li>Reason for choosing AoU</li>}
               { !this.categoryIsSelected() && <li>Research focus</li>}
+              { this.noSpecificPopulationSelected() && <li>Population of study</li>}
             </ul>]} disabled={!this.disableButton()}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
                       disabled={this.disableButton() || this.state.loading}>

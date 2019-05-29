@@ -134,7 +134,7 @@ public class WorkspaceMapper {
     dbWorkspace.setOtherPurpose(purpose.getOtherPurpose());
     dbWorkspace.setOtherPurposeDetails(purpose.getOtherPurposeDetails());
     dbWorkspace.setAdditionalNotes(purpose.getAdditionalNotes());
-    dbWorkspace.setSoftwareChoice(purpose.getSoftwareChoice());
+    dbWorkspace.setReasonForAllOfUs(purpose.getReasonForAllOfUs());
     dbWorkspace.setIntendedStudy(purpose.getIntendedStudy());
     dbWorkspace.setAnticipatedFindings(purpose.getAnticipatedFindings());
   }
@@ -155,7 +155,7 @@ public class WorkspaceMapper {
         .otherPurpose(workspace.getOtherPurpose())
         .otherPurposeDetails(workspace.getOtherPurposeDetails())
         .population(workspace.getPopulation())
-        .softwareChoice(workspace.getSoftwareChoice())
+        .reasonForAllOfUs(workspace.getReasonForAllOfUs())
         .intendedStudy(workspace.getIntendedStudy())
         .anticipatedFindings(workspace.getAnticipatedFindings())
         .additionalNotes(workspace.getAdditionalNotes())

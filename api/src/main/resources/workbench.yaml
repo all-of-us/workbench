@@ -1919,7 +1919,7 @@ definitions:
      - populationHealth
      - educational
      - otherPurpose
-     - softwareChoice
+     - reasonForAllOfUs
      - intendedStudy
      - anticipatedFindings
      - drugDevelopment
@@ -1970,14 +1970,14 @@ definitions:
       populationHealth:
         type: boolean
         default: false
+      reasonForAllOfUs:
+        type: string
       reviewRequested:
         type: boolean
         default: false
       socialBehavioral:
         type: boolean
         default: false
-      softwareChoice:
-        type: string
       timeRequested:
         type: integer
         format: int64

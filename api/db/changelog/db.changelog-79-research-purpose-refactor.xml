@@ -12,7 +12,7 @@
             <column name="rp_other_purpose" type="boolean" defaultValueBoolean="false"/>
             <column name="rp_drug_development" type="boolean" defaultValueBoolean="false"/>
             <column name="rp_other_purpose_details" type="varchar(500)"/>
-            <column name="rp_software_choice" type="varchar(500)"/>
+            <column name="rp_reason_for_all_of_us" type="varchar(500)"/>
             <column name="rp_anticipated_findings" type="varchar(2000)"/>
         </addColumn>
         <renameColumn newColumnName="rp_intended_study"

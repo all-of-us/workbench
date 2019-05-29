@@ -432,7 +432,7 @@ public class WorkspacesControllerTest {
     researchPurpose.setDrugDevelopment(true);
     researchPurpose.setPopulation(false);
     researchPurpose.setAdditionalNotes("additional notes");
-    researchPurpose.setSoftwareChoice("software choice");
+    researchPurpose.setReasonForAllOfUs("reason for aou");
     researchPurpose.setIntendedStudy("intended study");
     researchPurpose.setAnticipatedFindings("anticipated findings");
     researchPurpose.setTimeRequested(1000L);
@@ -501,7 +501,7 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getDrugDevelopment()).isTrue();
     assertThat(workspace2.getResearchPurpose().getPopulation()).isFalse();
     assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
-    assertThat(workspace2.getResearchPurpose().getSoftwareChoice()).isEqualTo("software choice");
+    assertThat(workspace2.getResearchPurpose().getReasonForAllOfUs()).isEqualTo("reason for aou");
     assertThat(workspace2.getResearchPurpose().getIntendedStudy()).isEqualTo("intended study");
     assertThat(workspace2.getResearchPurpose().getAnticipatedFindings()).isEqualTo("anticipated findings");
     assertThat(workspace2.getNamespace()).isEqualTo(workspace.getNamespace());
