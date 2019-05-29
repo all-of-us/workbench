@@ -7,6 +7,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {DomainType} from 'generated/fetch';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -61,6 +62,7 @@ const styles = reactStyles({
     color: '#262262',
   },
   table: {
+    width: '100%',
     textAlign: 'left',
     border: '1px solid #c8c8c8',
     borderRadius: '3px',
@@ -142,8 +144,10 @@ export const ListSearch = withCurrentWorkspace()(
       ).then(resp => {
         const data = resp.items;
         let sourceMatch;
-        if (data.length && !data[0].isStandard) {
-          sourceMatch = data.find(item => item.code.toLowerCase() === value.toLowerCase());
+        if (data.length && this.checkSource) {
+          sourceMatch = data.find(
+            item => item.code.toLowerCase() === value.toLowerCase() && !item.isStandard
+          );
         }
         this.setState({data, loading: false, sourceMatch});
       });
@@ -156,6 +160,10 @@ export const ListSearch = withCurrentWorkspace()(
       cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(
         +cdrVersionId, domain, sourceMatch.conceptId
       ).then(resp => this.setState({data: resp.items, loading: false}));
+    }
+
+    get checkSource() {
+      return [DomainType.CONDITION, DomainType.PROCEDURE].includes(this.props.wizard.domain);
     }
 
     selectItem = (row: any) => {
@@ -214,7 +222,7 @@ export const ListSearch = withCurrentWorkspace()(
           {results === 'standard' && <div style={{marginBottom: '0.75rem'}}>
             {!!data.length && <span>
               There are {data[0].count.toLocaleString()} participants for the standard version of
-              &nbsp;the code you searched.
+               the code you searched.
             </span>}
             {!data.length && <span>
               There are no standard matches for source code {sourceMatch.code}.
@@ -274,7 +282,7 @@ export const ListSearch = withCurrentWorkspace()(
           </table>}
           {results === 'all' && !data.length && <div>No results found</div>}
         </div>}
-        {loading && <SpinnerOverlay />}
+        {loading && <SpinnerOverlay/>}
       </div>;
     }
   }
