@@ -1,6 +1,8 @@
-import {DomainType, TreeSubType, TreeType} from 'generated';
+import {TreeSubType, TreeType} from 'generated';
+import {CriteriaType, DomainType} from 'generated/fetch';
 import {List} from 'immutable';
 import {DOMAIN_TYPES} from './constant';
+import {idsInUse} from './search-state.service';
 
 export function typeDisplay(parameter): string {
   const subtype = parameter.get('subtype', '');
@@ -19,17 +21,16 @@ export function typeDisplay(parameter): string {
 }
 
 export function listTypeDisplay(parameter): string {
-  const subtype = parameter.subtype;
-  const _type = parameter.type;
-  if (_type.match(/^DEMO.*/i)) {
+  const {domainId, type} = parameter;
+  if (domainId === DomainType.PERSON) {
     return {
       'GEN': 'Gender',
       'RACE': 'Race',
       'ETH': 'Ethnicity',
       'AGE': 'Age',
       'DEC': 'Deceased'
-    }[subtype] || '';
-  } else if (!_type.match(/^SNOMED.*/i)) {
+    }[type] || '';
+  } else if (type === CriteriaType.SNOMED) {
     return parameter.code;
   }
 }
@@ -45,9 +46,7 @@ export function nameDisplay(parameter): string {
 }
 
 export function listNameDisplay(parameter): string {
-  const subtype = parameter.subtype;
-  const _type = parameter.type;
-  if (_type.match(/^DEMO.*/i) && subtype.match(/AGE|DEC/i)) {
+  if (parameter.type === CriteriaType.AGE || parameter.type === CriteriaType.DECEASED) {
     return '';
   } else {
     return stripHtml(parameter.name);
@@ -78,9 +77,8 @@ export function attributeDisplay(parameter): string {
 }
 
 export function listAttributeDisplay(parameter): string {
-  const attrs = parameter.attributes;
-  const kind = `${parameter.type}${parameter.subtype}`;
-  if (kind.match(/^DEMO.*AGE/i)) {
+  if (parameter.type === CriteriaType.AGE) {
+    const attrs = parameter.attributes;
     const display = [];
     attrs.forEach(attr => {
       const op = {
@@ -238,4 +236,20 @@ export function getChartObj(chartObj: any) {
     });
     ro.observe(chartRef);
   }
+}
+
+export function generateId(prefix?: string): string {
+  prefix = prefix || 'id';
+  let newId = `${prefix}_${genSuffix()}`;
+  const ids = idsInUse.getValue();
+  while (ids.has(newId)) {
+    newId = `${prefix}_${genSuffix()}`;
+  }
+  ids.add(newId);
+  idsInUse.next(ids);
+  return newId;
+}
+
+function genSuffix(): string {
+  return Math.random().toString(36).substr(2, 9);
 }

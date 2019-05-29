@@ -18,6 +18,7 @@ import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -88,7 +89,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Workspace get(String ns, String firecloudName) {
-    return workspaceDao.findByWorkspaceNamespaceAndFirecloudName(ns, firecloudName);
+    return workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+        ns, firecloudName,
+        StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   @Override
@@ -117,22 +120,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   /**
    * This is an internal method used by createWorkspace and cloneWorkspace endpoints, to
-   * check the existance of ws name.  Currently does not return a conflict if user
+   * check the existence of ws name.  Currently does not return a conflict if user
    * is checking the name of a deleted ws.
    **/
   @Override
   public Workspace getByName(String ns, String name) {
-    Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndName(ns, name);
-    if (workspace == null || workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE) {
-      return null;
-    }
-    return workspace;
+    return workspaceDao.findByWorkspaceNamespaceAndNameAndActiveStatus(
+        ns, name, StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   @Override
   public Workspace getRequired(String ns, String firecloudName) {
     Workspace workspace = get(ns, firecloudName);
-    if (workspace == null || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
+    if (workspace == null) {
       throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
     }
     return workspace;
@@ -141,8 +141,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   @Transactional
   public Workspace getRequiredWithCohorts(String ns, String firecloudName) {
-    Workspace workspace = workspaceDao.findByFirecloudWithEagerCohorts(ns, firecloudName);
-    if (workspace == null || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
+    Workspace workspace = workspaceDao.findByFirecloudNameAndActiveStatusWithEagerCohorts(
+        ns, firecloudName,
+        StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    if (workspace == null) {
       throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
     }
     return workspace;

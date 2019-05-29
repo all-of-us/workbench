@@ -113,6 +113,9 @@ public class WorkbenchConfig {
   // The access object specifies whether each of the following access requirements block access
   // to the workbench.
   public static class AccessConfig {
+    // Allows a user to bypass their own access modules. This is used for testing purposes so that
+    // We can give control over 3rd party access modules
+    public boolean unsafeAllowSelfBypass;
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;
@@ -125,5 +128,8 @@ public class WorkbenchConfig {
 
   public static class FeatureFlagsConfig {
     public boolean useBillingProjectBuffer = false;
+    // Allows a user to delete their own account. This is used for testing purposes so that
+    // We can clean up after ourselves. This should never go to prod.
+    public boolean unsafeAllowDeleteUser;
   }
 }

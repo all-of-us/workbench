@@ -12,6 +12,7 @@ import {SidebarContent} from 'app/cohort-review/sidebar-content/sidebar-content.
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortAnnotationDefinitionApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -52,7 +53,7 @@ const styles = reactStyles({
     flex: 1,
     paddingTop: '0.35rem',
     paddingBottom: '0.35rem',
-    color: '#4A4A4A',
+    color: colors.gray[0],
   },
   sidebarContentOpen: {
     width: '385px',
@@ -153,7 +154,7 @@ export const DetailPage = withCurrentWorkspace()(
 
     definitionCreated(ad) {
       const annotationDefinitions = this.state.annotationDefinitions.concat([ad]);
-      this.setState({annotationDefinitions, creatingDefinition: true});
+      this.setState({annotationDefinitions, creatingDefinition: false});
     }
 
     openEditDefinitionsModal() {

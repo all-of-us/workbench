@@ -10,10 +10,10 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
-import {BugReportComponent} from 'app/views/bug-report/component';
-import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+import {BugReportComponent} from 'app/views/bug-report';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal';
+import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar';
+import {WorkspaceShareComponent} from 'app/views/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 
 import {UserService, WorkspaceAccessLevel} from 'generated';

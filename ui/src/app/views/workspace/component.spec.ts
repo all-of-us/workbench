@@ -12,17 +12,17 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {BugReportComponent} from 'app/views/bug-report/component';
-import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {RecentWorkComponent} from 'app/views/recent-work/component';
-import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {BugReportComponent} from 'app/views/bug-report';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal';
+import {RecentWorkComponent} from 'app/views/recent-work';
+import {ResetClusterButtonComponent} from 'app/views/reset-cluster-button';
+import {ResourceCardComponent} from 'app/views/resource-card';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
-import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar';
+import {WorkspaceShareComponent} from 'app/views/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
-
 import {
   ClusterService,
   DataAccessLevel,
@@ -30,6 +30,7 @@ import {
   UserService,
 } from 'generated';
 import {
+  ClusterApi,
   CohortsApi,
   ConceptSetsApi,
   ProfileApi,
@@ -42,6 +43,7 @@ import {
 } from 'notebooks-generated';
 
 import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
+import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
@@ -57,8 +59,9 @@ import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {workspaceDataStub, WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
-import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
+import {NewNotebookModalComponent} from 'app/views/new-notebook-modal';
 import {updateAndTick} from 'testing/test-helpers';
+
 
 describe('WorkspaceComponent', () => {
   let fixture: ComponentFixture<WorkspaceComponent>;
@@ -77,6 +80,7 @@ describe('WorkspaceComponent', () => {
         ConfirmDeleteModalComponent,
         NewNotebookModalComponent,
         RecentWorkComponent,
+        ResetClusterButtonComponent,
         ResourceCardComponent,
         ToolTipComponent,
         TopBoxComponent,
@@ -109,7 +113,8 @@ describe('WorkspaceComponent', () => {
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
-            gsuiteDomain: 'fake-research-aou.org'
+            gsuiteDomain: 'fake-research-aou.org',
+            useBillingProjectBuffer: false
           })
         }
       ]}).compileComponents().then(() => {
@@ -117,6 +122,7 @@ describe('WorkspaceComponent', () => {
         updateAndTick(fixture);
       });
     currentWorkspaceStore.next(workspaceDataStub);
+    registerApiClient(ClusterApi, new ClusterApiStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(ProfileApi, new ProfileApiStub());

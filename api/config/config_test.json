@@ -57,12 +57,14 @@
     "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": false,
-    "enableBetaAccess": true
+    "enableBetaAccess": true,
+    "unsafeAllowSelfBypass": true
   },
   "cohortbuilder": {
     "enableListSearch": false
   },
   "featureFlags": {
-    "useBillingProjectBuffer": false
+    "useBillingProjectBuffer": false,
+    "unsafeAllowDeleteUser": true
   }
 }

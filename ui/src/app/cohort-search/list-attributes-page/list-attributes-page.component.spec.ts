@@ -13,7 +13,6 @@ describe('ListAttributesPageComponent', () => {
   let fixture: ComponentFixture<ListAttributesPageComponent>;
 
   beforeEach(async(() => {
-    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     TestBed.configureTestingModule({
       declarations: [ListAttributesPageComponent, ValidatorErrorsComponent],
       imports: [ClarityModule, ReactiveFormsModule],
@@ -22,6 +21,7 @@ describe('ListAttributesPageComponent', () => {
   }));
 
   beforeEach(() => {
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     fixture = TestBed.createComponent(ListAttributesPageComponent);
     component = fixture.componentInstance;
     component.attrs = {EXISTS: false, NUM: [{operator: 'ANY', operands: []}], CAT: []};

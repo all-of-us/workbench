@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -120,6 +121,9 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       CreateConceptSetRequest request) {
     Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    if (request.getAddedIds() == null || request.getAddedIds().size() == 0) {
+      throw new BadRequestException("Cannot create a concept set with no concepts");
+    }
     org.pmiops.workbench.db.model.ConceptSet dbConceptSet = FROM_CLIENT_CONCEPT_SET.apply(request.getConceptSet());
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbConceptSet.setCreator(userProvider.get());
@@ -253,6 +257,16 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       String workspaceId, Long conceptSetId, UpdateConceptSetRequest request) {
     org.pmiops.workbench.db.model.ConceptSet dbConceptSet = getDbConceptSet(
         workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
+
+    Set<Long> allConceptSetIds = dbConceptSet.getConceptIds();
+    if (request.getAddedIds() != null) {
+      allConceptSetIds.addAll(request.getAddedIds());
+    }
+    int sizeOfAllConceptSetIds = allConceptSetIds.stream().collect(Collectors.toSet()).size();
+    if (request.getRemovedIds() != null && request.getRemovedIds().size() == sizeOfAllConceptSetIds) {
+      throw new BadRequestException("Concept Set must have at least one concept");
+    }
+
     if(Strings.isNullOrEmpty(request.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }

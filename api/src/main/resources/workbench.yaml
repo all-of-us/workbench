@@ -103,7 +103,7 @@ paths:
 
    # User methods ########################################################################
 
-  /v1/me:
+  /v1/profile:
     get:
       tags:
         - profile
@@ -114,6 +114,35 @@ paths:
           description: The user's profile.
           schema:
             $ref: "#/definitions/Profile"
+    patch:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      description: Updates a users profile
+      operationId: updateProfile
+      parameters:
+        - in: body
+          name: updatedProfile
+          description: the new profile to use
+          schema:
+            $ref: "#/definitions/Profile"
+      responses:
+        204:
+          description: Request received.
+        400:
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      tags:
+        - profile
+      description: Deletes the user's profile and gsuite account, does not clean up in firecloud.
+      operationId: deleteProfile
+      responses:
+        204:
+          description: Request Received.
+
 
   # TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
   # Error. It should respond with 400 Bad Request.
@@ -255,27 +284,7 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /v1/update-profile:
-    post:
-      tags:
-        - profile
-      consumes:
-        - application/json
-      description: Updates a users profile
-      operationId: updateProfile
-      parameters:
-        - in: body
-          name: updatedProfile
-          description: the new profile to use
-          schema:
-            $ref: "#/definitions/Profile"
-      responses:
-        204:
-          description: Request received.
-        400:
-          description: Bad request
-          schema:
-            $ref: "#/definitions/ErrorResponse"
+
 
   /v1/update-nih-token:
     post:
@@ -750,7 +759,38 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  /v1/admin/users/{userId}/bypass-access-requirement/{moduleName}:
+  /v1/admin/unsafe-self-bypass-access-requirement:
+      post:
+        tags:
+          - profile
+        consumes:
+          - application/json
+        description: >
+          Updates the given user to bypass the request access requirement
+        parameters:
+          - in: body
+            name: bypassed
+            schema:
+              $ref: '#/definitions/AccessBypassRequest'
+            description: >
+              Whether the requirement should be bypassed or not. Defaults to
+              true, so an empty body  will cause the requirement to be bypassed.
+        operationId: unsafeSelfBypassAccessRequirement
+        responses:
+          200:
+            description: success
+            schema:
+              $ref: "#/definitions/EmptyResponse"
+          403:
+            description: Self bypass is disallowed in this environment
+            schema:
+              $ref: "#/definitions/ErrorResponse"
+          400:
+            description: No module exists with name submitted
+            schema:
+              $ref: "#/definitions/ErrorResponse"
+
+  /v1/admin/users/{userId}/bypass-access-requirement:
     post:
       tags:
         - profile
@@ -761,11 +801,6 @@ paths:
         e.g. "eraCommons", or "twoFactorAuth"
       parameters:
         - $ref: '#/parameters/userId'
-        - in: path
-          name: moduleName
-          description: name of module to be bypassed
-          required: true
-          type: string
         - in: body
           name: bypassed
           schema:
@@ -2037,11 +2072,23 @@ definitions:
       clusterConfig:
         $ref: "#/definitions/ClusterConfig"
 
+  AccessModule:
+    type: string
+    enum: [
+      DATA_USE_AGREEMENT,
+      COMPLIANCE_TRAINING,
+      BETA_ACCESS,
+      ERA_COMMONS,
+      TWO_FACTOR_AUTH
+    ]
+
   AccessBypassRequest:
     type: object
     required:
       - isBypassed
     properties:
+      moduleName:
+        $ref: "#/definitions/AccessModule"
       isBypassed:
         type: boolean
 

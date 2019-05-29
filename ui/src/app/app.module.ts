@@ -23,42 +23,42 @@ import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
-import {AdminUserBypassComponent} from './views/admin-user-bypass/component';
+import {AdminUserBypassComponent} from './views/admin-user-bypass';
 import {AdminUserComponent} from './views/admin-user/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
-import {BreadcrumbComponent} from './views/breadcrumb/component';
-import {BugReportComponent} from './views/bug-report/component';
-import {CohortActionsComponent} from './views/cohort-actions/cohort-actions.component';
-import {CohortListComponent} from './views/cohort-list/component';
-import {ConceptAddModalComponent} from './views/concept-add-modal/component';
-import {ConceptHomepageComponent} from './views/concept-homepage/component';
-import {ConceptSetDetailsComponent} from './views/concept-set-details/component';
-import {ConceptSetListComponent} from './views/concept-set-list/component';
-import {ConceptTableComponent} from './views/concept-table/component';
-import {CreateConceptSetModalComponent} from './views/conceptset-create-modal/component';
-import {DataUseAgreementComponent} from './views/data-use-agreement/component';
+import {BreadcrumbComponent} from './views/breadcrumb';
+import {BugReportComponent} from './views/bug-report';
+import {CohortActionsComponent} from './views/cohort-actions';
+import {CohortListComponent} from './views/cohort-list';
+import {ConceptAddModalComponent} from './views/concept-add-modal';
+import {ConceptHomepageComponent} from './views/concept-homepage';
+import {ConceptSetActionsComponent} from './views/concept-set-actions';
+import {ConceptSetDetailsComponent} from './views/concept-set-details';
+import {ConceptSetListComponent} from './views/concept-set-list';
+import {ConceptTableComponent} from './views/concept-table';
+import {DataUseAgreementComponent} from './views/data-use-agreement';
 import {ErrorHandlerComponent} from './views/error-handler/component';
-import {HomepageComponent} from './views/homepage/component';
+import {HomepageComponent} from './views/homepage';
 import {InitialErrorComponent} from './views/initial-error/component';
-import {NewNotebookModalComponent} from './views/new-notebook-modal/component';
-import {NotebookListComponent} from './views/notebook-list/component';
+import {NewNotebookModalComponent} from './views/new-notebook-modal';
+import {NotebookListComponent} from './views/notebook-list';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
-import {ProfilePageComponent} from './views/profile-page/component';
-import {QuickTourModalComponent} from './views/quick-tour-modal/component';
-import {RecentWorkComponent} from './views/recent-work/component';
-import {ResourceCardComponent} from './views/resource-card/component';
+import {ProfilePageComponent} from './views/profile-page';
+import {QuickTourModalComponent} from './views/quick-tour-modal';
+import {RecentWorkComponent} from './views/recent-work';
+import {ResetClusterButtonComponent} from './views/reset-cluster-button';
+import {ResourceCardComponent} from './views/resource-card';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
-import {SettingsComponent} from './views/settings/component';
-import {SignInComponent} from './views/sign-in/component';
+import {SignInComponent} from './views/sign-in';
 import {SignedInComponent} from './views/signed-in/component';
-import {SlidingFabComponent} from './views/sliding-fab/component';
-import {StigmatizationPageComponent} from './views/stigmatization-page/component';
+import {SlidingFabComponent} from './views/sliding-fab';
+import {StigmatizationPageComponent} from './views/stigmatization-page';
 import {TopBoxComponent} from './views/top-box/component';
-import {WorkspaceEditComponent} from './views/workspace-edit/component';
-import {WorkspaceListComponent} from './views/workspace-list/component';
-import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
-import {WorkspaceShareComponent} from './views/workspace-share/component';
+import {WorkspaceEditComponent} from './views/workspace-edit';
+import {WorkspaceListComponent} from './views/workspace-list';
+import {WorkspaceNavBarComponent} from './views/workspace-nav-bar';
+import {WorkspaceShareComponent} from './views/workspace-share';
 import {WorkspaceComponent} from './views/workspace/component';
 
 /* Our Modules */
@@ -75,14 +75,14 @@ import {
 
 import {Configuration as FetchConfiguration} from 'generated/fetch';
 
-import {DataPageComponent} from 'app/views/data-page/component';
-import {DataSetPageComponent} from 'app/views/dataset-page/component';
+import {DataPageComponent} from 'app/views/data-page';
+import {DataSetPageComponent} from 'app/views/dataset-page';
 import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
-import { HighlightSearchComponent } from './highlight-search/highlight-search.component';
 import {ToolTipComponent} from './views/tooltip/component';
+
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -141,10 +141,10 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppComponent,
     BreadcrumbComponent,
     BugReportComponent,
-    CreateConceptSetModalComponent,
     CohortActionsComponent,
     CohortListComponent,
     ConceptAddModalComponent,
+    ConceptSetActionsComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,
     ConceptTableComponent,
@@ -163,7 +163,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     RecentWorkComponent,
     ResourceCardComponent,
     RoutingSpinnerComponent,
-    SettingsComponent,
     SignedInComponent,
     SignInComponent,
     SlidingFabComponent,
@@ -177,7 +176,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     WorkspaceShareComponent,
     WorkspaceWrapperComponent,
     HomepageComponent,
-    HighlightSearchComponent,
+    ResetClusterButtonComponent,
   ],
   providers: [
     {

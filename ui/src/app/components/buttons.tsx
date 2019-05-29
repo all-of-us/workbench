@@ -1,7 +1,7 @@
 import {styles as cardStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
-import {IconComponent} from 'app/icons/icon/component';
+import {IconComponent} from 'app/icons/icon';
 import colors from 'app/styles/colors';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -34,7 +34,7 @@ const buttonVariants = {
     style: {
       ...styles.base,
       borderRadius: '0.3rem',
-      backgroundColor: colors.purple[0], color: '#fff',
+      backgroundColor: colors.purple[0], color: colors.white,
     },
     disabledStyle: {backgroundColor: colors.gray[4]},
     hover: {backgroundColor: colors.purple[1]}

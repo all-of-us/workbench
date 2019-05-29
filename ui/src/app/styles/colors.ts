@@ -8,7 +8,9 @@ export default {
   red: '#d0021b',
   green: [
     '#8bc990',
-    '#7CC79B'
+    '#7AC79B',
+    '#7CC79B',
+    '#659F3D'
   ],
   blue: [
     '#2691d0',
@@ -36,6 +38,8 @@ export default {
     '#333333'
   ],
   yellow: [
-    '#F8C954'
+    '#F8C954',
+    '#F7981C',
+    '#F68D76'
   ]
 };
