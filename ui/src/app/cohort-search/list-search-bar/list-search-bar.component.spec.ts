@@ -15,7 +15,6 @@ describe('ListSearchBarComponent', () => {
   let fixture: ComponentFixture<ListSearchBarComponent>;
 
   beforeEach(async(() => {
-    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     TestBed.configureTestingModule({
       declarations: [ ListOptionInfoComponent, ListSearchBarComponent, SafeHtmlPipe ],
       imports: [
@@ -29,6 +28,7 @@ describe('ListSearchBarComponent', () => {
   }));
 
   beforeEach(() => {
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     fixture = TestBed.createComponent(ListSearchBarComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

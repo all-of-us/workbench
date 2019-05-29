@@ -56,7 +56,6 @@ describe('ListModalComponent', () => {
   let mockReduxInst;
 
   beforeEach(async(() => {
-    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     mockReduxInst = MockNgRedux.getInstance();
     const _old = mockReduxInst.getState;
     const _wrapped = () => fromJS(_old());
@@ -106,6 +105,7 @@ describe('ListModalComponent', () => {
   }));
 
   beforeEach(() => {
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     fixture = TestBed.createComponent(ListModalComponent);
     component = fixture.componentInstance;
     component.attributesNode = {
