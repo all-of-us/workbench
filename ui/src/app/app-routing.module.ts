@@ -5,28 +5,28 @@ import {DataSetGuard} from './guards/dataset-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
+import {DataPageComponent} from 'app/views/data-page';
+import {DataUseAgreementComponent} from 'app/views/data-use-agreement';
+import {DataSetPageComponent} from 'app/views/dataset-page';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {AdminUserComponent} from './views/admin-user/component';
+import {CohortActionsComponent} from './views/cohort-actions';
 import {CohortListComponent} from './views/cohort-list';
 import {ConceptHomepageComponent} from './views/concept-homepage';
+import {ConceptSetActionsComponent} from './views/concept-set-actions';
 import {ConceptSetDetailsComponent} from './views/concept-set-details';
 import {ConceptSetListComponent} from './views/concept-set-list';
 import {HomepageComponent} from './views/homepage';
 import {NotebookListComponent} from './views/notebook-list';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page';
+import {SignInComponent} from './views/sign-in';
 import {SignedInComponent} from './views/signed-in/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit';
 import {WorkspaceListComponent} from './views/workspace-list';
 import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
 import {WorkspaceComponent} from './views/workspace/component';
-import {CohortActionsComponent} from './views/cohort-actions';
-import {SignInComponent} from './views/sign-in';
-import {ConceptSetActionsComponent} from './views/concept-set-actions';
-import {DataPageComponent} from 'app/views/data-page';
-import {DataUseAgreementComponent} from 'app/views/data-use-agreement';
-import {DataSetPageComponent} from 'app/views/dataset-page';
 
 import {environment} from 'environments/environment';
 import {BreadcrumbType, NavStore} from './utils/navigation';
@@ -221,7 +221,7 @@ const routes: Routes = [
                     title: 'Concept Set Actions',
                     breadcrumb: BreadcrumbType.ConceptSet
                   },
-                },]
+                }, ]
               }]
           }]
       },
