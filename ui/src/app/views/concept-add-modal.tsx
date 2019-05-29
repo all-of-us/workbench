@@ -107,10 +107,10 @@ export const ConceptAddModal = withCurrentWorkspace()
         addedIds: conceptIds
       };
       try {
-        await conceptSetsApi().updateConceptSetConcepts(
+        const conceptSet = await conceptSetsApi().updateConceptSetConcepts(
           namespace, id, selectedSet.id, updateConceptSetReq);
         this.setState({saving: false});
-        onSave();
+        onSave(conceptSet);
       } catch (error) {
         console.error(error);
       }
@@ -125,9 +125,10 @@ export const ConceptAddModal = withCurrentWorkspace()
         addedIds: conceptIds
       };
       try {
-        await conceptSetsApi().createConceptSet(namespace, id, request);
+        const createdConceptSet =
+          await conceptSetsApi().createConceptSet(namespace, id, request);
         this.setState({saving: false});
-        onSave();
+        onSave(createdConceptSet);
       } catch (error) {
         console.error(error);
         this.setState({errorSaving: true});

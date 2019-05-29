@@ -1,5 +1,5 @@
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
-import {WorkspaceNavBarReact} from 'app/views/workspace-nav-bar/component';
+import {WorkspaceNavBarReact} from 'app/views/workspace-nav-bar';
 import {mount} from 'enzyme';
 import * as React from 'react';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';

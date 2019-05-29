@@ -32,6 +32,7 @@ import {CohortActionsComponent} from './views/cohort-actions';
 import {CohortListComponent} from './views/cohort-list';
 import {ConceptAddModalComponent} from './views/concept-add-modal';
 import {ConceptHomepageComponent} from './views/concept-homepage';
+import {ConceptSetActionsComponent} from './views/concept-set-actions';
 import {ConceptSetDetailsComponent} from './views/concept-set-details';
 import {ConceptSetListComponent} from './views/concept-set-list';
 import {ConceptTableComponent} from './views/concept-table';
@@ -56,7 +57,7 @@ import {StigmatizationPageComponent} from './views/stigmatization-page';
 import {TopBoxComponent} from './views/top-box/component';
 import {WorkspaceEditComponent} from './views/workspace-edit';
 import {WorkspaceListComponent} from './views/workspace-list';
-import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
+import {WorkspaceNavBarComponent} from './views/workspace-nav-bar';
 import {WorkspaceShareComponent} from './views/workspace-share';
 import {WorkspaceComponent} from './views/workspace/component';
 
@@ -143,6 +144,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     CohortActionsComponent,
     CohortListComponent,
     ConceptAddModalComponent,
+    ConceptSetActionsComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,
     ConceptTableComponent,

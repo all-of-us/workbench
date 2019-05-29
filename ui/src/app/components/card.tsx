@@ -33,4 +33,4 @@ export const styles = reactStyles({
 
 export const WorkspaceCardBase = withStyle(styles.workspaceCard)('div');
 export const ResourceCardBase = withStyle(styles.resourceCard)('div');
-export const CohortActionCardBase = withStyle(styles.cohortActionCard)('div');
+export const ActionCardBase = withStyle(styles.cohortActionCard)('div');
