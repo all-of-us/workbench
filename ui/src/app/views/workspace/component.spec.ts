@@ -130,7 +130,8 @@ describe('WorkspaceComponent', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
   }));
 
-  // TODO [RW-2594] add new tests
+  // TODO [RW-2594] add tests.  Test for correct workspace purpose
+  // details showing up in workspace about page.
   it('should render', fakeAsync(() => {
     expect(fixture).toBeTruthy();
   }));

@@ -422,32 +422,32 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       }
     }
 
-    categoryIsSelected() {
+    get categoryIsSelected() {
       const rp = this.state.workspace.researchPurpose;
       return rp.ancestry || rp.commercialPurpose || rp.controlSet || rp.diseaseFocusedResearch ||
         rp.drugDevelopment || rp.educational || rp.methodsDevelopment || rp.otherPurpose ||
         rp.populationHealth || rp.socialBehavioral;
     }
 
-    noSpecificPopulationSelected(): boolean {
+    get noSpecificPopulationSelected() {
       return this.state.workspace.researchPurpose.population &&
         this.state.workspace.researchPurpose.populationDetails.length === 0;
     }
 
-    noDiseaseOfFocusSpecified(): boolean {
+    get noDiseaseOfFocusSpecified() {
       return this.state.workspace.researchPurpose.diseaseFocusedResearch &&
         !! this.state.workspace.researchPurpose.diseaseOfFocus;
     }
 
-    disableButton(): boolean {
+    get disableButton() {
       const rp = this.state.workspace.researchPurpose;
       return this.isEmpty(this.state.workspace, 'name') ||
         this.isEmpty(rp, 'intendedStudy') ||
         this.isEmpty(rp, 'anticipatedFindings') ||
         this.isEmpty(rp, 'reasonForAllOfUs') ||
-        !this.categoryIsSelected() ||
-        this.noSpecificPopulationSelected() ||
-        this.noDiseaseOfFocusSpecified();
+        !this.categoryIsSelected ||
+        this.noSpecificPopulationSelected ||
+        this.noDiseaseOfFocusSpecified;
     }
 
     updateResearchPurpose(category, value) {
@@ -754,12 +754,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <li>Anticipated findings</li>}
               { this.isEmpty(this.state.workspace.researchPurpose, 'reasonForAllOfUs') &&
               <li>Reason for choosing AoU</li>}
-              { !this.categoryIsSelected() && <li>Research focus</li>}
-              { this.noSpecificPopulationSelected() && <li>Population of study</li>}
-              { this.noDiseaseOfFocusSpecified() && <li>Disease of focus</li>}
-            </ul>]} disabled={!this.disableButton()}>
+              { !this.categoryIsSelected && <li>Research focus</li>}
+              { this.noSpecificPopulationSelected && <li>Population of study</li>}
+              { this.noDiseaseOfFocusSpecified && <li>Disease of focus</li>}
+            </ul>]} disabled={!this.disableButton}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
-                      disabled={this.disableButton() || this.state.loading}>
+                      disabled={this.disableButton || this.state.loading}>
                 {this.state.loading && <SpinnerOverlay/>}
                 {this.renderButtonText()}
               </Button>
