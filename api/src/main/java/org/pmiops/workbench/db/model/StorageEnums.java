@@ -9,7 +9,7 @@ import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
-import org.pmiops.workbench.model.UnderservedPopulationEnum;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
@@ -101,59 +101,6 @@ public final class StorageEnums {
     return CLIENT_TO_STORAGE_EMAIL_VERIFICATION_STATUS.get(s);
   }
 
-  private static final BiMap<UnderservedPopulationEnum, Short>
-      CLIENT_TO_STORAGE_UNDERSERVED_POPULATION =
-      ImmutableBiMap.<UnderservedPopulationEnum, Short>builder()
-      .put(UnderservedPopulationEnum.RACE_AMERICAN_INDIAN_OR_ALASKA_NATIVE, (short) 0)
-      .put(UnderservedPopulationEnum.RACE_ASIAN, (short) 1)
-      .put(UnderservedPopulationEnum.RACE_BLACK_AFRICAN_OR_AFRICAN_AMERICAN, (short) 2)
-      .put(UnderservedPopulationEnum.RACE_HISPANIC_OR_LATINO, (short) 3)
-      .put(UnderservedPopulationEnum.RACE_MIDDLE_EASTERN_OR_NORTH_AFRICAN, (short) 4)
-      .put(UnderservedPopulationEnum.RACE_NATIVE_HAWAIIAN_OR_PACIFIC_ISLANDER, (short) 5)
-      .put(UnderservedPopulationEnum.RACE_MORE_THAN_ONE_RACE, (short) 6)
-      .put(UnderservedPopulationEnum.AGE_CHILDREN, (short) 7)
-      .put(UnderservedPopulationEnum.AGE_ADOLESCENTS, (short) 8)
-      .put(UnderservedPopulationEnum.AGE_OLDER_ADULTS, (short) 9)
-      .put(UnderservedPopulationEnum.AGE_ELDERLY, (short) 10)
-      .put(UnderservedPopulationEnum.SEX_FEMALE, (short) 11)
-      .put(UnderservedPopulationEnum.SEX_INTERSEX, (short) 12)
-      .put(UnderservedPopulationEnum.SEXUAL_ORIENTATION_GAY, (short) 13)
-      .put(UnderservedPopulationEnum.SEXUAL_ORIENTATION_LESBIAN, (short) 14)
-      .put(UnderservedPopulationEnum.SEXUAL_ORIENTATION_BISEXUAL, (short) 15)
-      .put(UnderservedPopulationEnum.SEXUAL_ORIENTATION_POLYSEXUAL_OMNISEXUAL_SAPIOSEXUAL_OR_PANSEXUAL, (short) 16)
-      .put(UnderservedPopulationEnum.SEXUAL_ORIENTATION_ASEXUAL, (short) 17)
-      .put(UnderservedPopulationEnum.SEXUAL_ORIENTATION_TWO_SPIRIT, (short) 18)
-      .put(UnderservedPopulationEnum.SEXUAL_ORIENTATION_FIGURING_OUT_SEXUALITY, (short) 19)
-      .put(UnderservedPopulationEnum.SEXUAL_ORIENTATION_MOSTLY_STRAIGHT, (short) 20)
-      .put(UnderservedPopulationEnum.SEXUAL_ORIENTATION_DOES_NOT_THINK_OF_HAVING_SEXUALITY, (short) 21)
-      .put(UnderservedPopulationEnum.SEXUAL_ORIENTATION_DOES_NOT_USE_LABELS, (short) 22)
-      .put(UnderservedPopulationEnum.SEXUAL_ORIENTATION_DOES_NOT_KNOW_ANSWER, (short) 23)
-      .put(UnderservedPopulationEnum.GENDER_IDENTITY_WOMAN, (short) 24)
-      .put(UnderservedPopulationEnum.GENDER_IDENTITY_NON_BINARY, (short) 25)
-      .put(UnderservedPopulationEnum.GENDER_IDENTITY_TRANSMAN, (short) 26)
-      .put(UnderservedPopulationEnum.GENDER_IDENTITY_TRANSWOMAN, (short) 27)
-      .put(UnderservedPopulationEnum.GENDER_IDENTITY_GENDERQUEER, (short) 28)
-      .put(UnderservedPopulationEnum.GENDER_IDENTITY_GENDERFLUID, (short) 29)
-      .put(UnderservedPopulationEnum.GENDER_IDENTITY_GENDER_VARIANT, (short) 30)
-      .put(UnderservedPopulationEnum.GENDER_IDENTITY_QUESTIONING, (short) 31)
-      .put(UnderservedPopulationEnum.GEOGRAPHY_URBAN_CLUSTERS, (short) 32)
-      .put(UnderservedPopulationEnum.GEOGRAPHY_RURAL, (short) 33)
-      .put(UnderservedPopulationEnum.DISABILITY_PHYSICAL, (short) 34)
-      .put(UnderservedPopulationEnum.DISABILITY_MENTAL, (short) 35)
-      .put(UnderservedPopulationEnum.ACCESS_TO_CARE_NOT_PAST_TWELVE_MONTHS, (short) 36)
-      .put(UnderservedPopulationEnum.ACCESS_TO_CARE_CANNOT_OBTAIN_OR_PAY_FOR, (short) 37)
-      .put(UnderservedPopulationEnum.EDUCATION_INCOME_LESS_THAN_HIGH_SCHOOL_GRADUATE, (short) 38)
-      .put(UnderservedPopulationEnum.EDUCATION_INCOME_LESS_THAN_TWENTY_FIVE_THOUSAND_FOR_FOUR_PEOPLE, (short) 39)
-      .build();
-
-  public static UnderservedPopulationEnum underservedPopulationFromStorage(Short p) {
-    return CLIENT_TO_STORAGE_UNDERSERVED_POPULATION.inverse().get(p);
-  }
-
-  public static Short underservedPopulationToStorage(UnderservedPopulationEnum p) {
-    return CLIENT_TO_STORAGE_UNDERSERVED_POPULATION.get(p);
-  }
-
   private static final BiMap<WorkspaceAccessLevel, Short> CLIENT_TO_STORAGE_WORKSPACE_ACCESS =
       ImmutableBiMap.<WorkspaceAccessLevel, Short>builder()
       .put(WorkspaceAccessLevel.NO_ACCESS, (short) 0)
@@ -229,6 +176,29 @@ public final class StorageEnums {
 
   public static Short workspaceActiveStatusToStorage(WorkspaceActiveStatus s) {
     return CLIENT_TO_STORAGE_WORKSPACE_ACTIVE_STATUS.get(s);
+  }
+
+  public static final BiMap<SpecificPopulationEnum, Short> CLIENT_TO_STORAGE_SPECIFIC_POPULATION =
+          ImmutableBiMap.<SpecificPopulationEnum, Short>builder()
+          .put(SpecificPopulationEnum.RACE_ETHNICITY, (short) 0)
+          .put(SpecificPopulationEnum. AGE_GROUPS, (short) 1)
+          .put(SpecificPopulationEnum.SEX, (short) 2)
+          .put(SpecificPopulationEnum.GENDER_IDENTITY, (short) 3)
+          .put(SpecificPopulationEnum.SEXUAL_ORIENTATION, (short) 4)
+          .put(SpecificPopulationEnum.GEOGRAPHY, (short) 5)
+          .put(SpecificPopulationEnum.DISABILITY_STATUS, (short) 6)
+          .put(SpecificPopulationEnum.ACCESS_TO_CARE, (short) 7)
+          .put(SpecificPopulationEnum.EDUCATION_LEVEL, (short) 8)
+          .put(SpecificPopulationEnum.INCOME_LEVEL, (short) 9)
+          .put(SpecificPopulationEnum.OTHER, (short) 10)
+          .build();
+
+  public static SpecificPopulationEnum specificPopulationFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_SPECIFIC_POPULATION.inverse().get(s);
+  }
+
+  public static Short specificPopulationToStorage(SpecificPopulationEnum s) {
+    return CLIENT_TO_STORAGE_SPECIFIC_POPULATION.get(s);
   }
 
   /** Utility class. */

@@ -173,7 +173,6 @@ export class WorkspaceCard extends React.Component<
                   {wp.workspace.name}</div>
               </Clickable>
             </div>
-            <div style={styles.workspaceDescription}>{wp.workspace.description}</div>
             {wp.isPending && <div style={{color: colors.yellow[0]}}>
               <ClrIcon shape='exclamation-triangle' className='is-solid'
                        style={{fill: colors.yellow[0]}}/>

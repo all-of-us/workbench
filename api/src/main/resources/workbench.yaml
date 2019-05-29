@@ -1807,8 +1807,6 @@ definitions:
         type: string
       namespace:
         type: string
-      description:
-        type: string
       cdrVersionId:
         type: string
       creator:
@@ -1947,105 +1945,98 @@ definitions:
      - diseaseFocusedResearch
      - methodsDevelopment
      - controlSet
-     - aggregateAnalysis
      - ancestry
      - commercialPurpose
      - population
      - reviewRequested
-     - underservedPopulation
+     - containsUnderservedPopulation
+     - socialBehavioral
+     - populationHealth
+     - educational
+     - otherPurpose
+     - reasonForAllOfUs
+     - intendedStudy
+     - anticipatedFindings
+     - drugDevelopment
     properties:
-      diseaseFocusedResearch:
+      additionalNotes:
+        type: string
+      approved:
+        type: boolean
+      ancestry:
         type: boolean
         default: false
-      diseaseOfFocus:
+      anticipatedFindings:
         type: string
-      methodsDevelopment:
+      commercialPurpose:
         type: boolean
         default: false
       controlSet:
         type: boolean
         default: false
-      aggregateAnalysis:
+      diseaseFocusedResearch:
         type: boolean
         default: false
-      ancestry:
+      diseaseOfFocus:
+        type: string
+      drugDevelopment:
         type: boolean
         default: false
-      commercialPurpose:
+      educational:
         type: boolean
         default: false
+      intendedStudy:
+        type: string
+      methodsDevelopment:
+        type: boolean
+        default: false
+      otherPurpose:
+        type: boolean
+        default: false
+      otherPurposeDetails:
+        type: string
       population:
         type: boolean
         default: false
-      populationOfFocus:
+      populationDetails:
+        type: array
+        items:
+          $ref: "#/definitions/specificPopulationEnum"
+      populationHealth:
+        type: boolean
+        default: false
+      reasonForAllOfUs:
         type: string
       reviewRequested:
         type: boolean
         default: false
-      containsUnderservedPopulation:
+      socialBehavioral:
         type: boolean
         default: false
-      underservedPopulationDetails:
-        type: array
-        items:
-          $ref: "#/definitions/underservedPopulationEnum"
       timeRequested:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
-      approved:
-        type: boolean
       timeReviewed:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
-      additionalNotes:
-        type: string
 
-  underservedPopulationEnum:
+  specificPopulationEnum:
     type: string
-    description: Short parsable descriptions of underserved populations
+    description: Short parsable descriptions of specific population categories
     enum: [
-      RACE_AMERICAN_INDIAN_OR_ALASKA_NATIVE,
-      RACE_ASIAN,
-      RACE_BLACK_AFRICAN_OR_AFRICAN_AMERICAN,
-      RACE_HISPANIC_OR_LATINO,
-      RACE_MIDDLE_EASTERN_OR_NORTH_AFRICAN,
-      RACE_NATIVE_HAWAIIAN_OR_PACIFIC_ISLANDER,
-      RACE_MORE_THAN_ONE_RACE,
-      AGE_CHILDREN,
-      AGE_ADOLESCENTS,
-      AGE_OLDER_ADULTS,
-      AGE_ELDERLY,
-      SEX_FEMALE,
-      SEX_INTERSEX,
-      SEXUAL_ORIENTATION_GAY,
-      SEXUAL_ORIENTATION_LESBIAN,
-      SEXUAL_ORIENTATION_BISEXUAL,
-      SEXUAL_ORIENTATION_POLYSEXUAL_OMNISEXUAL_SAPIOSEXUAL_OR_PANSEXUAL,
-      SEXUAL_ORIENTATION_ASEXUAL,
-      SEXUAL_ORIENTATION_TWO_SPIRIT,
-      SEXUAL_ORIENTATION_FIGURING_OUT_SEXUALITY,
-      SEXUAL_ORIENTATION_MOSTLY_STRAIGHT,
-      SEXUAL_ORIENTATION_DOES_NOT_THINK_OF_HAVING_SEXUALITY,
-      SEXUAL_ORIENTATION_DOES_NOT_USE_LABELS,
-      SEXUAL_ORIENTATION_DOES_NOT_KNOW_ANSWER,
-      GENDER_IDENTITY_WOMAN,
-      GENDER_IDENTITY_NON_BINARY,
-      GENDER_IDENTITY_TRANSMAN,
-      GENDER_IDENTITY_TRANSWOMAN,
-      GENDER_IDENTITY_GENDERQUEER,
-      GENDER_IDENTITY_GENDERFLUID,
-      GENDER_IDENTITY_GENDER_VARIANT,
-      GENDER_IDENTITY_QUESTIONING,
-      GEOGRAPHY_URBAN_CLUSTERS,
-      GEOGRAPHY_RURAL,
-      DISABILITY_PHYSICAL,
-      DISABILITY_MENTAL,
-      ACCESS_TO_CARE_NOT_PAST_TWELVE_MONTHS,
-      ACCESS_TO_CARE_CANNOT_OBTAIN_OR_PAY_FOR,
-      EDUCATION_INCOME_LESS_THAN_HIGH_SCHOOL_GRADUATE,
-      EDUCATION_INCOME_LESS_THAN_TWENTY_FIVE_THOUSAND_FOR_FOUR_PEOPLE
+      RACE_ETHNICITY,
+      AGE_GROUPS,
+      SEX,
+      GENDER_IDENTITY,
+      SEXUAL_ORIENTATION,
+      GEOGRAPHY,
+      DISABILITY_STATUS,
+      ACCESS_TO_CARE,
+      EDUCATION_LEVEL,
+      INCOME_LEVEL,
+      OTHER
     ]
 
   ResearchPurposeReviewRequest:

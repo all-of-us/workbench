@@ -444,12 +444,17 @@ public class WorkspacesControllerTest {
     researchPurpose.setDiseaseOfFocus("cancer");
     researchPurpose.setMethodsDevelopment(true);
     researchPurpose.setControlSet(true);
-    researchPurpose.setAggregateAnalysis(true);
     researchPurpose.setAncestry(true);
     researchPurpose.setCommercialPurpose(true);
-    researchPurpose.setPopulation(true);
-    researchPurpose.setPopulationOfFocus("population");
+    researchPurpose.setSocialBehavioral(true);
+    researchPurpose.setPopulationHealth(true);
+    researchPurpose.setEducational(true);
+    researchPurpose.setDrugDevelopment(true);
+    researchPurpose.setPopulation(false);
     researchPurpose.setAdditionalNotes("additional notes");
+    researchPurpose.setReasonForAllOfUs("reason for aou");
+    researchPurpose.setIntendedStudy("intended study");
+    researchPurpose.setAnticipatedFindings("anticipated findings");
     researchPurpose.setTimeRequested(1000L);
     researchPurpose.setTimeReviewed(1500L);
     researchPurpose.setReviewRequested(true);
@@ -458,7 +463,6 @@ public class WorkspacesControllerTest {
     workspace.setId(workspaceName);
     workspace.setName(workspaceName);
     workspace.setNamespace(workspaceNameSpace);
-    workspace.setDescription("description");
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(researchPurpose);
     workspace.setUserRoles(new ArrayList<UserRole>());
@@ -503,19 +507,23 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId);
     assertThat(workspace2.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
     assertThat(workspace2.getDataAccessLevel()).isEqualTo(DataAccessLevel.PROTECTED);
-    assertThat(workspace2.getDescription()).isEqualTo("description");
     assertThat(workspace2.getId()).isEqualTo("name");
     assertThat(workspace2.getName()).isEqualTo("name");
     assertThat(workspace2.getResearchPurpose().getDiseaseFocusedResearch()).isTrue();
     assertThat(workspace2.getResearchPurpose().getDiseaseOfFocus()).isEqualTo("cancer");
     assertThat(workspace2.getResearchPurpose().getMethodsDevelopment()).isTrue();
     assertThat(workspace2.getResearchPurpose().getControlSet()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getAggregateAnalysis()).isTrue();
     assertThat(workspace2.getResearchPurpose().getAncestry()).isTrue();
     assertThat(workspace2.getResearchPurpose().getCommercialPurpose()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getPopulation()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getPopulationOfFocus()).isEqualTo("population");
+    assertThat(workspace2.getResearchPurpose().getSocialBehavioral()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getPopulationHealth()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getEducational()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getDrugDevelopment()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getPopulation()).isFalse();
     assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
+    assertThat(workspace2.getResearchPurpose().getReasonForAllOfUs()).isEqualTo("reason for aou");
+    assertThat(workspace2.getResearchPurpose().getIntendedStudy()).isEqualTo("intended study");
+    assertThat(workspace2.getResearchPurpose().getAnticipatedFindings()).isEqualTo("anticipated findings");
     assertThat(workspace2.getNamespace()).isEqualTo(workspace.getNamespace());
     assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
     assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
@@ -614,11 +622,11 @@ public class WorkspacesControllerTest {
             .diseaseOfFocus(null)
             .methodsDevelopment(false)
             .controlSet(false)
-            .aggregateAnalysis(false)
             .ancestry(false)
             .commercialPurpose(false)
-            .population(false)
-            .populationOfFocus(null)
+            .populationHealth(false)
+            .socialBehavioral(false)
+            .drugDevelopment(false)
             .additionalNotes(null)
             .reviewRequested(false);
     ws.setResearchPurpose(rp);
@@ -633,11 +641,12 @@ public class WorkspacesControllerTest {
     assertThat(updatedRp.getDiseaseOfFocus()).isNull();
     assertThat(updatedRp.getMethodsDevelopment()).isFalse();
     assertThat(updatedRp.getControlSet()).isFalse();
-    assertThat(updatedRp.getAggregateAnalysis()).isFalse();
     assertThat(updatedRp.getAncestry()).isFalse();
     assertThat(updatedRp.getCommercialPurpose()).isFalse();
+    assertThat(updatedRp.getPopulationHealth()).isFalse();
+    assertThat(updatedRp.getSocialBehavioral()).isFalse();
+    assertThat(updatedRp.getDrugDevelopment()).isFalse();
     assertThat(updatedRp.getPopulation()).isFalse();
-    assertThat(updatedRp.getPopulationOfFocus()).isNull();
     assertThat(updatedRp.getAdditionalNotes()).isNull();
     assertThat(updatedRp.getReviewRequested()).isFalse();
   }
@@ -797,9 +806,6 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getName()).isEqualTo(modWorkspace.getName());
     assertThat(workspace2.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(workspace2.getResearchPurpose()).isEqualTo(modPurpose);
-
-    // Original description should have been copied.
-    assertThat(workspace2.getDescription()).isEqualTo(workspace.getDescription());
 
     // User roles should *not* be copied.
     assertThat(workspace2.getUserRoles().size()).isEqualTo(1);
@@ -1078,7 +1084,6 @@ public class WorkspacesControllerTest {
     clonedConceptSet = conceptSetsController.getConceptSet(clonedWorkspace.getNamespace(),
         clonedWorkspace.getId(), clonedConceptSet.getId()).getBody();
     assertThat(clonedConceptSet.getName()).isEqualTo(originalConceptSet.getName());
-    assertThat(clonedConceptSet.getDescription()).isEqualTo(originalConceptSet.getDescription());
     assertThat(clonedConceptSet.getDomain()).isEqualTo(originalConceptSet.getDomain());
     assertThat(clonedConceptSet.getConcepts()).isEqualTo(originalConceptSet.getConcepts());
     assertThat(clonedConceptSet.getCreator()).isEqualTo(clonedWorkspace.getCreator());

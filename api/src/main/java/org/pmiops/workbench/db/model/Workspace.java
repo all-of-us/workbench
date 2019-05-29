@@ -22,7 +22,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.UnderservedPopulationEnum;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 @Entity
@@ -66,7 +66,6 @@ public class Workspace {
   private long workspaceId;
   private int version;
   private String name;
-  private String description;
   private String workspaceNamespace;
   private String firecloudName;
   private Short dataAccessLevel;
@@ -84,14 +83,20 @@ public class Workspace {
   private String diseaseOfFocus;
   private boolean methodsDevelopment;
   private boolean controlSet;
-  private boolean aggregateAnalysis;
   private boolean ancestry;
   private boolean commercialPurpose;
   private boolean population;
-  private String populationOfFocus;
+  private Set<Short> populationDetailsSet = new HashSet<>();
+  private boolean socialBehavioral;
+  private boolean populationHealth;
+  private boolean educational;
+  private boolean drugDevelopment;
+  private boolean otherPurpose;
+  private String otherPurposeDetails;
   private String additionalNotes;
-  private boolean containsUnderservedPopulation;
-  private Set<Short> underservedPopulationSet = new HashSet<>();
+  private String reasonForAllOfUs;
+  private String intendedStudy;
+  private String anticipatedFindings;
 
   private Boolean reviewRequested;
   private Boolean approved;
@@ -129,15 +134,6 @@ public class Workspace {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  @Column(name = "description")
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
   }
 
   @Column(name = "workspace_namespace")
@@ -256,15 +252,6 @@ public class Workspace {
     this.controlSet = controlSet;
   }
 
-  @Column(name = "rp_aggregate_analysis")
-  public boolean getAggregateAnalysis() {
-    return this.aggregateAnalysis;
-  }
-
-  public void setAggregateAnalysis(boolean aggregateAnalysis) {
-    this.aggregateAnalysis = aggregateAnalysis;
-  }
-
   @Column(name = "rp_ancestry")
   public boolean getAncestry() {
     return this.ancestry;
@@ -283,6 +270,36 @@ public class Workspace {
     this.commercialPurpose = commercialPurpose;
   }
 
+  @Column(name = "rp_social_behavioral")
+  public boolean getSocialBehavioral() { return this.socialBehavioral; }
+
+  public void setSocialBehavioral(boolean socialBehavioral) { this.socialBehavioral = socialBehavioral; }
+
+  @Column(name = "rp_population_health")
+  public boolean getPopulationHealth() { return this.populationHealth; }
+
+  public void setPopulationHealth(boolean populationHealth) { this.populationHealth = populationHealth; }
+
+  @Column(name = "rp_educational")
+  public boolean getEducational() { return this.educational; }
+
+  public void setEducational(boolean educational) { this.educational = educational; }
+
+  @Column(name = "rp_drug_development")
+  public boolean getDrugDevelopment() { return this.drugDevelopment; }
+
+  public void setDrugDevelopment(boolean drugDevelopment) { this.drugDevelopment = drugDevelopment; }
+
+  @Column(name = "rp_other_purpose")
+  public boolean getOtherPurpose() { return this.otherPurpose; }
+
+  public void setOtherPurpose(boolean otherPurpose) {this.otherPurpose = otherPurpose; }
+
+  @Column(name = "rp_other_purpose_details")
+  public String getOtherPurposeDetails() { return this.otherPurposeDetails; }
+
+  public void setOtherPurposeDetails(String otherPurposeDetails) { this.otherPurposeDetails = otherPurposeDetails; }
+
   @Column(name = "rp_population")
   public boolean getPopulation() {
     return this.population;
@@ -292,13 +309,32 @@ public class Workspace {
     this.population = population;
   }
 
-  @Column(name = "rp_population_of_focus")
-  public String getPopulationOfFocus() {
-    return this.populationOfFocus;
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name = "specific_populations", joinColumns = @JoinColumn(name = "workspace_id"))
+  @Column(name = "specific_population")
+  public Set<Short> getPopulationDetails() { return populationDetailsSet; }
+
+  public void setPopulationDetails(Set<Short> newPopulationDetailsSet) {
+    this.populationDetailsSet = newPopulationDetailsSet;
   }
 
-  public void setPopulationOfFocus(String populationOfFocus) {
-    this.populationOfFocus = populationOfFocus;
+  @Transient
+  public Set<SpecificPopulationEnum> getSpecificPopulationsEnum() {
+    Set<Short> from = getPopulationDetails();
+    if (from == null) {
+      return null;
+    }
+    return from
+            .stream()
+            .map(StorageEnums::specificPopulationFromStorage)
+            .collect(Collectors.toSet());
+  }
+
+  public void setSpecificPopulationsEnum(Set<SpecificPopulationEnum> newPopulationDetails) {
+    setPopulationDetails(newPopulationDetails
+            .stream()
+            .map(StorageEnums::specificPopulationToStorage)
+            .collect(Collectors.toSet()));
   }
 
   @Column(name = "rp_additional_notes")
@@ -310,45 +346,20 @@ public class Workspace {
     this.additionalNotes = additionalNotes;
   }
 
-  @Column(name = "rp_contains_underserved_population")
-  public Boolean getContainsUnderservedPopulation() {
-    return this.containsUnderservedPopulation;
-  }
+  @Column(name = "rp_reason_for_all_of_us")
+  public String getReasonForAllOfUs() { return this.reasonForAllOfUs; }
 
-  public void setContainsUnderservedPopulation(Boolean containsUnderservedPopulation) {
-    this.containsUnderservedPopulation = containsUnderservedPopulation;
-  }
+  public void setReasonForAllOfUs(String reasonForAllOfUs) { this.reasonForAllOfUs = reasonForAllOfUs; }
 
-  @ElementCollection(fetch = FetchType.LAZY)
-  @CollectionTable(name = "underserved_populations", joinColumns = @JoinColumn(name = "workspace_id"))
-  @Column(name = "underserved_population")
-  public Set<Short> getUnderservedPopulations() {
-    return underservedPopulationSet;
-  }
+  @Column(name = "rp_intended_study")
+  public String getIntendedStudy() { return this.intendedStudy; }
 
-  public void setUnderservedPopulations(Set<Short> newUnderservedPopulations) {
-    this.underservedPopulationSet = newUnderservedPopulations;
-  }
+  public void setIntendedStudy(String intendedStudy) { this.intendedStudy = intendedStudy; }
 
-  @Transient
-  public Set<UnderservedPopulationEnum> getUnderservedPopulationsEnum() {
-    Set<Short> from = getUnderservedPopulations();
-    if (from == null) {
-      return null;
-    }
-    return from
-        .stream()
-        .map(StorageEnums::underservedPopulationFromStorage)
-        .collect(Collectors.toSet());
-  }
+  @Column(name = "rp_anticipated_findings")
+  public String getAnticipatedFindings() { return this.anticipatedFindings; }
 
-  public void setUnderservedPopulationsEnum(Set<UnderservedPopulationEnum> newUnderservedPopulations) {
-    setUnderservedPopulations(
-        newUnderservedPopulations
-        .stream()
-        .map(StorageEnums::underservedPopulationToStorage)
-        .collect(Collectors.toSet()));
-  }
+  public void setAnticipatedFindings(String anticipatedFindings) { this.anticipatedFindings = anticipatedFindings; }
 
   @Column(name = "rp_review_requested")
   public Boolean getReviewRequested() {
