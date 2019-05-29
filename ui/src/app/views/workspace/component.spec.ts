@@ -20,7 +20,7 @@ import {ResetClusterButtonComponent} from 'app/views/reset-cluster-button';
 import {ResourceCardComponent} from 'app/views/resource-card';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
-import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
+import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar';
 import {WorkspaceShareComponent} from 'app/views/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';

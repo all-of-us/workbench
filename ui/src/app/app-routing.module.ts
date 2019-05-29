@@ -21,14 +21,16 @@ import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit'
 import {WorkspaceListComponent} from './views/workspace-list';
 import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
 import {WorkspaceComponent} from './views/workspace/component';
-
+import {CohortActionsComponent} from './views/cohort-actions';
+import {SignInComponent} from './views/sign-in';
+import {ConceptSetActionsComponent} from './views/concept-set-actions';
 import {DataPageComponent} from 'app/views/data-page';
 import {DataUseAgreementComponent} from 'app/views/data-use-agreement';
 import {DataSetPageComponent} from 'app/views/dataset-page';
+
 import {environment} from 'environments/environment';
 import {BreadcrumbType, NavStore} from './utils/navigation';
-import {CohortActionsComponent} from './views/cohort-actions';
-import {SignInComponent} from './views/sign-in';
+
 
 declare let gtag: Function;
 
@@ -212,7 +214,14 @@ const routes: Routes = [
                     title: 'Concept Set',
                     breadcrumb: BreadcrumbType.ConceptSet
                   },
-                }]
+                }, {
+                  path: ':csid/actions',
+                  component: ConceptSetActionsComponent,
+                  data: {
+                    title: 'Concept Set Actions',
+                    breadcrumb: BreadcrumbType.ConceptSet
+                  },
+                },]
               }]
           }]
       },

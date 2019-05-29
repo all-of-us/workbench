@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -65,30 +66,40 @@ const actionCards = [
     action: 'notebook'
   },
   {
-    title: 'Create a Dataset',
+    title: 'Create a Data Set',
     description: `Here, you can build and preview a dataset for one or more cohorts by
        selecting the desired concept sets and values for the cohorts.`,
-    action: 'dataset'
+    action: 'dataSet'
   },
 ];
 
+interface Props {
+  workspace: WorkspaceData;
+}
+
+interface State {
+  cohort: Cohort;
+  cohortLoading: boolean;
+}
+
 const CohortActions = withCurrentWorkspace()(
-  class extends React.Component<{workspace: WorkspaceData}, {cohort: Cohort}> {
+  class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
-      this.state = {cohort: currentCohortStore.getValue()};
+      this.state = {cohort: currentCohortStore.getValue(), cohortLoading: false};
     }
 
     componentDidMount(): void {
       const {cohort} = this.state;
       if (!cohort) {
         const cid = urlParamsStore.getValue().cid;
+        this.setState({cohortLoading: true});
         if (cid) {
           const {namespace, id} = this.props.workspace;
           cohortsApi().getCohort(namespace, id, cid).then(c => {
             if (c) {
               currentCohortStore.next(c);
-              this.setState({cohort: c});
+              this.setState({cohort: c, cohortLoading: false});
             } else {
               navigate(['workspaces', namespace, id, 'cohorts']);
             }
@@ -97,7 +108,7 @@ const CohortActions = withCurrentWorkspace()(
       }
     }
 
-    navigateTo = (action: string): void => {
+    navigateTo(action: string): void {
       const {cohort} = this.state;
       const {namespace, id} = this.props.workspace;
       let url = `/workspaces/${namespace}/${id}/`;
@@ -111,16 +122,17 @@ const CohortActions = withCurrentWorkspace()(
         case 'notebook':
           url += 'notebooks';
           break;
-        case 'dataset':
-          url += 'data/datasets';
+        case 'dataSet':
+          url += 'data/data-sets';
           break;
       }
       navigateByUrl(url);
     }
 
     render() {
-      const {cohort} = this.state;
+      const {cohort, cohortLoading} = this.state;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
+        {cohortLoading && <SpinnerOverlay />}
         {cohort && <React.Fragment>
           <h3 style={styles.cohortsHeader}>Cohort Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
@@ -136,7 +148,7 @@ const CohortActions = withCurrentWorkspace()(
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
               const disabled = card.action === 'notebook' ||
-                (card.action === 'dataset' && !environment.enableDatasetBuilder);
+                (card.action === 'dataSet' && !environment.enableDatasetBuilder);
               return <ActionCardBase key={i} style={styles.card}>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                   <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>

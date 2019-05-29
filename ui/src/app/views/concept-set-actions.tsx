@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -67,16 +68,17 @@ const actionCards = [
   {
     title: 'Create another Concept Set',
     description: `Here, you can create another concept set for the same or a different domain.`,
-    action: 'conceptSet'
+    action: 'newConceptSet'
   },
 ];
 
 interface State {
   conceptSet: ConceptSet;
+  conceptSetLoading: boolean;
 }
 
 interface Props {
-  workspace: WorkspaceData
+  workspace: WorkspaceData;
 }
 
 export const ConceptSetActions = withCurrentWorkspace()(
@@ -84,52 +86,57 @@ export const ConceptSetActions = withCurrentWorkspace()(
     constructor(props: any) {
       super(props);
       this.state = {
-        conceptSet: undefined
+        conceptSet: undefined,
+        conceptSetLoading: false,
       };
     }
 
     componentDidMount(): void {
-      const {conceptSet} = this.state;
-      if (!conceptSet) {
-        const csid = urlParamsStore.getValue().csid;
-        if (csid) {
-          const {namespace, id} = this.props.workspace;
-          conceptSetsApi().getConceptSet(namespace, id, csid).then(cs => {
-            if (cs) {
-              this.setState({conceptSet: cs});
-            } else {
-              navigate(['workspaces', namespace, id, 'concepts']);
-            }
-          });
-        }
+      const csid = urlParamsStore.getValue().csid;
+      this.setState({conceptSetLoading: true});
+      if (csid) {
+        const {namespace, id} = this.props.workspace;
+        conceptSetsApi().getConceptSet(namespace, id, csid).then(cs => {
+          if (cs) {
+            this.setState({conceptSet: cs, conceptSetLoading: false});
+          } else {
+            navigate(['workspaces', namespace, id, 'concepts']);
+          }
+        });
       }
     }
 
     navigateTo(action: string): void {
       const {namespace, id} = this.props.workspace;
+      const {conceptSet} = this.state;
       let url = `/workspaces/${namespace}/${id}/`;
       switch (action) {
         case 'conceptSet':
+          url += `concepts/sets/${conceptSet.id}`;
+          break;
+        case 'newConceptSet':
           url += `concepts`;
           break;
         case 'notebook':
-          url += 'notebooks';
+          url += `notebooks`;
           break;
-        case 'dataset':
-          url += 'data/datasets';
+        case 'dataSet':
+          url += `data/data-sets`;
           break;
       }
       navigateByUrl(url);
     }
 
     render() {
-      const {conceptSet} = this.state;
+      const {conceptSet, conceptSetLoading} = this.state;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
+        {conceptSetLoading && <SpinnerOverlay />}
         {conceptSet && <React.Fragment>
           <h3 style={styles.conceptSetsHeader}>Concept Set Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
             The concept set
-            <a style={{color: '#5DAEE1', margin: '0 4px'}}>
+            <a style={{color: '#5DAEE1', margin: '0 4px'}}
+               onClick={() => this.navigateTo('conceptSet')}>
               {conceptSet.name}
             </a>
             has been saved and can now be used in analysis and concept sets.
@@ -138,7 +145,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
               const disabled = card.action === 'notebook' ||
-                (card.action === 'dataset' && !environment.enableDatasetBuilder);
+                (card.action === 'dataSet' && !environment.enableDatasetBuilder);
               return <ActionCardBase key={i} style={styles.card}>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                   <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>

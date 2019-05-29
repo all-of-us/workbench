@@ -143,7 +143,6 @@ export const WorkspaceNavBarReact = fp.flow(
 
 @Component({
   selector: 'app-workspace-nav-bar',
-  styleUrls: ['./component.css'],
   template: '<div #root></div>',
 })
 export class WorkspaceNavBarComponent extends ReactWrapperBase {

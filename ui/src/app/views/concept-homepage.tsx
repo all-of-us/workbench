@@ -11,7 +11,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {queryParamsStore} from 'app/utils/navigation';
+import {NavStore, queryParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptAddModal} from 'app/views/concept-add-modal';
 import {ConceptNavigationBar} from 'app/views/concept-navigation-bar';
@@ -20,6 +20,7 @@ import {SlidingFabReact} from 'app/views/sliding-fab';
 import * as Color from 'color';
 import {
   Concept,
+  ConceptSet,
   Domain,
   DomainCount,
   DomainInfo,
@@ -320,24 +321,10 @@ export const ConceptHomepage = withCurrentWorkspace()(
       return count === 0 ? 'Add to set' : 'Add (' + count + ') to set';
     }
 
-    afterConceptsSaved() {
-      const {selectedConceptDomainMap, selectedDomain, conceptsToAdd} = this.state;
-      this.setConceptsSaveText();
-      // Once concepts are saved clear the selection from concept homepage for active Domain
-      selectedConceptDomainMap[selectedDomain.domain] = 0;
-      const remainingConcepts = conceptsToAdd.filter((c) =>
-        c.domainId.toLowerCase() !== selectedDomain.domain.toString().toLowerCase());
-      this.setState({conceptAddModalOpen: false, conceptsToAdd: remainingConcepts});
-    }
-
-    setConceptsSaveText() {
-      const {selectedConceptDomainMap, selectedDomain} = this.state;
-      const conceptsCount = selectedConceptDomainMap[selectedDomain.domain];
-      this.setState({conceptsSavedText: conceptsCount + ' ' + selectedDomain.name.toLowerCase() +
-        (conceptsCount > 1 ? ' concepts have ' : ' concept has ') + 'been added to set.'});
-      setTimeout(() => {
-        this.setState({conceptsSavedText: ''});
-      }, 5000);
+    afterConceptsSaved(conceptSet: ConceptSet) {
+      const {namespace, id} = this.props.workspace;
+      NavStore.navigate(['workspaces', namespace, id,
+        'concepts', 'sets', conceptSet.id, 'actions']);
     }
 
     render() {
@@ -435,7 +422,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         {conceptAddModalOpen &&
           <ConceptAddModal selectedDomain={selectedDomain}
                            selectedConcepts={conceptsToAdd}
-                           onSave={() => this.afterConceptsSaved()}
+                           onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
                            onClose={() => this.setState({conceptAddModalOpen: false})}/>}
       </FadeBox>;
     }
