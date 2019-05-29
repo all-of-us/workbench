@@ -48,7 +48,7 @@ import {SelectionInfoComponent} from 'app/cohort-search/selection-info/selection
 import {TreeComponent} from 'app/cohort-search/tree/tree.component';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
-import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal';
 import {CohortBuilderService, CohortsService} from 'generated';
 import {CohortBuilderApi, CohortsApi} from 'generated/fetch';
 import {fromJS} from 'immutable';

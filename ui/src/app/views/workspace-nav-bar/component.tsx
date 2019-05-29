@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 
 import {Clickable, MenuItem} from 'app/components/buttons';
 import {PopupTrigger} from 'app/components/popups';
-import {CardMenuIconComponentReact} from 'app/icons/card-menu-icon/component';
+import {CardMenuIconComponentReact} from 'app/icons/card-menu-icon';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {withCurrentWorkspace, withUrlParams} from 'app/utils/index';
@@ -104,7 +104,7 @@ export const WorkspaceNavBarReact = fp.flow(
           <MenuItem
             icon='copy'
             onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}>
-            Duplicate
+            Duplicate Test
           </MenuItem>
           <MenuItem
             icon='pencil'

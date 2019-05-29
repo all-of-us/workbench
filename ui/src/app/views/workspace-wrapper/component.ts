@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, navigate, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+import {WorkspaceShareComponent} from 'app/views/workspace-share';
 
 import {
   Workspace,

@@ -21,7 +21,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 
 import {AdminReviewWorkspaceComponent} from 'app/views/admin-review-workspace/component';
-import {BugReportComponent} from 'app/views/bug-report/component';
+import {BugReportComponent} from 'app/views/bug-report';
 
 describe('AdminReviewWorkspaceComponent', () => {
   let fixture: ComponentFixture<AdminReviewWorkspaceComponent>;
