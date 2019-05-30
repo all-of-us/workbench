@@ -25,7 +25,7 @@ import {
   DomainCount,
   DomainInfo,
   StandardConceptFilter,
-  VocabularyCount
+  VocabularyCount, WorkspaceAccessLevel
 } from 'generated/fetch';
 
 const styles = reactStyles({
@@ -327,6 +327,20 @@ export const ConceptHomepage = withCurrentWorkspace()(
         'concepts', 'sets', conceptSet.id, 'actions']);
     }
 
+    get canEdit(): boolean {
+      return this.isOwner || this.isWriter;
+    }
+
+    get isWriter(): boolean {
+      return this.props.workspace.accessLevel as unknown as WorkspaceAccessLevel
+        === WorkspaceAccessLevel.WRITER;
+    }
+
+    get isOwner(): boolean {
+      return this.props.workspace.accessLevel as unknown as WorkspaceAccessLevel
+        === WorkspaceAccessLevel.OWNER;
+    }
+
     render() {
       const {loadingDomains, conceptDomainList, standardConceptsOnly, showSearchError,
         searching, concepts, searchLoading, conceptDomainCounts, selectedDomain,
@@ -407,8 +421,10 @@ export const ConceptHomepage = withCurrentWorkspace()(
                             nextPage={(page) => this.getNextConceptSet(page)}/>
               <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
                                iconShape='plus'
+                               tooltip={!this.canEdit}
+                               tooltipContent={<div>Requires Owner or Writer permission</div>}
                                expanded={this.addToSetText}
-                               disable={this.activeSelectedConceptCount === 0}/>
+                               disable={this.activeSelectedConceptCount === 0 || !this.canEdit}/>
             </FadeBox> :
             <div style={{display: 'flex', flexDirection: 'row', width: '94.3%', flexWrap: 'wrap'}}>
               {conceptDomainList.map((domain, i) => {

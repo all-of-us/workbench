@@ -47,8 +47,8 @@ const styles = reactStyles({
 });
 
 const ConceptSetMenu: React.FunctionComponent<{
-  disabled: boolean, canDelete: boolean, canEdit: boolean, onEdit: Function, onDelete: Function
-}> = ({disabled, canDelete, canEdit, onEdit, onDelete}) => {
+  canDelete: boolean, canEdit: boolean, onEdit: Function, onDelete: Function
+}> = ({canDelete, canEdit, onEdit, onDelete}) => {
 
   return <PopupTrigger
     side='right'
@@ -70,10 +70,10 @@ const ConceptSetMenu: React.FunctionComponent<{
       </TooltipTrigger>
     </React.Fragment>}
   >
-    <Clickable disabled={disabled} data-test-id='workspace-menu'>
+    <Clickable  data-test-id='workspace-menu'>
       <ClrIcon shape='ellipsis-vertical' size={21}
-               style={{color: disabled ? '#9B9B9B' : '#216FB4', marginLeft: -9,
-                 cursor: disabled ? 'auto' : 'pointer'}}/>
+               style={{color: '#216FB4', marginLeft: -9,
+                 cursor: 'pointer'}}/>
     </Clickable>
   </PopupTrigger>;
 };
@@ -208,7 +208,6 @@ export const ConceptSetDetails =
           <div style={styles.conceptSetHeader}>
             <div style={{display: 'flex', flexDirection: 'row'}}>
               <ConceptSetMenu canDelete={this.isOwner} canEdit={this.canEdit}
-                              disabled={!this.canEdit}
                               onDelete={() => this.setState({deleting: true})}
                               onEdit={() => this.setState({editing: true})}/>
               <div style={styles.conceptSetMetadataWrapper}>
