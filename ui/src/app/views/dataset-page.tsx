@@ -8,6 +8,8 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 
+import * as ReactDOM from 'react-dom';
+
 import {
   cohortsApi,
   conceptsApi,
@@ -164,6 +166,8 @@ interface State {
 
 const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
   class extends React.Component<Props, State> {
+    dt: DataTable;
+    myRef: any;
     constructor(props) {
       super(props);
       this.state = {
@@ -186,6 +190,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         valuesLoading: false,
         selectAll: false
       };
+      this.myRef = React.createRef();
     }
 
     get editing() {
@@ -381,25 +386,23 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     }
 
     isEllipsisActive(text) {
-      // For Data table with column title as active text, enable the tooltip if column's scroll
-      // width is greater than offsetWidth as that represents the textOverflow style has been
-      // applied and it has ellipsis at the end
-
-      const column = document.getElementsByClassName('p-column-title');
-      for (let i = 0; i < column.length; i++) {
-        const element = column[i].children[0] as HTMLElement;
-        if (element.innerText === text) {
-          if (element.offsetWidth < element.scrollWidth) {
-            return false;
-          }
+      if (this.dt) {
+        const columnIndex = this.dt.props.children.findIndex(child => child.key === text);
+        const element = document.getElementsByClassName('p-column-title')
+            .item(columnIndex).children[0] as HTMLElement;
+        if (element.offsetWidth < element.scrollWidth) {
+          return false;
         }
+
       }
       return true;
     }
 
     getHeaderValue(value) {
       const text = value.value;
-      return <TooltipTrigger side='top' content={text} disabled={this.isEllipsisActive(text)}>
+      const dataTestId = 'data-test-id-' + text;
+      return <TooltipTrigger data-test-id={dataTestId} side='top' content={text}
+                             disabled={this.isEllipsisActive(text)}>
         <div style={{overflow: 'hidden', textOverflow: 'ellipsis'}}>
           {text}
         </div>
@@ -411,12 +414,11 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       const filteredPreviewData =
           this.state.previewList.filter(
             preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
-
-      return <DataTable key={this.state.selectedPreviewDomain} scrollable={true}
-                        style={{width: '100%'}}
+      return <DataTable ref={el => this.dt = el} key={this.state.selectedPreviewDomain}
+                        scrollable={true} style={{width: '100%'}}
                         value={this.getDataTableValue(filteredPreviewData.values)}>
         {filteredPreviewData.values.map(value =>
-          <Column header={this.getHeaderValue(value)}
+          <Column key={value.value} header={this.getHeaderValue(value)}
                   headerStyle={{textAlign: 'left', width: '5rem'}} style={{width: '5rem'}}
                   field={value.value}/>
         )}
