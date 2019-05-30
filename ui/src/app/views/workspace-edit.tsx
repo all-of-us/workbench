@@ -130,34 +130,57 @@ export const researchPurposeQuestions = [
 export const specificPopulations = [
   {
     label: 'Race/Ethnicity',
-    object: SpecificPopulationEnum.RACEETHNICITY
+    object: SpecificPopulationEnum.RACEETHNICITY,
+    ubrLabel: 'Ancestry (Race/Ethnicity)',
+    ubrDescription: 'American Indian and Alaska Native (AIAN); Black, African American, or \
+       African; Middle Eastern or North African (MENA); Native Hawaiian or Other Pacific \
+       Islander (NHPI); Hispanic, Latino, or Spanish (H/L/S); Multi-Ancestry (2+ Races)'
   }, {
     label: 'Age Groups',
-    object: SpecificPopulationEnum.AGEGROUPS
+    object: SpecificPopulationEnum.AGEGROUPS,
+    ubrLabel: 'Age',
+    ubrDescription: 'Children (0-11); Adolescents (12-17); Older Adults (65-74); Older \
+      Adults (75+)'
   }, {
     label: 'Sex',
-    object: SpecificPopulationEnum.SEX
+    object: SpecificPopulationEnum.SEX,
+    ubrLabel: 'Sex',
+    ubrDescription: 'Intersex'
   }, {
     label: 'Gender Identity',
-    object: SpecificPopulationEnum.GENDERIDENTITY
+    object: SpecificPopulationEnum.GENDERIDENTITY,
+    ubrLabel: 'Gender Identity (GI)',
+    ubrDescription: 'Nonbinary; Transgender; or Other Gender Identity Choices'
   }, {
     label: 'Sexual Orientation',
-    object: SpecificPopulationEnum.SEXUALORIENTATION
+    object: SpecificPopulationEnum.SEXUALORIENTATION,
+    ubrLabel: 'Sexual Orientation (SO)',
+    ubrDescription: 'Gay; Lesbian; Bisexual; Queer; Other Sexual Orientation Choices'
   }, {
     label: 'Geography (e.g. Rural, urban, suburban, etc.)',
-    object: SpecificPopulationEnum.GEOGRAPHY
+    object: SpecificPopulationEnum.GEOGRAPHY,
+    ubrLabel: 'Geography',
+    ubrDescription: 'Rural and Non-Metropolitan Zip codes'
   }, {
     label: 'Disability status',
-    object: SpecificPopulationEnum.DISABILITYSTATUS
+    object: SpecificPopulationEnum.DISABILITYSTATUS,
+    ubrLabel: 'Disability Status',
+    ubrDescription: 'Physical and Cognitive Disabilities'
   }, {
     label: 'Access to care',
-    object: SpecificPopulationEnum.ACCESSTOCARE
+    object: SpecificPopulationEnum.ACCESSTOCARE,
+    ubrLabel: 'Access to Care',
+    ubrDescription: 'Limited Access to care; Cannot easily obtain or access medical care'
   }, {
     label: 'Education level',
-    object: SpecificPopulationEnum.EDUCATIONLEVEL
+    object: SpecificPopulationEnum.EDUCATIONLEVEL,
+    ubrLabel: 'Educational Attainment',
+    ubrDescription: 'Less than high school graduate or General Education Development (GED)'
   }, {
     label: 'Income level',
-    object: SpecificPopulationEnum.INCOMELEVEL
+    object: SpecificPopulationEnum.INCOMELEVEL,
+    ubrLabel: 'Income Level',
+    ubrDescription: 'Less than USD 25,000 [for a family of four]'
   }
 ];
 
@@ -241,6 +264,10 @@ const styles = reactStyles({
   },
   checkboxRow: {
     display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
+  },
+  ubrBox: {
+    color: colors.purple[0], fontSize: 13, lineHeight: '24px',
+    background: colors.white, padding: '0.2rem 0.5rem', display: 'flex'
   }
 });
 
@@ -302,6 +329,28 @@ export const LabeledCheckBox = (props) => {
   </div>;
 };
 
+export const UbrRow = (props) => {
+  return <div style={{padding: '.2rem', width: props.left ? '30%' : '70%', display: 'flex'}}>
+    <div style={{...styles.ubrBox, width: '100%'}}>{props.content}</div>
+  </div>;
+};
+
+export const UbrTable = (props) => {
+  return <div style={{display: 'flex', flexDirection: 'column', ...props.style}}>
+    <div style={{display: 'flex', flexDirection: 'row', height: '100%'}}>
+      <UbrRow left={true} content={<strong>Diversity Categories</strong>}/>
+      <UbrRow left={false} content={<strong>
+        Groups that are Underrepresented in Biomedical Research (UBR)*</strong>}/>
+    </div>
+    {specificPopulations.map(sp =>
+      <div style={{display: 'flex', flexDirection: 'row'}}>
+        <UbrRow left={true} content={sp.ubrLabel}/>
+        <UbrRow left={false} content={sp.ubrDescription}/>
+      </div>
+    )}
+  </div>;
+};
+
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Duplicate = 3 }
 
 
@@ -320,6 +369,7 @@ export interface WorkspaceEditState {
   cloneUserRole: boolean;
   loading: boolean;
   showUnderservedPopulationDetails: boolean;
+  showStigmatizationDetails: boolean;
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
@@ -360,7 +410,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspaceCreationErrorMessage: '',
         cloneUserRole: false,
         loading: false,
-        showUnderservedPopulationDetails: false
+        showUnderservedPopulationDetails: false,
+        showStigmatizationDetails: false
       };
     }
 
@@ -722,8 +773,27 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </div>
           </div>
         </WorkspaceEditSection>
-        <WorkspaceEditSection header='Request a review of your research purpose'
+        <WorkspaceEditSection header='Request a review of your research purpose for potential
+                                      stigmatization of Research Participants'
                               tooltip={toolTipText.reviewRequest}>
+          <Link onClick={() => this.setState({showStigmatizationDetails:
+              !this.state.showStigmatizationDetails})} style={{marginTop: '0.5rem'}}>
+            More info on stigmatization
+            {this.state.showStigmatizationDetails ? <ClrIcon shape='caret' dir='up'/> :
+              <ClrIcon shape='caret' dir='down'/>}
+          </Link>
+          {this.state.showStigmatizationDetails &&
+            <div>
+              <div style={styles.text}>
+                Populations that are historically medically underserved or underrepresented in
+                biomedical research are also more vulnerable to stigmatization. If your population
+                of interest includes the following categories defined as UBR by the All of Us
+                Research Program, you are encouraged to request a review of your research
+                purpose by the RAB.
+              </div>
+              <UbrTable style={{marginTop: '0.5rem', marginBottom: '1rem'}}/>
+            </div>
+          }
           <div style={{display: 'flex', flexDirection: 'row',
             paddingBottom: '14.4px', paddingTop: '0.3rem'}}>
             <CheckBox style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
