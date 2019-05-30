@@ -100,6 +100,15 @@ const styles = reactStyles({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis'
+  },
+  error: {
+    width: '99%',
+    marginTop: '2.75rem',
+    padding: '0.25rem',
+    background: '#f7981c',
+    color: '#ffffff',
+    fontSize: '12px',
+    borderRadius: '5px',
   }
 });
 
@@ -112,6 +121,7 @@ interface Props {
 
 interface State {
   data: any;
+  error: boolean;
   loading: boolean;
   results: string;
   sourceMatch: any;
@@ -123,43 +133,56 @@ export const ListSearch = withCurrentWorkspace()(
       super(props);
       this.state = {
         data: null,
+        error: false,
         loading: false,
         results: 'all',
         sourceMatch: undefined,
       };
     }
 
-    handleInput = (event) => {
+    handleInput = (event: any) => {
       const {key, target: {value}} = event;
       if (key === 'Enter') {
         this.getResults(value);
       }
     }
 
-    getResults = (value: string) => {
-      this.setState({data: null, loading: true, results: 'all'});
-      const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
-      cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
-        +cdrVersionId, domain, value
-      ).then(resp => {
+    getResults = async(value: string) => {
+      let sourceMatch;
+      try {
+        this.setState({data: null, error: false, loading: true, results: 'all'});
+        const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
+        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
+          +cdrVersionId, domain, value
+        );
         const data = resp.items;
-        let sourceMatch;
         if (data.length && this.checkSource) {
           sourceMatch = data.find(
             item => item.code.toLowerCase() === value.toLowerCase() && !item.isStandard
           );
         }
-        this.setState({data, loading: false, sourceMatch});
-      });
+        this.setState({data});
+      } catch (err) {
+        this.setState({error: true});
+      } finally {
+        this.setState({loading: false, sourceMatch});
+      }
     }
 
-    getStandardResults = () => {
-      const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
-      const {sourceMatch} = this.state;
-      this.setState({loading: true, results: 'standard'});
-      cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(
-        +cdrVersionId, domain, sourceMatch.conceptId
-      ).then(resp => this.setState({data: resp.items, loading: false}));
+    getStandardResults = async() => {
+      try {
+        const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
+        const {sourceMatch} = this.state;
+        this.setState({data: null, error: false, loading: true, results: 'standard'});
+        const resp = await cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(
+          +cdrVersionId, domain, sourceMatch.conceptId
+        );
+        this.setState({data: resp.items});
+      } catch (err) {
+        this.setState({error: true});
+      } finally {
+        this.setState({loading: false});
+      }
     }
 
     get checkSource() {
@@ -201,7 +224,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     render() {
-      const {data, loading, results, sourceMatch} = this.state;
+      const {data, error, loading, results, sourceMatch} = this.state;
       return <div style={{overflow: 'auto'}}>
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
@@ -283,6 +306,16 @@ export const ListSearch = withCurrentWorkspace()(
           {results === 'all' && !data.length && <div>No results found</div>}
         </div>}
         {loading && <SpinnerOverlay/>}
+        {error && <div style={styles.error}>
+          <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+            shape='exclamation-triangle' size='22'/>
+          A problem occurred and we were not able to retrieve the requested data.
+          {results === 'standard' && <Button type='link'
+            style={{display: 'inline-block'}}
+            onClick={() => this.getResults(sourceMatch.code)}>
+            &nbsp;Return to source code.
+            </Button>}
+        </div>}
       </div>;
     }
   }
