@@ -8,8 +8,6 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 
-import * as ReactDOM from 'react-dom';
-
 import {
   cohortsApi,
   conceptsApi,
@@ -393,7 +391,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         if (element.offsetWidth < element.scrollWidth) {
           return false;
         }
-
       }
       return true;
     }
