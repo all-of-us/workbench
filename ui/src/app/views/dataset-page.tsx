@@ -164,8 +164,7 @@ interface State {
 
 const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
   class extends React.Component<Props, State> {
-    dt: DataTable;
-    myRef: any;
+    dt: any;
     constructor(props) {
       super(props);
       this.state = {
@@ -188,7 +187,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         valuesLoading: false,
         selectAll: false
       };
-      this.myRef = React.createRef();
     }
 
     get editing() {
