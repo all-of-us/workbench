@@ -85,9 +85,6 @@ export class GenderChart extends React.Component<Props, State> {
         bar: {
           groupPadding: 0,
           pointPadding: 0.1,
-        },
-        series: {
-          stacking: 'normal'
         }
       },
       series: this.getSeries()
@@ -101,19 +98,17 @@ export class GenderChart extends React.Component<Props, State> {
       .map(datum => datum.update('gender', code => this.codeMap[code]))
       .groupBy(datum => datum.get('gender', 'Unknown'))
       .map((group, gender) => ({
+        y: group.reduce((acc, item) => acc + item.get('count'), 0),
         name: gender,
-        data: [{
-          y: group.reduce((acc, item) => acc + item.get('count'), 0),
-          name: gender,
-          color: this.colors[gender]
-        }]
+        color: this.colors[gender]
       }))
       .sort((a, b) => a.name < b.name ? 1 : -1)
       .toJS();
+    // TODO need to clean this up
     console.log(series);
     const test = Object.keys(series).map(key => series[key]);
     console.log(test);
-    return test;
+    return [{data: test}];
   }
 
   render() {
