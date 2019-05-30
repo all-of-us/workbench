@@ -27,6 +27,9 @@
         [isRequesting$]="isRequesting$">
       </app-overview>
     </div>
+    <div *ngIf="loading" class="spinner root-spinner">
+      Loading...
+    </div>
   </div>
 
   <!-- Components behind the enableCBListSearch feature flag -->
