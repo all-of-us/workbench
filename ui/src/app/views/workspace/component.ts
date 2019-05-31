@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
@@ -7,15 +7,10 @@ import {ResearchPurposeItems} from 'app/views/workspace-edit';
 
 import {cohortsApi, profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
-import {ToolTipComponent} from 'app/views/tooltip/component';
 import {CdrVersion} from 'generated';
 
 import {Cohort, FileDetail, PageVisit, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
-enum Tabs {
-  Cohorts,
-  Notebooks,
-}
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -28,7 +23,6 @@ enum Tabs {
 export class WorkspaceComponent implements OnInit, OnDestroy {
   private static PAGE_ID = 'workspace';
 
-  @ViewChild(ToolTipComponent) toolTip: ToolTipComponent;
   sharing = false;
   showTip: boolean;
   workspace: Workspace;
@@ -86,7 +80,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         }
         profileApi().updatePageVisits(this.newPageVisit);
       }).catch(
-        error => {});
+        error => console.error(error));
     cohortsApi().getCohortsInWorkspace(this.wsNamespace, this.wsId)
       .then(
         cohortsReceived => {

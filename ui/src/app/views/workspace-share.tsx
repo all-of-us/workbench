@@ -227,12 +227,11 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       this.state.workspace.id,
       {workspaceEtag: this.state.workspace.etag, items: this.state.workspace.userRoles})
       .then((resp: ShareWorkspaceResponse) => {
-        const updatedWorkspace = {
+        currentWorkspaceStore.next({
           ...currentWorkspaceStore.getValue(),
           etag: resp.workspaceEtag,
           userRoles: resp.items
-        } as WorkspaceData;
-        currentWorkspaceStore.next(updatedWorkspace);
+        } as WorkspaceData);
         this.props.onClose();
       }).catch(error => {
         if (error.status === 400) {
@@ -484,7 +483,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       </Modal>}
     </React.Fragment>;
   }
-})
+});
 
 @Component({
   selector: 'app-workspace-share',
