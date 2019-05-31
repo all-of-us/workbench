@@ -384,10 +384,12 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     isEllipsisActive(text) {
       if (this.dt) {
         const columnIndex = this.dt.props.children.findIndex(child => child.key === text);
-        const element = document.getElementsByClassName('p-column-title')
-            .item(columnIndex).children[0] as HTMLElement;
-        if (element.offsetWidth < element.scrollWidth) {
-          return false;
+        const columnTitlesDOM = document.getElementsByClassName('p-column-title');
+        if (columnTitlesDOM && columnTitlesDOM.item(columnIndex)) {
+          const element = columnTitlesDOM.item(columnIndex).children[0] as HTMLElement;
+          if (element.offsetWidth < element.scrollWidth) {
+            return false;
+          }
         }
       }
       return true;
