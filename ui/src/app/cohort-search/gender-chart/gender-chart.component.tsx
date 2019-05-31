@@ -5,6 +5,13 @@ import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
 
+highCharts.setOptions({
+  lang: {
+    decimalPoint: '.',
+    thousandsSep: ','
+  },
+});
+
 interface Props {
   data: any;
 }
@@ -19,28 +26,12 @@ export class GenderChart extends React.Component<Props, State> {
     'F': 'Female',
     'No matching concept': 'Unknown'
   };
+
   readonly defaults = {
-    Male: 0,
-    Female: 0,
-    Unknown: 0
+    Male: {y: 0, name: 'Male', color: '#7aa3e5'},
+    Female: {y: 0, name: 'Female', color: '#a8385d'},
+    Unknown: {y: 0, name: 'Unknown', color: '#a27ea8'},
   };
-  readonly axis = {
-    x: {
-      show: true,
-      label: '# Participants',
-      showLabel: true,
-    },
-    y: {
-      show: true,
-      label: 'Gender',
-      showLabel: true,
-    }
-  };
-  readonly colors = {
-    Male: '#a8385d',
-    Female: '#7aa3e5',
-    Unknown: '#a27ea8'
-  }
 
   constructor(props: Props) {
     super(props);
@@ -54,7 +45,7 @@ export class GenderChart extends React.Component<Props, State> {
   getChartOptions() {
     const options = {
       chart: {
-        height: 250,
+        height: 200,
         type: 'bar'
       },
       credits: {
@@ -77,7 +68,6 @@ export class GenderChart extends React.Component<Props, State> {
           text: '# Participants'
         }
       },
-      colors: ['#a8385d', '#7aa3e5', '#a27ea8'],
       legend: {
         enabled: false
       },
@@ -87,33 +77,35 @@ export class GenderChart extends React.Component<Props, State> {
           pointPadding: 0.1,
         }
       },
-      series: this.getSeries()
+      series: [{
+        data: this.getSeries(),
+        tooltip: {
+          pointFormat: '<span style="color:{point.color}">\u25CF </span><b> {point.y}</b>'
+        }
+      }]
     };
     this.setState({options});
   }
 
   getSeries() {
     const {data} = this.props;
-    const series = data
+    return data
       .map(datum => datum.update('gender', code => this.codeMap[code]))
       .groupBy(datum => datum.get('gender', 'Unknown'))
       .map((group, gender) => ({
         y: group.reduce((acc, item) => acc + item.get('count'), 0),
         name: gender,
-        color: this.colors[gender]
+        color: this.defaults[gender].color
       }))
-      .sort((a, b) => a.name < b.name ? 1 : -1)
-      .toJS();
-    // TODO need to clean this up
-    console.log(series);
-    const test = Object.keys(series).map(key => series[key]);
-    console.log(test);
-    return [{data: test}];
+      .mergeWith((old, _) => old, this.defaults)
+      .sort((a, b) => a.name > b.name ? 1 : -1)
+      .valueSeq()
+      .toArray();
   }
 
   render() {
     const {options} = this.state;
-    return <div className='chart-container' style={{minHeight: 200}}>
+    return <div style={{minHeight: 200}}>
       {options && <HighchartsReact
         highcharts={highCharts}
         options={options}
