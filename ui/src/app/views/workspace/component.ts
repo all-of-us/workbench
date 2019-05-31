@@ -9,7 +9,7 @@ import {cohortsApi, profileApi, workspacesApi} from 'app/services/swagger-fetch-
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {CdrVersion} from 'generated';
 
-import {Cohort, FileDetail, PageVisit, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
+import {Cohort, FileDetail, PageVisit, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
 enum Tabs {
   Cohorts,

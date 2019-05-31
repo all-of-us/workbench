@@ -4,6 +4,8 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {isBlank, reactStyles, ReactWrapperBase} from 'app/utils';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -21,8 +23,6 @@ import {
 import {Button} from 'app/components/buttons';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
-import {currentWorkspaceStore} from "../utils/navigation";
-import {WorkspaceData} from "../utils/workspace-data";
 
 const selectStyles = {
   option: (libstyles, {isSelected}) => ({
@@ -51,15 +51,6 @@ const selectStyles = {
     borderWidth: '1px',
     width: '6rem',
     position: 'relative'
-  }),
-  dropdownIndicator: (libstyles, {isDisabled}) => ({
-    ...libstyles,
-    color: colors.black[0],
-    paddingTop: '12px',
-    display: isDisabled ? 'none' : ''
-  }),
-  indicatorSeparator: () => ({
-    display: 'none'
   })
 };
 
@@ -236,11 +227,6 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       this.state.workspace.id,
       {workspaceEtag: this.state.workspace.etag, items: this.state.workspace.userRoles})
       .then((resp: ShareWorkspaceResponse) => {
-        const updatedWorkspace = {
-          ...this.state.workspace,
-          etag: resp.workspaceEtag,
-          userRoles: resp.items
-        };
         currentWorkspaceStore.next({
           ...currentWorkspaceStore.getValue(),
           etag: resp.workspaceEtag,
