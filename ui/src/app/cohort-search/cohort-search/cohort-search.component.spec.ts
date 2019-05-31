@@ -4,7 +4,6 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
-import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {ComboChartComponent} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
 import {AttributesPageComponent} from 'app/cohort-search/attributes-page/attributes-page.component';
@@ -121,7 +120,6 @@ describe('CohortSearchComponent', () => {
       imports: [
         ClarityModule,
         FormsModule,
-        NgxChartsModule,
         NgxPopperModule,
         NouisliderModule,
         ReactiveFormsModule
