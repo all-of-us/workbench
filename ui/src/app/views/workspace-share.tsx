@@ -21,6 +21,8 @@ import {
 import {Button} from 'app/components/buttons';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {currentWorkspaceStore} from "../utils/navigation";
+import {WorkspaceData} from "../utils/workspace-data";
 
 const selectStyles = {
   option: (libstyles, {isSelected}) => ({
@@ -239,8 +241,11 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           etag: resp.workspaceEtag,
           userRoles: resp.items
         };
-        this.setState({usersLoading: false, userNotFound: '',
-          searchTerm: '', workspace: updatedWorkspace});
+        currentWorkspaceStore.next({
+          ...currentWorkspaceStore.getValue(),
+          etag: resp.workspaceEtag,
+          userRoles: resp.items
+        } as WorkspaceData);
         this.props.onClose();
       }).catch(error => {
         if (error.status === 400) {

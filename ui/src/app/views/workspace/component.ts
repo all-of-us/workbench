@@ -64,28 +64,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const wsData = currentWorkspaceStore.getValue();
-    this.workspace = wsData;
-    this.accessLevel = wsData.accessLevel;
-    Object.keys(ResearchPurposeItems).forEach((key) => {
-      if (this.workspace.researchPurpose[key]) {
-        let shortDescription = ResearchPurposeItems[key].shortDescription;
-        if (key === 'diseaseFocusedResearch') {
-          shortDescription += ': ' + this.workspace.researchPurpose.diseaseOfFocus;
-        }
-        this.researchPurposeArray.push(shortDescription);
-      }
-    });
-    this.leftResearchPurposes =
-      this.researchPurposeArray.slice(0, Math.ceil(this.researchPurposeArray.length / 2));
-    this.rightResearchPurposes =
-      this.researchPurposeArray.slice(
-        this.leftResearchPurposes.length,
-        this.researchPurposeArray.length);
-    this.showTip = false;
-    const {ns, wsid} = urlParamsStore.getValue();
-    this.wsNamespace = ns;
-    this.wsId = wsid;
+    this.refetchWorkspaceCache();
     // TODO: RW-1057
     profileApi().getMe().then(
       profile => {
@@ -117,6 +96,31 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.cdrVersionStorageService.cdrVersions$.subscribe(resp => {
       this.cdrVersion = resp.items.find(v => v.cdrVersionId === this.workspace.cdrVersionId);
     });
+  }
+
+  private refetchWorkspaceCache() {
+    const wsData = currentWorkspaceStore.getValue();
+
+    this.workspace = wsData;
+    this.accessLevel = wsData.accessLevel;
+    Object.keys(ResearchPurposeItems).forEach((key) => {
+      if (this.workspace.researchPurpose[key]) {
+        let shortDescription = ResearchPurposeItems[key].shortDescription;
+        if (key === 'diseaseFocusedResearch') {
+          shortDescription += ': ' + this.workspace.researchPurpose.diseaseOfFocus;
+        }
+        this.researchPurposeArray.push(shortDescription);
+      }
+    });
+    this.leftResearchPurposes =
+      this.researchPurposeArray.slice(0, Math.ceil(this.researchPurposeArray.length / 2));
+    this.rightResearchPurposes =
+      this.researchPurposeArray.slice(
+        this.leftResearchPurposes.length,
+        this.researchPurposeArray.length);
+    const {ns, wsid} = urlParamsStore.getValue();
+    this.wsNamespace = ns;
+    this.wsId = wsid;
   }
 
   private loadNotebookList() {
@@ -178,15 +182,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   closeShare(): void {
+    this.refetchWorkspaceCache();
     this.sharing = false;
-  }
-
-  updateAclList(userRoleList: UserRole[]): void {
-    this.workspace.userRoles = userRoleList;
-  }
-
-  dismissTip(): void {
-    this.showTip = false;
   }
 
   submitNotebooksLoadBugReport(): void {
