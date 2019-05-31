@@ -227,11 +227,14 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       this.state.workspace.id,
       {workspaceEtag: this.state.workspace.etag, items: this.state.workspace.userRoles})
       .then((resp: ShareWorkspaceResponse) => {
-        currentWorkspaceStore.next({
+        const updatedWorkspace = {
           ...currentWorkspaceStore.getValue(),
           etag: resp.workspaceEtag,
           userRoles: resp.items
-        } as WorkspaceData);
+        } as WorkspaceData;
+        currentWorkspaceStore.next(updatedWorkspace);
+        this.setState({usersLoading: false, userNotFound: '',
+          searchTerm: '', workspace: updatedWorkspace});
         this.props.onClose();
       }).catch(error => {
         if (error.status === 400) {
