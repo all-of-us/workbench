@@ -106,7 +106,7 @@ export class ComboChart extends React.Component<ComboChartProps, {options: any}>
 
   render() {
     const {options} = this.state;
-    return <div className='chart-container' style={{minHeight: 200}}>
+    return <div style={{minHeight: 200}}>
       {options && <HighchartsReact
         highcharts={highCharts}
         options={options}
