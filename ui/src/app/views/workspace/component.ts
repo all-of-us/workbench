@@ -99,17 +99,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    for (const s of this.subscriptions) {
-      s.unsubscribe();
-    }
-  }
-
   private reloadWorkspace(workspace: WorkspaceData) {
-    const wsData = currentWorkspaceStore.getValue();
-
-    this.workspace = wsData;
-    this.accessLevel = wsData.accessLevel;
+    this.workspace = workspace;
+    this.accessLevel = workspace.accessLevel;
+    this.researchPurposeArray = [];
     Object.keys(ResearchPurposeItems).forEach((key) => {
       if (this.workspace.researchPurpose[key]) {
         let shortDescription = ResearchPurposeItems[key].shortDescription;
@@ -145,6 +138,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.notebookAuthListeners.forEach(f => window.removeEventListener('message', f));
+    for (const s of this.subscriptions) {
+      s.unsubscribe();
+    }
   }
 
   newNotebook(): void {
@@ -189,7 +185,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   closeShare(): void {
-    this.reloadWorkspace();
     this.sharing = false;
   }
 

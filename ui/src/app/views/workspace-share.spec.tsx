@@ -4,27 +4,27 @@ import * as Lolex from 'lolex';
 import * as fp from 'lodash/fp';
 import Select from 'react-select';
 
-import {WorkspaceShare, WorkspaceShareProps, WorkspaceShareState} from './workspace-share';
+import {Props, State, WorkspaceShare} from './workspace-share';
 
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   User,
   UserApi,
   UserRole,
-  Workspace,
   WorkspaceAccessLevel,
   WorkspacesApi
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {UserApiStub} from 'testing/stubs/user-api-stub'
-import {WorkspacesApiStub} from "../../testing/stubs/workspaces-api-stub";
+import {UserApiStub} from 'testing/stubs/user-api-stub';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 describe('WorkspaceShareComponent', () => {
-  let props: WorkspaceShareProps;
+  let props: Props;
 
   const component = () => {
-    return mount<WorkspaceShare, WorkspaceShareProps, WorkspaceShareState>
-    (<WorkspaceShare {...props}/>);
+    return mount(<WorkspaceShare {...props}/>);
   };
   const harry: User = {givenName: 'Harry', familyName: 'Potter', email: 'harry.potter@hogwarts.edu'};
   const harryRole: UserRole = {...harry, email: harry.email, role: WorkspaceAccessLevel.OWNER};
@@ -35,8 +35,12 @@ describe('WorkspaceShareComponent', () => {
   const luna: User = {givenName: 'Luna', familyName: 'Lovegood', email: 'luna.lovegood@hogwarts.edu'};
   const lunaRole: UserRole = {...luna, email: luna.email, role: WorkspaceAccessLevel.NOACCESS};
 
-  const tomRiddleDiary = {namespace: 'Horcrux', name: 'The Diary of Tom Marvolo Riddle',
-    userRoles: [harryRole, hermioneRole, ronRole], etag: '1', id: 'The Diary of Tom Marvolo Riddle'} as Workspace;
+  const tomRiddleDiary = {
+    namespace: 'Horcrux', name: 'The Diary of Tom Marvolo Riddle',
+    userRoles: [harryRole, hermioneRole, ronRole],
+    etag: '1', id: 'The Diary of Tom Marvolo Riddle',
+    accessLevel: WorkspaceAccessLevel.OWNER
+  } as WorkspaceData;
 
   const getSelectString = (user: UserRole) => {
     return '.' + (user.email).replace(/[@\.]/g, '')
@@ -50,9 +54,9 @@ describe('WorkspaceShareComponent', () => {
       onClose: () => {},
       workspace: tomRiddleDiary,
       accessLevel: WorkspaceAccessLevel.OWNER,
-      userEmail: 'harry.potter@hogwarts.edu',
-      sharing: true
+      userEmail: 'harry.potter@hogwarts.edu'
     };
+    currentWorkspaceStore.next(tomRiddleDiary);
   });
 
   it('display correct users', () => {

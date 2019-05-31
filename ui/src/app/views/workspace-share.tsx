@@ -193,7 +193,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
   searchTermChangedEvent: Function;
   searchingNode: HTMLElement;
 
-  constructor(props: WorkspaceShareProps) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       autocompleteLoading: false,
@@ -492,8 +492,8 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
 export class WorkspaceShareComponent extends ReactWrapperBase implements OnInit {
   @Input('workspace') workspace: Workspace;
   @Input('accessLevel') accessLevel: WorkspaceAccessLevel;
-  @Input('userEmail') userEmail: WorkspaceShareProps['userEmail'];
-  @Input('onClose') onClose: WorkspaceShareProps['onClose'];
+  @Input('userEmail') userEmail: Props['userEmail'];
+  @Input('onClose') onClose: Props['onClose'];
 
   constructor() {
     super(WorkspaceShare, ['workspace', 'accessLevel', 'onClose', 'userEmail']);
