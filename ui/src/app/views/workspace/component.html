@@ -172,11 +172,10 @@
     <app-react-cluster-button *ngIf="!!workspaceClusterBillingProjectId" [billingProjectId]="workspaceClusterBillingProjectId()"></app-react-cluster-button>
   </div>
 </div>
-<app-workspace-share [workspace]="workspace"
+<app-workspace-share *ngIf="sharing" [workspace]="workspace"
                      [accessLevel]="accessLevel"
                      [onClose]="closeShare.bind(this)"
-                     [userEmail]="username"
-                     [sharing]="sharing"></app-workspace-share>
+                     [userEmail]="username"></app-workspace-share>
 <clr-modal [(clrModalOpen)]="googleBucketModal">
   <h3 class="modal-title">Note</h3>
   <div class="modal-body">It is All of Us data use policy that researchers should not make copies of or download

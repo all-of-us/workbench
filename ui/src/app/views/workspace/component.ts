@@ -2,6 +2,7 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResearchPurposeItems} from 'app/views/workspace-edit';
 
 import {cohortsApi, profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -43,7 +44,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   notebookError = false;
   notebookList: FileDetail[] = [];
   notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
-  tabOpen = Tabs.Notebooks;
   researchPurposeArray: String[] = [];
   leftResearchPurposes: String[];
   rightResearchPurposes: String[];
@@ -56,6 +56,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   bugReportDescription = '';
   googleBucketModal = false;
 
+  private subscriptions = [];
+
   constructor(
     private cdrVersionStorageService: CdrVersionStorageService
   ) {
@@ -64,7 +66,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.refetchWorkspaceCache();
+    this.reloadWorkspace(currentWorkspaceStore.getValue());
+    this.subscriptions.push(currentWorkspaceStore.subscribe((workspace) => {
+      if (workspace) {
+        this.reloadWorkspace(workspace);
+      }
+    }));
     // TODO: RW-1057
     profileApi().getMe().then(
       profile => {
@@ -98,7 +105,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  private refetchWorkspaceCache() {
+  ngOnDestroy(): void {
+    for (const s of this.subscriptions) {
+      s.unsubscribe();
+    }
+  }
+
+  private reloadWorkspace(workspace: WorkspaceData) {
     const wsData = currentWorkspaceStore.getValue();
 
     this.workspace = wsData;
@@ -182,7 +195,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   closeShare(): void {
-    this.refetchWorkspaceCache();
+    this.reloadWorkspace();
     this.sharing = false;
   }
 
