@@ -5,25 +5,23 @@ import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
 
-export interface ComboChartProps {
+interface Props {
   mode: string;
   data: any;
 }
 
-export class ComboChart extends React.Component<ComboChartProps, {options: any}>  {
-  /*
-   * TODO - this maps gender codes to human readable representations.  We
-   * probably need to either grab that repro from the DB or generate a complete
-   * list of possible values and include mappings for each one, not just the
-   * binary basics.
-   */
+interface State {
+  options: any;
+}
+
+export class ComboChart extends React.Component<Props, State> {
   readonly codeMap = {
     'M': 'Male',
     'F': 'Female',
     'No matching concept': 'Unknown'
   };
 
-  constructor(props: ComboChartProps) {
+  constructor(props: Props) {
     super(props);
     this.state = {options: null};
   }
@@ -86,22 +84,22 @@ export class ComboChart extends React.Component<ComboChartProps, {options: any}>
 
   getCategories() {
     const {data} = this.props;
-    const categories = data
+    return data
       .map(datum => datum.update('gender', code => this.codeMap[code]))
       .groupBy(datum => `${datum.get('gender', 'Unknown')} ${datum.get('ageRange', 'Unknown')}`)
-      .toJS();
-    return Object.keys(categories);
+      .keySeq()
+      .toArray();
   }
 
   getSeries() {
     const {data} = this.props;
-    const series = data
+    return data
       .map(datum => datum.update('gender', code => this.codeMap[code]))
       .groupBy(datum => datum.get('race', 'Unknown'))
       .map((group, race) => ({name: race, data: group.map(item => item.get('count'))}))
       .sort((a, b) => a.name < b.name ? 1 : -1)
+      .valueSeq()
       .toJS();
-    return Object.keys(series).map(key => series[key]);
   }
 
   render() {
@@ -121,8 +119,8 @@ export class ComboChart extends React.Component<ComboChartProps, {options: any}>
   template: '<div #root></div>'
 })
 export class ComboChartComponent extends ReactWrapperBase {
-  @Input('mode') mode: ComboChartProps['mode'];
-  @Input('data') data: ComboChartProps['data'];
+  @Input('mode') mode: Props['mode'];
+  @Input('data') data: Props['data'];
   constructor() {
     super(ComboChart, ['mode', 'data']);
   }
