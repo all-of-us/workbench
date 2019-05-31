@@ -255,9 +255,7 @@ const styles = reactStyles({
     width: '95%'
   },
   categoryRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    padding: '0.6rem 0',
+    display: 'flex', flexDirection: 'row', padding: '0.6rem 0',
   },
   checkBoxStyle: {
     marginRight: '.31667rem', zoom: '1.5'
