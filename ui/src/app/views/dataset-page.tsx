@@ -5,7 +5,9 @@ import * as React from 'react';
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
+
 import {
   cohortsApi,
   conceptsApi,
@@ -162,6 +164,7 @@ interface State {
 
 const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
   class extends React.Component<Props, State> {
+    dt: any;
     constructor(props) {
       super(props);
       this.state = {
@@ -378,18 +381,43 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       }
     }
 
+    isEllipsisActive(text) {
+      if (this.dt) {
+        const columnIndex = this.dt.props.children.findIndex(child => child.key === text);
+        const columnTitlesDOM = document.getElementsByClassName('p-column-title');
+        if (columnTitlesDOM && columnTitlesDOM.item(columnIndex)) {
+          const element = columnTitlesDOM.item(columnIndex).children[0] as HTMLElement;
+          if (element.offsetWidth < element.scrollWidth) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    getHeaderValue(value) {
+      const text = value.value;
+      const dataTestId = 'data-test-id-' + text;
+      return <TooltipTrigger data-test-id={dataTestId} side='top' content={text}
+                             disabled={this.isEllipsisActive(text)}>
+        <div style={{overflow: 'hidden', textOverflow: 'ellipsis'}}>
+          {text}
+        </div>
+      </TooltipTrigger>;
+    }
+
+
     renderPreviewDataTable() {
       const filteredPreviewData =
           this.state.previewList.filter(
             preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
-
-      return <DataTable key={this.state.selectedPreviewDomain} scrollable={true}
-                        style={{width: '100%'}}
+      return <DataTable ref={el => this.dt = el} key={this.state.selectedPreviewDomain}
+                        scrollable={true} style={{width: '100%'}}
                         value={this.getDataTableValue(filteredPreviewData.values)}>
         {filteredPreviewData.values.map(value =>
-            <Column header={value.value}
-                    headerStyle={{textAlign: 'left', width: '5rem', wordBreak: 'break-all'}}
-                    style={{width: '5rem'}} field={value.value}/>
+          <Column key={value.value} header={this.getHeaderValue(value)}
+                  headerStyle={{textAlign: 'left', width: '5rem'}} style={{width: '5rem'}}
+                  field={value.value}/>
         )}
       </DataTable>;
     }
