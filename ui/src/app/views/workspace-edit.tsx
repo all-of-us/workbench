@@ -132,15 +132,15 @@ export const specificPopulations = [
     label: 'Race/Ethnicity',
     object: SpecificPopulationEnum.RACEETHNICITY,
     ubrLabel: 'Ancestry (Race/Ethnicity)',
-    ubrDescription: 'American Indian and Alaska Native (AIAN); Black, African American, or \
-       African; Middle Eastern or North African (MENA); Native Hawaiian or Other Pacific \
-       Islander (NHPI); Hispanic, Latino, or Spanish (H/L/S); Multi-Ancestry (2+ Races)'
+    ubrDescription: 'American Indian and Alaska Native (AIAN); Black, African American, or ' +
+       'African; Middle Eastern or North African (MENA); Native Hawaiian or Other Pacific ' +
+       'Islander (NHPI); Hispanic, Latino, or Spanish (H/L/S); Multi-Ancestry (2+ Races)'
   }, {
     label: 'Age Groups',
     object: SpecificPopulationEnum.AGEGROUPS,
     ubrLabel: 'Age',
-    ubrDescription: 'Children (0-11); Adolescents (12-17); Older Adults (65-74); Older \
-      Adults (75+)'
+    ubrDescription: 'Children (0-11); Adolescents (12-17); Older Adults (65-74); Older ' +
+      'Adults (75+)'
   }, {
     label: 'Sex',
     object: SpecificPopulationEnum.SEX,
@@ -170,7 +170,7 @@ export const specificPopulations = [
     label: 'Access to care',
     object: SpecificPopulationEnum.ACCESSTOCARE,
     ubrLabel: 'Access to Care',
-    ubrDescription: 'Limited Access to care; Cannot easily obtain or access medical care'
+    ubrDescription: 'Limited access to care; Cannot easily obtain or access medical care'
   }, {
     label: 'Education level',
     object: SpecificPopulationEnum.EDUCATIONLEVEL,
@@ -329,7 +329,7 @@ export const LabeledCheckBox = (props) => {
   </div>;
 };
 
-export const UbrRow = (props) => {
+export const UbrTableCell = (props) => {
   return <div style={{padding: '.2rem', width: props.left ? '30%' : '70%', display: 'flex'}}>
     <div style={{...styles.ubrBox, width: '100%'}}>{props.content}</div>
   </div>;
@@ -338,14 +338,14 @@ export const UbrRow = (props) => {
 export const UbrTable = (props) => {
   return <div style={{display: 'flex', flexDirection: 'column', ...props.style}}>
     <div style={{display: 'flex', flexDirection: 'row', height: '100%'}}>
-      <UbrRow left={true} content={<strong>Diversity Categories</strong>}/>
-      <UbrRow left={false} content={<strong>
+      <UbrTableCell left={true} content={<strong>Diversity Categories</strong>}/>
+      <UbrTableCell left={false} content={<strong>
         Groups that are Underrepresented in Biomedical Research (UBR)*</strong>}/>
     </div>
     {specificPopulations.map(sp =>
       <div style={{display: 'flex', flexDirection: 'row'}}>
-        <UbrRow left={true} content={sp.ubrLabel}/>
-        <UbrRow left={false} content={sp.ubrDescription}/>
+        <UbrTableCell left={true} content={sp.ubrLabel}/>
+        <UbrTableCell left={false} content={sp.ubrDescription}/>
       </div>
     )}
   </div>;
@@ -774,7 +774,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </div>
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Request a review of your research purpose for potential
-                                      stigmatization of Research Participants'
+                                      stigmatization of research participants'
                               tooltip={toolTipText.reviewRequest}>
           <Link onClick={() => this.setState({showStigmatizationDetails:
               !this.state.showStigmatizationDetails})} style={{marginTop: '0.5rem'}}>
@@ -787,9 +787,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <div style={styles.text}>
                 Populations that are historically medically underserved or underrepresented in
                 biomedical research are also more vulnerable to stigmatization. If your population
-                of interest includes the following categories defined as UBR by the All of Us
-                Research Program, you are encouraged to request a review of your research
-                purpose by the RAB.
+                of interest includes the following categories defined as Underrepresented in
+                Biomedical Research (UBR) by the All of Us Research Program, you are encouraged
+                to request a review of your research purpose by the Resource Access Board (RAB).
               </div>
               <UbrTable style={{marginTop: '0.5rem', marginBottom: '1rem'}}/>
             </div>
@@ -804,7 +804,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               I am concerned about potential
               <a href='/definitions/stigmatization' target='_blank'> stigmatization </a>
             of research participants. I would like the All of Us Resource Access Board (RAB) to
-              review my Research Purpose.
+              review my research purpose.
               (This will not prevent you from creating a workspace and proceeding.)
             </label>
           </div>
