@@ -1,8 +1,7 @@
 package org.pmiops.workbench.mail;
 
-import javax.mail.MessagingException;
-
 import com.google.api.services.admin.directory.model.User;
+import javax.mail.MessagingException;
 
 public interface MailService {
 

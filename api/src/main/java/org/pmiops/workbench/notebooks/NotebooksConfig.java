@@ -23,23 +23,25 @@ public class NotebooksConfig {
   private static final String USER_NOTEBOOKS_CLIENT = "notebooksApiClient";
   private static final String NOTEBOOKS_SERVICE_CLIENT = "notebooksSvcApiClient";
 
-  private static final List<String> NOTEBOOK_SCOPES = ImmutableList.of(
-      "https://www.googleapis.com/auth/userinfo.profile",
-      "https://www.googleapis.com/auth/userinfo.email");
+  private static final List<String> NOTEBOOK_SCOPES =
+      ImmutableList.of(
+          "https://www.googleapis.com/auth/userinfo.profile",
+          "https://www.googleapis.com/auth/userinfo.email");
 
-  @Bean(name=USER_NOTEBOOKS_CLIENT)
+  @Bean(name = USER_NOTEBOOKS_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient notebooksApiClient(UserAuthentication userAuthentication,
-      WorkbenchConfig workbenchConfig) {
+  public ApiClient notebooksApiClient(
+      UserAuthentication userAuthentication, WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     apiClient.setAccessToken(userAuthentication.getCredentials());
     return apiClient;
   }
 
-  @Bean(name=NOTEBOOKS_SERVICE_CLIENT)
+  @Bean(name = NOTEBOOKS_SERVICE_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient workbenchServiceAccountClient(
-      WorkbenchEnvironment workbenchEnvironment, WorkbenchConfig workbenchConfig,
+      WorkbenchEnvironment workbenchEnvironment,
+      WorkbenchConfig workbenchConfig,
       ServiceAccounts serviceAccounts) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     try {
@@ -51,7 +53,7 @@ public class NotebooksConfig {
     return apiClient;
   }
 
-  @Bean(name=USER_CLUSTER_API)
+  @Bean(name = USER_CLUSTER_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ClusterApi clusterApi(@Qualifier(USER_NOTEBOOKS_CLIENT) ApiClient apiClient) {
     ClusterApi api = new ClusterApi();
@@ -75,7 +77,7 @@ public class NotebooksConfig {
     return api;
   }
 
-  @Bean(name=SERVICE_CLUSTER_API)
+  @Bean(name = SERVICE_CLUSTER_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ClusterApi serviceClusterApi(@Qualifier(NOTEBOOKS_SERVICE_CLIENT) ApiClient apiClient) {
     ClusterApi api = new ClusterApi();
@@ -87,7 +89,8 @@ public class NotebooksConfig {
     return new ApiClient()
         .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
         .setDebugging(workbenchConfig.firecloud.debugEndpoints)
-        .addDefaultHeader(org.pmiops.workbench.firecloud.FireCloudConfig.X_APP_ID_HEADER,
+        .addDefaultHeader(
+            org.pmiops.workbench.firecloud.FireCloudConfig.X_APP_ID_HEADER,
             workbenchConfig.firecloud.xAppIdValue);
   }
 }

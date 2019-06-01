@@ -1,7 +1,14 @@
 package org.pmiops.workbench.firecloud;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,22 +29,11 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.auth.OAuth;
-import org.pmiops.workbench.firecloud.model.ManagedGroupAccessResponse;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.firecloud.model.SystemStatus;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.NoBackOffPolicy;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 public class FireCloudServiceImplTest {
 
@@ -45,27 +41,17 @@ public class FireCloudServiceImplTest {
 
   private FireCloudServiceImpl service;
 
-  @Mock
-  private ProfileApi profileApi;
-  @Mock
-  private BillingApi billingApi;
-  @Mock
-  private WorkspacesApi workspacesApi;
-  @Mock
-  private GroupsApi groupsApi;
-  @Mock
-  private NihApi nihApi;
-  @Mock
-  private StatusApi statusApi;
-  @Mock
-  private GoogleCredential fireCloudCredential;
-  @Mock
-  private ServiceAccounts serviceAccounts;
-  @Mock
-  private GoogleCredential impersonatedCredential;
+  @Mock private ProfileApi profileApi;
+  @Mock private BillingApi billingApi;
+  @Mock private WorkspacesApi workspacesApi;
+  @Mock private GroupsApi groupsApi;
+  @Mock private NihApi nihApi;
+  @Mock private StatusApi statusApi;
+  @Mock private GoogleCredential fireCloudCredential;
+  @Mock private ServiceAccounts serviceAccounts;
+  @Mock private GoogleCredential impersonatedCredential;
 
-  @Rule
-  public MockitoRule mockitoRule = MockitoJUnit.rule();
+  @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @Before
   public void setUp() {
@@ -74,12 +60,18 @@ public class FireCloudServiceImplTest {
     workbenchConfig.firecloud.baseUrl = "https://api.firecloud.org";
     workbenchConfig.firecloud.debugEndpoints = true;
 
-    service = new FireCloudServiceImpl(Providers.of(workbenchConfig),
-        Providers.of(profileApi), Providers.of(billingApi), Providers.of(groupsApi),
-        Providers.of(nihApi), Providers.of(workspacesApi),
-        Providers.of(statusApi), new FirecloudRetryHandler(new NoBackOffPolicy()),
-        serviceAccounts,
-        Providers.of(fireCloudCredential));
+    service =
+        new FireCloudServiceImpl(
+            Providers.of(workbenchConfig),
+            Providers.of(profileApi),
+            Providers.of(billingApi),
+            Providers.of(groupsApi),
+            Providers.of(nihApi),
+            Providers.of(workspacesApi),
+            Providers.of(statusApi),
+            new FirecloudRetryHandler(new NoBackOffPolicy()),
+            serviceAccounts,
+            Providers.of(fireCloudCredential));
   }
 
   @Test
@@ -172,7 +164,8 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testNihCallback() throws Exception {
-    when(nihApi.nihCallback(any())).thenReturn(new NihStatus().linkedNihUsername("test").linkExpireTime(500L));
+    when(nihApi.nihCallback(any()))
+        .thenReturn(new NihStatus().linkedNihUsername("test").linkExpireTime(500L));
     try {
       service.postNihCallback(any());
     } catch (Exception e) {
@@ -194,8 +187,8 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testGetApiClientWithImpersonation() throws IOException {
-    when(serviceAccounts.getImpersonatedCredential(any(),
-        eq("asdf@fake-research-aou.org"), any())).thenReturn(impersonatedCredential);
+    when(serviceAccounts.getImpersonatedCredential(any(), eq("asdf@fake-research-aou.org"), any()))
+        .thenReturn(impersonatedCredential);
 
     // Pretend we retrieved the given access token.
     when(impersonatedCredential.getAccessToken()).thenReturn("impersonated-access-token");
@@ -206,5 +199,4 @@ public class FireCloudServiceImplTest {
     OAuth oauth = (OAuth) apiClient.getAuthentication("googleoauth");
     assertThat(oauth.getAccessToken()).isEqualTo("impersonated-access-token");
   }
-
 }

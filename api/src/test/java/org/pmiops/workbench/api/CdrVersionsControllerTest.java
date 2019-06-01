@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.CdrConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -36,29 +35,22 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CdrVersionsControllerTest {
 
-  @Autowired
-  private CdrVersionDao cdrVersionDao;
+  @Autowired private CdrVersionDao cdrVersionDao;
 
-  @Autowired
-  private CdrVersionsController cdrVersionsController;
+  @Autowired private CdrVersionsController cdrVersionsController;
 
   private CdrVersion defaultCdrVersion;
   private CdrVersion protectedCdrVersion;
   private User user;
 
   @TestConfiguration
-  @Import({
-      CdrVersionService.class,
-      CdrVersionsController.class
-  })
-  @MockBean({
-      FireCloudService.class
-  })
+  @Import({CdrVersionService.class, CdrVersionsController.class})
+  @MockBean({FireCloudService.class})
   static class Configuration {
     @Bean
     public User user() {
@@ -81,11 +73,12 @@ public class CdrVersionsControllerTest {
     user = new User();
     user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
     cdrVersionsController.setUserProvider(Providers.of(user));
-    defaultCdrVersion = makeCdrVersion(1L, /* isDefault */ true, "Test Registered CDR",
-        123L, DataAccessLevel.REGISTERED);
-    protectedCdrVersion = makeCdrVersion(2L, /* isDefault */ false, "Test Protected CDR",
-        456L, DataAccessLevel.PROTECTED);
-
+    defaultCdrVersion =
+        makeCdrVersion(
+            1L, /* isDefault */ true, "Test Registered CDR", 123L, DataAccessLevel.REGISTERED);
+    protectedCdrVersion =
+        makeCdrVersion(
+            2L, /* isDefault */ false, "Test Protected CDR", 456L, DataAccessLevel.PROTECTED);
   }
 
   @Test
@@ -96,8 +89,8 @@ public class CdrVersionsControllerTest {
   @Test
   public void testGetCdrVersionsProtected() {
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
-    assertResponse(cdrVersionsController.getCdrVersions().getBody(), protectedCdrVersion,
-        defaultCdrVersion);
+    assertResponse(
+        cdrVersionsController.getCdrVersions().getBody(), protectedCdrVersion, defaultCdrVersion);
   }
 
   @Test(expected = ForbiddenException.class)
@@ -107,13 +100,19 @@ public class CdrVersionsControllerTest {
   }
 
   private void assertResponse(CdrVersionListResponse response, CdrVersion... versions) {
-    assertThat(response.getItems()).containsExactly(
-        Arrays.stream(versions).map(CdrVersionsController.TO_CLIENT_CDR_VERSION).toArray()).inOrder();
-    assertThat(response.getDefaultCdrVersionId()).isEqualTo(
-        String.valueOf(defaultCdrVersion.getCdrVersionId()));
+    assertThat(response.getItems())
+        .containsExactly(
+            Arrays.stream(versions).map(CdrVersionsController.TO_CLIENT_CDR_VERSION).toArray())
+        .inOrder();
+    assertThat(response.getDefaultCdrVersionId())
+        .isEqualTo(String.valueOf(defaultCdrVersion.getCdrVersionId()));
   }
 
-  private CdrVersion makeCdrVersion(long cdrVersionId, boolean isDefault, String name, long creationTime,
+  private CdrVersion makeCdrVersion(
+      long cdrVersionId,
+      boolean isDefault,
+      String name,
+      long creationTime,
       DataAccessLevel dataAccessLevel) {
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setIsDefault(isDefault);
@@ -129,5 +128,4 @@ public class CdrVersionsControllerTest {
     cdrVersionDao.save(cdrVersion);
     return cdrVersion;
   }
-
 }

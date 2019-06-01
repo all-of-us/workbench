@@ -36,9 +36,12 @@ public class FirecloudRetryHandler extends RetryHandler<ApiException> {
     @Override
     protected void logNoRetry(Throwable t, int responseCode) {
       if (t instanceof ApiException) {
-        logger.log(getLogLevel(responseCode),
-            String.format("Exception calling Firecloud API with response: %s",
-                ((ApiException) t).getResponseBody()), t);
+        logger.log(
+            getLogLevel(responseCode),
+            String.format(
+                "Exception calling Firecloud API with response: %s",
+                ((ApiException) t).getResponseBody()),
+            t);
       } else {
         super.logNoRetry(t, responseCode);
       }
@@ -54,5 +57,4 @@ public class FirecloudRetryHandler extends RetryHandler<ApiException> {
   protected WorkbenchException convertException(ApiException exception) {
     return ExceptionUtils.convertFirecloudException(exception);
   }
-
 }

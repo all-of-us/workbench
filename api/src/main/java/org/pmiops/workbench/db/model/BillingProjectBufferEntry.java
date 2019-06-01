@@ -12,7 +12,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 @Entity
-@Table(name ="billing_project_buffer_entry")
+@Table(name = "billing_project_buffer_entry")
 public class BillingProjectBufferEntry {
 
   private long id;
@@ -23,7 +23,8 @@ public class BillingProjectBufferEntry {
   private User assignedUser;
 
   public enum BillingProjectBufferStatus {
-    CREATING, // Sent a request to FireCloud to create a BillingProject. Status of BillingProject is TBD
+    CREATING, // Sent a request to FireCloud to create a BillingProject. Status of BillingProject is
+    // TBD
     ERROR, // Failed to create BillingProject
     AVAILABLE, // BillingProject is ready to be assigned to a user
     ASSIGNING, //  BillingProject is being assigned to a user
@@ -36,6 +37,7 @@ public class BillingProjectBufferEntry {
   public long getId() {
     return id;
   }
+
   public void setId(long id) {
     this.id = id;
   }
@@ -44,6 +46,7 @@ public class BillingProjectBufferEntry {
   public String getFireCloudProjectName() {
     return fireCloudProjectName;
   }
+
   public void setFireCloudProjectName(String fireCloudProjectName) {
     this.fireCloudProjectName = fireCloudProjectName;
   }
@@ -52,6 +55,7 @@ public class BillingProjectBufferEntry {
   public Timestamp getCreationTime() {
     return creationTime;
   }
+
   public void setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
   }
@@ -60,15 +64,17 @@ public class BillingProjectBufferEntry {
   public Timestamp getLastSyncRequestTime() {
     return lastSyncRequestTime;
   }
+
   public void setLastSyncRequestTime(Timestamp lastSyncRequestTime) {
     this.lastSyncRequestTime = lastSyncRequestTime;
   }
 
   @ManyToOne
-  @JoinColumn(name="assigned_user_id")
+  @JoinColumn(name = "assigned_user_id")
   public User getAssignedUser() {
     return assignedUser;
   }
+
   public void setAssignedUser(User assignedUser) {
     this.assignedUser = assignedUser;
   }
@@ -77,12 +83,17 @@ public class BillingProjectBufferEntry {
   public BillingProjectBufferStatus getStatusEnum() {
     return StorageEnums.billingProjectBufferStatusFromStorage(status);
   }
+
   public void setStatusEnum(BillingProjectBufferStatus status) {
     this.status = StorageEnums.billingProjectBufferStatusToStorage(status);
   }
 
   @Column(name = "status")
-  private short getStatus() { return this.status; }
-  private void setStatus(short s) { this.status = s; }
+  private short getStatus() {
+    return this.status;
+  }
 
+  private void setStatus(short s) {
+    this.status = s;
+  }
 }

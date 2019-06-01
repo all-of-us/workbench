@@ -21,8 +21,10 @@ public class ConceptBigQueryService {
   private final ConceptService conceptService;
 
   @Autowired
-  public ConceptBigQueryService(BigQueryService bigQueryService,
-      CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService, ConceptService conceptService) {
+  public ConceptBigQueryService(
+      BigQueryService bigQueryService,
+      CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
+      ConceptService conceptService) {
     this.bigQueryService = bigQueryService;
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.conceptService = conceptService;
@@ -43,8 +45,10 @@ public class ConceptBigQueryService {
     if (!classifiedConceptIds.getStandardConceptIds().isEmpty()) {
       innerSql.append(conceptColumns.getStandardConceptColumn().name);
       innerSql.append(" in unnest(@standardConceptIds)");
-      paramMap.put("standardConceptIds", QueryParameterValue.array(
-          classifiedConceptIds.getStandardConceptIds().toArray(new Long[0]), Long.class));
+      paramMap.put(
+          "standardConceptIds",
+          QueryParameterValue.array(
+              classifiedConceptIds.getStandardConceptIds().toArray(new Long[0]), Long.class));
       if (!classifiedConceptIds.getSourceConceptIds().isEmpty()) {
         innerSql.append(" or ");
       }
@@ -52,17 +56,18 @@ public class ConceptBigQueryService {
     if (!classifiedConceptIds.getSourceConceptIds().isEmpty()) {
       innerSql.append(conceptColumns.getSourceConceptColumn().name);
       innerSql.append(" in unnest(@sourceConceptIds)");
-      paramMap.put("sourceConceptIds", QueryParameterValue.array(
-          classifiedConceptIds.getSourceConceptIds().toArray(new Long[0]), Long.class));
+      paramMap.put(
+          "sourceConceptIds",
+          QueryParameterValue.array(
+              classifiedConceptIds.getSourceConceptIds().toArray(new Long[0]), Long.class));
     }
-    QueryJobConfiguration jobConfiguration = QueryJobConfiguration
-        .newBuilder(innerSql.toString())
-        .setNamedParameters(paramMap.build())
-        .setUseLegacySql(false)
-        .build();
-    TableResult result = bigQueryService.executeQuery(
-        bigQueryService.filterBigQueryConfig(jobConfiguration));
+    QueryJobConfiguration jobConfiguration =
+        QueryJobConfiguration.newBuilder(innerSql.toString())
+            .setNamedParameters(paramMap.build())
+            .setUseLegacySql(false)
+            .build();
+    TableResult result =
+        bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(jobConfiguration));
     return (int) result.iterateAll().iterator().next().get(0).getLongValue();
   }
-
 }

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.test;
 
+import java.util.Arrays;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -8,8 +9,6 @@ import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
-
-import java.util.Arrays;
 
 public class SearchRequests {
 
@@ -24,67 +23,73 @@ public class SearchRequests {
   public static final String ICD9_SUBTYPE = TreeSubType.CM.name();
   public static final String ICD9_GROUP_CODE = "001";
 
-  private SearchRequests() {
-  }
+  private SearchRequests() {}
 
   public static SearchRequest genderRequest(long... conceptIds) {
     SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(DEMO_TYPE);
-    for (long conceptId: conceptIds) {
-      SearchParameter parameter = new SearchParameter()
-        .type(DEMO_DOMAIN)
-        .subtype(GENDER_SUBTYPE)
-        .conceptId(conceptId);
+    for (long conceptId : conceptIds) {
+      SearchParameter parameter =
+          new SearchParameter().type(DEMO_DOMAIN).subtype(GENDER_SUBTYPE).conceptId(conceptId);
       searchGroupItem.addSearchParametersItem(parameter);
     }
     return searchRequest(searchGroupItem);
   }
 
-  public static SearchRequest codesRequest(String groupType, String type, String subtype, String... codes) {
+  public static SearchRequest codesRequest(
+      String groupType, String type, String subtype, String... codes) {
     SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(groupType);
-    for (String code: codes) {
-      SearchParameter parameter = new SearchParameter().type(type).subtype(subtype).group(true).value(code);
+    for (String code : codes) {
+      SearchParameter parameter =
+          new SearchParameter().type(type).subtype(subtype).group(true).value(code);
       searchGroupItem.addSearchParametersItem(parameter);
     }
     return searchRequest(searchGroupItem);
   }
 
   public static SearchRequest temporalRequest() {
-    SearchParameter icd9 = new SearchParameter()
-      .type(TreeType.ICD9.name())
-      .subtype(TreeSubType.CM.name())
-      .group(false)
-      .conceptId(1L);
-    SearchParameter icd10 = new SearchParameter()
-        .type(TreeType.ICD10.name())
-        .subtype(TreeSubType.CM.name())
-        .group(false)
-        .conceptId(9L);
-    SearchParameter snomed = new SearchParameter()
-        .type(TreeType.SNOMED.name())
-        .subtype(TreeSubType.CM.name())
-        .group(false)
-        .conceptId(4L);
+    SearchParameter icd9 =
+        new SearchParameter()
+            .type(TreeType.ICD9.name())
+            .subtype(TreeSubType.CM.name())
+            .group(false)
+            .conceptId(1L);
+    SearchParameter icd10 =
+        new SearchParameter()
+            .type(TreeType.ICD10.name())
+            .subtype(TreeSubType.CM.name())
+            .group(false)
+            .conceptId(9L);
+    SearchParameter snomed =
+        new SearchParameter()
+            .type(TreeType.SNOMED.name())
+            .subtype(TreeSubType.CM.name())
+            .group(false)
+            .conceptId(4L);
 
-    SearchGroupItem icd9SGI = new SearchGroupItem()
-      .type(TreeType.CONDITION.name())
-      .addSearchParametersItem(icd9)
-      .temporalGroup(0);
-    SearchGroupItem icd10SGI = new SearchGroupItem()
-      .type(TreeType.CONDITION.name())
-      .addSearchParametersItem(icd10)
-      .temporalGroup(1);
-    SearchGroupItem snomedSGI = new SearchGroupItem()
-      .type(TreeType.CONDITION.name())
-      .addSearchParametersItem(snomed)
-      .temporalGroup(0);
+    SearchGroupItem icd9SGI =
+        new SearchGroupItem()
+            .type(TreeType.CONDITION.name())
+            .addSearchParametersItem(icd9)
+            .temporalGroup(0);
+    SearchGroupItem icd10SGI =
+        new SearchGroupItem()
+            .type(TreeType.CONDITION.name())
+            .addSearchParametersItem(icd10)
+            .temporalGroup(1);
+    SearchGroupItem snomedSGI =
+        new SearchGroupItem()
+            .type(TreeType.CONDITION.name())
+            .addSearchParametersItem(snomed)
+            .temporalGroup(0);
 
-    //First Mention Of (ICD9Child or Snomed) 5 Days After ICD10
-    SearchGroup temporalGroup = new SearchGroup()
-      .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
-      .temporal(true)
-      .mention(TemporalMention.FIRST_MENTION)
-      .time(TemporalTime.X_DAYS_AFTER)
-      .timeValue(5L);
+    // First Mention Of (ICD9Child or Snomed) 5 Days After ICD10
+    SearchGroup temporalGroup =
+        new SearchGroup()
+            .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
+            .temporal(true)
+            .mention(TemporalMention.FIRST_MENTION)
+            .time(TemporalTime.X_DAYS_AFTER)
+            .timeValue(5L);
     return new SearchRequest().includes(Arrays.asList(temporalGroup));
   }
 

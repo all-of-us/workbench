@@ -32,17 +32,18 @@ import org.springframework.context.annotation.Configuration;
  * available to the application default user. This should generally be used while authorized as the
  * App Engine default service account for a given environment.
  *
- * Note: If this utility later needs database access, replace @Configuration with
- * @SpringBootApplication.
+ * <p>Note: If this utility later needs database access, replace @Configuration
+ * with @SpringBootApplication.
  */
 @Configuration
 public class ManageClusters {
 
   private static final Logger log = Logger.getLogger(ManageClusters.class.getName());
-  private static final String[] BILLING_SCOPES = new String[] {
-      "https://www.googleapis.com/auth/userinfo.profile",
-      "https://www.googleapis.com/auth/userinfo.email"
-  };
+  private static final String[] BILLING_SCOPES =
+      new String[] {
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email"
+      };
 
   private static Set<String> commaDelimitedStringToSet(String str) {
     return Arrays.asList(str.split(",")).stream()
@@ -53,8 +54,8 @@ public class ManageClusters {
   private static ClusterApi newApiClient(String apiUrl) throws IOException {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(apiUrl);
-    GoogleCredential credential = GoogleCredential.getApplicationDefault()
-        .createScoped(Arrays.asList(BILLING_SCOPES));
+    GoogleCredential credential =
+        GoogleCredential.getApplicationDefault().createScoped(Arrays.asList(BILLING_SCOPES));
     credential.refreshToken();
     apiClient.setAccessToken(credential.getAccessToken());
     ClusterApi api = new ClusterApi();
@@ -77,15 +78,16 @@ public class ManageClusters {
     if (c.getStatus() != null) {
       status = c.getStatus();
     }
-    return String.format("%-30.30s %-50.50s %-10s %-15s",
-        clusterId(c), creator, status, c.getCreatedDate());
+    return String.format(
+        "%-30.30s %-50.50s %-10s %-15s", clusterId(c), creator, status, c.getCreatedDate());
   }
 
   private static void listClusters(String apiUrl) throws IOException, ApiException {
     AtomicInteger count = new AtomicInteger();
     newApiClient(apiUrl).listClusters(null, false).stream()
         .sorted(Comparator.comparing(c -> Instant.parse(c.getCreatedDate())))
-        .forEachOrdered((c) -> {
+        .forEachOrdered(
+            (c) -> {
               System.out.println(formatTabular(c));
               count.getAndIncrement();
             });
@@ -96,13 +98,14 @@ public class ManageClusters {
       String apiUrl, @Nullable Instant oldest, Set<String> ids, boolean dryRun)
       throws IOException, ApiException {
     Set<String> remaining = new HashSet<>(ids);
-    String dryMsg = dryRun? "[DRY RUN]: would have... " : "";
+    String dryMsg = dryRun ? "[DRY RUN]: would have... " : "";
 
     AtomicInteger deleted = new AtomicInteger();
     ClusterApi api = newApiClient(apiUrl);
     api.listClusters(null, false).stream()
         .sorted(Comparator.comparing(c -> Instant.parse(c.getCreatedDate())))
-        .filter((c) -> {
+        .filter(
+            (c) -> {
               Instant createdDate = Instant.parse(c.getCreatedDate());
               if (oldest != null && createdDate.isAfter(oldest)) {
                 return false;
@@ -112,7 +115,8 @@ public class ManageClusters {
               }
               return true;
             })
-        .forEachOrdered((c) -> {
+        .forEachOrdered(
+            (c) -> {
               String cid = clusterId(c);
               if (!dryRun) {
                 try {
@@ -127,8 +131,10 @@ public class ManageClusters {
               System.out.println(dryMsg + "deleted cluster: " + formatTabular(c));
             });
     if (!remaining.isEmpty()) {
-      log.log(Level.SEVERE, "failed to find/delete clusters: {1}",
-          new Object[]{Joiner.on(", ").join(remaining)});
+      log.log(
+          Level.SEVERE,
+          "failed to find/delete clusters: {1}",
+          new Object[] {Joiner.on(", ").join(remaining)});
     }
     System.out.println(String.format("%sdeleted %d clusters", dryMsg, deleted.get()));
   }

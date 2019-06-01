@@ -121,12 +121,18 @@ public class CdrVersion {
   }
 
   @Column(name = "cdr_db_name")
-  public String getCdrDbName() { return cdrDbName; }
+  public String getCdrDbName() {
+    return cdrDbName;
+  }
 
-  public void setCdrDbName(String cdrDbName) { this.cdrDbName = cdrDbName; }
+  public void setCdrDbName(String cdrDbName) {
+    this.cdrDbName = cdrDbName;
+  }
 
   @Column(name = "elastic_index_base_name")
-  public String getElasticIndexBaseName() { return elasticIndexBaseName; }
+  public String getElasticIndexBaseName() {
+    return elasticIndexBaseName;
+  }
 
   public void setElasticIndexBaseName(String elasticIndexBaseName) {
     this.elasticIndexBaseName = elasticIndexBaseName;
@@ -134,8 +140,17 @@ public class CdrVersion {
 
   @Override
   public int hashCode() {
-    return Objects.hash(cdrVersionId, isDefault, name, dataAccessLevel, releaseNumber,
-        bigqueryProject, bigqueryDataset, creationTime, numParticipants, cdrDbName,
+    return Objects.hash(
+        cdrVersionId,
+        isDefault,
+        name,
+        dataAccessLevel,
+        releaseNumber,
+        bigqueryProject,
+        bigqueryDataset,
+        creationTime,
+        numParticipants,
+        cdrDbName,
         elasticIndexBaseName);
   }
 
@@ -145,7 +160,8 @@ public class CdrVersion {
       return false;
     }
     CdrVersion that = (CdrVersion) obj;
-    return new EqualsBuilder().append(this.cdrVersionId, that.cdrVersionId)
+    return new EqualsBuilder()
+        .append(this.cdrVersionId, that.cdrVersionId)
         .append(this.isDefault, that.isDefault)
         .append(this.name, that.name)
         .append(this.dataAccessLevel, that.dataAccessLevel)

@@ -1,5 +1,16 @@
 package org.pmiops.workbench.api;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,18 +28,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
@@ -37,16 +36,12 @@ import static org.mockito.Mockito.when;
 public class OfflineUserControllerTest {
 
   @TestConfiguration
-  @Import({
-      OfflineUserController.class
-  })
+  @Import({OfflineUserController.class})
   @MockBean({UserService.class})
   static class Configuration {}
 
-  @Autowired
-  private UserService userService;
-  @Autowired
-  private OfflineUserController offlineUserController;
+  @Autowired private UserService userService;
+  @Autowired private OfflineUserController offlineUserController;
 
   private Long incrementedUserId = 1L;
 
@@ -71,38 +66,46 @@ public class OfflineUserControllerTest {
   }
 
   @Test
-  public void testBulkSyncTrainingStatus() throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+  public void testBulkSyncTrainingStatus()
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     // Mock out the service under test to simply return the passed user argument.
     doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatus(any());
     offlineUserController.bulkSyncComplianceTrainingStatus();
     verify(userService, times(3)).syncComplianceTrainingStatus(any());
   }
 
-  @Test(expected=ServerErrorException.class)
-  public void testBulkSyncTrainingStatusWithSingleUserError() throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+  @Test(expected = ServerErrorException.class)
+  public void testBulkSyncTrainingStatusWithSingleUserError()
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatus(any());
     doThrow(new org.pmiops.workbench.moodle.ApiException("Unknown error"))
-        .when(userService).syncComplianceTrainingStatus(argThat(user -> user.getEmail().equals("a@fake-research-aou.org")));
+        .when(userService)
+        .syncComplianceTrainingStatus(
+            argThat(user -> user.getEmail().equals("a@fake-research-aou.org")));
     offlineUserController.bulkSyncComplianceTrainingStatus();
     // Even when a single call throws an exception, we call the service for all users.
     verify(userService, times(3)).syncComplianceTrainingStatus(any());
   }
 
   @Test
-  public void testBulkSyncEraCommonsStatus() throws IOException, org.pmiops.workbench.firecloud.ApiException {
+  public void testBulkSyncEraCommonsStatus()
+      throws IOException, org.pmiops.workbench.firecloud.ApiException {
     doAnswer(i -> i.getArgument(0)).when(userService).syncEraCommonsStatusUsingImpersonation(any());
     offlineUserController.bulkSyncEraCommonsStatus();
     verify(userService, times(3)).syncEraCommonsStatusUsingImpersonation(any());
   }
 
-  @Test(expected=ServerErrorException.class)
-  public void testBulkSyncEraCommonsStatusWithSingleUserError() throws ApiException, NotFoundException, IOException, org.pmiops.workbench.firecloud.ApiException {
+  @Test(expected = ServerErrorException.class)
+  public void testBulkSyncEraCommonsStatusWithSingleUserError()
+      throws ApiException, NotFoundException, IOException,
+          org.pmiops.workbench.firecloud.ApiException {
     doAnswer(i -> i.getArgument(0)).when(userService).syncEraCommonsStatusUsingImpersonation(any());
     doThrow(new org.pmiops.workbench.firecloud.ApiException("Unknown error"))
-        .when(userService).syncEraCommonsStatusUsingImpersonation(argThat(user -> user.getEmail().equals("a@fake-research-aou.org")));
+        .when(userService)
+        .syncEraCommonsStatusUsingImpersonation(
+            argThat(user -> user.getEmail().equals("a@fake-research-aou.org")));
     offlineUserController.bulkSyncEraCommonsStatus();
     // Even when a single call throws an exception, we call the service for all users.
     verify(userService, times(3)).syncEraCommonsStatusUsingImpersonation(any());
   }
-
 }

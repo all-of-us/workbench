@@ -36,21 +36,22 @@ public class NotebooksRetryHandler extends RetryHandler<ApiException> {
     @Override
     protected void logNoRetry(Throwable t, int responseCode) {
       if (t instanceof ApiException) {
-        logger.log(getLogLevel(responseCode),
-            String.format("Exception calling Notebooks API with response: %s",
-                ((ApiException) t).getResponseBody()), t);
+        logger.log(
+            getLogLevel(responseCode),
+            String.format(
+                "Exception calling Notebooks API with response: %s",
+                ((ApiException) t).getResponseBody()),
+            t);
       } else {
         super.logNoRetry(t, responseCode);
       }
     }
-
   }
 
   @Autowired
   public NotebooksRetryHandler(BackOffPolicy backoffPolicy) {
     super(backoffPolicy, new NotebookRetryPolicy());
   }
-
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {

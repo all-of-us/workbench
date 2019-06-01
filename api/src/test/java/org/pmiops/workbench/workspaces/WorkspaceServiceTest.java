@@ -33,49 +33,50 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspaceServiceTest {
 
   @TestConfiguration
-  @Import({
-      WorkspaceMapper.class
-  })
-  static class Configuration { }
+  @Import({WorkspaceMapper.class})
+  static class Configuration {}
 
-  @Mock
-  private CohortCloningService cohortCloningService;
-  @Mock
-  private ConceptSetService conceptSetService;
-  @Mock
-  private WorkspaceDao workspaceDao;
-  @Autowired
-  private WorkspaceMapper workspaceMapper;
-  @Mock
-  private FireCloudService fireCloudService;
-  @Mock
-  private Clock clock;
+  @Mock private CohortCloningService cohortCloningService;
+  @Mock private ConceptSetService conceptSetService;
+  @Mock private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceMapper workspaceMapper;
+  @Mock private FireCloudService fireCloudService;
+  @Mock private Clock clock;
 
   private WorkspaceService workspaceService;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    workspaceService = new WorkspaceServiceImpl(clock, cohortCloningService, conceptSetService,
-        fireCloudService, workspaceDao, workspaceMapper);
+    workspaceService =
+        new WorkspaceServiceImpl(
+            clock,
+            cohortCloningService,
+            conceptSetService,
+            fireCloudService,
+            workspaceDao,
+            workspaceMapper);
 
-    List<WorkspaceResponse> firecloudWorkspaceResponses = Arrays.asList(
-        mockFirecloudWorkspaceResponse("reader", WorkspaceAccessLevel.READER),
-        mockFirecloudWorkspaceResponse("writer", WorkspaceAccessLevel.WRITER),
-        mockFirecloudWorkspaceResponse("owner", WorkspaceAccessLevel.OWNER)
-    );
+    List<WorkspaceResponse> firecloudWorkspaceResponses =
+        Arrays.asList(
+            mockFirecloudWorkspaceResponse("reader", WorkspaceAccessLevel.READER),
+            mockFirecloudWorkspaceResponse("writer", WorkspaceAccessLevel.WRITER),
+            mockFirecloudWorkspaceResponse("owner", WorkspaceAccessLevel.OWNER));
     doReturn(firecloudWorkspaceResponses).when(fireCloudService).getWorkspaces();
 
-    List<org.pmiops.workbench.db.model.Workspace> workspaces = firecloudWorkspaceResponses
-        .stream()
-        .map(workspaceResponse -> mockDbWorkspace(
-            workspaceResponse.getWorkspace().getWorkspaceId(),
-            workspaceResponse.getWorkspace().getWorkspaceId()))
-        .collect(Collectors.toList());
+    List<org.pmiops.workbench.db.model.Workspace> workspaces =
+        firecloudWorkspaceResponses.stream()
+            .map(
+                workspaceResponse ->
+                    mockDbWorkspace(
+                        workspaceResponse.getWorkspace().getWorkspaceId(),
+                        workspaceResponse.getWorkspace().getWorkspaceId()))
+            .collect(Collectors.toList());
     doReturn(workspaces).when(workspaceDao).findAllByFirecloudUuidIn(any());
   }
 
-  private WorkspaceResponse mockFirecloudWorkspaceResponse(String workspaceId, WorkspaceAccessLevel accessLevel) {
+  private WorkspaceResponse mockFirecloudWorkspaceResponse(
+      String workspaceId, WorkspaceAccessLevel accessLevel) {
     Workspace workspace = mock(Workspace.class);
     doReturn(workspaceId).when(workspace).getWorkspaceId();
     WorkspaceResponse workspaceResponse = mock(WorkspaceResponse.class);
@@ -84,8 +85,10 @@ public class WorkspaceServiceTest {
     return workspaceResponse;
   }
 
-  private org.pmiops.workbench.db.model.Workspace mockDbWorkspace(String name, String firecloudUuid) {
-    org.pmiops.workbench.db.model.Workspace workspace = mock(org.pmiops.workbench.db.model.Workspace.class);
+  private org.pmiops.workbench.db.model.Workspace mockDbWorkspace(
+      String name, String firecloudUuid) {
+    org.pmiops.workbench.db.model.Workspace workspace =
+        mock(org.pmiops.workbench.db.model.Workspace.class);
     doReturn(mock(Timestamp.class)).when(workspace).getLastModifiedTime();
     doReturn(mock(Timestamp.class)).when(workspace).getCreationTime();
     doReturn(name).when(workspace).getName();

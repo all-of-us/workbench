@@ -33,8 +33,14 @@ public class DataSet {
 
   public DataSet() {}
 
-  public DataSet(long dataSetId, long workspaceId, String name, String description, long creatorId,
-      Timestamp creationTime, Boolean invalid) {
+  public DataSet(
+      long dataSetId,
+      long workspaceId,
+      String name,
+      String description,
+      long creatorId,
+      Timestamp creationTime,
+      Boolean invalid) {
     this.dataSetId = dataSetId;
     this.workspaceId = workspaceId;
     this.name = name;
@@ -47,7 +53,9 @@ public class DataSet {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "data_set_id")
-  public long getDataSetId() { return dataSetId; }
+  public long getDataSetId() {
+    return dataSetId;
+  }
 
   public void setDataSetId(long dataSetId) {
     this.dataSetId = dataSetId;
@@ -59,7 +67,9 @@ public class DataSet {
     return version;
   }
 
-  public void setVersion(int version) { this.version = version; }
+  public void setVersion(int version) {
+    this.version = version;
+  }
 
   @Column(name = "workspace_id")
   public long getWorkspaceId() {
@@ -79,7 +89,7 @@ public class DataSet {
     this.name = name;
   }
 
-  @Column(name ="description")
+  @Column(name = "description")
   public String getDescription() {
     return description;
   }

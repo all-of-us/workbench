@@ -21,12 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspaceDaoTest {
-  @Autowired
-  WorkspaceDao workspaceDao;
+  @Autowired WorkspaceDao workspaceDao;
 
   @Test
   public void testWorkspaceVersionLocking() {
@@ -43,7 +42,7 @@ public class WorkspaceDaoTest {
       ws.setVersion(1);
       workspaceDao.save(ws);
       fail("expected optimistic lock exception on stale version update");
-    } catch(ObjectOptimisticLockingFailureException e) {
+    } catch (ObjectOptimisticLockingFailureException e) {
       // expected
     }
   }

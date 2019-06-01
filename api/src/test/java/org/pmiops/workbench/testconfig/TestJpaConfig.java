@@ -13,45 +13,46 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @TestConfiguration
-@EnableJpaRepositories(basePackages = { "org.pmiops.workbench.cdr", "org.pmiops.workbench.db" })
+@EnableJpaRepositories(basePackages = {"org.pmiops.workbench.cdr", "org.pmiops.workbench.db"})
 @EnableTransactionManagement
 public class TestJpaConfig {
 
-    @Bean
-    public DataSource dataSource() {
-        final DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.h2.Driver");
-        dataSource.setUrl("jdbc:h2:mem:db;DB_CLOSE_DELAY=-1");
-        dataSource.setUsername("sa");
-        dataSource.setPassword("sa");
+  @Bean
+  public DataSource dataSource() {
+    final DriverManagerDataSource dataSource = new DriverManagerDataSource();
+    dataSource.setDriverClassName("org.h2.Driver");
+    dataSource.setUrl("jdbc:h2:mem:db;DB_CLOSE_DELAY=-1");
+    dataSource.setUsername("sa");
+    dataSource.setPassword("sa");
 
-        return dataSource;
-    }
+    return dataSource;
+  }
 
-    @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-        final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(dataSource());
-        em.setPackagesToScan(new String[] { "org.pmiops.workbench.cdr", "org.pmiops.workbench.db" });
-        em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-        em.setJpaProperties(additionalProperties());
-        return em;
-    }
+  @Bean
+  public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+    final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+    em.setDataSource(dataSource());
+    em.setPackagesToScan(new String[] {"org.pmiops.workbench.cdr", "org.pmiops.workbench.db"});
+    em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+    em.setJpaProperties(additionalProperties());
+    return em;
+  }
 
-    @Bean
-    public JpaTransactionManager transactionManager(final EntityManagerFactory entityManagerFactory) {
-        final JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(entityManagerFactory);
-        return transactionManager;
-    }
+  @Bean
+  public JpaTransactionManager transactionManager(final EntityManagerFactory entityManagerFactory) {
+    final JpaTransactionManager transactionManager = new JpaTransactionManager();
+    transactionManager.setEntityManagerFactory(entityManagerFactory);
+    return transactionManager;
+  }
 
-    public final Properties additionalProperties() {
-        final Properties hibernateProperties = new Properties();
+  public final Properties additionalProperties() {
+    final Properties hibernateProperties = new Properties();
 
-        hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
-        hibernateProperties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL57InnoDBDialect");
-        hibernateProperties.setProperty("hibernate.show_sql", "true");
+    hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+    hibernateProperties.setProperty(
+        "hibernate.dialect", "org.hibernate.dialect.MySQL57InnoDBDialect");
+    hibernateProperties.setProperty("hibernate.show_sql", "true");
 
-        return hibernateProperties;
-    }
+    return hibernateProperties;
+  }
 }

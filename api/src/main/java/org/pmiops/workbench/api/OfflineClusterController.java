@@ -21,11 +21,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /**
- * Offline cluster API. Handles cronjobs for cleanup and upgrade of older
- * clusters. Methods here should be access restricted as, unlike
- * ClusterController, these endpoints run as the Workbench service account.
+ * Offline cluster API. Handles cronjobs for cleanup and upgrade of older clusters. Methods here
+ * should be access restricted as, unlike ClusterController, these endpoints run as the Workbench
+ * service account.
  */
 @RestController
 public class OfflineClusterController implements OfflineClusterApiDelegate {
@@ -51,22 +50,18 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
   }
 
   /**
-   * checkClusters deletes older clusters in order to force an upgrade on the
-   * next researcher login. This method is meant to be restricted to invocation
-   * by App Engine cron.
+   * checkClusters deletes older clusters in order to force an upgrade on the next researcher login.
+   * This method is meant to be restricted to invocation by App Engine cron.
    *
-   * The cluster deletion policy here aims to strike a balance between enforcing
-   * upgrades, cost savings, and minimizing user disruption. To this point, our
-   * goal is to only upgrade idle clusters if possible, as doing so gives us an
-   * assurance that a researcher is not actively using it. We delete clusters in
-   * the following cases:
+   * <p>The cluster deletion policy here aims to strike a balance between enforcing upgrades, cost
+   * savings, and minimizing user disruption. To this point, our goal is to only upgrade idle
+   * clusters if possible, as doing so gives us an assurance that a researcher is not actively using
+   * it. We delete clusters in the following cases:
    *
-   * 1. It exceeds the max cluster age. Per environment, but O(weeks).
-   * 2. It is idle and exceeds the max idle cluster age. Per environment,
-   *    smaller than (1).
+   * <p>1. It exceeds the max cluster age. Per environment, but O(weeks). 2. It is idle and exceeds
+   * the max idle cluster age. Per environment, smaller than (1).
    *
-   * As an App Engine cron endpoint, the runtime of this method may not exceed
-   * 10 minutes.
+   * <p>As an App Engine cron endpoint, the runtime of this method may not exceed 10 minutes.
    */
   @Override
   public ResponseEntity<CheckClustersResponse> checkClusters() {
@@ -102,8 +97,8 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
         log.warning(String.format("unknown cluster status for cluster '%s'", clusterId));
         continue;
       }
-      if (!ClusterStatus.RUNNING.equals(c.getStatus()) &&
-          !ClusterStatus.STOPPED.equals(c.getStatus())) {
+      if (!ClusterStatus.RUNNING.equals(c.getStatus())
+          && !ClusterStatus.STOPPED.equals(c.getStatus())) {
         // For now, we only handle running or stopped (suspended) clusters.
         continue;
       }
@@ -117,14 +112,16 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
       Instant created = Instant.parse(c.getCreatedDate());
       Duration age = Duration.between(created, now);
       if (age.toMillis() > maxAge.toMillis()) {
-        log.info(String.format(
-            "deleting cluster '%s', exceeded max lifetime @ %s (>%s)",
-            clusterId, formatDuration(age), formatDuration(maxAge)));
+        log.info(
+            String.format(
+                "deleting cluster '%s', exceeded max lifetime @ %s (>%s)",
+                clusterId, formatDuration(age), formatDuration(maxAge)));
         activeDeletes++;
       } else if (isIdle && age.toMillis() > idleMaxAge.toMillis()) {
-        log.info(String.format(
-            "deleting cluster '%s', idle with age %s (>%s)",
-            clusterId, formatDuration(age), formatDuration(idleMaxAge)));
+        log.info(
+            String.format(
+                "deleting cluster '%s', idle with age %s (>%s)",
+                clusterId, formatDuration(age), formatDuration(idleMaxAge)));
         unusedDeletes++;
       } else {
         // Don't delete.
@@ -137,17 +134,16 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
         errors++;
       }
     }
-    log.info(String.format(
-        "deleted %d old clusters and %d idle clusters (with %d errors) " +
-        "of %d total clusters (%d of which were idle)",
-        activeDeletes, unusedDeletes, errors, clusters.size(), idles));
+    log.info(
+        String.format(
+            "deleted %d old clusters and %d idle clusters (with %d errors) "
+                + "of %d total clusters (%d of which were idle)",
+            activeDeletes, unusedDeletes, errors, clusters.size(), idles));
     if (errors > 0) {
-      throw new ServerErrorException(
-          String.format("%d cluster deletion calls failed", errors));
+      throw new ServerErrorException(String.format("%d cluster deletion calls failed", errors));
     }
     return ResponseEntity.ok(
-        new CheckClustersResponse()
-          .clusterDeletionCount(activeDeletes + unusedDeletes - errors));
+        new CheckClustersResponse().clusterDeletionCount(activeDeletes + unusedDeletes - errors));
   }
 
   private static String formatDuration(Duration d) {

@@ -1,18 +1,5 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryParameterValue;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.Modifier;
-import org.pmiops.workbench.model.SearchGroupItem;
-import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.TemporalMention;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.typeBlank;
@@ -25,52 +12,69 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TYPE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
-/**
- * VisitsQueryBuilder builds SQL for BigQuery for visit criteria types.
- */
+import com.google.cloud.bigquery.QueryParameterValue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.Modifier;
+import org.pmiops.workbench.model.SearchGroupItem;
+import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TemporalMention;
+import org.springframework.stereotype.Service;
+
+/** VisitsQueryBuilder builds SQL for BigQuery for visit criteria types. */
 @Service
 public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
   private static final String VISIT_SELECT_CLAUSE_TEMPLATE =
-    "select distinct person_id, entry_date, concept_id\n" +
-      "from `${projectId}.${dataSetId}." + TABLE_ID + "` a\n" +
-      "where ";
+      "select distinct person_id, entry_date, concept_id\n"
+          + "from `${projectId}.${dataSetId}."
+          + TABLE_ID
+          + "` a\n"
+          + "where ";
   private static final String CONCEPT_ID_TEMPLATE =
-    "concept_id in unnest(${visitConceptIds})\n" +
-      AGE_DATE_AND_ENCOUNTER_VAR;
+      "concept_id in unnest(${visitConceptIds})\n" + AGE_DATE_AND_ENCOUNTER_VAR;
   private static final String IS_STANDARD = " and is_standard = 1\n";
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
-  public String buildQuery(Map<String, QueryParameterValue> queryParams,
-                           SearchGroupItem inputParameters,
-                           TemporalMention mention) {
-    from(parametersEmpty()).test(inputParameters.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
+  public String buildQuery(
+      Map<String, QueryParameterValue> queryParams,
+      SearchGroupItem inputParameters,
+      TemporalMention mention) {
+    from(parametersEmpty())
+        .test(inputParameters.getSearchParameters())
+        .throwException(EMPTY_MESSAGE, PARAMETERS);
     List<Long> conceptIdList = new ArrayList<>();
     for (SearchParameter parameter : inputParameters.getSearchParameters()) {
-      from(typeBlank().or(visitTypeInvalid())).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, parameter.getType());
-      from(conceptIdNull()).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, parameter.getConceptId());
+      from(typeBlank().or(visitTypeInvalid()))
+          .test(parameter)
+          .throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, parameter.getType());
+      from(conceptIdNull())
+          .test(parameter)
+          .throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, parameter.getConceptId());
       conceptIdList.add(parameter.getConceptId());
     }
 
     if (conceptIdList.isEmpty()) {
       throw new BadRequestException(
-        "Bad Request: please provide valid concept ids with search parameters ");
+          "Bad Request: please provide valid concept ids with search parameters ");
     }
     String baseSql = VISIT_SELECT_CLAUSE_TEMPLATE + CONCEPT_ID_TEMPLATE + IS_STANDARD;
     List<Modifier> modifiers = inputParameters.getModifiers();
     String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
-    String finalSql = buildTemporalSql(modifiedSql, CONCEPT_ID_TEMPLATE + IS_STANDARD, queryParams, modifiers, mention);
-    String namedParameter = addQueryParameterValue(queryParams,
-      QueryParameterValue.array(conceptIdList.stream().toArray(Long[]::new), Long.class));
+    String finalSql =
+        buildTemporalSql(
+            modifiedSql, CONCEPT_ID_TEMPLATE + IS_STANDARD, queryParams, modifiers, mention);
+    String namedParameter =
+        addQueryParameterValue(
+            queryParams,
+            QueryParameterValue.array(conceptIdList.stream().toArray(Long[]::new), Long.class));
     return finalSql.replace("${visitConceptIds}", "@" + namedParameter);
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public FactoryKey getType() {
     return FactoryKey.VISIT;

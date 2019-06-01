@@ -1,5 +1,12 @@
 package org.pmiops.workbench.cohorts;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.pmiops.workbench.db.model.Cohort;
@@ -7,14 +14,6 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.model.ReviewStatus;
-
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 public class CohortFactoryTest {
 
@@ -100,5 +99,4 @@ public class CohortFactoryTest {
     assertThat(newReview.getReviewStatusEnum())
         .isEqualTo(originalCohortReview.getReviewStatusEnum());
   }
-
 }

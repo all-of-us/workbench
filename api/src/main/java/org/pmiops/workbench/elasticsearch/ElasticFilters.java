@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -43,9 +42,7 @@ public final class ElasticFilters {
 
   private static final Logger log = Logger.getLogger(ElasticFilters.class.getName());
 
-  /**
-   * Translates a Cohort Builder search request into an Elasticsearch filter.
-   */
+  /** Translates a Cohort Builder search request into an Elasticsearch filter. */
   public static QueryBuilder fromCohortSearch(CriteriaDao criteriaDao, SearchRequest req) {
     ElasticFilters f = new ElasticFilters(criteriaDao);
     return f.process(req);
@@ -54,11 +51,10 @@ public final class ElasticFilters {
   /**
    * A hand-maintained mapping of which criteria trees map to standard vs source concept IDs. This
    * indicates which concept ID field we should be querying against for a SearchRequest on a given
-   * tree.
-   * TODO(RW-2249): Document or encode this more centrally.
+   * tree. TODO(RW-2249): Document or encode this more centrally.
    */
-  private static Set<TreeType> STANDARD_TREES = ImmutableSet.of(
-      TreeType.SNOMED, TreeType.DRUG, TreeType.MEAS, TreeType.VISIT);
+  private static Set<TreeType> STANDARD_TREES =
+      ImmutableSet.of(TreeType.SNOMED, TreeType.DRUG, TreeType.MEAS, TreeType.VISIT);
   /**
    * Criteria trees which are coded hierarchically, e.g. parent code "001", child code "001.002".
    * TODO(RW-2249): Why aren't all trees coded this way?
@@ -66,10 +62,11 @@ public final class ElasticFilters {
   private static Set<TreeType> HIERARCHICAL_CODE_TREES =
       ImmutableSet.of(TreeType.ICD9, TreeType.ICD10);
 
-  private static Map<String, String> NON_NESTED_FIELDS = ImmutableMap.of(
-    TreeSubType.GEN.toString(), "gender_concept_id",
-    TreeSubType.RACE.toString(), "race_concept_id",
-    TreeSubType.ETH.toString(), "ethnicity_concept_id");
+  private static Map<String, String> NON_NESTED_FIELDS =
+      ImmutableMap.of(
+          TreeSubType.GEN.toString(), "gender_concept_id",
+          TreeSubType.RACE.toString(), "race_concept_id",
+          TreeSubType.ETH.toString(), "ethnicity_concept_id");
 
   private final CriteriaDao criteriaDao;
 
@@ -89,7 +86,7 @@ public final class ElasticFilters {
       filter.filter(searchGroupToFilter(sg));
     }
     for (SearchGroup sg : req.getExcludes()) {
-      //Only case to use mustNot is when both includes and excludes exist together
+      // Only case to use mustNot is when both includes and excludes exist together
       if (req.getIncludes().isEmpty()) {
         filter.filter(searchGroupToFilter(sg));
       } else {
@@ -136,7 +133,8 @@ public final class ElasticFilters {
 
       // TODO(freemabd): Handle Blood Pressure and Deceased
       for (SearchParameter param : sgi.getSearchParameters()) {
-        String conceptField = "events." + (isStandardConcept(param) ? "concept_id" : "source_concept_id");
+        String conceptField =
+            "events." + (isStandardConcept(param) ? "concept_id" : "source_concept_id");
         if (isNonNestedSchema(param)) {
           conceptField = NON_NESTED_FIELDS.get(param.getSubtype());
         }
@@ -156,15 +154,17 @@ public final class ElasticFilters {
           // setup non nested filter with proper field
           filter.should(b);
         } else {
-          // "should" gives us "OR" behavior so long as we're in a filter context, which we are. This
+          // "should" gives us "OR" behavior so long as we're in a filter context, which we are.
+          // This
           // translates to N occurrences of criteria 1 OR N occurrences of criteria 2, etc.
           filter.should(
-            QueryBuilders.functionScoreQuery(
-              QueryBuilders.nestedQuery(
-                // We sum a constant score for each matching document, yielding the total number
-                // of matching nested documents (events).
-                "events", QueryBuilders.constantScoreQuery(b), ScoreMode.Total))
-              .setMinScore(occurredAtLeast));
+              QueryBuilders.functionScoreQuery(
+                      QueryBuilders.nestedQuery(
+                          // We sum a constant score for each matching document, yielding the total
+                          // number
+                          // of matching nested documents (events).
+                          "events", QueryBuilders.constantScoreQuery(b), ScoreMode.Total))
+                  .setMinScore(occurredAtLeast));
         }
       }
     }
@@ -173,9 +173,9 @@ public final class ElasticFilters {
   }
 
   private static QueryBuilder attributeToQuery(Attribute attr) {
-    //Attributes with a name of CAT map to the value_as_concept_id column
+    // Attributes with a name of CAT map to the value_as_concept_id column
     if (AttrName.CAT.equals(attr.getName())) {
-      //Currently the UI only uses the In operator for CAT which fits the terms query
+      // Currently the UI only uses the In operator for CAT which fits the terms query
       return QueryBuilders.termsQuery("events.value_as_concept_id", attr.getOperands());
     }
     Object left = null, right = null;
@@ -205,14 +205,14 @@ public final class ElasticFilters {
       return rq;
     } else if (AttrName.AGE.equals(attr.getName())) {
       rq = QueryBuilders.rangeQuery("birth_datetime");
-      //use the low end of the age range to calculate the high end(right) of the date range
+      // use the low end of the age range to calculate the high end(right) of the date range
       right = ElasticUtils.todayMinusYears(Integer.parseInt(attr.getOperands().get(0)));
       if (attr.getOperands().size() > 1) {
-        //use high end of the age range to calculate the low end(left) of the date range
-        //need to add 1 year to adjust to the beginning of the date range
-        //Ex: 2019-03-19(current date) - 55year(age) - 1 year = 1963-03-19
-        //Need to use GT to make sure not to include 1963-03-19 which evaluates to 56 years old
-        //which is out the range of 55. 1963-03-20 evaluates to 55 years 11 months 30 days.
+        // use high end of the age range to calculate the low end(left) of the date range
+        // need to add 1 year to adjust to the beginning of the date range
+        // Ex: 2019-03-19(current date) - 55year(age) - 1 year = 1963-03-19
+        // Need to use GT to make sure not to include 1963-03-19 which evaluates to 56 years old
+        // which is out the range of 55. 1963-03-20 evaluates to 55 years 11 months 30 days.
         left = ElasticUtils.todayMinusYears(Integer.parseInt(attr.getOperands().get(1)) + 1);
       }
       switch (attr.getOperator()) {
@@ -286,13 +286,12 @@ public final class ElasticFilters {
     for (SearchParameter param : params) {
       if (param.getGroup()) {
         out.addAll(
-            childrenByCriteriaGroup.get(param)
-                .stream()
+            childrenByCriteriaGroup.get(param).stream()
                 .map(id -> Long.toString(id))
                 .collect(Collectors.toSet()));
       } else if (param.getConceptId() != null) {
-        //not all SearchParameter have a concept id, so attributes/modifiers
-        //are used to find matches in those scenarios.
+        // not all SearchParameter have a concept id, so attributes/modifiers
+        // are used to find matches in those scenarios.
         out.add(Long.toString(param.getConceptId()));
       }
     }
@@ -302,6 +301,7 @@ public final class ElasticFilters {
   private static class FullTreeType {
     final TreeType type;
     final TreeSubType subType;
+
     private FullTreeType(TreeType type, TreeSubType subType) {
       this.type = type;
       this.subType = subType;
@@ -321,8 +321,7 @@ public final class ElasticFilters {
         return false;
       }
       FullTreeType that = (FullTreeType) o;
-      return type == that.type &&
-          subType == that.subType;
+      return type == that.type && subType == that.subType;
     }
 
     @Override
@@ -354,16 +353,18 @@ public final class ElasticFilters {
             continue;
           }
           if (TreeType.SNOMED.toString().equals(param.getType())) {
-            log.warning("Received a SNOMED group in a search request - this indicates a client " +
-                "bug. SNOMED concepts are poly-hierarchical; the SearchRequest does not encode " +
-                "enough information to determine which criteria ID should be used");
+            log.warning(
+                "Received a SNOMED group in a search request - this indicates a client "
+                    + "bug. SNOMED concepts are poly-hierarchical; the SearchRequest does not encode "
+                    + "enough information to determine which criteria ID should be used");
             throw new BadRequestException("Invalid criteria group of type SNOMED");
           }
 
           FullTreeType treeKey = FullTreeType.fromParam(param);
           if (param.getConceptId() != null) {
             childrenByParentConcept.putIfAbsent(treeKey, Maps.newHashMap());
-            childrenByParentConcept.get(treeKey)
+            childrenByParentConcept
+                .get(treeKey)
                 .putIfAbsent(param.getConceptId(), Sets.newHashSet());
           } else if (param.getValue() != null) {
             if (!HIERARCHICAL_CODE_TREES.contains(treeKey.type)) {
@@ -387,15 +388,17 @@ public final class ElasticFilters {
 
       List<Criteria> parents = Lists.newArrayList();
       List<Criteria> leaves = Lists.newArrayList();
-      criteriaDao.findCriteriaLeavesAndParentsByTypeAndParentConceptIds(
-          treeType.type.toString(), treeType.subType.toString(), parentConceptIds)
-          .forEach(c -> {
-            if (c.getGroup()) {
-              parents.add(c);
-            } else {
-              leaves.add(c);
-            }
-          });
+      criteriaDao
+          .findCriteriaLeavesAndParentsByTypeAndParentConceptIds(
+              treeType.type.toString(), treeType.subType.toString(), parentConceptIds)
+          .forEach(
+              c -> {
+                if (c.getGroup()) {
+                  parents.add(c);
+                } else {
+                  leaves.add(c);
+                }
+              });
 
       for (Criteria c : leaves) {
         // Technically this could scale poorly with many criteria groups. We don't expect this
@@ -403,9 +406,9 @@ public final class ElasticFilters {
         // structure could be used here if this becomes too slow.
         for (Criteria parent : parents) {
           String parentId = Long.toString(parent.getId());
-          if (c.getPath().startsWith(parentId + ".") ||
-              c.getPath().contains("." + parentId + ".") ||
-              c.getPath().endsWith("." + parentId)) {
+          if (c.getPath().startsWith(parentId + ".")
+              || c.getPath().contains("." + parentId + ".")
+              || c.getPath().endsWith("." + parentId)) {
             long parentConceptId = Long.parseLong(parent.getConceptId());
             byParent.putIfAbsent(parentConceptId, Sets.newHashSet());
             byParent.get(parentConceptId).add(Long.parseLong(c.getConceptId()));
@@ -415,9 +418,11 @@ public final class ElasticFilters {
     }
     for (FullTreeType treeType : childrenByParentCode.keySet()) {
       Map<String, Set<Long>> byParent = childrenByParentCode.get(treeType);
-      List<Criteria> criteriaList = criteriaDao.findCriteriaLeavesByTypeAndParentCodeRegex(
-          treeType.type.toString(), treeType.subType.toString(),
-          String.format("^(%s)", Strings.join(byParent.keySet(), "|")));
+      List<Criteria> criteriaList =
+          criteriaDao.findCriteriaLeavesByTypeAndParentCodeRegex(
+              treeType.type.toString(),
+              treeType.subType.toString(),
+              String.format("^(%s)", Strings.join(byParent.keySet(), "|")));
       for (Criteria c : criteriaList) {
         // See above comment on performance, this has the same characteristics.
         for (String parentCode : byParent.keySet()) {
@@ -429,12 +434,14 @@ public final class ElasticFilters {
       }
     }
     for (FullTreeType treeType : childrenByTreeType.keySet()) {
-      childrenByTreeType.get(treeType).addAll(
-          criteriaDao.findCriteriaLeavesByType(
-              treeType.type.toString(), treeType.subType.toString())
-              .stream()
-              .map(c -> Long.parseLong(c.getConceptId()))
-              .collect(Collectors.toSet()));
+      childrenByTreeType
+          .get(treeType)
+          .addAll(
+              criteriaDao
+                  .findCriteriaLeavesByType(treeType.type.toString(), treeType.subType.toString())
+                  .stream()
+                  .map(c -> Long.parseLong(c.getConceptId()))
+                  .collect(Collectors.toSet()));
     }
 
     // Finally, we unpack the results and map them back to the original SearchParameters.

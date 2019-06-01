@@ -1,14 +1,13 @@
 package org.pmiops.workbench.cohorts;
 
+import java.sql.Timestamp;
+import java.time.Clock;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.sql.Timestamp;
-import java.time.Clock;
 
 @Service
 public class CohortFactoryImpl implements CohortFactory {
@@ -21,29 +20,27 @@ public class CohortFactoryImpl implements CohortFactory {
   }
 
   @Override
-  public Cohort createCohort(org.pmiops.workbench.model.Cohort apiCohort, User creator,
-      long workspaceId) {
+  public Cohort createCohort(
+      org.pmiops.workbench.model.Cohort apiCohort, User creator, long workspaceId) {
     return createCohort(
         apiCohort.getDescription(),
         apiCohort.getName(),
         apiCohort.getType(),
         apiCohort.getCriteria(),
         creator,
-        workspaceId
-    );
+        workspaceId);
   }
 
   @Override
-  public Cohort duplicateCohort(String newName, User creator, Workspace workspace,
-      Cohort original) {
+  public Cohort duplicateCohort(
+      String newName, User creator, Workspace workspace, Cohort original) {
     return createCohort(
         original.getDescription(),
         newName,
         original.getType(),
         original.getCriteria(),
         creator,
-        workspace.getWorkspaceId()
-    );
+        workspace.getWorkspaceId());
   }
 
   @Override
@@ -62,8 +59,8 @@ public class CohortFactoryImpl implements CohortFactory {
     return newCohortReview;
   }
 
-  private Cohort createCohort(String desc, String name, String type, String criteria, User creator,
-      long workspaceId) {
+  private Cohort createCohort(
+      String desc, String name, String type, String criteria, User creator, long workspaceId) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     Cohort cohort = new Cohort();
 
@@ -79,5 +76,4 @@ public class CohortFactoryImpl implements CohortFactory {
 
     return cohort;
   }
-
 }
