@@ -21,8 +21,7 @@ public class DomainVocabularyInfo {
     private String domainId;
     private String vocabularyId;
 
-    public DomainVocabularyInfoId() {
-    }
+    public DomainVocabularyInfoId() {}
 
     public DomainVocabularyInfoId(String domainId, String vocabularyId) {
       this.domainId = domainId;
@@ -72,17 +71,17 @@ public class DomainVocabularyInfo {
     public String toString() {
       return ToStringBuilder.reflectionToString(this);
     }
-
   }
+
   private DomainVocabularyInfoId id;
   private long allConceptCount;
   private long standardConceptCount;
 
-
   @EmbeddedId
   @AttributeOverrides({
-      @AttributeOverride(name="domainId", column=@Column(name="domain_id")),
-      @AttributeOverride(name="vocabularyId", column=@Column(name="vocabulary_id"))})
+    @AttributeOverride(name = "domainId", column = @Column(name = "domain_id")),
+    @AttributeOverride(name = "vocabularyId", column = @Column(name = "vocabulary_id"))
+  })
   public DomainVocabularyInfoId getId() {
     return id;
   }
@@ -129,8 +128,9 @@ public class DomainVocabularyInfo {
     if (obj == this) return true;
     if (!(obj instanceof DomainVocabularyInfo)) return false;
     DomainVocabularyInfo that = (DomainVocabularyInfo) obj;
-    return this.id.equals(that.id) && this.allConceptCount == that.allConceptCount &&
-        this.standardConceptCount == that.standardConceptCount;
+    return this.id.equals(that.id)
+        && this.allConceptCount == that.allConceptCount
+        && this.standardConceptCount == that.standardConceptCount;
   }
 
   @Override

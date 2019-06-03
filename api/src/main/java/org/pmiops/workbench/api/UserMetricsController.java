@@ -17,7 +17,6 @@ import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.Workspace;
@@ -31,6 +30,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.RecentResourceResponse;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,7 +47,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private int distinctWorkspacelimit = 5;
   private Clock clock;
 
-  //Converts DB model to client Model
+  // Converts DB model to client Model
   private final Function<UserRecentResource, RecentResource> TO_CLIENT =
       userRecentResource -> {
         RecentResource resource = new RecentResource();
@@ -67,15 +67,16 @@ public class UserMetricsController implements UserMetricsApiDelegate {
           if (cohort == null) {
             return null;
           }
-          Cohort result = new Cohort()
-              .etag(Etags.fromVersion(cohort.getVersion()))
-              .lastModifiedTime(cohort.getLastModifiedTime().getTime())
-              .creationTime(cohort.getCreationTime().getTime())
-              .criteria(cohort.getCriteria())
-              .description(cohort.getDescription())
-              .id(cohort.getCohortId())
-              .name(cohort.getName())
-              .type(cohort.getType());
+          Cohort result =
+              new Cohort()
+                  .etag(Etags.fromVersion(cohort.getVersion()))
+                  .lastModifiedTime(cohort.getLastModifiedTime().getTime())
+                  .creationTime(cohort.getCreationTime().getTime())
+                  .criteria(cohort.getCriteria())
+                  .description(cohort.getDescription())
+                  .id(cohort.getCohortId())
+                  .name(cohort.getName())
+                  .type(cohort.getType());
           if (cohort.getCreator() != null) {
             result.setCreator(cohort.getCreator().getEmail());
           }
@@ -83,26 +84,29 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         }
       };
 
-  private static final Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet> TO_CLIENT_CONCEPT_SET =
-    new Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>() {
-      @Override
-      public ConceptSet apply(org.pmiops.workbench.db.model.ConceptSet conceptSet) {
-        if (conceptSet == null) {
-          return null;
-        }
-        ConceptSet result = new ConceptSet()
-          .etag(Etags.fromVersion(conceptSet.getVersion()))
-          .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
-          .creationTime(conceptSet.getCreationTime().getTime())
-          .description(conceptSet.getDescription())
-          .id(conceptSet.getConceptSetId())
-          .name(conceptSet.getName());
-        return result;
-      }
-    };
+  private static final Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>
+      TO_CLIENT_CONCEPT_SET =
+          new Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>() {
+            @Override
+            public ConceptSet apply(org.pmiops.workbench.db.model.ConceptSet conceptSet) {
+              if (conceptSet == null) {
+                return null;
+              }
+              ConceptSet result =
+                  new ConceptSet()
+                      .etag(Etags.fromVersion(conceptSet.getVersion()))
+                      .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
+                      .creationTime(conceptSet.getCreationTime().getTime())
+                      .description(conceptSet.getDescription())
+                      .id(conceptSet.getConceptSetId())
+                      .name(conceptSet.getName());
+              return result;
+            }
+          };
 
   @Autowired
-  UserMetricsController(Provider<User> userProvider,
+  UserMetricsController(
+      Provider<User> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
@@ -121,10 +125,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     distinctWorkspacelimit = limit;
   }
 
-
   @Override
-  public ResponseEntity<RecentResource> updateRecentResource(String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
-    // this is only ever used for Notebooks because we update/add to the cache for the other resources in the backend
+  public ResponseEntity<RecentResource> updateRecentResource(
+      String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
+    // this is only ever used for Notebooks because we update/add to the cache for the other
+    // resources in the backend
     // Because we don't store notebooks in our database the way we do other resources.
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     long wId = getWorkspaceId(workspaceNamespace, workspaceId);
@@ -132,83 +137,99 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     if (recentResourceRequest.getNotebookName().startsWith("gs://")) {
       notebookPath = recentResourceRequest.getNotebookName();
     } else {
-      String bucket = fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
-      .getWorkspace()
-      .getBucketName();
+      String bucket =
+          fireCloudService
+              .getWorkspace(workspaceNamespace, workspaceId)
+              .getWorkspace()
+              .getBucketName();
       notebookPath = "gs://" + bucket + "/notebooks/" + recentResourceRequest.getNotebookName();
     }
-    UserRecentResource recentResource = userRecentResourceService.updateNotebookEntry(wId, userProvider.get().getUserId(), notebookPath, now);
+    UserRecentResource recentResource =
+        userRecentResourceService.updateNotebookEntry(
+            wId, userProvider.get().getUserId(), notebookPath, now);
     return ResponseEntity.ok(TO_CLIENT.apply(recentResource));
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteRecentResource(String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
+  public ResponseEntity<EmptyResponse> deleteRecentResource(
+      String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
     long wId = getWorkspaceId(workspaceNamespace, workspaceId);
-    userRecentResourceService.deleteNotebookEntry(wId, userProvider.get().getUserId(), recentResourceRequest.getNotebookName());
+    userRecentResourceService.deleteNotebookEntry(
+        wId, userProvider.get().getUserId(), recentResourceRequest.getNotebookName());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
-  /**
-   * Gets the list of all resources recently access by user in order of access date time
-   */
+  /** Gets the list of all resources recently access by user in order of access date time */
   @Override
   public ResponseEntity<RecentResourceResponse> getUserRecentResources() {
     long userId = userProvider.get().getUserId();
-    List<UserRecentResource> userRecentResourceList = userRecentResourceService.findAllResourcesByUser(userId);
-    List<Long> workspaceIdList = userRecentResourceList
-        .stream()
-        .map(UserRecentResource::getWorkspaceId)
-        .distinct()
-        .limit(distinctWorkspacelimit)
-        .collect(Collectors.toList());
+    List<UserRecentResource> userRecentResourceList =
+        userRecentResourceService.findAllResourcesByUser(userId);
+    List<Long> workspaceIdList =
+        userRecentResourceList.stream()
+            .map(UserRecentResource::getWorkspaceId)
+            .distinct()
+            .limit(distinctWorkspacelimit)
+            .collect(Collectors.toList());
 
     // RW-1298
     // This needs to be refactored to only use namespace and FC ID
     // The purpose of this Map, is to check what is actually still present in FC
-    Map<Long, WorkspaceResponse> workspaceAccessMap = workspaceIdList.stream().collect(Collectors.toMap(id -> id, id -> {
-      Workspace workspace = workspaceService.findByWorkspaceId(id);
-      WorkspaceResponse workspaceResponse = fireCloudService
-          .getWorkspace(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-      return workspaceResponse;
-    }));
+    Map<Long, WorkspaceResponse> workspaceAccessMap =
+        workspaceIdList.stream()
+            .collect(
+                Collectors.toMap(
+                    id -> id,
+                    id -> {
+                      Workspace workspace = workspaceService.findByWorkspaceId(id);
+                      WorkspaceResponse workspaceResponse =
+                          fireCloudService.getWorkspace(
+                              workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+                      return workspaceResponse;
+                    }));
 
-    List<UserRecentResource> workspaceFilteredResources = userRecentResourceList.stream()
-        .filter(r -> workspaceAccessMap.containsKey(r.getWorkspaceId()))
-        // Drop any invalid notebook resources - parseBlobId will log errors.
-        .filter(r -> r.getNotebookName() == null || parseBlobId(r.getNotebookName()) != null)
-        .collect(Collectors.toList());
+    List<UserRecentResource> workspaceFilteredResources =
+        userRecentResourceList.stream()
+            .filter(r -> workspaceAccessMap.containsKey(r.getWorkspaceId()))
+            // Drop any invalid notebook resources - parseBlobId will log errors.
+            .filter(r -> r.getNotebookName() == null || parseBlobId(r.getNotebookName()) != null)
+            .collect(Collectors.toList());
 
     // Check for existence of recent notebooks. Notebooks reside in GCS so they may be arbitrarily
     // deleted or renamed without notification to the Workbench. This makes a batch of GCS requests
     // so it will scale fairly well, but limit to the first N notebooks to avoid excess GCS traffic.
     // TODO: If we find a non-existent notebook, expunge from the cache.
-    Set<BlobId> foundNotebooks = cloudStorageService.blobsExist(
-        workspaceFilteredResources.stream()
-          .map(r -> parseBlobId(r.getNotebookName()))
-          .filter(Objects::nonNull)
-          .limit(MAX_RECENT_NOTEBOOKS)
-          .collect(Collectors.toList()));
+    Set<BlobId> foundNotebooks =
+        cloudStorageService.blobsExist(
+            workspaceFilteredResources.stream()
+                .map(r -> parseBlobId(r.getNotebookName()))
+                .filter(Objects::nonNull)
+                .limit(MAX_RECENT_NOTEBOOKS)
+                .collect(Collectors.toList()));
 
     RecentResourceResponse recentResponse = new RecentResourceResponse();
     recentResponse.addAll(
         workspaceFilteredResources.stream()
-          .filter(r -> {
-            return r.getNotebookName() == null ||
-                foundNotebooks.contains(parseBlobId(r.getNotebookName()));
-          })
-          .map(userRecentResource -> {
-            RecentResource resource = TO_CLIENT.apply(userRecentResource);
-            WorkspaceResponse workspaceDetails = workspaceAccessMap.get(userRecentResource.getWorkspaceId());
-            resource.setPermission(workspaceDetails.getAccessLevel());
-            resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
-            resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
-            return resource;
-          })
-          .collect(Collectors.toList()));
+            .filter(
+                r -> {
+                  return r.getNotebookName() == null
+                      || foundNotebooks.contains(parseBlobId(r.getNotebookName()));
+                })
+            .map(
+                userRecentResource -> {
+                  RecentResource resource = TO_CLIENT.apply(userRecentResource);
+                  WorkspaceResponse workspaceDetails =
+                      workspaceAccessMap.get(userRecentResource.getWorkspaceId());
+                  resource.setPermission(workspaceDetails.getAccessLevel());
+                  resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
+                  resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
+                  return resource;
+                })
+            .collect(Collectors.toList()));
     return ResponseEntity.ok(recentResponse);
   }
 
-  //Retrieves Database workspace ID
+  // Retrieves Database workspace ID
   private long getWorkspaceId(String workspaceNamespace, String workspaceId) {
     Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     return dbWorkspace.getWorkspaceId();
@@ -245,5 +266,4 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     String filePath = str.replaceFirst(replacement, "");
     return new FileDetail().name(fileName).path(filePath);
   }
-
 }

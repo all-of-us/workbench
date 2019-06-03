@@ -9,9 +9,9 @@ import org.springframework.context.annotation.Primary;
 @TestConfiguration
 public class TestWebMvcConfig extends WebMvcConfig {
 
-    @Bean
-    @Primary
-    public WorkbenchEnvironment workbenchEnvironment() {
-        return new WorkbenchEnvironment(true, "appId");
-    }
+  @Bean
+  @Primary
+  public WorkbenchEnvironment workbenchEnvironment() {
+    return new WorkbenchEnvironment(true, "appId");
+  }
 }

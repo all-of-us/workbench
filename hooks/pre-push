@@ -28,7 +28,7 @@ do
 
   for dir in "ui"; do
     pushd "${dir}" > /dev/null
-    if [ -n "`echo ${files} | grep "^${dir}\/.*\.tsx\?$"`" ]; then
+    if [ -n "`echo ${files} | grep -w "^${dir}\/.*\.tsx\?"`" ]; then
       echo "Linting ${dir}..."
       if [ -x "$(command -v yarn)" ]; then
         yarn run lint
@@ -40,4 +40,13 @@ do
     fi
     popd > /dev/null
   done
+
+  pushd "api" > /dev/null
+  if [ -n "`echo ${files} | grep -w "^api\/.*\.java"`" ]; then
+    echo "Linting Java (via Gradle)"
+    ./gradlew spotlessCheck
+  else
+    echo "No Java files changed to lint."
+  fi
+  popd > /dev/null
 done

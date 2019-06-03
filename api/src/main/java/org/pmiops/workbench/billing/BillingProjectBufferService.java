@@ -36,7 +36,8 @@ public class BillingProjectBufferService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
-  public BillingProjectBufferService(BillingProjectBufferEntryDao billingProjectBufferEntryDao,
+  public BillingProjectBufferService(
+      BillingProjectBufferEntryDao billingProjectBufferEntryDao,
       Clock clock,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
@@ -64,8 +65,8 @@ public class BillingProjectBufferService {
 
   public void syncBillingProjectStatus() {
     for (int i = 0; i < SYNCS_PER_INVOCATION; i++) {
-      BillingProjectBufferEntry entry = billingProjectBufferEntryDao
-          .findFirstByStatusOrderByLastSyncRequestTimeAsc(
+      BillingProjectBufferEntry entry =
+          billingProjectBufferEntryDao.findFirstByStatusOrderByLastSyncRequestTimeAsc(
               StorageEnums.billingProjectBufferStatusToStorage(CREATING));
 
       if (entry == null) {
@@ -75,14 +76,17 @@ public class BillingProjectBufferService {
       entry.setLastSyncRequestTime(new Timestamp(clock.instant().toEpochMilli()));
 
       try {
-        switch (fireCloudService.getBillingProjectStatus(entry.getFireCloudProjectName())
+        switch (fireCloudService
+            .getBillingProjectStatus(entry.getFireCloudProjectName())
             .getCreationStatus()) {
           case READY:
             entry.setStatusEnum(AVAILABLE);
             break;
           case ERROR:
-            log.warning(String.format("SyncBillingProjectStatus: BillingProject %s creation failed",
-                entry.getFireCloudProjectName()));
+            log.warning(
+                String.format(
+                    "SyncBillingProjectStatus: BillingProject %s creation failed",
+                    entry.getFireCloudProjectName()));
             entry.setStatusEnum(ERROR);
             break;
           case CREATING:
@@ -114,8 +118,8 @@ public class BillingProjectBufferService {
 
     BillingProjectBufferEntry entry;
     try {
-      entry = billingProjectBufferEntryDao
-          .findFirstByStatusOrderByCreationTimeAsc(
+      entry =
+          billingProjectBufferEntryDao.findFirstByStatusOrderByCreationTimeAsc(
               StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE));
 
       if (entry == null) {
@@ -133,8 +137,11 @@ public class BillingProjectBufferService {
   }
 
   private String createBillingProjectName() {
-    String randomString = Hashing.sha256().hashUnencodedChars(UUID.randomUUID().toString()).toString()
-        .substring(0, PROJECT_BILLING_ID_SIZE);
+    String randomString =
+        Hashing.sha256()
+            .hashUnencodedChars(UUID.randomUUID().toString())
+            .toString()
+            .substring(0, PROJECT_BILLING_ID_SIZE);
 
     String prefix = workbenchConfigProvider.get().firecloud.billingProjectPrefix;
     if (!prefix.endsWith("-")) {
@@ -155,5 +162,4 @@ public class BillingProjectBufferService {
   private int getBufferMaxCapacity() {
     return workbenchConfigProvider.get().firecloud.billingProjectBufferCapacity;
   }
-
 }

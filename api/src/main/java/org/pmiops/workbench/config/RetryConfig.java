@@ -16,8 +16,7 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 @Configuration
 public class RetryConfig {
 
-  public static abstract class ResponseCodeRetryPolicy
-      extends SimpleRetryPolicy {
+  public abstract static class ResponseCodeRetryPolicy extends SimpleRetryPolicy {
 
     private static final Logger logger = Logger.getLogger(ResponseCodeRetryPolicy.class.getName());
 
@@ -55,13 +54,17 @@ public class RetryConfig {
     }
 
     protected void logRetry(int retryCount, Throwable t) {
-      logger.log(Level.WARNING,
-          String.format("%s unavailable, retrying after %d attempts", serviceName, retryCount), t);
+      logger.log(
+          Level.WARNING,
+          String.format("%s unavailable, retrying after %d attempts", serviceName, retryCount),
+          t);
     }
 
     protected void logGivingUp(int retryCount, Throwable t) {
-      logger.log(Level.WARNING,
-          String.format("%s unavailable, giving up after %d attempts", serviceName, retryCount), t);
+      logger.log(
+          Level.WARNING,
+          String.format("%s unavailable, giving up after %d attempts", serviceName, retryCount),
+          t);
     }
 
     protected Level getLogLevel(int responseCode) {

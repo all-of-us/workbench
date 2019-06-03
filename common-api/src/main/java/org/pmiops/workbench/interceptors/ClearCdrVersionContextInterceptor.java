@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
- * Clears the CDR version (the controller is expected to
- * then specify it based on the request if CDR metadata is accessed.)
+ * Clears the CDR version (the controller is expected to then specify it based on the request if CDR
+ * metadata is accessed.)
  */
 @Service
 public class ClearCdrVersionContextInterceptor extends HandlerInterceptorAdapter {
@@ -24,5 +24,4 @@ public class ClearCdrVersionContextInterceptor extends HandlerInterceptorAdapter
     CdrVersionContext.clearCdrVersion();
     return true;
   }
-
 }

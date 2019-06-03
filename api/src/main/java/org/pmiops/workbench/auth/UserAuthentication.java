@@ -21,7 +21,8 @@ public class UserAuthentication implements Authentication {
   private final String bearerToken;
   private final UserType userType;
 
-  public UserAuthentication(User user, Userinfoplus userInfo, String bearerToken, UserType userType) {
+  public UserAuthentication(
+      User user, Userinfoplus userInfo, String bearerToken, UserType userType) {
     this.user = user;
     this.userInfo = userInfo;
     this.bearerToken = bearerToken;
@@ -59,8 +60,7 @@ public class UserAuthentication implements Authentication {
   }
 
   @Override
-  public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-  }
+  public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {}
 
   public User getUser() {
     return user;

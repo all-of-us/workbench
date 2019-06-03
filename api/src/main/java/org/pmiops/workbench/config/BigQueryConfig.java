@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BigQueryConfig {
 
-    @Bean
-    public BigQuery bigQuery() {
-      return BigQueryOptions.getDefaultInstance().getService();
-    }
+  @Bean
+  public BigQuery bigQuery() {
+    return BigQueryOptions.getDefaultInstance().getService();
+  }
 }

@@ -1,13 +1,12 @@
 package org.pmiops.workbench.config;
 
-import com.google.gson.Gson;
-import org.junit.Test;
-import org.springframework.context.annotation.Bean;
+import static com.google.common.truth.Truth.assertThat;
 
+import com.google.gson.Gson;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-
-import static com.google.common.truth.Truth.assertThat;
+import org.junit.Test;
+import org.springframework.context.annotation.Bean;
 
 public class WorkbenchConfigTest {
 
@@ -34,7 +33,6 @@ public class WorkbenchConfigTest {
 
   @Bean
   private WorkbenchConfig getConfigFromFile(String path) throws FileNotFoundException {
-    return new Gson().fromJson(new FileReader(path),
-        WorkbenchConfig.class);
+    return new Gson().fromJson(new FileReader(path), WorkbenchConfig.class);
   }
 }

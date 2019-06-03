@@ -12,15 +12,16 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 @Table(name = "survey_module")
 public class SurveyModule {
 
-  public static final Function<SurveyModule, org.pmiops.workbench.model.SurveyModule> TO_CLIENT_SURVEY_MODULE =
-      (surveyModule) ->
-          new org.pmiops.workbench.model.SurveyModule()
-              .conceptId(surveyModule.getConceptId())
-              .name(surveyModule.getName())
-              .description(surveyModule.getDescription())
-              .questionCount(surveyModule.getQuestionCount())
-              .participantCount(surveyModule.getParticipantCount())
-              .orderNumber(surveyModule.getOrderNumber());
+  public static final Function<SurveyModule, org.pmiops.workbench.model.SurveyModule>
+      TO_CLIENT_SURVEY_MODULE =
+          (surveyModule) ->
+              new org.pmiops.workbench.model.SurveyModule()
+                  .conceptId(surveyModule.getConceptId())
+                  .name(surveyModule.getName())
+                  .description(surveyModule.getDescription())
+                  .questionCount(surveyModule.getQuestionCount())
+                  .participantCount(surveyModule.getParticipantCount())
+                  .orderNumber(surveyModule.getOrderNumber());
 
   private long conceptId;
   private String name;
@@ -72,7 +73,7 @@ public class SurveyModule {
     return this;
   }
 
-  @Column(name="question_count")
+  @Column(name = "question_count")
   public long getQuestionCount() {
     return questionCount;
   }
@@ -86,8 +87,8 @@ public class SurveyModule {
     return this;
   }
 
-  @Column(name="participant_count")
-  public long getParticipantCount(){
+  @Column(name = "participant_count")
+  public long getParticipantCount() {
     return participantCount;
   }
 
@@ -95,12 +96,12 @@ public class SurveyModule {
     this.participantCount = participantCount == null ? 0L : participantCount;
   }
 
-  public SurveyModule participantCount(long participantCount){
+  public SurveyModule participantCount(long participantCount) {
     this.participantCount = participantCount;
     return this;
   }
 
-  @Column(name="order_number")
+  @Column(name = "order_number")
   public int getOrderNumber() {
     return orderNumber;
   }
@@ -119,12 +120,12 @@ public class SurveyModule {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     SurveyModule surveyModule = (SurveyModule) o;
-    return Objects.equals(name, surveyModule.name) &&
-        Objects.equals(description, surveyModule.description) &&
-        Objects.equals(conceptId, surveyModule.conceptId) &&
-        Objects.equals(questionCount, surveyModule.questionCount) &&
-        Objects.equals(participantCount, surveyModule.participantCount) &&
-        Objects.equals(orderNumber, surveyModule.orderNumber);
+    return Objects.equals(name, surveyModule.name)
+        && Objects.equals(description, surveyModule.description)
+        && Objects.equals(conceptId, surveyModule.conceptId)
+        && Objects.equals(questionCount, surveyModule.questionCount)
+        && Objects.equals(participantCount, surveyModule.participantCount)
+        && Objects.equals(orderNumber, surveyModule.orderNumber);
   }
 
   @Override
@@ -134,7 +135,6 @@ public class SurveyModule {
 
   @Override
   public String toString() {
-    return  ToStringBuilder.reflectionToString(this);
+    return ToStringBuilder.reflectionToString(this);
   }
-
 }

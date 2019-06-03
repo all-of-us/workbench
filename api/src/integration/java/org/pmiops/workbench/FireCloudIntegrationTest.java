@@ -1,8 +1,12 @@
 package org.pmiops.workbench;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,11 +33,6 @@ import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-
-import static com.google.common.truth.Truth.assertThat;
-
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {IntegrationTestConfig.class})
 public class FireCloudIntegrationTest {
@@ -43,18 +42,12 @@ public class FireCloudIntegrationTest {
    * Integration tests with real users/workspaces against production FireCloud is not
    * recommended at this time.
    */
-  @Mock
-  private BillingApi billingApi;
-  @Mock
-  private WorkspacesApi workspacesApi;
-  @Mock
-  private GroupsApi allOfUsGroupsApi;
-  @Mock
-  private GroupsApi endUserGroupsApi;
-  @Mock
-  private ProfileApi profileApi;
-  @Mock
-  private NihApi nihApi;
+  @Mock private BillingApi billingApi;
+  @Mock private WorkspacesApi workspacesApi;
+  @Mock private GroupsApi allOfUsGroupsApi;
+  @Mock private GroupsApi endUserGroupsApi;
+  @Mock private ProfileApi profileApi;
+  @Mock private NihApi nihApi;
 
   // N.B. this will load the default service account credentials for whatever AoU environment
   // is set when running integration tests. This should be the test environment.
@@ -62,8 +55,7 @@ public class FireCloudIntegrationTest {
   @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
   private GoogleCredential serviceAccountCredential;
 
-  @Autowired
-  private ServiceAccounts serviceAccounts;
+  @Autowired private ServiceAccounts serviceAccounts;
 
   @Autowired
   @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
@@ -72,8 +64,8 @@ public class FireCloudIntegrationTest {
   @Before
   public void setUp() throws IOException {
     // Get a refreshed access token for the FireCloud service account credentials.
-    serviceAccountCredential = serviceAccountCredential.createScoped(
-        FireCloudServiceImpl.FIRECLOUD_API_OAUTH_SCOPES);
+    serviceAccountCredential =
+        serviceAccountCredential.createScoped(FireCloudServiceImpl.FIRECLOUD_API_OAUTH_SCOPES);
     serviceAccountCredential.refreshToken();
   }
 
@@ -82,14 +74,15 @@ public class FireCloudIntegrationTest {
    * WorkbenchConfig. Note that this will always use the test environment's default service account
    * credentials when making API calls. It shouldn't be possible to make authenticated calls to the
    * FireCloud prod environment.
-   * <p>
-   * This method mostly exists to allow us to run a status-check against both FC dev & prod within
-   * the same integration test run.
-   **/
+   *
+   * <p>This method mostly exists to allow us to run a status-check against both FC dev & prod
+   * within the same integration test run.
+   */
   private FireCloudService createService(WorkbenchConfig config) {
-    ApiClient apiClient = new ApiClient()
-        .setBasePath(config.firecloud.baseUrl)
-        .setDebugging(config.firecloud.debugEndpoints);
+    ApiClient apiClient =
+        new ApiClient()
+            .setBasePath(config.firecloud.baseUrl)
+            .setDebugging(config.firecloud.debugEndpoints);
     apiClient.setAccessToken(serviceAccountCredential.getAccessToken());
 
     return new FireCloudServiceImpl(
@@ -102,12 +95,12 @@ public class FireCloudIntegrationTest {
         Providers.of(new StatusApi(apiClient)),
         new FirecloudRetryHandler(new NoBackOffPolicy()),
         serviceAccounts,
-        Providers.of(fireCloudAdminCredential)
-    );
+        Providers.of(fireCloudAdminCredential));
   }
 
   private WorkbenchConfig loadConfig(String filename) throws Exception {
-    String testConfig = Resources.toString(Resources.getResource(filename), Charset.defaultCharset());
+    String testConfig =
+        Resources.toString(Resources.getResource(filename), Charset.defaultCharset());
     WorkbenchConfig workbenchConfig = new Gson().fromJson(testConfig, WorkbenchConfig.class);
     workbenchConfig.firecloud.debugEndpoints = true;
     return workbenchConfig;
@@ -134,19 +127,21 @@ public class FireCloudIntegrationTest {
   /**
    * Ensures we can successfully use delegation of authority to make FireCloud API calls on behalf
    * of AoU users.
-   * <p>
-   * This test depends on there being an active account in FireCloud dev with the email address
+   *
+   * <p>This test depends on there being an active account in FireCloud dev with the email address
    * integration-test-user@fake-research-aou.org.
    */
   @Test
   public void testImpersonatedProfileCall() throws Exception {
-    ApiClient apiClient = getTestService().getApiClientWithImpersonation(
-        "integration-test-user@fake-research-aou.org");
+    ApiClient apiClient =
+        getTestService()
+            .getApiClientWithImpersonation("integration-test-user@fake-research-aou.org");
 
     // Run the most basic API call against the /me/ endpoint.
     ProfileApi profileApi = new ProfileApi(apiClient);
     Me me = profileApi.me();
-    assertThat(me.getUserInfo().getUserEmail()).isEqualTo("integration-test-user@fake-research-aou.org");
+    assertThat(me.getUserInfo().getUserEmail())
+        .isEqualTo("integration-test-user@fake-research-aou.org");
     assertThat(me.getUserInfo().getUserSubjectId()).isEqualTo("101727030557929965916");
 
     // Run a test against a different FireCloud endpoint. This is important, because the /me/
@@ -164,5 +159,4 @@ public class FireCloudIntegrationTest {
     }
     assertThat(responseCode).isEqualTo(404);
   }
-
 }

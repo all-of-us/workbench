@@ -1,6 +1,13 @@
 package org.pmiops.workbench.auth;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import java.io.IOException;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -9,26 +16,15 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.io.IOException;
-import java.util.Arrays;
-
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 public class ServiceAccountsTest {
 
-  @Mock
-  private GoogleCredential serviceAccountCredential;
-  @Mock
-  private GoogleCredential impersonatedCredential;
+  @Mock private GoogleCredential serviceAccountCredential;
+  @Mock private GoogleCredential impersonatedCredential;
   private GoogleCredential.Builder credentialBuilder;
 
   private ServiceAccounts serviceAccounts;
 
-  @Rule
-  public MockitoRule mockitoRule = MockitoJUnit.rule();
+  @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @Before
   public void setUp() {
@@ -53,10 +49,7 @@ public class ServiceAccountsTest {
     when(impersonatedCredential.getAccessToken()).thenReturn("impersonated-access-token");
 
     serviceAccounts.getImpersonatedCredential(
-        serviceAccountCredential,
-        "asdf@fake-research-aou.org",
-        Arrays.asList("profile", "email")
-    );
+        serviceAccountCredential, "asdf@fake-research-aou.org", Arrays.asList("profile", "email"));
 
     // The Credential builder should be called with the impersonated username and the original
     // service account's subject ID.

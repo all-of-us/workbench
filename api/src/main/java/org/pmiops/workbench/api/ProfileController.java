@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -14,12 +13,10 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -59,8 +56,8 @@ import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
-import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.model.UserListResponse;
+import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,8 +69,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Contains implementations for all Workbench API methods tagged with "profile".
  *
- * The majority of handlers here are lightweight wrappers which delegate to UserService, where many
- * user-focused database and/or API calls are implemented.
+ * <p>The majority of handlers here are lightweight wrappers which delegate to UserService, where
+ * many user-focused database and/or API calls are implemented.
  */
 @RestController
 public class ProfileController implements ProfileApiDelegate {
@@ -83,33 +80,40 @@ public class ProfileController implements ProfileApiDelegate {
           .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
           .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
           .build();
-  private static final Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership,
-      BillingProjectMembership> TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
-      new Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership, BillingProjectMembership>() {
-        @Override
-        public BillingProjectMembership apply(
-            org.pmiops.workbench.firecloud.model.BillingProjectMembership billingProjectMembership) {
-          BillingProjectMembership result = new BillingProjectMembership();
-          result.setProjectName(billingProjectMembership.getProjectName());
-          result.setRole(billingProjectMembership.getRole());
-          result.setStatus(
-              fcToWorkbenchBillingMap.get(billingProjectMembership.getCreationStatus()));
-          return result;
-        }
-      };
-  private static final Function<InstitutionalAffiliation,
-      org.pmiops.workbench.db.model.InstitutionalAffiliation> FROM_CLIENT_INSTITUTIONAL_AFFILIATION =
-      new Function<InstitutionalAffiliation, org.pmiops.workbench.db.model.InstitutionalAffiliation>() {
-        @Override
-        public org.pmiops.workbench.db.model.InstitutionalAffiliation apply(InstitutionalAffiliation institutionalAffiliation) {
-          org.pmiops.workbench.db.model.InstitutionalAffiliation result =
-              new org.pmiops.workbench.db.model.InstitutionalAffiliation();
-          result.setRole(institutionalAffiliation.getRole());
-          result.setInstitution(institutionalAffiliation.getInstitution());
+  private static final Function<
+          org.pmiops.workbench.firecloud.model.BillingProjectMembership, BillingProjectMembership>
+      TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
+          new Function<
+              org.pmiops.workbench.firecloud.model.BillingProjectMembership,
+              BillingProjectMembership>() {
+            @Override
+            public BillingProjectMembership apply(
+                org.pmiops.workbench.firecloud.model.BillingProjectMembership
+                    billingProjectMembership) {
+              BillingProjectMembership result = new BillingProjectMembership();
+              result.setProjectName(billingProjectMembership.getProjectName());
+              result.setRole(billingProjectMembership.getRole());
+              result.setStatus(
+                  fcToWorkbenchBillingMap.get(billingProjectMembership.getCreationStatus()));
+              return result;
+            }
+          };
+  private static final Function<
+          InstitutionalAffiliation, org.pmiops.workbench.db.model.InstitutionalAffiliation>
+      FROM_CLIENT_INSTITUTIONAL_AFFILIATION =
+          new Function<
+              InstitutionalAffiliation, org.pmiops.workbench.db.model.InstitutionalAffiliation>() {
+            @Override
+            public org.pmiops.workbench.db.model.InstitutionalAffiliation apply(
+                InstitutionalAffiliation institutionalAffiliation) {
+              org.pmiops.workbench.db.model.InstitutionalAffiliation result =
+                  new org.pmiops.workbench.db.model.InstitutionalAffiliation();
+              result.setRole(institutionalAffiliation.getRole());
+              result.setInstitution(institutionalAffiliation.getInstitution());
 
-          return result;
-        }
-      };
+              return result;
+            }
+          };
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 
@@ -130,10 +134,14 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<MailService> mailServiceProvider;
 
   @Autowired
-  ProfileController(ProfileService profileService, Provider<User> userProvider,
+  ProfileController(
+      ProfileService profileService,
+      Provider<User> userProvider,
       Provider<UserAuthentication> userAuthenticationProvider,
       UserDao userDao,
-      Clock clock, UserService userService, FireCloudService fireCloudService,
+      Clock clock,
+      UserService userService,
+      FireCloudService fireCloudService,
       DirectoryService directoryService,
       CloudStorageService cloudStorageService,
       LeonardoNotebooksClient leonardoNotebooksClient,
@@ -159,14 +167,16 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<List<BillingProjectMembership>> getBillingProjects() {
     List<org.pmiops.workbench.firecloud.model.BillingProjectMembership> memberships =
         fireCloudService.getBillingProjectMemberships();
-    return ResponseEntity.ok(memberships.stream().map(TO_CLIENT_BILLING_PROJECT_MEMBERSHIP)
-        .collect(Collectors.toList()));
+    return ResponseEntity.ok(
+        memberships.stream()
+            .map(TO_CLIENT_BILLING_PROJECT_MEMBERSHIP)
+            .collect(Collectors.toList()));
   }
 
   private String createFirecloudUserAndBillingProject(User user) {
     // If the user is already registered, their profile will get updated.
-    fireCloudService.registerUser(user.getContactEmail(),
-        user.getGivenName(), user.getFamilyName());
+    fireCloudService.registerUser(
+        user.getContactEmail(), user.getGivenName(), user.getFamilyName());
     return createFirecloudBillingProject(user);
   }
 
@@ -175,13 +185,15 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException(String.format("%s cannot be left blank!", fieldName));
     }
     if (field.length() > max) {
-      throw new BadRequestException(String.format("%s length exceeds character limit. (%d)", fieldName, max));
+      throw new BadRequestException(
+          String.format("%s length exceeds character limit. (%d)", fieldName, max));
     }
     if (field.length() < min) {
       if (min == 1) {
         throw new BadRequestException(String.format("%s cannot be left blank.", fieldName));
       } else {
-        throw new BadRequestException(String.format("%s is under character minimum. (%d)", fieldName, min));
+        throw new BadRequestException(
+            String.format("%s is under character minimum. (%d)", fieldName, min));
       }
     }
   }
@@ -230,8 +242,10 @@ public class ProfileController implements ProfileApiDelegate {
         if (workbenchEnvironment.isDevelopment()) {
           // In local development, just re-use existing projects for the account. (We don't
           // want to create a new billing project every time the database is reset.)
-          log.log(Level.WARNING, String.format("Project with name '%s' already exists; using it.",
-              billingProjectName));
+          log.log(
+              Level.WARNING,
+              String.format(
+                  "Project with name '%s' already exists; using it.", billingProjectName));
           break;
         } else {
           numAttempts++;
@@ -242,8 +256,10 @@ public class ProfileController implements ProfileApiDelegate {
       }
     }
     if (numAttempts == MAX_BILLING_PROJECT_CREATION_ATTEMPTS) {
-      throw new ServerErrorException(String.format("Encountered %d billing project name " +
-          "collisions; giving up", MAX_BILLING_PROJECT_CREATION_ATTEMPTS));
+      throw new ServerErrorException(
+          String.format(
+              "Encountered %d billing project name " + "collisions; giving up",
+              MAX_BILLING_PROJECT_CREATION_ATTEMPTS));
     }
 
     try {
@@ -253,8 +269,13 @@ public class ProfileController implements ProfileApiDelegate {
       // AofU is not the owner of the billing project. This should only happen in local
       // environments (and hopefully never, given the prefix we're using.) If it happens,
       // we may need to pick a different prefix.
-      log.log(Level.SEVERE, String.format("Unable to add user to billing project %s; " +
-          "consider changing billing project prefix", billingProjectName), e);
+      log.log(
+          Level.SEVERE,
+          String.format(
+              "Unable to add user to billing project %s; "
+                  + "consider changing billing project prefix",
+              billingProjectName),
+          e);
       throw new ServerErrorException("Unable to add user to billing project", e);
     }
     return billingProjectName;
@@ -271,25 +292,28 @@ public class ProfileController implements ProfileApiDelegate {
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (user.getFirstSignInTime() == null) {
       // If the user is already registered, their profile will get updated.
-      fireCloudService.registerUser(user.getContactEmail(),
-          user.getGivenName(), user.getFamilyName());
+      fireCloudService.registerUser(
+          user.getContactEmail(), user.getGivenName(), user.getFamilyName());
 
       // TODO(calbach): After the next DB wipe, switch this null check to
       // instead use the freeTierBillingProjectStatus.
-      if (!workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer && user.getFreeTierBillingProjectName() == null) {
-          String billingProjectName = createFirecloudBillingProject(user);
-          user.setFreeTierBillingProjectName(billingProjectName);
-          user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.PENDING);
+      if (!workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer
+          && user.getFreeTierBillingProjectName() == null) {
+        String billingProjectName = createFirecloudBillingProject(user);
+        user.setFreeTierBillingProjectName(billingProjectName);
+        user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.PENDING);
       }
 
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
-      // If the user is logged in, then we know that they have followed the account creation instructions sent to
+      // If the user is logged in, then we know that they have followed the account creation
+      // instructions sent to
       // their initial contact email address.
       user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
       return saveUserWithConflictHandling(user);
     }
 
-    // everything after this if block is code that will be deleted when useBillingProjectBuffer is turned on permanently.
+    // everything after this if block is code that will be deleted when useBillingProjectBuffer is
+    // turned on permanently.
     if (workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer) {
       return user;
     }
@@ -305,15 +329,16 @@ public class ProfileController implements ProfileApiDelegate {
     BillingProjectStatus status;
     try {
       String billingProjectName = user.getFreeTierBillingProjectName();
-      status = fireCloudService.getBillingProjectMemberships().stream()
-          .filter(m -> m.getProjectName() != null)
-          .filter(m -> m.getCreationStatus() != null)
-          .filter(m -> fcToWorkbenchBillingMap.containsKey(m.getCreationStatus()))
-          .filter(m -> billingProjectName.equals(m.getProjectName()))
-          .map(m -> fcToWorkbenchBillingMap.get(m.getCreationStatus()))
-          // Should be at most one matching billing project; though we're not asserting this.
-          .findFirst()
-          .orElse(BillingProjectStatus.NONE);
+      status =
+          fireCloudService.getBillingProjectMemberships().stream()
+              .filter(m -> m.getProjectName() != null)
+              .filter(m -> m.getCreationStatus() != null)
+              .filter(m -> fcToWorkbenchBillingMap.containsKey(m.getCreationStatus()))
+              .filter(m -> billingProjectName.equals(m.getProjectName()))
+              .map(m -> fcToWorkbenchBillingMap.get(m.getCreationStatus()))
+              // Should be at most one matching billing project; though we're not asserting this.
+              .findFirst()
+              .orElse(BillingProjectStatus.NONE);
     } catch (WorkbenchException e) {
       log.log(Level.WARNING, "failed to retrieve billing projects, continuing", e);
       return user;
@@ -328,19 +353,25 @@ public class ProfileController implements ProfileApiDelegate {
         int retries = Optional.ofNullable(user.getBillingProjectRetries()).orElse(0);
         if (retries < workbenchConfigProvider.get().firecloud.billingRetryCount) {
           this.userService.setBillingRetryCount(retries + 1);
-          log.log(Level.INFO, String.format(
-              "Billing project %s failed to be created, retrying.", user.getFreeTierBillingProjectName()));
+          log.log(
+              Level.INFO,
+              String.format(
+                  "Billing project %s failed to be created, retrying.",
+                  user.getFreeTierBillingProjectName()));
           try {
-            fireCloudService.removeUserFromBillingProject(user.getEmail(), user.getFreeTierBillingProjectName());
+            fireCloudService.removeUserFromBillingProject(
+                user.getEmail(), user.getFreeTierBillingProjectName());
           } catch (WorkbenchException e) {
             log.log(Level.INFO, "Failed to remove user from errored billing project");
           }
           String billingProjectName = createFirecloudBillingProject(user);
-          return this.userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.PENDING);
+          return this.userService.setFreeTierBillingProjectNameAndStatus(
+              billingProjectName, BillingProjectStatus.PENDING);
         } else {
           String billingProjectName = user.getFreeTierBillingProjectName();
-          log.log(Level.SEVERE, String.format(
-              "free tier project %s failed to be created", billingProjectName));
+          log.log(
+              Level.SEVERE,
+              String.format("free tier project %s failed to be created", billingProjectName));
           return userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, status);
         }
       case READY:
@@ -354,17 +385,24 @@ public class ProfileController implements ProfileApiDelegate {
 
     String billingProjectName = user.getFreeTierBillingProjectName();
     try {
-      this.leonardoNotebooksClient.createCluster(billingProjectName,
-          LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
-      log.log(Level.INFO, String.format("created cluster %s/%s", billingProjectName,
-          LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
+      this.leonardoNotebooksClient.createCluster(
+          billingProjectName, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      log.log(
+          Level.INFO,
+          String.format(
+              "created cluster %s/%s",
+              billingProjectName, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
     } catch (ConflictException e) {
-      log.log(Level.INFO, String.format("Cluster %s/%s already exists", billingProjectName,
-          LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
+      log.log(
+          Level.INFO,
+          String.format(
+              "Cluster %s/%s already exists",
+              billingProjectName, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
     } catch (GatewayTimeoutException e) {
       log.log(Level.WARNING, "Socket Timeout creating cluster.");
     }
-    return userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.READY);
+    return userService.setFreeTierBillingProjectNameAndStatus(
+        billingProjectName, BillingProjectStatus.READY);
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
@@ -401,13 +439,16 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
     verifyInvitationKey(request.getInvitationKey());
     String userName = request.getProfile().getUsername();
-    if(userName == null || userName.length() < 3 || userName.length() > 64 )
-      throw new BadRequestException("Username should be at least 3 characters and not more than 64 characters");
+    if (userName == null || userName.length() < 3 || userName.length() > 64)
+      throw new BadRequestException(
+          "Username should be at least 3 characters and not more than 64 characters");
     request.getProfile().setUsername(request.getProfile().getUsername().toLowerCase());
     validateProfileFields(request.getProfile());
     com.google.api.services.admin.directory.model.User googleUser =
-        directoryService.createUser(request.getProfile().getGivenName(),
-            request.getProfile().getFamilyName(), request.getProfile().getUsername(),
+        directoryService.createUser(
+            request.getProfile().getGivenName(),
+            request.getProfile().getFamilyName(),
+            request.getProfile().getUsername(),
             request.getProfile().getContactEmail());
 
     // Create a user that has no data access or FC user associated.
@@ -421,18 +462,21 @@ public class ProfileController implements ProfileApiDelegate {
     // It's possible for the profile information to become out of sync with the user's Google
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
-    User user = userService.createUser(
-        request.getProfile().getGivenName(),
-        request.getProfile().getFamilyName(),
-        googleUser.getPrimaryEmail(),
-        request.getProfile().getContactEmail(),
-        request.getProfile().getCurrentPosition(),
-        request.getProfile().getOrganization(),
-        request.getProfile().getAreaOfResearch()
-    );
+    User user =
+        userService.createUser(
+            request.getProfile().getGivenName(),
+            request.getProfile().getFamilyName(),
+            googleUser.getPrimaryEmail(),
+            request.getProfile().getContactEmail(),
+            request.getProfile().getCurrentPosition(),
+            request.getProfile().getOrganization(),
+            request.getProfile().getAreaOfResearch());
 
     try {
-      mailServiceProvider.get().sendWelcomeEmail(request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);
+      mailServiceProvider
+          .get()
+          .sendWelcomeEmail(
+              request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
@@ -478,12 +522,13 @@ public class ProfileController implements ProfileApiDelegate {
 
   /**
    * This methods updates logged in user's training status from Moodle.
+   *
    * @return Profile updated with training completion time
    */
   public ResponseEntity<Profile> syncComplianceTrainingStatus() {
     try {
       userService.syncComplianceTrainingStatus();
-    } catch(NotFoundException ex) {
+    } catch (NotFoundException ex) {
       throw ex;
     } catch (ApiException e) {
       throw new ServerErrorException(e);
@@ -504,13 +549,16 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> invitationKeyVerification(InvitationVerificationRequest invitationVerificationRequest) {
+  public ResponseEntity<Void> invitationKeyVerification(
+      InvitationVerificationRequest invitationVerificationRequest) {
     verifyInvitationKey(invitationVerificationRequest.getInvitationKey());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   private void verifyInvitationKey(String invitationKey) {
-    if (invitationKey == null || invitationKey.equals("") || !invitationKey.equals(cloudStorageService.readInvitationKey())) {
+    if (invitationKey == null
+        || invitationKey.equals("")
+        || !invitationKey.equals(cloudStorageService.readInvitationKey())) {
       throw new BadRequestException(
           "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }
@@ -531,10 +579,11 @@ public class ProfileController implements ProfileApiDelegate {
    * the normal profile update process.
    */
   @Override
-  public ResponseEntity<Void> updateContactEmail(UpdateContactEmailRequest updateContactEmailRequest) {
+  public ResponseEntity<Void> updateContactEmail(
+      UpdateContactEmailRequest updateContactEmailRequest) {
     String username = updateContactEmailRequest.getUsername().toLowerCase();
     com.google.api.services.admin.directory.model.User googleUser =
-      directoryService.getUser(username);
+        directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
     checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
     if (!userNeverLoggedIn(googleUser, user)) {
@@ -555,7 +604,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
     String username = resendRequest.getUsername().toLowerCase();
     com.google.api.services.admin.directory.model.User googleUser =
-      directoryService.getUser(username);
+        directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
     checkUserCreationNonce(user, resendRequest.getCreationNonce());
     if (!userNeverLoggedIn(googleUser, user)) {
@@ -564,14 +613,18 @@ public class ProfileController implements ProfileApiDelegate {
     return resetPasswordAndSendWelcomeEmail(username, user);
   }
 
-  private boolean userNeverLoggedIn(com.google.api.services.admin.directory.model.User googleUser, User user) {
+  private boolean userNeverLoggedIn(
+      com.google.api.services.admin.directory.model.User googleUser, User user) {
     return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin();
   }
 
   private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, User user) {
-    com.google.api.services.admin.directory.model.User googleUser = directoryService.resetUserPassword(username);
+    com.google.api.services.admin.directory.model.User googleUser =
+        directoryService.resetUserPassword(username);
     try {
-      mailServiceProvider.get().sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
+      mailServiceProvider
+          .get()
+          .sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
     } catch (MessagingException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
@@ -583,10 +636,11 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     user = userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
     Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    boolean shouldAdd = user.getPageVisits().stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
+    boolean shouldAdd =
+        user.getPageVisits().stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
     if (shouldAdd) {
       org.pmiops.workbench.db.model.PageVisit firstPageVisit =
-        new org.pmiops.workbench.db.model.PageVisit();
+          new org.pmiops.workbench.db.model.PageVisit();
       firstPageVisit.setPageId(newPageVisit.getPage());
       firstPageVisit.setUser(user);
       firstPageVisit.setFirstVisit(timestamp);
@@ -607,14 +661,14 @@ public class ProfileController implements ProfileApiDelegate {
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
 
-    if (updatedProfile.getContactEmail() != null &&
-        !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
+    if (updatedProfile.getContactEmail() != null
+        && !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
       // See RW-1488.
       throw new BadRequestException("Changing email is not currently supported");
     }
     List<org.pmiops.workbench.db.model.InstitutionalAffiliation> newAffiliations =
-        updatedProfile.getInstitutionalAffiliations()
-            .stream().map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
+        updatedProfile.getInstitutionalAffiliations().stream()
+            .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
             .collect(Collectors.toList());
     int i = 0;
     ListIterator<org.pmiops.workbench.db.model.InstitutionalAffiliation> oldAffilations =
@@ -628,7 +682,8 @@ public class ProfileController implements ProfileApiDelegate {
       affiliation.setOrderIndex(i);
       affiliation.setUserId(userId);
       if (oldAffilations.hasNext()) {
-        org.pmiops.workbench.db.model.InstitutionalAffiliation oldAffilation = oldAffilations.next();
+        org.pmiops.workbench.db.model.InstitutionalAffiliation oldAffilation =
+            oldAffilations.next();
         if (!oldAffilation.getRole().equals(affiliation.getRole())
             || !oldAffilation.getInstitution().equals(affiliation.getInstitution())) {
           shouldAdd = true;
@@ -667,13 +722,15 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
-  public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, AccessBypassRequest request) {
+  public ResponseEntity<EmptyResponse> bypassAccessRequirement(
+      Long userId, AccessBypassRequest request) {
     updateBypass(userId, request);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirement(AccessBypassRequest request) {
+  public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirement(
+      AccessBypassRequest request) {
     if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
@@ -729,14 +786,14 @@ public class ProfileController implements ProfileApiDelegate {
         userService.setTwoFactorAuthBypassTime(userId, valueToSet);
         break;
       default:
-        throw new BadRequestException("There is no access module named: " + request.getModuleName().toString());
+        throw new BadRequestException(
+            "There is no access module named: " + request.getModuleName().toString());
     }
     userService.logAdminUserAction(
         userId,
         "set bypass status for module " + request.getModuleName().toString() + " to " + bypassed,
         previousValue,
-        valueToSet
-    );
+        valueToSet);
   }
 
   @Override
@@ -751,5 +808,4 @@ public class ProfileController implements ProfileApiDelegate {
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
-
 }

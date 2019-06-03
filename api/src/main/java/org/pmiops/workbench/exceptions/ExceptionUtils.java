@@ -1,17 +1,13 @@
 package org.pmiops.workbench.exceptions;
 
-
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.springframework.http.HttpStatus;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-
-/**
- * Utility methods related to exceptions.
- */
+/** Utility methods related to exceptions. */
 public class ExceptionUtils {
 
   public static boolean isGoogleServiceUnavailableException(IOException e) {
@@ -43,7 +39,6 @@ public class ExceptionUtils {
   public static boolean isSocketTimeoutException(Throwable e) {
     return (e instanceof SocketTimeoutException);
   }
-
 
   public static WorkbenchException convertFirecloudException(ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {

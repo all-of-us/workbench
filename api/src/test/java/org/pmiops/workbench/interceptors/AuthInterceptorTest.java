@@ -36,7 +36,6 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.web.method.HandlerMethod;
 
-
 /** mimicing a Swagger-generated wrapper */
 class FakeApiController {
   public void handle() {}
@@ -52,23 +51,15 @@ public class AuthInterceptorTest {
 
   private static final long USER_ID = 123L;
 
-  @Mock
-  private UserInfoService userInfoService;
-  @Mock
-  private FireCloudService fireCloudService;
-  @Mock
-  private UserDao userDao;
-  @Mock
-  private HttpServletRequest request;
-  @Mock
-  private HttpServletResponse response;
-  @Mock
-  private HandlerMethod handler;
-  @Mock
-  private UserService userService;
+  @Mock private UserInfoService userInfoService;
+  @Mock private FireCloudService fireCloudService;
+  @Mock private UserDao userDao;
+  @Mock private HttpServletRequest request;
+  @Mock private HttpServletResponse response;
+  @Mock private HandlerMethod handler;
+  @Mock private UserService userService;
 
-  @Rule
-  public MockitoRule mockitoRule = MockitoJUnit.rule();
+  @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   private AuthInterceptor interceptor;
   private User user;
@@ -81,8 +72,9 @@ public class AuthInterceptorTest {
     workbenchConfig.auth = new AuthConfig();
     workbenchConfig.auth.serviceAccountApiUsers = new ArrayList<>();
     workbenchConfig.auth.serviceAccountApiUsers.add("service-account@appspot.gserviceaccount.com");
-    this.interceptor = new AuthInterceptor(userInfoService, fireCloudService,
-        Providers.of(workbenchConfig), userDao, userService);
+    this.interceptor =
+        new AuthInterceptor(
+            userInfoService, fireCloudService, Providers.of(workbenchConfig), userDao, userService);
     this.user = new User();
     user.setUserId(USER_ID);
     user.setDisabled(false);
@@ -208,7 +200,7 @@ public class AuthInterceptorTest {
         return method;
       }
     }
-    throw new RuntimeException("Method \""+methodName+"\" not found");
+    throw new RuntimeException("Method \"" + methodName + "\" not found");
   }
 
   @Test

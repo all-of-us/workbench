@@ -20,7 +20,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -125,7 +124,9 @@ public class Workspace {
     return version;
   }
 
-  public void setVersion(int version) { this.version = version; }
+  public void setVersion(int version) {
+    this.version = version;
+  }
 
   @Column(name = "name")
   public String getName() {
@@ -144,7 +145,6 @@ public class Workspace {
   public void setWorkspaceNamespace(String workspaceNamespace) {
     this.workspaceNamespace = workspaceNamespace;
   }
-
 
   @Column(name = "firecloud_name")
   public String getFirecloudName() {
@@ -212,9 +212,13 @@ public class Workspace {
   }
 
   @Column(name = "last_accessed_time")
-  public Timestamp getLastAccessedTime() { return lastAccessedTime; }
+  public Timestamp getLastAccessedTime() {
+    return lastAccessedTime;
+  }
 
-  public void setLastAccessedTime(Timestamp lastAccessedTime) { this.lastAccessedTime = lastAccessedTime; }
+  public void setLastAccessedTime(Timestamp lastAccessedTime) {
+    this.lastAccessedTime = lastAccessedTime;
+  }
 
   @Column(name = "rp_disease_focused_research")
   public boolean getDiseaseFocusedResearch() {
@@ -271,34 +275,58 @@ public class Workspace {
   }
 
   @Column(name = "rp_social_behavioral")
-  public boolean getSocialBehavioral() { return this.socialBehavioral; }
+  public boolean getSocialBehavioral() {
+    return this.socialBehavioral;
+  }
 
-  public void setSocialBehavioral(boolean socialBehavioral) { this.socialBehavioral = socialBehavioral; }
+  public void setSocialBehavioral(boolean socialBehavioral) {
+    this.socialBehavioral = socialBehavioral;
+  }
 
   @Column(name = "rp_population_health")
-  public boolean getPopulationHealth() { return this.populationHealth; }
+  public boolean getPopulationHealth() {
+    return this.populationHealth;
+  }
 
-  public void setPopulationHealth(boolean populationHealth) { this.populationHealth = populationHealth; }
+  public void setPopulationHealth(boolean populationHealth) {
+    this.populationHealth = populationHealth;
+  }
 
   @Column(name = "rp_educational")
-  public boolean getEducational() { return this.educational; }
+  public boolean getEducational() {
+    return this.educational;
+  }
 
-  public void setEducational(boolean educational) { this.educational = educational; }
+  public void setEducational(boolean educational) {
+    this.educational = educational;
+  }
 
   @Column(name = "rp_drug_development")
-  public boolean getDrugDevelopment() { return this.drugDevelopment; }
+  public boolean getDrugDevelopment() {
+    return this.drugDevelopment;
+  }
 
-  public void setDrugDevelopment(boolean drugDevelopment) { this.drugDevelopment = drugDevelopment; }
+  public void setDrugDevelopment(boolean drugDevelopment) {
+    this.drugDevelopment = drugDevelopment;
+  }
 
   @Column(name = "rp_other_purpose")
-  public boolean getOtherPurpose() { return this.otherPurpose; }
+  public boolean getOtherPurpose() {
+    return this.otherPurpose;
+  }
 
-  public void setOtherPurpose(boolean otherPurpose) {this.otherPurpose = otherPurpose; }
+  public void setOtherPurpose(boolean otherPurpose) {
+    this.otherPurpose = otherPurpose;
+  }
 
   @Column(name = "rp_other_purpose_details")
-  public String getOtherPurposeDetails() { return this.otherPurposeDetails; }
+  public String getOtherPurposeDetails() {
+    return this.otherPurposeDetails;
+  }
 
-  public void setOtherPurposeDetails(String otherPurposeDetails) { this.otherPurposeDetails = otherPurposeDetails; }
+  public void setOtherPurposeDetails(String otherPurposeDetails) {
+    this.otherPurposeDetails = otherPurposeDetails;
+  }
 
   @Column(name = "rp_population")
   public boolean getPopulation() {
@@ -312,7 +340,9 @@ public class Workspace {
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "specific_populations", joinColumns = @JoinColumn(name = "workspace_id"))
   @Column(name = "specific_population")
-  public Set<Short> getPopulationDetails() { return populationDetailsSet; }
+  public Set<Short> getPopulationDetails() {
+    return populationDetailsSet;
+  }
 
   public void setPopulationDetails(Set<Short> newPopulationDetailsSet) {
     this.populationDetailsSet = newPopulationDetailsSet;
@@ -324,15 +354,14 @@ public class Workspace {
     if (from == null) {
       return null;
     }
-    return from
-            .stream()
-            .map(StorageEnums::specificPopulationFromStorage)
-            .collect(Collectors.toSet());
+    return from.stream()
+        .map(StorageEnums::specificPopulationFromStorage)
+        .collect(Collectors.toSet());
   }
 
   public void setSpecificPopulationsEnum(Set<SpecificPopulationEnum> newPopulationDetails) {
-    setPopulationDetails(newPopulationDetails
-            .stream()
+    setPopulationDetails(
+        newPopulationDetails.stream()
             .map(StorageEnums::specificPopulationToStorage)
             .collect(Collectors.toSet()));
   }
@@ -347,19 +376,31 @@ public class Workspace {
   }
 
   @Column(name = "rp_reason_for_all_of_us")
-  public String getReasonForAllOfUs() { return this.reasonForAllOfUs; }
+  public String getReasonForAllOfUs() {
+    return this.reasonForAllOfUs;
+  }
 
-  public void setReasonForAllOfUs(String reasonForAllOfUs) { this.reasonForAllOfUs = reasonForAllOfUs; }
+  public void setReasonForAllOfUs(String reasonForAllOfUs) {
+    this.reasonForAllOfUs = reasonForAllOfUs;
+  }
 
   @Column(name = "rp_intended_study")
-  public String getIntendedStudy() { return this.intendedStudy; }
+  public String getIntendedStudy() {
+    return this.intendedStudy;
+  }
 
-  public void setIntendedStudy(String intendedStudy) { this.intendedStudy = intendedStudy; }
+  public void setIntendedStudy(String intendedStudy) {
+    this.intendedStudy = intendedStudy;
+  }
 
   @Column(name = "rp_anticipated_findings")
-  public String getAnticipatedFindings() { return this.anticipatedFindings; }
+  public String getAnticipatedFindings() {
+    return this.anticipatedFindings;
+  }
 
-  public void setAnticipatedFindings(String anticipatedFindings) { this.anticipatedFindings = anticipatedFindings; }
+  public void setAnticipatedFindings(String anticipatedFindings) {
+    this.anticipatedFindings = anticipatedFindings;
+  }
 
   @Column(name = "rp_review_requested")
   public Boolean getReviewRequested() {
@@ -431,18 +472,28 @@ public class Workspace {
     return new FirecloudWorkspaceId(workspaceNamespace, firecloudName);
   }
 
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "workspace", orphanRemoval = true, cascade = CascadeType.ALL)
+  @OneToMany(
+      fetch = FetchType.EAGER,
+      mappedBy = "workspace",
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
   public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
     return usersWithAccess;
   }
 
   @Column(name = "firecloud_uuid")
-  public String getFirecloudUuid() {return this.firecloudUuid; }
+  public String getFirecloudUuid() {
+    return this.firecloudUuid;
+  }
 
-  public void setFirecloudUuid(String firecloudUuid) {this.firecloudUuid = firecloudUuid;}
+  public void setFirecloudUuid(String firecloudUuid) {
+    this.firecloudUuid = firecloudUuid;
+  }
 
   @Column(name = "active_status")
-  private Short getActiveStatus() { return activeStatus; }
+  private Short getActiveStatus() {
+    return activeStatus;
+  }
 
   private void setActiveStatus(Short activeStatus) {
     this.activeStatus = activeStatus;
@@ -458,8 +509,8 @@ public class Workspace {
   }
 
   /**
-   * Necessary for Spring initialization of the object.
-   * Not actually supported because it won't delete old entries.
+   * Necessary for Spring initialization of the object. Not actually supported because it won't
+   * delete old entries.
    */
   public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
     this.usersWithAccess = userRoles;

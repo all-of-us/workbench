@@ -27,8 +27,8 @@ public class QueryConfiguration {
     }
   }
 
-  public QueryConfiguration(ImmutableList<ColumnInfo> selectColumns,
-      QueryJobConfiguration queryJobConfiguration) {
+  public QueryConfiguration(
+      ImmutableList<ColumnInfo> selectColumns, QueryJobConfiguration queryJobConfiguration) {
     this.selectColumns = selectColumns;
     this.queryJobConfiguration = queryJobConfiguration;
   }

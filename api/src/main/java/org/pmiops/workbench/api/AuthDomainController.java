@@ -5,15 +5,13 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.UpdateUserDisabledRequest;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.UpdateUserDisabledRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
 
 @RestController
 public class AuthDomainController implements AuthDomainApiDelegate {
@@ -24,9 +22,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
 
   @Autowired
   AuthDomainController(
-      FireCloudService fireCloudService,
-      UserService userService,
-      UserDao userDao) {
+      FireCloudService fireCloudService, UserService userService, UserDao userDao) {
     this.fireCloudService = fireCloudService;
     this.userService = userService;
     this.userDao = userDao;
@@ -46,11 +42,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     Boolean previousDisabled = user.getDisabled();
     User updatedUser = userService.setDisabledStatus(user.getUserId(), request.getDisabled());
     userService.logAdminUserAction(
-        user.getUserId(),
-        "updated user disabled state",
-        previousDisabled,
-        request.getDisabled());
+        user.getUserId(), "updated user disabled state", previousDisabled, request.getDisabled());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
-
 }

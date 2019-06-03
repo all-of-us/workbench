@@ -38,9 +38,7 @@ import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * Builds queries based of a {@link FieldSet} and {@link ParticipantCriteria}.
- */
+/** Builds queries based of a {@link FieldSet} and {@link ParticipantCriteria}. */
 // TODO: figure out how to return nicer error messages to users for bad queries
 // TODO: consider whether we want to impose limits on number of columns, joins, etc. requested
 @Service
@@ -92,8 +90,8 @@ public class FieldSetQueryBuilder {
   }
 
   /**
-   * A container for state needed to turn a query into SQL. We pass this around to avoid having
-   * to pass around a whole bunch of arguments.
+   * A container for state needed to turn a query into SQL. We pass this around to avoid having to
+   * pass around a whole bunch of arguments.
    */
   private static final class QueryState {
 
@@ -123,8 +121,8 @@ public class FieldSetQueryBuilder {
   }
 
   @Autowired
-  public FieldSetQueryBuilder(CohortQueryBuilder cohortQueryBuilder,
-      BigQueryService bigQueryService) {
+  public FieldSetQueryBuilder(
+      CohortQueryBuilder cohortQueryBuilder, BigQueryService bigQueryService) {
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.bigQueryService = bigQueryService;
   }
@@ -157,7 +155,8 @@ public class FieldSetQueryBuilder {
       TableConfig tableConfig = queryState.schemaConfig.cohortTables.get(tableName);
       if (tableConfig == null) {
         if (tableNeedsPersonId) {
-          throw new BadRequestException("Not a valid cohort table (lacks person_id column): " + tableName);
+          throw new BadRequestException(
+              "Not a valid cohort table (lacks person_id column): " + tableName);
         }
         tableConfig = queryState.schemaConfig.metadataTables.get(tableName);
         if (tableConfig == null) {
@@ -173,8 +172,8 @@ public class FieldSetQueryBuilder {
     return configTable;
   }
 
-  private TableNameAndAlias getTableNameAndAlias(List<String> columnParts, QueryState queryState,
-      boolean beforeLimitRequired) {
+  private TableNameAndAlias getTableNameAndAlias(
+      List<String> columnParts, QueryState queryState, boolean beforeLimitRequired) {
     String tableName = queryState.mainTableName;
     JoinedTableInfo joinedTableInfo = null;
     String tableAlias = tableName;
@@ -229,7 +228,8 @@ public class FieldSetQueryBuilder {
     return new TableNameAndAlias(tableName, tableAlias);
   }
 
-  private ImmutableList<SelectedColumn> handleSelect(QueryState queryState, List<String> columnNames) {
+  private ImmutableList<SelectedColumn> handleSelect(
+      QueryState queryState, List<String> columnNames) {
     ImmutableList.Builder<SelectedColumn> selectColumns = ImmutableList.builder();
     String tableName = queryState.mainTableName;
     queryState.mainTableColumns = getColumnConfigs(queryState, tableName, true);
@@ -248,16 +248,15 @@ public class FieldSetQueryBuilder {
         selectColumns.add(selectedColumn);
       } else {
 
-        TableNameAndAlias tableNameAndAlias = getTableNameAndAlias(columnParts,
-            queryState, false);
-        Map<String, ColumnConfig> aliasConfig = getColumnConfigs(queryState,
-            tableNameAndAlias.tableName, false);
+        TableNameAndAlias tableNameAndAlias = getTableNameAndAlias(columnParts, queryState, false);
+        Map<String, ColumnConfig> aliasConfig =
+            getColumnConfigs(queryState, tableNameAndAlias.tableName, false);
         String columnEnd = columnParts.get(columnParts.size() - 1);
         ColumnConfig columnConfig = aliasConfig.get(columnEnd);
         if (columnConfig == null) {
           throw new BadRequestException(
-              String.format("No column %s found on table %s", columnEnd,
-                  tableNameAndAlias.tableName));
+              String.format(
+                  "No column %s found on table %s", columnEnd, tableNameAndAlias.tableName));
         }
         SelectedColumn selectedColumn = new SelectedColumn();
         selectedColumn.columnInfo = new ColumnInfo(columnName, columnConfig);
@@ -272,8 +271,11 @@ public class FieldSetQueryBuilder {
     return selectColumns.build();
   }
 
-  private void handleComparison(ColumnFilter columnFilter, ColumnInfo columnInfo,
-      QueryState queryState, StringBuilder whereSql) {
+  private void handleComparison(
+      ColumnFilter columnFilter,
+      ColumnInfo columnInfo,
+      QueryState queryState,
+      StringBuilder whereSql) {
     ColumnConfig columnConfig = columnInfo.getColumnConfig();
     String paramName = "p" + queryState.paramMap.size();
     Operator operator = columnFilter.getOperator();
@@ -284,16 +286,18 @@ public class FieldSetQueryBuilder {
         ^ (columnFilter.getValueDate() != null)
         ^ (columnFilter.getValueNumber() != null)
         ^ (columnFilter.getValueNull() != null && columnFilter.getValueNull()))) {
-      throw new BadRequestException("Exactly one of value, valueDate, valueNumber, and valueNull "
-          + "must be specified for filter on column " + columnConfig.name);
+      throw new BadRequestException(
+          "Exactly one of value, valueDate, valueNumber, and valueNull "
+              + "must be specified for filter on column "
+              + columnConfig.name);
     }
     if (operator.equals(Operator.LIKE) && columnFilter.getValue() == null) {
       throw new BadRequestException("LIKE operator only support with value");
     }
     if (columnFilter.getValue() != null) {
       if (!columnConfig.type.equals(ColumnType.STRING)) {
-        throw new BadRequestException("Can't use value with column " + columnConfig.name
-            + " of type " + columnConfig.type);
+        throw new BadRequestException(
+            "Can't use value with column " + columnConfig.name + " of type " + columnConfig.type);
       }
       queryState.paramMap.put(paramName, QueryParameterValue.string(columnFilter.getValue()));
     } else if (columnFilter.getValueDate() != null) {
@@ -302,29 +306,44 @@ public class FieldSetQueryBuilder {
           DATE_FORMAT.parse(columnFilter.getValueDate());
           queryState.paramMap.put(paramName, QueryParameterValue.date(columnFilter.getValueDate()));
         } catch (ParseException e) {
-          throw new BadRequestException("Couldn't parse date value " + columnFilter.getValueDate()
-              + "; expected format: " + DATE_FORMAT_PATTERN);
+          throw new BadRequestException(
+              "Couldn't parse date value "
+                  + columnFilter.getValueDate()
+                  + "; expected format: "
+                  + DATE_FORMAT_PATTERN);
         }
       } else if (columnConfig.type.equals(ColumnType.TIMESTAMP)) {
         try {
-          long timestamp = DATE_TIME_FORMAT.parseDateTime(columnFilter.getValueDate()).getMillis() * 1000;
+          long timestamp =
+              DATE_TIME_FORMAT.parseDateTime(columnFilter.getValueDate()).getMillis() * 1000;
           queryState.paramMap.put(paramName, QueryParameterValue.timestamp(timestamp));
         } catch (IllegalArgumentException e) {
-          throw new BadRequestException("Couldn't parse timestamp value " +
-              columnFilter.getValueDate() + "; expected format: " + DATE_TIME_FORMAT_PATTERN);
+          throw new BadRequestException(
+              "Couldn't parse timestamp value "
+                  + columnFilter.getValueDate()
+                  + "; expected format: "
+                  + DATE_TIME_FORMAT_PATTERN);
         }
       } else {
-        throw new BadRequestException("Can't use valueDate with column " + columnConfig.name
-            + " of type " + columnConfig.type);
+        throw new BadRequestException(
+            "Can't use valueDate with column "
+                + columnConfig.name
+                + " of type "
+                + columnConfig.type);
       }
     } else if (columnFilter.getValueNumber() != null) {
       if (columnConfig.type.equals(ColumnType.FLOAT)) {
-        queryState.paramMap.put(paramName, QueryParameterValue.float64(columnFilter.getValueNumber().doubleValue()));
+        queryState.paramMap.put(
+            paramName, QueryParameterValue.float64(columnFilter.getValueNumber().doubleValue()));
       } else if (columnConfig.type.equals(ColumnType.INTEGER)) {
-        queryState.paramMap.put(paramName, QueryParameterValue.int64(columnFilter.getValueNumber().longValue()));
+        queryState.paramMap.put(
+            paramName, QueryParameterValue.int64(columnFilter.getValueNumber().longValue()));
       } else {
-        throw new BadRequestException("Can't use valueNumber with column " + columnConfig.name
-            + " of type " + columnConfig.type);
+        throw new BadRequestException(
+            "Can't use valueNumber with column "
+                + columnConfig.name
+                + " of type "
+                + columnConfig.type);
       }
     } else if (columnFilter.getValueNull() != null && columnFilter.getValueNull()) {
       if (operator != Operator.EQUAL && operator != Operator.NOT_EQUAL) {
@@ -338,77 +357,95 @@ public class FieldSetQueryBuilder {
       }
       return;
     }
-    whereSql.append(String.format("%s %s @%s",
-        columnInfo.getColumnName(), OperatorUtils.getSqlOperator(columnFilter.getOperator()),
-        paramName));
+    whereSql.append(
+        String.format(
+            "%s %s @%s",
+            columnInfo.getColumnName(),
+            OperatorUtils.getSqlOperator(columnFilter.getOperator()),
+            paramName));
   }
 
-  private void handleInClause(ColumnFilter columnFilter, ColumnInfo columnInfo,
-      QueryState queryState, StringBuilder whereSql) {
+  private void handleInClause(
+      ColumnFilter columnFilter,
+      ColumnInfo columnInfo,
+      QueryState queryState,
+      StringBuilder whereSql) {
     ColumnConfig columnConfig = columnInfo.getColumnConfig();
     String paramName = "p" + queryState.paramMap.size();
-    if (columnFilter.getValue() != null || columnFilter.getValueNumber() != null
-        || columnFilter.getValueDate() != null || columnFilter.getValueNull() != null) {
+    if (columnFilter.getValue() != null
+        || columnFilter.getValueNumber() != null
+        || columnFilter.getValueDate() != null
+        || columnFilter.getValueNull() != null) {
       throw new BadRequestException("Can't use IN operator with single value filter");
     }
     List<BigDecimal> valueNumbers = columnFilter.getValueNumbers();
     List<String> valueStrings = columnFilter.getValues();
     if (!((valueNumbers != null && !valueNumbers.isEmpty())
         ^ (valueStrings != null && !valueStrings.isEmpty()))) {
-      throw new BadRequestException("Either valueNumbers or valueStrings must be specified with "
-          + "in clause on column " + columnFilter.getColumnName());
+      throw new BadRequestException(
+          "Either valueNumbers or valueStrings must be specified with "
+              + "in clause on column "
+              + columnFilter.getColumnName());
     }
 
     if (valueNumbers != null && !valueNumbers.isEmpty()) {
       if (!columnConfig.type.equals(ColumnType.INTEGER)) {
-        throw new BadRequestException("Can't use valueNumbers with column " + columnConfig.name
-            + " of type " + columnConfig.type);
+        throw new BadRequestException(
+            "Can't use valueNumbers with column "
+                + columnConfig.name
+                + " of type "
+                + columnConfig.type);
       }
-      queryState.paramMap.put(paramName, QueryParameterValue.array(
-          valueNumbers.stream().map(BigDecimal::longValue).collect(
-              Collectors.toList()).toArray(new Long[0]),
-          Long.class));
+      queryState.paramMap.put(
+          paramName,
+          QueryParameterValue.array(
+              valueNumbers.stream()
+                  .map(BigDecimal::longValue)
+                  .collect(Collectors.toList())
+                  .toArray(new Long[0]),
+              Long.class));
     } else {
       if (!columnConfig.type.equals(ColumnType.STRING)) {
-        throw new BadRequestException("Can't use values with column " + columnConfig.name
-            + " of type " + columnConfig.type);
+        throw new BadRequestException(
+            "Can't use values with column " + columnConfig.name + " of type " + columnConfig.type);
       }
-      queryState.paramMap.put(paramName, QueryParameterValue.array(valueStrings.toArray(new String[0]),
-          String.class));
+      queryState.paramMap.put(
+          paramName, QueryParameterValue.array(valueStrings.toArray(new String[0]), String.class));
     }
-    whereSql.append(String.format("%s in unnest(@%s)",
-        columnInfo.getColumnName(), paramName));
+    whereSql.append(String.format("%s in unnest(@%s)", columnInfo.getColumnName(), paramName));
   }
 
-  private ColumnInfo getColumnInfo(QueryState queryState, String columnName, boolean beforeLimitRequired) {
+  private ColumnInfo getColumnInfo(
+      QueryState queryState, String columnName, boolean beforeLimitRequired) {
     List<String> columnParts = parseColumnName(columnName);
     ColumnConfig columnConfig;
     if (columnParts.size() == 1) {
       columnConfig = queryState.mainTableColumns.get(columnName);
       if (columnConfig == null) {
-        throw new BadRequestException("No such column " + columnName +
-            "on table " + queryState.mainTableName);
+        throw new BadRequestException(
+            "No such column " + columnName + "on table " + queryState.mainTableName);
       }
-      return new ColumnInfo(String.format("%s.%s", queryState.mainTableName, columnName),
-          columnConfig);
+      return new ColumnInfo(
+          String.format("%s.%s", queryState.mainTableName, columnName), columnConfig);
     } else {
-      TableNameAndAlias tableNameAndAlias = getTableNameAndAlias(columnParts, queryState, beforeLimitRequired);
-      Map<String, ColumnConfig> aliasConfig = getColumnConfigs(queryState,
-          tableNameAndAlias.tableName, false);
+      TableNameAndAlias tableNameAndAlias =
+          getTableNameAndAlias(columnParts, queryState, beforeLimitRequired);
+      Map<String, ColumnConfig> aliasConfig =
+          getColumnConfigs(queryState, tableNameAndAlias.tableName, false);
       String columnEnd = columnParts.get(columnParts.size() - 1);
       columnConfig = aliasConfig.get(columnEnd);
       if (columnConfig == null) {
         throw new BadRequestException(
-            String.format("No column %s found on table %s", columnEnd, tableNameAndAlias.tableName));
+            String.format(
+                "No column %s found on table %s", columnEnd, tableNameAndAlias.tableName));
       }
       return new ColumnInfo(
-          String.format("%s.%s", tableNameAndAlias.alias, columnEnd),
-          columnConfig);
+          String.format("%s.%s", tableNameAndAlias.alias, columnEnd), columnConfig);
     }
   }
 
-  private void handleColumnFilter(ColumnFilter columnFilter, QueryState queryState,
-      StringBuilder whereSql) {
+  private void handleColumnFilter(
+      ColumnFilter columnFilter, QueryState queryState, StringBuilder whereSql) {
     if (Strings.isNullOrEmpty(columnFilter.getColumnName())) {
       throw new BadRequestException("Missing column name for column filter");
     }
@@ -426,12 +463,13 @@ public class FieldSetQueryBuilder {
     }
   }
 
-  private void handleResultFilters(ResultFilters resultFilters, QueryState queryState,
-      StringBuilder whereSql) {
-    if (!((resultFilters.getColumnFilter() != null) ^ (resultFilters.getAllOf() != null)
+  private void handleResultFilters(
+      ResultFilters resultFilters, QueryState queryState, StringBuilder whereSql) {
+    if (!((resultFilters.getColumnFilter() != null)
+        ^ (resultFilters.getAllOf() != null)
         ^ (resultFilters.getAnyOf() != null))) {
-      throw new BadRequestException("Exactly one of allOf, anyOf, or columnFilter must be "
-          + "specified for result filters");
+      throw new BadRequestException(
+          "Exactly one of allOf, anyOf, or columnFilter must be " + "specified for result filters");
     }
     if (resultFilters.getIfNot() != null && resultFilters.getIfNot()) {
       whereSql.append("not ");
@@ -484,20 +522,31 @@ public class FieldSetQueryBuilder {
     return orderByColumns.build();
   }
 
-  private void addJoin(StringBuilder sql, String joinedTableAlias, JoinedTableInfo joinedTableInfo) {
-    sql.append(String.format("\nLEFT OUTER JOIN `${projectId}.${dataSetId}.%s` %s ON %s.%s = %s.%s",
-        joinedTableInfo.joinedTableName, joinedTableAlias,
-        joinedTableInfo.startTableAlias, joinedTableInfo.startTableJoinColumn,
-        joinedTableAlias, joinedTableInfo.joinedTablePrimaryKey.name));
+  private void addJoin(
+      StringBuilder sql, String joinedTableAlias, JoinedTableInfo joinedTableInfo) {
+    sql.append(
+        String.format(
+            "\nLEFT OUTER JOIN `${projectId}.${dataSetId}.%s` %s ON %s.%s = %s.%s",
+            joinedTableInfo.joinedTableName,
+            joinedTableAlias,
+            joinedTableInfo.startTableAlias,
+            joinedTableInfo.startTableJoinColumn,
+            joinedTableAlias,
+            joinedTableInfo.joinedTablePrimaryKey.name));
   }
 
   private String getColumnAlias(String tableAndColumnExpression) {
     return tableAndColumnExpression.replace(TABLE_SEPARATOR, ALIAS_SEPARATOR);
   }
 
-  private String buildSql(ParticipantCriteria participantCriteria, QueryState queryState,
-      ImmutableList<SelectedColumn> selectColumns, String whereSql,
-      ImmutableList<OrderByColumn> orderByColumns, Long resultSize, long offset) {
+  private String buildSql(
+      ParticipantCriteria participantCriteria,
+      QueryState queryState,
+      ImmutableList<SelectedColumn> selectColumns,
+      String whereSql,
+      ImmutableList<OrderByColumn> orderByColumns,
+      Long resultSize,
+      long offset) {
 
     // Joining to tables after applying the LIMIT performs better in BigQuery than
     // joining to them before. Figure out if there are any tables that can be joined to after
@@ -522,13 +571,14 @@ public class FieldSetQueryBuilder {
     List<String> outerSelectExpressions = new ArrayList<>();
     Set<String> innerSelectColumnAliases = new HashSet<>();
     for (SelectedColumn column : selectColumns) {
-      String columnSql = String.format("%s.%s %s",
-          column.tableAlias, column.columnInfo.getColumnConfig().name,
-          column.columnAlias);
+      String columnSql =
+          String.format(
+              "%s.%s %s",
+              column.tableAlias, column.columnInfo.getColumnConfig().name, column.columnAlias);
       // If the table we're retrieving this from is found in the inner query, select the column
       // in both the inner and outer query.
-      if (column.tableAlias.equals(queryState.mainTableName) ||
-          beforeLimitTables.containsKey(column.tableAlias)) {
+      if (column.tableAlias.equals(queryState.mainTableName)
+          || beforeLimitTables.containsKey(column.tableAlias)) {
         innerSelectExpressions.add(columnSql);
         if (hasAfterLimitTables) {
           innerSelectColumnAliases.add(column.columnAlias);
@@ -543,8 +593,8 @@ public class FieldSetQueryBuilder {
       JoinedTableInfo tableInfo = entry.getValue();
       if (tableInfo.startTableAlias.equals(queryState.mainTableName)
           || beforeLimitTables.containsKey(tableInfo.startTableAlias)) {
-        String joinColumn = String.format("%s.%s", tableInfo.startTableAlias,
-            tableInfo.startTableJoinColumn);
+        String joinColumn =
+            String.format("%s.%s", tableInfo.startTableAlias, tableInfo.startTableJoinColumn);
         String columnAlias = getColumnAlias(joinColumn);
         if (!innerSelectColumnAliases.contains(columnAlias)) {
           innerSelectExpressions.add(String.format("%s %s", joinColumn, columnAlias));
@@ -558,14 +608,17 @@ public class FieldSetQueryBuilder {
     }
     List<String> innerOrderByExpressions = new ArrayList<>();
     for (OrderByColumn column : orderByColumns) {
-      innerOrderByExpressions.add(column.descending ? column.columnInfo.getColumnName() + " DESC"
-          : column.columnInfo.getColumnName());
+      innerOrderByExpressions.add(
+          column.descending
+              ? column.columnInfo.getColumnName() + " DESC"
+              : column.columnInfo.getColumnName());
       if (hasAfterLimitTables) {
         // Columns that appear in the inner ORDER BY appear in the outer ORDER BY, too; make sure
         // they get returned.
         String columnAlias = getColumnAlias(column.columnInfo.getColumnName());
         if (!innerSelectColumnAliases.contains(columnAlias)) {
-          innerSelectExpressions.add(String.format("%s %s", column.columnInfo.getColumnName(), columnAlias));
+          innerSelectExpressions.add(
+              String.format("%s %s", column.columnInfo.getColumnName(), columnAlias));
           innerSelectColumnAliases.add(columnAlias);
         }
       }
@@ -585,14 +638,14 @@ public class FieldSetQueryBuilder {
     Joiner commaJoiner = Joiner.on(", ");
     StringBuilder innerSql = new StringBuilder("select ");
     innerSql.append(commaJoiner.join(innerSelectExpressions));
-    innerSql.append(String.format(
-        "\nfrom `${projectId}.${dataSetId}.%s` %s", tableName, tableName));
+    innerSql.append(
+        String.format("\nfrom `${projectId}.${dataSetId}.%s` %s", tableName, tableName));
     for (Entry<String, JoinedTableInfo> entry : beforeLimitTables.entrySet()) {
       addJoin(innerSql, entry.getKey(), entry.getValue());
     }
     innerSql.append(whereSql);
-    cohortQueryBuilder.addWhereClause(participantCriteria, queryState.mainTableName,
-        innerSql, queryState.paramMap);
+    cohortQueryBuilder.addWhereClause(
+        participantCriteria, queryState.mainTableName, innerSql, queryState.paramMap);
     innerSql.append("\norder by ");
     innerSql.append(commaJoiner.join(innerOrderByExpressions));
 
@@ -624,15 +677,20 @@ public class FieldSetQueryBuilder {
     return outerSql.toString();
   }
 
-  public QueryJobConfiguration getQueryJobConfiguration(ParticipantCriteria participantCriteria,
-      TableQueryAndConfig tableQueryAndConfig, Long resultSize) {
-    QueryConfiguration queryConfiguration = buildQuery(participantCriteria, tableQueryAndConfig,
-        resultSize, 0L);
+  public QueryJobConfiguration getQueryJobConfiguration(
+      ParticipantCriteria participantCriteria,
+      TableQueryAndConfig tableQueryAndConfig,
+      Long resultSize) {
+    QueryConfiguration queryConfiguration =
+        buildQuery(participantCriteria, tableQueryAndConfig, resultSize, 0L);
     return bigQueryService.filterBigQueryConfig(queryConfiguration.getQueryJobConfiguration());
   }
 
-  private QueryConfiguration buildQuery(ParticipantCriteria participantCriteria,
-      TableQueryAndConfig tableQueryAndConfig, Long resultSize, long offset) {
+  private QueryConfiguration buildQuery(
+      ParticipantCriteria participantCriteria,
+      TableQueryAndConfig tableQueryAndConfig,
+      Long resultSize,
+      long offset) {
     QueryState queryState = new QueryState();
     queryState.schemaConfig = tableQueryAndConfig.getConfig();
     TableQuery tableQuery = tableQueryAndConfig.getTableQuery();
@@ -646,19 +704,28 @@ public class FieldSetQueryBuilder {
       handleResultFilters(tableQuery.getFilters(), queryState, whereSql);
       whereSql.append("\nand\n");
     }
-    ImmutableList<OrderByColumn> orderByColumns = handleOrderBy(queryState, tableQuery.getOrderBy());
-    QueryJobConfiguration jobConfiguration = QueryJobConfiguration
-        .newBuilder(buildSql(participantCriteria, queryState, selectColumns,
-            whereSql.toString(), orderByColumns, resultSize, offset))
-        .setNamedParameters(queryState.paramMap)
-        .setUseLegacySql(false)
-        .build();
+    ImmutableList<OrderByColumn> orderByColumns =
+        handleOrderBy(queryState, tableQuery.getOrderBy());
+    QueryJobConfiguration jobConfiguration =
+        QueryJobConfiguration.newBuilder(
+                buildSql(
+                    participantCriteria,
+                    queryState,
+                    selectColumns,
+                    whereSql.toString(),
+                    orderByColumns,
+                    resultSize,
+                    offset))
+            .setNamedParameters(queryState.paramMap)
+            .setUseLegacySql(false)
+            .build();
     return new QueryConfiguration(
         ImmutableList.copyOf(selectColumns.stream().map(SelectedColumn::getColumnInfo).iterator()),
         jobConfiguration);
   }
 
-  private Map<String, Object> extractResults(TableQueryAndConfig tableQueryAndConfig,
+  private Map<String, Object> extractResults(
+      TableQueryAndConfig tableQueryAndConfig,
       ImmutableList<ColumnInfo> columns,
       List<FieldValue> row) {
     TableQuery tableQuery = tableQueryAndConfig.getTableQuery();
@@ -695,17 +762,21 @@ public class FieldSetQueryBuilder {
   }
 
   /**
-   * Materializes a cohort with the specified table query and participant criteria, and returns
-   * a {@link Iterable} of {@link Map} objects representing dictionaries of key-value pairs.
+   * Materializes a cohort with the specified table query and participant criteria, and returns a
+   * {@link Iterable} of {@link Map} objects representing dictionaries of key-value pairs.
    */
-  public Iterable<Map<String, Object>> materializeTableQuery(TableQueryAndConfig tableQueryAndConfig,
-      ParticipantCriteria criteria, int limit, long offset) {
-    QueryConfiguration queryConfiguration = buildQuery(criteria, tableQueryAndConfig, (long) limit, offset);
+  public Iterable<Map<String, Object>> materializeTableQuery(
+      TableQueryAndConfig tableQueryAndConfig,
+      ParticipantCriteria criteria,
+      int limit,
+      long offset) {
+    QueryConfiguration queryConfiguration =
+        buildQuery(criteria, tableQueryAndConfig, (long) limit, offset);
     TableResult result;
     QueryJobConfiguration jobConfiguration = queryConfiguration.getQueryJobConfiguration();
     result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(jobConfiguration));
-    return Iterables.transform(result.iterateAll(),
+    return Iterables.transform(
+        result.iterateAll(),
         (row) -> extractResults(tableQueryAndConfig, queryConfiguration.getSelectColumns(), row));
   }
-
 }

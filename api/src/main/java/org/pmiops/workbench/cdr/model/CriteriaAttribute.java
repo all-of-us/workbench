@@ -1,18 +1,17 @@
 package org.pmiops.workbench.cdr.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.Objects;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
 @Table(name = "criteria_attribute")
-//TODO:Remove freemabd
+// TODO:Remove freemabd
 public class CriteriaAttribute {
 
   private long id;
@@ -113,11 +112,11 @@ public class CriteriaAttribute {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     CriteriaAttribute that = (CriteriaAttribute) o;
-    return conceptId == that.conceptId &&
-      valueAsConceptId == that.valueAsConceptId &&
-      Objects.equals(conceptName, that.conceptName) &&
-      Objects.equals(type, that.type) &&
-      Objects.equals(estCount, that.estCount);
+    return conceptId == that.conceptId
+        && valueAsConceptId == that.valueAsConceptId
+        && Objects.equals(conceptName, that.conceptName)
+        && Objects.equals(type, that.type)
+        && Objects.equals(estCount, that.estCount);
   }
 
   @Override

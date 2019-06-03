@@ -13,30 +13,33 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProfileService {
-  private static final Function<org.pmiops.workbench.db.model.InstitutionalAffiliation,
-      InstitutionalAffiliation> TO_CLIENT_INSTITUTIONAL_AFFILIATION =
-      new Function<org.pmiops.workbench.db.model.InstitutionalAffiliation, InstitutionalAffiliation>() {
-        @Override
-        public InstitutionalAffiliation apply(
-            org.pmiops.workbench.db.model.InstitutionalAffiliation institutionalAffiliation) {
-          InstitutionalAffiliation result = new InstitutionalAffiliation();
-          result.setRole(institutionalAffiliation.getRole());
-          result.setInstitution(institutionalAffiliation.getInstitution());
+  private static final Function<
+          org.pmiops.workbench.db.model.InstitutionalAffiliation, InstitutionalAffiliation>
+      TO_CLIENT_INSTITUTIONAL_AFFILIATION =
+          new Function<
+              org.pmiops.workbench.db.model.InstitutionalAffiliation, InstitutionalAffiliation>() {
+            @Override
+            public InstitutionalAffiliation apply(
+                org.pmiops.workbench.db.model.InstitutionalAffiliation institutionalAffiliation) {
+              InstitutionalAffiliation result = new InstitutionalAffiliation();
+              result.setRole(institutionalAffiliation.getRole());
+              result.setInstitution(institutionalAffiliation.getInstitution());
 
-          return result;
-        }
-      };
+              return result;
+            }
+          };
 
-  private static final Function<org.pmiops.workbench.db.model.PageVisit, PageVisit> TO_CLIENT_PAGE_VISIT =
-    new Function<org.pmiops.workbench.db.model.PageVisit, PageVisit>() {
-      @Override
-      public PageVisit apply(org.pmiops.workbench.db.model.PageVisit pageVisit) {
-        PageVisit result = new PageVisit();
-        result.setPage(pageVisit.getPageId());
-        result.setFirstVisit(pageVisit.getFirstVisit().getTime());
-        return result;
-      }
-    };
+  private static final Function<org.pmiops.workbench.db.model.PageVisit, PageVisit>
+      TO_CLIENT_PAGE_VISIT =
+          new Function<org.pmiops.workbench.db.model.PageVisit, PageVisit>() {
+            @Override
+            public PageVisit apply(org.pmiops.workbench.db.model.PageVisit pageVisit) {
+              PageVisit result = new PageVisit();
+              result.setPage(pageVisit.getPageId());
+              result.setFirstVisit(pageVisit.getFirstVisit().getTime());
+              return result;
+            }
+          };
 
   private final UserDao userDao;
 
@@ -47,9 +50,11 @@ public class ProfileService {
 
   public Profile getProfile(User user) {
     // Fetch the user's authorities, since they aren't loaded during normal request interception.
-    User userWithAuthoritiesAndPageVisits = userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
+    User userWithAuthoritiesAndPageVisits =
+        userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
     if (userWithAuthoritiesAndPageVisits != null) {
-      // If the user is already written to the database, use it and whatever authorities and page visits are there.
+      // If the user is already written to the database, use it and whatever authorities and page
+      // visits are there.
       user = userWithAuthoritiesAndPageVisits;
     }
 
@@ -76,7 +81,8 @@ public class ProfileService {
       profile.setTermsOfServiceCompletionTime(user.getTermsOfServiceCompletionTime().getTime());
     }
     if (user.getComplianceTrainingCompletionTime() != null) {
-      profile.setComplianceTrainingCompletionTime(user.getComplianceTrainingCompletionTime().getTime());
+      profile.setComplianceTrainingCompletionTime(
+          user.getComplianceTrainingCompletionTime().getTime());
     }
     if (user.getComplianceTrainingBypassTime() != null) {
       profile.setComplianceTrainingBypassTime(user.getComplianceTrainingBypassTime().getTime());
@@ -91,8 +97,8 @@ public class ProfileService {
       profile.setEraCommonsBypassTime(user.getEraCommonsBypassTime().getTime());
     }
     if (user.getDemographicSurveyCompletionTime() != null) {
-      profile.setDemographicSurveyCompletionTime(user.getDemographicSurveyCompletionTime()
-          .getTime());
+      profile.setDemographicSurveyCompletionTime(
+          user.getDemographicSurveyCompletionTime().getTime());
     }
     if (user.getFirstSignInTime() != null) {
       profile.setFirstSignInTime(user.getFirstSignInTime().getTime());
@@ -113,7 +119,8 @@ public class ProfileService {
       profile.setBetaAccessRequestTime(user.getBetaAccessRequestTime().getTime());
     }
     if (user.getEmailVerificationCompletionTime() != null) {
-      profile.setEmailVerificationCompletionTime(user.getEmailVerificationCompletionTime().getTime());
+      profile.setEmailVerificationCompletionTime(
+          user.getEmailVerificationCompletionTime().getTime());
     }
     if (user.getEmailVerificationBypassTime() != null) {
       profile.setEmailVerificationBypassTime(user.getEmailVerificationBypassTime().getTime());
@@ -134,12 +141,13 @@ public class ProfileService {
       profile.setAuthorities(new ArrayList<>(user.getAuthoritiesEnum()));
     }
     if (user.getPageVisits() != null && !user.getPageVisits().isEmpty()) {
-      profile.setPageVisits(user.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT)
-          .collect(Collectors.toList()));
+      profile.setPageVisits(
+          user.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT).collect(Collectors.toList()));
     }
-    profile.setInstitutionalAffiliations(user.getInstitutionalAffiliations()
-        .stream().map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
-        .collect(Collectors.toList()));
+    profile.setInstitutionalAffiliations(
+        user.getInstitutionalAffiliations().stream()
+            .map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
+            .collect(Collectors.toList()));
     profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
 
     return profile;

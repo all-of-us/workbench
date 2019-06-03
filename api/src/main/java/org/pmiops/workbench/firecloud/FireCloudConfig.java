@@ -34,15 +34,16 @@ public class FireCloudConfig {
   public static final String SERVICE_ACCOUNT_API_CLIENT = "serviceAccountApiClient";
   public static final String SERVICE_ACCOUNT_GROUPS_API = "serviceAccountGroupsApi";
 
-  private static final List<String> BILLING_SCOPES = ImmutableList.of(
-      "https://www.googleapis.com/auth/userinfo.profile",
-      "https://www.googleapis.com/auth/userinfo.email",
-      "https://www.googleapis.com/auth/cloud-billing");
+  private static final List<String> BILLING_SCOPES =
+      ImmutableList.of(
+          "https://www.googleapis.com/auth/userinfo.profile",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/cloud-billing");
 
   @Bean(name = END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient endUserApiClient(UserAuthentication userAuthentication,
-      WorkbenchConfig workbenchConfig) {
+  public ApiClient endUserApiClient(
+      UserAuthentication userAuthentication, WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     apiClient.setAccessToken(userAuthentication.getCredentials());
     return apiClient;
@@ -50,7 +51,8 @@ public class FireCloudConfig {
 
   @Bean(name = SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient allOfUsApiClient(WorkbenchEnvironment workbenchEnvironment,
+  public ApiClient allOfUsApiClient(
+      WorkbenchEnvironment workbenchEnvironment,
       WorkbenchConfig workbenchConfig,
       ServiceAccounts serviceAccounts) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
@@ -113,7 +115,7 @@ public class FireCloudConfig {
     return statusApi;
   }
 
-  static public ApiClient buildApiClient(WorkbenchConfig workbenchConfig) {
+  public static ApiClient buildApiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
     apiClient.addDefaultHeader(X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);

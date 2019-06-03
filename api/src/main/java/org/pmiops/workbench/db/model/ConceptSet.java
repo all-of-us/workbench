@@ -1,6 +1,5 @@
 package org.pmiops.workbench.db.model;
 
-
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
@@ -65,7 +64,9 @@ public class ConceptSet {
     return version;
   }
 
-  public void setVersion(int version) { this.version = version; }
+  public void setVersion(int version) {
+    this.version = version;
+  }
 
   @Column(name = "name")
   public String getName() {
@@ -150,7 +151,9 @@ public class ConceptSet {
   }
 
   @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "concept_set_concept_id", joinColumns = @JoinColumn(name = "concept_set_id"))
+  @CollectionTable(
+      name = "concept_set_concept_id",
+      joinColumns = @JoinColumn(name = "concept_set_id"))
   @Column(name = "concept_id")
   public Set<Long> getConceptIds() {
     return conceptIds;

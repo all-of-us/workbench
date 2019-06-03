@@ -21,11 +21,11 @@ public class ConfigController implements ConfigApiDelegate {
   public ResponseEntity<ConfigResponse> getConfig() {
     WorkbenchConfig config = configProvider.get();
     return ResponseEntity.ok(
-      new ConfigResponse()
-        .gsuiteDomain(config.googleDirectoryService.gSuiteDomain)
-        .projectId(config.server.projectId)
-        .enforceRegistered(config.firecloud.enforceRegistered)
-        .useBillingProjectBuffer(config.featureFlags.useBillingProjectBuffer)
-        .publicApiKeyForErrorReports(config.server.publicApiKeyForErrorReports));
+        new ConfigResponse()
+            .gsuiteDomain(config.googleDirectoryService.gSuiteDomain)
+            .projectId(config.server.projectId)
+            .enforceRegistered(config.firecloud.enforceRegistered)
+            .useBillingProjectBuffer(config.featureFlags.useBillingProjectBuffer)
+            .publicApiKeyForErrorReports(config.server.publicApiKeyForErrorReports));
   }
 }

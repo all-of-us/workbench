@@ -1,5 +1,16 @@
 package org.pmiops.workbench.db.dao;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Random;
+import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,23 +34,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.inject.Provider;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Random;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import({LiquibaseAutoConfiguration.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserServiceTest {
 
   private final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
@@ -50,16 +49,11 @@ public class UserServiceTest {
   private static final long TIMESTAMP_MSECS = 100;
   private static final FakeClock CLOCK = new FakeClock();
 
-  @Autowired
-  private UserDao userDao;
-  @Mock
-  private AdminActionHistoryDao adminActionHistoryDao;
-  @Mock
-  private FireCloudService fireCloudService;
-  @Mock
-  private ComplianceService complianceService;
-  @Mock
-  private DirectoryService directoryService;
+  @Autowired private UserDao userDao;
+  @Mock private AdminActionHistoryDao adminActionHistoryDao;
+  @Mock private FireCloudService fireCloudService;
+  @Mock private ComplianceService complianceService;
+  @Mock private DirectoryService directoryService;
 
   private UserService userService;
 
@@ -71,8 +65,17 @@ public class UserServiceTest {
     Provider<WorkbenchConfig> configProvider = Providers.of(WorkbenchConfig.createEmptyConfig());
     testUser = insertUser(EMAIL_ADDRESS);
 
-    userService = new UserService(Providers.of(testUser), userDao, adminActionHistoryDao, CLOCK,
-        new Random(), fireCloudService, configProvider, complianceService, directoryService);
+    userService =
+        new UserService(
+            Providers.of(testUser),
+            userDao,
+            adminActionHistoryDao,
+            CLOCK,
+            new Random(),
+            fireCloudService,
+            configProvider,
+            complianceService,
+            directoryService);
   }
 
   private User insertUser(String email) {
@@ -97,10 +100,9 @@ public class UserServiceTest {
 
     // The user should be updated in the database with a non-empty completion and expiration time.
     User user = userDao.findUserByEmail(EMAIL_ADDRESS);
-    assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(
-        new Timestamp(TIMESTAMP_MSECS));
-    assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(
-        new Timestamp(12345));
+    assertThat(user.getComplianceTrainingCompletionTime())
+        .isEqualTo(new Timestamp(TIMESTAMP_MSECS));
+    assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(new Timestamp(12345));
 
     // Completion timestamp should not change when the method is called again.
     CLOCK.increment(1000);
@@ -138,8 +140,9 @@ public class UserServiceTest {
     // We should propagate a NOT_FOUND exception from the compliance service.
     when(complianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
     when(complianceService.getUserBadge(1))
-        .thenThrow(new org.pmiops.workbench.moodle.ApiException
-            (HttpStatus.NOT_FOUND.value(), "user not found"));
+        .thenThrow(
+            new org.pmiops.workbench.moodle.ApiException(
+                HttpStatus.NOT_FOUND.value(), "user not found"));
     userService.syncComplianceTrainingStatus();
   }
 
@@ -155,10 +158,8 @@ public class UserServiceTest {
     userService.syncEraCommonsStatus();
 
     User user = userDao.findUserByEmail(EMAIL_ADDRESS);
-    assertThat(user.getEraCommonsCompletionTime()).isEqualTo(
-        new Timestamp(TIMESTAMP_MSECS));
-    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(
-        new Timestamp(TIMESTAMP_MSECS / 1000));
+    assertThat(user.getEraCommonsCompletionTime()).isEqualTo(new Timestamp(TIMESTAMP_MSECS));
+    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(new Timestamp(TIMESTAMP_MSECS / 1000));
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
 
     // Completion timestamp should not change when the method is called again.
@@ -186,7 +187,8 @@ public class UserServiceTest {
 
   @Test
   public void testSyncTwoFactorAuthStatus() throws Exception {
-    com.google.api.services.admin.directory.model.User googleUser = new com.google.api.services.admin.directory.model.User();
+    com.google.api.services.admin.directory.model.User googleUser =
+        new com.google.api.services.admin.directory.model.User();
     googleUser.setPrimaryEmail(EMAIL_ADDRESS);
     googleUser.setIsEnrolledIn2Sv(true);
 
@@ -209,5 +211,4 @@ public class UserServiceTest {
     user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNull();
   }
-
 }
