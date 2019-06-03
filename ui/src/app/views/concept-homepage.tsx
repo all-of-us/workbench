@@ -13,6 +13,7 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {NavStore, queryParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {ConceptAddModal} from 'app/views/concept-add-modal';
 import {ConceptNavigationBar} from 'app/views/concept-navigation-bar';
 import {ConceptTable} from 'app/views/concept-table';
@@ -25,7 +26,7 @@ import {
   DomainCount,
   DomainInfo,
   StandardConceptFilter,
-  VocabularyCount
+  VocabularyCount,
 } from 'generated/fetch';
 
 const styles = reactStyles({
@@ -124,7 +125,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
       // Only search on standard concepts
       standardConceptsOnly: boolean,
       // Array of vocabulary id and number of concepts in vocabulary
-      vocabularies: Array<VocabularyCount>
+      vocabularies: Array<VocabularyCount>,
+      workspacePermissions: WorkspacePermissions
     }> {
 
     private MAX_CONCEPT_FETCH = 100;
@@ -151,7 +153,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
         },
         showSearchError: false,
         standardConceptsOnly: true,
-        vocabularies: []
+        vocabularies: [],
+        workspacePermissions: new WorkspacePermissions(props.workspace)
       };
     }
 
@@ -407,8 +410,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
                             nextPage={(page) => this.getNextConceptSet(page)}/>
               <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
                                iconShape='plus'
+                               tooltip={!this.state.workspacePermissions.canWrite}
+                               tooltipContent={<div>Requires Owner or Writer permission</div>}
                                expanded={this.addToSetText}
-                               disable={this.activeSelectedConceptCount === 0}/>
+                               disable={this.activeSelectedConceptCount === 0 ||
+                                !this.state.workspacePermissions.canWrite}/>
             </FadeBox> :
             <div style={{display: 'flex', flexDirection: 'row', width: '94.3%', flexWrap: 'wrap'}}>
               {conceptDomainList.map((domain, i) => {
