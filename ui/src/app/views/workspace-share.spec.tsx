@@ -4,7 +4,7 @@ import * as Lolex from 'lolex';
 import * as fp from 'lodash/fp';
 import Select from 'react-select';
 
-import {Props, State, WorkspaceShare} from './workspace-share';
+import {Props, WorkspaceShare} from './workspace-share';
 
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -64,10 +64,11 @@ describe('WorkspaceShareComponent', () => {
     expect(wrapper).toBeTruthy();
     expect(wrapper.find('[data-test-id="collab-user-name"]').length).toBe(3);
     expect(wrapper.find('[data-test-id="collab-user-email"]').length).toBe(3);
-    const expectedNames = [harry, hermione, ron].map(u => u.givenName + ' ' + u.familyName);
-    expect(wrapper.find('[data-test-id="collab-user-name"]').map(el => el.text())).toEqual(expectedNames);
-    const expectedEmails = [harry, hermione, ron].map(u => u.email);
-    expect(wrapper.find('[data-test-id="collab-user-email"]').map(el => el.text())).toEqual(expectedEmails);
+    const expectedUsers = fp.sortBy('familyName', [harry, hermione, ron]);
+    expect(wrapper.find('[data-test-id="collab-user-name"]').map(el => el.text()))
+      .toEqual(expectedUsers.map(u => u.givenName + ' ' + u.familyName));
+    expect(wrapper.find('[data-test-id="collab-user-email"]').map(el => el.text()))
+      .toEqual(expectedUsers.map(u => u.email));
   });
 
   it('displays correct role info', () => {
@@ -81,7 +82,8 @@ describe('WorkspaceShareComponent', () => {
   it('removes user correctly', () => {
     const wrapper = component();
     wrapper.find('[data-test-id="remove-collab-ron.weasley@hogwarts.edu"]').first().simulate('click');
-    const expectedNames = [harry, hermione].map(u => u.givenName + ' ' + u.familyName);
+    const expectedNames = fp.sortBy('familyName', [harry, hermione])
+      .map(u => u.givenName + ' ' + u.familyName);
     expect(wrapper.find('[data-test-id="collab-user-name"]').map(el => el.text())).toEqual(expectedNames);
   });
 
@@ -94,7 +96,8 @@ describe('WorkspaceShareComponent', () => {
     wrapper.update();
     clock.uninstall();
     wrapper.find('[data-test-id="add-collab-luna.lovegood@hogwarts.edu"]').first().simulate('click');
-    const expectedNames = [harry, hermione, ron, luna].map(u => u.givenName + ' ' + u.familyName);
+    const expectedNames = fp.sortBy('familyName', [harry, hermione, ron, luna])
+      .map(u => u.givenName + ' ' + u.familyName);
     expect(wrapper.find('[data-test-id="collab-user-name"]').map(el => el.text())).toEqual(expectedNames);
   });
 
@@ -137,8 +140,9 @@ describe('WorkspaceShareComponent', () => {
     wrapper.find('[data-test-id="save"]').first().simulate('click');
     expect(spy).toHaveBeenCalledWith(tomRiddleDiary.namespace, tomRiddleDiary.name,
       {workspaceEtag: tomRiddleDiary.etag,
-        items: [harryRole, {...hermioneRole, role: WorkspaceAccessLevel.OWNER},
-          {...lunaRole, role: WorkspaceAccessLevel.READER}]});
+        items: fp.sortBy('familyName', [harryRole,
+          {...hermioneRole, role: WorkspaceAccessLevel.OWNER},
+          {...lunaRole, role: WorkspaceAccessLevel.READER}])});
   });
 
 });
