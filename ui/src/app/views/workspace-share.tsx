@@ -7,9 +7,9 @@ import {isBlank, reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
+import {Select} from 'app/components/inputs';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {Select} from 'app/components/inputs';
 
 import {User} from 'generated';
 
