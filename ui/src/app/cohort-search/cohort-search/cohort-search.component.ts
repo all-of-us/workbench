@@ -44,6 +44,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   tempLength = {};
   private subscription;
   listSearch = environment.enableCBListSearch;
+  loading = false;
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -59,8 +60,10 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
        * it */
       const cohortId = params.cohortId;
       if (cohortId) {
+        this.loading = true;
         cohortsApi().getCohort(workspace.namespace, workspace.id, cohortId)
           .then(cohort => {
+            this.loading = false;
             currentCohortStore.next(cohort);
             if (cohort.criteria) {
               this.actions.loadFromJSON(cohort.criteria);
