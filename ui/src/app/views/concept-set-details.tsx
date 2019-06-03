@@ -22,10 +22,11 @@ import {
 import {currentConceptSetStore, navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {ConceptTable} from 'app/views/concept-table';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
 import {SlidingFabReact} from 'app/views/sliding-fab';
-import {Concept, ConceptSet, WorkspaceAccessLevel} from 'generated/fetch';
+import {Concept, ConceptSet} from 'generated/fetch';
 
 const styles = reactStyles({
   conceptSetHeader: {
@@ -84,7 +85,7 @@ export const ConceptSetDetails =
       conceptSet: ConceptSet, deleting: boolean, editName: string, editDescription: string,
       editSaving: boolean, error: boolean, errorMessage: string, editing: boolean,
       loading: boolean, removingConcepts: boolean, removeSubmitting: boolean,
-      selectedConcepts: Concept[]}> {
+      selectedConcepts: Concept[], workspacePermissions: WorkspacePermissions}> {
     constructor(props) {
       super(props);
       this.state = {
@@ -99,7 +100,8 @@ export const ConceptSetDetails =
         loading: true,
         removingConcepts: false,
         removeSubmitting: false,
-        selectedConcepts: []
+        selectedConcepts: [],
+        workspacePermissions: new WorkspacePermissions(props.workspace)
       };
     }
 
@@ -170,20 +172,6 @@ export const ConceptSetDetails =
       }
     }
 
-    get canEdit(): boolean {
-      return this.isOwner || this.isWriter;
-    }
-
-    get isWriter(): boolean {
-      return this.props.workspace.accessLevel as unknown as WorkspaceAccessLevel
-        === WorkspaceAccessLevel.WRITER;
-    }
-
-    get isOwner(): boolean {
-      return this.props.workspace.accessLevel as unknown as WorkspaceAccessLevel
-        === WorkspaceAccessLevel.OWNER;
-    }
-
     get selectedConceptsCount(): number {
       return !!this.state.selectedConcepts ? this.state.selectedConcepts.length : 0;
     }
@@ -197,7 +185,7 @@ export const ConceptSetDetails =
       const {urlParams: {ns, wsid}} = this.props;
       const {conceptSet, removingConcepts, editing, editDescription, editName,
         error, errorMessage, editSaving, deleting, removeSubmitting, loading,
-        selectedConcepts} = this.state;
+        selectedConcepts, workspacePermissions} = this.state;
       const errors = validate({editName: editName}, {editName: {
         presence: {allowEmpty: false}
       }});
@@ -207,7 +195,8 @@ export const ConceptSetDetails =
         <div style={{display: 'flex', flexDirection: 'column'}}>
           <div style={styles.conceptSetHeader}>
             <div style={{display: 'flex', flexDirection: 'row'}}>
-              <ConceptSetMenu canDelete={this.isOwner} canEdit={this.canEdit}
+              <ConceptSetMenu canDelete={workspacePermissions.isOwner}
+                              canEdit={workspacePermissions.canWrite}
                               onDelete={() => this.setState({deleting: true})}
                               onEdit={() => this.setState({editing: true})}/>
               <div style={styles.conceptSetMetadataWrapper}>
@@ -240,9 +229,11 @@ export const ConceptSetDetails =
                 <React.Fragment>
                   <div style={styles.conceptSetTitle} data-test-id='concept-set-title'>
                     {conceptSet.name}
-                    <Clickable disabled={!this.canEdit} data-test-id='edit-concept-set'
+                    <Clickable disabled={!workspacePermissions.canWrite}
+                               data-test-id='edit-concept-set'
                                onClick={() => this.setState({editing: true})}>
-                      <EditComponentReact disabled={!this.canEdit} style={{marginTop: '0.1rem'}}/>
+                      <EditComponentReact disabled={!workspacePermissions.canWrite}
+                                          style={{marginTop: '0.1rem'}}/>
                     </Clickable>
                   </div>
                   <div style={{marginBottom: '1.5rem', color: colors.black[0]}}
@@ -281,13 +272,14 @@ export const ConceptSetDetails =
                     wsid + '/concepts' + '?domain=' + conceptSet.domain)}>
             <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
           </Button>}
-          {this.canEdit && this.selectedConceptsCount > 0 &&
+          {workspacePermissions.canWrite && this.selectedConceptsCount > 0 &&
               <SlidingFabReact submitFunction={() => this.setState({removingConcepts: true})}
                                iconShape='trash' expanded='Remove from set'
                                tooltip={this.conceptSetConceptsCount === this.selectedConceptsCount}
                                tooltipContent={
                                  <div>Concept Sets must include at least one concept</div>}
-                               disable={!this.canEdit || this.selectedConceptsCount === 0 ||
+                               disable={!workspacePermissions.canWrite ||
+                                 this.selectedConceptsCount === 0 ||
                                this.conceptSetConceptsCount === this.selectedConceptsCount}/>}
         </div>}
         {!loading && deleting &&
