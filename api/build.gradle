@@ -459,6 +459,21 @@ appengine {  // App Engine tasks configuration
   }
 }
 
+task startCronEmulator(dependsOn: ':appengine-cron-emulator:jar') {
+    doFirst {
+      println "Starting Cron Emulator"
+
+      ext.process = new ProcessBuilder()
+        .directory(projectDir)
+        .command("java", "-jar", project(":appengine-cron-emulator").jar.archivePath.getPath())
+        .start()
+
+      println "Started Cron Emulator"
+    }
+}
+
+appengineRun.dependsOn startCronEmulator
+
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
 
