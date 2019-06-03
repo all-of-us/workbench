@@ -17,16 +17,16 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Map;
-import javax.inject.Provider;
+import java.util.Random;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -50,7 +50,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
-import org.pmiops.workbench.test.Providers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -60,6 +59,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -74,6 +74,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ClusterControllerTest {
+
   private static final String BILLING_PROJECT_ID = "proj";
   // a workspace's namespace is always its billing project ID
   private static final String WORKSPACE_NS = BILLING_PROJECT_ID;
@@ -86,23 +87,25 @@ public class ClusterControllerTest {
   private static final String API_HOST = "api.stable.fake-research-aou.org";
   private static final String API_BASE_URL = "https://" + API_HOST;
 
+  private static WorkbenchConfig config = new WorkbenchConfig();
+  private static User user = new User();
+
   @TestConfiguration
-  @Import({ClusterController.class})
+  @Import({ClusterController.class, UserService.class})
   @MockBean({
     FireCloudService.class,
     LeonardoNotebooksClient.class,
     WorkspaceService.class,
-    UserService.class,
-    UserRecentResourceService.class
+    UserRecentResourceService.class,
+    ComplianceService.class,
+    DirectoryService.class,
+    AdminActionHistoryDao.class
   })
   static class Configuration {
+
     @Bean
+    @Scope("prototype")
     public WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig config = new WorkbenchConfig();
-      config.server = new WorkbenchConfig.ServerConfig();
-      config.server.apiBaseUrl = API_BASE_URL;
-      config.access = new WorkbenchConfig.AccessConfig();
-      config.access.enableComplianceTraining = true;
       return config;
     }
 
@@ -112,23 +115,23 @@ public class ClusterControllerTest {
     }
 
     @Bean
+    @Scope("prototype")
     User user() {
-      // Allows for wiring of the initial Provider<User>; actual mocking of the
-      // user is achieved via setUserProvider().
-      return null;
+      return user;
+    }
+
+    @Bean
+    Random random() {
+      return new FakeLongRandom(123);
     }
   }
 
   @Captor private ArgumentCaptor<Map<String, String>> mapCaptor;
 
   @Autowired LeonardoNotebooksClient notebookService;
-  @Mock private AdminActionHistoryDao adminActionHistoryDao;
   @Autowired FireCloudService fireCloudService;
   @Autowired UserDao userDao;
   @Autowired WorkspaceService workspaceService;
-  @Mock DirectoryService directoryService;
-  @Mock Provider<User> userProvider;
-  @Mock ComplianceService complianceService;
   @Autowired ClusterController clusterController;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired Clock clock;
@@ -139,33 +142,23 @@ public class ClusterControllerTest {
 
   @Before
   public void setUp() {
-    WorkbenchConfig config = new WorkbenchConfig();
+    config = new WorkbenchConfig();
+    config.server = new WorkbenchConfig.ServerConfig();
+    config.server.apiBaseUrl = API_BASE_URL;
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.registeredDomainName = "";
     config.access = new WorkbenchConfig.AccessConfig();
     config.access.enableComplianceTraining = true;
-    User user = new User();
+    config.featureFlags = new FeatureFlagsConfig();
+    config.featureFlags.useBillingProjectBuffer = false;
+
+    user = new User();
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
     user.setFreeTierBillingProjectName(BILLING_PROJECT_ID);
     user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.READY);
-    when(userProvider.get()).thenReturn(user);
-    clusterController.setUserProvider(userProvider);
 
     createUser(OTHER_USER_EMAIL);
-
-    UserService userService =
-        new UserService(
-            userProvider,
-            userDao,
-            adminActionHistoryDao,
-            CLOCK,
-            new FakeLongRandom(123),
-            fireCloudService,
-            Providers.of(config),
-            complianceService,
-            directoryService);
-    clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
@@ -173,6 +166,7 @@ public class ClusterControllerTest {
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
 
+    // TODO: Update cluster names to include user IDs once useBillingProjectBuffer is the default.
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
     testFcCluster =
         new org.pmiops.workbench.notebooks.model.Cluster()
@@ -259,18 +253,30 @@ public class ClusterControllerTest {
     notReadyUser.setFreeTierBillingProjectName(BILLING_PROJECT_ID);
     notReadyUser.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.PENDING);
 
-    when(userProvider.get()).thenReturn(notReadyUser);
+    user = notReadyUser;
 
     clusterController.listClusters(BILLING_PROJECT_ID);
   }
 
   @Test
-  public void testListClustersLazyCreate() throws Exception {
+  public void testListClustersLazyCreate() {
     when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us"))
         .thenThrow(new NotFoundException());
     when(notebookService.createCluster(eq(BILLING_PROJECT_ID), eq("all-of-us")))
         .thenReturn(testFcCluster);
 
+    assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
+        .isEqualTo(testCluster);
+  }
+
+  @Test
+  public void testListClustersLazyCreateUsingBillingProjectBuffer() {
+    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us-123"))
+        .thenThrow(new NotFoundException());
+    when(notebookService.createCluster(eq(BILLING_PROJECT_ID), eq("all-of-us-123")))
+        .thenReturn(testFcCluster);
+
+    config.featureFlags.useBillingProjectBuffer = true;
     assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
   }
