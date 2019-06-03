@@ -122,6 +122,9 @@ export const CohortList = withCurrentWorkspace()(
           <div style={styles.resourceCardArea}>
             {cohortList && cohortList.map((cohort: RecentResource) => {
               return <ResourceCard resourceCard={cohort} key={cohort.cohort.id}
+                 onDuplicateResource={(duplicating) => this.setState({
+                   cohortsLoading: duplicating
+                 })}
                  onUpdate={() => this.reloadCohorts()}>
               </ResourceCard>;
             })}

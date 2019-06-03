@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -7,7 +6,7 @@ import {ResourceCardBase} from 'app/components/card';
 import {ResourceCardMenu} from 'app/components/resources';
 import {TextModal} from 'app/components/text-modal';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 
@@ -79,14 +78,15 @@ const resourceTypeStyles = reactStyles({
   }
 });
 
-export interface ResourceCardProps {
+export interface Props {
   marginTop: string;
   resourceCard: RecentResource;
+  onDuplicateResource: Function;
   onUpdate: Function;
   existingNameList?: string[];
 }
 
-export interface ResourceCardState {
+export interface State {
   confirmDeleting: boolean;
   errorModalBody: string;
   errorModalTitle: string;
@@ -97,12 +97,12 @@ export interface ResourceCardState {
   showErrorModal: boolean;
 }
 
-export class ResourceCard extends React.Component<ResourceCardProps, ResourceCardState> {
+export class ResourceCard extends React.Component<Props, State> {
   public static defaultProps = {
     marginTop: '1rem'
   };
 
-  constructor(props: ResourceCardProps) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       confirmDeleting: false,
@@ -265,6 +265,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   }
 
   cloneResource(): void {
+    this.props.onDuplicateResource(true);
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         workspacesApi().cloneNotebook(
@@ -273,6 +274,10 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           this.props.resourceCard.notebook.name)
           .then(() => {
             this.props.onUpdate();
+          }).catch(e => {
+            this.props.onDuplicateResource(false);
+            this.showErrorModal('Duplicating Notebook Error',
+              'Notebook with the same name already exists.');
           });
         break;
       }
@@ -287,6 +292,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         ).then(() => {
           this.props.onUpdate();
         }).catch(e => {
+          this.props.onDuplicateResource(false);
           this.showErrorModal('Duplicating Cohort Error',
             'Cohort with the same name already exists.');
         });
@@ -579,20 +585,5 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           existingNames={this.props.existingNameList}/>
       }
     </React.Fragment>;
-  }
-}
-
-@Component ({
-  selector : 'app-resource-card',
-  template: '<div #root></div>'
-})
-export class ResourceCardComponent extends ReactWrapperBase {
-  resourceType: ResourceType;
-  @Input('resourceCard') resourceCard: ResourceCardProps['resourceCard'];
-  @Input('onUpdate') onUpdate: ResourceCardProps['onUpdate'];
-  @Input('marginTop') marginTop: ResourceCardProps['marginTop'];
-
-  constructor() {
-    super(ResourceCard, ['resourceCard', 'onUpdate', 'marginTop']);
   }
 }

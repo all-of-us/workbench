@@ -79,6 +79,9 @@ export const ConceptSetsList = withCurrentWorkspace()(
           <div style={styles.resourceCardArea}>
             {conceptSetsList && conceptSetsList.map((conceptSet: RecentResource) => {
               return <ResourceCard resourceCard={conceptSet} key={conceptSet.conceptSet.name}
+                                   onDuplicateResource={(duplicating) => this.setState({
+                                     conceptSetsLoading: duplicating
+                                   })}
                                    onUpdate={() => this.loadConceptSets()}>
               </ResourceCard>;
             })}
