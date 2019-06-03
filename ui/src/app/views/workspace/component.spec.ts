@@ -16,7 +16,6 @@ import {BugReportComponent} from 'app/views/bug-report';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal';
 import {RecentWorkComponent} from 'app/views/recent-work';
 import {ResetClusterButtonComponent} from 'app/views/reset-cluster-button';
-import {ResourceCardComponent} from 'app/views/resource-card';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar';
@@ -81,7 +80,6 @@ describe('WorkspaceComponent', () => {
         NewNotebookModalComponent,
         RecentWorkComponent,
         ResetClusterButtonComponent,
-        ResourceCardComponent,
         ToolTipComponent,
         TopBoxComponent,
         WorkspaceComponent,
