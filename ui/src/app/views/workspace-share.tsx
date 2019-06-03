@@ -173,7 +173,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       saving: false,
       workspaceFound: (this.props.workspace !== null),
       workspaceUpdateConflictError: false,
-      userRoles: this.props.workspace.userRoles,
+      userRoles: fp.sortBy('familyName', this.props.workspace.userRoles),
       searchTerm: '',
       dropDown: false,
     };
@@ -244,7 +244,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       email: user.email, role: WorkspaceAccessLevel.READER};
     this.setState({
       searchTerm: '', autocompleteLoading: false, autocompleteUsers: [], dropDown: false,
-      userRoles: this.state.userRoles.concat(userRole)});
+      userRoles: fp.sortBy('familyName', this.state.userRoles.concat(userRole))});
   }
 
   userSearch(value: string): void {
@@ -270,10 +270,10 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       });
   }
 
-  setRole = (e, user)  => {
+  setRole(e, user): void {
     const oldUserRoles = this.state.userRoles;
     const newUserRoleList = fp.map((u) => {
-      return u.email === user.email ? {...u, role: e.value} : u;
+      return u.email === user.email ? {...u, role: e} : u;
     }, oldUserRoles);
     this.setState({userRoles: newUserRoleList});
   }

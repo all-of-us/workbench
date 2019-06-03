@@ -1,4 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
+import * as fp from 'lodash/fp';
 
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
@@ -101,6 +102,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   private reloadWorkspace(workspace: WorkspaceData) {
     this.workspace = workspace;
+    this.workspace.userRoles = fp.sortBy('familyName', workspace.userRoles);
     this.accessLevel = workspace.accessLevel;
     this.researchPurposeArray = [];
     Object.keys(ResearchPurposeItems).forEach((key) => {
