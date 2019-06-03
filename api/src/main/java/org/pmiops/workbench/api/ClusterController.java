@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -88,14 +87,14 @@ public class ClusterController implements ClusterApiDelegate {
           };
 
   private final LeonardoNotebooksClient leonardoNotebooksClient;
-  private Provider<User> userProvider;
+  private final Provider<User> userProvider;
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private UserService userService;
-  private UserRecentResourceService userRecentResourceService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final UserService userService;
+  private final UserRecentResourceService userRecentResourceService;
   private final UserDao userDao;
-  private Clock clock;
+  private final Clock clock;
 
   @Autowired
   ClusterController(
@@ -119,16 +118,6 @@ public class ClusterController implements ClusterApiDelegate {
     this.clock = clock;
   }
 
-  @VisibleForTesting
-  public void setUserProvider(Provider<User> userProvider) {
-    this.userProvider = userProvider;
-  }
-
-  @VisibleForTesting
-  public void setUserService(UserService userService) {
-    this.userService = userService;
-  }
-
   @Override
   public ResponseEntity<ClusterListResponse> listClusters(String billingProjectId) {
     if (billingProjectId == null) {
@@ -146,15 +135,18 @@ public class ClusterController implements ClusterApiDelegate {
           "User billing project is not yet initialized, cannot list/create clusters");
     }
 
+    String clusterName = LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME;
+    if (workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer) {
+      // With 1 project per workspace (http://broad.io/1ppw), a billing project may contain multiple
+      // clusters (up to 1 per workspace collaborator), therefore cluster names must be unique per
+      // user.
+      clusterName = clusterNameForUser(user);
+    }
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
-      fcCluster =
-          this.leonardoNotebooksClient.getCluster(
-              billingProjectId, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      fcCluster = this.leonardoNotebooksClient.getCluster(billingProjectId, clusterName);
     } catch (NotFoundException e) {
-      fcCluster =
-          this.leonardoNotebooksClient.createCluster(
-              billingProjectId, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+      fcCluster = this.leonardoNotebooksClient.createCluster(billingProjectId, clusterName);
     }
 
     int retries = Optional.ofNullable(user.getClusterCreateRetries()).orElse(0);
@@ -169,8 +161,7 @@ public class ClusterController implements ClusterApiDelegate {
         }
         log.warning("Retrying cluster creation.");
 
-        this.leonardoNotebooksClient.deleteCluster(
-            billingProjectId, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
+        this.leonardoNotebooksClient.deleteCluster(billingProjectId, clusterName);
       }
     } else if (org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(
             fcCluster.getStatus())
@@ -295,6 +286,10 @@ public class ClusterController implements ClusterApiDelegate {
     userService.logAdminUserAction(
         user.getUserId(), "cluster config override", oldOverride, new Gson().toJson(override));
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  private static String clusterNameForUser(User user) {
+    return "all-of-us-" + user.getUserId();
   }
 
   private String jsonToDataUri(JSONObject json) {
