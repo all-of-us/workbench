@@ -93,6 +93,9 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
         <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
           {notebooks.map(notebook => {
             return <ResourceCard key={notebook.path}
+              onDuplicateResource={(duplicating) =>
+                this.setState({loading: duplicating})
+              }
               resourceCard={convertToResource(notebook, namespace, id, al, ResourceType.NOTEBOOK)}
               onUpdate={() => this.loadNotebooks()}
             />;
