@@ -9,7 +9,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import Select from 'react-select';
+import {Select} from 'app/components/inputs';
 
 import {User} from 'generated';
 
@@ -24,36 +24,6 @@ import {Button} from 'app/components/buttons';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-
-const selectStyles = {
-  option: (libstyles, {isSelected}) => ({
-    ...libstyles,
-    lineHeight: '1rem',
-    fontSize: '12px',
-    color: colors.black[0],
-    backgroundColor: isSelected ? '#E0EAF1' : '#FFFFFF'
-  }),
-  control: (libstyles, {isDisabled}) => ({
-    color: isDisabled ? '#7f7f7f' : '#000000',
-    display: 'flex',
-    height: '1rem',
-    fontSize: '12px',
-    fontSpacing: '13px'
-  }),
-  menu: (libstyles) => ({
-    ...libstyles,
-    top: '-.15rem',
-    position: 'absolute',
-  }),
-  container: (libstyles, {isDisabled}) => ({
-    color: isDisabled ? '#7f7f7f' : '#000000',
-    borderRadius: '5px',
-    border: isDisabled ? 0 : '1px solid #CCCCCC',
-    borderWidth: '1px',
-    width: '6rem',
-    position: 'relative'
-  })
-};
 
 const styles = reactStyles( {
   tooltipLabel: {
@@ -177,7 +147,7 @@ export interface State {
   saving: boolean;
   workspaceFound: boolean;
   workspaceUpdateConflictError: boolean;
-  workspace: Workspace;
+  userRoles: UserRole[];
   searchTerm: string;
   dropDown: boolean;
 }
@@ -203,7 +173,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       saving: false,
       workspaceFound: (this.props.workspace !== null),
       workspaceUpdateConflictError: false,
-      workspace: this.props.workspace,
+      userRoles: this.props.workspace.userRoles,
       searchTerm: '',
       dropDown: false,
     };
@@ -223,9 +193,9 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       return;
     }
     this.setState({saving: true, workspaceShareError: false});
-    workspacesApi().shareWorkspace(this.state.workspace.namespace,
-      this.state.workspace.id,
-      {workspaceEtag: this.state.workspace.etag, items: this.state.workspace.userRoles})
+    workspacesApi().shareWorkspace(this.props.workspace.namespace,
+      this.props.workspace.id,
+      {workspaceEtag: this.props.workspace.etag, items: this.state.userRoles})
       .then((resp: ShareWorkspaceResponse) => {
         currentWorkspaceStore.next({
           ...currentWorkspaceStore.getValue(),
@@ -250,18 +220,16 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
   }
 
   removeCollaborator(user: UserRole): void {
-    this.setState(({workspace}) => ({
-      workspace: {...workspace,
-        userRoles: fp.remove(({email}) => {
-          return user.email === email;
-        }, workspace.userRoles)} as Workspace}
-    ));
+    this.setState({
+      userRoles: fp.remove(({email}) => {
+        return user.email === email;
+      }, this.state.userRoles)});
   }
 
   reloadWorkspace(): void {
-    workspacesApi().getWorkspace(this.state.workspace.namespace, this.state.workspace.id)
+    workspacesApi().getWorkspace(this.props.workspace.namespace, this.props.workspace.id)
       .then((workspaceResponse) => {
-        this.setState({workspace: workspaceResponse.workspace});
+        this.setState({userRoles: workspaceResponse.workspace.userRoles});
         this.resetModalState();
       })
       .catch(({status}) => {
@@ -274,10 +242,9 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
   addCollaborator(user: User): void {
     const userRole: UserRole = {givenName: user.givenName, familyName: user.familyName,
       email: user.email, role: WorkspaceAccessLevel.READER};
-    this.setState(({workspace}) => ({
+    this.setState({
       searchTerm: '', autocompleteLoading: false, autocompleteUsers: [], dropDown: false,
-      workspace: {...workspace, userRoles: fp.concat(workspace.userRoles, [userRole])} as Workspace}
-    ));
+      userRoles: this.state.userRoles.concat(userRole)});
   }
 
   userSearch(value: string): void {
@@ -294,7 +261,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
         }
         response.users = fp.differenceWith((a, b) => {
           return a.email === b.email;
-        }, response.users, this.state.workspace.userRoles);
+        }, response.users, this.state.userRoles);
         this.setState({
           autocompleteUsers: response.users.splice(0, 4),
           autocompleteLoading: false,
@@ -304,12 +271,11 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
   }
 
   setRole = (e, user)  => {
-    const oldUserRoles = this.state.workspace.userRoles;
+    const oldUserRoles = this.state.userRoles;
     const newUserRoleList = fp.map((u) => {
       return u.email === user.email ? {...u, role: e.value} : u;
     }, oldUserRoles);
-    this.setState(({workspace}) => ({
-      workspace: {...workspace, userRoles: newUserRoleList} as Workspace}));
+    this.setState({userRoles: newUserRoleList});
   }
 
   resetModalState(): void {
@@ -424,7 +390,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
           </div>}
             <h3>Current Collaborators</h3>
           <div style={{overflowY: this.state.dropDown ? 'hidden' : 'auto'}}>
-            {this.state.workspace.userRoles.map((user, i) => {
+            {this.state.userRoles.map((user, i) => {
               return <div key={user.email}>
                 <div style={styles.wrapper}>
                   <div style={styles.box}>
@@ -434,17 +400,13 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
                     </h5>
                     <div data-test-id='collab-user-email'
                          style={styles.userName}>{user.email}</div>
-                    <label>
-                      <Select styles={selectStyles} value={fp.find((u) => {
-                        return u.value === user.role;
-                      }, UserRoleOptions)}
-                              menuPortalTarget={document.getElementById('popup-root')}
-                              isDisabled={user.email === this.props.userEmail}
-                              classNamePrefix={this.cleanClassNameForSelect(user.email)}
-                              data-test-id={user.email + '-user-role'}
-                              onChange={e => this.setRole(e, user)}
-                              options={UserRoleOptions}/>
-                    </label>
+                    <Select value={user.role}
+                            menuPortalTarget={document.getElementById('popup-root')}
+                            isDisabled={user.email === this.props.userEmail}
+                            classNamePrefix={this.cleanClassNameForSelect(user.email)}
+                            data-test-id={user.email + '-user-role'}
+                            onChange={e => this.setRole(e, user)}
+                            options={UserRoleOptions}/>
                   </div>
                 <div style={styles.box}>
                   <div style={styles.collaboratorIcon}>
@@ -455,7 +417,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
                   </div>
                 </div>
                 </div>
-                  {(this.state.workspace.userRoles.length !== i + 1) &&
+                  {(this.state.userRoles.length !== i + 1) &&
                   <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>}
               </div>;
             })}
@@ -469,7 +431,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
         </ModalFooter>
       </Modal>}
       {!this.state.workspaceFound && <div>
-        <h3>The workspace {this.state.workspace.id} could not be found</h3></div>}
+        <h3>The workspace {this.props.workspace.id} could not be found</h3></div>}
       {this.state.workspaceUpdateConflictError && <Modal>
         <ModalTitle>Conflicting update:</ModalTitle>
         <ModalBody>
