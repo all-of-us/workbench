@@ -186,7 +186,48 @@ from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = m.person_id
 join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = m.measurement_source_concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = m.visit_occurrence_id)
-where m.measurement_source_concept_id is not null and m.measurement_source_concept_id != 0"
+where m.measurement_source_concept_id is not null and m.measurement_source_concept_id != 0
+and m.measurement_source_concept_id not in (903118, 903115)"
+
+####################################################################
+#   insert source systolic pressure data into search_all_domains   #
+####################################################################
+echo "Inserting systolic pressure data into search_all_domains"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+ (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id, value_as_number, value_as_concept_id, systolic)
+select p.person_id,
+m.measurement_date as entry_date,
+m.measurement_datetime as entry_datetime,
+0 as is_standard,
+m.measurement_source_concept_id as concept_id,
+'Measurement' as domain,
+cast(floor(date_diff(m.measurement_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
+vo.visit_concept_id,
+vo.visit_occurrence_id,
+m.value_as_number,
+m.value_as_concept_id,
+m.value_as_number as systolic
+from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
+join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = m.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = m.measurement_source_concept_id)
+left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = m.visit_occurrence_id)
+where m.measurement_source_concept_id in (903118)"
+
+#####################################################################
+#   update source diastolic pressure data into search_all_domains   #
+#####################################################################
+echo "Updating diastolic pressure data into search_all_domains"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` sad
+set sad.diastolic = meas.diastolic
+from (
+select m.person_id,
+m.measurement_datetime,
+m.value_as_number as diastolic
+from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m) as meas
+where meas.person_id = sad.person_id and meas.measurement_datetime = sad.entry_datetime
+and meas.measurement_source_concept_id in (903115)"
 
 #####################################################################
 #   update source diastolic pressure data into search_all_domains   #
@@ -246,7 +287,48 @@ from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = m.person_id
 join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = m.measurement_concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = m.visit_occurrence_id)
-where m.measurement_concept_id is not null and m.measurement_concept_id != 0"
+where m.measurement_concept_id is not null and m.measurement_concept_id != 0
+and m.measurement_concept_id not in (903118, 903115)"
+
+####################################################################
+#   insert standard systolic pressure data into search_all_domains   #
+####################################################################
+echo "Inserting systolic pressure data into search_all_domains"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+ (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id, value_as_number, value_as_concept_id, systolic)
+select p.person_id,
+m.measurement_date as entry_date,
+m.measurement_datetime as entry_datetime,
+1 as is_standard,
+m.measurement_concept_id as concept_id,
+'Measurement' as domain,
+cast(floor(date_diff(m.measurement_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
+vo.visit_concept_id,
+vo.visit_occurrence_id,
+m.value_as_number,
+m.value_as_concept_id,
+m.value_as_number as systolic
+from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
+join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = m.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = m.measurement_concept_id)
+left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = m.visit_occurrence_id)
+where m.measurement_concept_id in (903118)"
+
+#####################################################################
+#   update standard diastolic pressure data into search_all_domains   #
+#####################################################################
+echo "Updating diastolic pressure data into search_all_domains"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` sad
+set sad.diastolic = meas.diastolic
+from (
+select m.person_id,
+m.measurement_datetime,
+m.value_as_number as diastolic
+from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m) as meas
+where meas.person_id = sad.person_id and meas.measurement_datetime = sad.entry_datetime
+and meas.measurement_concept_id in (903115)"
 
 #######################################################################
 #   update standard diastolic pressure data into search_all_domains   #
