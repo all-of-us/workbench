@@ -139,7 +139,8 @@ public class BigQueryService {
     } else {
       throw new BadRequestException("Invalid domain, unable to fetch fields from table");
     }
-    TableId tableId = TableId.of(cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), tableName);
+    TableId tableId =
+        TableId.of(cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), tableName);
 
     return bigquery.getTable(tableId).getDefinition().getSchema().getFields();
   }
@@ -150,5 +151,4 @@ public class BigQueryService {
     }
     return row.get(index).getStringValue();
   }
-
 }

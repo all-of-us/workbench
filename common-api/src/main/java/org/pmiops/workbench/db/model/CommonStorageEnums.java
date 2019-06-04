@@ -17,7 +17,7 @@ public class CommonStorageEnums {
           .put(Domain.OBSERVATION, (short) 5)
           .put(Domain.PROCEDURE, (short) 6)
           .put(Domain.VISIT, (short) 7)
-          .put(Domain.PERSON, (short)8)
+          .put(Domain.PERSON, (short) 8)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
@@ -64,5 +64,4 @@ public class CommonStorageEnums {
   public static Short dataAccessLevelToStorage(DataAccessLevel level) {
     return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.get(level);
   }
-
 }
