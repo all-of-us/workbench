@@ -145,7 +145,8 @@ public class DataSetServiceImpl implements DataSetService {
     List<org.pmiops.workbench.db.model.ConceptSet> conceptSetsSelected =
       this.conceptSetDao.findAllByConceptSetIdIn(dataSet.getConceptSetIds());
     // conceptSetList -1 represents Demographics Concept Set which is a dummy concept Set to include
-    // Person Domain values like RACE GENDER ETHNICITY DOB. As of now this is a dummy concept set and does not contain any concept.
+    // Person Domain values like RACE GENDER ETHNICITY DOB. As of now this is a dummy concept set
+    // and does not contain any concept.
     if (((cohortsSelected == null || cohortsSelected.size() == 0) && !includesAllParticipants) ||
         (conceptSetsSelected == null || conceptSetsSelected.size() == 0 &&
             !(conceptSetList.size() == 1 && conceptSetList.get(0) == -1l))) {  

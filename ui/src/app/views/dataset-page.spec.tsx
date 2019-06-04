@@ -37,7 +37,8 @@ describe('DataSet', () => {
   it ('should display all concepts sets in workspace', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="concept-set-list-item"]').length)
+    // Add dummy concept set for Demographics
+    expect(wrapper.find('[data-test-id="concept-set-list-item"]').length + 1)
       .toBe(ConceptSetsApiStub.stubConceptSets().length);
   });
 //  it should load all cohorts related to workspace
