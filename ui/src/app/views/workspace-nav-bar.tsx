@@ -102,12 +102,10 @@ export const WorkspaceNavBarReact = fp.flow(
         <React.Fragment>
           <div style={styles.dropdownHeader}>Workspace Actions</div>
           <MenuItem
-            icon='copy'
             onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}>
             Duplicate Test
           </MenuItem>
           <MenuItem
-            icon='pencil'
             tooltip={isNotOwner && 'Requires owner permission'}
             disabled={isNotOwner}
             onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'edit'])}
@@ -115,14 +113,12 @@ export const WorkspaceNavBarReact = fp.flow(
             Edit
           </MenuItem>
           <MenuItem
-            icon='share'
             tooltip={isNotOwner && 'Requires owner permission'}
             disabled={isNotOwner}
             onClick={() => shareFunction()}>
             Share
           </MenuItem>
           <MenuItem
-            icon='trash'
             tooltip={isNotOwner && 'Requires owner permission'}
             disabled={isNotOwner}
             onClick={() => deleteFunction()}>

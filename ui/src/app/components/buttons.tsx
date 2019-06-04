@@ -135,10 +135,10 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
   />;
 };
 
-export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...props}) => {
+export const MenuItem = ({tooltip = '', disabled = false, children, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
-      data-test-id={icon}
+      data-test-id={children}
       disabled={disabled}
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'start',
@@ -150,7 +150,6 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...pro
       hover={!disabled ? {backgroundColor: colors.blue[4]} : undefined}
       {...props}
     >
-      <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>
       {children}
     </Clickable>
   </TooltipTrigger>;
