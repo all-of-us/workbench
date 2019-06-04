@@ -48,7 +48,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_test.json",
     :cdr_versions_json => "cdr_versions_test.json",
-    :gae_vars => make_gae_vars(10, 64)
+    :gae_vars => make_gae_vars(10, 10)
   },
   "all-of-us-rw-staging" => {
     :api_endpoint_host => "api-dot-all-of-us-rw-staging.appspot.com",
