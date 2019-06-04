@@ -9,7 +9,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {NotebookComponent} from 'app/icons/notebook/component';
 import {ReminderComponent} from 'app/icons/reminder';
-import {queryParamsStore, urlParamsStore} from 'app/utils/navigation';
+import {queryParamsStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebookRedirectComponent} from 'app/views/notebook-redirect/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
@@ -108,6 +108,8 @@ describe('NotebookRedirectComponent', () => {
         blockingClusterStub.release();
         blockingNotebooksStub.release();
       });
+
+    serverConfigStore.next({useBillingProjectBuffer: false, gsuiteDomain: 'x'});
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
@@ -359,6 +361,8 @@ describe('NotebookRedirectComponent', () => {
         blockingClusterStub.release();
         blockingNotebooksStub.release();
       });
+
+    serverConfigStore.next({useBillingProjectBuffer: false, gsuiteDomain: 'x'});
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
