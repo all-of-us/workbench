@@ -33,6 +33,7 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -271,6 +272,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     permissions.setUser(user);
 
     dbWorkspace.addWorkspaceUserRole(permissions);
+
+    if (useBillingProjectBuffer) {
+      dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
+    } else {
+      dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.OLD);
+    }
+
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
 
     org.pmiops.workbench.db.model.Workspace finalDbWorkspace = dbWorkspace;
@@ -559,6 +567,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     ownerRole.setUser(user);
 
     dbWorkspace.addWorkspaceUserRole(ownerRole);
+
+    if (useBillingProjectBuffer) {
+      dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
+    } else {
+      dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.OLD);
+    }
+
     org.pmiops.workbench.db.model.Workspace savedWorkspace =
         workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
 

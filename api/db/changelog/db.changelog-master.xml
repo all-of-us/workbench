@@ -88,4 +88,5 @@
   <include file="changelog/db.changelog-78-data-set-etag.xml"/>
   <include file="changelog/db.changelog-79-drop-fc-index.xml"/>
   <include file="changelog/db.changelog-80-research-purpose-refactor.xml"/>
+  <include file="changelog/db.changelog-81-add-billing_migration_status-workspace.xml"/>
 </databaseChangeLog>
