@@ -142,10 +142,15 @@ public class DataSetServiceImpl implements DataSetService {
 
     Map<String, QueryJobConfiguration> dataSetUtil = new HashMap<>();
     List<Cohort> cohortsSelected = this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds());
+    List<Long> conceptSetList = dataSet.getConceptSetIds();
     List<org.pmiops.workbench.db.model.ConceptSet> conceptSetsSelected =
-        this.conceptSetDao.findAllByConceptSetIdIn(dataSet.getConceptSetIds());
+      this.conceptSetDao.findAllByConceptSetIdIn(dataSet.getConceptSetIds());
 
-    if (((cohortsSelected == null || cohortsSelected.size() == 0) && !includesAllParticipants) || conceptSetsSelected == null || conceptSetsSelected.size() == 0) {
+    // conceptSetList -1 represents Demographics Concept Set which is a dummy concept Set to include
+    // Person Domain values like RACE GENDER ETHNICITY DOB. As of now this is a dummy concept set and does not contain any concept.
+    if (((cohortsSelected == null || cohortsSelected.size() == 0) && !includesAllParticipants) ||
+        (conceptSetsSelected == null || conceptSetsSelected.size() == 0 &&
+            !(conceptSetList.size() == 1 && conceptSetList.get(0) == -1l))) {
       throw new BadRequestException("Data Sets must include at least one cohort and concept.");
     }
 
@@ -190,29 +195,36 @@ public class DataSetServiceImpl implements DataSetService {
           .concat(" ")
           .concat(valuesLinkingPair.getJoins().stream().distinct().collect(Collectors.joining(" ")));
 
-      // CONCEPT SETS HERE:
-      if (conceptSetsSelected.stream().map(conceptSet -> conceptSet.getConceptIds()).count() == 0) {
-        throw new BadRequestException("Concept Sets must contain at least one concept");
-      }
-      String conceptSetQueries = conceptSetsSelected.stream().filter(cs -> d == cs.getDomainEnum())
-          .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
-          .collect(Collectors.joining(", "));
-      String conceptSetListQuery = " IN (" + conceptSetQueries + ")";
+      if (!d.equals(Domain.PERSON)) {
+        // CONCEPT SETS HERE:
+        if (conceptSetsSelected.stream().map(conceptSet -> conceptSet.getConceptIds()).count() == 0) {
+          throw new BadRequestException("Concept Sets must contain at least one concept");
+        }
+        String conceptSetQueries = conceptSetsSelected.stream().filter(cs -> d == cs.getDomainEnum())
+            .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
+            .collect(Collectors.joining(", "));
+        String conceptSetListQuery = " IN (" + conceptSetQueries + ")";
 
-      Optional<DomainConceptIds> domainConceptIds = bigQuerySchemaConfig.cohortTables.values().stream()
-          .filter(config -> d.toString().equals(config.domain))
-          .map(tableConfig -> new DomainConceptIds(getColumnName(tableConfig, "source"), getColumnName(tableConfig, "standard")))
-          .findFirst();
-      if (!domainConceptIds.isPresent()) {
-        throw new ServerErrorException("Couldn't find source and standard columns for domain: " + d.toString());
-      }
-      DomainConceptIds columnNames = domainConceptIds.get();
+        Optional<DomainConceptIds> domainConceptIds = bigQuerySchemaConfig.cohortTables.values().stream()
+            .filter(config -> d.toString().equals(config.domain))
+            .map(tableConfig -> new DomainConceptIds(getColumnName(tableConfig, "source"), getColumnName(tableConfig, "standard")))
+            .findFirst();
+        if (!domainConceptIds.isPresent()) {
+          throw new ServerErrorException("Couldn't find source and standard columns for domain: " + d.toString());
+        }
+        DomainConceptIds columnNames = domainConceptIds.get();
 
-      // This adds the where clauses for cohorts and concept sets.
-      query = query.concat(" WHERE \n(" + columnNames.getStandardConceptIdColumn() + conceptSetListQuery
-          + " OR \n" + columnNames.getSourceConceptIdColumn() + conceptSetListQuery + ")");
+        // This adds the where clauses for cohorts and concept sets.
+        query = query.concat(" WHERE \n(" + columnNames.getStandardConceptIdColumn() + conceptSetListQuery
+            + " OR \n" + columnNames.getSourceConceptIdColumn() + conceptSetListQuery + ")");
+      }
       if (!includesAllParticipants) {
-        query = query.concat(" \nAND (PERSON_ID IN ("
+        if (d.equals(Domain.PERSON)) {
+          query = query.concat(" \nWHERE (");
+        } else {
+          query = query.concat(" \nAND (") ;
+        }
+         query = query.concat("PERSON_ID IN ("
             + cohortQueries + "))");
       }
       queryMap.put(query, cohortParameters);

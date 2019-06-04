@@ -27,6 +27,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {NewDataSetModal} from 'app/views/new-dataset-modal';
 import {
   Cohort,
+  Concept,
   ConceptSet,
   DataSet,
   DataSetPreviewList,
@@ -226,6 +227,13 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         const [conceptSets, cohorts] = await Promise.all([
           conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
           cohortsApi().getCohortsInWorkspace(namespace, id)]);
+        const dummyDemographics = {
+          domain: Domain.PERSON,
+          name: 'Demographics',
+          concepts: [],
+          id: -1
+        };
+        conceptSets.items.push(dummyDemographics);
         this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
           loadingResources: false});
         return Promise.resolve();
@@ -529,7 +537,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                     {valueSets.map(valueSet =>
                       <div key={valueSet.domain} style={{marginLeft: '0.5rem'}}>
                         <div style={{fontSize: '13px', fontWeight: 600, color: 'black'}}>
-                          {fp.capitalize(valueSet.domain.toString())}
+                          {fp.capitalize(valueSet.domain.toString()) === 'Person' ? 'DEMOGRAPHICS' :
+                              fp.capitalize(valueSet.domain.toString())}
                         </div>
                         {valueSet.values.items.map(domainValue =>
                           <ValueListItem data-test-id='value-list-items'
@@ -592,7 +601,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                        <div key={previewRow.domain}
                            style={{
                              marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'}}>
-                         {previewRow.domain}
+                         {previewRow.domain === 'PERSON' ? 'DEMOGRAPHICS' : previewRow.domain}
                        </div>
                      </Clickable>
                   )}
