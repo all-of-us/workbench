@@ -37,12 +37,11 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
  * Workspace manipulation and shared business logic which can't be represented by automatic query
  * generation in WorkspaceDao, or convenience aliases.
  *
- * This needs to implement an interface to support Transactional
+ * <p>This needs to implement an interface to support Transactional
  */
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService {
@@ -59,7 +58,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private Clock clock;
 
   @Autowired
-  public WorkspaceServiceImpl(Clock clock,
+  public WorkspaceServiceImpl(
+      Clock clock,
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
       FireCloudService fireCloudService,
@@ -74,8 +74,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   /**
-   * Clients wishing to use the auto-generated methods from the DAO interface may directly access
-   * it here.
+   * Clients wishing to use the auto-generated methods from the DAO interface may directly access it
+   * here.
    */
   @Override
   public WorkspaceDao getDao() {
@@ -90,39 +90,48 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public Workspace get(String ns, String firecloudName) {
     return workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-        ns, firecloudName,
+        ns,
+        firecloudName,
         StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   @Override
   public List<WorkspaceResponse> getWorkspaces() {
-    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces = getFirecloudWorkspaces();
+    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
+        getFirecloudWorkspaces();
     List<Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
     return dbWorkspaces.stream()
-        .filter(dbWorkspace -> dbWorkspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.ACTIVE)
-        .map(dbWorkspace -> {
-          String fcWorkspaceAccessLevel = fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
-          WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-          currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
-          currentWorkspace.setAccessLevel(workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
-          return currentWorkspace;
-        })
+        .filter(
+            dbWorkspace ->
+                dbWorkspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.ACTIVE)
+        .map(
+            dbWorkspace -> {
+              String fcWorkspaceAccessLevel =
+                  fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
+              WorkspaceResponse currentWorkspace = new WorkspaceResponse();
+              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
+              currentWorkspace.setAccessLevel(
+                  workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
+              return currentWorkspace;
+            })
         .collect(Collectors.toList());
   }
 
-  private Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> getFirecloudWorkspaces() {
+  private Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse>
+      getFirecloudWorkspaces() {
     return fireCloudService.getWorkspaces().stream()
-            .collect(Collectors.toMap(
+        .collect(
+            Collectors.toMap(
                 fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
                 fcWorkspace -> fcWorkspace));
   }
 
   /**
-   * This is an internal method used by createWorkspace and cloneWorkspace endpoints, to
-   * check the existence of ws name.  Currently does not return a conflict if user
-   * is checking the name of a deleted ws.
-   **/
+   * This is an internal method used by createWorkspace and cloneWorkspace endpoints, to check the
+   * existence of ws name. Currently does not return a conflict if user is checking the name of a
+   * deleted ws.
+   */
   @Override
   public Workspace getByName(String ns, String name) {
     return workspaceDao.findByWorkspaceNamespaceAndNameAndActiveStatus(
@@ -141,9 +150,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   @Transactional
   public Workspace getRequiredWithCohorts(String ns, String firecloudName) {
-    Workspace workspace = workspaceDao.findByFirecloudNameAndActiveStatusWithEagerCohorts(
-        ns, firecloudName,
-        StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    Workspace workspace =
+        workspaceDao.findByFirecloudNameAndActiveStatusWithEagerCohorts(
+            ns,
+            firecloudName,
+            StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     if (workspace == null) {
       throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
     }
@@ -174,13 +185,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved) {
     Workspace workspace = getRequired(ns, firecloudName);
     if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
-      throw new BadRequestException(String.format(
-          "No review requested for workspace %s/%s.", ns, firecloudName));
+      throw new BadRequestException(
+          String.format("No review requested for workspace %s/%s.", ns, firecloudName));
     }
     if (workspace.getApproved() != null) {
-      throw new BadRequestException(String.format(
-          "Workspace %s/%s already %s.",
-          ns, firecloudName, workspace.getApproved() ? "approved" : "rejected"));
+      throw new BadRequestException(
+          String.format(
+              "Workspace %s/%s already %s.",
+              ns, firecloudName, workspace.getApproved() ? "approved" : "rejected"));
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspace.setApproved(approved);
@@ -220,7 +232,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       workspace.getWorkspaceUserRoles().add(remainingRole.getValue());
     }
 
-    for(WorkspaceUserRole currentWorkspaceUser : workspace.getWorkspaceUserRoles()) {
+    for (WorkspaceUserRole currentWorkspaceUser : workspace.getWorkspaceUserRoles()) {
       WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
       currentUpdate.setEmail(currentWorkspaceUser.getUser().getEmail());
       currentUpdate.setCanCompute(false);
@@ -237,8 +249,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
       updateACLRequestList.add(currentUpdate);
     }
-    WorkspaceACLUpdateResponseList fireCloudResponse = fireCloudService.updateWorkspaceACL(
-        workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
+    WorkspaceACLUpdateResponseList fireCloudResponse =
+        fireCloudService.updateWorkspaceACL(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
     if (fireCloudResponse.getUsersNotFound().size() != 0) {
       String usersNotFound = "";
       for (int i = 0; i < fireCloudResponse.getUsersNotFound().size(); i++) {
@@ -258,8 +271,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // Save the workspace first to allocate an ID.
     Workspace saved = workspaceDao.save(to);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(saved.getCdrVersion());
-    boolean cdrVersionChanged = from.getCdrVersion().getCdrVersionId() !=
-        to.getCdrVersion().getCdrVersionId();
+    boolean cdrVersionChanged =
+        from.getCdrVersion().getCdrVersionId() != to.getCdrVersion().getCdrVersionId();
     for (Cohort fromCohort : from.getCohorts()) {
       cohortCloningService.cloneCohortAndReviews(fromCohort, to);
     }
@@ -270,9 +283,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId) {
-    String userAccess = fireCloudService.getWorkspace(
-          workspaceNamespace, workspaceId).getAccessLevel();
+  public WorkspaceAccessLevel getWorkspaceAccessLevel(
+      String workspaceNamespace, String workspaceId) {
+    String userAccess =
+        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
     if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
       return WorkspaceAccessLevel.OWNER;
     }
@@ -284,20 +298,22 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(String workspaceNamespace,
-      String workspaceId, WorkspaceAccessLevel requiredAccess) {
+  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
+      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
     WorkspaceAccessLevel access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     if (requiredAccess.compareTo(access) > 0) {
-      throw new ForbiddenException(String.format("You do not have sufficient permissions to access workspace %s/%s",
-          workspaceNamespace, workspaceId));
+      throw new ForbiddenException(
+          String.format(
+              "You do not have sufficient permissions to access workspace %s/%s",
+              workspaceNamespace, workspaceId));
     } else {
       return access;
     }
   }
 
   @Override
-  public Workspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(String workspaceNamespace,
-      String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
+  public Workspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
     enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, workspaceAccessLevel);
     Workspace workspace = getRequired(workspaceNamespace, workspaceId);
     // Because we've already checked that the user has access to the workspace in question,
@@ -310,7 +326,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public Workspace findByWorkspaceId(long workspaceId) {
     Workspace workspace = getDao().findOne(workspaceId);
-    if (workspace == null || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
+    if (workspace == null
+        || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
       throw new NotFoundException(String.format("Workspace %s not found.", workspaceId));
     }
     return workspace;

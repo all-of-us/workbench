@@ -42,8 +42,8 @@ public class StorageEnumsTest {
         (Function<EmailVerificationStatus, Short>) StorageEnums::emailVerificationStatusToStorage
       },
       {
-              SpecificPopulationEnum.class.getSimpleName(),
-              SpecificPopulationEnum.values(),
+        SpecificPopulationEnum.class.getSimpleName(),
+        SpecificPopulationEnum.values(),
         (Function<Short, SpecificPopulationEnum>) StorageEnums::specificPopulationFromStorage,
         (Function<SpecificPopulationEnum, Short>) StorageEnums::specificPopulationToStorage
       },
@@ -74,8 +74,7 @@ public class StorageEnumsTest {
     };
   }
 
-  @Parameter()
-  public String description;
+  @Parameter() public String description;
 
   @Parameter(1)
   public Enum<?>[] enumValues;

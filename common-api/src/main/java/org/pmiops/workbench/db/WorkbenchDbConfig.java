@@ -24,12 +24,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(
     entityManagerFactoryRef = "entityManagerFactory",
     transactionManagerRef = "transactionManager",
-    basePackages = { "org.pmiops.workbench.db" }
-)
+    basePackages = {"org.pmiops.workbench.db"})
 /**
- * Spring configuration for our workbench database. Uses the spring.datasource.* properties
- * from application.properties to configure the connection. Applies to the model and DAO objects
- * under this package.
+ * Spring configuration for our workbench database. Uses the spring.datasource.* properties from
+ * application.properties to configure the connection. Applies to the model and DAO objects under
+ * this package.
  */
 public class WorkbenchDbConfig {
 
@@ -50,9 +49,7 @@ public class WorkbenchDbConfig {
   @Primary
   @Bean(name = "entityManagerFactory")
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-      EntityManagerFactoryBuilder builder,
-      @Qualifier("dataSource") DataSource dataSource
-  ) {
+      EntityManagerFactoryBuilder builder, @Qualifier("dataSource") DataSource dataSource) {
     return builder
         .dataSource(dataSource)
         .packages("org.pmiops.workbench.db")

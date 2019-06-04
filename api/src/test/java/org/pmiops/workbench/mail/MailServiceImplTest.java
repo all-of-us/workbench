@@ -1,27 +1,26 @@
 package org.pmiops.workbench.mail;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.google.api.services.admin.directory.model.User;
 import com.google.api.services.admin.directory.model.UserEmail;
 import com.google.api.services.admin.directory.model.UserName;
+import javax.mail.MessagingException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageServiceImpl;
-import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.ApiException;
+import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
-import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
+import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.test.Providers;
-
-import javax.mail.MessagingException;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 public class MailServiceImplTest {
 
@@ -33,14 +32,10 @@ public class MailServiceImplTest {
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
   private static final String API_KEY = "this-is-an-api-key";
 
-  @Mock
-  private CloudStorageServiceImpl cloudStorageService;
-  @Mock
-  private MandrillApi mandrillApi;
-  @Mock
-  private MandrillMessageStatus msgStatus;
-  @Rule
-  public MockitoRule mockitoRule = MockitoJUnit.rule();
+  @Mock private CloudStorageServiceImpl cloudStorageService;
+  @Mock private MandrillApi mandrillApi;
+  @Mock private MandrillMessageStatus msgStatus;
+  @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @Before
   public void setUp() throws ApiException {
@@ -50,12 +45,16 @@ public class MailServiceImplTest {
     when(cloudStorageService.readMandrillApiKey()).thenReturn(API_KEY);
     when(cloudStorageService.getImageUrl(any())).thenReturn("test_img");
 
-    service = new MailServiceImpl(Providers.of(mandrillApi), Providers.of(cloudStorageService),
-      Providers.of(createWorkbenchConfig()));
+    service =
+        new MailServiceImpl(
+            Providers.of(mandrillApi),
+            Providers.of(cloudStorageService),
+            Providers.of(createWorkbenchConfig()));
   }
 
   @Test(expected = MessagingException.class)
-  public void testSendWelcomeEmail_throwsMessagingException() throws MessagingException, ApiException {
+  public void testSendWelcomeEmail_throwsMessagingException()
+      throws MessagingException, ApiException {
     when(msgStatus.getRejectReason()).thenReturn("this was rejected");
     User user = createUser();
     service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user);
@@ -85,11 +84,12 @@ public class MailServiceImplTest {
 
   private User createUser() {
     return new User()
-      .setPrimaryEmail(PRIMARY_EMAIL)
-      .setPassword(PASSWORD)
-      .setName(new UserName().setGivenName(GIVEN_NAME).setFamilyName(FAMILY_NAME))
-      .setEmails(new UserEmail().setType("custom").setAddress(CONTACT_EMAIL).setCustomType("contact"))
-      .setChangePasswordAtNextLogin(true);
+        .setPrimaryEmail(PRIMARY_EMAIL)
+        .setPassword(PASSWORD)
+        .setName(new UserName().setGivenName(GIVEN_NAME).setFamilyName(FAMILY_NAME))
+        .setEmails(
+            new UserEmail().setType("custom").setAddress(CONTACT_EMAIL).setCustomType("contact"))
+        .setChangePasswordAtNextLogin(true);
   }
 
   private WorkbenchConfig createWorkbenchConfig() {
@@ -97,11 +97,11 @@ public class MailServiceImplTest {
     workbenchConfig.mandrill = new WorkbenchConfig.MandrillConfig();
     workbenchConfig.mandrill.fromEmail = "test-donotreply@fake-research-aou.org";
     workbenchConfig.mandrill.sendRetries = 3;
-    workbenchConfig.googleCloudStorageService = new WorkbenchConfig.GoogleCloudStorageServiceConfig();
+    workbenchConfig.googleCloudStorageService =
+        new WorkbenchConfig.GoogleCloudStorageServiceConfig();
     workbenchConfig.googleCloudStorageService.credentialsBucketName = "test-bucket";
     workbenchConfig.admin = new WorkbenchConfig.AdminConfig();
     workbenchConfig.admin.loginUrl = "http://localhost:4200/";
     return workbenchConfig;
   }
-
 }

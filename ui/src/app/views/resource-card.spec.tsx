@@ -40,6 +40,7 @@ const ResourceCardWrapper = {
 describe('ResourceCardComponent', () => {
   const component = (resourceCard: Object) => {
     return mount(<ResourceCard
+        onDuplicateResource={() => {}}
         resourceCard={resourceCard}
         onUpdate={() => {}}/>);
   };

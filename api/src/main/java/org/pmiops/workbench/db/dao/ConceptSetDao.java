@@ -27,19 +27,17 @@ public interface ConceptSetDao extends CrudRepository<ConceptSet, Long> {
 
   List<ConceptSet> findByWorkspaceId(long workspaceId);
 
-  /**
-   * Returns the concept set in the workspace with the specified name, or null if there is none.
-   */
+  /** Returns the concept set in the workspace with the specified name, or null if there is none. */
   ConceptSet findConceptSetByNameAndWorkspaceId(String name, long workspaceId);
-
 
   @Modifying
   @Query(
-      value="INSERT INTO concept_set_concept_id(concept_set_id, concept_id) " +
-          " SELECT (:toCsId), concept_id " +
-          " FROM concept_set_concept_id " +
-          " WHERE concept_set_id = (:fromCsId)",
-      nativeQuery=true)
+      value =
+          "INSERT INTO concept_set_concept_id(concept_set_id, concept_id) "
+              + " SELECT (:toCsId), concept_id "
+              + " FROM concept_set_concept_id "
+              + " WHERE concept_set_id = (:fromCsId)",
+      nativeQuery = true)
   void bulkCopyConceptIds(
       @Param("fromCsId") long fromConceptSetId, @Param("toCsId") long toConceptSetId);
 

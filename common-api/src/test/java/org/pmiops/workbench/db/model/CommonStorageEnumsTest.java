@@ -17,23 +17,22 @@ public class CommonStorageEnumsTest {
   @Parameters(name = "{0}")
   public static Object[][] data() {
     return new Object[][] {
-        {
-            DataAccessLevel.class.getSimpleName(),
-            DataAccessLevel.values(),
-            (Function<Short, DataAccessLevel>) CommonStorageEnums::dataAccessLevelFromStorage,
-            (Function<DataAccessLevel, Short>) CommonStorageEnums::dataAccessLevelToStorage
-        },
-        {
-            Domain.class.getSimpleName(),
-            Domain.values(),
-            (Function<Short, Domain>) CommonStorageEnums::domainFromStorage,
-            (Function<Domain, Short>) CommonStorageEnums::domainToStorage
-        }
+      {
+        DataAccessLevel.class.getSimpleName(),
+        DataAccessLevel.values(),
+        (Function<Short, DataAccessLevel>) CommonStorageEnums::dataAccessLevelFromStorage,
+        (Function<DataAccessLevel, Short>) CommonStorageEnums::dataAccessLevelToStorage
+      },
+      {
+        Domain.class.getSimpleName(),
+        Domain.values(),
+        (Function<Short, Domain>) CommonStorageEnums::domainFromStorage,
+        (Function<Domain, Short>) CommonStorageEnums::domainToStorage
+      }
     };
   }
 
-  @Parameter()
-  public String description;
+  @Parameter() public String description;
 
   @Parameter(1)
   public Enum<?>[] enumValues;

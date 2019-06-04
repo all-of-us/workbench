@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.nio.charset.Charset;
-import java.util.Objects;
 import java.util.Base64;
+import java.util.Objects;
 import org.pmiops.workbench.exceptions.BadRequestException;
 
 public final class PaginationToken {
@@ -14,6 +14,7 @@ public final class PaginationToken {
 
   @JsonProperty("o")
   private long offset;
+
   @JsonProperty("h")
   private int parameterHash;
 
@@ -47,8 +48,8 @@ public final class PaginationToken {
     try {
       PaginationToken result = new Gson().fromJson(json, PaginationToken.class);
       if (result.getOffset() < 0) {
-        throw new BadRequestException(String.format("Invalid pagination offset: %d",
-            result.getOffset()));
+        throw new BadRequestException(
+            String.format("Invalid pagination offset: %d", result.getOffset()));
       }
       return result;
     } catch (JsonSyntaxException e) {

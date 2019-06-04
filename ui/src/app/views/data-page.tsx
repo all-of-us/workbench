@@ -254,6 +254,9 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           {filteredList.map((resource: RecentResource, index: number) => {
             return <ResourceCard key={index}
                                  resourceCard={resource}
+                                 onDuplicateResource={(duplicating) => this.setState({
+                                   isLoading: duplicating
+                                 })}
                                  onUpdate={() => this.loadResources()}
                                  existingNameList={this.getExistingNameList(resource)}
             />;

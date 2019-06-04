@@ -4,31 +4,25 @@ import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
-
 import com.google.common.base.Strings;
-
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.List;
-
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
-
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -52,16 +46,15 @@ import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewList;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
-import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DataSetQuery;
 import org.pmiops.workbench.model.DataSetQueryList;
+import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.NamedParameterEntry;
 import org.pmiops.workbench.model.NamedParameterValue;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,23 +75,17 @@ public class DataSetController implements DataSetApiDelegate {
   private static int NO_OF_PREVIEW_ROWS = 20;
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
-  @Autowired
-  private final CohortDao cohortDao;
+  @Autowired private final CohortDao cohortDao;
 
-  @Autowired
-  private ConceptDao conceptDao;
+  @Autowired private ConceptDao conceptDao;
 
-  @Autowired
-  private ConceptSetDao conceptSetDao;
+  @Autowired private ConceptSetDao conceptSetDao;
 
-  @Autowired
-  private DataSetDao dataSetDao;
+  @Autowired private DataSetDao dataSetDao;
 
-  @Autowired
-  private FireCloudService fireCloudService;
+  @Autowired private FireCloudService fireCloudService;
 
-  @Autowired
-  private NotebooksService notebooksService;
+  @Autowired private NotebooksService notebooksService;
 
   @Autowired
   DataSetController(
@@ -127,33 +114,48 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   @Override
-  public ResponseEntity<DataSet> createDataSet(String workspaceNamespace, String workspaceId,
-      DataSetRequest dataSetRequest) {
-    boolean includesAllParticipants = Optional.of(dataSetRequest.getIncludesAllParticipants()).orElse(false);
+  public ResponseEntity<DataSet> createDataSet(
+      String workspaceNamespace, String workspaceId, DataSetRequest dataSetRequest) {
+    boolean includesAllParticipants =
+        Optional.of(dataSetRequest.getIncludesAllParticipants()).orElse(false);
     if (Strings.isNullOrEmpty(dataSetRequest.getName())) {
       throw new BadRequestException("Missing name");
-    } else if (dataSetRequest.getConceptSetIds() == null || dataSetRequest.getConceptSetIds().size() == 0) {
+    } else if (dataSetRequest.getConceptSetIds() == null
+        || dataSetRequest.getConceptSetIds().size() == 0) {
       throw new BadRequestException("Missing concept set ids");
-    } else if ((dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().size() == 0) && !includesAllParticipants) {
+    } else if ((dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().size() == 0)
+        && !includesAllParticipants) {
       throw new BadRequestException("Missing cohort ids");
     } else if (dataSetRequest.getValues() == null || dataSetRequest.getValues().size() == 0) {
       throw new BadRequestException("Missing values");
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    workspaceService
-        .getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     long wId = workspaceService.get(workspaceNamespace, workspaceId).getWorkspaceId();
-    List<DataSetValues> dataSetValuesList = dataSetRequest.getValues().stream().map(
-        (domainValueSet) -> {
-          DataSetValues dataSetValues = new DataSetValues(domainValueSet.getDomain().name(), domainValueSet.getValue());
-          dataSetValues.setDomainEnum(domainValueSet.getDomain());
-          return dataSetValues;
-        }).collect(Collectors.toList());
+    List<DataSetValues> dataSetValuesList =
+        dataSetRequest.getValues().stream()
+            .map(
+                (domainValueSet) -> {
+                  DataSetValues dataSetValues =
+                      new DataSetValues(
+                          domainValueSet.getDomain().name(), domainValueSet.getValue());
+                  dataSetValues.setDomainEnum(domainValueSet.getDomain());
+                  return dataSetValues;
+                })
+            .collect(Collectors.toList());
     try {
-      org.pmiops.workbench.db.model.DataSet savedDataSet = dataSetService.saveDataSet(
-          dataSetRequest.getName(), dataSetRequest.getIncludesAllParticipants(),
-          dataSetRequest.getDescription(), wId, dataSetRequest.getCohortIds(),
-          dataSetRequest.getConceptSetIds(), dataSetValuesList, userProvider.get().getUserId(), now);
+      org.pmiops.workbench.db.model.DataSet savedDataSet =
+          dataSetService.saveDataSet(
+              dataSetRequest.getName(),
+              dataSetRequest.getIncludesAllParticipants(),
+              dataSetRequest.getDescription(),
+              wId,
+              dataSetRequest.getCohortIds(),
+              dataSetRequest.getConceptSetIds(),
+              dataSetValuesList,
+              userProvider.get().getUserId(),
+              now);
       return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(savedDataSet));
     } catch (DataIntegrityViolationException ex) {
       throw new ConflictException("Data set with the same name already exist");
@@ -164,25 +166,27 @@ public class DataSetController implements DataSetApiDelegate {
       new Function<org.pmiops.workbench.db.model.DataSet, DataSet>() {
         @Override
         public DataSet apply(org.pmiops.workbench.db.model.DataSet dataSet) {
-          DataSet result = new DataSet()
-              .name(dataSet.getName())
-              .includesAllParticipants(dataSet.getIncludesAllParticipants())
-              .id(dataSet.getDataSetId())
-              .etag(Etags.fromVersion(dataSet.getVersion()))
-              .description(dataSet.getDescription());
+          DataSet result =
+              new DataSet()
+                  .name(dataSet.getName())
+                  .includesAllParticipants(dataSet.getIncludesAllParticipants())
+                  .id(dataSet.getDataSetId())
+                  .etag(Etags.fromVersion(dataSet.getVersion()))
+                  .description(dataSet.getDescription());
           if (dataSet.getLastModifiedTime() != null) {
             result.setLastModifiedTime(dataSet.getLastModifiedTime().getTime());
           }
-          result.setConceptSets(StreamSupport
-              .stream(conceptSetDao.findAll(dataSet.getConceptSetId()).spliterator(), false)
-              .map(conceptSet -> toClientConceptSet(conceptSet))
-              .collect(Collectors.toList()));
-          result.setCohorts(StreamSupport
-                .stream(cohortDao.findAll(dataSet.getCohortSetId()).spliterator(), false)
-                .map(CohortsController.TO_CLIENT_COHORT)
-                .collect(Collectors.toList()));
-          result.setValues(dataSet.getValues()
-                  .stream()
+          result.setConceptSets(
+              StreamSupport.stream(
+                      conceptSetDao.findAll(dataSet.getConceptSetId()).spliterator(), false)
+                  .map(conceptSet -> toClientConceptSet(conceptSet))
+                  .collect(Collectors.toList()));
+          result.setCohorts(
+              StreamSupport.stream(cohortDao.findAll(dataSet.getCohortSetId()).spliterator(), false)
+                  .map(CohortsController.TO_CLIENT_COHORT)
+                  .collect(Collectors.toList()));
+          result.setValues(
+              dataSet.getValues().stream()
                   .map(TO_CLIENT_DOMAIN_VALUE)
                   .collect(Collectors.toList()));
           return result;
@@ -194,10 +198,10 @@ public class DataSetController implements DataSetApiDelegate {
     if (!conceptSet.getConceptIds().isEmpty()) {
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts =
           conceptDao.findAll(conceptSet.getConceptIds());
-      result.setConcepts(StreamSupport.stream(concepts.spliterator(), false)
-          .map(ConceptsController.TO_CLIENT_CONCEPT)
-          .collect(Collectors.toList()));
-
+      result.setConcepts(
+          StreamSupport.stream(concepts.spliterator(), false)
+              .map(ConceptsController.TO_CLIENT_CONCEPT)
+              .collect(Collectors.toList()));
     }
     return result;
   }
@@ -213,9 +217,10 @@ public class DataSetController implements DataSetApiDelegate {
         }
       };
 
-
-  public ResponseEntity<DataSetQueryList> generateQuery(String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+  public ResponseEntity<DataSetQueryList> generateQuery(
+      String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     List<DataSetQuery> respQueryList = new ArrayList<>();
 
     // Generate query per domain for the selected concept set, cohort and values
@@ -223,148 +228,194 @@ public class DataSetController implements DataSetApiDelegate {
 
     // Loop through and run the query for each domain and create LIST of
     // domain, value and their corresponding query result
-    bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
-      List<NamedParameterEntry> parameters = new ArrayList<>();
-      queryJobConfiguration.getNamedParameters().forEach((key, value) ->
-              parameters.add(generateResponseFromQueryParameter(key, value)));
-      respQueryList.add(new DataSetQuery()
-          .domain(Domain.fromValue(domain))
-          .query(queryJobConfiguration.getQuery())
-          .namedParameters(parameters));
-    });
+    bigQueryJobConfig.forEach(
+        (domain, queryJobConfiguration) -> {
+          List<NamedParameterEntry> parameters = new ArrayList<>();
+          queryJobConfiguration
+              .getNamedParameters()
+              .forEach(
+                  (key, value) -> parameters.add(generateResponseFromQueryParameter(key, value)));
+          respQueryList.add(
+              new DataSetQuery()
+                  .domain(Domain.fromValue(domain))
+                  .query(queryJobConfiguration.getQuery())
+                  .namedParameters(parameters));
+        });
     return ResponseEntity.ok(new DataSetQueryList().queryList(respQueryList));
   }
 
   @Override
-  public ResponseEntity<DataSetPreviewResponse> previewQuery(String workspaceNamespace,
-      String workspaceId, DataSetRequest dataSet) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+  public ResponseEntity<DataSetPreviewResponse> previewQuery(
+      String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
-    bigQueryJobConfig.forEach((domain, queryJobConfiguration) -> {
-      int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS;
-      List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
+    bigQueryJobConfig.forEach(
+        (domain, queryJobConfiguration) -> {
+          int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS;
+          List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
 
-      do {
-        try {
-          String query = queryJobConfiguration.getQuery().concat(" LIMIT " + rowsRequested);
+          do {
+            try {
+              String query = queryJobConfiguration.getQuery().concat(" LIMIT " + rowsRequested);
 
-          queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
+              queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
-          TableResult queryResponse = bigQueryService.executeQuery(bigQueryService
-              .filterBigQueryConfig(queryJobConfiguration), 60000l);
-          if (queryResponse.getSchema() == null || queryResponse.getValues() == null) {
-            break;
-          }
-          queryResponse.getSchema().getFields().forEach(fields -> {
-            valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
-          });
-
-          queryResponse.getValues().forEach(fieldValueList -> {
-            IntStream.range(0, fieldValueList.size()).forEach(columnNumber -> {
-              try {
-                valuePreviewList.get(columnNumber).addQueryValueItem(
-                    fieldValueList.get(columnNumber).getValue().toString());
-              } catch (NullPointerException ex) {
-                log.severe(
-                    String.format("Null pointer exception while retriving value for query: Column %s ", columnNumber));
-                valuePreviewList.get(columnNumber).addQueryValueItem("");
+              TableResult queryResponse =
+                  bigQueryService.executeQuery(
+                      bigQueryService.filterBigQueryConfig(queryJobConfiguration), 60000l);
+              if (queryResponse.getSchema() == null || queryResponse.getValues() == null) {
+                break;
               }
-            });
-          });
-          queryResponse.getSchema().getFields().forEach(fields -> {
-            DataSetPreviewValueList previewValue = valuePreviewList.stream()
-                .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName())).findFirst().get();
-            if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
-              List<String> queryValues = new ArrayList<String>();
-              DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-              previewValue.getQueryValue().forEach(value -> {
-                try {
-                  Double fieldValue = Double.parseDouble(value);
-                  queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
-                } catch (NumberFormatException ex) {
-                  queryValues.add("");
-                }
-              });
-              previewValue.setQueryValue(queryValues);
+              queryResponse
+                  .getSchema()
+                  .getFields()
+                  .forEach(
+                      fields -> {
+                        valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
+                      });
+
+              queryResponse
+                  .getValues()
+                  .forEach(
+                      fieldValueList -> {
+                        IntStream.range(0, fieldValueList.size())
+                            .forEach(
+                                columnNumber -> {
+                                  try {
+                                    valuePreviewList
+                                        .get(columnNumber)
+                                        .addQueryValueItem(
+                                            fieldValueList.get(columnNumber).getValue().toString());
+                                  } catch (NullPointerException ex) {
+                                    log.severe(
+                                        String.format(
+                                            "Null pointer exception while retriving value for query: Column %s ",
+                                            columnNumber));
+                                    valuePreviewList.get(columnNumber).addQueryValueItem("");
+                                  }
+                                });
+                      });
+              queryResponse
+                  .getSchema()
+                  .getFields()
+                  .forEach(
+                      fields -> {
+                        DataSetPreviewValueList previewValue =
+                            valuePreviewList.stream()
+                                .filter(
+                                    preview ->
+                                        preview.getValue().equalsIgnoreCase(fields.getName()))
+                                .findFirst()
+                                .get();
+                        if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
+                          List<String> queryValues = new ArrayList<String>();
+                          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                          previewValue
+                              .getQueryValue()
+                              .forEach(
+                                  value -> {
+                                    try {
+                                      Double fieldValue = Double.parseDouble(value);
+                                      queryValues.add(
+                                          dateFormat.format(new Date(fieldValue.longValue())));
+                                    } catch (NumberFormatException ex) {
+                                      queryValues.add("");
+                                    }
+                                  });
+                          previewValue.setQueryValue(queryValues);
+                        }
+                      });
+              break;
+            } catch (Exception ex) {
+              if (ex.getCause() != null
+                  && ex.getCause().getMessage() != null
+                  && ex.getCause().getMessage().contains("Read timed out")) {
+                rowsRequested = (rowsRequested / 2);
+                retry++;
+              } else {
+                throw ex;
+              }
             }
-          });
-          break;
-        } catch (Exception ex) {
-          if (ex.getCause() != null
-              && ex.getCause().getMessage() != null
-              && ex.getCause().getMessage().contains("Read timed out")) {
-            rowsRequested = (rowsRequested / 2);
-            retry++;
-          } else {
-            throw ex;
-          }
-        }
-      } while (retry < 2);
+          } while (retry < 2);
 
-      Collections.sort(valuePreviewList,
-          Comparator.comparing(item -> dataSet.getValues().indexOf(item.getValue())));
+          Collections.sort(
+              valuePreviewList,
+              Comparator.comparing(item -> dataSet.getValues().indexOf(item.getValue())));
 
-     previewQueryResponse.addDomainValueItem(new DataSetPreviewList().domain(domain).values(valuePreviewList));
-    });
+          previewQueryResponse.addDomainValueItem(
+              new DataSetPreviewList().domain(domain).values(valuePreviewList));
+        });
     return ResponseEntity.ok(previewQueryResponse);
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> exportToNotebook(String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    DataSetQueryList queryList = generateQuery(workspaceNamespace, workspaceId, dataSetExportRequest.getDataSetRequest()).getBody();
-    String queriesAsStrings = "import pandas\n\n" + queryList.getQueryList().stream()
-        .map(query -> convertQueryToString(query, dataSetExportRequest.getDataSetRequest().getName()))
-        .collect(Collectors.joining("\n\n"));
+  public ResponseEntity<EmptyResponse> exportToNotebook(
+      String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    DataSetQueryList queryList =
+        generateQuery(workspaceNamespace, workspaceId, dataSetExportRequest.getDataSetRequest())
+            .getBody();
+    String queriesAsStrings =
+        "import pandas\n\n"
+            + queryList.getQueryList().stream()
+                .map(
+                    query ->
+                        convertQueryToString(
+                            query, dataSetExportRequest.getDataSetRequest().getName()))
+                .collect(Collectors.joining("\n\n"));
     JSONObject notebookFile;
     WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
     if (dataSetExportRequest.getNewNotebook()) {
-       notebookFile = new JSONObject()
-          .put("cells", new JSONArray()
-              .put(createNotebookCodeCellWithString(queriesAsStrings)))
-          .put("metadata", new JSONObject())
-          // nbformat and nbformat_minor are the notebook major and minor version we are creating.
-          // Specifically, here we create notebook version 4.2 (I believe)
-          // See https://nbformat.readthedocs.io/en/latest/api.html
-          .put("nbformat", 4)
-          .put("nbformat_minor", 2);
+      notebookFile =
+          new JSONObject()
+              .put("cells", new JSONArray().put(createNotebookCodeCellWithString(queriesAsStrings)))
+              .put("metadata", new JSONObject())
+              // nbformat and nbformat_minor are the notebook major and minor version we are
+              // creating.
+              // Specifically, here we create notebook version 4.2 (I believe)
+              // See https://nbformat.readthedocs.io/en/latest/api.html
+              .put("nbformat", 4)
+              .put("nbformat_minor", 2);
     } else {
-      notebookFile = notebooksService.getNotebookContents(
-          workspace.getWorkspace().getBucketName(),
-          dataSetExportRequest.getNotebookName());
+      notebookFile =
+          notebooksService.getNotebookContents(
+              workspace.getWorkspace().getBucketName(), dataSetExportRequest.getNotebookName());
       notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(queriesAsStrings));
     }
 
-    notebooksService.saveNotebook(workspace.getWorkspace().getBucketName(),
-        dataSetExportRequest.getNotebookName(), notebookFile);
+    notebooksService.saveNotebook(
+        workspace.getWorkspace().getBucketName(),
+        dataSetExportRequest.getNotebookName(),
+        notebookFile);
 
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
-  public ResponseEntity<DataSetListResponse> getDataSetsInWorkspace(String workspaceNamespace,
-                                                                    String workspaceId) {
+  public ResponseEntity<DataSetListResponse> getDataSetsInWorkspace(
+      String workspaceNamespace, String workspaceId) {
     Workspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId,
-            WorkspaceAccessLevel.READER);
+        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     List<org.pmiops.workbench.db.model.DataSet> dataSets =
         dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
     DataSetListResponse response = new DataSetListResponse();
 
-    response.setItems(dataSets.stream()
-        .map(TO_CLIENT_DATA_SET)
-        .sorted(Comparator.comparing(DataSet::getName))
-        .collect(Collectors.toList()));
+    response.setItems(
+        dataSets.stream()
+            .map(TO_CLIENT_DATA_SET)
+            .sorted(Comparator.comparing(DataSet::getName))
+            .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteDataSet(
-      String workspaceNamespace,
-      String workspaceId,
-      Long dataSetId) {
+      String workspaceNamespace, String workspaceId, Long dataSetId) {
     org.pmiops.workbench.db.model.DataSet dataSet =
         getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
     dataSetDao.delete(dataSet.getDataSetId());
@@ -373,13 +424,10 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DataSet> updateDataSet(
-      String workspaceNamespace,
-      String workspaceId,
-      Long dataSetId,
-      DataSetRequest request) {
+      String workspaceNamespace, String workspaceId, Long dataSetId, DataSetRequest request) {
     org.pmiops.workbench.db.model.DataSet dbDataSet =
         getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
-    if(Strings.isNullOrEmpty(request.getEtag())) {
+    if (Strings.isNullOrEmpty(request.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }
     int version = Etags.toVersion(request.getEtag());
@@ -393,12 +441,17 @@ public class DataSetController implements DataSetApiDelegate {
     dbDataSet.setConceptSetId(request.getConceptSetIds());
     dbDataSet.setDescription(request.getDescription());
     dbDataSet.setName(request.getName());
-    dbDataSet.setValues(request.getValues().stream().map(
-        (domainValueSet) -> {
-          DataSetValues dataSetValues = new DataSetValues(domainValueSet.getDomain().name(), domainValueSet.getValue());
-          dataSetValues.setDomainEnum(domainValueSet.getDomain());
-          return dataSetValues;
-        }).collect(Collectors.toList()));
+    dbDataSet.setValues(
+        request.getValues().stream()
+            .map(
+                (domainValueSet) -> {
+                  DataSetValues dataSetValues =
+                      new DataSetValues(
+                          domainValueSet.getDomain().name(), domainValueSet.getValue());
+                  dataSetValues.setDomainEnum(domainValueSet.getDomain());
+                  return dataSetValues;
+                })
+            .collect(Collectors.toList()));
     try {
       dbDataSet = dataSetDao.save(dbDataSet);
       // TODO: add recent resource entry for data sets
@@ -410,7 +463,8 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   @Override
-  public ResponseEntity<DataSet> getDataSet(String workspaceNamespace, String workspaceId, Long dataSetId) {
+  public ResponseEntity<DataSet> getDataSet(
+      String workspaceNamespace, String workspaceId, Long dataSetId) {
     org.pmiops.workbench.db.model.DataSet dataSet =
         getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.READER);
 
@@ -423,30 +477,39 @@ public class DataSetController implements DataSetApiDelegate {
         .put("metadata", new JSONObject())
         .put("execution_count", JSONObject.NULL)
         .put("outputs", new JSONArray())
-        .put("source", new JSONArray()
-            .put(cellInformation));
+        .put("source", new JSONArray().put(cellInformation));
   }
 
   private String convertQueryToString(DataSetQuery query, String prefix) {
-    String namespace = prefix
-        .toLowerCase()
-        .replaceAll(" ", "_") +
-        "_" +
-        query.getDomain()
-            .toString().toLowerCase() + "_";
+    String namespace =
+        prefix.toLowerCase().replaceAll(" ", "_")
+            + "_"
+            + query.getDomain().toString().toLowerCase()
+            + "_";
     String sqlSection = namespace + "sql = \"\"\"" + query.getQuery() + "\"\"\"";
 
-    String namedParamsSection = namespace +
-        "query_config = {\n" +
-        "  \'query\': {\n" +
-        "  \'parameterMode\': \'NAMED\',\n" +
-        "  \'queryParameters\': [\n" +
-        query.getNamedParameters().stream().map(namedParameterEntry -> convertNamedParameterToString(namedParameterEntry) + "\n").collect(Collectors.joining("")) +
-        "    ]\n" +
-        "  }\n" +
-        "}\n\n";
+    String namedParamsSection =
+        namespace
+            + "query_config = {\n"
+            + "  \'query\': {\n"
+            + "  \'parameterMode\': \'NAMED\',\n"
+            + "  \'queryParameters\': [\n"
+            + query.getNamedParameters().stream()
+                .map(
+                    namedParameterEntry ->
+                        convertNamedParameterToString(namedParameterEntry) + "\n")
+                .collect(Collectors.joining(""))
+            + "    ]\n"
+            + "  }\n"
+            + "}\n\n";
 
-    String dataFrameSection = namespace + "df = pandas.read_gbq(" + namespace + "sql, dialect=\"standard\", configuration=" + namespace + "query_config)";
+    String dataFrameSection =
+        namespace
+            + "df = pandas.read_gbq("
+            + namespace
+            + "sql, dialect=\"standard\", configuration="
+            + namespace
+            + "query_config)";
 
     return sqlSection + "\n\n" + namedParamsSection + "\n\n" + dataFrameSection;
   }
@@ -459,58 +522,81 @@ public class DataSetController implements DataSetApiDelegate {
     if (namedParameterEntry.getValue() == null) {
       return "";
     }
-    boolean isArrayParameter = !(namedParameterEntry.getValue().getParameterValue() instanceof String);
+    boolean isArrayParameter =
+        !(namedParameterEntry.getValue().getParameterValue() instanceof String);
 
     List<NamedParameterValue> arrayValues = new ArrayList<>();
     Object value = namedParameterEntry.getValue().getParameterValue();
     if (value instanceof List) {
       arrayValues = (List<NamedParameterValue>) value;
     }
-    return "      {\n" +
-        "        'name': \"" + namedParameterEntry.getValue().getName() + "\",\n" +
-        "        'parameterType': {'type': \"" + namedParameterEntry.getValue().getParameterType() + "\"" +
-        (isArrayParameter ? ",'arrayType': {'type': \"" + namedParameterEntry.getValue().getArrayType() + "\"}," : "") + "},\n" +
-        "        \'parameterValue\': {" + (isArrayParameter ? "\'arrayValues\': [" +
-            arrayValues
-        .stream().map(namedParameterValue -> "{\'value\': " + namedParameterValue.getParameterValue() + "}") + "]" :
-        "'value': \"" + namedParameterEntry.getValue().getParameterValue() + "\"") + "}\n" +
-        "      },";
+    return "      {\n"
+        + "        'name': \""
+        + namedParameterEntry.getValue().getName()
+        + "\",\n"
+        + "        'parameterType': {'type': \""
+        + namedParameterEntry.getValue().getParameterType()
+        + "\""
+        + (isArrayParameter
+            ? ",'arrayType': {'type': \"" + namedParameterEntry.getValue().getArrayType() + "\"},"
+            : "")
+        + "},\n"
+        + "        \'parameterValue\': {"
+        + (isArrayParameter
+            ? "\'arrayValues\': ["
+                + arrayValues.stream()
+                    .map(
+                        namedParameterValue ->
+                            "{\'value\': " + namedParameterValue.getParameterValue() + "}")
+                + "]"
+            : "'value': \"" + namedParameterEntry.getValue().getParameterValue() + "\"")
+        + "}\n"
+        + "      },";
   }
 
-  private NamedParameterEntry generateResponseFromQueryParameter(String key, QueryParameterValue value) {
+  private NamedParameterEntry generateResponseFromQueryParameter(
+      String key, QueryParameterValue value) {
     if (value.getValue() != null) {
-      return new NamedParameterEntry().key(key)
-          .value(new NamedParameterValue()
-              .name(key)
-              .parameterType(value.getType().toString())
-              .parameterValue(value.getValue()));
-    } else if (value.getArrayValues() != null) {
-      List<NamedParameterValue> values = value.getArrayValues().stream()
-          .map(arrayValue -> generateResponseFromQueryParameter(key, arrayValue).getValue())
-          .collect(Collectors.toList());
       return new NamedParameterEntry()
           .key(key)
-          .value(new NamedParameterValue()
-              .name(key)
-              .parameterType(value.getType().toString())
-              .arrayType(value.getArrayType() == null ? null : value.getArrayType().toString())
-              .parameterValue(values));
+          .value(
+              new NamedParameterValue()
+                  .name(key)
+                  .parameterType(value.getType().toString())
+                  .parameterValue(value.getValue()));
+    } else if (value.getArrayValues() != null) {
+      List<NamedParameterValue> values =
+          value.getArrayValues().stream()
+              .map(arrayValue -> generateResponseFromQueryParameter(key, arrayValue).getValue())
+              .collect(Collectors.toList());
+      return new NamedParameterEntry()
+          .key(key)
+          .value(
+              new NamedParameterValue()
+                  .name(key)
+                  .parameterType(value.getType().toString())
+                  .arrayType(value.getArrayType() == null ? null : value.getArrayType().toString())
+                  .parameterValue(values));
     } else {
-      throw new ServerErrorException("Unsupported query parameter type in query generation: " + value.getType().toString());
+      throw new ServerErrorException(
+          "Unsupported query parameter type in query generation: " + value.getType().toString());
     }
   }
 
-  private org.pmiops.workbench.db.model.DataSet getDbDataSet(String workspaceNamespace,
-                                                             String workspaceId, Long dataSetId,
-                                                             WorkspaceAccessLevel workspaceAccessLevel) {
-    Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, workspaceAccessLevel);
+  private org.pmiops.workbench.db.model.DataSet getDbDataSet(
+      String workspaceNamespace,
+      String workspaceId,
+      Long dataSetId,
+      WorkspaceAccessLevel workspaceAccessLevel) {
+    Workspace workspace =
+        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, workspaceAccessLevel);
 
-    org.pmiops.workbench.db.model.DataSet dataSet =
-        dataSetDao.findOne(dataSetId);
+    org.pmiops.workbench.db.model.DataSet dataSet = dataSetDao.findOne(dataSetId);
     if (dataSet == null || workspace.getWorkspaceId() != dataSet.getWorkspaceId()) {
-      throw new NotFoundException(String.format(
-          "No data set with ID %s in workspace %s.", dataSet, workspace.getFirecloudName()));
+      throw new NotFoundException(
+          String.format(
+              "No data set with ID %s in workspace %s.", dataSet, workspace.getFirecloudName()));
     }
     return dataSet;
   }

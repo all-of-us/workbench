@@ -4,27 +4,27 @@ import * as Lolex from 'lolex';
 import * as fp from 'lodash/fp';
 import Select from 'react-select';
 
-import {WorkspaceShare, WorkspaceShareProps, WorkspaceShareState} from './workspace-share';
+import {Props, WorkspaceShare} from './workspace-share';
 
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   User,
   UserApi,
   UserRole,
-  Workspace,
   WorkspaceAccessLevel,
   WorkspacesApi
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {UserApiStub} from 'testing/stubs/user-api-stub'
-import {WorkspacesApiStub} from "../../testing/stubs/workspaces-api-stub";
+import {UserApiStub} from 'testing/stubs/user-api-stub';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 describe('WorkspaceShareComponent', () => {
-  let props: WorkspaceShareProps;
+  let props: Props;
 
   const component = () => {
-    return mount<WorkspaceShare, WorkspaceShareProps, WorkspaceShareState>
-    (<WorkspaceShare {...props}/>);
+    return mount(<WorkspaceShare {...props}/>);
   };
   const harry: User = {givenName: 'Harry', familyName: 'Potter', email: 'harry.potter@hogwarts.edu'};
   const harryRole: UserRole = {...harry, email: harry.email, role: WorkspaceAccessLevel.OWNER};
@@ -35,8 +35,12 @@ describe('WorkspaceShareComponent', () => {
   const luna: User = {givenName: 'Luna', familyName: 'Lovegood', email: 'luna.lovegood@hogwarts.edu'};
   const lunaRole: UserRole = {...luna, email: luna.email, role: WorkspaceAccessLevel.NOACCESS};
 
-  const tomRiddleDiary = {namespace: 'Horcrux', name: 'The Diary of Tom Marvolo Riddle',
-    userRoles: [harryRole, hermioneRole, ronRole], etag: '1', id: 'The Diary of Tom Marvolo Riddle'} as Workspace;
+  const tomRiddleDiary = {
+    namespace: 'Horcrux', name: 'The Diary of Tom Marvolo Riddle',
+    userRoles: [harryRole, hermioneRole, ronRole],
+    etag: '1', id: 'The Diary of Tom Marvolo Riddle',
+    accessLevel: WorkspaceAccessLevel.OWNER
+  } as WorkspaceData;
 
   const getSelectString = (user: UserRole) => {
     return '.' + (user.email).replace(/[@\.]/g, '')
@@ -50,9 +54,9 @@ describe('WorkspaceShareComponent', () => {
       onClose: () => {},
       workspace: tomRiddleDiary,
       accessLevel: WorkspaceAccessLevel.OWNER,
-      userEmail: 'harry.potter@hogwarts.edu',
-      sharing: true
+      userEmail: 'harry.potter@hogwarts.edu'
     };
+    currentWorkspaceStore.next(tomRiddleDiary);
   });
 
   it('display correct users', () => {
@@ -60,10 +64,11 @@ describe('WorkspaceShareComponent', () => {
     expect(wrapper).toBeTruthy();
     expect(wrapper.find('[data-test-id="collab-user-name"]').length).toBe(3);
     expect(wrapper.find('[data-test-id="collab-user-email"]').length).toBe(3);
-    const expectedNames = [harry, hermione, ron].map(u => u.givenName + ' ' + u.familyName);
-    expect(wrapper.find('[data-test-id="collab-user-name"]').map(el => el.text())).toEqual(expectedNames);
-    const expectedEmails = [harry, hermione, ron].map(u => u.email);
-    expect(wrapper.find('[data-test-id="collab-user-email"]').map(el => el.text())).toEqual(expectedEmails);
+    const expectedUsers = fp.sortBy('familyName', [harry, hermione, ron]);
+    expect(wrapper.find('[data-test-id="collab-user-name"]').map(el => el.text()))
+      .toEqual(expectedUsers.map(u => u.givenName + ' ' + u.familyName));
+    expect(wrapper.find('[data-test-id="collab-user-email"]').map(el => el.text()))
+      .toEqual(expectedUsers.map(u => u.email));
   });
 
   it('displays correct role info', () => {
@@ -77,7 +82,8 @@ describe('WorkspaceShareComponent', () => {
   it('removes user correctly', () => {
     const wrapper = component();
     wrapper.find('[data-test-id="remove-collab-ron.weasley@hogwarts.edu"]').first().simulate('click');
-    const expectedNames = [harry, hermione].map(u => u.givenName + ' ' + u.familyName);
+    const expectedNames = fp.sortBy('familyName', [harry, hermione])
+      .map(u => u.givenName + ' ' + u.familyName);
     expect(wrapper.find('[data-test-id="collab-user-name"]').map(el => el.text())).toEqual(expectedNames);
   });
 
@@ -90,7 +96,8 @@ describe('WorkspaceShareComponent', () => {
     wrapper.update();
     clock.uninstall();
     wrapper.find('[data-test-id="add-collab-luna.lovegood@hogwarts.edu"]').first().simulate('click');
-    const expectedNames = [harry, hermione, ron, luna].map(u => u.givenName + ' ' + u.familyName);
+    const expectedNames = fp.sortBy('familyName', [harry, hermione, ron, luna])
+      .map(u => u.givenName + ' ' + u.familyName);
     expect(wrapper.find('[data-test-id="collab-user-name"]').map(el => el.text())).toEqual(expectedNames);
   });
 
@@ -133,8 +140,9 @@ describe('WorkspaceShareComponent', () => {
     wrapper.find('[data-test-id="save"]').first().simulate('click');
     expect(spy).toHaveBeenCalledWith(tomRiddleDiary.namespace, tomRiddleDiary.name,
       {workspaceEtag: tomRiddleDiary.etag,
-        items: [harryRole, {...hermioneRole, role: WorkspaceAccessLevel.OWNER},
-          {...lunaRole, role: WorkspaceAccessLevel.READER}]});
+        items: fp.sortBy('familyName', [harryRole,
+          {...hermioneRole, role: WorkspaceAccessLevel.OWNER},
+          {...lunaRole, role: WorkspaceAccessLevel.READER}])});
   });
 
 });

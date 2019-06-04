@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class AuditControllerTest {
@@ -61,14 +61,10 @@ public class AuditControllerTest {
     }
   }
 
-  @Autowired
-  BigQueryService bigQueryService;
-  @Autowired
-  UserDao userDao;
-  @Autowired
-  CdrVersionDao cdrVersionDao;
-  @Autowired
-  AuditController auditController;
+  @Autowired BigQueryService bigQueryService;
+  @Autowired UserDao userDao;
+  @Autowired CdrVersionDao cdrVersionDao;
+  @Autowired AuditController auditController;
 
   @Before
   public void setUp() {
@@ -92,19 +88,21 @@ public class AuditControllerTest {
   // TODO(RW-350): This stubbing is awful, improve this.
   private void stubBigQueryCalls(String projectId, String email, long total) {
     TableResult queryResult = mock(TableResult.class);
-    Iterable testIterable = new Iterable() {
-        @Override
-        public Iterator iterator() {
-          List<FieldValue> list = new ArrayList<>();
-          list.add(null);
-          return list.iterator();
-        }
-      };
-    Map<String, Integer> rm = ImmutableMap.<String, Integer>builder()
-        .put("client_project_id", 0)
-        .put("user_email", 1)
-        .put("total", 2)
-        .build();
+    Iterable testIterable =
+        new Iterable() {
+          @Override
+          public Iterator iterator() {
+            List<FieldValue> list = new ArrayList<>();
+            list.add(null);
+            return list.iterator();
+          }
+        };
+    Map<String, Integer> rm =
+        ImmutableMap.<String, Integer>builder()
+            .put("client_project_id", 0)
+            .put("user_email", 1)
+            .put("total", 2)
+            .build();
 
     when(bigQueryService.executeQuery(any())).thenReturn(queryResult);
     when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);

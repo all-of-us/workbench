@@ -4,7 +4,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import org.pmiops.workbench.model.Authority;
 
 /**
@@ -13,7 +12,7 @@ import org.pmiops.workbench.model.Authority;
  */
 // Annotations on methods are never inherited, even with the @Inherited annotation.
 @Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)  // By default (CLASS), the VM may discard annotations.
+@Retention(RetentionPolicy.RUNTIME) // By default (CLASS), the VM may discard annotations.
 public @interface AuthorityRequired {
   Authority[] value();
 }

@@ -1,15 +1,14 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class ParameterPredicates {
 
@@ -17,58 +16,64 @@ public class ParameterPredicates {
   private static final int DIASTOLIC = 903115;
 
   private static final List<String> ICD_TYPES =
-    Arrays.asList(TreeType.ICD9.toString(),
-      TreeType.ICD10.toString());
+      Arrays.asList(TreeType.ICD9.toString(), TreeType.ICD10.toString());
 
   private static final List<String> CODE_TYPES =
-    Arrays.asList(TreeType.ICD9.toString(),
-      TreeType.ICD10.toString(),
-      TreeType.CPT.toString(),
-      TreeType.SNOMED.toString());
+      Arrays.asList(
+          TreeType.ICD9.toString(),
+          TreeType.ICD10.toString(),
+          TreeType.CPT.toString(),
+          TreeType.SNOMED.toString());
 
   private static final List<String> CODE_SUBTYPES =
-    Arrays.asList(TreeSubType.CM.toString(),
-      TreeSubType.PROC.toString(),
-      TreeSubType.CM.toString(),
-      TreeSubType.PCS.toString(),
-      TreeSubType.CPT4.toString());
+      Arrays.asList(
+          TreeSubType.CM.toString(),
+          TreeSubType.PROC.toString(),
+          TreeSubType.CM.toString(),
+          TreeSubType.PCS.toString(),
+          TreeSubType.CPT4.toString());
 
   private static final List<String> DEMO_SUBTYPES =
-    Arrays.asList(TreeSubType.AGE.toString(),
-      TreeSubType.DEC.toString(),
-      TreeSubType.GEN.toString(),
-      TreeSubType.RACE.toString(),
-      TreeSubType.ETH.toString());
+      Arrays.asList(
+          TreeSubType.AGE.toString(),
+          TreeSubType.DEC.toString(),
+          TreeSubType.GEN.toString(),
+          TreeSubType.RACE.toString(),
+          TreeSubType.ETH.toString());
 
   private static final List<String> PM_SUBTYPES =
-    Arrays.asList(TreeSubType.BP.toString(),
-      TreeSubType.HR.toString(),
-      TreeSubType.HR_DETAIL.toString(),
-      TreeSubType.HEIGHT.toString(),
-      TreeSubType.WEIGHT.toString(),
-      TreeSubType.BMI.toString(),
-      TreeSubType.WC.toString(),
-      TreeSubType.HC.toString(),
-      TreeSubType.PREG.toString(),
-      TreeSubType.WHEEL.toString(),
-      TreeSubType.HR_IRR.toString(),
-      TreeSubType.HR_NOIRR.toString());
+      Arrays.asList(
+          TreeSubType.BP.toString(),
+          TreeSubType.HR.toString(),
+          TreeSubType.HR_DETAIL.toString(),
+          TreeSubType.HEIGHT.toString(),
+          TreeSubType.WEIGHT.toString(),
+          TreeSubType.BMI.toString(),
+          TreeSubType.WC.toString(),
+          TreeSubType.HC.toString(),
+          TreeSubType.PREG.toString(),
+          TreeSubType.WHEEL.toString(),
+          TreeSubType.HR_IRR.toString(),
+          TreeSubType.HR_NOIRR.toString());
 
   private static final List<String> DEMO_GEN_RACE_ETH_SUBTYPES =
-    Arrays.asList(TreeSubType.GEN.toString(),
-      TreeSubType.RACE.toString(),
-      TreeSubType.ETH.toString());
+      Arrays.asList(
+          TreeSubType.GEN.toString(), TreeSubType.RACE.toString(), TreeSubType.ETH.toString());
 
   public static Predicate<List<SearchParameter>> parametersEmpty() {
     return params -> params.isEmpty();
   }
 
   public static Predicate<List<SearchParameter>> containsAgeAndDec() {
-    return params -> params
-      .stream()
-      .filter(param -> TreeSubType.AGE.toString().equalsIgnoreCase(param.getSubtype()) ||
-        TreeSubType.DEC.toString().equalsIgnoreCase(param.getSubtype()))
-      .collect(Collectors.toList()).size() == 2;
+    return params ->
+        params.stream()
+                .filter(
+                    param ->
+                        TreeSubType.AGE.toString().equalsIgnoreCase(param.getSubtype())
+                            || TreeSubType.DEC.toString().equalsIgnoreCase(param.getSubtype()))
+                .collect(Collectors.toList())
+                .size()
+            == 2;
   }
 
   public static Predicate<SearchParameter> attributesEmpty() {
@@ -152,16 +157,20 @@ public class ParameterPredicates {
   }
 
   public static Predicate<SearchParameter> notNumAttr() {
-    return sp -> sp.getAttributes()
-      .stream()
-      .filter(a -> AttrName.NUM.equals(a.getName()))
-      .collect(Collectors.toList()).size() == 0;
+    return sp ->
+        sp.getAttributes().stream()
+                .filter(a -> AttrName.NUM.equals(a.getName()))
+                .collect(Collectors.toList())
+                .size()
+            == 0;
   }
 
   public static Predicate<SearchParameter> notSystolicAndDiastolic() {
-    return sp -> sp.getAttributes()
-      .stream()
-      .filter(a -> SYSTOLIC != a.getConceptId() && DIASTOLIC != a.getConceptId())
-      .collect(Collectors.toList()).size() != 0;
+    return sp ->
+        sp.getAttributes().stream()
+                .filter(a -> SYSTOLIC != a.getConceptId() && DIASTOLIC != a.getConceptId())
+                .collect(Collectors.toList())
+                .size()
+            != 0;
   }
 }

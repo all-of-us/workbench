@@ -4,9 +4,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 
-/**
- * Mutable clock implementation for testing.
- */
+/** Mutable clock implementation for testing. */
 public class FakeClock extends Clock {
 
   private Instant instant;

@@ -15,5 +15,4 @@ public class CallsRealMethodsWithDelay extends CallsRealMethods {
     Thread.sleep(delay);
     return super.answer(invocation);
   }
-
 }

@@ -31,7 +31,6 @@ public class CdrBigQuerySchemaConfigService {
     }
   }
 
-
   private final Provider<CdrBigQuerySchemaConfig> configProvider;
 
   @Autowired
@@ -68,10 +67,9 @@ public class CdrBigQuerySchemaConfigService {
       }
     }
     if (standardConceptColumn == null || sourceConceptColumn == null) {
-      throw new ServerErrorException("Could not find standard and source concept columns for table "
-          + tableName);
+      throw new ServerErrorException(
+          "Could not find standard and source concept columns for table " + tableName);
     }
     return new ConceptColumns(standardConceptColumn, sourceConceptColumn);
   }
-
 }

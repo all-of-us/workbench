@@ -39,6 +39,10 @@ jobs:
           working_directory: ~/workbench/api
           command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
       - run:
+          name: Java linting
+          working_directory: ~/workbench/api
+          command: ./gradlew spotlessCheck
+      - run:
           name: Integration tests compile
           working_directory: ~/workbench/api
           command: ./project.rb gradle compileBigQuery compileIntegration

@@ -55,6 +55,11 @@ https://github.com/all-of-us/workbench based on your upload.
 
 After responding to changes, merge in GitHub.
 
+### API
+
+* Autoformat Java code via google-java-format: `./gradlew spotlessApply` (git pre-push / Circle will complain if you forget)
+* Optionally, [set up Intellij](https://docs.google.com/document/d/18N4oz_GGLUPavMnUhsaOheaRDIti8DuK6QlVpcZlFWE/edit) - including autoformatting 
+
 ### UI
 
 * Direct your editor to write swap files outside the source tree, so Webpack

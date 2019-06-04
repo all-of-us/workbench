@@ -3,11 +3,13 @@ import {Component, Input, OnInit} from '@angular/core';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {isBlank, reactStyles, ReactWrapperBase} from 'app/utils';
+import {isBlank, reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 
+import {Select} from 'app/components/inputs';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import Select from 'react-select';
 
 import {User} from 'generated';
 
@@ -21,45 +23,7 @@ import {
 import {Button} from 'app/components/buttons';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
-
-const selectStyles = {
-  option: (libstyles, {isSelected}) => ({
-    ...libstyles,
-    lineHeight: '1rem',
-    fontSize: '12px',
-    color: colors.black[0],
-    backgroundColor: isSelected ? '#E0EAF1' : '#FFFFFF'
-  }),
-  control: (libstyles, {isDisabled}) => ({
-    color: isDisabled ? '#7f7f7f' : '#000000',
-    display: 'flex',
-    height: '1rem',
-    fontSize: '12px',
-    fontSpacing: '13px'
-  }),
-  menu: (libstyles) => ({
-    ...libstyles,
-    top: '-.15rem',
-    position: 'absolute',
-  }),
-  container: (libstyles, {isDisabled}) => ({
-    color: isDisabled ? '#7f7f7f' : '#000000',
-    borderRadius: '5px',
-    border: isDisabled ? 0 : '1px solid #CCCCCC',
-    borderWidth: '1px',
-    width: '6rem',
-    position: 'relative'
-  }),
-  dropdownIndicator: (libstyles, {isDisabled}) => ({
-    ...libstyles,
-    color: colors.black[0],
-    paddingTop: '12px',
-    display: isDisabled ? 'none' : ''
-  }),
-  indicatorSeparator: () => ({
-    display: 'none'
-  })
-};
+import {SpinnerOverlay} from 'app/components/spinners';
 
 const styles = reactStyles( {
   tooltipLabel: {
@@ -175,42 +139,41 @@ export const UserRoleOptions = [
   {value: WorkspaceAccessLevel.OWNER, label: 'Owner'}
 ];
 
-export interface WorkspaceShareState {
+export interface State {
   autocompleteLoading: boolean;
   autocompleteUsers: User[];
   userNotFound: string;
   workspaceShareError: boolean;
-  usersLoading: boolean;
+  saving: boolean;
   workspaceFound: boolean;
   workspaceUpdateConflictError: boolean;
-  workspace: Workspace;
+  userRoles: UserRole[];
   searchTerm: string;
   dropDown: boolean;
 }
 
-export interface WorkspaceShareProps {
+export interface Props {
   workspace: Workspace;
   accessLevel: WorkspaceAccessLevel;
   userEmail: string;
   onClose: Function;
-  sharing: boolean;
 }
 
-export class WorkspaceShare extends React.Component<WorkspaceShareProps, WorkspaceShareState> {
+export const WorkspaceShare = withCurrentWorkspace()(class extends React.Component<Props, State> {
   searchTermChangedEvent: Function;
   searchingNode: HTMLElement;
 
-  constructor(props: WorkspaceShareProps) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       autocompleteLoading: false,
       autocompleteUsers: [],
       userNotFound: '',
       workspaceShareError: false,
-      usersLoading: false,
+      saving: false,
       workspaceFound: (this.props.workspace !== null),
       workspaceUpdateConflictError: false,
-      workspace: this.props.workspace,
+      userRoles: fp.sortBy('familyName', this.props.workspace.userRoles),
       searchTerm: '',
       dropDown: false,
     };
@@ -226,21 +189,19 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   }
 
   save(): void {
-    if (this.state.usersLoading) {
+    if (this.state.saving) {
       return;
     }
-    this.setState({usersLoading: true, workspaceShareError: false});
-    workspacesApi().shareWorkspace(this.state.workspace.namespace,
-      this.state.workspace.id,
-      {workspaceEtag: this.state.workspace.etag, items: this.state.workspace.userRoles})
+    this.setState({saving: true, workspaceShareError: false});
+    workspacesApi().shareWorkspace(this.props.workspace.namespace,
+      this.props.workspace.id,
+      {workspaceEtag: this.props.workspace.etag, items: this.state.userRoles})
       .then((resp: ShareWorkspaceResponse) => {
-        const updatedWorkspace = {
-          ...this.state.workspace,
+        currentWorkspaceStore.next({
+          ...currentWorkspaceStore.getValue(),
           etag: resp.workspaceEtag,
           userRoles: resp.items
-        };
-        this.setState({usersLoading: false, userNotFound: '',
-          searchTerm: '', workspace: updatedWorkspace});
+        } as WorkspaceData);
         this.props.onClose();
       }).catch(error => {
         if (error.status === 400) {
@@ -250,29 +211,25 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         } else {
           this.setState({workspaceShareError: true});
         }
-        this.setState({usersLoading: false});
+        this.setState({saving: false});
       });
   }
 
   onCancel(): void {
-    // Reload the workspace to remove the temp added user/user roles in state variable workspace
-    this.reloadWorkspace();
     this.props.onClose();
   }
 
   removeCollaborator(user: UserRole): void {
-    this.setState(({workspace}) => ({
-      workspace: {...workspace,
-        userRoles: fp.remove(({email}) => {
-          return user.email === email;
-        }, workspace.userRoles)} as Workspace}
-    ));
+    this.setState({
+      userRoles: fp.remove(({email}) => {
+        return user.email === email;
+      }, this.state.userRoles)});
   }
 
   reloadWorkspace(): void {
-    workspacesApi().getWorkspace(this.state.workspace.namespace, this.state.workspace.id)
+    workspacesApi().getWorkspace(this.props.workspace.namespace, this.props.workspace.id)
       .then((workspaceResponse) => {
-        this.setState({workspace: workspaceResponse.workspace});
+        this.setState({userRoles: workspaceResponse.workspace.userRoles});
         this.resetModalState();
       })
       .catch(({status}) => {
@@ -285,10 +242,9 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   addCollaborator(user: User): void {
     const userRole: UserRole = {givenName: user.givenName, familyName: user.familyName,
       email: user.email, role: WorkspaceAccessLevel.READER};
-    this.setState(({workspace}) => ({
+    this.setState({
       searchTerm: '', autocompleteLoading: false, autocompleteUsers: [], dropDown: false,
-      workspace: {...workspace, userRoles: fp.concat(workspace.userRoles, [userRole])} as Workspace}
-    ));
+      userRoles: fp.sortBy('familyName', this.state.userRoles.concat(userRole))});
   }
 
   userSearch(value: string): void {
@@ -305,7 +261,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         }
         response.users = fp.differenceWith((a, b) => {
           return a.email === b.email;
-        }, response.users, this.state.workspace.userRoles);
+        }, response.users, this.state.userRoles);
         this.setState({
           autocompleteUsers: response.users.splice(0, 4),
           autocompleteLoading: false,
@@ -314,13 +270,12 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       });
   }
 
-  setRole = (e, user)  => {
-    const oldUserRoles = this.state.workspace.userRoles;
+  setRole(e, user): void {
+    const oldUserRoles = this.state.userRoles;
     const newUserRoleList = fp.map((u) => {
-      return u.email === user.email ? {...u, role: e.value} : u;
+      return u.email === user.email ? {...u, role: e} : u;
     }, oldUserRoles);
-    this.setState(({workspace}) => ({
-      workspace: {...workspace, userRoles: newUserRoleList} as Workspace}));
+    this.setState({userRoles: newUserRoleList});
   }
 
   resetModalState(): void {
@@ -328,7 +283,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       userNotFound: '',
       workspaceShareError: false,
       workspaceUpdateConflictError: false,
-      usersLoading: false,
+      saving: false,
     });
   }
 
@@ -370,8 +325,9 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
 
   render() {
     return <React.Fragment>
-      {this.state.workspaceFound && this.props.sharing &&
+      {this.state.workspaceFound &&
       <Modal width={450}>
+        {this.state.saving && <SpinnerOverlay />}
         <ModalTitle style={styles.modalTitle}>
           <div>
           <label>Share {this.props.workspace.name}</label>
@@ -432,13 +388,9 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           {this.state.workspaceShareError && <div style={{color: 'red'}}>
             Failed to share workspace. Please try again.
           </div>}
-          {this.state.usersLoading && <div>
-            <span style={styles.spinner}/>
-            <span>Loading updated user list...</span>
-          </div>}
             <h3>Current Collaborators</h3>
           <div style={{overflowY: this.state.dropDown ? 'hidden' : 'auto'}}>
-            {this.state.workspace.userRoles.map((user, i) => {
+            {this.state.userRoles.map((user, i) => {
               return <div key={user.email}>
                 <div style={styles.wrapper}>
                   <div style={styles.box}>
@@ -448,17 +400,13 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                     </h5>
                     <div data-test-id='collab-user-email'
                          style={styles.userName}>{user.email}</div>
-                    <label>
-                      <Select styles={selectStyles} value={fp.find((u) => {
-                        return u.value === user.role;
-                      }, UserRoleOptions)}
-                              menuPortalTarget={document.getElementById('popup-root')}
-                              isDisabled={user.email === this.props.userEmail}
-                              classNamePrefix={this.cleanClassNameForSelect(user.email)}
-                              data-test-id={user.email + '-user-role'}
-                              onChange={e => this.setRole(e, user)}
-                              options={UserRoleOptions}/>
-                    </label>
+                    <Select value={user.role}
+                            menuPortalTarget={document.getElementById('popup-root')}
+                            isDisabled={user.email === this.props.userEmail}
+                            classNamePrefix={this.cleanClassNameForSelect(user.email)}
+                            data-test-id={user.email + '-user-role'}
+                            onChange={e => this.setRole(e, user)}
+                            options={UserRoleOptions}/>
                   </div>
                 <div style={styles.box}>
                   <div style={styles.collaboratorIcon}>
@@ -469,7 +417,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                   </div>
                 </div>
                 </div>
-                  {(this.state.workspace.userRoles.length !== i + 1) &&
+                  {(this.state.userRoles.length !== i + 1) &&
                   <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>}
               </div>;
             })}
@@ -483,7 +431,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         </ModalFooter>
       </Modal>}
       {!this.state.workspaceFound && <div>
-        <h3>The workspace {this.state.workspace.id} could not be found</h3></div>}
+        <h3>The workspace {this.props.workspace.id} could not be found</h3></div>}
       {this.state.workspaceUpdateConflictError && <Modal>
         <ModalTitle>Conflicting update:</ModalTitle>
         <ModalBody>
@@ -497,7 +445,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       </Modal>}
     </React.Fragment>;
   }
-}
+});
 
 @Component({
   selector: 'app-workspace-share',
@@ -506,12 +454,11 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
 export class WorkspaceShareComponent extends ReactWrapperBase implements OnInit {
   @Input('workspace') workspace: Workspace;
   @Input('accessLevel') accessLevel: WorkspaceAccessLevel;
-  @Input('userEmail') userEmail: WorkspaceShareProps['userEmail'];
-  @Input('sharing') sharing: boolean;
-  @Input('onClose') onClose: WorkspaceShareProps['onClose'];
+  @Input('userEmail') userEmail: Props['userEmail'];
+  @Input('onClose') onClose: Props['onClose'];
 
   constructor() {
-    super(WorkspaceShare, ['workspace', 'accessLevel', 'sharing', 'onClose', 'userEmail']);
+    super(WorkspaceShare, ['workspace', 'accessLevel', 'onClose', 'userEmail']);
   }
 
 }

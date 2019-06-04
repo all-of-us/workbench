@@ -3,7 +3,10 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import * as fp from 'lodash/fp';
 
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, navigate, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
+import {
+  currentWorkspaceStore, navigate, routeConfigDataStore, urlParamsStore,
+  userProfileStore
+} from 'app/utils/navigation';
 import {WorkspaceShareComponent} from 'app/views/workspace-share';
 
 import {
@@ -49,7 +52,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.tabPath = this.getTabPath();
-
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
         .subscribe(event => {
@@ -89,6 +91,15 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         currentWorkspaceStore.next(workspace);
       })
     );
+    this.subscriptions.push(currentWorkspaceStore.subscribe((workspace) => {
+      if (workspace) {
+        this.workspace = workspace;
+        this.accessLevel = workspace.accessLevel;
+      }
+    }));
+    this.subscriptions.push(userProfileStore.subscribe((profileResp) => {
+      this.username = profileResp.profile.username;
+    }));
   }
 
   ngOnDestroy() {

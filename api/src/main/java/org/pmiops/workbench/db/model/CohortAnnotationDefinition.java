@@ -21,120 +21,125 @@ import org.pmiops.workbench.model.AnnotationType;
 @Table(name = "cohort_annotation_definition")
 public class CohortAnnotationDefinition {
 
-    private long cohortAnnotationDefinitionId;
-    private long cohortId;
-    private String columnName;
-    private Short annotationType;
-    private SortedSet<CohortAnnotationEnumValue> enumValues = new TreeSet<>();
+  private long cohortAnnotationDefinitionId;
+  private long cohortId;
+  private String columnName;
+  private Short annotationType;
+  private SortedSet<CohortAnnotationEnumValue> enumValues = new TreeSet<>();
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cohort_annotation_definition_id")
-    public long getCohortAnnotationDefinitionId() {
-        return cohortAnnotationDefinitionId;
-    }
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "cohort_annotation_definition_id")
+  public long getCohortAnnotationDefinitionId() {
+    return cohortAnnotationDefinitionId;
+  }
 
-    public void setCohortAnnotationDefinitionId(long cohortAnnotationDefinitionId) {
-        this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
-    }
+  public void setCohortAnnotationDefinitionId(long cohortAnnotationDefinitionId) {
+    this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
+  }
 
-    public CohortAnnotationDefinition cohortAnnotationDefinitionId(long cohortAnnotationDefinitionId) {
-        this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
-        return this;
-    }
+  public CohortAnnotationDefinition cohortAnnotationDefinitionId(
+      long cohortAnnotationDefinitionId) {
+    this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
+    return this;
+  }
 
-    @Column(name = "cohort_id")
-    public long getCohortId() {
-        return cohortId;
-    }
+  @Column(name = "cohort_id")
+  public long getCohortId() {
+    return cohortId;
+  }
 
-    public void setCohortId(long cohortId) {
-        this.cohortId = cohortId;
-    }
+  public void setCohortId(long cohortId) {
+    this.cohortId = cohortId;
+  }
 
-    public CohortAnnotationDefinition cohortId(long cohortId) {
-        this.cohortId = cohortId;
-        return this;
-    }
+  public CohortAnnotationDefinition cohortId(long cohortId) {
+    this.cohortId = cohortId;
+    return this;
+  }
 
-    @Column(name = "column_name")
-    public String getColumnName() {
-        return columnName;
-    }
+  @Column(name = "column_name")
+  public String getColumnName() {
+    return columnName;
+  }
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
+  public void setColumnName(String columnName) {
+    this.columnName = columnName;
+  }
 
-    public CohortAnnotationDefinition columnName(String columnName) {
-        this.columnName = columnName;
-        return this;
-    }
+  public CohortAnnotationDefinition columnName(String columnName) {
+    this.columnName = columnName;
+    return this;
+  }
 
-    @Column(name = "annotation_type")
-    public Short getAnnotationType() {
-        return annotationType;
-    }
+  @Column(name = "annotation_type")
+  public Short getAnnotationType() {
+    return annotationType;
+  }
 
-    public void setAnnotationType(Short annotationType) {
-        this.annotationType = annotationType;
-    }
+  public void setAnnotationType(Short annotationType) {
+    this.annotationType = annotationType;
+  }
 
-    public CohortAnnotationDefinition annotationType(Short annotationType) {
-        this.annotationType = annotationType;
-        return this;
-    }
+  public CohortAnnotationDefinition annotationType(Short annotationType) {
+    this.annotationType = annotationType;
+    return this;
+  }
 
-    @Transient
-    public AnnotationType getAnnotationTypeEnum() {
-        return StorageEnums.annotationTypeFromStorage(getAnnotationType());
-    }
+  @Transient
+  public AnnotationType getAnnotationTypeEnum() {
+    return StorageEnums.annotationTypeFromStorage(getAnnotationType());
+  }
 
-    public void setAnnotationTypeEnum(AnnotationType annotationType) {
-        setAnnotationType(StorageEnums.annotationTypeToStorage(annotationType));
-    }
+  public void setAnnotationTypeEnum(AnnotationType annotationType) {
+    setAnnotationType(StorageEnums.annotationTypeToStorage(annotationType));
+  }
 
-    public CohortAnnotationDefinition annotationTypeEnum(AnnotationType annotationType) {
-        return this.annotationType(StorageEnums.annotationTypeToStorage(annotationType));
-    }
+  public CohortAnnotationDefinition annotationTypeEnum(AnnotationType annotationType) {
+    return this.annotationType(StorageEnums.annotationTypeToStorage(annotationType));
+  }
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "cohortAnnotationDefinition", orphanRemoval = true, cascade = CascadeType.ALL)
-    @OrderBy("cohortAnnotationEnumValueId ASC")
-    public SortedSet<CohortAnnotationEnumValue> getEnumValues() {
-        return enumValues;
-    }
+  @OneToMany(
+      fetch = FetchType.EAGER,
+      mappedBy = "cohortAnnotationDefinition",
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
+  @OrderBy("cohortAnnotationEnumValueId ASC")
+  public SortedSet<CohortAnnotationEnumValue> getEnumValues() {
+    return enumValues;
+  }
 
-    public void setEnumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
-        this.enumValues = enumValues;
-    }
+  public void setEnumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
+    this.enumValues = enumValues;
+  }
 
-    public CohortAnnotationDefinition enumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
-        this.setEnumValues(enumValues);
-        return this;
-    }
+  public CohortAnnotationDefinition enumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
+    this.setEnumValues(enumValues);
+    return this;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CohortAnnotationDefinition that = (CohortAnnotationDefinition) o;
-        return cohortId == that.cohortId &&
-                Objects.equals(columnName, that.columnName) &&
-                annotationType == that.annotationType;
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    CohortAnnotationDefinition that = (CohortAnnotationDefinition) o;
+    return cohortId == that.cohortId
+        && Objects.equals(columnName, that.columnName)
+        && annotationType == that.annotationType;
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(cohortId, columnName, annotationType);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hash(cohortId, columnName, annotationType);
+  }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("cohortAnnotationDefinitionId", cohortAnnotationDefinitionId)
-                .append("cohortId", cohortId)
-                .append("columnName", columnName)
-                .append("annotationType", annotationType)
-                .toString();
-    }
+  @Override
+  public String toString() {
+    return new ToStringBuilder(this)
+        .append("cohortAnnotationDefinitionId", cohortAnnotationDefinitionId)
+        .append("cohortId", cohortId)
+        .append("columnName", columnName)
+        .append("annotationType", annotationType)
+        .toString();
+  }
 }

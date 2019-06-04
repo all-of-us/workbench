@@ -5,10 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Returns a 503 to the client, indicating that the service temporarily can't handle the request
- * and the client should retry.
+ * Returns a 503 to the client, indicating that the service temporarily can't handle the request and
+ * the client should retry.
  *
- * Use {@link ServerErrorException} instead when there's a bug / condition we haven't figured out
+ * <p>Use {@link ServerErrorException} instead when there's a bug / condition we haven't figured out
  * how to handle yet.
  */
 @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)

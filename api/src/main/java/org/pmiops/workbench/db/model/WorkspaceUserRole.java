@@ -31,7 +31,7 @@ public class WorkspaceUserRole {
   }
 
   @ManyToOne
-  @JoinColumn(name="user_id")
+  @JoinColumn(name = "user_id")
   public User getUser() {
     return user;
   }
@@ -41,7 +41,7 @@ public class WorkspaceUserRole {
   }
 
   @ManyToOne
-  @JoinColumn(name="workspace_id")
+  @JoinColumn(name = "workspace_id")
   public Workspace getWorkspace() {
     return workspace;
   }
@@ -50,7 +50,7 @@ public class WorkspaceUserRole {
     this.workspace = workspace;
   }
 
-  @Column(name="role")
+  @Column(name = "role")
   public Short getRole() {
     return this.role;
   }

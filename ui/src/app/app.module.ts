@@ -48,7 +48,6 @@ import {ProfilePageComponent} from './views/profile-page';
 import {QuickTourModalComponent} from './views/quick-tour-modal';
 import {RecentWorkComponent} from './views/recent-work';
 import {ResetClusterButtonComponent} from './views/reset-cluster-button';
-import {ResourceCardComponent} from './views/resource-card';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SignInComponent} from './views/sign-in';
 import {SignedInComponent} from './views/signed-in/component';
@@ -161,7 +160,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ProfilePageComponent,
     QuickTourModalComponent,
     RecentWorkComponent,
-    ResourceCardComponent,
     RoutingSpinnerComponent,
     SignedInComponent,
     SignInComponent,

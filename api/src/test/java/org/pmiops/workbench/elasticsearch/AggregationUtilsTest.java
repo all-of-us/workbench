@@ -5,6 +5,7 @@ import static org.pmiops.workbench.elasticsearch.AggregationUtils.DATE;
 import static org.pmiops.workbench.elasticsearch.AggregationUtils.GENDER;
 import static org.pmiops.workbench.elasticsearch.AggregationUtils.RACE;
 import static org.pmiops.workbench.elasticsearch.AggregationUtils.RANGE_19_44;
+
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;

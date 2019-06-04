@@ -1,14 +1,13 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
-import org.apache.commons.lang3.math.NumberUtils;
-import org.pmiops.workbench.model.Modifier;
-import org.pmiops.workbench.model.Operator;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.pmiops.workbench.model.Modifier;
+import org.pmiops.workbench.model.Operator;
 
 public class ModifierPredicates {
 
@@ -33,11 +32,11 @@ public class ModifierPredicates {
   }
 
   public static Predicate<Modifier> operandsNotNumbers() {
-    return m -> !m
-      .getOperands()
-      .stream()
-      .filter(o -> !NumberUtils.isNumber(o))
-      .collect(Collectors.toList()).isEmpty();
+    return m ->
+        !m.getOperands().stream()
+            .filter(o -> !NumberUtils.isNumber(o))
+            .collect(Collectors.toList())
+            .isEmpty();
   }
 
   public static Predicate<Modifier> operatorNull() {
@@ -49,15 +48,19 @@ public class ModifierPredicates {
   }
 
   public static Predicate<Modifier> operandsNotDates() {
-    return m -> !m.getOperands().stream()
-      .filter(date -> {
-        try {
-          new SimpleDateFormat("yyyy-MM-dd").parse(date);
-          return false;
-        } catch (ParseException pe) {
-          return true;
-        }
-      }).collect(Collectors.toList()).isEmpty();
+    return m ->
+        !m.getOperands().stream()
+            .filter(
+                date -> {
+                  try {
+                    new SimpleDateFormat("yyyy-MM-dd").parse(date);
+                    return false;
+                  } catch (ParseException pe) {
+                    return true;
+                  }
+                })
+            .collect(Collectors.toList())
+            .isEmpty();
   }
 
   public static Predicate<Modifier> operatorNotIn() {

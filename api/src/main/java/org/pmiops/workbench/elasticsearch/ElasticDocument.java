@@ -23,7 +23,12 @@ import org.elasticsearch.common.xcontent.XContentType;
 public class ElasticDocument {
   /** The Elasticsearch primitive index types we utilize. */
   private enum ElasticType {
-    KEYWORD, INTEGER, FLOAT, DATE, NESTED, TEXT;
+    KEYWORD,
+    INTEGER,
+    FLOAT,
+    DATE,
+    NESTED,
+    TEXT;
 
     String lower() {
       return this.name().toLowerCase();
@@ -33,50 +38,54 @@ public class ElasticDocument {
   // An unfortunate manual mapping of column name to BigQuery index in the nested struct query for
   // domain types. BigQuery does not return a schema for nested types therefore we cannot lookup
   // result columns by name (only index).
-  private static final Map<String, Integer> BIG_QUERY_COLUMN_INDICES = ImmutableMap.<String, Integer>builder()
-      .put("concept_id", 0)
-      .put("source_concept_id", 1)
-      .put("start_date", 2)
-      .put("age_at_start", 3)
-      .put("visit_concept_id", 4)
-      .put("value_as_number", 5)
-      .put("value_as_concept_id", 6)
-      .build();
+  private static final Map<String, Integer> BIG_QUERY_COLUMN_INDICES =
+      ImmutableMap.<String, Integer>builder()
+          .put("concept_id", 0)
+          .put("source_concept_id", 1)
+          .put("start_date", 2)
+          .put("age_at_start", 3)
+          .put("visit_concept_id", 4)
+          .put("value_as_number", 5)
+          .put("value_as_concept_id", 6)
+          .build();
 
-  private static final Map<String, Object> NESTED_FOREIGN_SCHEMA = ImmutableMap.of(
-      "type", ElasticType.NESTED.lower(),
-      "properties", ImmutableMap.builder()
-          .put("concept_id", esType(ElasticType.KEYWORD))
-          .put("source_concept_id", esType(ElasticType.KEYWORD))
-          // Domain-dependent fields follow (may be unpopulated).
-          .put("start_date", esType(ElasticType.DATE))
-          .put("age_at_start", esType(ElasticType.INTEGER))
-          .put("visit_concept_id", esType(ElasticType.KEYWORD))
-          .put("value_as_number", esType(ElasticType.FLOAT))
-          .put("value_as_concept_id", esType(ElasticType.KEYWORD))
-          .build());
+  private static final Map<String, Object> NESTED_FOREIGN_SCHEMA =
+      ImmutableMap.of(
+          "type", ElasticType.NESTED.lower(),
+          "properties",
+              ImmutableMap.builder()
+                  .put("concept_id", esType(ElasticType.KEYWORD))
+                  .put("source_concept_id", esType(ElasticType.KEYWORD))
+                  // Domain-dependent fields follow (may be unpopulated).
+                  .put("start_date", esType(ElasticType.DATE))
+                  .put("age_at_start", esType(ElasticType.INTEGER))
+                  .put("visit_concept_id", esType(ElasticType.KEYWORD))
+                  .put("value_as_number", esType(ElasticType.FLOAT))
+                  .put("value_as_concept_id", esType(ElasticType.KEYWORD))
+                  .build());
 
-  public static final Map<String, Object> PERSON_SCHEMA = ImmutableMap.<String, Object>builder()
-      .put("birth_datetime", esType(ElasticType.DATE))
-      .put("gender_concept_id", esType(ElasticType.KEYWORD))
-      .put("gender_concept_name", esType(ElasticType.KEYWORD))
-      .put("race_concept_id", esType(ElasticType.KEYWORD))
-      .put("race_concept_name", esType(ElasticType.KEYWORD))
-      .put("ethnicity_concept_id", esType(ElasticType.KEYWORD))
-      .put("ethnicity_concept_name", esType(ElasticType.KEYWORD))
-      .put("condition_concept_ids", esType(ElasticType.KEYWORD))
-      .put("condition_source_concept_ids", esType(ElasticType.KEYWORD))
-      .put("observation_concept_ids", esType(ElasticType.KEYWORD))
-      .put("observation_source_concept_ids", esType(ElasticType.KEYWORD))
-      .put("drug_concept_ids", esType(ElasticType.KEYWORD))
-      .put("drug_source_concept_ids", esType(ElasticType.KEYWORD))
-      .put("procedure_concept_ids", esType(ElasticType.KEYWORD))
-      .put("procedure_source_concept_ids", esType(ElasticType.KEYWORD))
-      .put("measurement_concept_ids", esType(ElasticType.KEYWORD))
-      .put("measurement_source_concept_ids", esType(ElasticType.KEYWORD))
-      .put("visit_concept_ids", esType(ElasticType.KEYWORD))
-      .put("events", NESTED_FOREIGN_SCHEMA)
-      .build();
+  public static final Map<String, Object> PERSON_SCHEMA =
+      ImmutableMap.<String, Object>builder()
+          .put("birth_datetime", esType(ElasticType.DATE))
+          .put("gender_concept_id", esType(ElasticType.KEYWORD))
+          .put("gender_concept_name", esType(ElasticType.KEYWORD))
+          .put("race_concept_id", esType(ElasticType.KEYWORD))
+          .put("race_concept_name", esType(ElasticType.KEYWORD))
+          .put("ethnicity_concept_id", esType(ElasticType.KEYWORD))
+          .put("ethnicity_concept_name", esType(ElasticType.KEYWORD))
+          .put("condition_concept_ids", esType(ElasticType.KEYWORD))
+          .put("condition_source_concept_ids", esType(ElasticType.KEYWORD))
+          .put("observation_concept_ids", esType(ElasticType.KEYWORD))
+          .put("observation_source_concept_ids", esType(ElasticType.KEYWORD))
+          .put("drug_concept_ids", esType(ElasticType.KEYWORD))
+          .put("drug_source_concept_ids", esType(ElasticType.KEYWORD))
+          .put("procedure_concept_ids", esType(ElasticType.KEYWORD))
+          .put("procedure_source_concept_ids", esType(ElasticType.KEYWORD))
+          .put("measurement_concept_ids", esType(ElasticType.KEYWORD))
+          .put("measurement_source_concept_ids", esType(ElasticType.KEYWORD))
+          .put("visit_concept_ids", esType(ElasticType.KEYWORD))
+          .put("events", NESTED_FOREIGN_SCHEMA)
+          .build();
 
   private static Map<String, Object> esType(ElasticType t) {
     return ImmutableMap.of("type", t.lower());
@@ -99,8 +108,7 @@ public class ElasticDocument {
       return false;
     }
     ElasticDocument that = (ElasticDocument) o;
-    return id.equals(that.id) &&
-        source.equals(that.source);
+    return id.equals(that.id) && source.equals(that.source);
   }
 
   @Override
@@ -108,9 +116,7 @@ public class ElasticDocument {
     return Objects.hash(id, source);
   }
 
-  /**
-   * Converts a line of BigQuery results JSON to an Elasticsearch document.
-   */
+  /** Converts a line of BigQuery results JSON to an Elasticsearch document. */
   public static ElasticDocument fromBigQueryJson(String line) throws IOException {
     JsonObject doc = new JsonParser().parse(line).getAsJsonObject();
     String id = doc.remove("_id").getAsString();
@@ -119,9 +125,7 @@ public class ElasticDocument {
     return new ElasticDocument(id, builder);
   }
 
-  /**
-   * Converts a row of BigQuery results to an Elasticsearch document suitable for indexing.
-   */
+  /** Converts a row of BigQuery results to an Elasticsearch document suitable for indexing. */
   public static ElasticDocument fromBigQueryResults(FieldValueList fvl) {
     // The id must be ingested separately from the source document, so we first remove it from the
     // BigQuery JSON results.
@@ -139,11 +143,12 @@ public class ElasticDocument {
 
   /**
    * Recursively convert BigQuery results into a format consumable by Elastic. BigQuery result
-   * columns must exactly match the target Elasticsearch schema, and the resulting documents
-   * are encoded as a nested "JSON" structure of type Map<String, Object>.
+   * columns must exactly match the target Elasticsearch schema, and the resulting documents are
+   * encoded as a nested "JSON" structure of type Map<String, Object>.
    */
   @SuppressWarnings("unchecked")
-  private static Map<String, Object> bqToElasticSchema(FieldValueList fvl, Map<String, Object> elasticSchema) {
+  private static Map<String, Object> bqToElasticSchema(
+      FieldValueList fvl, Map<String, Object> elasticSchema) {
     Map<String, Object> doc = Maps.newHashMap();
     for (String k : elasticSchema.keySet()) {
       Map<String, Object> prop = (Map<String, Object>) elasticSchema.get(k);
@@ -166,8 +171,10 @@ public class ElasticDocument {
         case INTEGER:
         case FLOAT:
           if (isRepeated) {
-            val = fv.getRepeatedValue().stream().map(FieldValue::getNumericValue)
-                .collect(Collectors.toList());
+            val =
+                fv.getRepeatedValue().stream()
+                    .map(FieldValue::getNumericValue)
+                    .collect(Collectors.toList());
           } else {
             val = fv.getNumericValue();
           }
@@ -176,7 +183,10 @@ public class ElasticDocument {
         case KEYWORD:
         case TEXT:
           if (isRepeated) {
-            val = fv.getRepeatedValue().stream().map(FieldValue::getStringValue).collect(Collectors.toList());
+            val =
+                fv.getRepeatedValue().stream()
+                    .map(FieldValue::getStringValue)
+                    .collect(Collectors.toList());
           } else {
             val = fv.getStringValue();
           }
@@ -184,7 +194,10 @@ public class ElasticDocument {
         case NESTED:
           Map<String, Object> nestedSchema = (Map<String, Object>) prop.get("properties");
           if (isRepeated) {
-            val = fv.getRepeatedValue().stream().map(f -> bqToElasticSchema(f.getRecordValue(), nestedSchema)).collect(Collectors.toList());
+            val =
+                fv.getRepeatedValue().stream()
+                    .map(f -> bqToElasticSchema(f.getRecordValue(), nestedSchema))
+                    .collect(Collectors.toList());
           } else {
             val = bqToElasticSchema(fv.getRecordValue(), nestedSchema);
           }

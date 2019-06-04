@@ -1,5 +1,8 @@
 package org.pmiops.workbench.api;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.*;
+
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
@@ -8,6 +11,15 @@ import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import com.google.gson.Gson;
+import java.io.FileReader;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -50,16 +62,16 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetExportRequest;
-import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DataSetQueryList;
+import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
@@ -82,24 +94,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Provider;
-
-import java.io.FileReader;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
-
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class DataSetControllerTest {
@@ -123,98 +121,86 @@ public class DataSetControllerTest {
   String cohortCriteria;
   SearchRequest searchRequest;
 
-  @Autowired
-  BillingProjectBufferService billingProjectBufferService;
+  @Autowired BillingProjectBufferService billingProjectBufferService;
 
-  @Autowired
-  BigQueryService bigQueryService;
+  @Autowired BigQueryService bigQueryService;
 
-  @Autowired
-  CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
+  @Autowired CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
 
-  @Autowired
-  CdrVersionDao cdrVersionDao;
+  @Autowired CdrVersionDao cdrVersionDao;
 
-  @Autowired
-  CdrVersionService cdrVersionService;
+  @Autowired CdrVersionService cdrVersionService;
 
-  @Autowired
-  CloudStorageService cloudStorageService;
+  @Autowired CloudStorageService cloudStorageService;
 
-  @Autowired
-  CohortDao cohortDao;
+  @Autowired CohortDao cohortDao;
 
-  @Autowired
-  CohortFactory cohortFactory;
+  @Autowired CohortFactory cohortFactory;
 
-  @Autowired
-  CohortMaterializationService cohortMaterializationService;
+  @Autowired CohortMaterializationService cohortMaterializationService;
 
-  @Autowired
-  CohortReviewDao cohortReviewDao;
+  @Autowired CohortReviewDao cohortReviewDao;
 
-  @Autowired
-  ConceptBigQueryService conceptBigQueryService;
+  @Autowired ConceptBigQueryService conceptBigQueryService;
 
-  @Autowired
-  ConceptDao conceptDao;
+  @Autowired ConceptDao conceptDao;
 
-  @Autowired
-  ConceptSetDao conceptSetDao;
+  @Autowired ConceptSetDao conceptSetDao;
 
-  @Autowired
-  DataSetDao dataSetDao;
+  @Autowired DataSetDao dataSetDao;
 
-  @Autowired
-  DataSetService dataSetService;
+  @Autowired DataSetService dataSetService;
 
-  @Autowired
-  FireCloudService fireCloudService;
+  @Autowired FireCloudService fireCloudService;
 
-  @Autowired
-  CohortQueryBuilder cohortQueryBuilder;
+  @Autowired CohortQueryBuilder cohortQueryBuilder;
 
-  @Autowired
-  TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
+  @Autowired TestBigQueryCdrSchemaConfig testBigQueryCdrSchemaConfig;
 
-  @Autowired
-  UserDao userDao;
+  @Autowired UserDao userDao;
 
-  @Mock
-  Provider<User> userProvider;
+  @Mock Provider<User> userProvider;
 
-  @Autowired
-  Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  @Autowired
-  NotebooksService notebooksService;
+  @Autowired NotebooksService notebooksService;
 
-  @Autowired
-  UserRecentResourceService userRecentResourceService;
+  @Autowired UserRecentResourceService userRecentResourceService;
 
-  @Autowired
-  UserService userService;
+  @Autowired UserService userService;
 
-  @Autowired
-  WorkspaceService workspaceService;
+  @Autowired WorkspaceService workspaceService;
 
-  @Autowired
-  WorkspaceMapper workspaceMapper;
+  @Autowired WorkspaceMapper workspaceMapper;
 
   @TestConfiguration
-  @Import({CohortFactoryImpl.class,
-      DataSetServiceImpl.class,
-      TestBigQueryCdrSchemaConfig.class,
-      UserService.class,
-      WorkspacesController.class,
-      WorkspaceMapper.class,
-      WorkspaceServiceImpl.class})
-  @MockBean({BillingProjectBufferService.class, BigQueryService.class, CdrBigQuerySchemaConfigService.class, CdrVersionService.class,
-      CloudStorageService.class, CohortCloningService.class,
-      CohortMaterializationService.class, ComplianceService.class,
-      ConceptBigQueryService.class, ConceptSetService.class, DataSetService.class,
-      FireCloudService.class, DirectoryService.class, NotebooksService.class,
-      CohortQueryBuilder.class, UserRecentResourceService.class})
+  @Import({
+    CohortFactoryImpl.class,
+    DataSetServiceImpl.class,
+    TestBigQueryCdrSchemaConfig.class,
+    UserService.class,
+    WorkspacesController.class,
+    WorkspaceMapper.class,
+    WorkspaceServiceImpl.class
+  })
+  @MockBean({
+    BillingProjectBufferService.class,
+    BigQueryService.class,
+    CdrBigQuerySchemaConfigService.class,
+    CdrVersionService.class,
+    CloudStorageService.class,
+    CohortCloningService.class,
+    CohortMaterializationService.class,
+    ComplianceService.class,
+    ConceptBigQueryService.class,
+    ConceptSetService.class,
+    DataSetService.class,
+    FireCloudService.class,
+    DirectoryService.class,
+    NotebooksService.class,
+    CohortQueryBuilder.class,
+    UserRecentResourceService.class
+  })
   static class Configuration {
     @Bean
     Clock clock() {
@@ -239,21 +225,69 @@ public class DataSetControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    dataSetService = new DataSetServiceImpl(bigQueryService, cdrBigQuerySchemaConfigService, cohortDao, conceptSetDao, cohortQueryBuilder);
-    dataSetController = new DataSetController(bigQueryService, CLOCK, cohortDao, conceptDao, conceptSetDao,
-        dataSetDao, dataSetService, fireCloudService, notebooksService, userProvider, workspaceService);
+    dataSetService =
+        new DataSetServiceImpl(
+            bigQueryService,
+            cdrBigQuerySchemaConfigService,
+            cohortDao,
+            conceptSetDao,
+            cohortQueryBuilder);
+    dataSetController =
+        new DataSetController(
+            bigQueryService,
+            CLOCK,
+            cohortDao,
+            conceptDao,
+            conceptSetDao,
+            dataSetDao,
+            dataSetService,
+            fireCloudService,
+            notebooksService,
+            userProvider,
+            workspaceService);
     WorkspacesController workspacesController =
-        new WorkspacesController(billingProjectBufferService, workspaceService, workspaceMapper, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao, userDao,
-            userProvider, fireCloudService, cloudStorageService, CLOCK, notebooksService, userService, workbenchConfigProvider);
-    CohortsController cohortsController = new CohortsController(workspaceService, cohortDao, cdrVersionDao, cohortFactory,
-        cohortReviewDao, conceptSetDao, cohortMaterializationService, userProvider, CLOCK,
-        cdrVersionService, userRecentResourceService);
-    ConceptSetsController conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao,
-        conceptDao, conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
+        new WorkspacesController(
+            billingProjectBufferService,
+            workspaceService,
+            workspaceMapper,
+            cdrVersionDao,
+            cohortDao,
+            cohortFactory,
+            conceptSetDao,
+            userDao,
+            userProvider,
+            fireCloudService,
+            cloudStorageService,
+            CLOCK,
+            notebooksService,
+            userService,
+            workbenchConfigProvider);
+    CohortsController cohortsController =
+        new CohortsController(
+            workspaceService,
+            cohortDao,
+            cdrVersionDao,
+            cohortFactory,
+            cohortReviewDao,
+            conceptSetDao,
+            cohortMaterializationService,
+            userProvider,
+            CLOCK,
+            cdrVersionService,
+            userRecentResourceService);
+    ConceptSetsController conceptSetsController =
+        new ConceptSetsController(
+            workspaceService,
+            conceptSetDao,
+            conceptDao,
+            conceptBigQueryService,
+            userRecentResourceService,
+            userProvider,
+            CLOCK);
 
     Gson gson = new Gson();
-    CdrBigQuerySchemaConfig cdrBigQuerySchemaConfig =  gson.fromJson(new FileReader("config/cdm/cdm_5_2.json"),
-        CdrBigQuerySchemaConfig.class);
+    CdrBigQuerySchemaConfig cdrBigQuerySchemaConfig =
+        gson.fromJson(new FileReader("config/cdm/cdm_5_2.json"), CdrBigQuerySchemaConfig.class);
 
     when(cdrBigQuerySchemaConfigService.getConfig()).thenReturn(cdrBigQuerySchemaConfig);
 
@@ -267,8 +301,8 @@ public class DataSetControllerTest {
 
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
-    //set the db name to be empty since test cases currently
-    //run in the workbench schema only.
+    // set the db name to be empty since test cases currently
+    // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
@@ -285,64 +319,82 @@ public class DataSetControllerTest {
     searchRequest = SearchRequests.males();
     cohortCriteria = new Gson().toJson(searchRequest);
 
-    Cohort cohort = new Cohort()
-        .name(COHORT_ONE_NAME)
-        .criteria(cohortCriteria);
-    cohort = cohortsController.createCohort(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, cohort).getBody();
+    Cohort cohort = new Cohort().name(COHORT_ONE_NAME).criteria(cohortCriteria);
+    cohort = cohortsController.createCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, cohort).getBody();
     COHORT_ONE_ID = cohort.getId();
 
-    Cohort cohortTwo = new Cohort()
-        .name(COHORT_TWO_NAME)
-        .criteria(cohortCriteria);
-    cohortTwo = cohortsController.createCohort(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, cohortTwo).getBody();
+    Cohort cohortTwo = new Cohort().name(COHORT_TWO_NAME).criteria(cohortCriteria);
+    cohortTwo =
+        cohortsController.createCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, cohortTwo).getBody();
     COHORT_TWO_ID = cohortTwo.getId();
 
     List<Concept> conceptList = new ArrayList<>();
 
-    conceptList.add(new Concept()
-        .conceptId(123L)
-        .conceptName("a concept")
-        .standardConcept(true)
-        .conceptCode("conceptA")
-        .conceptClassId("classId")
-        .vocabularyId("V1")
-        .domainId("Condition")
-        .countValue(123L)
-        .prevalence(0.2F)
-        .conceptSynonyms(new ArrayList<String>()));
+    conceptList.add(
+        new Concept()
+            .conceptId(123L)
+            .conceptName("a concept")
+            .standardConcept(true)
+            .conceptCode("conceptA")
+            .conceptClassId("classId")
+            .vocabularyId("V1")
+            .domainId("Condition")
+            .countValue(123L)
+            .prevalence(0.2F)
+            .conceptSynonyms(new ArrayList<String>()));
 
-    ConceptSet conceptSet = new ConceptSet()
-        .id(CONCEPT_SET_ONE_ID)
-        .name(CONCEPT_SET_ONE_NAME)
-        .domain(Domain.CONDITION)
-        .concepts(conceptList);
+    ConceptSet conceptSet =
+        new ConceptSet()
+            .id(CONCEPT_SET_ONE_ID)
+            .name(CONCEPT_SET_ONE_NAME)
+            .domain(Domain.CONDITION)
+            .concepts(conceptList);
 
-    CreateConceptSetRequest conceptSetRequest = new CreateConceptSetRequest().conceptSet(conceptSet)
-        .addedIds(conceptList.stream().map(concept -> concept.getConceptId()).collect(Collectors.toList()));
+    CreateConceptSetRequest conceptSetRequest =
+        new CreateConceptSetRequest()
+            .conceptSet(conceptSet)
+            .addedIds(
+                conceptList.stream()
+                    .map(concept -> concept.getConceptId())
+                    .collect(Collectors.toList()));
 
-    conceptSet = conceptSetsController.createConceptSet(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSetRequest).getBody();
+    conceptSet =
+        conceptSetsController
+            .createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSetRequest)
+            .getBody();
     CONCEPT_SET_ONE_ID = conceptSet.getId();
 
-    ConceptSet conceptSetTwo = new ConceptSet()
-        .id(CONCEPT_SET_TWO_ID)
-        .name(CONCEPT_SET_TWO_NAME)
-        .domain(Domain.DRUG)
-        .concepts(conceptList);
+    ConceptSet conceptSetTwo =
+        new ConceptSet()
+            .id(CONCEPT_SET_TWO_ID)
+            .name(CONCEPT_SET_TWO_NAME)
+            .domain(Domain.DRUG)
+            .concepts(conceptList);
 
-    CreateConceptSetRequest conceptSetTwoRequest = new CreateConceptSetRequest().conceptSet(conceptSetTwo)
-        .addedIds(conceptList.stream().map(concept -> concept.getConceptId()).collect(Collectors.toList()));
+    CreateConceptSetRequest conceptSetTwoRequest =
+        new CreateConceptSetRequest()
+            .conceptSet(conceptSetTwo)
+            .addedIds(
+                conceptList.stream()
+                    .map(concept -> concept.getConceptId())
+                    .collect(Collectors.toList()));
 
-    conceptSetTwo = conceptSetsController.createConceptSet(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSetTwoRequest).getBody();
+    conceptSetTwo =
+        conceptSetsController
+            .createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSetTwoRequest)
+            .getBody();
     CONCEPT_SET_TWO_ID = conceptSetTwo.getId();
 
-    when(cohortQueryBuilder.buildParticipantIdQuery(any())).thenReturn(
-        QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person").build());
-    when(bigQueryService.filterBigQueryConfig(any())).thenReturn(
-        QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person").build());
+    when(cohortQueryBuilder.buildParticipantIdQuery(any()))
+        .thenReturn(
+            QueryJobConfiguration.newBuilder(
+                    "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
+                .build());
+    when(bigQueryService.filterBigQueryConfig(any()))
+        .thenReturn(
+            QueryJobConfiguration.newBuilder(
+                    "SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person")
+                .build());
   }
 
   private DataSetRequest buildEmptyDataSet() {
@@ -353,8 +405,8 @@ public class DataSetControllerTest {
         .name("blah");
   }
 
-  private void stubGetWorkspace(String ns, String name, String creator,
-                                WorkspaceAccessLevel access) throws Exception {
+  private void stubGetWorkspace(String ns, String name, String creator, WorkspaceAccessLevel access)
+      throws Exception {
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
         new org.pmiops.workbench.firecloud.model.Workspace();
     fcWorkspace.setNamespace(ns);
@@ -365,9 +417,7 @@ public class DataSetControllerTest {
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
-    when(fireCloudService.getWorkspace(ns, name)).thenReturn(
-        fcResponse
-    );
+    when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
   }
 
   private List<DomainValuePair> mockDomainValuePair() {
@@ -382,17 +432,18 @@ public class DataSetControllerTest {
   private void mockLinkingTableQuery(ArrayList<String> domainBaseTables) {
     TableResult tableResultMock = mock(TableResult.class);
     ArrayList<FieldValueList> values = new ArrayList<>();
-    domainBaseTables.forEach(domainBaseTable -> {
-      ArrayList<Field> schemaFields = new ArrayList<>();
-      schemaFields.add(Field.of("OMOP_SQL", LegacySQLTypeName.STRING));
-      schemaFields.add(Field.of("JOIN_VALUE", LegacySQLTypeName.STRING));
-      FieldList schema = FieldList.of(schemaFields);
-      ArrayList<FieldValue> rows = new ArrayList<>();
-      rows.add(FieldValue.of(FieldValue.Attribute.PRIMITIVE, "PERSON_ID"));
-      rows.add(FieldValue.of(FieldValue.Attribute.PRIMITIVE, domainBaseTable));
-      FieldValueList fieldValueList = FieldValueList.of(rows, schema);
-      values.add(fieldValueList);
-    });
+    domainBaseTables.forEach(
+        domainBaseTable -> {
+          ArrayList<Field> schemaFields = new ArrayList<>();
+          schemaFields.add(Field.of("OMOP_SQL", LegacySQLTypeName.STRING));
+          schemaFields.add(Field.of("JOIN_VALUE", LegacySQLTypeName.STRING));
+          FieldList schema = FieldList.of(schemaFields);
+          ArrayList<FieldValue> rows = new ArrayList<>();
+          rows.add(FieldValue.of(FieldValue.Attribute.PRIMITIVE, "PERSON_ID"));
+          rows.add(FieldValue.of(FieldValue.Attribute.PRIMITIVE, domainBaseTable));
+          FieldValueList fieldValueList = FieldValueList.of(rows, schema);
+          values.add(fieldValueList);
+        });
     doReturn(values).when(tableResultMock).getValues();
     doReturn(tableResultMock).when(bigQueryService).executeQuery(any());
   }
@@ -419,7 +470,8 @@ public class DataSetControllerTest {
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
-    DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
+    DataSetQueryList response =
+        dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList()).isEmpty();
   }
 
@@ -436,14 +488,16 @@ public class DataSetControllerTest {
 
     mockLinkingTableQuery(tables);
 
-    DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
+    DataSetQueryList response =
+        dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList().size()).isEqualTo(1);
     verify(bigQueryService, times(1)).executeQuery(any());
     assertThat(response.getQueryList().get(0).getQuery())
-        .isEqualTo("SELECT PERSON_ID FROM " +
-            "`all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` " +
-            "c_occurrence WHERE \n(condition_concept_id IN (123) OR \ncondition_source_concept_id IN (123)) \n" +
-            "AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
+        .isEqualTo(
+            "SELECT PERSON_ID FROM "
+                + "`all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` "
+                + "c_occurrence WHERE \n(condition_concept_id IN (123) OR \ncondition_source_concept_id IN (123)) \n"
+                + "AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
   }
 
   @Test
@@ -466,7 +520,8 @@ public class DataSetControllerTest {
 
     mockLinkingTableQuery(tables);
 
-    DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
+    DataSetQueryList response =
+        dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList()).isNotEmpty();
     verify(bigQueryService, times(2)).executeQuery(any());
     assertThat(response.getQueryList().size()).isEqualTo(2);
@@ -481,19 +536,18 @@ public class DataSetControllerTest {
     List<DomainValuePair> domainValuePairList = mockDomainValuePair();
     dataSet.setValues(domainValuePairList);
 
-
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
 
     mockLinkingTableQuery(tables);
 
-    DataSetQueryList response = dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
+    DataSetQueryList response =
+        dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
     assertThat(response.getQueryList().size()).isEqualTo(1);
     assertThat(response.getQueryList().get(0).getQuery()).contains("OR PERSON_ID IN");
   }
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+  @Rule public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void createDataSetMissingArguments() {
@@ -524,7 +578,6 @@ public class DataSetControllerTest {
     dataSet.setName("dataSet");
     dataSet.setCohortIds(null);
 
-
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing cohort ids");
 
@@ -537,7 +590,6 @@ public class DataSetControllerTest {
     expectedException.expectMessage("Missing concept set ids");
 
     dataSetController.createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
-
 
     dataSet.setConceptSetIds(conceptIds);
     dataSet.setValues(null);
@@ -562,7 +614,11 @@ public class DataSetControllerTest {
     mockLinkingTableQuery(tables);
     String notebookName = "Hello World";
 
-    DataSetExportRequest request = new DataSetExportRequest().dataSetRequest(dataSet).newNotebook(true).notebookName(notebookName);
+    DataSetExportRequest request =
+        new DataSetExportRequest()
+            .dataSetRequest(dataSet)
+            .newNotebook(true)
+            .notebookName(notebookName);
 
     dataSetController.exportToNotebook(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request).getBody();
     verify(notebooksService, never()).getNotebookContents(any(), any());
@@ -587,13 +643,19 @@ public class DataSetControllerTest {
 
     String notebookName = "Hello World";
 
-    when(notebooksService.getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName)).thenReturn(new JSONObject()
-        .put("cells", new JSONArray())
-        .put("metadata", new JSONObject())
-        .put("nbformat", 4)
-        .put("nbformat_minor", 2));
+    when(notebooksService.getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName))
+        .thenReturn(
+            new JSONObject()
+                .put("cells", new JSONArray())
+                .put("metadata", new JSONObject())
+                .put("nbformat", 4)
+                .put("nbformat_minor", 2));
 
-    DataSetExportRequest request = new DataSetExportRequest().dataSetRequest(dataSet).newNotebook(false).notebookName(notebookName);
+    DataSetExportRequest request =
+        new DataSetExportRequest()
+            .dataSetRequest(dataSet)
+            .newNotebook(false)
+            .notebookName(notebookName);
 
     dataSetController.exportToNotebook(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request).getBody();
     verify(notebooksService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);

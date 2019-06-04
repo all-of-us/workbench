@@ -184,6 +184,7 @@ buildscript {    // Configuration for building
     classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
     classpath 'io.swagger:swagger-codegen:2.2.3'
     classpath 'org.owasp:dependency-check-gradle:3.1.0'
+    classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
   }
 }
 
@@ -197,6 +198,13 @@ apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'org.springframework.boot'
 apply plugin: 'org.hidetake.swagger.generator'
 apply plugin: 'org.owasp.dependencycheck'
+apply plugin: 'com.diffplug.gradle.spotless'
+
+spotless {
+  java {
+    googleJavaFormat()
+  }
+}
 
 configurations {
   integrationCompile.extendsFrom testCompile

@@ -18,10 +18,10 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cohortbuilder.BaseQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.BaseQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.querybuilder.DemoQueryBuilder;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -69,36 +69,42 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({LiquibaseAutoConfiguration.class, FieldSetQueryBuilder.class, AnnotationQueryBuilder.class,
-    TestBigQueryCdrSchemaConfig.class, CohortQueryBuilder.class, CdrBigQuerySchemaConfigService.class,
-    DemoQueryBuilder.class, QueryBuilderFactory.class, BigQueryService.class, BaseQueryBuilder.class,
-    CohortMaterializationService.class, ConceptService.class, TestJpaConfig.class, CdrJpaConfig.class})
+@Import({
+  LiquibaseAutoConfiguration.class,
+  FieldSetQueryBuilder.class,
+  AnnotationQueryBuilder.class,
+  TestBigQueryCdrSchemaConfig.class,
+  CohortQueryBuilder.class,
+  CdrBigQuerySchemaConfigService.class,
+  DemoQueryBuilder.class,
+  QueryBuilderFactory.class,
+  BigQueryService.class,
+  BaseQueryBuilder.class,
+  CohortMaterializationService.class,
+  ConceptService.class,
+  TestJpaConfig.class,
+  CdrJpaConfig.class
+})
 @MockBean({BigQuery.class})
 public class CohortMaterializationServiceTest {
 
   private static final String DATA_SET_ID = "data_set_id";
   private static final String PROJECT_ID = "project_id";
-  
-  @Autowired
-  private ParticipantCohortStatusDao participantCohortStatusDao;
 
-  @Autowired
-  private CdrVersionDao cdrVersionDao;
+  @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
 
-  @Autowired
-  private WorkspaceDao workspaceDao;
+  @Autowired private CdrVersionDao cdrVersionDao;
 
-  @Autowired
-  private CohortDao cohortDao;
+  @Autowired private WorkspaceDao workspaceDao;
 
-  @Autowired
-  private CohortReviewDao cohortReviewDao;
+  @Autowired private CohortDao cohortDao;
 
-  @Autowired
-  CohortMaterializationService cohortMaterializationService;
+  @Autowired private CohortReviewDao cohortReviewDao;
+
+  @Autowired CohortMaterializationService cohortMaterializationService;
 
   @TestConfiguration
   static class Configuration {
@@ -153,28 +159,32 @@ public class CohortMaterializationServiceTest {
     cohortReview.setReviewSize(3);
     cohortReviewDao.save(cohortReview);
 
-    participantCohortStatusDao.save(makeStatus(cohortReview.getCohortReviewId(), 1L, CohortStatus.INCLUDED));
-    participantCohortStatusDao.save(makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
+    participantCohortStatusDao.save(
+        makeStatus(cohortReview.getCohortReviewId(), 1L, CohortStatus.INCLUDED));
+    participantCohortStatusDao.save(
+        makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
   }
 
   @Test
   public void testGetCdrQueryNoTableQuery() {
-    CdrQuery cdrQuery = cohortMaterializationService.getCdrQuery(
-        SearchRequests.allGenders(), new DataTableSpecification(), cohortReview, null);
+    CdrQuery cdrQuery =
+        cohortMaterializationService.getCdrQuery(
+            SearchRequests.allGenders(), new DataTableSpecification(), cohortReview, null);
     assertThat(cdrQuery.getBigqueryDataset()).isEqualTo(DATA_SET_ID);
     assertThat(cdrQuery.getBigqueryProject()).isEqualTo(PROJECT_ID);
     assertThat(cdrQuery.getColumns()).isEqualTo(ImmutableList.of("person_id"));
-    assertThat(cdrQuery.getSql()).isEqualTo(
-        "select person.person_id person_id\n"
-        + "from `project_id.data_set_id.person` person\n"
-        + "where\n"
-        + "person.person_id in (select person_id\n"
-        + "from `project_id.data_set_id.person` p\n"
-        + "where\n"
-        + "p.gender_concept_id in unnest(@p0)\n"
-        + ")\n"
-        + "and person.person_id not in unnest(@person_id_blacklist)\n\n"
-        + "order by person.person_id\n");
+    assertThat(cdrQuery.getSql())
+        .isEqualTo(
+            "select person.person_id person_id\n"
+                + "from `project_id.data_set_id.person` person\n"
+                + "where\n"
+                + "person.person_id in (select person_id\n"
+                + "from `project_id.data_set_id.person` p\n"
+                + "where\n"
+                + "p.gender_concept_id in unnest(@p0)\n"
+                + ")\n"
+                + "and person.person_id not in unnest(@person_id_blacklist)\n\n"
+                + "order by person.person_id\n");
     Map<String, Map<String, Object>> params = getParameters(cdrQuery);
     Map<String, Object> genderParam = params.get("p0");
     Map<String, Object> personIdBlacklistParam = params.get("person_id_blacklist");
@@ -184,36 +194,43 @@ public class CohortMaterializationServiceTest {
 
   @Test
   public void testGetCdrQueryWithTableQuery() {
-    CdrQuery cdrQuery = cohortMaterializationService.getCdrQuery(
-        SearchRequests.allGenders(), new DataTableSpecification().tableQuery(
-            new TableQuery().tableName("measurement").columns(
-                ImmutableList.of("person_id", "measurement_concept.concept_name"))), cohortReview,
-        null);
+    CdrQuery cdrQuery =
+        cohortMaterializationService.getCdrQuery(
+            SearchRequests.allGenders(),
+            new DataTableSpecification()
+                .tableQuery(
+                    new TableQuery()
+                        .tableName("measurement")
+                        .columns(
+                            ImmutableList.of("person_id", "measurement_concept.concept_name"))),
+            cohortReview,
+            null);
     assertThat(cdrQuery.getBigqueryDataset()).isEqualTo(DATA_SET_ID);
     assertThat(cdrQuery.getBigqueryProject()).isEqualTo(PROJECT_ID);
-    assertThat(cdrQuery.getColumns()).isEqualTo(
-        ImmutableList.of("person_id", "measurement_concept.concept_name"));
-    assertThat(cdrQuery.getSql()).isEqualTo(
-        "select inner_results.person_id, "
-            + "measurement_concept.concept_name measurement_concept__concept_name\n"
-            + "from (select measurement.person_id person_id, "
-            + "measurement.measurement_concept_id measurement_measurement_concept_id, "
-            + "measurement.person_id measurement_person_id, "
-            + "measurement.measurement_id measurement_measurement_id\n"
-            + "from `project_id.data_set_id.measurement` measurement\n"
-            + "where\n"
-            + "measurement.person_id in (select person_id\n"
-            + "from `project_id.data_set_id.person` p\n"
-            + "where\n"
-            + "p.gender_concept_id in unnest(@p0)\n"
-            + ")\n"
-            + "and measurement.person_id not in unnest(@person_id_blacklist)\n"
-            + "\n"
-            + "order by measurement.person_id, measurement.measurement_id\n"
-            + ") inner_results\n"
-            + "LEFT OUTER JOIN `project_id.data_set_id.concept` measurement_concept ON "
-            + "inner_results.measurement_measurement_concept_id = measurement_concept.concept_id\n"
-            + "order by measurement_person_id, measurement_measurement_id");
+    assertThat(cdrQuery.getColumns())
+        .isEqualTo(ImmutableList.of("person_id", "measurement_concept.concept_name"));
+    assertThat(cdrQuery.getSql())
+        .isEqualTo(
+            "select inner_results.person_id, "
+                + "measurement_concept.concept_name measurement_concept__concept_name\n"
+                + "from (select measurement.person_id person_id, "
+                + "measurement.measurement_concept_id measurement_measurement_concept_id, "
+                + "measurement.person_id measurement_person_id, "
+                + "measurement.measurement_id measurement_measurement_id\n"
+                + "from `project_id.data_set_id.measurement` measurement\n"
+                + "where\n"
+                + "measurement.person_id in (select person_id\n"
+                + "from `project_id.data_set_id.person` p\n"
+                + "where\n"
+                + "p.gender_concept_id in unnest(@p0)\n"
+                + ")\n"
+                + "and measurement.person_id not in unnest(@person_id_blacklist)\n"
+                + "\n"
+                + "order by measurement.person_id, measurement.measurement_id\n"
+                + ") inner_results\n"
+                + "LEFT OUTER JOIN `project_id.data_set_id.concept` measurement_concept ON "
+                + "inner_results.measurement_measurement_concept_id = measurement_concept.concept_id\n"
+                + "order by measurement_person_id, measurement_measurement_id");
     Map<String, Map<String, Object>> params = getParameters(cdrQuery);
     Map<String, Object> genderParam = params.get("p0");
     Map<String, Object> personIdBlacklistParam = params.get("person_id_blacklist");
@@ -221,11 +238,10 @@ public class CohortMaterializationServiceTest {
     assertParameterArray(personIdBlacklistParam, 2L);
   }
 
-
   private Map<String, Map<String, Object>> getParameters(CdrQuery cdrQuery) {
     Map<String, Object> configuration = (Map<String, Object>) cdrQuery.getConfiguration();
-    Object[] queryParameters = (Object[])
-        ((Map<String, Object>) configuration.get("query")).get("queryParameters");
+    Object[] queryParameters =
+        (Object[]) ((Map<String, Object>) configuration.get("query")).get("queryParameters");
     Map<String, Map<String, Object>> result = new HashMap<>();
     for (Object obj : queryParameters) {
       Map<String, Object> param = (Map<String, Object>) obj;
@@ -237,11 +253,11 @@ public class CohortMaterializationServiceTest {
   private void assertParameterArray(Map<String, Object> param, long... values) {
     Map<String, Object> parameterTypeMap = (Map<String, Object>) param.get("parameterType");
     assertThat(parameterTypeMap.get("type")).isEqualTo("ARRAY");
-    assertThat(((Map<String, Object>) parameterTypeMap.get("arrayType"))
-          .get("type")).isEqualTo("INT64");
+    assertThat(((Map<String, Object>) parameterTypeMap.get("arrayType")).get("type"))
+        .isEqualTo("INT64");
 
-    Object[] paramValues = (Object[])
-        ((Map<String, Object>) param.get("parameterValue")).get("arrayValues");
+    Object[] paramValues =
+        (Object[]) ((Map<String, Object>) param.get("parameterValue")).get("arrayValues");
     assertThat(paramValues.length).isEqualTo(values.length);
     for (int i = 0; i < values.length; i++) {
       assertThat(((Map<String, Object>) paramValues[i]).get("value"))
@@ -253,9 +269,10 @@ public class CohortMaterializationServiceTest {
   public void testMaterializeAnnotationQueryNoPagination() {
     FieldSet fieldSet = new FieldSet().annotationQuery(new AnnotationQuery());
     MaterializeCohortResponse response =
-        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(),
-            null, 0, makeRequest(fieldSet, 1000));
-    ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
+        cohortMaterializationService.materializeCohort(
+            cohortReview, SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
+    ImmutableMap<String, Object> p1Map =
+        ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
     assertResults(response, p1Map);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -263,18 +280,23 @@ public class CohortMaterializationServiceTest {
   @Test
   public void testMaterializeAnnotationQueryWithPagination() {
     FieldSet fieldSet = new FieldSet().annotationQuery(new AnnotationQuery());
-    MaterializeCohortRequest request = makeRequest(fieldSet, 1)
-        .statusFilter(ImmutableList.of(CohortStatus.INCLUDED, CohortStatus.EXCLUDED));
+    MaterializeCohortRequest request =
+        makeRequest(fieldSet, 1)
+            .statusFilter(ImmutableList.of(CohortStatus.INCLUDED, CohortStatus.EXCLUDED));
     MaterializeCohortResponse response =
-        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), null, 0, request);
-    ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
+        cohortMaterializationService.materializeCohort(
+            cohortReview, SearchRequests.allGenders(), null, 0, request);
+    ImmutableMap<String, Object> p1Map =
+        ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
     assertResults(response, p1Map);
     assertThat(response.getNextPageToken()).isNotNull();
 
     request.setPageToken(response.getNextPageToken());
     MaterializeCohortResponse response2 =
-        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), null, 0, request);
-    ImmutableMap<String, Object> p2Map = ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED");
+        cohortMaterializationService.materializeCohort(
+            cohortReview, SearchRequests.allGenders(), null, 0, request);
+    ImmutableMap<String, Object> p2Map =
+        ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED");
     assertResults(response2, p2Map);
     assertThat(response2.getNextPageToken()).isNull();
   }
@@ -282,9 +304,10 @@ public class CohortMaterializationServiceTest {
   @Test
   public void testGetAnnotations() {
     CohortAnnotationsResponse response =
-        cohortMaterializationService.getAnnotations(cohortReview,
-            new CohortAnnotationsRequest().annotationQuery(new AnnotationQuery()));
-    ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
+        cohortMaterializationService.getAnnotations(
+            cohortReview, new CohortAnnotationsRequest().annotationQuery(new AnnotationQuery()));
+    ImmutableMap<String, Object> p1Map =
+        ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
     assertResults(response.getResults(), p1Map);
   }
 
@@ -296,38 +319,47 @@ public class CohortMaterializationServiceTest {
     return makeRequest(pageSize).fieldSet(fieldSet);
   }
 
-  private ParticipantCohortStatus makeStatus(long cohortReviewId, long participantId, CohortStatus status) {
-    ParticipantCohortStatusKey key = new ParticipantCohortStatusKey()
-        .cohortReviewId(cohortReviewId)
-        .participantId(participantId);
-    ParticipantCohortStatus result = new ParticipantCohortStatus()
-        .statusEnum(status)
-        .participantKey(key);
+  private ParticipantCohortStatus makeStatus(
+      long cohortReviewId, long participantId, CohortStatus status) {
+    ParticipantCohortStatusKey key =
+        new ParticipantCohortStatusKey()
+            .cohortReviewId(cohortReviewId)
+            .participantId(participantId);
+    ParticipantCohortStatus result =
+        new ParticipantCohortStatus().statusEnum(status).participantKey(key);
     return result;
   }
 
-  private void assertResults(MaterializeCohortResponse actualResponse,
-      ImmutableMap<String, Object>... expectedResults) {
+  private void assertResults(
+      MaterializeCohortResponse actualResponse, ImmutableMap<String, Object>... expectedResults) {
     assertResults(actualResponse.getResults(), expectedResults);
   }
 
-  private void assertResults(List<Object> actualResults,
-      ImmutableMap<String, Object>... expectedResults) {
+  private void assertResults(
+      List<Object> actualResults, ImmutableMap<String, Object>... expectedResults) {
     if (actualResults.size() != expectedResults.length) {
-      fail("Expected " + expectedResults.length + ", got " + actualResults.size()
-          + "; actual results: " + actualResults);
+      fail(
+          "Expected "
+              + expectedResults.length
+              + ", got "
+              + actualResults.size()
+              + "; actual results: "
+              + actualResults);
     }
     for (int i = 0; i < actualResults.size(); i++) {
       MapDifference<String, Object> difference =
-          Maps.difference((Map<String, Object>) actualResults.get(i),
-              expectedResults[i]);
+          Maps.difference((Map<String, Object>) actualResults.get(i), expectedResults[i]);
       if (!difference.areEqual()) {
-        fail("Result " + i + " had difference: " + difference.entriesDiffering()
-            + "; unexpected entries: " + difference.entriesOnlyOnLeft()
-            + "; missing entries: " + difference.entriesOnlyOnRight());
+        fail(
+            "Result "
+                + i
+                + " had difference: "
+                + difference.entriesDiffering()
+                + "; unexpected entries: "
+                + difference.entriesOnlyOnLeft()
+                + "; missing entries: "
+                + difference.entriesOnlyOnRight());
       }
     }
   }
-
-
 }

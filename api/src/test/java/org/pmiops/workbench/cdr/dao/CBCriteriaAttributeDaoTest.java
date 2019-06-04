@@ -1,5 +1,8 @@
 package org.pmiops.workbench.cdr.dao;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.CBCriteriaAttribute;
@@ -11,10 +14,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
@@ -22,20 +21,20 @@ import static org.junit.Assert.assertEquals;
 @Transactional
 public class CBCriteriaAttributeDaoTest {
 
-  @Autowired
-  private CBCriteriaAttributeDao cbCriteriaAttributeDao;
+  @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
 
   @Test
   public void findCriteriaAttributeByConceptId() throws Exception {
-    CBCriteriaAttribute attribute = new CBCriteriaAttribute()
-      .conceptId(1L)
-      .conceptName("test")
-      .estCount("10")
-      .type("type")
-      .valueAsConceptId(12345678L);
+    CBCriteriaAttribute attribute =
+        new CBCriteriaAttribute()
+            .conceptId(1L)
+            .conceptName("test")
+            .estCount("10")
+            .type("type")
+            .valueAsConceptId(12345678L);
     cbCriteriaAttributeDao.save(attribute);
     List<CBCriteriaAttribute> attributes =
-      cbCriteriaAttributeDao.findCriteriaAttributeByConceptId(1L);
+        cbCriteriaAttributeDao.findCriteriaAttributeByConceptId(1L);
     assertEquals(1, attributes.size());
     assertEquals(attribute, attributes.get(0));
   }

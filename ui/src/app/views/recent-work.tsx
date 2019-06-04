@@ -107,6 +107,7 @@ export const RecentWork = (fp.flow as any)(
         paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
         {resources.slice(offset, offset + limit).map((resource, i) => {
           return <ResourceCard key={i} marginTop={cardMarginTop}
+            onDuplicateResource={(duplicating) => this.setState({loading: duplicating})}
             resourceCard={resource} onUpdate={() => this.loadResources()}
             existingNameList={this.getExistingNameList(resource)}
           />;

@@ -6,7 +6,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface BillingProjectBufferEntryDao  extends CrudRepository<BillingProjectBufferEntry, Long> {
+public interface BillingProjectBufferEntryDao
+    extends CrudRepository<BillingProjectBufferEntry, Long> {
 
   String ASSIGNING_LOCK = "ASSIGNING_LOCK";
 

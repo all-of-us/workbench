@@ -4,16 +4,15 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -26,34 +25,33 @@ import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
+import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
-import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
-import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.ConceptSet;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
-import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {
@@ -66,7 +64,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   // If we later decide to tune this value, consider moving to the WorkbenchConfig.
   private static final int MAX_NOTEBOOK_SIZE_MB = 100;
   // "directory" for notebooks, within the workspace cloud storage bucket.
-  private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY;
+  private static final String NOTEBOOKS_WORKSPACE_DIRECTORY =
+      NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY;
   private static final Pattern NOTEBOOK_PATTERN = NotebooksService.NOTEBOOK_PATTERN;
 
   private final BillingProjectBufferService billingProjectBufferService;
@@ -133,8 +132,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return sb.toString();
   }
 
-  private CdrVersion setCdrVersionId(org.pmiops.workbench.db.model.Workspace dbWorkspace,
-      String cdrVersionId) {
+  private CdrVersion setCdrVersionId(
+      org.pmiops.workbench.db.model.Workspace dbWorkspace, String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
     }
@@ -163,10 +162,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private org.pmiops.workbench.firecloud.model.Workspace attemptFirecloudWorkspaceCreation(
       FirecloudWorkspaceId workspaceId) {
-    fireCloudService.createWorkspace(workspaceId.getWorkspaceNamespace(),
-        workspaceId.getWorkspaceName());
-    return fireCloudService.getWorkspace(workspaceId.getWorkspaceNamespace(),
-        workspaceId.getWorkspaceName()).getWorkspace();
+    fireCloudService.createWorkspace(
+        workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
+    return fireCloudService
+        .getWorkspace(workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName())
+        .getWorkspace();
   }
 
   @Override
@@ -181,17 +181,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("Workspace name must be 80 characters or less");
     }
 
-    final boolean useBillingProjectBuffer = workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer;
+    final boolean useBillingProjectBuffer =
+        workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer;
     if (!useBillingProjectBuffer) {
       if (Strings.isNullOrEmpty(workspace.getNamespace())) {
         throw new BadRequestException("missing required field 'namespace'");
       }
-      org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.getByName(
-              workspace.getNamespace(), workspace.getName());
+      org.pmiops.workbench.db.model.Workspace existingWorkspace =
+          workspaceService.getByName(workspace.getNamespace(), workspace.getName());
       if (existingWorkspace != null) {
-        throw new ConflictException(String.format(
-                "Workspace %s/%s already exists",
-                workspace.getNamespace(), workspace.getName()));
+        throw new ConflictException(
+            String.format(
+                "Workspace %s/%s already exists", workspace.getNamespace(), workspace.getName()));
       }
     }
 
@@ -210,8 +211,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
-    FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspaceNamespace,
-        workspace.getName());
+    FirecloudWorkspaceId workspaceId =
+        generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
     FirecloudWorkspaceId fcWorkspaceId = workspaceId;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
 
@@ -228,8 +229,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             throw e;
           } else {
             fcWorkspaceId =
-                    new FirecloudWorkspaceId(workspaceId.getWorkspaceNamespace(),
-                            workspaceId.getWorkspaceName() + Integer.toString(attemptValue));
+                new FirecloudWorkspaceId(
+                    workspaceId.getWorkspaceNamespace(),
+                    workspaceId.getWorkspaceName() + Integer.toString(attemptValue));
           }
         }
       }
@@ -273,18 +275,23 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     org.pmiops.workbench.db.model.Workspace finalDbWorkspace = dbWorkspace;
     cloudStorageService.readAllDemoCohorts().stream()
-        .map(apiCohort -> cohortFactory
-            .createCohort(apiCohort, userProvider.get(), finalDbWorkspace.getWorkspaceId())
-        ).forEach(dbCohort -> {
-      try {
-        dbCohort = cohortDao.save(dbCohort);
-      } catch (DataIntegrityViolationException e) {
-        throw new BadRequestException(String.format(
-            "Cohort \"/%s/%s/%d\" already exists.",
-            finalDbWorkspace.getWorkspaceNamespace(), finalDbWorkspace.getWorkspaceId(),
-            dbCohort.getCohortId()));
-      }
-    });
+        .map(
+            apiCohort ->
+                cohortFactory.createCohort(
+                    apiCohort, userProvider.get(), finalDbWorkspace.getWorkspaceId()))
+        .forEach(
+            dbCohort -> {
+              try {
+                dbCohort = cohortDao.save(dbCohort);
+              } catch (DataIntegrityViolationException e) {
+                throw new BadRequestException(
+                    String.format(
+                        "Cohort \"/%s/%s/%d\" already exists.",
+                        finalDbWorkspace.getWorkspaceNamespace(),
+                        finalDbWorkspace.getWorkspaceId(),
+                        dbCohort.getCohortId()));
+              }
+            });
 
     List<JSONObject> demoConceptSets = cloudStorageService.readAllDemoConceptSets();
     for (JSONObject conceptSet : demoConceptSets) {
@@ -301,39 +308,40 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           CommonStorageEnums.domainToStorage(Domain.fromValue(conceptSet.getString("domain"))));
       try {
         List<Object> conceptIdsJSON = conceptSet.getJSONArray("concept_ids").toList();
-        Set<Long> conceptIds = conceptIdsJSON
-            .stream()
-            .map(Object::toString)
-            .map(Long::valueOf)
-            .collect(Collectors.toSet());
+        Set<Long> conceptIds =
+            conceptIdsJSON.stream()
+                .map(Object::toString)
+                .map(Long::valueOf)
+                .collect(Collectors.toSet());
         dbConceptSet.getConceptIds().addAll(conceptIds);
       } catch (JSONException e) {
-        throw new ServerErrorException(String.format(
-            "concept_ids cannot be read from %s", conceptSet.getString("name")
-        ));
+        throw new ServerErrorException(
+            String.format("concept_ids cannot be read from %s", conceptSet.getString("name")));
       }
 
       try {
         dbConceptSet = conceptSetDao.save(dbConceptSet);
       } catch (DataIntegrityViolationException e) {
-        throw new ServerErrorException(String.format(
-            "Concept Set \"/%s/%s/%d\" already exists.",
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(),
-            dbConceptSet.getConceptSetId()));
+        throw new ServerErrorException(
+            String.format(
+                "Concept Set \"/%s/%s/%d\" already exists.",
+                dbWorkspace.getWorkspaceNamespace(),
+                dbWorkspace.getWorkspaceId(),
+                dbConceptSet.getConceptSetId()));
       }
     }
     return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteWorkspace(String workspaceNamespace,
-      String workspaceId) {
+  public ResponseEntity<EmptyResponse> deleteWorkspace(
+      String workspaceNamespace, String workspaceId) {
     // This deletes all Firecloud and google resources, however saves all references
     // to the workspace and its resources in the Workbench database.
     // This is for auditing purposes and potentially workspace restore.
     // TODO: do we want to delete workspace resource references and save only metadata?
-    org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
-        workspaceNamespace, workspaceId);
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.getRequired(workspaceNamespace, workspaceId);
     // This automatically handles access control to the workspace.
     fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
@@ -343,10 +351,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<WorkspaceResponse> getWorkspace(String workspaceNamespace,
-      String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
-        workspaceNamespace, workspaceId);
+  public ResponseEntity<WorkspaceResponse> getWorkspace(
+      String workspaceNamespace, String workspaceId) {
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
@@ -354,8 +362,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceResponse response = new WorkspaceResponse();
 
     // This enforces access controls.
-    fcResponse = fireCloudService.getWorkspace(
-        workspaceNamespace, workspaceId);
+    fcResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
     fcWorkspace = fcResponse.getWorkspace();
 
     if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
@@ -379,12 +386,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Workspace> updateWorkspace(String workspaceNamespace, String workspaceId,
-      UpdateWorkspaceRequest request) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
-        workspaceNamespace, workspaceId);
-    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
-        workspaceId, WorkspaceAccessLevel.OWNER);
+  public ResponseEntity<Workspace> updateWorkspace(
+      String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.getRequired(workspaceNamespace, workspaceId);
+    workspaceService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace();
@@ -398,8 +405,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated workspace version");
     }
-    if (workspace.getDataAccessLevel() != null &&
-        !dbWorkspace.getDataAccessLevelEnum().equals(workspace.getDataAccessLevel())) {
+    if (workspace.getDataAccessLevel() != null
+        && !dbWorkspace.getDataAccessLevelEnum().equals(workspace.getDataAccessLevel())) {
       throw new BadRequestException("Attempted to change data access level");
     }
     if (workspace.getName() != null) {
@@ -421,8 +428,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(String fromWorkspaceNamespace,
-      String fromWorkspaceId, CloneWorkspaceRequest body) {
+  public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(
+      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body) {
     Workspace toWorkspace = body.getWorkspace();
     if (Strings.isNullOrEmpty(toWorkspace.getName())) {
       throw new BadRequestException("missing required field 'workspace.name'");
@@ -430,13 +437,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'workspace.researchPurpose'");
     }
 
-    final boolean useBillingProjectBuffer = workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer;
+    final boolean useBillingProjectBuffer =
+        workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer;
     if (!useBillingProjectBuffer) {
       if (Strings.isNullOrEmpty(toWorkspace.getNamespace())) {
         throw new BadRequestException("missing required field 'workspace.namespace'");
       }
       if (workspaceService.getByName(toWorkspace.getNamespace(), toWorkspace.getName()) != null) {
-        throw new ConflictException(String.format(
+        throw new ConflictException(
+            String.format(
                 "Workspace %s/%s already exists",
                 toWorkspace.getNamespace(), toWorkspace.getName()));
       }
@@ -458,25 +467,32 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     // Retrieving the workspace is done first, which acts as an access check.
-    String fromBucket = fireCloudService.getWorkspace(fromWorkspaceNamespace, fromWorkspaceId)
-        .getWorkspace()
-        .getBucketName();
+    String fromBucket =
+        fireCloudService
+            .getWorkspace(fromWorkspaceNamespace, fromWorkspaceId)
+            .getWorkspace()
+            .getBucketName();
 
     org.pmiops.workbench.db.model.Workspace fromWorkspace =
         workspaceService.getRequiredWithCohorts(fromWorkspaceNamespace, fromWorkspaceId);
     if (fromWorkspace == null) {
-      throw new NotFoundException(String.format(
-          "Workspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceId));
+      throw new NotFoundException(
+          String.format("Workspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceId));
     }
 
-    FirecloudWorkspaceId toFcWorkspaceId = generateFirecloudWorkspaceId(toWorkspaceName,
-        toWorkspace.getName());
-    fireCloudService.cloneWorkspace(fromWorkspaceNamespace, fromWorkspaceId,
-        toFcWorkspaceId.getWorkspaceNamespace(), toFcWorkspaceId.getWorkspaceName());
+    FirecloudWorkspaceId toFcWorkspaceId =
+        generateFirecloudWorkspaceId(toWorkspaceName, toWorkspace.getName());
+    fireCloudService.cloneWorkspace(
+        fromWorkspaceNamespace,
+        fromWorkspaceId,
+        toFcWorkspaceId.getWorkspaceNamespace(),
+        toFcWorkspaceId.getWorkspaceName());
 
     org.pmiops.workbench.firecloud.model.Workspace toFcWorkspace =
-        fireCloudService.getWorkspace(toFcWorkspaceId.getWorkspaceNamespace(),
-            toFcWorkspaceId.getWorkspaceName()).getWorkspace();
+        fireCloudService
+            .getWorkspace(
+                toFcWorkspaceId.getWorkspaceNamespace(), toFcWorkspaceId.getWorkspaceName())
+            .getWorkspace();
 
     // In the future, we may want to allow callers to specify whether notebooks
     // should be cloned at all (by default, yes), else they are currently stuck
@@ -487,10 +503,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         continue;
       }
       if (b.getSize() != null && b.getSize() / 1e6 > MAX_NOTEBOOK_SIZE_MB) {
-        throw new FailedPreconditionException(String.format(
-            "workspace %s/%s contains a notebook larger than %dMB: '%s'; cannot clone - please " +
-                "remove this notebook, reduce its size, or contact the workspace owner",
-            fromWorkspaceNamespace, fromWorkspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
+        throw new FailedPreconditionException(
+            String.format(
+                "workspace %s/%s contains a notebook larger than %dMB: '%s'; cannot clone - please "
+                    + "remove this notebook, reduce its size, or contact the workspace owner",
+                fromWorkspaceNamespace, fromWorkspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
       }
       cloudStorageService.copyBlob(
           b.getBlobId(), BlobId.of(toFcWorkspace.getBucketName(), b.getName()));
@@ -527,8 +544,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Clone CDR version from the source, by default.
     String reqCdrVersionId = body.getWorkspace().getCdrVersionId();
-    if (Strings.isNullOrEmpty(reqCdrVersionId) ||
-        reqCdrVersionId.equals(Long.toString(fromWorkspace.getCdrVersion().getCdrVersionId()))) {
+    if (Strings.isNullOrEmpty(reqCdrVersionId)
+        || reqCdrVersionId.equals(Long.toString(fromWorkspace.getCdrVersion().getCdrVersionId()))) {
       dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
       dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
     } else {
@@ -546,26 +563,29 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
 
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
-      Set<WorkspaceUserRole> clonedRoles = fromWorkspace.getWorkspaceUserRoles().stream()
-          .filter((role) -> role.getUser().getUserId() != user.getUserId())
-          .map((role) -> {
-            WorkspaceUserRole to = new WorkspaceUserRole();
-            to.setUser(role.getUser());
-            to.setWorkspace(dbWorkspace);
-            to.setRole(role.getRole());
-            return to;
-          })
-          .collect(Collectors.toSet());
+      Set<WorkspaceUserRole> clonedRoles =
+          fromWorkspace.getWorkspaceUserRoles().stream()
+              .filter((role) -> role.getUser().getUserId() != user.getUserId())
+              .map(
+                  (role) -> {
+                    WorkspaceUserRole to = new WorkspaceUserRole();
+                    to.setUser(role.getUser());
+                    to.setWorkspace(dbWorkspace);
+                    to.setRole(role.getRole());
+                    return to;
+                  })
+              .collect(Collectors.toSet());
       clonedRoles.add(ownerRole);
       savedWorkspace = workspaceService.updateUserRoles(savedWorkspace, clonedRoles);
     }
-    return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(workspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
+    return ResponseEntity.ok(
+        new CloneWorkspaceResponse()
+            .workspace(workspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
   }
 
   @Override
-  public ResponseEntity<ShareWorkspaceResponse> shareWorkspace(String workspaceNamespace,
-      String workspaceId,
-      ShareWorkspaceRequest request) {
+  public ResponseEntity<ShareWorkspaceResponse> shareWorkspace(
+      String workspaceNamespace, String workspaceId, ShareWorkspaceRequest request) {
     if (Strings.isNullOrEmpty(request.getWorkspaceEtag())) {
       throw new BadRequestException("Missing required update field 'workspaceEtag'");
     }
@@ -584,9 +604,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceUserRole newUserRole = new WorkspaceUserRole();
       User newUser = userDao.findUserByEmail(role.getEmail());
       if (newUser == null) {
-        throw new BadRequestException(String.format(
-            "User %s doesn't exist",
-            role.getEmail()));
+        throw new BadRequestException(String.format("User %s doesn't exist", role.getEmail()));
       }
       newUserRole.setUser(newUser);
       newUserRole.setRoleEnum(role.getRole());
@@ -596,24 +614,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace = workspaceService.updateUserRoles(dbWorkspace, dbUserRoles);
     ShareWorkspaceResponse resp = new ShareWorkspaceResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
-    List<UserRole> updatedUserRoles = dbWorkspace.getWorkspaceUserRoles()
-        .stream()
-        .map(r -> new UserRole()
-            .email(r.getUser().getEmail())
-            .givenName(r.getUser().getGivenName())
-            .familyName(r.getUser().getFamilyName())
-            .role(r.getRoleEnum()))
-        // Reverse sorting arranges the role list in a logical order - owners first, then by email.
-        .sorted(
-            Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
-        .collect(Collectors.toList());
+    List<UserRole> updatedUserRoles =
+        dbWorkspace.getWorkspaceUserRoles().stream()
+            .map(
+                r ->
+                    new UserRole()
+                        .email(r.getUser().getEmail())
+                        .givenName(r.getUser().getGivenName())
+                        .familyName(r.getUser().getFamilyName())
+                        .role(r.getRoleEnum()))
+            // Reverse sorting arranges the role list in a logical order - owners first, then by
+            // email.
+            .sorted(
+                Comparator.comparing(UserRole::getRole)
+                    .thenComparing(UserRole::getEmail)
+                    .reversed())
+            .collect(Collectors.toList());
     resp.setItems(updatedUserRoles);
     return ResponseEntity.ok(resp);
   }
 
-  /**
-   * Record approval or rejection of research purpose.
-   */
+  /** Record approval or rejection of research purpose. */
   @Override
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<EmptyResponse> reviewWorkspace(
@@ -628,7 +649,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(new EmptyResponse());
   }
 
-
   // Note we do not paginate the workspaces list, since we expect few workspaces
   // to require review.
   //
@@ -640,33 +660,41 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
-    response.setItems(workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
+    response.setItems(
+        workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
   @Override
-  public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace,
-      String workspaceId) {
+  public ResponseEntity<List<FileDetail>> getNoteBookList(
+      String workspaceNamespace, String workspaceId) {
     List<FileDetail> fileList = notebooksService.getNotebooks(workspaceNamespace, workspaceId);
     return ResponseEntity.ok(fileList);
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteNotebook(String workspace, String workspaceName,
-      String notebookName) {
+  public ResponseEntity<EmptyResponse> deleteNotebook(
+      String workspace, String workspaceName, String notebookName) {
     notebooksService.deleteNotebook(workspace, workspaceName, notebookName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
-  public ResponseEntity<FileDetail> copyNotebook(String fromWorkspaceNamespace, String fromWorkspaceId,
-      String fromNotebookName, CopyNotebookRequest copyNotebookRequest) {
+  public ResponseEntity<FileDetail> copyNotebook(
+      String fromWorkspaceNamespace,
+      String fromWorkspaceId,
+      String fromNotebookName,
+      CopyNotebookRequest copyNotebookRequest) {
     FileDetail fileDetail;
     try {
-      fileDetail = notebooksService.copyNotebook(fromWorkspaceNamespace, fromWorkspaceId,
-          fromNotebookName,
-          copyNotebookRequest.getToWorkspaceNamespace(), copyNotebookRequest.getToWorkspaceName(),
-          copyNotebookRequest.getNewName());
+      fileDetail =
+          notebooksService.copyNotebook(
+              fromWorkspaceNamespace,
+              fromWorkspaceId,
+              fromNotebookName,
+              copyNotebookRequest.getToWorkspaceNamespace(),
+              copyNotebookRequest.getToWorkspaceName(),
+              copyNotebookRequest.getNewName());
     } catch (BlobAlreadyExistsException e) {
       throw new BadRequestException("File already exists at copy destination");
     }
@@ -675,8 +703,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<FileDetail> cloneNotebook(String workspace, String workspaceName,
-      String notebookName) {
+  public ResponseEntity<FileDetail> cloneNotebook(
+      String workspace, String workspaceName, String notebookName) {
     FileDetail fileDetail;
     try {
       fileDetail = notebooksService.cloneNotebook(workspace, workspaceName, notebookName);
@@ -688,11 +716,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<FileDetail> renameNotebook(String workspace, String workspaceName,
-      NotebookRename rename) {
+  public ResponseEntity<FileDetail> renameNotebook(
+      String workspace, String workspaceName, NotebookRename rename) {
     FileDetail fileDetail;
     try {
-      fileDetail = notebooksService.renameNotebook(workspace, workspaceName, rename.getName(), rename.getNewName());
+      fileDetail =
+          notebooksService.renameNotebook(
+              workspace, workspaceName, rename.getName(), rename.getNewName());
     } catch (BlobAlreadyExistsException e) {
       throw new BadRequestException("File already exists at copy destination");
     }

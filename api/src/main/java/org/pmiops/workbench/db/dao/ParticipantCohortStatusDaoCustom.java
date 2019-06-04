@@ -1,10 +1,9 @@
 package org.pmiops.workbench.db.dao;
 
+import java.util.List;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.PageRequest;
-
-import java.util.List;
 
 /**
  * This implementation manually creates batched sql statements. For unknown reasons Spring JPA nor
@@ -13,9 +12,10 @@ import java.util.List;
  */
 public interface ParticipantCohortStatusDaoCustom {
 
-    void saveParticipantCohortStatusesCustom(List<ParticipantCohortStatus> participantCohortStatuses);
+  void saveParticipantCohortStatusesCustom(List<ParticipantCohortStatus> participantCohortStatuses);
 
-    List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest);
+  List<ParticipantCohortStatus> findAll(
+      Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest);
 
-    Long findCount(Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest);
+  Long findCount(Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest);
 }

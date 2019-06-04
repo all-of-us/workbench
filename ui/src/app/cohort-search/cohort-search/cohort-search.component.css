@@ -3,3 +3,8 @@
   margin-bottom: 1rem;
   position: relative;
 }
+
+.root-spinner {
+  left: 50%;
+  top: 50%;
+}

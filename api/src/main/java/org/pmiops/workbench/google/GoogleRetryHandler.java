@@ -39,16 +39,18 @@ public class GoogleRetryHandler extends RetryHandler<IOException> {
     protected boolean canRetry(int code) {
       // Google services are known to throw 500 errors sometimes when it would be appropriate
       // to retry. So we will retry in these cases, too.
-      return super.canRetry(code)
-          || code == HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+      return super.canRetry(code) || code == HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     }
 
     @Override
     protected void logNoRetry(Throwable t, int responseCode) {
       if (t instanceof GoogleJsonResponseException) {
-        logger.log(getLogLevel(responseCode),
-            String.format("Exception calling Google API with response: %s",
-                ((GoogleJsonResponseException) t).getDetails()), t);
+        logger.log(
+            getLogLevel(responseCode),
+            String.format(
+                "Exception calling Google API with response: %s",
+                ((GoogleJsonResponseException) t).getDetails()),
+            t);
       } else {
         super.logNoRetry(t, responseCode);
       }

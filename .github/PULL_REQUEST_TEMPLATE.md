@@ -1,6 +1,6 @@
 <!--
-Replace this this template with your PR description.
-Please remember to keep in mind the security levels outlined in [CONTRIBUTING.md](CONTRIBUTING.md) and to 
+Replace this template with your PR description.
+Please remember to keep in mind the security levels outlined in [CONTRIBUTING.md](https://github.com/all-of-us/workbench/blob/master/.github/CONTRIBUTING.md) and to 
 include a risk tag of the form `[risk=no|low|moderate|severe]` in the PR title
 
 * **no**: None 

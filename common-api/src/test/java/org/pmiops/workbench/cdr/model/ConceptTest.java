@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cdr.model;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import org.junit.Test;
 
 public class ConceptTest {
@@ -16,16 +17,13 @@ public class ConceptTest {
   public void testSetSynonymStrIdAndCodeOneSynonym() {
     Concept concept = new Concept();
     concept.setSynonymsStr("123|foo bar");
-    assertThat(concept.getSynonyms()).containsExactly("foo bar")
-        .inOrder();
+    assertThat(concept.getSynonyms()).containsExactly("foo bar").inOrder();
   }
 
   @Test
   public void testSetSynonymStrIdAndCodeTwoSynonymsOneEscaped() {
     Concept concept = new Concept();
     concept.setSynonymsStr("123|foo bar|baz || blah");
-    assertThat(concept.getSynonyms()).containsExactly("foo bar",
-        "baz | blah")
-        .inOrder();
+    assertThat(concept.getSynonyms()).containsExactly("foo bar", "baz | blah").inOrder();
   }
 }

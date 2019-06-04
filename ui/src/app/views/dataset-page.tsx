@@ -27,7 +27,6 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {NewDataSetModal} from 'app/views/new-dataset-modal';
 import {
   Cohort,
-  Concept,
   ConceptSet,
   DataSet,
   DataSetPreviewList,
