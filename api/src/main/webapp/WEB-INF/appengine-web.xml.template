@@ -27,6 +27,7 @@
   </static-error-handlers>
 
   <automatic-scaling>
-    <min-instances>10</min-instances>
+    <min-instances>${GAE_MIN_INSTANCES}</min-instances>
+    <max-instances>${GAE_MAX_INSTANCES}</max-instances>
   </automatic-scaling>
 </appengine-web-app>
