@@ -1,5 +1,4 @@
 import {styles as cardStyles} from 'app/components/card';
-import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {IconComponent} from 'app/icons/icon';
 import colors from 'app/styles/colors';
