@@ -83,7 +83,8 @@ public class Workspace {
   private Set<ConceptSet> conceptSets = new HashSet<>();
   private Set<DataSet> dataSets = new HashSet<>();
   private Short activeStatus;
-  private Short billingMigrationStatus = StorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.OLD);
+  private Short billingMigrationStatus =
+      StorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.OLD);
 
   private boolean diseaseFocusedResearch;
   private String diseaseOfFocus;

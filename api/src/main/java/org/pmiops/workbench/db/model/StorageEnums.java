@@ -86,12 +86,12 @@ public final class StorageEnums {
   }
 
   private static final BiMap<BillingMigrationStatus, Short>
-          CLIENT_TO_STORAGE_BILLING_MIGRATION_STATUS =
+      CLIENT_TO_STORAGE_BILLING_MIGRATION_STATUS =
           ImmutableBiMap.<BillingMigrationStatus, Short>builder()
-                  .put(BillingMigrationStatus.OLD, (short) 0)
-                  .put(BillingMigrationStatus.NEW, (short) 1)
-                  .put(BillingMigrationStatus.MIGRATED, (short) 2)
-                  .build();
+              .put(BillingMigrationStatus.OLD, (short) 0)
+              .put(BillingMigrationStatus.NEW, (short) 1)
+              .put(BillingMigrationStatus.MIGRATED, (short) 2)
+              .build();
 
   public static BillingMigrationStatus billingMigrationStatusFromStorage(Short s) {
     return CLIENT_TO_STORAGE_BILLING_MIGRATION_STATUS.inverse().get(s);
@@ -100,7 +100,6 @@ public final class StorageEnums {
   public static Short billingMigrationStatusToStorage(BillingMigrationStatus s) {
     return CLIENT_TO_STORAGE_BILLING_MIGRATION_STATUS.get(s);
   }
-
 
   private static final BiMap<EmailVerificationStatus, Short>
       CLIENT_TO_STORAGE_EMAIL_VERIFICATION_STATUS =
