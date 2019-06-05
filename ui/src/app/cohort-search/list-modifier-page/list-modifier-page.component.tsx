@@ -4,7 +4,7 @@ import {wizardStore} from 'app/cohort-search/search-state.service';
 import {ClrIcon} from 'app/components/icons';
 import {Select} from 'app/components/inputs';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ModifierType, TreeType} from 'generated';
 import {CriteriaType, DomainType} from 'generated/fetch';
@@ -12,6 +12,28 @@ import {List} from 'immutable';
 import * as moment from 'moment';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
+
+const styles = reactStyles({
+  header: {
+    color: '#262262',
+    fontWeight: 500,
+    fontSize: '16px',
+    borderBottom: '1px solid #262262',
+    paddingBottom: '0.5rem'
+  },
+  label: {
+    color: '#262262',
+    fontWeight: 500,
+  },
+  select: {
+    width: '50%',
+    marginTop: '0.5rem'
+  },
+  info: {
+    color: '#0077b7',
+    marginLeft: '0.25rem',
+  }
+});
 
 interface Props {
   disabled: Function;
@@ -21,6 +43,7 @@ interface Props {
 
 interface State {
   formState: any;
+  visitCounts: any;
 }
 
 export const ListModifierPage = withCurrentWorkspace()(
@@ -85,7 +108,8 @@ export const ListModifierPage = withCurrentWorkspace()(
             label: 'Is Between',
             value: 'BETWEEN',
           }]
-        }]
+        }],
+        visitCounts: undefined
       };
     }
 
@@ -97,7 +121,6 @@ export const ListModifierPage = withCurrentWorkspace()(
     dropdownOption = {
       selected: ['Any', 'Any', 'Any', 'Any']
     };
-    visitCounts: any;
 
     readonly modifiers = [{
       name: 'ageAtEvent',
@@ -180,9 +203,11 @@ export const ListModifierPage = withCurrentWorkspace()(
           }]
         });
         cohortBuilderApi()
-        .getCriteriaBy(+cdrVersionId, DomainType[DomainType.VISIT])
+        .getCriteriaBy(
+            +cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]
+        )
         .then(response => {
-          this.visitCounts = {};
+          const visitCounts = {};
           const encounters = {
             name: 'encounters',
             label: 'During Visit Type',
@@ -198,14 +223,14 @@ export const ListModifierPage = withCurrentWorkspace()(
           response.items.forEach(option => {
             if (option.parentId === 0 && option.count > 0) {
               encounters.options.push({
-                label: option.name,
+                label: `${option.name} (${option.count.toLocaleString()})`,
                 value: option.conceptId.toString()
               });
-              this.visitCounts[option.conceptId] = option.count;
+              visitCounts[option.conceptId] = option.count;
             }
           });
           formState.push(encounters);
-          this.setState({formState});
+          this.setState({formState, visitCounts});
           this.getExisting();
         });
       } else {
@@ -321,15 +346,23 @@ export const ListModifierPage = withCurrentWorkspace()(
 
     render() {
       const {formState} = this.state;
-      return <div>
+      return <div style={{marginTop: '1rem'}}>
+        <div style={styles.header}>
+          The following modifiers are optional and apply to all selected criteria
+        </div>
         {formState.map((mod, i) => {
           const {label, name, options, values: {operator, valueA, valueB}} = mod;
-          return <div key={i}>
-            <label>{label}</label>
-            {name === 'eventDate' && <ClrIcon shape='info-standard'/>}
-            <Select value={operator}
-              onChange={(e) => this.selectChange(e, i)}
-              options={options} />
+          return <div key={i} style={{marginTop: '1rem'}}>
+            <label style={styles.label}>{label}</label>
+            {name === 'eventDate' &&
+              <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
+            }
+            <div style={styles.select}>
+              <Select value={operator}
+                onChange={(e) => this.selectChange(e, i)}
+                options={options}
+                theme={(theme) => ({...theme, colors: {...theme.colors, primary: '#216FB4'}})}/>
+            </div>
             {operator && name !== 'encounters' && <React.Fragment>
               <input value={valueA}
                 onChange={(e) => this.inputChange(i, 'valueA', e.target.value)}/>
