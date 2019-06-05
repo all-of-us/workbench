@@ -12,7 +12,7 @@
   {
     "mode": "NULLABLE",
     "name": "entry_datetime",
-    "type": "DATE"
+    "type": "TIMESTAMP"
   },
   {
     "mode": "NULLABLE",
