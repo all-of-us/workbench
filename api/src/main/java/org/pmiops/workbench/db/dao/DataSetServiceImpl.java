@@ -196,7 +196,7 @@ public class DataSetServiceImpl implements DataSetService {
 
     for (Domain d : domainList) {
       Map<String, Map<String, QueryParameterValue>> queryMap = new HashMap<>();
-      String query = "SELECT ";
+      StringBuffer query = new StringBuffer("SELECT ");
       // VALUES HERE:
       Optional<List<DomainValuePair>> valueSetOpt =
           Optional.of(
@@ -209,14 +209,11 @@ public class DataSetServiceImpl implements DataSetService {
 
       ValuesLinkingPair valuesLinkingPair = this.getValueSelectsAndJoins(valueSetOpt.get(), d);
 
-      query =
-          query
-              .concat(valuesLinkingPair.getSelects().stream().collect(Collectors.joining(", ")))
-              .concat(" ")
-              .concat(
-                  valuesLinkingPair.getJoins().stream()
-                      .distinct()
-                      .collect(Collectors.joining(" ")));
+      query
+          .append(valuesLinkingPair.getSelects().stream().collect(Collectors.joining(", ")))
+          .append(" ")
+          .append(
+              valuesLinkingPair.getJoins().stream().distinct().collect(Collectors.joining(" ")));
 
       if (!d.equals(Domain.PERSON)) {
         // CONCEPT SETS HERE:
@@ -247,15 +244,14 @@ public class DataSetServiceImpl implements DataSetService {
         DomainConceptIds columnNames = domainConceptIds.get();
 
         // This adds the where clauses for cohorts and concept sets.
-        query =
-            query.concat(
-                " WHERE \n("
-                    + columnNames.getStandardConceptIdColumn()
-                    + conceptSetListQuery
-                    + " OR \n"
-                    + columnNames.getSourceConceptIdColumn()
-                    + conceptSetListQuery
-                    + ")");
+        query.append(
+            " WHERE \n("
+                + columnNames.getStandardConceptIdColumn()
+                + conceptSetListQuery
+                + " OR \n"
+                + columnNames.getSourceConceptIdColumn()
+                + conceptSetListQuery
+                + ")");
       }
       String conceptSetQueries =
           conceptSetsSelected.stream()
@@ -280,26 +276,25 @@ public class DataSetServiceImpl implements DataSetService {
       DomainConceptIds columnNames = domainConceptIds.get();
 
       // This adds the where clauses for cohorts and concept sets.
-      query =
-          query.concat(
-              " WHERE \n("
-                  + columnNames.getStandardConceptIdColumn()
-                  + conceptSetListQuery
-                  + " OR \n"
-                  + columnNames.getSourceConceptIdColumn()
-                  + conceptSetListQuery
-                  + ")");
+      query.append(
+          " WHERE \n("
+              + columnNames.getStandardConceptIdColumn()
+              + conceptSetListQuery
+              + " OR \n"
+              + columnNames.getSourceConceptIdColumn()
+              + conceptSetListQuery
+              + ")");
       if (!includesAllParticipants) {
         if (d.equals(Domain.PERSON)) {
-          query = query.concat(" \nWHERE (");
+          query.append(" \nWHERE (");
         } else {
-          query = query.concat(" \nAND (");
+          query.append(" \nAND (");
         }
-        query = query.concat("PERSON_ID IN (" + cohortQueries + "))");
+        query.append("PERSON_ID IN (" + cohortQueries + "))");
       }
-      queryMap.put(query, cohortParameters);
+      queryMap.put(query.toString(), cohortParameters);
       QueryJobConfiguration queryJobConfiguration =
-          QueryJobConfiguration.newBuilder(query)
+          QueryJobConfiguration.newBuilder(query.toString())
               .setNamedParameters(cohortParameters)
               .setUseLegacySql(false)
               .build();
