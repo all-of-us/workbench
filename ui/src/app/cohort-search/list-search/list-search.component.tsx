@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {attributesStore, groupSelectionsStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {domainToTitle} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
@@ -224,12 +225,15 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     render() {
+      const {wizard: {domain}} = this.props;
       const {data, error, loading, results, sourceMatch} = this.state;
       return <div style={{overflow: 'auto'}}>
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
             <ClrIcon shape='search' size='18'/>
-            <TextInput style={styles.searchInput} onKeyPress={this.handleInput} />
+            <TextInput style={styles.searchInput}
+              placeholder={`Search ${domainToTitle(domain)} by code or description`}
+              onKeyPress={this.handleInput} />
           </div>
         </div>
         {!loading && data && <div style={styles.listContainer}>
