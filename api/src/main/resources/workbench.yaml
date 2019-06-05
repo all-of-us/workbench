@@ -977,6 +977,22 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/cron/bulkAuditProjectAccess:
+    get:
+      security: []
+      tags:
+        - offlineUser
+        - cron
+      description: Audits project access for all users
+      operationId: bulkAuditProjectAccess
+      responses:
+        200:
+          description: All users' project access were audited.
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
