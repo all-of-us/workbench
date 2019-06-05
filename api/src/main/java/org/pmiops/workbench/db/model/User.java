@@ -64,7 +64,6 @@ public class User {
   private Short freeTierBillingProjectStatus;
   private Timestamp firstSignInTime;
   private Set<Short> authorities = new HashSet<>();
-  private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<>();
   private Boolean idVerificationIsValid;
   private Timestamp termsOfServiceCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
@@ -287,19 +286,6 @@ public class User {
 
   public void setPageVisits(Set<PageVisit> newPageVisits) {
     this.pageVisits = newPageVisits;
-  }
-
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
-  public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
-    return workspaceUserRoles;
-  }
-
-  /**
-   * Necessary for Spring initialization of the object. Not actually supported because it won't
-   * delete old entries.
-   */
-  public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
-    this.workspaceUserRoles = userRoles;
   }
 
   @Column(name = "id_verification_is_valid")
