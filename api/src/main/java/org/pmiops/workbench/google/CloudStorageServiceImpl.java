@@ -11,6 +11,14 @@ import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.json.JSONObject;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.Cohort;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Provider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
@@ -18,13 +26,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import javax.inject.Provider;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.json.JSONObject;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.Cohort;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class CloudStorageServiceImpl implements CloudStorageService {
