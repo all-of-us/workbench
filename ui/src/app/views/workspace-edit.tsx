@@ -485,7 +485,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     get noDiseaseOfFocusSpecified() {
       return this.state.workspace.researchPurpose.diseaseFocusedResearch &&
-        !! this.state.workspace.researchPurpose.diseaseOfFocus;
+        !this.state.workspace.researchPurpose.diseaseOfFocus;
     }
 
     get disableButton() {
