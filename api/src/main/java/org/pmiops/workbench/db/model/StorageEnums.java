@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.model;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
+import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -82,6 +83,22 @@ public final class StorageEnums {
 
   public static Short billingProjectBufferStatusToStorage(BillingProjectBufferStatus s) {
     return CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS.get(s);
+  }
+
+  private static final BiMap<BillingMigrationStatus, Short>
+      CLIENT_TO_STORAGE_BILLING_MIGRATION_STATUS =
+          ImmutableBiMap.<BillingMigrationStatus, Short>builder()
+              .put(BillingMigrationStatus.OLD, (short) 0)
+              .put(BillingMigrationStatus.NEW, (short) 1)
+              .put(BillingMigrationStatus.MIGRATED, (short) 2)
+              .build();
+
+  public static BillingMigrationStatus billingMigrationStatusFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_BILLING_MIGRATION_STATUS.inverse().get(s);
+  }
+
+  public static Short billingMigrationStatusToStorage(BillingMigrationStatus s) {
+    return CLIENT_TO_STORAGE_BILLING_MIGRATION_STATUS.get(s);
   }
 
   private static final BiMap<EmailVerificationStatus, Short>
