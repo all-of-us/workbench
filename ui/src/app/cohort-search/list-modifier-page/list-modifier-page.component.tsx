@@ -10,6 +10,7 @@ import {ModifierType, TreeType} from 'generated';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {List} from 'immutable';
 import * as moment from 'moment';
+import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -28,6 +29,15 @@ const styles = reactStyles({
   select: {
     width: '50%',
     marginTop: '0.5rem'
+  },
+  count: {
+    display: 'inline-flex',
+    height: '0.625rem',
+    background: '#0079b8',
+    color: '#ffffff',
+    padding: '0 0.166667rem',
+    borderRadius: '10px',
+
   },
   info: {
     color: '#0077b7',
@@ -344,6 +354,14 @@ export const ListModifierPage = withCurrentWorkspace()(
     //   return disable;
     // }
 
+    optionTemplate = (opt: any) => {
+      const {visitCounts} = this.state;
+      return <div className='p-clearfix'>
+        {opt.label}
+        <span style={styles.count}>{visitCounts[opt.value]}</span>
+      </div>;
+    }
+
     render() {
       const {formState} = this.state;
       return <div style={{marginTop: '1rem'}}>
@@ -358,10 +376,11 @@ export const ListModifierPage = withCurrentWorkspace()(
               <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
             }
             <div style={styles.select}>
-              <Select value={operator}
+              {/*TODO finish styling prime dropdown*/}
+              <Dropdown value={operator}
                 onChange={(e) => this.selectChange(e, i)}
                 options={options}
-                theme={(theme) => ({...theme, colors: {...theme.colors, primary: '#216FB4'}})}/>
+                itemTemplate={name === 'encounters' && this.optionTemplate}/>
             </div>
             {operator && name !== 'encounters' && <React.Fragment>
               <input value={valueA}
