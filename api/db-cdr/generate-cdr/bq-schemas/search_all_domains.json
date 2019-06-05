@@ -11,6 +11,11 @@
   },
   {
     "mode": "NULLABLE",
+    "name": "entry_datetime",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
     "name": "is_standard",
     "type": "INTEGER"
   },
@@ -48,5 +53,15 @@
     "mode": "NULLABLE",
     "name": "value_as_concept_id",
     "type": "integer"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "systolic",
+    "type": "float"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "diastolic",
+    "type": "float"
   }
 ]
