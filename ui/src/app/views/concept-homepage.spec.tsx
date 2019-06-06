@@ -9,7 +9,8 @@ import {
   ConceptSetsApi,
   DomainInfo,
   StandardConceptFilter,
-  WorkspacesApi} from 'generated/fetch';
+  WorkspacesApi
+} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {

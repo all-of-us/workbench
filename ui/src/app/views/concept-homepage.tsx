@@ -68,7 +68,7 @@ const styles = reactStyles({
     fill: colors.blue[0], transform: 'translate(-1.5rem)', height: '1rem', width: '1rem'
   },
   sectionHeader: {
-    height: '24px',
+    height: 24,
     color: colors.blue[8],
     fontFamily: 'Montserrat',
     fontSize: 20,
@@ -100,7 +100,7 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
         <div style={styles.domainBoxHeader}
              data-test-id='domain-box-name'>{conceptDomainInfo.name}</div>
         <div style={styles.conceptText}>
-          <span style={{fontSize: '30px'}}>{conceptCount}</span> concepts in this domain. <p/>
+          <span style={{fontSize: 30}}>{conceptCount}</span> concepts in this domain. <p/>
           <div><b>{conceptDomainInfo.participantCount}</b> participants in domain.</div>
         </div>
         <Clickable style={styles.domainBoxLink}
@@ -109,10 +109,10 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
     };
 
 const SurveyCard: React.FunctionComponent<{survey}> = ({survey}) => {
-  return <WorkspaceCardBase style={{minWidth: '11rem', maxHeight: 'auto', width: '11.5rem'}}>
+  return <WorkspaceCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
     <div style={styles.domainBoxHeader} data-test-id='survey-box-name'>{survey.name}</div>
     <div style={styles.conceptText}>
-      <span style={{fontSize: '30px'}}>{survey.questionCount}</span> survey questions with
+      <span style={{fontSize: 30}}>{survey.questionCount}</span> survey questions with
       <div><b>{survey.participantCount}</b> participants</div>
     </div>
     <div style={{...styles.conceptText, height: '3.5rem'}}>
@@ -200,40 +200,36 @@ export const ConceptHomepage = withCurrentWorkspace()(
     async loadDomainsAndSurveys() {
       const {namespace, id} = this.props.workspace;
       try {
+        const conceptsCache: ConceptCacheItem[] = [];
+        const conceptDomainCounts: DomainCount[] = [];
         const [conceptDomainInfo, surveysInfo] = await Promise.all([
           conceptsApi().getDomainInfo(namespace, id),
           conceptsApi().getSurveyInfo(namespace, id)]);
-        this.setState({conceptSurveysList: surveysInfo.items});
-        this.loadConceptDomainInfo(conceptDomainInfo);
+        conceptDomainInfo.items.map((domain) => {
+          conceptsCache.push({
+            domain: domain.domain,
+            items: [],
+            vocabularyList: []
+          });
+          conceptDomainCounts.push({
+            domain: domain.domain,
+            name: domain.name,
+            conceptCount: 0
+          });
+        });
+        this.setState({
+          conceptsCache: conceptsCache,
+          conceptDomainList: conceptDomainInfo.items,
+          conceptDomainCounts: conceptDomainCounts,
+          conceptSurveysList: surveysInfo.items,
+          selectedDomain: conceptDomainCounts[0],
+        });
       } catch (e) {
         console.error(e);
       } finally {
         this.browseDomainFromQueryParams();
         this.setState({loadingDomains: false});
       }
-    }
-
-    loadConceptDomainInfo(conceptDomainInfo) {
-      const conceptsCache: ConceptCacheItem[] = [];
-      const conceptDomainCounts: DomainCount[] = [];
-      conceptDomainInfo.items.forEach((domain) => {
-        conceptsCache.push({
-          domain: domain.domain,
-          items: [],
-          vocabularyList: []
-        });
-        conceptDomainCounts.push({
-          domain: domain.domain,
-          name: domain.name,
-          conceptCount: 0
-        });
-      });
-      this.setState({
-        conceptsCache: conceptsCache,
-        conceptDomainList: conceptDomainInfo.items,
-        conceptDomainCounts: conceptDomainCounts,
-        selectedDomain: conceptDomainCounts[0],
-      });
     }
 
     browseDomainFromQueryParams() {
@@ -474,7 +470,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                     Survey Questions
                   </div>
                   <div style={styles.cardList}>
-                    {conceptSurveysList.map((surveys, i) => {
+                    {conceptSurveysList.map((surveys) => {
                       return <SurveyCard survey={surveys} key={surveys.orderNumber}/>;
                     })}
                    </div>
