@@ -235,16 +235,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     for (WorkspaceUserRole currentWorkspaceUser : workspace.getWorkspaceUserRoles()) {
       WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
       currentUpdate.setEmail(currentWorkspaceUser.getUser().getEmail());
-      currentUpdate.setCanCompute(false);
       WorkspaceAccessLevel access = currentWorkspaceUser.getRoleEnum();
       if (access == WorkspaceAccessLevel.OWNER) {
         currentUpdate.setCanShare(true);
+        currentUpdate.setCanCompute(true);
         currentUpdate.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
       } else if (access == WorkspaceAccessLevel.WRITER) {
         currentUpdate.setCanShare(false);
+        currentUpdate.setCanCompute(true);
         currentUpdate.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
       } else {
         currentUpdate.setCanShare(false);
+        currentUpdate.setCanCompute(false);
         currentUpdate.setAccessLevel(WorkspaceAccessLevel.READER.toString());
       }
       updateACLRequestList.add(currentUpdate);
