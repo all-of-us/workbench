@@ -289,7 +289,8 @@ public class User {
     this.pageVisits = newPageVisits;
   }
 
-  @OneToMany(fetch = FetchType.LAZY,
+  @OneToMany(
+      fetch = FetchType.LAZY,
       mappedBy = "user",
       orphanRemoval = true,
       cascade = CascadeType.ALL)
