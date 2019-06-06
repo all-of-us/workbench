@@ -5,10 +5,15 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import * as React from 'react';
 import {ResearchPurposeDescription, ResearchPurposeItems, specificPopulations, UbrTableCell} from './workspace-edit';
+import {EditComponentReact} from "../icons/edit";
+import {Clickable} from "../components/buttons";
+import {WorkspacePermissions} from "../utils/workspace-permissions";
+import {navigate} from 'app/utils/navigation';
 
 const styles = reactStyles({
   mainHeader: {
-    fontSize: '20px', fontWeight: 600, color: colors.purple[0], marginBottom: '0.5rem'
+    fontSize: '20px', fontWeight: 600, color: colors.purple[0], marginBottom: '0.5rem',
+    display: 'flex', flexDirection: 'row'
   },
   sectionHeader: {
     fontSize: '16px', fontWeight: 600, color: colors.purple[0], marginTop: '1rem'
@@ -20,15 +25,28 @@ const styles = reactStyles({
 
 
 export const WorkspaceAbout = withCurrentWorkspace()(
-  class extends React.Component<{workspace: WorkspaceData}, {}> {
+  class extends React.Component<{workspace: WorkspaceData},
+    {workspacePermissions: WorkspacePermissions}> {
     constructor(props) {
       super(props);
+      this.state = {
+        workspacePermissions: new WorkspacePermissions(props.workspace)
+      };
     }
 
     render() {
       const workspace = this.props.workspace;
+      const {workspacePermissions} = this.state;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '98%'}}>
-        <div style={styles.mainHeader}>Research Purpose</div>
+        <div style={styles.mainHeader}>Research Purpose
+          <Clickable disabled={!workspacePermissions.canWrite}
+                     data-test-id='edit-workspace'
+                     onClick={() => navigate(
+                       ['workspaces',  workspace.namespace, workspace.id, 'edit'])}>
+            <EditComponentReact disabled={!workspacePermissions.canWrite}
+                                style={{marginTop: '0.1rem'}}/>
+          </Clickable>
+        </div>
         <div style={styles.sectionText}>{ResearchPurposeDescription}</div>
         <div style={styles.sectionHeader}>Primary purpose of the project</div>
         {ResearchPurposeItems.map((item, key) => {
