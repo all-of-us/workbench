@@ -30,7 +30,7 @@ const styles = reactStyles({
   },
   select: {
     width: '12rem',
-    height: '1.5rem',
+    height: '1.6rem',
     paddingLeft: '0.5rem',
     marginRight: '1rem',
   },
@@ -38,7 +38,8 @@ const styles = reactStyles({
     borderRadius: '3px',
     border: '1px solid #a6a6a6',
     width: '3rem',
-    height: '1.5rem',
+    height: '1.6rem',
+    verticalAlign: 'middle',
   },
   count: {
     display: 'inline-flex',
@@ -401,10 +402,11 @@ export const ListModifierPage = withCurrentWorkspace()(
               {operator && name !== 'encounters' && <React.Fragment>
                 <input type='number' style={styles.input} value={valueA}
                        onChange={(e) => this.inputChange(i, 'valueA', e.target.value)}/>
-                {operator === 'Between' &&
-                <input type='number' style={styles.input} value={valueB}
-                       onChange={(e) => this.inputChange(i, 'valueB', e.target.value)}/>
-                }
+                {operator === 'BETWEEN' && <React.Fragment>
+                  <span style={{margin: '0 0.25rem'}}>and</span>
+                  <input type='number' style={styles.input} value={valueB}
+                         onChange={(e) => this.inputChange(i, 'valueB', e.target.value)}/>
+                </React.Fragment>}
               </React.Fragment>}
             </div>
           </div>;
