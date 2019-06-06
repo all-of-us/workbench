@@ -5,7 +5,7 @@ The UI is an Angular 2.0 app in TypeScript. For an intro to Angular 2, see
 
 All the interesting code is under `src/app/`.
 
-`*.component.tsx` are UI components, controlling various widgets; they have
+`*.workspace-about.tsx` are UI components, controlling various widgets; they have
 associated `*.component.html` and/or `*.component.css` for their templated DOM
 and style. Angular scopes CSS to its associated component.
 

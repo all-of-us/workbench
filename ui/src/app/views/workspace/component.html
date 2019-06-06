@@ -1,89 +1,90 @@
 <div class="workspace-container">
-  <app-top-box style="width: 78%">
-    <div class="padding-wrapper">
-      <div class="main-body">
-        <div style="display: flex; flex-direction: row">
-          <h2 class="greeting" style="width: 200px; padding-left: .5%">
-            Actions
-            <app-tooltip>
-                <div class="tooltip-header">Create a new Cohort</div>
-                <div class="tooltip-label">A “Cohort” is a group of participants you are interested in researching.
-                  <br>The cohort builder allows you to create and review cohorts and annotate participants in your study group.
-                </div>
-                <div class="tooltip-header">Create a new Notebook</div>
-                <div class="tooltip-label">A Notebook is a computational environment
-                  where you can analyze data with basic programming knowledge
-                  in R or Python.
-                </div>
-            </app-tooltip>
-          </h2>
-          <h2 class="greeting" style="margin-left: 2.3rem; font-size: 16px">
-            Recently Modified
-            <app-tooltip>
-              <div class="tooltip-label">This section shows the items in your workspace sorted by their last modified date.
-              </div>
-            </app-tooltip>
-          </h2>
-        </div>
-        <div style="display: flex; flex-direction: row; align-items: center; width: 100%">
-          <div style="width: 200px; margin-right: 1rem;">
-            <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
-              <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
-              <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" (click)="!writePermission || buildCohort()">
-                <div class="create-text">
-                  Create a <br/>New Cohort
-                  <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
-                </div>
-              </div>
-            </div>
-            <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
-              <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
-              <div class="card add-card" [ngClass]="{'disabled' : !writePermission }" style="margin-top: 13px;" (click)="!writePermission || newNotebook()">
-                <div class="create-text">
-                  Create a<br/>New Notebook
-                  <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div style="flex-grow: 3; min-width: 0;">
-            <app-recent-work></app-recent-work>
-          </div>
-        </div>
-        <div style="padding-top: 1rem;">
-          <h4 class="subheader">Research Purpose
-            <span role="tooltip"
-                  aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
-          <button [disabled]="!ownerPermission"
-                  [class.disabled]="!ownerPermission"
-                  routerLink="/workspaces/{{workspace.namespace}}/{{workspace.id}}/edit"
-                  routerLinkActive="active" class="action-item">
-            <clr-icon shape="pencil" class="icon"></clr-icon>
-          </button>
-          <span *ngIf="!ownerPermission" class="tooltip-content">You must be a workspace owner to edit the Research Purpose</span>
-        </span>
-            <app-tooltip [direction]="'top-right'">
-              <div class="tooltip-label">When you created your Workspace, you were required to describe your research purpose. This will be posted on the publicly available All of Us website. Here you can edit your research purpose and keep it up to date.
-              </div>
-            </app-tooltip>
-          </h4>
-          <div class="description-text">{{workspace.researchPurpose.intendedStudy}}</div>
-          <div class="research-purpose-items">
-            <div class="column">
-              <div class="research-purpose-item" *ngFor="let researchPurposeDescription of leftResearchPurposes">
-                {{researchPurposeDescription}}
-              </div>
-            </div>
-            <div class="column">
-              <div class="research-purpose-item" *ngFor="let researchPurposeDescription of rightResearchPurposes">
-                {{researchPurposeDescription}}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </app-top-box>
+  <app-workspace-about></app-workspace-about>
+  <!--<app-top-box style="width: 78%">-->
+    <!--<div class="padding-wrapper">-->
+      <!--<div class="main-body">-->
+        <!--<div style="display: flex; flex-direction: row">-->
+          <!--<h2 class="greeting" style="width: 200px; padding-left: .5%">-->
+            <!--Actions-->
+            <!--<app-tooltip>-->
+                <!--<div class="tooltip-header">Create a new Cohort</div>-->
+                <!--<div class="tooltip-label">A “Cohort” is a group of participants you are interested in researching.-->
+                  <!--<br>The cohort builder allows you to create and review cohorts and annotate participants in your study group.-->
+                <!--</div>-->
+                <!--<div class="tooltip-header">Create a new Notebook</div>-->
+                <!--<div class="tooltip-label">A Notebook is a computational environment-->
+                  <!--where you can analyze data with basic programming knowledge-->
+                  <!--in R or Python.-->
+                <!--</div>-->
+            <!--</app-tooltip>-->
+          <!--</h2>-->
+          <!--<h2 class="greeting" style="margin-left: 2.3rem; font-size: 16px">-->
+            <!--Recently Modified-->
+            <!--<app-tooltip>-->
+              <!--<div class="tooltip-label">This section shows the items in your workspace sorted by their last modified date.-->
+              <!--</div>-->
+            <!--</app-tooltip>-->
+          <!--</h2>-->
+        <!--</div>-->
+        <!--<div style="display: flex; flex-direction: row; align-items: center; width: 100%">-->
+          <!--<div style="width: 200px; margin-right: 1rem;">-->
+            <!--<div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">-->
+              <!--<span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>-->
+              <!--<div class="card add-card" [ngClass]="{'disabled' : !writePermission}" (click)="!writePermission || buildCohort()">-->
+                <!--<div class="create-text">-->
+                  <!--Create a <br/>New Cohort-->
+                  <!--<clr-icon shape="plus-circle" class="plus-circle"></clr-icon>-->
+                <!--</div>-->
+              <!--</div>-->
+            <!--</div>-->
+            <!--<div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">-->
+              <!--<span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>-->
+              <!--<div class="card add-card" [ngClass]="{'disabled' : !writePermission }" style="margin-top: 13px;" (click)="!writePermission || newNotebook()">-->
+                <!--<div class="create-text">-->
+                  <!--Create a<br/>New Notebook-->
+                  <!--<clr-icon shape="plus-circle" class="plus-circle"></clr-icon>-->
+                <!--</div>-->
+              <!--</div>-->
+            <!--</div>-->
+          <!--</div>-->
+          <!--<div style="flex-grow: 3; min-width: 0;">-->
+            <!--<app-recent-work></app-recent-work>-->
+          <!--</div>-->
+        <!--</div>-->
+        <!--<div style="padding-top: 1rem;">-->
+          <!--<h4 class="subheader">Research Purpose-->
+            <!--<span role="tooltip"-->
+                  <!--aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">-->
+          <!--<button [disabled]="!ownerPermission"-->
+                  <!--[class.disabled]="!ownerPermission"-->
+                  <!--routerLink="/workspaces/{{workspace.namespace}}/{{workspace.id}}/edit"-->
+                  <!--routerLinkActive="active" class="action-item">-->
+            <!--<clr-icon shape="pencil" class="icon"></clr-icon>-->
+          <!--</button>-->
+          <!--<span *ngIf="!ownerPermission" class="tooltip-content">You must be a workspace owner to edit the Research Purpose</span>-->
+        <!--</span>-->
+            <!--<app-tooltip [direction]="'top-right'">-->
+              <!--<div class="tooltip-label">When you created your Workspace, you were required to describe your research purpose. This will be posted on the publicly available All of Us website. Here you can edit your research purpose and keep it up to date.-->
+              <!--</div>-->
+            <!--</app-tooltip>-->
+          <!--</h4>-->
+          <!--<div class="description-text">{{workspace.researchPurpose.intendedStudy}}</div>-->
+          <!--<div class="research-purpose-items">-->
+            <!--<div class="column">-->
+              <!--<div class="research-purpose-item" *ngFor="let researchPurposeDescription of leftResearchPurposes">-->
+                <!--{{researchPurposeDescription}}-->
+              <!--</div>-->
+            <!--</div>-->
+            <!--<div class="column">-->
+              <!--<div class="research-purpose-item" *ngFor="let researchPurposeDescription of rightResearchPurposes">-->
+                <!--{{researchPurposeDescription}}-->
+              <!--</div>-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</div>-->
+    <!--</div>-->
+  <!--</app-top-box>-->
   <div class="right-sidebar">
     <div>
       <h6 class="collaborator-text">
