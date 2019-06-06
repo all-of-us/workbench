@@ -45,8 +45,8 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
   }
 
   private CloudResourceManager getCloudResourceManagerServiceWithImpersonation(User user) throws IOException {
-// Load credentials for the cloud-resource-manager Service Account. This account has been granted
-    // domain-wide delegation for the OAuth scopes required by FireCloud.
+    // Load credentials for the cloud-resource-manager Service Account. This account has been granted
+    // domain-wide delegation for the OAuth scopes required by cloud apis.
     GoogleCredential googleCredential = cloudResourceManagerAdminCredsProvider.get();
 
     googleCredential = serviceAccounts.getImpersonatedCredential(

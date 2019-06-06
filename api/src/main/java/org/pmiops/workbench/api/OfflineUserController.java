@@ -243,6 +243,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
     for (User user : userService.getAllUsers()) {
       userCount++;
+      // TODO(RW-2062): Move to using the gcloud api for list all resources when it is available.
       List<String> unauthorizedLogs = cloudResourceManagerService.getAllProjectsForUser(user).stream()
           .filter(project -> !(project.getParent().getId().equals(PMI_OPS_ORG_ID)))
           .map(project -> project.getName() + " in organization " + project.getParent().getId()).collect(Collectors.toList());
