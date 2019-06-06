@@ -76,6 +76,12 @@ const styles = reactStyles({
     lineHeight: '24px',
     marginBottom: '1rem',
     marginTop: '2.5rem'
+  },
+  cardList: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '94.3%',
+    flexWrap: 'wrap'
   }
 });
 
@@ -456,18 +462,18 @@ export const ConceptHomepage = withCurrentWorkspace()(
                   <div style={styles.sectionHeader}>
                     EHR Domain
                   </div>
-                  <div style={{display: 'flex', flexDirection: 'row', width: '94.3%', flexWrap: 'wrap'}}>
+                  <div style={styles.cardList}>
                   {conceptDomainList.map((domain, i) => {
-                      return <DomainCard conceptDomainInfo={domain}
+                    return <DomainCard conceptDomainInfo={domain}
                                          standardConceptsOnly={standardConceptsOnly}
                                          browseInDomain={() => this.browseDomain(domain)}
                                          key={i} data-test-id='domain-box'/>;
-                    })}
+                  })}
                   </div>
                   <div style={styles.sectionHeader}>
                     Survey Questions
                   </div>
-                  <div style={{display: 'flex', flexDirection: 'row', width: '94.3%', flexWrap: 'wrap'}}>
+                  <div style={styles.cardList}>
                     {conceptSurveysList.map((surveys, i) => {
                       return <SurveyCard survey={surveys} key={surveys.orderNumber}/>;
                     })}
