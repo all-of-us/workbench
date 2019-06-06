@@ -26,6 +26,7 @@ import {
   DomainCount,
   DomainInfo,
   StandardConceptFilter,
+  SurveyModule,
   VocabularyCount,
 } from 'generated/fetch';
 
@@ -65,6 +66,16 @@ const styles = reactStyles({
   },
   clearSearchIcon: {
     fill: colors.blue[0], transform: 'translate(-1.5rem)', height: '1rem', width: '1rem'
+  },
+  sectionHeader: {
+    height: '24px',
+    color: colors.blue[8],
+    fontFamily: 'Montserrat',
+    fontSize: 20,
+    fontWeight: 600,
+    lineHeight: '24px',
+    marginBottom: '1rem',
+    marginTop: '2.5rem'
   }
 });
 
@@ -84,11 +95,26 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
              data-test-id='domain-box-name'>{conceptDomainInfo.name}</div>
         <div style={styles.conceptText}>
           <span style={{fontSize: '30px'}}>{conceptCount}</span> concepts in this domain. <p/>
-          <b>{conceptDomainInfo.participantCount}</b> participants in domain.</div>
+          <div><b>{conceptDomainInfo.participantCount}</b> participants in domain.</div>
+        </div>
         <Clickable style={styles.domainBoxLink}
                    onClick={browseInDomain}>Browse Domain</Clickable>
       </WorkspaceCardBase>;
     };
+
+const SurveyCard: React.FunctionComponent<{survey}> = ({survey}) => {
+  return <WorkspaceCardBase style={{minWidth: '11rem', maxHeight: 'auto', width: '11.5rem'}}>
+    <div style={styles.domainBoxHeader} data-test-id='survey-box-name'>{survey.name}</div>
+    <div style={styles.conceptText}>
+      <span style={{fontSize: '30px'}}>{survey.questionCount}</span> survey questions with
+      <div><b>{survey.participantCount}</b> participants</div>
+    </div>
+    <div style={{...styles.conceptText, height: '3.5rem'}}>
+      {survey.description}
+    </div>
+    <Clickable style={{...styles.domainBoxLink}}>Browse Survey</Clickable>
+  </WorkspaceCardBase>;
+};
 
 
 export const ConceptHomepage = withCurrentWorkspace()(
@@ -106,6 +132,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
       // Cache for storing selected concepts, their domain, and vocabulary
       conceptsCache: Array<ConceptCacheItem>,
       conceptsSavedText: string,
+      // Array of surveys
+      conceptSurveysList: Array<SurveyModule>,
       // Array of concepts that have been selected
       conceptsToAdd: Concept[],
       // Current string in search box
@@ -140,6 +168,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         concepts: [],
         conceptsCache: [],
         conceptsSavedText: '',
+        conceptSurveysList: [],
         conceptsToAdd: [],
         currentSearchString: '',
         loadingDomains: true,
@@ -159,39 +188,46 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      this.loadDomains();
+      this.loadDomainsAndSurveys();
     }
 
-    async loadDomains() {
+    async loadDomainsAndSurveys() {
       const {namespace, id} = this.props.workspace;
       try {
-        const conceptsCache: ConceptCacheItem[] = [];
-        const conceptDomainCounts: DomainCount[] = [];
-        const resp = await conceptsApi().getDomainInfo(namespace, id);
-        this.setState({conceptDomainList: resp.items});
-        resp.items.forEach((domain) => {
-          conceptsCache.push({
-            domain: domain.domain,
-            items: [],
-            vocabularyList: []
-          });
-          conceptDomainCounts.push({
-            domain: domain.domain,
-            name: domain.name,
-            conceptCount: 0
-          });
-        });
-        this.setState({
-          conceptsCache: conceptsCache,
-          conceptDomainCounts: conceptDomainCounts,
-          selectedDomain: conceptDomainCounts[0],
-        });
+        const [conceptDomainInfo, surveysInfo] = await Promise.all([
+          conceptsApi().getDomainInfo(namespace, id),
+          conceptsApi().getSurveyInfo(namespace, id)]);
+        this.setState({conceptSurveysList: surveysInfo.items});
+        this.loadConceptDomainInfo(conceptDomainInfo);
       } catch (e) {
         console.error(e);
       } finally {
         this.browseDomainFromQueryParams();
         this.setState({loadingDomains: false});
       }
+    }
+
+    loadConceptDomainInfo(conceptDomainInfo) {
+      const conceptsCache: ConceptCacheItem[] = [];
+      const conceptDomainCounts: DomainCount[] = [];
+      conceptDomainInfo.items.forEach((domain) => {
+        conceptsCache.push({
+          domain: domain.domain,
+          items: [],
+          vocabularyList: []
+        });
+        conceptDomainCounts.push({
+          domain: domain.domain,
+          name: domain.name,
+          conceptCount: 0
+        });
+      });
+      this.setState({
+        conceptsCache: conceptsCache,
+        conceptDomainList: conceptDomainInfo.items,
+        conceptDomainCounts: conceptDomainCounts,
+        selectedDomain: conceptDomainCounts[0],
+      });
     }
 
     browseDomainFromQueryParams() {
@@ -331,8 +367,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     render() {
-      const {loadingDomains, conceptDomainList, standardConceptsOnly, showSearchError,
-        searching, concepts, searchLoading, conceptDomainCounts, selectedDomain,
+      const {loadingDomains, conceptDomainList, conceptSurveysList, standardConceptsOnly,
+        showSearchError, searching, concepts, searchLoading, conceptDomainCounts, selectedDomain,
         conceptAddModalOpen, conceptsToAdd, selectedConceptDomainMap,
         currentSearchString, conceptsSavedText} = this.state;
       const {workspace} = this.props;
@@ -416,14 +452,27 @@ export const ConceptHomepage = withCurrentWorkspace()(
                                disable={this.activeSelectedConceptCount === 0 ||
                                 !this.state.workspacePermissions.canWrite}/>
             </FadeBox> :
-            <div style={{display: 'flex', flexDirection: 'row', width: '94.3%', flexWrap: 'wrap'}}>
-              {conceptDomainList.map((domain, i) => {
-                return <DomainCard conceptDomainInfo={domain}
-                                    standardConceptsOnly={standardConceptsOnly}
-                                    browseInDomain={() => this.browseDomain(domain)}
-                                    key={i} data-test-id='domain-box'/>;
-              })}
-          </div>
+                <div>
+                  <div style={styles.sectionHeader}>
+                    EHR Domain
+                  </div>
+                  <div style={{display: 'flex', flexDirection: 'row', width: '94.3%', flexWrap: 'wrap'}}>
+                  {conceptDomainList.map((domain, i) => {
+                      return <DomainCard conceptDomainInfo={domain}
+                                         standardConceptsOnly={standardConceptsOnly}
+                                         browseInDomain={() => this.browseDomain(domain)}
+                                         key={i} data-test-id='domain-box'/>;
+                    })}
+                  </div>
+                  <div style={styles.sectionHeader}>
+                    Survey Questions
+                  </div>
+                  <div style={{display: 'flex', flexDirection: 'row', width: '94.3%', flexWrap: 'wrap'}}>
+                    {conceptSurveysList.map((surveys, i) => {
+                      return <SurveyCard survey={surveys} key={surveys.orderNumber}/>;
+                    })}
+                   </div>
+                </div>
         }
         {conceptAddModalOpen &&
           <ConceptAddModal selectedDomain={selectedDomain}

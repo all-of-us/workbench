@@ -20,7 +20,8 @@ export default {
     '#afd3ed',
     '#d7eaf6',
     '#eaf4fb',
-    '#2F2E7E'
+    '#2F2E7E',
+    '#302C71'
   ],
   gray: [
     '#4a4a4a',

@@ -8,7 +8,9 @@ import {
   DomainInfoResponse,
   DomainValuesResponse,
   SearchConceptsRequest,
-  StandardConceptFilter
+  StandardConceptFilter,
+  SurveyModule,
+  SurveysResponse
 } from 'generated/fetch';
 
 export class ConceptStubVariables {
@@ -71,6 +73,34 @@ export class ConceptStubVariables {
     }
   ];
 }
+export class SurveyStubVariables {
+  static STUB_SURVEYS: SurveyModule[] = [
+    {
+      conceptId: 1,
+      name: 'The Basics',
+      description: 'Basis description',
+      questionCount: 101,
+      participantCount: 200,
+      orderNumber: 1
+    },
+    {
+      conceptId: 2,
+      name: 'Overall Health',
+      description: 'Overall Health description',
+      questionCount: 102,
+      participantCount: 300,
+      orderNumber: 2
+    },
+    {
+      conceptId: 3,
+      name: 'LifeStyle',
+      description: 'Lifestyle description',
+      questionCount: 103,
+      participantCount: 300,
+      orderNumber: 3
+    }
+  ];
+}
 
 export class DomainStubVariables {
   static STUB_DOMAINS: DomainInfo[] = [
@@ -122,6 +152,10 @@ export class ConceptsApiStub extends ConceptsApi {
   public getDomainInfo(
     workspaceNamespace: string, workspaceId: string): Promise<DomainInfoResponse> {
     return Promise.resolve({items: DomainStubVariables.STUB_DOMAINS});
+  }
+
+  public getSurveyInfo(workspaceNamespace: string, workspaceId: string): Promise<SurveysResponse> {
+    return Promise.resolve({items: SurveyStubVariables.STUB_SURVEYS});
   }
 
   // This just returns static values rather than doing a real search.

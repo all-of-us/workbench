@@ -4,11 +4,25 @@ import * as React from 'react';
 import {conceptsApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {ConceptHomepage} from 'app/views/concept-homepage';
-import {ConceptsApi, ConceptSetsApi, DomainInfo, StandardConceptFilter, WorkspacesApi} from 'generated/fetch';
+import {
+  ConceptsApi,
+  ConceptSetsApi,
+  DomainInfo,
+  StandardConceptFilter,
+  WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {ConceptsApiStub, ConceptStubVariables, DomainStubVariables} from 'testing/stubs/concepts-api-stub';
-import {workspaceDataStub, WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {
+  ConceptsApiStub,
+  ConceptStubVariables,
+  DomainStubVariables,
+  SurveyStubVariables
+} from 'testing/stubs/concepts-api-stub';
+import {
+  workspaceDataStub,
+  WorkspacesApiStub,
+  WorkspaceStubVariables
+} from 'testing/stubs/workspaces-api-stub';
 
 
 function isSelectedDomain(
@@ -53,6 +67,13 @@ describe('ConceptHomepage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="domain-box-name"]').length)
       .toBe(DomainStubVariables.STUB_DOMAINS.length);
+  });
+
+  it('should have one card per survey.', async() => {
+    const wrapper = mount(<ConceptHomepage />);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="survey-box-name"]').length)
+      .toBe(SurveyStubVariables.STUB_SURVEYS.length);
   });
 
   it('should default to standard concepts only, and performs a full search', async() => {

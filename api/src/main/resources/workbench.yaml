@@ -1497,6 +1497,24 @@ paths:
             schema:
               $ref: "#/definitions/DomainValuesResponse"
 
+### Surveys #############################################
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyInfo:
+    get:
+      tags:
+        - concepts
+      description: >
+        Returns survey information in the workspace's CDR version along with participant and
+        question count
+      operationId: "getSurveyInfo"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+      responses:
+        200:
+          description: information about the surveys
+          schema:
+            $ref: "#/definitions/SurveysResponse"
+
 ### Data set ############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateQuery:
     post:
@@ -2574,6 +2592,16 @@ definitions:
       value:
         description: The user facing display name for the value.
         type: string
+
+  SurveysResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/SurveyModule"
 
   CreateAccountRequest:
     type: object

@@ -12,6 +12,7 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.DomainVocabularyInfoDao;
+import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DomainInfo;
 import org.pmiops.workbench.cdr.model.DomainVocabularyInfo;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -25,6 +26,7 @@ import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
+import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.VocabularyCount;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -45,6 +47,8 @@ public class ConceptsController implements ConceptsApiDelegate {
   private final DomainInfoDao domainInfoDao;
   private final DomainVocabularyInfoDao domainVocabularyInfoDao;
   private final ConceptDao conceptDao;
+  private final SurveyModuleDao surveyModuleDao;
+
 
   static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
       (concept) ->
@@ -91,13 +95,15 @@ public class ConceptsController implements ConceptsApiDelegate {
       WorkspaceService workspaceService,
       DomainInfoDao domainInfoDao,
       DomainVocabularyInfoDao domainVocabularyInfoDao,
-      ConceptDao conceptDao) {
+      ConceptDao conceptDao,
+      SurveyModuleDao surveyModuleDao) {
     this.bigQueryService = bigQueryService;
     this.conceptService = conceptService;
     this.workspaceService = workspaceService;
     this.domainInfoDao = domainInfoDao;
     this.domainVocabularyInfoDao = domainVocabularyInfoDao;
     this.conceptDao = conceptDao;
+    this.surveyModuleDao = surveyModuleDao;
   }
 
   @Override
@@ -113,6 +119,19 @@ public class ConceptsController implements ConceptsApiDelegate {
                 domains.stream()
                     .map(org.pmiops.workbench.cdr.model.DomainInfo.TO_CLIENT_DOMAIN_INFO)
                     .collect(Collectors.toList()));
+    return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<SurveysResponse> getSurveyInfo(String workspaceNamespace, String workspaceId) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    List<org.pmiops.workbench.cdr.model.SurveyModule> surveyModules = surveyModuleDao.findByOrderByOrderNumberAsc();
+
+    SurveysResponse response = new SurveysResponse()
+        .items(surveyModules.stream()
+            .map(org.pmiops.workbench.cdr.model.SurveyModule.TO_CLIENT_SURVEY_MODULE)
+            .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
