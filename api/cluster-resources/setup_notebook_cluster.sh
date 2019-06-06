@@ -25,7 +25,7 @@ echo "Sys.setenv(RETICULATE_PYTHON = '$(which python3)')" >> ~/.Rprofile
 
 # The following are required for R packages to function:
 # - libmagick++-dev: summarytools
-# - g++-4.6-miltilib: minqa (brings in the gfortran library)
+# - gfortran-6: minqa (Leo base fix: https://broadworkbench.atlassian.net/browse/IA-1002)
 #
 # Must be installed from the cran repository, otherwise will receive install
 # errors. See: https://github.com/DataBiosphere/leonardo/issues/813
@@ -36,7 +36,7 @@ echo "Sys.setenv(RETICULATE_PYTHON = '$(which python3)')" >> ~/.Rprofile
 # TODO: These steps are quite slow, we could also consider pushing this into the
 # base Leo image or a custom AoU docker image.
 apt-get update
-apt-get -t stretch-cran35 install -y --no-install-recommends libmagick++-dev g++-4.6-multilib
+apt-get -t stretch-cran35 install -y --no-install-recommends libmagick++-dev gfortran-6
 
 for v in "2.7" "3"; do
   "pip${v}" install --upgrade \
