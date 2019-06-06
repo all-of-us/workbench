@@ -89,4 +89,5 @@
   <include file="changelog/db.changelog-79-drop-fc-index.xml"/>
   <include file="changelog/db.changelog-80-research-purpose-refactor.xml"/>
   <include file="changelog/db.changelog-81-add-billing_migration_status-workspace.xml"/>
+  <include file="changelog/db.changelog-82-add-cascade-delete-admin-actions-after-user-delete.xml"/>
 </databaseChangeLog>
