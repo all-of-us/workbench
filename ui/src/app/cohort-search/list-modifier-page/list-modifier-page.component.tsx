@@ -1,6 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {wizardStore} from 'app/cohort-search/search-state.service';
+import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -55,7 +56,21 @@ const styles = reactStyles({
   info: {
     color: '#0077b7',
     marginLeft: '0.25rem',
-  }
+  },
+  footer: {
+    background: '#e4f3fc',
+    padding: '0.5rem',
+    position: 'absolute',
+    width: '93%',
+    bottom: '1rem'
+  },
+  calculate: {
+    background: '#2691d0',
+    color: '#ffffff',
+    margin: '0.25rem 0.5rem 0.25rem 0',
+    border: '1px solid #0077b7',
+    borderRadius: '3px',
+  },
 });
 
 interface Props {
@@ -411,6 +426,9 @@ export const ListModifierPage = withCurrentWorkspace()(
             </div>
           </div>;
         })}
+        <div style={styles.footer}>
+          <Button type='primary' style={styles.calculate}>Calculate</Button>
+        </div>
       </div>;
     }
   }
