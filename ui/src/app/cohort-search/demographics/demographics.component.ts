@@ -177,7 +177,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   loadOptions(nodes: any, subtype: string) {
-    this.loading = false;
     switch (subtype) {
       /* Age and Deceased are single nodes we use as templates */
       case TreeSubType[TreeSubType.AGE]:
@@ -200,12 +199,15 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         break;
       case TreeSubType[TreeSubType.GEN]:
         this.genderNodes = nodes;
+        this.loading = false;
         break;
       case TreeSubType[TreeSubType.RACE]:
         this.raceNodes = nodes;
+        this.loading = false;
         break;
       case TreeSubType[TreeSubType.ETH]:
         this.ethnicityNodes = nodes;
+        this.loading = false;
         break;
     }
   }
@@ -359,6 +361,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       count += ageNode.count;
     }
     this.ageCount = count;
+    this.loading = false;
   }
 
   centerAgeCount() {
