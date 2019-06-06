@@ -64,6 +64,7 @@ public class User {
   private Short freeTierBillingProjectStatus;
   private Timestamp firstSignInTime;
   private Set<Short> authorities = new HashSet<>();
+  private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<>();
   private Boolean idVerificationIsValid;
   private Timestamp termsOfServiceCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
@@ -288,7 +289,7 @@ public class User {
     this.pageVisits = newPageVisits;
   }
 
-  @OneToMany(fetch = FetchType.EAGER,
+  @OneToMany(fetch = FetchType.LAZY,
       mappedBy = "user",
       orphanRemoval = true,
       cascade = CascadeType.ALL)
