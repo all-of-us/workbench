@@ -49,7 +49,6 @@ public class ConceptsController implements ConceptsApiDelegate {
   private final ConceptDao conceptDao;
   private final SurveyModuleDao surveyModuleDao;
 
-
   static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
       (concept) ->
           new Concept()
@@ -123,15 +122,19 @@ public class ConceptsController implements ConceptsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<SurveysResponse> getSurveyInfo(String workspaceNamespace, String workspaceId) {
+  public ResponseEntity<SurveysResponse> getSurveyInfo(
+      String workspaceNamespace, String workspaceId) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<org.pmiops.workbench.cdr.model.SurveyModule> surveyModules = surveyModuleDao.findByOrderByOrderNumberAsc();
+    List<org.pmiops.workbench.cdr.model.SurveyModule> surveyModules =
+        surveyModuleDao.findByOrderByOrderNumberAsc();
 
-    SurveysResponse response = new SurveysResponse()
-        .items(surveyModules.stream()
-            .map(org.pmiops.workbench.cdr.model.SurveyModule.TO_CLIENT_SURVEY_MODULE)
-            .collect(Collectors.toList()));
+    SurveysResponse response =
+        new SurveysResponse()
+            .items(
+                surveyModules.stream()
+                    .map(org.pmiops.workbench.cdr.model.SurveyModule.TO_CLIENT_SURVEY_MODULE)
+                    .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
