@@ -18,7 +18,7 @@ import {RecentWorkComponent} from 'app/views/recent-work';
 import {ResetClusterButtonComponent} from 'app/views/reset-cluster-button';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
-import {WorkspaceAboutComponent} from "app/views/workspace-about";
+import {WorkspaceAboutComponent} from 'app/views/workspace-about';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar';
 import {WorkspaceShareComponent} from 'app/views/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';

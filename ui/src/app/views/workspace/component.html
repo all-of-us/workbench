@@ -1,6 +1,6 @@
 <div class="workspace-container">
-  <app-workspace-about *ngIf="datasetBuilderFlag"></app-workspace-about>
-  <app-top-box *ngIf="!datasetBuilderFlag" style="width: 78%">
+  <app-workspace-about *ngIf="showUpdatedResearchPurpose"></app-workspace-about>
+  <app-top-box *ngIf="!showUpdatedResearchPurpose" style="width: 78%">
     <div class="padding-wrapper">
       <div class="main-body">
         <div style="display: flex; flex-direction: row">
