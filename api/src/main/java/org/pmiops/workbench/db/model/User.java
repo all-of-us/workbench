@@ -288,6 +288,22 @@ public class User {
     this.pageVisits = newPageVisits;
   }
 
+  @OneToMany(fetch = FetchType.EAGER,
+      mappedBy = "user",
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
+  public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
+    return workspaceUserRoles;
+  }
+
+  /**
+   * Necessary for Spring initialization of the object. Not actually supported because it won't
+   * delete old entries.
+   */
+  public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
+    this.workspaceUserRoles = userRoles;
+  }
+
   @Column(name = "id_verification_is_valid")
   public Boolean getIdVerificationIsValid() {
     return idVerificationIsValid;
