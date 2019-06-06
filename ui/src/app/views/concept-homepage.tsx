@@ -41,7 +41,7 @@ const styles = reactStyles({
     color: colors.blue[0], fontSize: '18px', lineHeight: '22px'
   },
   domainBoxLink: {
-    color: colors.blue[0], lineHeight: '18px', fontWeight: 600, letterSpacing: '0.05rem'
+    color: colors.blue[0], lineHeight: '18px', fontWeight: 400, letterSpacing: '0.05rem'
   },
   conceptText: {
     marginTop: '0.3rem', fontSize: '14px', fontWeight: 400, color: colors.gray[0],
