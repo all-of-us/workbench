@@ -1,44 +1,49 @@
 <form class="form-container" [class.age]="subtype === treeSubType.AGE" [formGroup]="demoForm" [ngSwitch]="subtype">
   <!-- Age -->
   <div *ngSwitchCase="treeSubType.AGE">
-    <div class="age-label">
-      Age Range
-    </div>
-    <div class="control-wrapper slider-wrapper" [class.disabled]="deceased.value">
-      <input type="number"
-             id="min-age"
-             [min]="minAge" [max]="maxAge"
-             formControlName="ageMin"
-             class="number-display"
-             (blur)="checkMin()">
-      <div class="slider">
-        <div id="count-wrapper">
-            <span *ngIf="ageCount !== null" id="age-count" class="badge badge-info">
-              {{ ageCount | number }}
-            </span>
-        </div>
-        <nouislider
-                [min]="minAge" [max]="maxAge" [step]="1"
-                [behaviour]="'drag'"
-                [connect]="true"
-                (slide)="centerAgeCount()"
-                [formControl]="demoForm.controls.ageRange">
-        </nouislider>
+    <ng-container *ngIf="!loading">
+      <div class="age-label">
+        Age Range
       </div>
-      <input type="number"
-             id="max-age"
-             [min]="minAge" [max]="maxAge"
-             formControlName="ageMax"
-             class="number-display"
-             (blur)="checkMax()">
-    </div>
+      <div class="control-wrapper slider-wrapper" [class.disabled]="deceased.value">
+        <input type="number"
+               id="min-age"
+               [min]="minAge" [max]="maxAge"
+               [disabled]="loading"
+               formControlName="ageMin"
+               class="number-display"
+               (blur)="checkMin()">
+        <div class="slider">
+          <div id="count-wrapper">
+              <span *ngIf="ageCount !== null" id="age-count" class="badge badge-info">
+                {{ ageCount | number }}
+              </span>
+          </div>
+          <nouislider
+                  [min]="minAge" [max]="maxAge" [step]="1"
+                  [behaviour]="'drag'"
+                  [connect]="true"
+                  (slide)="centerAgeCount()"
+                  [formControl]="demoForm.controls.ageRange">
+          </nouislider>
+        </div>
+        <input type="number"
+               id="max-age"
+               [min]="minAge" [max]="maxAge"
+               [disabled]="loading"
+               formControlName="ageMax"
+               class="number-display"
+               (blur)="checkMax()">
+      </div>
 
-    <clr-checkbox formControlName="deceased">
-      Is Deceased
-      <span *ngIf="deceasedNode" class="badge badge-info">
-        {{ deceasedNode.get('count') | number }}
-      </span>
-    </clr-checkbox>
+      <clr-checkbox formControlName="deceased" [clrDisabled]="loading">
+        Is Deceased
+        <span *ngIf="deceasedNode" class="badge badge-info">
+          {{ deceasedNode.get('count') | number }}
+        </span>
+      </clr-checkbox>
+    </ng-container>
+    <div *ngIf="loading" class="spinner" style="left: 45%"></div>
   </div>
 
   <!-- Genders -->
