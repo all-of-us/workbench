@@ -2,7 +2,6 @@ import {Component, Input} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {ClrIcon} from 'app/components/icons';
-import {Select} from 'app/components/inputs';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -26,18 +25,31 @@ const styles = reactStyles({
     color: '#262262',
     fontWeight: 500,
   },
-  select: {
-    width: '50%',
+  modifier: {
     marginTop: '0.5rem'
+  },
+  select: {
+    width: '12rem',
+    height: '1.5rem',
+    paddingLeft: '0.5rem',
+    marginRight: '1rem',
+  },
+  input: {
+    borderRadius: '3px',
+    border: '1px solid #a6a6a6',
+    width: '3rem',
+    height: '1.5rem',
   },
   count: {
     display: 'inline-flex',
     height: '0.625rem',
     background: '#0079b8',
     color: '#ffffff',
+    fontSize: '10px',
     padding: '0 0.166667rem',
     borderRadius: '10px',
-
+    verticalAlign: 'middle',
+    alignItems: 'center',
   },
   info: {
     color: '#0077b7',
@@ -233,7 +245,7 @@ export const ListModifierPage = withCurrentWorkspace()(
           response.items.forEach(option => {
             if (option.parentId === 0 && option.count > 0) {
               encounters.options.push({
-                label: `${option.name} (${option.count.toLocaleString()})`,
+                label: option.name,
                 value: option.conceptId.toString()
               });
               visitCounts[option.conceptId] = option.count;
@@ -311,7 +323,7 @@ export const ListModifierPage = withCurrentWorkspace()(
       return modName === 'encounters' && optName !== 'Any';
     }
 
-    selectChange(sel, index) {
+    selectChange = (sel, index) => {
       const {formState} = this.state;
       const {name} = formState[index];
       if (name === 'encounters') {
@@ -354,11 +366,14 @@ export const ListModifierPage = withCurrentWorkspace()(
     //   return disable;
     // }
 
-    optionTemplate = (opt: any) => {
+    optionTemplate = (opt: any, name: string) => {
+      if (name !== 'encounters' || !opt.value) {
+        return opt.label;
+      }
       const {visitCounts} = this.state;
       return <div className='p-clearfix'>
         {opt.label}
-        <span style={styles.count}>{visitCounts[opt.value]}</span>
+        &nbsp;<span style={styles.count}>{visitCounts[opt.value]}</span>
       </div>;
     }
 
@@ -375,21 +390,23 @@ export const ListModifierPage = withCurrentWorkspace()(
             {name === 'eventDate' &&
               <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
             }
-            <div style={styles.select}>
+            <div style={styles.modifier}>
               {/*TODO finish styling prime dropdown*/}
               <Dropdown value={operator}
-                onChange={(e) => this.selectChange(e, i)}
+                style={styles.select}
+                panelStyle={{color: 'red'}}
+                onChange={(e) => this.selectChange(e.value, i)}
                 options={options}
-                itemTemplate={name === 'encounters' && this.optionTemplate}/>
+                itemTemplate={(e) => this.optionTemplate(e, name)}/>
+              {operator && name !== 'encounters' && <React.Fragment>
+                <input type='number' style={styles.input} value={valueA}
+                       onChange={(e) => this.inputChange(i, 'valueA', e.target.value)}/>
+                {operator === 'Between' &&
+                <input type='number' style={styles.input} value={valueB}
+                       onChange={(e) => this.inputChange(i, 'valueB', e.target.value)}/>
+                }
+              </React.Fragment>}
             </div>
-            {operator && name !== 'encounters' && <React.Fragment>
-              <input value={valueA}
-                onChange={(e) => this.inputChange(i, 'valueA', e.target.value)}/>
-              {operator === 'Between' &&
-                <input value={valueB}
-                  onChange={(e) => this.inputChange(i, 'valueB', e.target.value)}/>
-              }
-            </React.Fragment>}
           </div>;
         })}
       </div>;
