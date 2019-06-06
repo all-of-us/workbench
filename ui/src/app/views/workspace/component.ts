@@ -105,11 +105,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.workspace.userRoles = fp.sortBy('familyName', workspace.userRoles);
     this.accessLevel = workspace.accessLevel;
     this.researchPurposeArray = [];
-    Object.keys(ResearchPurposeItems).forEach((key) => {
-      if (this.workspace.researchPurpose[key]) {
-        let shortDescription = ResearchPurposeItems[key].shortDescription;
-        if (key === 'diseaseFocusedResearch') {
+    ResearchPurposeItems.forEach((key) => {
+      if (this.workspace.researchPurpose[key.shortName]) {
+        let shortDescription = key.shortDescription;
+        if (key.shortName === 'diseaseFocusedResearch') {
           shortDescription += ': ' + this.workspace.researchPurpose.diseaseOfFocus;
+        }
+        if (key.shortName === 'otherPurpose') {
+          shortDescription += ': ' + this.workspace.researchPurpose.otherPurposeDetails;
         }
         this.researchPurposeArray.push(shortDescription);
       }
