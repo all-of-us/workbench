@@ -343,3 +343,7 @@ export const append = fp.curry((value, arr) => fp.concat(arr, [value]));
 export const toggleIncludes = fp.curry((value, arr) => {
   return fp.includes(value, arr) ? fp.pull(value, arr) : append(value, arr);
 });
+
+export function sliceByHalfLength(obj) {
+  return Math.ceil(obj.length / 2);
+}

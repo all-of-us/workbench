@@ -1,14 +1,17 @@
 import {Component} from '@angular/core';
+import * as React from 'react';
+
+import {Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {TwoColPaddedTable} from 'app/components/tables';
+import {EditComponentReact} from 'app/icons/edit';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {WorkspaceData} from 'app/utils/workspace-data';
-import * as React from 'react';
-import {ResearchPurposeDescription, ResearchPurposeItems, specificPopulations, UbrTableCell} from './workspace-edit';
-import {EditComponentReact} from "../icons/edit";
-import {Clickable} from "../components/buttons";
-import {WorkspacePermissions} from "../utils/workspace-permissions";
+import {sliceByHalfLength} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {WorkspacePermissions} from 'app/utils/workspace-permissions';
+import {ResearchPurposeDescription, ResearchPurposeItems, specificPopulations} from './workspace-edit';
 
 const styles = reactStyles({
   mainHeader: {
@@ -34,9 +37,41 @@ export const WorkspaceAbout = withCurrentWorkspace()(
       };
     }
 
+    getSelectedResearchPurposeItems() {
+      return ResearchPurposeItems.filter((item) =>
+        this.props.workspace.researchPurpose[item.shortName]).map((item) => {
+          let content = item.shortDescription;
+          if (item.shortName === 'otherPurpose') {
+            content += ': ' + this.props.workspace.researchPurpose.otherPurposeDetails;
+          }
+          if (item.shortName === 'diseaseFocusedResearch') {
+            content += ': ' + this.props.workspace.researchPurpose.diseaseOfFocus;
+          }
+          return content;
+        });
+    }
+
+    getSelectedPopulations() {
+      return specificPopulations.filter(sp =>
+        this.props.workspace.researchPurpose.populationDetails.includes(sp.object))
+        .map(sp => sp.ubrLabel);
+    }
+
+    getSelectedPopulationsSlice(left: boolean) {
+      const populations = this.getSelectedPopulations();
+      const populationsHalfLen = sliceByHalfLength(populations);
+      if (left) {
+        return populations.slice(0, populationsHalfLen);
+      } else {
+        return populations.slice(populationsHalfLen);
+      }
+    }
+
     render() {
       const workspace = this.props.workspace;
       const {workspacePermissions} = this.state;
+      const selectedResearchPurposeItems = this.getSelectedResearchPurposeItems();
+      const rpItemsHalfLen = sliceByHalfLength(selectedResearchPurposeItems);
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '98%'}}>
         <div style={styles.mainHeader}>Research Purpose
           <Clickable disabled={!workspacePermissions.canWrite}
@@ -49,18 +84,9 @@ export const WorkspaceAbout = withCurrentWorkspace()(
         </div>
         <div style={styles.sectionText}>{ResearchPurposeDescription}</div>
         <div style={styles.sectionHeader}>Primary purpose of the project</div>
-        {ResearchPurposeItems.map((item, key) => {
-          if (workspace.researchPurpose[item.shortName]) {
-            let content = item.shortDescription;
-            if (item.shortName === 'otherPurpose') {
-              content += ': ' + workspace.researchPurpose.otherPurposeDetails;
-            }
-            if (item.shortName === 'diseaseFocusedResearch') {
-              content += ': ' + workspace.researchPurpose.diseaseOfFocus;
-            }
-            return <UbrTableCell left={true} key={key} content={content}/>;
-          }
-        })}
+        <TwoColPaddedTable header={false} style={{marginTop: '0.3rem'}}
+                           contentLeft={selectedResearchPurposeItems.slice(0, rpItemsHalfLen)}
+                           contentRight={selectedResearchPurposeItems.slice(rpItemsHalfLen)}/>
         <div style={styles.sectionHeader}>
           Reason for choosing All of Us data for your investigation</div>
         <div style={styles.sectionText}>{workspace.researchPurpose.reasonForAllOfUs}</div>
@@ -70,12 +96,10 @@ export const WorkspaceAbout = withCurrentWorkspace()(
         <div style={styles.sectionText}>{workspace.researchPurpose.anticipatedFindings}</div>
         {workspace.researchPurpose.population && <div style={{marginBottom: '1rem'}}>
           <div style={styles.sectionHeader}>Population area(s) of focus</div>
-          {specificPopulations.map((population, key) => {
-            if (workspace.researchPurpose.populationDetails.includes(population.object)) {
-              return <UbrTableCell left={true} key={key}
-                                   content={population.ubrLabel}/>;
-            }
-          })}</div>
+          <TwoColPaddedTable header={false} style={{marginTop: '0.3rem'}}
+                             contentLeft={this.getSelectedPopulationsSlice(true)}
+                             contentRight={this.getSelectedPopulationsSlice(false)}/>
+        </div>
         }
       </FadeBox>;
     }
