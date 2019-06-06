@@ -3,8 +3,8 @@ import * as React from 'react';
 
 import {WorkspaceList} from './workspace-list';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {WorkspacesApi, ProfileApi} from "generated/fetch/api";
 import {Profile} from 'generated';
+import {ProfileApi, WorkspacesApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
@@ -65,9 +65,11 @@ describe('WorkspaceList', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="workspace-card"]').first()
-        .find('[data-test-id="workspace-access-level"]').text())
-        .toBe(WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION);
-  })
+      .find('[data-test-id="workspace-access-level"]').text())
+      .toBe(WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION);
+  });
+
+  // TODO (RW-2625) Exercise a workspace share code path from the workspace list.
 
   // Note: this spec is not testing the Popup menus on workspace cards due to an issue using
   //    PopupTrigger in the test suite.
