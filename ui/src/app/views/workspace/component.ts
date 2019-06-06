@@ -11,6 +11,7 @@ import {cohortsApi, profileApi, workspacesApi} from 'app/services/swagger-fetch-
 import {CdrVersion} from 'generated';
 
 import {Cohort, FileDetail, PageVisit, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
+import {environment} from 'environments/environment';
 
 
 @Component({
@@ -51,6 +52,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   bugReportDescription = '';
   googleBucketModal = false;
 
+  private datasetBuilderFlag = environment.enableDatasetBuilder;
   private subscriptions = [];
 
   constructor(
