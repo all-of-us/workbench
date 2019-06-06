@@ -280,7 +280,9 @@ export const connectBehaviorSubject = <T extends {}>(subject: BehaviorSubject<T>
 
       render() {
         const {value} = this.state;
-        return <WrappedComponent {...this.props} {...{[name]: value}} />;
+        // We allow overriding of the currentValue, for reuse of the same
+        // logic outside of the scope of a current workspace.
+        return <WrappedComponent {...{[name]: value}} {...this.props}/>;
       }
     }
 
