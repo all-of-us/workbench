@@ -139,7 +139,8 @@ export const Select = ({value, options, onChange, ...props}) => {
 };
 
 export class DatePicker extends React.Component<
-  {value: Date, onChange: Function, onBlur?: Function, maxDate?: Date, disabled?: boolean}
+  {value: Date, onChange: Function, onBlur?: Function, maxDate?: Date, disabled?: boolean,
+    placeholder?: string}
 > {
   popup: React.RefObject<any>;
   constructor(props) {
@@ -148,7 +149,7 @@ export class DatePicker extends React.Component<
   }
 
   render() {
-    const {value, onChange, onBlur, disabled, ...props} = this.props;
+    const {value, onChange, onBlur, disabled, placeholder, ...props} = this.props;
     let date, text;
     if (value !== null && typeof value === 'object') {
       date = value;
@@ -173,6 +174,7 @@ export class DatePicker extends React.Component<
         onChange={onChange}
         onBlur={onBlur}
         disabled={disabled}
+        placeholder={placeholder}
         style={{...(disabled ? {cursor: 'not-allowed'} : {})}}/>
       <PopupTrigger
         ref={this.popup}

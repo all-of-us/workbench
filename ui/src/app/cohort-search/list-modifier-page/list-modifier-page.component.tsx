@@ -3,6 +3,7 @@ import {FormControl} from '@angular/forms';
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {DatePicker} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -36,12 +37,16 @@ const styles = reactStyles({
     paddingLeft: '0.5rem',
     marginRight: '1rem',
   },
-  input: {
+  number: {
     borderRadius: '3px',
     border: '1px solid #a6a6a6',
     width: '3rem',
     height: '1.6rem',
     verticalAlign: 'middle',
+  },
+  date: {
+    width: '6.5rem',
+    display: 'inline-block',
   },
   count: {
     display: 'inline-flex',
@@ -437,10 +442,17 @@ export const ListModifierPage = withCurrentWorkspace()(
       const {values} = this.state.formState[index];
       switch (type) {
         case 'number':
-          return <input type='number' style={styles.input} value={values[name]}
-            onChange={(e) => this.inputChange(index, name, e.target.value)}/>;
+          return <input type='number' style={styles.number} value={values[name]}
+            onChange={e => this.inputChange(index, name, e.target.value)}/>;
         case 'date':
-          return <div>Date input</div>;
+          return <div style={styles.date}>
+            <DatePicker
+              value={values[name]}
+              placeholder='YYYY-MM-DD'
+              onChange={e => this.inputChange(index, name, e)}
+              maxDate={new Date()}
+            />
+          </div>;
       }
     }
 
