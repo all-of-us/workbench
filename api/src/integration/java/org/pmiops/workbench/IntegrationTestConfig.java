@@ -66,7 +66,17 @@ public class IntegrationTestConfig {
   }
 
   @Lazy
-  @Bean(name = Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
+  @Bean(name=Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
+  GoogleCredential cloudResourceManagerCredentials(CloudStorageService cloudStorageService) {
+    try {
+      return cloudStorageService.getCloudResourceManagerAdminCredentials();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Lazy
+  @Bean(name= Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
   GoogleCredential defaultServiceAccountCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getDefaultServiceAccountCredentials();

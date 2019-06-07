@@ -34,8 +34,6 @@ public class CloudResourceManagerServiceImplIntegrationTest {
 
   private final String CLOUD_RESOURCE_MANAGER_TEST_USER_EMAIL = "cloud-resource-manager-integration-test@fake-research-aou.org";
 
-  @Autowired
-  private final GoogleCredential googleCredential = getGoogleCredential();
 
   // N.B. this will load the default service account credentials for whatever AoU environment
   // is set when running integration tests. This should be the test environment.
@@ -56,31 +54,17 @@ public class CloudResourceManagerServiceImplIntegrationTest {
     serviceAccountCredential = serviceAccountCredential.createScoped(
         CloudResourceManagerServiceImpl.SCOPES);
     serviceAccountCredential.refreshToken();
-    service = createService();
-  }
-
-
-  private CloudResourceManagerServiceImpl createService() {
-    return new CloudResourceManagerServiceImpl(
+    service = new CloudResourceManagerServiceImpl(
         Providers.of(cloudResourceManagerAdminCredential),
         httpTransport, new GoogleRetryHandler(new NoBackOffPolicy()),
-        serviceAccounts);
+        serviceAccounts);;
   }
 
   @Test
-  public void testCanReadFile() {
+  public void testGetAllProjectsForUser() {
     User testUser = new User();
     testUser.setEmail(CLOUD_RESOURCE_MANAGER_TEST_USER_EMAIL);
     List<Project> projectList = service.getAllProjectsForUser(testUser);
     assertThat(projectList.size()).isEqualTo(1);
-  }
-
-  private static GoogleCredential getGoogleCredential() {
-    try {
-      String saKeyPath = "src/main/webapp/WEB-INF/gsuite-admin-sa.json";
-      return GoogleCredential.fromStream(new FileInputStream(new File(saKeyPath)));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 }
