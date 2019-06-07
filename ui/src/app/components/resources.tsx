@@ -39,9 +39,7 @@ export const ResourceCardMenu: React.FunctionComponent<{
                access, and playground mode is currently only enabled if you do
                not have write access.
               */
-              <MenuItem onClick={onOpenJupyterLabNotebook}>
-                Open in Jupyter Lab
-              </MenuItem>
+              <MenuItem onClick={onOpenJupyterLabNotebook}>Open in Jupyter Lab</MenuItem>
             }
           </React.Fragment>;
         }],

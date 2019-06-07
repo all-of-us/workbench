@@ -137,7 +137,7 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
 export const MenuItem = ({tooltip = '', disabled = false, children, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
-      data-test-id={children}
+      data-test-id={children.innerText}
       disabled={disabled}
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'start',
