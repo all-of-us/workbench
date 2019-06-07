@@ -208,6 +208,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   workspaceClusterBillingProjectId(): string {
     if (this.useBillingProjectBuffer === undefined) {
+      // The server config hasn't loaded yet, we don't yet know which billing
+      // project should be used for clusters.
       return null;
     }
     if (!this.useBillingProjectBuffer) {
