@@ -127,7 +127,8 @@ describe('NewDataSetModal', () => {
     expect(exportSpy).toHaveBeenCalledWith(workspaceNamespace, workspaceId, {
       dataSetRequest: dataSetRequestStub,
       newNotebook: true,
-      notebookName: notebookNameStub
+      notebookName: notebookNameStub,
+      kernelType: KernelTypeEnum.PYTHON
     });
   });
 });

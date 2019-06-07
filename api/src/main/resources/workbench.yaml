@@ -2378,6 +2378,14 @@ definitions:
         type: string
       newNotebook:
         type: boolean
+      kernelType:
+        $ref: "#/definitions/KernelTypeEnum"
+
+  KernelTypeEnum:
+    type: string
+    enum:
+      - R
+      - Python
 
   DomainValuePair:
     type: object

@@ -52,6 +52,7 @@ import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.NamedParameterEntry;
 import org.pmiops.workbench.model.NamedParameterValue;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -355,14 +356,28 @@ public class DataSetController implements DataSetApiDelegate {
     DataSetQueryList queryList =
         generateQuery(workspaceNamespace, workspaceId, dataSetExportRequest.getDataSetRequest())
             .getBody();
+
+    String libraries;
+    switch(dataSetExportRequest.getKernelType()) {
+      case PYTHON:
+        libraries = "import pandas";
+        break;
+      case R:
+        libraries = "library(reticulate)";
+        break;
+      default:
+        throw new BadRequestException("Language " + dataSetExportRequest.getKernelType() + " is not supported");
+    }
+
     String queriesAsStrings =
-        "import pandas\n\n"
-            + queryList.getQueryList().stream()
-                .map(
-                    query ->
-                        convertQueryToString(
-                            query, dataSetExportRequest.getDataSetRequest().getName()))
-                .collect(Collectors.joining("\n\n"));
+      libraries + "\n\n"
+          + queryList.getQueryList().stream()
+          .map(
+              query ->
+                  convertQueryToString(
+                      query, dataSetExportRequest.getDataSetRequest().getName(), dataSetExportRequest.getKernelType()))
+          .collect(Collectors.joining("\n\n"));
+
     JSONObject notebookFile;
     WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
     if (dataSetExportRequest.getNewNotebook()) {
@@ -477,36 +492,50 @@ public class DataSetController implements DataSetApiDelegate {
         .put("source", new JSONArray().put(cellInformation));
   }
 
-  private String convertQueryToString(DataSetQuery query, String prefix) {
+  private String convertQueryToString(DataSetQuery query, String prefix, KernelTypeEnum kernelTypeEnum) {
     String namespace =
         prefix.toLowerCase().replaceAll(" ", "_")
             + "_"
             + query.getDomain().toString().toLowerCase()
             + "_";
-    String sqlSection = namespace + "sql = \"\"\"" + query.getQuery() + "\"\"\"";
 
-    String namedParamsSection =
-        namespace
-            + "query_config = {\n"
-            + "  \'query\': {\n"
-            + "  \'parameterMode\': \'NAMED\',\n"
-            + "  \'queryParameters\': [\n"
-            + query.getNamedParameters().stream()
+    String sqlSection;
+    String namedParamsSection;
+    String dataFrameSection;
+
+    switch (kernelTypeEnum) {
+      case PYTHON:
+        sqlSection = namespace + "sql = \"\"\"" + query.getQuery() + "\"\"\"";
+        namedParamsSection =
+            namespace
+                + "query_config = {\n"
+                + "  \'query\': {\n"
+                + "  \'parameterMode\': \'NAMED\',\n"
+                + "  \'queryParameters\': [\n"
+                + query.getNamedParameters().stream()
                 .map(
                     namedParameterEntry ->
                         convertNamedParameterToString(namedParameterEntry) + "\n")
                 .collect(Collectors.joining(""))
-            + "    ]\n"
-            + "  }\n"
-            + "}\n\n";
-
-    String dataFrameSection =
-        namespace
-            + "df = pandas.read_gbq("
-            + namespace
-            + "sql, dialect=\"standard\", configuration="
-            + namespace
-            + "query_config)";
+                + "    ]\n"
+                + "  }\n"
+                + "}\n\n";
+        dataFrameSection =
+            namespace
+                + "df = pandas.read_gbq("
+                + namespace
+                + "sql, dialect=\"standard\", configuration="
+                + namespace
+                + "query_config)";
+        break;
+      case R:
+        sqlSection = "";
+        namedParamsSection = "";
+        dataFrameSection = "";
+        break;
+      default:
+        throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
+    }
 
     return sqlSection + "\n\n" + namedParamsSection + "\n\n" + dataFrameSection;
   }
@@ -545,6 +574,7 @@ public class DataSetController implements DataSetApiDelegate {
                     .map(
                         namedParameterValue ->
                             "{\'value\': " + namedParameterValue.getParameterValue() + "}")
+                    .collect(Collectors.joining(","))
                 + "]"
             : "'value': \"" + namedParameterEntry.getValue().getParameterValue() + "\"")
         + "}\n"
