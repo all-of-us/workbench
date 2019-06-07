@@ -31,7 +31,9 @@ public class CloudResourceManagerServiceImplIntegrationTest {
   private CloudResourceManagerServiceImpl service;
   private final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
 
-
+  // This is a single hand created user in the fake-research-aou.org gsuite.
+  // It has one project that has been shared with it, AoU CRM Integration Test
+  // in the firecloud dev domain.
   private final String CLOUD_RESOURCE_MANAGER_TEST_USER_EMAIL = "cloud-resource-manager-integration-test@fake-research-aou.org";
 
 
