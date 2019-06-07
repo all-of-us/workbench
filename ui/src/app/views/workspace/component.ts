@@ -51,6 +51,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   bugReportOpen: boolean;
   bugReportDescription = '';
   googleBucketModal = false;
+
+  // The updated Workspace About page will be released with the dataset builder
+  //  because workspace recent work will be moved to the Data tab.
   showUpdatedResearchPurpose = environment.enableDatasetBuilder;
 
   private subscriptions = [];

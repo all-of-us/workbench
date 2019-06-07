@@ -16,13 +16,11 @@ import {CdrVersion, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'ge
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-export const ResearchPurposeDescription = <div>
-   The AoU Research Program requires each user of AoU data to provide a
-   meaningful description of the intended purpose of data use for each Workspace they
-   create. The responses provided below will be posted publicly in the AoU Research Hub
-   website to inform the AoU Research Participants.  Therefore, please provide
-   sufficiently detailed responses at a 5th grade reading level.  Your responses will
-   not be used to make decisions about data access.</div>;
+export const ResearchPurposeDescription =
+   'The AoU Research Program requires each user of AoU data to provide a \
+   meaningful description of the intended purpose of data use for each Workspace they \
+   create. The responses provided below will be posted publicly in the AoU Research Hub \
+   website to inform the AoU Research Participants. ';
 
 export const ResearchPurposeItems = [
   {
@@ -614,7 +612,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <WorkspaceEditSection header='Billing Account' subHeader='National Institutes of Health'
             tooltip={toolTipText.billingAccount}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
-            description={[ResearchPurposeDescription, <br/>, <br/>,
+            description={[ResearchPurposeDescription, 'Therefore, please provide' +
+            ' sufficiently detailed responses at a 5th grade reading level.  Your responses' +
+            ' will not be used to make decisions about data access.', <br/>, <br/>,
               <i>Note that you are required to create separate Workspaces for each project
               for which you access AoU data, hence the responses below are expected to be specific
               to the project for which you are creating this particular Workspace.</i>
