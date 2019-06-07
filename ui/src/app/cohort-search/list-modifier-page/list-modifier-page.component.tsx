@@ -64,6 +64,19 @@ const styles = reactStyles({
     width: '93%',
     bottom: '1rem'
   },
+  row: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    marginRight: '-.5rem',
+    marginLeft: '-.5rem'
+  },
+  col: {
+    position: 'relative',
+    minHeight: '1px',
+    width: '100%',
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem',
+  },
   calculate: {
     background: '#2691d0',
     color: '#ffffff',
@@ -72,6 +85,19 @@ const styles = reactStyles({
     borderRadius: '3px',
   },
 });
+
+const columns = {
+  col3: {
+    ...styles.col,
+    flex: '0 0 25%',
+    maxWidth: '25%'
+  },
+  col8: {
+    ...styles.col,
+    flex: '0 0 67.66667%',
+    maxWidth: '67.66667%'
+  }
+};
 
 interface Props {
   disabled: Function;
@@ -92,6 +118,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         formState: [{
           name: 'ageAtEvent',
           label: 'Age At Event',
+          type: 'number',
           values: {
             operator: undefined,
             valueA: undefined,
@@ -113,6 +140,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         }, {
           name: 'hasOccurrences',
           label: 'Has Occurrences',
+          type: 'number',
           values: {
             operator: undefined,
             valueA: undefined,
@@ -128,6 +156,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         }, {
           name: 'eventDate',
           label: 'Shifted Event Date',
+          type: 'date',
           values: {
             operator: undefined,
             valueA: undefined,
@@ -249,6 +278,7 @@ export const ListModifierPage = withCurrentWorkspace()(
           const encounters = {
             name: 'encounters',
             label: 'During Visit Type',
+            type: null,
             values: {
               operator: undefined,
               encounterType: undefined,
@@ -393,6 +423,17 @@ export const ListModifierPage = withCurrentWorkspace()(
       </div>;
     }
 
+    renderInput(index: string, name: string, type) {
+      const {values} = this.state.formState[index];
+      switch (type) {
+        case 'number':
+          return <input type='number' style={styles.input} value={values[name]}
+            onChange={(e) => this.inputChange(index, name, e.target.value)}/>;
+        case 'date':
+          return <div>Date input</div>;
+      }
+    }
+
     render() {
       const {formState} = this.state;
       return <div style={{marginTop: '1rem'}}>
@@ -400,14 +441,13 @@ export const ListModifierPage = withCurrentWorkspace()(
           The following modifiers are optional and apply to all selected criteria
         </div>
         {formState.map((mod, i) => {
-          const {label, name, options, values: {operator, valueA, valueB}} = mod;
+          const {label, name, options, values: {operator}} = mod;
           return <div key={i} style={{marginTop: '1rem'}}>
             <label style={styles.label}>{label}</label>
             {name === 'eventDate' &&
               <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
             }
             <div style={styles.modifier}>
-              {/*TODO finish styling prime dropdown*/}
               <Dropdown value={operator}
                 style={styles.select}
                 panelStyle={{color: 'red'}}
@@ -415,19 +455,22 @@ export const ListModifierPage = withCurrentWorkspace()(
                 options={options}
                 itemTemplate={(e) => this.optionTemplate(e, name)}/>
               {operator && name !== 'encounters' && <React.Fragment>
-                <input type='number' style={styles.input} value={valueA}
-                       onChange={(e) => this.inputChange(i, 'valueA', e.target.value)}/>
+                {this.renderInput(i, 'valueA', mod.type)}
                 {operator === 'BETWEEN' && <React.Fragment>
                   <span style={{margin: '0 0.25rem'}}>and</span>
-                  <input type='number' style={styles.input} value={valueB}
-                         onChange={(e) => this.inputChange(i, 'valueB', e.target.value)}/>
+                  {this.renderInput(i, 'valueB', mod.type)}
                 </React.Fragment>}
               </React.Fragment>}
             </div>
           </div>;
         })}
         <div style={styles.footer}>
-          <Button type='primary' style={styles.calculate}>Calculate</Button>
+          <div style={styles.row}>
+            <div style={columns.col3}>
+              <Button type='primary' style={styles.calculate}>Calculate</Button>
+            </div>
+            <div style={columns.col8}></div>
+          </div>
         </div>
       </div>;
     }
