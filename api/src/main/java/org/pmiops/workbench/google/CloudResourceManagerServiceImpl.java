@@ -24,7 +24,7 @@ import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 public class CloudResourceManagerServiceImpl implements CloudResourceManagerService {
   private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
 
-  private static final List<String> SCOPES = Arrays.asList(
+  public static final List<String> SCOPES = Arrays.asList(
       CloudResourceManagerScopes.CLOUD_PLATFORM_READ_ONLY
   );
 
@@ -50,7 +50,9 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
     GoogleCredential googleCredential = cloudResourceManagerAdminCredsProvider.get();
 
     googleCredential = serviceAccounts.getImpersonatedCredential(
-        googleCredential, user.getEmail(), SCOPES
+        googleCredential,
+        user.getEmail(),
+        SCOPES
     );
 
     return new CloudResourceManager.Builder(httpTransport, getDefaultJsonFactory(),
