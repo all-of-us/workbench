@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -282,5 +283,46 @@ public class CBCriteriaDaoTest {
                 DomainType.CONDITION.toString(), true, Arrays.asList("1"))
             .get(0));
     cbCriteriaDao.delete(criteria.getId());
+  }
+
+  @Test
+  public void findCriteriaParentsByDomainAndTypeAndParentConceptIds() throws Exception {
+    String domain = DomainType.CONDITION.toString();
+    String type = CriteriaType.SNOMED.toString();
+    CBCriteria criteria =
+        new CBCriteria()
+            .domainId(domain)
+            .type(type)
+            .standard(false)
+            .conceptId("1")
+            .synonyms("+[CONDITION_rank1]");
+    cbCriteriaDao.save(criteria);
+    HashSet<String> parentConceptIds = new HashSet<>();
+    parentConceptIds.add("1");
+    List<CBCriteria> results =
+        cbCriteriaDao.findCriteriaParentsByDomainAndTypeAndParentConceptIds(
+            domain, type, false, parentConceptIds);
+    assertEquals(criteria, results.get(0));
+    cbCriteriaDao.delete(criteria.getId());
+  }
+
+  @Test
+  public void findCriteriaLeavesAndParentsByRegExp() throws Exception {
+    CBCriteria criteria =
+        new CBCriteria()
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false)
+            .path("1.5.99");
+    cbCriteriaDao.save(criteria);
+    assertEquals(
+        criteria,
+        cbCriteriaDao
+            .findCriteriaLeavesAndParentsByRegExp(
+                "([.]|^)5($|[.])",
+                DomainType.CONDITION.toString(),
+                CriteriaType.ICD9CM.toString(),
+                false)
+            .get(0));
   }
 }
