@@ -3,6 +3,7 @@ import {FormControl} from '@angular/forms';
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -84,6 +85,10 @@ const styles = reactStyles({
     border: '1px solid #0077b7',
     borderRadius: '3px',
   },
+  previewCount: {
+    color: '#4a4a4a',
+    fontWeight: 'bold'
+  }
 });
 
 const columns = {
@@ -107,6 +112,7 @@ interface Props {
 
 interface State {
   formState: any;
+  preview: any;
   visitCounts: any;
 }
 
@@ -176,6 +182,10 @@ export const ListModifierPage = withCurrentWorkspace()(
             value: 'BETWEEN',
           }]
         }],
+        preview: {
+          loading: false,
+          count: 10,
+        },
         visitCounts: undefined
       };
     }
@@ -435,7 +445,10 @@ export const ListModifierPage = withCurrentWorkspace()(
     }
 
     render() {
-      const {formState} = this.state;
+      const {formState, preview} = this.state;
+      const tooltip = `Dates are consistently shifted within a participant’s record
+              by a time period of up to 364 days backwards.
+              The date shift differs across participants.`;
       return <div style={{marginTop: '1rem'}}>
         <div style={styles.header}>
           The following modifiers are optional and apply to all selected criteria
@@ -445,7 +458,9 @@ export const ListModifierPage = withCurrentWorkspace()(
           return <div key={i} style={{marginTop: '1rem'}}>
             <label style={styles.label}>{label}</label>
             {name === 'eventDate' &&
-              <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
+              <TooltipTrigger content={<div>{tooltip}</div>}>
+                <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
+              </TooltipTrigger>
             }
             <div style={styles.modifier}>
               <Dropdown value={operator}
@@ -469,7 +484,12 @@ export const ListModifierPage = withCurrentWorkspace()(
             <div style={columns.col3}>
               <Button type='primary' style={styles.calculate}>Calculate</Button>
             </div>
-            <div style={columns.col8}></div>
+            {!preview.loading && preview.count && <div style={columns.col8}>
+              <div style={{color: '#262262'}}>Results</div>
+              {!preview.loading && <div>
+                Number Participants: <span style={styles.previewCount}>{preview.count}</span>
+              </div>}
+            </div>}
           </div>
         </div>
       </div>;
