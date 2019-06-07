@@ -358,7 +358,7 @@ public class DataSetController implements DataSetApiDelegate {
             .getBody();
 
     String libraries;
-    switch(dataSetExportRequest.getKernelType()) {
+    switch (dataSetExportRequest.getKernelType()) {
       case PYTHON:
         libraries = "import pandas";
         break;
@@ -366,17 +366,21 @@ public class DataSetController implements DataSetApiDelegate {
         libraries = "library(reticulate)";
         break;
       default:
-        throw new BadRequestException("Language " + dataSetExportRequest.getKernelType() + " is not supported");
+        throw new BadRequestException(
+            "Language " + dataSetExportRequest.getKernelType() + " is not supported");
     }
 
     String queriesAsStrings =
-      libraries + "\n\n"
-          + queryList.getQueryList().stream()
-          .map(
-              query ->
-                  convertQueryToString(
-                      query, dataSetExportRequest.getDataSetRequest().getName(), dataSetExportRequest.getKernelType()))
-          .collect(Collectors.joining("\n\n"));
+        libraries
+            + "\n\n"
+            + queryList.getQueryList().stream()
+                .map(
+                    query ->
+                        convertQueryToString(
+                            query,
+                            dataSetExportRequest.getDataSetRequest().getName(),
+                            dataSetExportRequest.getKernelType()))
+                .collect(Collectors.joining("\n\n"));
 
     JSONObject notebookFile;
     WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
@@ -492,7 +496,8 @@ public class DataSetController implements DataSetApiDelegate {
         .put("source", new JSONArray().put(cellInformation));
   }
 
-  private String convertQueryToString(DataSetQuery query, String prefix, KernelTypeEnum kernelTypeEnum) {
+  private String convertQueryToString(
+      DataSetQuery query, String prefix, KernelTypeEnum kernelTypeEnum) {
     String namespace =
         prefix.toLowerCase().replaceAll(" ", "_")
             + "_"
@@ -513,10 +518,10 @@ public class DataSetController implements DataSetApiDelegate {
                 + "  \'parameterMode\': \'NAMED\',\n"
                 + "  \'queryParameters\': [\n"
                 + query.getNamedParameters().stream()
-                .map(
-                    namedParameterEntry ->
-                        convertNamedParameterToString(namedParameterEntry) + "\n")
-                .collect(Collectors.joining(""))
+                    .map(
+                        namedParameterEntry ->
+                            convertNamedParameterToString(namedParameterEntry) + "\n")
+                    .collect(Collectors.joining(""))
                 + "    ]\n"
                 + "  }\n"
                 + "}\n\n";
