@@ -3,7 +3,7 @@ import {FormControl} from '@angular/forms';
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {DatePicker} from 'app/components/inputs';
+import {DatePicker, ValidationError} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -15,6 +15,11 @@ import * as moment from 'moment';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
+import {validate, validators} from 'validate.js';
+validators.dateFormat = (value: string) => {
+  return moment(value, 'YYYY-MM-DD', true).isValid()
+      ? null : 'must be in format \'YYYY-MM-DD\'';
+};
 
 const styles = reactStyles({
   header: {
@@ -130,8 +135,8 @@ export const ListModifierPage = withCurrentWorkspace()(
           name: 'ageAtEvent',
           label: 'Age At Event',
           type: 'number',
+          operator: undefined,
           values: {
-            operator: undefined,
             valueA: undefined,
             valueB: undefined,
           },
@@ -152,8 +157,8 @@ export const ListModifierPage = withCurrentWorkspace()(
           name: 'hasOccurrences',
           label: 'Has Occurrences',
           type: 'number',
+          operator: undefined,
           values: {
-            operator: undefined,
             valueA: undefined,
             valueB: undefined,
           },
@@ -168,8 +173,8 @@ export const ListModifierPage = withCurrentWorkspace()(
           name: 'eventDate',
           label: 'Shifted Event Date',
           type: 'date',
+          operator: undefined,
           values: {
-            operator: undefined,
             valueA: undefined,
             valueB: undefined,
           },
@@ -294,8 +299,8 @@ export const ListModifierPage = withCurrentWorkspace()(
             name: 'encounters',
             label: 'During Visit Type',
             type: null,
+            operator: undefined,
             values: {
-              operator: undefined,
               encounterType: undefined,
             },
             options: [{
@@ -391,12 +396,11 @@ export const ListModifierPage = withCurrentWorkspace()(
         formState[index].values.encounterType = sel;
       } else if (!sel) {
         formState[index].values = {
-          operator: undefined,
           valueA: undefined,
           valueB: undefined,
         };
       }
-      formState[index].values.operator = sel;
+      formState[index].operator = sel;
       this.setState({formState});
     }
 
@@ -458,15 +462,14 @@ export const ListModifierPage = withCurrentWorkspace()(
 
     render() {
       const {formState, preview} = this.state;
-      const tooltip = `Dates are consistently shifted within a participant’s record
-              by a time period of up to 364 days backwards.
-              The date shift differs across participants.`;
+      const tooltip = `Dates are consistently shifted within a participant’s record by a time period
+        of up to 364 days backwards. The date shift differs across participants.`;
       return <div style={{marginTop: '1rem'}}>
         <div style={styles.header}>
           The following modifiers are optional and apply to all selected criteria
         </div>
         {formState.map((mod, i) => {
-          const {label, name, options, values: {operator}} = mod;
+          const {label, name, options, operator} = mod;
           return <div key={i} style={{marginTop: '1rem'}}>
             <label style={styles.label}>{label}</label>
             {name === 'eventDate' &&
