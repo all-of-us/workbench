@@ -2,6 +2,8 @@ package org.pmiops.workbench.api;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OfflineUserController implements OfflineUserApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineUserController.class.getName());
-  private static final String PMI_OPS_ORG_ID = "400176686919";
+  private static final List<String> WHITELISTED_ORG_IDS = Arrays.asList(
+      "400176686919", // test.firecloud.org
+      "386193000800", // firecloud.org
+      "394551486437" //pmi-ops.org
+  );
 
   private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
@@ -235,7 +241,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
       // TODO(RW-2062): Move to using the gcloud api for list all resources when it is available.
       List<String> unauthorizedLogs =
           cloudResourceManagerService.getAllProjectsForUser(user).stream()
-              .filter(project -> !(project.getParent().getId().equals(PMI_OPS_ORG_ID)))
+              .filter(project -> !(WHITELISTED_ORG_IDS.contains(project.getParent().getId())))
               .map(project -> project.getName() + " in organization " + project.getParent().getId())
               .collect(Collectors.toList());
       if (unauthorizedLogs.size() > 0) {
