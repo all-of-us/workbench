@@ -2,6 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import * as fp from 'lodash/fp';
 
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResearchPurposeItems} from 'app/views/workspace-edit';
@@ -10,6 +11,7 @@ import {cohortsApi, profileApi, workspacesApi} from 'app/services/swagger-fetch-
 
 import {CdrVersion} from 'generated';
 
+import {environment} from 'environments/environment';
 import {Cohort, FileDetail, PageVisit, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
 
@@ -30,6 +32,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   cdrVersion: CdrVersion;
   wsId: string;
   wsNamespace: string;
+  useBillingProjectBuffer: boolean;
   freeTierBillingProject: string;
   cohortsLoading = true;
   cohortsError = false;
@@ -51,9 +54,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   bugReportDescription = '';
   googleBucketModal = false;
 
+  // The updated Workspace About page will be released with the dataset builder
+  //  because workspace recent work will be moved to the Data tab.
+  showUpdatedResearchPurpose = environment.enableDatasetBuilder;
+
   private subscriptions = [];
 
   constructor(
+    private serverConfigService: ServerConfigService,
     private cdrVersionStorageService: CdrVersionStorageService
   ) {
     this.closeNotebookModal = this.closeNotebookModal.bind(this);
@@ -67,6 +75,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.reloadWorkspace(workspace);
       }
     }));
+    this.serverConfigService.getConfig().subscribe(({useBillingProjectBuffer}) => {
+      this.useBillingProjectBuffer = useBillingProjectBuffer;
+    });
+
     // TODO: RW-1057
     profileApi().getMe().then(
       profile => {
@@ -105,11 +117,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.workspace.userRoles = fp.sortBy('familyName', workspace.userRoles);
     this.accessLevel = workspace.accessLevel;
     this.researchPurposeArray = [];
-    Object.keys(ResearchPurposeItems).forEach((key) => {
-      if (this.workspace.researchPurpose[key]) {
-        let shortDescription = ResearchPurposeItems[key].shortDescription;
-        if (key === 'diseaseFocusedResearch') {
+    ResearchPurposeItems.forEach((item) => {
+      if (this.workspace.researchPurpose[item.shortName]) {
+        let shortDescription = item.shortDescription;
+        if (item.shortName === 'diseaseFocusedResearch') {
           shortDescription += ': ' + this.workspace.researchPurpose.diseaseOfFocus;
+        }
+        if (item.shortName === 'otherPurpose') {
+          shortDescription += ': ' + this.workspace.researchPurpose.otherPurposeDetails;
         }
         this.researchPurposeArray.push(shortDescription);
       }
@@ -197,14 +212,18 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   workspaceClusterBillingProjectId(): string {
-    if (this.workspace.namespace === this.freeTierBillingProject) {
+    if (this.useBillingProjectBuffer === undefined) {
+      // The server config hasn't loaded yet, we don't yet know which billing
+      // project should be used for clusters.
+      return null;
+    }
+    if (!this.useBillingProjectBuffer) {
       return this.freeTierBillingProject;
     }
 
     if ([WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.OWNER].includes(this.accessLevel)) {
       return this.workspace.namespace;
     }
-
     return null;
   }
 

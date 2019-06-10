@@ -1,10 +1,8 @@
 import {NgReduxModule} from '@angular-redux/store';
-import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
-import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {CohortCommonModule} from 'app/cohort-common/module';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
@@ -63,14 +61,12 @@ const routes: Routes = [{
 @NgModule({
   imports: [
     // Angular
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forChild(routes),
     // 3rd Party
     ClarityModule,
     NgReduxModule,
-    NgxChartsModule,
     NgxPopperModule,
     NouisliderModule,
     // Ours

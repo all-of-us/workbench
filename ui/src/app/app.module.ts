@@ -5,7 +5,6 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouteReuseStrategy} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
-import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
@@ -54,6 +53,7 @@ import {SignedInComponent} from './views/signed-in/component';
 import {SlidingFabComponent} from './views/sliding-fab';
 import {StigmatizationPageComponent} from './views/stigmatization-page';
 import {TopBoxComponent} from './views/top-box/component';
+import {WorkspaceAboutComponent} from './views/workspace-about';
 import {WorkspaceEditComponent} from './views/workspace-edit';
 import {WorkspaceListComponent} from './views/workspace-list';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar';
@@ -130,7 +130,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     CohortCommonModule,
     FetchModule,
     IconsModule,
-    NgxChartsModule,
     ClarityModule,
   ],
   declarations: [
@@ -167,6 +166,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     StigmatizationPageComponent,
     ToolTipComponent,
     TopBoxComponent,
+    WorkspaceAboutComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceListComponent,

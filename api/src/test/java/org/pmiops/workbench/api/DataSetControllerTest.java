@@ -497,9 +497,35 @@ public class DataSetControllerTest {
             "SELECT PERSON_ID FROM "
                 + "`all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` "
                 + "c_occurrence WHERE \n(condition_concept_id IN (123) OR "
-                + "\ncondition_source_concept_id IN (123)) WHERE \n"
-                + "(condition_concept_id IN (123) OR \ncondition_source_concept_id IN (123)) \nAND "
-                + "(PERSON_ID IN (SELECT * FROM person_id from "
+                + "\ncondition_source_concept_id IN (123))\n"
+                + "AND (PERSON_ID IN (SELECT * FROM person_id from " +
+                "`all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
+  }
+
+  @Test
+  public void testGetQueryDemographicsDomain() {
+    DataSetRequest dataSet = buildEmptyDataSet();
+    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID).addConceptSetIdsItem(-1l);
+
+    List<DomainValuePair> domainValues = mockDomainValuePair();
+    domainValues.get(0).setDomain(Domain.PERSON);
+    dataSet.setValues(domainValues);
+
+    ArrayList<String> tables = new ArrayList<>();
+    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.person` person");
+
+    mockLinkingTableQuery(tables);
+
+    DataSetQueryList response =
+        dataSetController.generateQuery(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
+    assertThat(response.getQueryList().size()).isEqualTo(1);
+    verify(bigQueryService, times(1)).executeQuery(any());
+    assertThat(response.getQueryList().get(0).getQuery())
+        .isEqualTo(
+            "SELECT PERSON_ID FROM "
+                + "`all-of-us-ehr-dev.synthetic_cdr20180606.person` "
+                + "person \n"
+                + "WHERE (PERSON_ID IN (SELECT * FROM person_id from "
                 + "`all-of-us-ehr-dev.synthetic_cdr20180606.person` person))");
   }
 

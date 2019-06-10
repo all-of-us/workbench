@@ -976,6 +976,7 @@
       ]
     },
     "person": {
+      "domain": "PERSON",
       "columns": [
         {
           "type": "integer",
@@ -1027,7 +1028,8 @@
           "name": "ethnicity_concept_id",
           "mode": "required",
           "description": "A foreign key that refers to the standard concept identifier in the Standardized Vocabularies for the ethnicity of the person.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "standard"
         },
         {
           "type": "integer",
@@ -1067,7 +1069,8 @@
           "name": "gender_source_concept_id",
           "mode": "nullable",
           "description": "A foreign key to the gender concept that refers to the code used in the source.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "source"
         },
         {
           "type": "string",

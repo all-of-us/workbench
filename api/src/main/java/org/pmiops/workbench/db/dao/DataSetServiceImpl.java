@@ -253,37 +253,6 @@ public class DataSetServiceImpl implements DataSetService {
                 + conceptSetListQuery
                 + ")");
       }
-      String conceptSetQueries =
-          conceptSetsSelected.stream()
-              .filter(cs -> d == cs.getDomainEnum())
-              .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
-              .collect(Collectors.joining(", "));
-      String conceptSetListQuery = " IN (" + conceptSetQueries + ")";
-
-      Optional<DomainConceptIds> domainConceptIds =
-          bigQuerySchemaConfig.cohortTables.values().stream()
-              .filter(config -> d.toString().equals(config.domain))
-              .map(
-                  tableConfig ->
-                      new DomainConceptIds(
-                          getColumnName(tableConfig, "source"),
-                          getColumnName(tableConfig, "standard")))
-              .findFirst();
-      if (!domainConceptIds.isPresent()) {
-        throw new ServerErrorException(
-            "Couldn't find source and standard columns for domain: " + d.toString());
-      }
-      DomainConceptIds columnNames = domainConceptIds.get();
-
-      // This adds the where clauses for cohorts and concept sets.
-      query.append(
-          " WHERE \n("
-              + columnNames.getStandardConceptIdColumn()
-              + conceptSetListQuery
-              + " OR \n"
-              + columnNames.getSourceConceptIdColumn()
-              + conceptSetListQuery
-              + ")");
       if (!includesAllParticipants) {
         if (d.equals(Domain.PERSON)) {
           query.append(" \nWHERE (");
