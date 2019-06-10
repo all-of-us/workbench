@@ -3,12 +3,15 @@ package org.pmiops.workbench.api;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.api.services.cloudresourcemanager.model.Project;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
@@ -18,6 +21,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -37,9 +41,10 @@ public class OfflineUserControllerTest {
 
   @TestConfiguration
   @Import({OfflineUserController.class})
-  @MockBean({UserService.class})
+  @MockBean({CloudResourceManagerService.class, UserService.class})
   static class Configuration {}
 
+  @Autowired private CloudResourceManagerService cloudResourceManagerService;
   @Autowired private UserService userService;
   @Autowired private OfflineUserController offlineUserController;
 
@@ -107,5 +112,13 @@ public class OfflineUserControllerTest {
     offlineUserController.bulkSyncEraCommonsStatus();
     // Even when a single call throws an exception, we call the service for all users.
     verify(userService, times(3)).syncEraCommonsStatusUsingImpersonation(any());
+  }
+
+  @Test
+  public void testBulkProjectAudit() {
+    List<Project> projectList = new ArrayList<>();
+    doReturn(projectList).when(cloudResourceManagerService).getAllProjectsForUser(any());
+    offlineUserController.bulkAuditProjectAccess();
+    verify(cloudResourceManagerService, times(3)).getAllProjectsForUser(any());
   }
 }

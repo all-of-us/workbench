@@ -25,6 +25,12 @@
     <schedule>every 24 hours</schedule>
   </cron>
   <cron>
+    <url>/v1/cron/bulkAuditProjectAccess</url>
+    <target>api</target>
+    <description>Daily audit of gcp resources that users have access to</description>
+    <schedule>every 24 hours</schedule>
+  </cron>
+  <cron>
     <url>/v1/cron/bufferBillingProject</url>
     <target>api</target>
     <description>If the AoU Billing Project buffer is not full, create a firecloud billing project and add one</description>

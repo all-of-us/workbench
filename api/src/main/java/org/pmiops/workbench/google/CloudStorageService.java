@@ -40,6 +40,8 @@ public interface CloudStorageService {
 
   GoogleCredential getFireCloudAdminCredentials() throws IOException;
 
+  GoogleCredential getCloudResourceManagerAdminCredentials() throws IOException;
+
   GoogleCredential getDefaultServiceAccountCredentials() throws IOException;
 
   JSONObject getFileAsJson(String bucketName, String fileName) throws IOException;
