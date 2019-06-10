@@ -1067,7 +1067,7 @@ end
 
 Common.register_command({
   :invocation => "backfill-can-compute",
-  :description => "Backfills the can compute permission for editors/owners",
+  :description => "Backfills the canCompute permission for editors/owners",
   :fn => ->(*args) {backfill_can_compute("backfill-can-compute", *args)}
 })
 
@@ -1608,13 +1608,11 @@ def get_fc_config(project)
 end
 
 def get_leo_api_url(project)
-  config_json = get_config(project)
-  return JSON.parse(File.read("config/#{config_json}"))["firecloud"]["leoBaseUrl"]
+  return get_fc_config(project)["leoBaseUrl"]
 end
 
 def get_auth_domain(project)
-  config_json = get_config(project)
-  return JSON.parse(File.read("config/#{config_json}"))["firecloud"]["registeredDomainName"]
+  return get_fc_config(project)["registeredDomainName"]
 end
 
 def get_es_base_url(env)
