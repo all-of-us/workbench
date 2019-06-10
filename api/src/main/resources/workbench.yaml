@@ -2006,6 +2006,8 @@ definitions:
       methodsDevelopment:
         type: boolean
         default: false
+      otherPopulationDetails:
+        type: string
       otherPurpose:
         type: boolean
         default: false
