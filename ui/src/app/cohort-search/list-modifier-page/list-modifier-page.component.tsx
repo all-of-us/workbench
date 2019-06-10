@@ -136,10 +136,7 @@ export const ListModifierPage = withCurrentWorkspace()(
           label: 'Age At Event',
           type: 'number',
           operator: undefined,
-          values: {
-            valueA: undefined,
-            valueB: undefined,
-          },
+          values: [undefined, undefined],
           options: [{
             label: 'Any',
             value: undefined,
@@ -158,10 +155,7 @@ export const ListModifierPage = withCurrentWorkspace()(
           label: 'Has Occurrences',
           type: 'number',
           operator: undefined,
-          values: {
-            valueA: undefined,
-            valueB: undefined,
-          },
+          values: [undefined, undefined],
           options: [{
             label: 'Any',
             value: undefined,
@@ -174,10 +168,7 @@ export const ListModifierPage = withCurrentWorkspace()(
           label: 'Shifted Event Date',
           type: 'date',
           operator: undefined,
-          values: {
-            valueA: undefined,
-            valueB: undefined,
-          },
+          values: [undefined, undefined],
           options: [{
             label: 'Any',
             value: undefined,
@@ -300,9 +291,7 @@ export const ListModifierPage = withCurrentWorkspace()(
             label: 'During Visit Type',
             type: null,
             operator: undefined,
-            values: {
-              encounterType: undefined,
-            },
+            values: [undefined],
             options: [{
               label: 'Any',
               value: undefined,
@@ -393,12 +382,11 @@ export const ListModifierPage = withCurrentWorkspace()(
       const {formState} = this.state;
       const {name} = formState[index];
       if (name === 'encounters') {
-        formState[index].values.encounterType = sel;
+        formState[index].values = [sel];
       } else if (!sel) {
-        formState[index].values = {
-          valueA: undefined,
-          valueB: undefined,
-        };
+        formState[index].values = [undefined, undefined];
+      } else if (sel !== 'BETWEEN') {
+        formState[index].values[1] = undefined;
       }
       formState[index].operator = sel;
       this.setState({formState});
@@ -442,18 +430,18 @@ export const ListModifierPage = withCurrentWorkspace()(
       </div>;
     }
 
-    renderInput(index: string, name: string, type) {
+    renderInput(index: string, field: string, type) {
       const {values} = this.state.formState[index];
       switch (type) {
         case 'number':
-          return <input type='number' style={styles.number} value={values[name]}
-            onChange={e => this.inputChange(index, name, e.target.value)}/>;
+          return <input type='number' style={styles.number} value={values[field]}
+            onChange={e => this.inputChange(index, field, e.target.value)}/>;
         case 'date':
           return <div style={styles.date}>
             <DatePicker
-              value={values[name]}
+              value={values[field]}
               placeholder='YYYY-MM-DD'
-              onChange={e => this.inputChange(index, name, e)}
+              onChange={e => this.inputChange(index, field, e)}
               maxDate={new Date()}
             />
           </div>;
@@ -485,10 +473,10 @@ export const ListModifierPage = withCurrentWorkspace()(
                 options={options}
                 itemTemplate={(e) => this.optionTemplate(e, name)}/>
               {operator && name !== 'encounters' && <React.Fragment>
-                {this.renderInput(i, 'valueA', mod.type)}
+                {this.renderInput(i, '0', mod.type)}
                 {operator === 'BETWEEN' && <React.Fragment>
                   <span style={{margin: '0 0.25rem'}}>and</span>
-                  {this.renderInput(i, 'valueB', mod.type)}
+                  {this.renderInput(i, '1', mod.type)}
                 </React.Fragment>}
               </React.Fragment>}
             </div>
