@@ -529,6 +529,16 @@ task backfillGSuiteUserData(type: JavaExec) {
   }
 }
 
+// See project.rb command: backfill-can-compute
+task backfillCanCompute(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.BackfillCanCompute"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
 // See project.rb command: load-es-index
 task elasticSearchIndexer(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath

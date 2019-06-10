@@ -1026,6 +1026,51 @@ Common.register_command({
   :fn => ->(*args) {backfill_gsuite_user_data("backfill-gsuite-user-data", *args)}
 })
 
+def backfill_can_compute(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  fc_config = get_fc_config(op.opts.project)
+  flags = ([
+    ["--fc-base-url", fc_config["baseUrl"]],
+    ["--billing-project-prefix", fc_config["billingProjectPrefix"]]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    flags += ["--dry-run"]
+  end
+  # Gradle args need to be single-quote wrapped.
+  flags.map! { |f| "'#{f}'" }
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+        gradle backfillCanCompute
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+Common.register_command({
+  :invocation => "backfill-can-compute",
+  :description => "Backfills the canCompute permission for editors/owners",
+  :fn => ->(*args) {backfill_can_compute("backfill-can-compute", *args)}
+})
+
 def fetch_firecloud_user_profile(cmd_name, *args)
   common = Common.new
   ensure_docker cmd_name, args
@@ -1557,14 +1602,17 @@ def migrate_workbench_data()
   end
 end
 
-def get_leo_api_url(project)
+def get_fc_config(project)
   config_json = get_config(project)
-  return JSON.parse(File.read("config/#{config_json}"))["firecloud"]["leoBaseUrl"]
+  return JSON.parse(File.read("config/#{config_json}"))["firecloud"]
+end
+
+def get_leo_api_url(project)
+  return get_fc_config(project)["leoBaseUrl"]
 end
 
 def get_auth_domain(project)
-  config_json = get_config(project)
-  return JSON.parse(File.read("config/#{config_json}"))["firecloud"]["registeredDomainName"]
+  return get_fc_config(project)["registeredDomainName"]
 end
 
 def get_es_base_url(env)
