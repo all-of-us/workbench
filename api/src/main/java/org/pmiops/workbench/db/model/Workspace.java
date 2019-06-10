@@ -378,9 +378,7 @@ public class Workspace {
   @Column(name = "rp_other_population_details")
   public String getOtherPopulationDetails() { return this.otherPopulationDetails; }
 
-  public void setOtherPopulationDetails(String otherPopulationDetails) {
-    this.otherPopulationDetails = otherPopulationDetails;
-  }
+  public void setOtherPopulationDetails(String otherPopulationDetails) { this.otherPopulationDetails = otherPopulationDetails; }
 
   @Column(name = "rp_additional_notes")
   public String getAdditionalNotes() {
