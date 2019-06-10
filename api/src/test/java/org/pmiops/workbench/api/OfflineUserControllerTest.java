@@ -9,11 +9,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.api.services.cloudresourcemanager.model.Project;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.google.api.services.cloudresourcemanager.model.Project;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,18 +40,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class OfflineUserControllerTest {
 
   @TestConfiguration
-  @Import({
-      OfflineUserController.class
-  })
+  @Import({OfflineUserController.class})
   @MockBean({CloudResourceManagerService.class, UserService.class})
   static class Configuration {}
 
-  @Autowired
-  private CloudResourceManagerService cloudResourceManagerService;
-  @Autowired
-  private UserService userService;
-  @Autowired
-  private OfflineUserController offlineUserController;
+  @Autowired private CloudResourceManagerService cloudResourceManagerService;
+  @Autowired private UserService userService;
+  @Autowired private OfflineUserController offlineUserController;
 
   private Long incrementedUserId = 1L;
 

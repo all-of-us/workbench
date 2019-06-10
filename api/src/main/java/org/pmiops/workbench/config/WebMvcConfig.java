@@ -103,12 +103,13 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   }
 
   /**
-   * Service account credentials for Cloud Resource Manager administration. This Service Account has been enabled
-   * for domain-wide delegation of authority.
+   * Service account credentials for Cloud Resource Manager administration. This Service Account has
+   * been enabled for domain-wide delegation of authority.
    */
   @Lazy
-  @Bean(name= Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
-  public GoogleCredential cloudResourceManagerAdminCredential(CloudStorageService cloudStorageService) throws IOException {
+  @Bean(name = Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
+  public GoogleCredential cloudResourceManagerAdminCredential(
+      CloudStorageService cloudStorageService) throws IOException {
     return cloudStorageService.getCloudResourceManagerAdminCredentials();
   }
 

@@ -2,7 +2,10 @@ package org.pmiops.workbench.api;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -15,16 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Handles offline / cron-based API requests related to user management. */
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-/**
- * Handles offline / cron-based API requests related to user management.
- */
 @RestController
 public class OfflineUserController implements OfflineUserApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineUserController.class.getName());
@@ -34,8 +27,8 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   private final UserService userService;
 
   @Autowired
-  public OfflineUserController(CloudResourceManagerService cloudResourceManagerService,
-                               UserService userService) {
+  public OfflineUserController(
+      CloudResourceManagerService cloudResourceManagerService, UserService userService) {
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
   }
@@ -234,21 +227,24 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   /**
    * Audits GCP access for all users in the database.
    *
-   * This API method is called by a cron job and is not part of our normal user-facing surface.
+   * <p>This API method is called by a cron job and is not part of our normal user-facing surface.
    */
   @Override
   public ResponseEntity<Void> bulkAuditProjectAccess() {
-    int errorCount = 0;
-    int userCount = 0;
-
     for (User user : userService.getAllUsers()) {
-      userCount++;
       // TODO(RW-2062): Move to using the gcloud api for list all resources when it is available.
-      List<String> unauthorizedLogs = cloudResourceManagerService.getAllProjectsForUser(user).stream()
-          .filter(project -> !(project.getParent().getId().equals(PMI_OPS_ORG_ID)))
-          .map(project -> project.getName() + " in organization " + project.getParent().getId()).collect(Collectors.toList());
+      List<String> unauthorizedLogs =
+          cloudResourceManagerService.getAllProjectsForUser(user).stream()
+              .filter(project -> !(project.getParent().getId().equals(PMI_OPS_ORG_ID)))
+              .map(project -> project.getName() + " in organization " + project.getParent().getId())
+              .collect(Collectors.toList());
       if (unauthorizedLogs.size() > 0) {
-        log.log(Level.WARNING, "User " + user.getEmail() + " has access to projects: " + String.join(", ", unauthorizedLogs));
+        log.log(
+            Level.WARNING,
+            "User "
+                + user.getEmail()
+                + " has access to projects: "
+                + String.join(", ", unauthorizedLogs));
       }
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

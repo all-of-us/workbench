@@ -87,7 +87,7 @@ public class CommandLineToolConfig {
   }
 
   @Lazy
-  @Bean(name=Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
+  @Bean(name = Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
   GoogleCredential cloudResourceManagerCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getCloudResourceManagerAdminCredentials();
