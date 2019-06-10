@@ -100,6 +100,7 @@ public class Workspace {
   private boolean drugDevelopment;
   private boolean otherPurpose;
   private String otherPurposeDetails;
+  private String otherPopulationDetails;
   private String additionalNotes;
   private String reasonForAllOfUs;
   private String intendedStudy;
@@ -372,6 +373,13 @@ public class Workspace {
         newPopulationDetails.stream()
             .map(StorageEnums::specificPopulationToStorage)
             .collect(Collectors.toSet()));
+  }
+
+  @Column(name = "rp_other_population_details")
+  public String getOtherPopulationDetails() { return this.otherPopulationDetails; }
+
+  public void setOtherPopulationDetails(String otherPopulationDetails) {
+    this.otherPopulationDetails = otherPopulationDetails;
   }
 
   @Column(name = "rp_additional_notes")

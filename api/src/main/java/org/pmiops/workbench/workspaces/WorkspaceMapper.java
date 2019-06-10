@@ -143,6 +143,7 @@ public class WorkspaceMapper {
     dbWorkspace.setReasonForAllOfUs(purpose.getReasonForAllOfUs());
     dbWorkspace.setIntendedStudy(purpose.getIntendedStudy());
     dbWorkspace.setAnticipatedFindings(purpose.getAnticipatedFindings());
+    dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
   }
 
   private final ResearchPurpose createResearchPurpose(
@@ -167,7 +168,8 @@ public class WorkspaceMapper {
             .anticipatedFindings(workspace.getAnticipatedFindings())
             .additionalNotes(workspace.getAdditionalNotes())
             .reviewRequested(workspace.getReviewRequested())
-            .approved(workspace.getApproved());
+            .approved(workspace.getApproved())
+            .otherPopulationDetails(workspace.getOtherPopulationDetails());
     if (workspace.getTimeRequested() != null) {
       researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
     }
