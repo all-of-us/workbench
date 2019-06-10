@@ -46,7 +46,7 @@ describe('WorkspaceNavBarComponent', () => {
     const wrapper = component();
 
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
-    wrapper.find({'data-test-id': 'Delete'}).first().simulate('click');
+    wrapper.find({'data-test-id': 'Delete-menu-item'}).first().simulate('click');
     expect(deleteSpy).toHaveBeenCalled();
   });
 
@@ -56,7 +56,7 @@ describe('WorkspaceNavBarComponent', () => {
     const wrapper = component();
 
     wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
-    wrapper.find({'data-test-id': 'Share'}).first().simulate('click');
+    wrapper.find({'data-test-id': 'Share-menu-item'}).first().simulate('click');
     expect(shareSpy).toHaveBeenCalled();
   });
 
