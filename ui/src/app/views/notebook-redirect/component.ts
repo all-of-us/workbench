@@ -6,7 +6,12 @@ import {timer} from 'rxjs/observable/timer';
 import {mapTo} from 'rxjs/operators';
 import {Subscription} from 'rxjs/Subscription';
 
-import {queryParamsStore, urlParamsStore} from 'app/utils/navigation';
+import {
+  queryParamsStore,
+  serverConfigStore,
+  urlParamsStore,
+  userProfileStore
+} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
 
@@ -130,7 +135,17 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.jupyterLabMode = jupyterLabMode === 'true';
     this.setNotebookNames();
 
-    this.loadingSub = this.clusterService.listClusters(this.wsNamespace)
+    this.loadingSub = serverConfigStore.asObservable()
+      .flatMap(({useBillingProjectBuffer}) => {
+        if (useBillingProjectBuffer) {
+          return this.clusterService.listClusters(this.wsNamespace);
+        }
+        return  userProfileStore.asObservable()
+          .flatMap((profileStore) => {
+            return this.clusterService.listClusters(
+              profileStore.profile.freeTierBillingProjectName);
+          });
+      })
       .flatMap((resp) => {
         const c = resp.defaultCluster;
         this.incrementProgress(Progress.Initializing);

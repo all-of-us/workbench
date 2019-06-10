@@ -33,6 +33,7 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -43,7 +44,26 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.CloneWorkspaceRequest;
+import org.pmiops.workbench.model.CloneWorkspaceResponse;
+import org.pmiops.workbench.model.CopyNotebookRequest;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.NotebookRename;
+import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
+import org.pmiops.workbench.model.ShareWorkspaceRequest;
+import org.pmiops.workbench.model.ShareWorkspaceResponse;
+import org.pmiops.workbench.model.UpdateWorkspaceRequest;
+import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.model.WorkspaceListResponse;
+import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
@@ -271,6 +291,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     permissions.setUser(user);
 
     dbWorkspace.addWorkspaceUserRole(permissions);
+
+    if (useBillingProjectBuffer) {
+      dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
+    } else {
+      dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.OLD);
+    }
+
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
 
     org.pmiops.workbench.db.model.Workspace finalDbWorkspace = dbWorkspace;
@@ -559,6 +586,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     ownerRole.setUser(user);
 
     dbWorkspace.addWorkspaceUserRole(ownerRole);
+
+    if (useBillingProjectBuffer) {
+      dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
+    } else {
+      dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.OLD);
+    }
+
     org.pmiops.workbench.db.model.Workspace savedWorkspace =
         workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
 
@@ -610,7 +644,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       newUserRole.setRoleEnum(role.getRole());
       dbUserRoles.add(newUserRole);
     }
-    // This automatically enforces owner role.
+    // This automatically enforces the "canShare" permission.
     dbWorkspace = workspaceService.updateUserRoles(dbWorkspace, dbUserRoles);
     ShareWorkspaceResponse resp = new ShareWorkspaceResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));

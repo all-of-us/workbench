@@ -103,7 +103,7 @@ export const WorkspaceNavBarReact = fp.flow(
           <div style={styles.dropdownHeader}>Workspace Actions</div>
           <MenuItem
             onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}>
-            Duplicate Test
+            Duplicate
           </MenuItem>
           <MenuItem
             tooltip={isNotOwner && 'Requires owner permission'}

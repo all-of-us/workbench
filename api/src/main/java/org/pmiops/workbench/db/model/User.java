@@ -289,7 +289,11 @@ public class User {
     this.pageVisits = newPageVisits;
   }
 
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
+  @OneToMany(
+      fetch = FetchType.LAZY,
+      mappedBy = "user",
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
   public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
     return workspaceUserRoles;
   }

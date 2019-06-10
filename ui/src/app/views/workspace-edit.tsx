@@ -7,14 +7,20 @@ import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs'
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {TwoColPaddedTable} from 'app/components/tables';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {currentWorkspaceStore, navigate, userProfileStore} from 'app/utils/navigation';
 import {CdrVersion, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+export const ResearchPurposeDescription =
+   'The AoU Research Program requires each user of AoU data to provide a \
+   meaningful description of the intended purpose of data use for each Workspace they \
+   create. The responses provided below will be posted publicly in the AoU Research Hub \
+   website to inform the AoU Research Participants. ';
 
 export const ResearchPurposeItems = [
   {
@@ -262,10 +268,6 @@ const styles = reactStyles({
   },
   checkboxRow: {
     display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
-  },
-  ubrBox: {
-    color: colors.purple[0], fontSize: 13, lineHeight: '24px',
-    background: colors.white, padding: '0.2rem 0.5rem', display: 'flex'
   }
 });
 
@@ -324,28 +326,6 @@ export const LabeledCheckBox = (props) => {
               checked={!!props.value} disabled={props.disabled}
               onChange={e => props.onChange(e)}/>
     <label style={styles.text}>{props.label}</label>
-  </div>;
-};
-
-export const UbrTableCell = (props) => {
-  return <div style={{padding: '.2rem', width: props.left ? '30%' : '70%', display: 'flex'}}>
-    <div style={{...styles.ubrBox, width: '100%'}}>{props.content}</div>
-  </div>;
-};
-
-export const UbrTable = (props) => {
-  return <div style={{display: 'flex', flexDirection: 'column', ...props.style}}>
-    <div style={{display: 'flex', flexDirection: 'row', height: '100%'}}>
-      <UbrTableCell left={true} content={<strong>Diversity Categories</strong>}/>
-      <UbrTableCell left={false} content={<strong>
-        Groups that are Underrepresented in Biomedical Research (UBR)*</strong>}/>
-    </div>
-    {specificPopulations.map(sp =>
-      <div style={{display: 'flex', flexDirection: 'row'}}>
-        <UbrTableCell left={true} content={sp.ubrLabel}/>
-        <UbrTableCell left={false} content={sp.ubrDescription}/>
-      </div>
-    )}
   </div>;
 };
 
@@ -485,7 +465,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     get noDiseaseOfFocusSpecified() {
       return this.state.workspace.researchPurpose.diseaseFocusedResearch &&
-        !! this.state.workspace.researchPurpose.diseaseOfFocus;
+        !this.state.workspace.researchPurpose.diseaseOfFocus;
     }
 
     get disableButton() {
@@ -589,10 +569,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return this.props.routeConfigData.mode === mode;
     }
 
-    sliceLength(obj) {
-      return obj.length / 2 + 1;
-    }
-
     render() {
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '95%'}}>
@@ -636,12 +612,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <WorkspaceEditSection header='Billing Account' subHeader='National Institutes of Health'
             tooltip={toolTipText.billingAccount}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
-            description={['The AoU Research Program requires each user of AoU data to provide a \
-             meaningful description of the intended purpose of data use for each Workspace they \
-             create. The responses provided below will be posted publicly in the AoU Research Hub \
-             website to inform the AoU Research Participants.  Therefore, please provide \
-             sufficiently detailed responses at a 5th grade reading level.  Your responses will \
-             not be used to make decisions about data access.', <br/>, <br/>,
+            description={[ResearchPurposeDescription, 'Therefore, please provide' +
+            ' sufficiently detailed responses at a 5th grade reading level.  Your responses' +
+            ' will not be used to make decisions about data access.', <br/>, <br/>,
               <i>Note that you are required to create separate Workspaces for each project
               for which you access AoU data, hence the responses below are expected to be specific
               to the project for which you are creating this particular Workspace.</i>
@@ -650,7 +623,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             description={researchPurposeQuestions[0].description} required>
           <div style={{display: 'flex', flexDirection: 'row'}}>
             <div style={{display: 'flex', flexDirection: 'column', flex: '1 1 0'}}>
-              {ResearchPurposeItems.slice(0, this.sliceLength(ResearchPurposeItems))
+              {ResearchPurposeItems.slice(0, sliceByHalfLength(ResearchPurposeItems))
                 .map((rp, i) =>
                   <WorkspaceCategory shortDescription={rp.shortDescription} key={i}
                     longDescription={rp.longDescription}
@@ -675,7 +648,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               )}
             </div>
             <div style={{display: 'flex', flexDirection: 'column', flex: '1 1 0'}}>
-              {ResearchPurposeItems.slice(this.sliceLength(ResearchPurposeItems))
+              {ResearchPurposeItems.slice(sliceByHalfLength(ResearchPurposeItems))
                 .map((rp, i) =>
                   <WorkspaceCategory shortDescription={rp.shortDescription}
                     longDescription={rp.longDescription} key={i}
@@ -746,7 +719,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <div style={{display: 'flex', flexDirection: 'row', flex: '1 1 0',
               marginTop: '0.5rem'}}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
-                {specificPopulations.slice(0, this.sliceLength(specificPopulations)).map(i =>
+                {specificPopulations.slice(0, sliceByHalfLength(specificPopulations) + 1).map(i =>
                   <LabeledCheckBox label={i.label} key={i.label}
                                    value={this.specificPopulationSelected(i.object)}
                                    onChange={v => this.updateSpecificPopulation(i.object, v)}
@@ -754,7 +727,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 )}
               </div>
               <div style={{display: 'flex', flexDirection: 'column'}}>
-                {specificPopulations.slice(this.sliceLength(specificPopulations)).map(i =>
+                {specificPopulations.slice(sliceByHalfLength(specificPopulations) + 1).map(i =>
                   <LabeledCheckBox label={i.label} key={i.label}
                                    value={this.specificPopulationSelected(i.object)}
                                    onChange={v => this.updateSpecificPopulation(i.object, v)}
@@ -789,7 +762,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 Biomedical Research (UBR) by the All of Us Research Program, you are encouraged
                 to request a review of your research purpose by the Resource Access Board (RAB).
               </div>
-              <UbrTable style={{marginTop: '0.5rem', marginBottom: '1rem'}}/>
+              <TwoColPaddedTable header={true} headerLeft='Diversity Categories'
+                 headerRight='Groups that are Underrepresented in Biomedical Research (UBR)*'
+                 cellWidth={{left: '30%', right: '70%'}}
+                 contentLeft={specificPopulations.map(sp => sp.ubrLabel)}
+                 contentRight={specificPopulations.map(sp => sp.ubrDescription)}/>
             </div>
           }
           <div style={{display: 'flex', flexDirection: 'row',

@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
-import {navigate, serverConfigStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
 import {AlertDanger} from 'app/components/alert';
@@ -137,6 +137,10 @@ export class WorkspaceCard extends React.Component<
   }
 
   shareWorkspace(): void {
+    // Share workspace publishes to current workspace,
+    // but here we aren't in the context of a workspace
+    // so we need to clear it.
+    currentWorkspaceStore.next(undefined);
     this.setState({sharing: false});
     this.props.reload();
   }

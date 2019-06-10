@@ -19,7 +19,7 @@ To manually test updates to this script locally:
   local server config to use your custom script:
 
   ```
-  api$ sed -i "s,setup_notebook_cluster\.sh,setup_notebook_cluster-${USER}.sh," config/config_local.json
+  api$ sed -i "s,setup_notebook_cluster\.sh,setup_notebook_cluster-${USER}.sh," src/main/java/org/pmiops/workbench/notebooks/LeonardoNotebooksClientImpl.java
   ```
 
 - Restart your dev API server and point a local UI to it
@@ -41,6 +41,13 @@ To manually test updates to this script locally:
 - Dig through the directories until you find the initialization script output
   log, as of 4/3/19 the file was named `dataproc-initialization-script-0_output`
 
+## Quick Local Testing of the Leo Jupyter Image
+
+```
+docker run -i -t -u 0 --entrypoint "" us.gcr.io/broad-dsp-gcr-public/leonardo-jupyter:prod /bin/bash
+```
+
+This can be used to quickly test command lines or reproduce bugs.
 
 # playground-extension.js
 

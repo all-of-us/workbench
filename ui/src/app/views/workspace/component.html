@@ -1,5 +1,6 @@
 <div class="workspace-container">
-  <app-top-box style="width: 78%">
+  <app-workspace-about *ngIf="showUpdatedResearchPurpose"></app-workspace-about>
+  <app-top-box *ngIf="!showUpdatedResearchPurpose" style="width: 78%">
     <div class="padding-wrapper">
       <div class="main-body">
         <div style="display: flex; flex-direction: row">
@@ -67,6 +68,7 @@
               </div>
             </app-tooltip>
           </h4>
+          <div class="description-text">{{workspace.researchPurpose.intendedStudy}}</div>
           <div class="research-purpose-items">
             <div class="column">
               <div class="research-purpose-item" *ngFor="let researchPurposeDescription of leftResearchPurposes">
@@ -166,7 +168,7 @@
     <a (click)="googleBucketModal = true">
       Google Bucket
     </a>
-    <app-react-cluster-button *ngIf="!!workspaceClusterBillingProjectId" [billingProjectId]="workspaceClusterBillingProjectId()"></app-react-cluster-button>
+    <app-react-cluster-button *ngIf="!!workspaceClusterBillingProjectId()" [billingProjectId]="workspaceClusterBillingProjectId()"></app-react-cluster-button>
   </div>
 </div>
 <app-workspace-share *ngIf="sharing" [workspace]="workspace"

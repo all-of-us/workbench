@@ -62,6 +62,12 @@ public class Workspace {
     }
   }
 
+  public enum BillingMigrationStatus {
+    OLD,
+    NEW,
+    MIGRATED
+  }
+
   private long workspaceId;
   private int version;
   private String name;
@@ -77,6 +83,8 @@ public class Workspace {
   private Set<ConceptSet> conceptSets = new HashSet<>();
   private Set<DataSet> dataSets = new HashSet<>();
   private Short activeStatus;
+  private Short billingMigrationStatus =
+      StorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.OLD);
 
   private boolean diseaseFocusedResearch;
   private String diseaseOfFocus;
@@ -518,5 +526,23 @@ public class Workspace {
 
   public void addWorkspaceUserRole(WorkspaceUserRole userRole) {
     this.usersWithAccess.add(userRole);
+  }
+
+  @Transient
+  public BillingMigrationStatus getBillingMigrationStatusEnum() {
+    return StorageEnums.billingMigrationStatusFromStorage(billingMigrationStatus);
+  }
+
+  public void setBillingMigrationStatusEnum(BillingMigrationStatus status) {
+    this.billingMigrationStatus = StorageEnums.billingMigrationStatusToStorage(status);
+  }
+
+  @Column(name = "billing_migration_status")
+  private short getBillingMigrationStatus() {
+    return this.billingMigrationStatus;
+  }
+
+  private void setBillingMigrationStatus(short s) {
+    this.billingMigrationStatus = s;
   }
 }

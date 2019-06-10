@@ -5,8 +5,14 @@ import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
 
+highCharts.setOptions({
+  lang: {
+    decimalPoint: '.',
+    thousandsSep: ','
+  },
+});
+
 interface Props {
-  mode: string;
   data: any;
 }
 
@@ -14,11 +20,17 @@ interface State {
   options: any;
 }
 
-export class ComboChart extends React.Component<Props, State> {
+export class GenderChart extends React.Component<Props, State> {
   readonly codeMap = {
     'M': 'Male',
     'F': 'Female',
     'No matching concept': 'Unknown'
+  };
+
+  readonly defaults = {
+    Male: {y: 0, name: 'Male', color: '#7aa3e5'},
+    Female: {y: 0, name: 'Female', color: '#a8385d'},
+    Unknown: {y: 0, name: 'Unknown', color: '#a27ea8'},
   };
 
   constructor(props: Props) {
@@ -30,18 +42,10 @@ export class ComboChart extends React.Component<Props, State> {
     this.getChartOptions();
   }
 
-  componentDidUpdate(prevProps: any): void {
-    if (prevProps.mode !== this.props.mode) {
-      this.getChartOptions();
-    }
-  }
-
   getChartOptions() {
-    const {mode} = this.props;
-    const normalized = mode === 'normalized';
     const options = {
       chart: {
-        height: 250,
+        height: 200,
         type: 'bar'
       },
       credits: {
@@ -51,20 +55,19 @@ export class ComboChart extends React.Component<Props, State> {
         text: ''
       },
       xAxis: {
-        categories: this.getCategories(),
+        categories: ['Female', 'Male', 'Unknown'],
         tickLength: 0,
-        tickPixelInterval: 50
-      },
-      yAxis: {
-        labels: {
-          format: '{value}' + (normalized ? '%' : '')
-        },
-        min: 0,
+        tickPixelInterval: 50,
         title: {
-          text: ''
+          text: 'Gender'
         }
       },
-      colors: ['#adcded', '#aae3f5', '#a27ea8', '#7aa3e5', '#a8385d'],
+      yAxis: {
+        min: 0,
+        title: {
+          text: '# Participants'
+        }
+      },
       legend: {
         enabled: false
       },
@@ -72,34 +75,32 @@ export class ComboChart extends React.Component<Props, State> {
         bar: {
           groupPadding: 0,
           pointPadding: 0.1,
-        },
-        series: {
-          stacking: (normalized ? 'percent' : 'normal')
         }
       },
-      series: this.getSeries()
+      series: [{
+        data: this.getSeries(),
+        tooltip: {
+          pointFormat: '<span style="color:{point.color}">\u25CF </span><b> {point.y}</b>'
+        }
+      }]
     };
     this.setState({options});
-  }
-
-  getCategories() {
-    const {data} = this.props;
-    return data
-      .map(datum => datum.update('gender', code => this.codeMap[code]))
-      .groupBy(datum => `${datum.get('gender', 'Unknown')} ${datum.get('ageRange', 'Unknown')}`)
-      .keySeq()
-      .toArray();
   }
 
   getSeries() {
     const {data} = this.props;
     return data
       .map(datum => datum.update('gender', code => this.codeMap[code]))
-      .groupBy(datum => datum.get('race', 'Unknown'))
-      .map((group, race) => ({name: race, data: group.map(item => item.get('count'))}))
-      .sort((a, b) => a.name < b.name ? 1 : -1)
+      .groupBy(datum => datum.get('gender', 'Unknown'))
+      .map((group, gender) => ({
+        y: group.reduce((acc, item) => acc + item.get('count'), 0),
+        name: gender,
+        color: this.defaults[gender].color
+      }))
+      .mergeWith((old, _) => old, this.defaults)
+      .sort((a, b) => a.name > b.name ? 1 : -1)
       .valueSeq()
-      .toJS();
+      .toArray();
   }
 
   render() {
@@ -114,15 +115,14 @@ export class ComboChart extends React.Component<Props, State> {
   }
 }
 
-@Component ({
-  selector: 'app-combo-chart',
+@Component({
+  selector: 'app-gender-chart',
   template: '<div #root></div>'
 })
-export class ComboChartComponent extends ReactWrapperBase {
-  @Input('mode') mode: Props['mode'];
+export class GenderChartComponent extends ReactWrapperBase {
   @Input('data') data: Props['data'];
+
   constructor() {
-    super(ComboChart, ['mode', 'data']);
+    super(GenderChart, ['data']);
   }
 }
-

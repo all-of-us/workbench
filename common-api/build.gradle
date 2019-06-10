@@ -55,6 +55,12 @@ apply plugin: 'com.diffplug.gradle.spotless'
 spotless {
   java {
     googleJavaFormat()
+    target fileTree('.') {
+      include '**/*.java'
+
+      exclude 'src/generated/**'
+      exclude 'build/**'
+    }
   }
 }
 
