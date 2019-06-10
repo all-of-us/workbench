@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
@@ -23,11 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OfflineUserController implements OfflineUserApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineUserController.class.getName());
-  private static final List<String> WHITELISTED_ORG_IDS = Arrays.asList(
-      "400176686919", // test.firecloud.org
-      "386193000800", // firecloud.org
-      "394551486437" //pmi-ops.org
-  );
+  private static final List<String> WHITELISTED_ORG_IDS =
+      Arrays.asList(
+          "400176686919", // test.firecloud.org
+          "386193000800", // firecloud.org
+          "394551486437" // pmi-ops.org
+          );
 
   private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
