@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="srubenst" id="changelog-82-add-cascade-delete-admin-actions-after-user-delete">
+    <dropForeignKeyConstraint baseTableName="admin_action_history" constraintName="fk_history_target_user_id"/>
+    <addForeignKeyConstraint baseColumnNames="target_user_id"
+                             baseTableName="admin_action_history"
+                             constraintName="fk_history_target_user_id"
+                             onDelete="CASCADE"
+                             referencedColumnNames="user_id"
+                             referencedTableName="user"/>
+    <dropForeignKeyConstraint baseTableName="admin_action_history" constraintName="fk_history_admin_id"/>
+    <addForeignKeyConstraint baseColumnNames="admin_user_id"
+                             baseTableName="admin_action_history"
+                             constraintName="fk_history_admin_id"
+                             onDelete="CASCADE"
+                             referencedColumnNames="user_id"
+                             referencedTableName="user"/>
+  </changeSet>
+</databaseChangeLog>
