@@ -57,7 +57,6 @@ public class CloudResourceManagerServiceImplIntegrationTest {
             httpTransport,
             new GoogleRetryHandler(new NoBackOffPolicy()),
             serviceAccounts);
-    ;
   }
 
   @Test
