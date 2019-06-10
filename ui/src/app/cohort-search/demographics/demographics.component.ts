@@ -163,7 +163,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         const items = response.items
                   .filter(item => item.parentId !== 0
                       || subtype === TreeSubType[TreeSubType.DEC]);
-        items.sort(sortByCountThenName);
+        if (subtype !== TreeSubType[TreeSubType.AGE]) {
+          items.sort(sortByCountThenName);
+        }
         const nodes = fromJS(items).map(node => {
           if (subtype !== TreeSubType[TreeSubType.AGE]) {
             const paramId = subtype === TreeSubType[TreeSubType.DEC] ? 'param-dec' :
@@ -177,7 +179,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   loadOptions(nodes: any, subtype: string) {
-    this.loading = false;
     switch (subtype) {
       /* Age and Deceased are single nodes we use as templates */
       case TreeSubType[TreeSubType.AGE]:
@@ -191,6 +192,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         });
         const paramId = `age-param${this.ageNode.get('id')}`;
         this.selectedNode = this.ageNode
+          .set('name', `${minAge.toString()} - ${maxAge.toString()}`)
           .set('parameterId', paramId)
           .set('attributes', [attr]);
         this.actions.addParameter(this.selectedNode);
@@ -200,12 +202,15 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         break;
       case TreeSubType[TreeSubType.GEN]:
         this.genderNodes = nodes;
+        this.loading = false;
         break;
       case TreeSubType[TreeSubType.RACE]:
         this.raceNodes = nodes;
+        this.loading = false;
         break;
       case TreeSubType[TreeSubType.ETH]:
         this.ethnicityNodes = nodes;
+        this.loading = false;
         break;
     }
   }
@@ -310,6 +315,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
                 });
                 const paramId = `age-param${this.ageNode.get('id')}`;
                 return this.ageNode
+                    .set('name', `${lo} - ${hi}`)
                     .set('parameterId', paramId)
                     .set('attributes', [attr]);
             })
@@ -359,6 +365,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       count += ageNode.count;
     }
     this.ageCount = count;
+    this.loading = false;
   }
 
   centerAgeCount() {

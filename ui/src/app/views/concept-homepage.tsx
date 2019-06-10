@@ -200,22 +200,22 @@ export const ConceptHomepage = withCurrentWorkspace()(
     async loadDomainsAndSurveys() {
       const {namespace, id} = this.props.workspace;
       try {
-        const conceptsCache: ConceptCacheItem[] = [];
-        const conceptDomainCounts: DomainCount[] = [];
         const [conceptDomainInfo, surveysInfo] = await Promise.all([
           conceptsApi().getDomainInfo(namespace, id),
           conceptsApi().getSurveyInfo(namespace, id)]);
-        conceptDomainInfo.items.map((domain) => {
-          conceptsCache.push({
+        const conceptsCache: ConceptCacheItem[] = conceptDomainInfo.items.map((domain) => {
+          return {
             domain: domain.domain,
             items: [],
             vocabularyList: []
-          });
-          conceptDomainCounts.push({
+          };
+        });
+        const conceptDomainCounts: DomainCount[] = conceptDomainInfo.items.map((domain) => {
+          return {
             domain: domain.domain,
             name: domain.name,
             conceptCount: 0
-          });
+          };
         });
         this.setState({
           conceptsCache: conceptsCache,
