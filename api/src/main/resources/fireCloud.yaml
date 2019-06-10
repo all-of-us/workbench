@@ -397,6 +397,7 @@ paths:
           description: Workspace does not exist
         500:
           description: Internal Server Error
+
   /api/workspaces/{workspaceNamespace}/{workspaceName}/acl:
     get:
       tags:

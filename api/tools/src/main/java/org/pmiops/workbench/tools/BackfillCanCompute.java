@@ -30,9 +30,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Backfill script for granting canCompute permission to all AoU editors and owners. For
- * http://broad.io/1ppw, collaborators will need canCompute in order to launch clusters within
- * shared billing projects.
+ * Backfill script for granting canCompute permission to all AoU editors and owners (corresponding
+ * to Firecloud WRITER/OWNER access). For http://broad.io/1ppw, collaborators will need canCompute
+ * in order to launch clusters within shared billing projects.
  */
 @Configuration
 public class BackfillCanCompute {
@@ -63,9 +63,11 @@ public class BackfillCanCompute {
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/userinfo.email"
       };
+
   private static final Logger log = Logger.getLogger(BackfillCanCompute.class.getName());
-  private static final Set<String> CAN_COMPUTE_ROLES =
-      ImmutableSet.of("PROJECT_OWNER", "OWNER", "WRITER");
+  // AoU researchers should not currently be PROJECT_OWNERs, as all billing projects are owned by
+  // the GAE Default service account. Even if one were - they should already have canCompute.
+  private static final Set<String> CAN_COMPUTE_UPGRADE_ROLES = ImmutableSet.of("OWNER", "WRITER");
 
   private static WorkspacesApi newWorkspacesApi(String apiUrl) throws IOException {
     ApiClient apiClient = new ApiClient();
@@ -122,7 +124,8 @@ public class BackfillCanCompute {
           extractAclResponse(workspacesApi.getWorkspaceAcl(w.getNamespace(), w.getName()));
       for (String user : acl.keySet()) {
         WorkspaceAccessEntry entry = acl.get(user);
-        if (!CAN_COMPUTE_ROLES.contains(entry.getAccessLevel()) || entry.getCanCompute()) {
+        if (!CAN_COMPUTE_UPGRADE_ROLES.contains(entry.getAccessLevel()) || entry.getCanCompute()) {
+          // This user already has sufficient canCompute permission.
           continue;
         }
         dryLog(
