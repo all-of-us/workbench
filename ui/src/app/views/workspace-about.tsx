@@ -11,8 +11,8 @@ import {sliceByHalfLength} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
+import {SpecificPopulationEnum} from 'generated/fetch';
 import {ResearchPurposeDescription, ResearchPurposeItems, specificPopulations} from './workspace-edit';
-import {SpecificPopulationEnum} from "../../generated/fetch";
 
 const styles = reactStyles({
   mainHeader: {
