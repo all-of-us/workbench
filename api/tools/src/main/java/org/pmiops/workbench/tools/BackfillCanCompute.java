@@ -124,7 +124,7 @@ public class BackfillCanCompute {
           extractAclResponse(workspacesApi.getWorkspaceAcl(w.getNamespace(), w.getName()));
       for (String user : acl.keySet()) {
         WorkspaceAccessEntry entry = acl.get(user);
-        if (!CAN_COMPUTE_UPGRADE_ROLES.contains(entry.getAccessLevel()) || entry.getCanCompute()) {
+        if (entry.getCanCompute() || !CAN_COMPUTE_UPGRADE_ROLES.contains(entry.getAccessLevel())) {
           // This user already has sufficient canCompute permission.
           continue;
         }
