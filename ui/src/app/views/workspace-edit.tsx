@@ -373,6 +373,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             educational: false,
             intendedStudy: '',
             methodsDevelopment: false,
+            otherPopulationDetails: '',
             otherPurpose: false,
             otherPurposeDetails: '',
             population: false,
@@ -738,8 +739,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                    onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
                    disabled={!this.state.workspace.researchPurpose.population}/>
                 <TextInput type='text' autoFocus placeholder='Please specify'
+                           value={this.state.workspace.researchPurpose.otherPopulationDetails}
                            disabled={!this.state.workspace.researchPurpose.populationDetails
-                             .includes(SpecificPopulationEnum.OTHER)}/>
+                             .includes(SpecificPopulationEnum.OTHER)}
+                           onChange={v => this.setState(fp.set(
+                             ['workspace', 'researchPurpose', 'otherPopulationDetails'], v))}/>
               </div>
             </div>
           </div>

@@ -11,6 +11,7 @@ import {sliceByHalfLength} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
+import {SpecificPopulationEnum} from 'generated/fetch';
 import {ResearchPurposeDescription, ResearchPurposeItems, specificPopulations} from './workspace-edit';
 
 const styles = reactStyles({
@@ -52,9 +53,14 @@ export const WorkspaceAbout = withCurrentWorkspace()(
     }
 
     getSelectedPopulations() {
-      return specificPopulations.filter(sp =>
+      const populations = specificPopulations.filter(sp =>
         this.props.workspace.researchPurpose.populationDetails.includes(sp.object))
         .map(sp => sp.ubrLabel);
+      if (this.props.workspace.researchPurpose.populationDetails
+        .includes(SpecificPopulationEnum.OTHER)) {
+        populations.push('Other: ' + this.props.workspace.researchPurpose.otherPopulationDetails);
+      }
+      return populations;
     }
 
     getSelectedPopulationsSlice(left: boolean) {

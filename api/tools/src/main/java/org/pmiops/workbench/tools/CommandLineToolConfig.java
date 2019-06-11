@@ -86,6 +86,16 @@ public class CommandLineToolConfig {
     }
   }
 
+  @Lazy
+  @Bean(name = Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
+  GoogleCredential cloudResourceManagerCredentials(CloudStorageService cloudStorageService) {
+    try {
+      return cloudStorageService.getCloudResourceManagerAdminCredentials();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   /**
    * Instead of using the CacheSpringConfiguration class (which has a request-scoped bean to return
    * a cached workbench config), we load the workbench config once from the database and use that.

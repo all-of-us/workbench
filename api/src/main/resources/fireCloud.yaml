@@ -399,6 +399,25 @@ paths:
           description: Internal Server Error
 
   /api/workspaces/{workspaceNamespace}/{workspaceName}/acl:
+    get:
+      tags:
+        - Workspaces
+      operationId: getWorkspaceAcl
+      summary: Get workspace ACL
+      parameters:
+        - $ref: '#/parameters/workspaceNamespaceParam'
+        - $ref: '#/parameters/workspaceNameParam'
+      responses:
+        200:
+          description: Successful Request
+          schema:
+            $ref: '#/definitions/WorkspaceACL'
+        400:
+          description: Can't retrieve ACL for workspace
+        404:
+          description: Workspace not found
+        500:
+          description: Internal Server Error
     patch:
       tags:
         - Workspaces
@@ -1040,6 +1059,17 @@ definitions:
       runningSubmissionsCount:
         type: integer
         description: Count of all the running submissions
+
+  WorkspaceACL:
+    description: ''
+    required:
+      - acl
+    type: object
+    properties:
+      acl:
+        type: object
+        description: Map[String, WorkspaceAccessEntry]
+
   WorkspaceACLUpdate:
     description: ''
     required:
@@ -1102,6 +1132,28 @@ definitions:
         description: the users or groups who were not found
         items:
           $ref: '#/definitions/WorkspaceACLUpdate'
+
+  WorkspaceAccessEntry:
+    description: ''
+    required:
+      - accessLevel
+      - pending
+      - canShare
+      - canCompute
+    type: object
+    properties:
+      accessLevel:
+        type: string
+        description: The access level granted to this user or group (OWNER, READER, WRITER, NO ACCESS)
+      pending:
+        type: boolean
+        description: The status of the users access
+      canShare:
+        type: boolean
+        description: True if the user can share the workspace with others, false otherwise
+      canCompute:
+        type: boolean
+        description: True if the user can launch compute in this workspace, false otherwise
 
   ManagedGroupAccessResponse:
     description: an element of a list of groups a user has access to

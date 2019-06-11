@@ -2,11 +2,16 @@ package org.pmiops.workbench.api;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,11 +22,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OfflineUserController implements OfflineUserApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineUserController.class.getName());
+  private static final List<String> WHITELISTED_ORG_IDS =
+      Arrays.asList(
+          "400176686919", // test.firecloud.org
+          "386193000800", // firecloud.org
+          "394551486437" // pmi-ops.org
+          );
 
+  private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
 
   @Autowired
-  public OfflineUserController(UserService userService) {
+  public OfflineUserController(
+      CloudResourceManagerService cloudResourceManagerService, UserService userService) {
+    this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
   }
 
@@ -212,6 +226,32 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     if (errorCount > 0) {
       throw new ServerErrorException(
           String.format("%d errors encountered during two-factor auth sync", errorCount));
+    }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  /**
+   * Audits GCP access for all users in the database.
+   *
+   * <p>This API method is called by a cron job and is not part of our normal user-facing surface.
+   */
+  @Override
+  public ResponseEntity<Void> bulkAuditProjectAccess() {
+    for (User user : userService.getAllUsers()) {
+      // TODO(RW-2062): Move to using the gcloud api for list all resources when it is available.
+      List<String> unauthorizedLogs =
+          cloudResourceManagerService.getAllProjectsForUser(user).stream()
+              .filter(project -> !(WHITELISTED_ORG_IDS.contains(project.getParent().getId())))
+              .map(project -> project.getName() + " in organization " + project.getParent().getId())
+              .collect(Collectors.toList());
+      if (unauthorizedLogs.size() > 0) {
+        log.log(
+            Level.WARNING,
+            "User "
+                + user.getEmail()
+                + " has access to projects: "
+                + String.join(", ", unauthorizedLogs));
+      }
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

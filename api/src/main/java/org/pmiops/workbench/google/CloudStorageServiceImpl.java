@@ -169,6 +169,12 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
+  public GoogleCredential getCloudResourceManagerAdminCredentials() throws IOException {
+    String json = readToString(getCredentialsBucketName(), "cloud-resource-manager-admin-sa.json");
+    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
+  }
+
+  @Override
   public GoogleCredential getDefaultServiceAccountCredentials() throws IOException {
     String json = readToString(getCredentialsBucketName(), "app-engine-default-sa.json");
     return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
