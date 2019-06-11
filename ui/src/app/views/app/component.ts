@@ -108,13 +108,14 @@ export class AppComponent implements OnInit {
   private setTitleFromRoute(event: RouterEvent): void {
     if (event instanceof NavigationEnd) {
 
-      let currentRoute = this.activatedRoute;
-      while (currentRoute.firstChild) {
-        currentRoute = currentRoute.firstChild;
-      }
+      const currentRoute = this.getLeafRoute();
       if (currentRoute.outlet === 'primary') {
-        currentRoute.data.subscribe(value =>
-            this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
+        currentRoute.data.subscribe(value => {
+          const routeTitle = (value.titleFromPath) ?
+            decodeURIComponent(currentRoute.params.getValue()[value.titleFromPath]) :
+            value.title;
+          this.titleService.setTitle(`${routeTitle} | ${this.baseTitle}`);
+        });
       }
     }
   }
