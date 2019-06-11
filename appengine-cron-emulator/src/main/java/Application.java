@@ -6,6 +6,9 @@ import com.squareup.okhttp.Response;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.net.ConnectException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,16 +48,12 @@ public class Application {
     private static int MAX_CONNECTION_FAILURES_BEFORE_EXIT = 2;
 
     public static void main(String[] args) throws Exception {
-        String cronXmlPath = args[0];
-
-        File file = new File(cronXmlPath);
-        XmlMapper xmlMapper = new XmlMapper();
-        String xml = inputStreamToString(new FileInputStream(file));
-
-        CronEntries cronEntries = xmlMapper.readValue(xml, CronEntries.class);
-
         OkHttpClient client = new OkHttpClient();
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+
+        String cronXmlPath = args[0];
+        String xml = new String(Files.readAllBytes(Paths.get(cronXmlPath)));
+        CronEntries cronEntries = new XmlMapper().readValue(xml, CronEntries.class);
 
         for (Cron cron : cronEntries.cron) {
             Schedule schedule = parseCronSchedule(cron.schedule);
@@ -71,11 +70,11 @@ public class Application {
                     log(response.toString());
                     hasServerStarted = true;
                     consecutiveConnectionFailures = 0;
-                } catch (Exception e) {
+                } catch (ConnectException e) {
                     log(e.getMessage());
-                    if (e.getMessage().contains("Failed to connect to")) {
-                        consecutiveConnectionFailures++;
-                    }
+                    consecutiveConnectionFailures++;
+                } catch (IOException e) {
+                    log(e.getMessage());
                 }
 
                 if (hasServerStarted && consecutiveConnectionFailures >= MAX_CONNECTION_FAILURES_BEFORE_EXIT) {
@@ -106,17 +105,6 @@ public class Application {
         } else {
             throw new RuntimeException("Could not parse cron schedule: " + scheduleString);
         }
-    }
-
-    private static String inputStreamToString(InputStream is) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        String line;
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        while ((line = br.readLine()) != null) {
-            sb.append(line);
-        }
-        br.close();
-        return sb.toString();
     }
 
 }
