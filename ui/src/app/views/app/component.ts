@@ -103,7 +103,7 @@ export class AppComponent implements OnInit {
   }
 
   /**
-   * Uses the title service to set the page title after nagivation events
+   * Uses the title service to set the page title after navigation events
    */
   private setTitleFromRoute(event: RouterEvent): void {
     if (event instanceof NavigationEnd) {
