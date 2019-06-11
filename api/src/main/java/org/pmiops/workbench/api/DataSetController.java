@@ -145,6 +145,8 @@ public class DataSetController implements DataSetApiDelegate {
                 })
             .collect(Collectors.toList());
     try {
+      // Remove -1 which is a dummy concept set for Demographics
+      dataSetRequest.getConceptSetIds().remove(-1l);
       org.pmiops.workbench.db.model.DataSet savedDataSet =
           dataSetService.saveDataSet(
               dataSetRequest.getName(),
