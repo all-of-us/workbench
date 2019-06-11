@@ -358,12 +358,25 @@ public class DataSetController implements DataSetApiDelegate {
             .getBody();
 
     String libraries;
+    JSONObject metaData = new JSONObject();
     switch (dataSetExportRequest.getKernelType()) {
       case PYTHON:
         libraries = "import pandas";
         break;
       case R:
+        metaData.put("kernelspec", new JSONObject()
+            .put("display_name", "R")
+            .put("language", "R")
+            .put("name", "ir"))
+            .put("language_info", new JSONObject()
+                .put("codemirror_mode", "r")
+                .put("file_extension", ".r")
+                .put("mimetype", "text/x-r-source")
+                .put("name", "r")
+                .put("pygments_lexer", "r")
+                .put("version", "3.4.4"));
         libraries = "library(reticulate)";
+
         break;
       default:
         throw new BadRequestException(
@@ -388,7 +401,7 @@ public class DataSetController implements DataSetApiDelegate {
       notebookFile =
           new JSONObject()
               .put("cells", new JSONArray().put(createNotebookCodeCellWithString(queriesAsStrings)))
-              .put("metadata", new JSONObject())
+              .put("metadata", metaData)
               // nbformat and nbformat_minor are the notebook major and minor version we are
               // creating.
               // Specifically, here we create notebook version 4.2 (I believe)
@@ -534,7 +547,7 @@ public class DataSetController implements DataSetApiDelegate {
                 + "query_config)";
         break;
       case R:
-        sqlSection = "";
+        sqlSection = "sql <- \"" + query.getQuery() + "\"";
         namedParamsSection = "";
         dataFrameSection = "";
         break;

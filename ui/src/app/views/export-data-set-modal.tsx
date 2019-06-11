@@ -13,7 +13,7 @@ import {convertQueryToText} from 'app/utils/big-query-queries';
 import {navigate} from 'app/utils/navigation';
 
 
-import {DataSet, DataSetQuery, DataSetRequest, FileDetail} from 'generated/fetch';
+import {DataSet, DataSetQuery, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
 
 interface Props {
   closeFunction: Function;
@@ -24,6 +24,7 @@ interface Props {
 
 interface State {
   existingNotebooks: FileDetail[];
+  kernelType: KernelTypeEnum;
   loading: boolean;
   newNotebook: boolean;
   notebookName: string;
@@ -40,6 +41,7 @@ class ExportDataSetModal extends React.Component<
     super(props);
     this.state = {
       existingNotebooks: [],
+      kernelType: KernelTypeEnum.Python,
       loading: false,
       newNotebook: true,
       notebookName: '',
@@ -98,17 +100,24 @@ class ExportDataSetModal extends React.Component<
       {
         dataSetRequest: request,
         notebookName: this.state.notebookName,
-        newNotebook: this.state.newNotebook
+        newNotebook: this.state.newNotebook,
+        kernelType: KernelTypeEnum.R
       });
     navigate(['workspaces',
       workspaceNamespace,
       workspaceFirecloudName, 'notebooks', this.state.notebookName + '.ipynb']);
   }
 
+  setKernelType(event: any) {
+    console.log(event);
+    this.setState({kernelType: event.value});
+  }
+
   render() {
     const {dataSet} = this.props;
     const {
       existingNotebooks,
+      kernelType,
       loading,
       newNotebook,
       notebookName,
@@ -154,7 +163,7 @@ class ExportDataSetModal extends React.Component<
           <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
           <TextInput onChange={(v) => this.setState({notebookName: v})}
                      value={notebookName} data-test-id='notebook-name-input'/>
-        </React.Fragment>}
+         </React.Fragment>}
       </ModalBody>
       <ModalFooter>
         <Button type='secondary'
