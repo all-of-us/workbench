@@ -21,6 +21,7 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.DomainVocabularyInfoDao;
+import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DomainVocabularyInfo.DomainVocabularyInfoId;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortCloningService;
@@ -233,6 +234,7 @@ public class ConceptsControllerTest {
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private DomainVocabularyInfoDao domainVocabularyInfoDao;
   @Autowired FireCloudService fireCloudService;
+  @Autowired SurveyModuleDao surveyModuleDao;
 
   @PersistenceContext private EntityManager entityManager;
 
@@ -251,7 +253,8 @@ public class ConceptsControllerTest {
             workspaceService,
             domainInfoDao,
             domainVocabularyInfoDao,
-            conceptDao);
+            conceptDao,
+            surveyModuleDao);
 
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
