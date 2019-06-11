@@ -111,9 +111,8 @@ export class AppComponent implements OnInit {
       const currentRoute = this.getLeafRoute();
       if (currentRoute.outlet === 'primary') {
         currentRoute.data.subscribe(value => {
-          const routeTitle = (value.titleFromPath) ?
-            decodeURIComponent(currentRoute.params.getValue()[value.titleFromPath]) :
-            value.title;
+          const routeTitle = value.title ||
+            decodeURIComponent(currentRoute.params.getValue()[value.pathElementForTitle]);
           this.titleService.setTitle(`${routeTitle} | ${this.baseTitle}`);
         });
       }

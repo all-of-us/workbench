@@ -121,7 +121,7 @@ const routes: Routes = [
                     path: ':nbName',
                     component: NotebookRedirectComponent,
                     data: {
-                      titleFromPath: 'nbName',  // use the (urldecoded) captured value nbName
+                      pathElementForTitle: 'nbName',  // use the (urldecoded) captured value nbName
                       breadcrumb: BreadcrumbType.Notebook,
                       minimizeChrome: true
                     }
