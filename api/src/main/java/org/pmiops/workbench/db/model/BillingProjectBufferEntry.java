@@ -1,6 +1,8 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -75,7 +77,7 @@ public class BillingProjectBufferEntry {
     return lastStatusChangedTime;
   }
 
-  public void setLastStatusChangedTime(Timestamp lastStatusChangedTime) {
+  private void setLastStatusChangedTime(Timestamp lastStatusChangedTime) {
     this.lastStatusChangedTime = lastStatusChangedTime;
   }
 
@@ -94,7 +96,8 @@ public class BillingProjectBufferEntry {
     return StorageEnums.billingProjectBufferStatusFromStorage(status);
   }
 
-  public void setStatusEnum(BillingProjectBufferStatus status) {
+  public void setStatusEnum(BillingProjectBufferStatus status, Supplier<Timestamp> currentTimestamp) {
+    this.setLastStatusChangedTime(currentTimestamp.get());
     this.status = StorageEnums.billingProjectBufferStatusToStorage(status);
   }
 

@@ -16,6 +16,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -47,6 +48,10 @@ public class BillingProjectBufferService {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
+  private Timestamp getCurrentTimestamp() {
+    return new Timestamp(clock.instant().toEpochMilli());
+  }
+
   public void bufferBillingProject() {
     if (getUnfilledBufferSpace() <= 0) {
       return;
@@ -58,7 +63,7 @@ public class BillingProjectBufferService {
     BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
     entry.setFireCloudProjectName(projectName);
     entry.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
-    entry.setStatusEnum(CREATING);
+    entry.setStatusEnum(CREATING, this::getCurrentTimestamp);
 
     billingProjectBufferEntryDao.save(entry);
   }
@@ -80,14 +85,14 @@ public class BillingProjectBufferService {
             .getBillingProjectStatus(entry.getFireCloudProjectName())
             .getCreationStatus()) {
           case READY:
-            entry.setStatusEnum(AVAILABLE);
+            entry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
             break;
           case ERROR:
             log.warning(
                 String.format(
                     "SyncBillingProjectStatus: BillingProject %s creation failed",
                     entry.getFireCloudProjectName()));
-            entry.setStatusEnum(ERROR);
+            entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
             break;
           case CREATING:
           default:
@@ -105,7 +110,7 @@ public class BillingProjectBufferService {
     BillingProjectBufferEntry entry = consumeBufferEntryForAssignment();
 
     fireCloudService.addUserToBillingProject(user.getEmail(), entry.getFireCloudProjectName());
-    entry.setStatusEnum(ASSIGNED);
+    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     entry.setAssignedUser(user);
     billingProjectBufferEntryDao.save(entry);
 
@@ -127,7 +132,7 @@ public class BillingProjectBufferService {
         throw new EmptyBufferException();
       }
 
-      entry.setStatusEnum(ASSIGNING);
+      entry.setStatusEnum(ASSIGNING, this::getCurrentTimestamp);
       billingProjectBufferEntryDao.save(entry);
     } finally {
       billingProjectBufferEntryDao.releaseAssigningLock();

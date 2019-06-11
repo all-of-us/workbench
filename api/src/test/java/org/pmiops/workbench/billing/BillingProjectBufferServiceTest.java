@@ -15,6 +15,7 @@ import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingPro
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -160,7 +161,7 @@ public class BillingProjectBufferServiceTest {
 
     // free up buffer
     BillingProjectBufferEntry entry = billingProjectBufferEntryDao.findAll().iterator().next();
-    entry.setStatusEnum(ASSIGNED);
+    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     expectedCallCount++;
     billingProjectBufferService.bufferBillingProject();
@@ -197,21 +198,21 @@ public class BillingProjectBufferServiceTest {
     Iterator<BillingProjectBufferEntry> bufferEntries =
         billingProjectBufferEntryDao.findAll().iterator();
     BillingProjectBufferEntry entry = bufferEntries.next();
-    entry.setStatusEnum(ASSIGNED);
+    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProject();
     verify(fireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
 
     // should no op since we're at capacity
     entry = bufferEntries.next();
-    entry.setStatusEnum(ASSIGNED);
+    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProject();
     verify(fireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
 
     // should invoke since we're below capacity
     entry = bufferEntries.next();
-    entry.setStatusEnum(ASSIGNED);
+    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProject();
     verify(fireCloudService, times((int) BUFFER_CAPACITY + 1))
@@ -352,7 +353,7 @@ public class BillingProjectBufferServiceTest {
   @Test
   public void assignBillingProject() {
     BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
-    entry.setStatusEnum(AVAILABLE);
+    entry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
     entry.setFireCloudProjectName("test-project-name");
     entry.setCreationTime(new Timestamp(NOW.toEpochMilli()));
     billingProjectBufferEntryDao.save(entry);
@@ -381,7 +382,7 @@ public class BillingProjectBufferServiceTest {
   @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   public void assignBillingProject_locking() throws InterruptedException, ExecutionException {
     BillingProjectBufferEntry firstEntry = new BillingProjectBufferEntry();
-    firstEntry.setStatusEnum(AVAILABLE);
+    firstEntry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
     firstEntry.setFireCloudProjectName("test-project-name-1");
     firstEntry.setCreationTime(new Timestamp(NOW.toEpochMilli()));
     billingProjectBufferEntryDao.save(firstEntry);
@@ -391,7 +392,7 @@ public class BillingProjectBufferServiceTest {
     userDao.save(firstUser);
 
     BillingProjectBufferEntry secondEntry = new BillingProjectBufferEntry();
-    secondEntry.setStatusEnum(AVAILABLE);
+    secondEntry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
     secondEntry.setFireCloudProjectName("test-project-name-2");
     secondEntry.setCreationTime(new Timestamp(NOW.toEpochMilli()));
     billingProjectBufferEntryDao.save(secondEntry);
@@ -418,5 +419,9 @@ public class BillingProjectBufferServiceTest {
 
     assertThat(futures.get(0).get().getFireCloudProjectName())
         .isNotEqualTo(futures.get(1).get().getFireCloudProjectName());
+  }
+
+  private Timestamp getCurrentTimestamp() {
+    return new Timestamp(NOW.toEpochMilli());
   }
 }
