@@ -107,7 +107,7 @@ public class BillingProjectBufferService {
     }
   }
 
-  public void cleanupFailedEntries() {
+  public void cleanBufferEntries() {
     Iterables.concat(
         billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
             StorageEnums.billingProjectBufferStatusToStorage(CREATING),

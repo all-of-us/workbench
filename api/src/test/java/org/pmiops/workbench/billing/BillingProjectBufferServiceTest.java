@@ -16,7 +16,6 @@ import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingPro
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -431,7 +430,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferEntryDao.save(entry);
 
     CLOCK.setInstant(NOW.plus(61, ChronoUnit.MINUTES));
-    billingProjectBufferService.cleanupFailedEntries();
+    billingProjectBufferService.cleanBufferEntries();
 
     assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
         .isEqualTo(ERROR);
@@ -445,7 +444,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferEntryDao.save(entry);
 
     CLOCK.setInstant(NOW.plus(11, ChronoUnit.MINUTES));
-    billingProjectBufferService.cleanupFailedEntries();
+    billingProjectBufferService.cleanBufferEntries();
 
     assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
         .isEqualTo(ERROR);

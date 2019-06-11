@@ -19,7 +19,7 @@ public interface BillingProjectBufferEntryDao
   Long getCurrentBufferSize();
 
   List<BillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(short status, Timestamp timestamp);
-  
+
   BillingProjectBufferEntry findFirstByStatusOrderByLastSyncRequestTimeAsc(short status);
 
   BillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
