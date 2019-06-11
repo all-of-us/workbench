@@ -356,7 +356,8 @@ public class DataSetController implements DataSetApiDelegate {
     DataSetQueryList queryList =
         generateQuery(workspaceNamespace, workspaceId, dataSetExportRequest.getDataSetRequest())
             .getBody();
-    // This suppresses 'may not be initialized errors. We will always init to something else before used.
+    // This suppresses 'may not be initialized errors. We will always init to something else before
+    // used.
     JSONObject notebookFile = new JSONObject();
     WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
 
@@ -364,10 +365,11 @@ public class DataSetController implements DataSetApiDelegate {
       notebookFile =
           notebooksService.getNotebookContents(
               workspace.getWorkspace().getBucketName(), dataSetExportRequest.getNotebookName());
-      String language = Optional.of(notebookFile.getJSONObject("metadata"))
-          .flatMap(metaData -> Optional.of(metaData.getJSONObject("kernelspec")))
-          .map(kernelSpec -> kernelSpec.getString("language"))
-          .orElse("Python");
+      String language =
+          Optional.of(notebookFile.getJSONObject("metadata"))
+              .flatMap(metaData -> Optional.of(metaData.getJSONObject("kernelspec")))
+              .map(kernelSpec -> kernelSpec.getString("language"))
+              .orElse("Python");
       if (language.equals("R")) {
         dataSetExportRequest.setKernelType(KernelTypeEnum.R);
       } else {
@@ -395,9 +397,10 @@ public class DataSetController implements DataSetApiDelegate {
                     .put("name", "r")
                     .put("pygments_lexer", "r")
                     .put("version", "3.4.4"));
-        libraries = "install.packages(\"reticulate\")\n" +
-            "library(reticulate)\n" +
-            "pd <- reticulate::import(\"pandas\")";
+        libraries =
+            "install.packages(\"reticulate\")\n"
+                + "library(reticulate)\n"
+                + "pd <- reticulate::import(\"pandas\")";
 
         break;
       default:
@@ -517,8 +520,6 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dataSet));
   }
 
-
-
   private JSONObject createNotebookCodeCellWithString(String cellInformation) {
     return new JSONObject()
         .put("cell_type", "code")
@@ -552,8 +553,10 @@ public class DataSetController implements DataSetApiDelegate {
                 + query.getNamedParameters().stream()
                     .map(
                         namedParameterEntry ->
-                            convertNamedParameterToString(namedParameterEntry, KernelTypeEnum.PYTHON))
-                    .collect(Collectors.joining(",\n")) + "\n"
+                            convertNamedParameterToString(
+                                namedParameterEntry, KernelTypeEnum.PYTHON))
+                    .collect(Collectors.joining(",\n"))
+                + "\n"
                 + "    ]\n"
                 + "  }\n"
                 + "}\n\n";
@@ -574,12 +577,21 @@ public class DataSetController implements DataSetApiDelegate {
                 + "    parameterMode = 'NAMED',\n"
                 + "    queryParameters = list(\n"
                 + query.getNamedParameters().stream()
-                .map(namedParameterEntry -> convertNamedParameterToString(namedParameterEntry, KernelTypeEnum.R))
-                .collect(Collectors.joining(",\n")) + "\n"
+                    .map(
+                        namedParameterEntry ->
+                            convertNamedParameterToString(namedParameterEntry, KernelTypeEnum.R))
+                    .collect(Collectors.joining(",\n"))
+                + "\n"
                 + "    )\n"
                 + "  )\n"
                 + ")";
-        dataFrameSection = namespace + "df <- pd$read_gbq(" + namespace + "sql, dialect=\"standard\", configuration=" + namespace + "query_config)";
+        dataFrameSection =
+            namespace
+                + "df <- pd$read_gbq("
+                + namespace
+                + "sql, dialect=\"standard\", configuration="
+                + namespace
+                + "query_config)";
         break;
       default:
         throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
@@ -592,7 +604,8 @@ public class DataSetController implements DataSetApiDelegate {
   // To avoid warnings on our cast to list, we suppress those warnings here,
   // as they are expected.
   @SuppressWarnings("unchecked")
-  private String convertNamedParameterToString(NamedParameterEntry namedParameterEntry, KernelTypeEnum kernelTypeEnum) {
+  private String convertNamedParameterToString(
+      NamedParameterEntry namedParameterEntry, KernelTypeEnum kernelTypeEnum) {
     if (namedParameterEntry.getValue() == null) {
       return "";
     }
@@ -607,42 +620,55 @@ public class DataSetController implements DataSetApiDelegate {
     switch (kernelTypeEnum) {
       case PYTHON:
         return "      {\n"
-            + "        'name': \"" + namedParameterEntry.getValue().getName() + "\",\n"
+            + "        'name': \""
+            + namedParameterEntry.getValue().getName()
+            + "\",\n"
             + "        'parameterType': {'type': \""
             + namedParameterEntry.getValue().getParameterType()
             + "\""
             + (isArrayParameter
-            ? ",'arrayType': {'type': \"" + namedParameterEntry.getValue().getArrayType() + "\"},"
-            : "")
+                ? ",'arrayType': {'type': \""
+                    + namedParameterEntry.getValue().getArrayType()
+                    + "\"},"
+                : "")
             + "},\n"
             + "        \'parameterValue\': {"
             + (isArrayParameter
-            ? "\'arrayValues\': ["
-            + arrayValues.stream()
-            .map(
-                namedParameterValue ->
-                    "{\'value\': " + namedParameterValue.getParameterValue() + "}")
-            .collect(Collectors.joining(","))
-            + "]"
-            : "'value': \"" + namedParameterEntry.getValue().getParameterValue() + "\"")
+                ? "\'arrayValues\': ["
+                    + arrayValues.stream()
+                        .map(
+                            namedParameterValue ->
+                                "{\'value\': " + namedParameterValue.getParameterValue() + "}")
+                        .collect(Collectors.joining(","))
+                    + "]"
+                : "'value': \"" + namedParameterEntry.getValue().getParameterValue() + "\"")
             + "}\n"
             + "      }";
       case R:
         return "      list(\n"
-            + "        name = \"" + namedParameterEntry.getValue().getName() + "\",\n"
-            + "        parameterType = list(type = \"" + namedParameterEntry.getValue().getParameterType() + "\""
-            + (isArrayParameter ? ", arrayType = list(type = " + namedParameterEntry.getValue().getArrayType() + ")," : "")
+            + "        name = \""
+            + namedParameterEntry.getValue().getName()
+            + "\",\n"
+            + "        parameterType = list(type = \""
+            + namedParameterEntry.getValue().getParameterType()
+            + "\""
+            + (isArrayParameter
+                ? ", arrayType = list(type = "
+                    + namedParameterEntry.getValue().getArrayType()
+                    + "),"
+                : "")
             + "),\n"
             + "        parameterValue = list("
             + (isArrayParameter
-            ? "arrayValues = list("
-            + arrayValues.stream()
-            .map(
-                namedParameterValue ->
-                    "list(value = " + namedParameterValue.getParameterValue() + ")")
-            .collect(Collectors.joining(","))
-            + ")"
-            : "value = \"" + namedParameterEntry.getValue().getParameterValue()) + "\""
+                ? "arrayValues = list("
+                    + arrayValues.stream()
+                        .map(
+                            namedParameterValue ->
+                                "list(value = " + namedParameterValue.getParameterValue() + ")")
+                        .collect(Collectors.joining(","))
+                    + ")"
+                : "value = \"" + namedParameterEntry.getValue().getParameterValue())
+            + "\""
             + ")\n"
             + "      )";
       default:
