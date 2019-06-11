@@ -6,9 +6,11 @@ import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingPro
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
 
+import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,7 +18,6 @@ import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -104,6 +105,22 @@ public class BillingProjectBufferService {
 
       billingProjectBufferEntryDao.save(entry);
     }
+  }
+
+  public void cleanupFailedEntries() {
+    Iterables.concat(
+        billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
+            StorageEnums.billingProjectBufferStatusToStorage(CREATING),
+            new Timestamp(clock.instant().minus(60, ChronoUnit.MINUTES).toEpochMilli())
+        ),
+        billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
+            StorageEnums.billingProjectBufferStatusToStorage(ASSIGNING),
+            new Timestamp(clock.instant().minus(10, ChronoUnit.MINUTES).toEpochMilli())
+        )
+    ).forEach(entry -> {
+      entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
+      billingProjectBufferEntryDao.save(entry);
+    });
   }
 
   public BillingProjectBufferEntry assignBillingProject(User user) {
