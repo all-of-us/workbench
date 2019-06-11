@@ -353,9 +353,8 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    DataSetQueryList queryList =
-        generateQuery(workspaceNamespace, workspaceId, dataSetExportRequest.getDataSetRequest())
-            .getBody();
+    Map<String, QueryJobConfiguration> queryList =
+        dataSetService.generateQuery(dataSetExportRequest.getDataSetRequest());
     // This suppresses 'may not be initialized errors. We will always init to something else before
     // used.
     JSONObject notebookFile = new JSONObject();
@@ -411,11 +410,11 @@ public class DataSetController implements DataSetApiDelegate {
     String queriesAsStrings =
         libraries
             + "\n\n"
-            + queryList.getQueryList().stream()
+            + queryList.entrySet().stream()
                 .map(
-                    query ->
+                    entry ->
                         convertQueryToString(
-                            query,
+                            entry.getValue(), Domain.fromValue(entry.getKey()),
                             dataSetExportRequest.getDataSetRequest().getName(),
                             dataSetExportRequest.getKernelType()))
                 .collect(Collectors.joining("\n\n"));
@@ -530,11 +529,11 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   private String convertQueryToString(
-      DataSetQuery query, String prefix, KernelTypeEnum kernelTypeEnum) {
+      QueryJobConfiguration queryJobConfiguration, Domain domain, String prefix, KernelTypeEnum kernelTypeEnum) {
     String namespace =
         prefix.toLowerCase().replaceAll(" ", "_")
             + "_"
-            + query.getDomain().toString().toLowerCase()
+            + domain.toString().toLowerCase()
             + "_";
 
     String sqlSection;
@@ -543,18 +542,18 @@ public class DataSetController implements DataSetApiDelegate {
 
     switch (kernelTypeEnum) {
       case PYTHON:
-        sqlSection = namespace + "sql = \"\"\"" + query.getQuery() + "\"\"\"";
+        sqlSection = namespace + "sql = \"\"\"" + queryJobConfiguration.getQuery() + "\"\"\"";
         namedParamsSection =
             namespace
                 + "query_config = {\n"
                 + "  \'query\': {\n"
                 + "  \'parameterMode\': \'NAMED\',\n"
                 + "  \'queryParameters\': [\n"
-                + query.getNamedParameters().stream()
+                + queryJobConfiguration.getNamedParameters().entrySet().stream()
                     .map(
-                        namedParameterEntry ->
+                        entry ->
                             convertNamedParameterToString(
-                                namedParameterEntry, KernelTypeEnum.PYTHON))
+                                entry.getKey(), entry.getValue(), KernelTypeEnum.PYTHON))
                     .collect(Collectors.joining(",\n"))
                 + "\n"
                 + "    ]\n"
@@ -569,17 +568,17 @@ public class DataSetController implements DataSetApiDelegate {
                 + "query_config)";
         break;
       case R:
-        sqlSection = namespace + "sql <- \"" + query.getQuery() + "\"";
+        sqlSection = namespace + "sql <- \"" + queryJobConfiguration.getQuery() + "\"";
         namedParamsSection =
             namespace
                 + "query_config <- list(\n"
                 + "  query = list(\n"
                 + "    parameterMode = 'NAMED',\n"
                 + "    queryParameters = list(\n"
-                + query.getNamedParameters().stream()
+                + queryJobConfiguration.getNamedParameters().entrySet().stream()
                     .map(
-                        namedParameterEntry ->
-                            convertNamedParameterToString(namedParameterEntry, KernelTypeEnum.R))
+                        entry ->
+                            convertNamedParameterToString(entry.getKey(), entry.getValue(), KernelTypeEnum.R))
                     .collect(Collectors.joining(",\n"))
                 + "\n"
                 + "    )\n"
@@ -605,30 +604,28 @@ public class DataSetController implements DataSetApiDelegate {
   // as they are expected.
   @SuppressWarnings("unchecked")
   private String convertNamedParameterToString(
-      NamedParameterEntry namedParameterEntry, KernelTypeEnum kernelTypeEnum) {
-    if (namedParameterEntry.getValue() == null) {
+      String key, QueryParameterValue namedParameterValue, KernelTypeEnum kernelTypeEnum) {
+    if (namedParameterValue == null) {
       return "";
     }
     boolean isArrayParameter =
-        !(namedParameterEntry.getValue().getParameterValue() instanceof String);
+        namedParameterValue.getArrayType() != null;
+    
+    List<QueryParameterValue> arrayValues = Optional.ofNullable(namedParameterValue.getArrayValues())
+        .orElse(new ArrayList<>());
 
-    List<NamedParameterValue> arrayValues = new ArrayList<>();
-    Object value = namedParameterEntry.getValue().getParameterValue();
-    if (value instanceof List) {
-      arrayValues = (List<NamedParameterValue>) value;
-    }
     switch (kernelTypeEnum) {
       case PYTHON:
         return "      {\n"
             + "        'name': \""
-            + namedParameterEntry.getValue().getName()
+            + key
             + "\",\n"
             + "        'parameterType': {'type': \""
-            + namedParameterEntry.getValue().getParameterType()
+            + namedParameterValue.getType().toString()
             + "\""
             + (isArrayParameter
                 ? ",'arrayType': {'type': \""
-                    + namedParameterEntry.getValue().getArrayType()
+                    + namedParameterValue.getArrayType()
                     + "\"},"
                 : "")
             + "},\n"
@@ -637,24 +634,24 @@ public class DataSetController implements DataSetApiDelegate {
                 ? "\'arrayValues\': ["
                     + arrayValues.stream()
                         .map(
-                            namedParameterValue ->
-                                "{\'value\': " + namedParameterValue.getParameterValue() + "}")
+                            arrayValue ->
+                                "{\'value\': " + arrayValue.getValue() + "}")
                         .collect(Collectors.joining(","))
                     + "]"
-                : "'value': \"" + namedParameterEntry.getValue().getParameterValue() + "\"")
+                : "'value': \"" + namedParameterValue.getValue() + "\"")
             + "}\n"
             + "      }";
       case R:
         return "      list(\n"
             + "        name = \""
-            + namedParameterEntry.getValue().getName()
+            + key
             + "\",\n"
             + "        parameterType = list(type = \""
-            + namedParameterEntry.getValue().getParameterType()
+            + namedParameterValue.getType().toString()
             + "\""
             + (isArrayParameter
                 ? ", arrayType = list(type = "
-                    + namedParameterEntry.getValue().getArrayType()
+                    + namedParameterValue.getArrayType()
                     + "),"
                 : "")
             + "),\n"
@@ -663,11 +660,11 @@ public class DataSetController implements DataSetApiDelegate {
                 ? "arrayValues = list("
                     + arrayValues.stream()
                         .map(
-                            namedParameterValue ->
-                                "list(value = " + namedParameterValue.getParameterValue() + ")")
+                            arrayValue ->
+                                "list(value = " + arrayValue.getValue() + ")")
                         .collect(Collectors.joining(","))
                     + ")"
-                : "value = \"" + namedParameterEntry.getValue().getParameterValue())
+                : "value = \"" + namedParameterValue.getValue())
             + "\""
             + ")\n"
             + "      )";
