@@ -19,6 +19,7 @@ public class BillingProjectBufferEntry {
   private String fireCloudProjectName;
   private Timestamp creationTime;
   private Timestamp lastSyncRequestTime;
+  private Timestamp lastStatusChangedTime;
   private Short status;
   private User assignedUser;
 
@@ -67,6 +68,15 @@ public class BillingProjectBufferEntry {
 
   public void setLastSyncRequestTime(Timestamp lastSyncRequestTime) {
     this.lastSyncRequestTime = lastSyncRequestTime;
+  }
+
+  @Column(name = "last_status_changed_time")
+  public Timestamp getLastStatusChangedTime() {
+    return lastStatusChangedTime;
+  }
+
+  public void setLastStatusChangedTime(Timestamp lastStatusChangedTime) {
+    this.lastStatusChangedTime = lastStatusChangedTime;
   }
 
   @ManyToOne
