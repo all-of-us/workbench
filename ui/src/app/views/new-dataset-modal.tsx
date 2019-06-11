@@ -6,9 +6,14 @@ import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {AlertDanger} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
-import {SmallHeader} from 'app/components/headers';
-import {Select, TextArea} from 'app/components/inputs';
-import {CheckBox, TextInput} from 'app/components/inputs';
+import {SmallHeader, styles as headerStyles} from 'app/components/headers';
+import {
+  CheckBox,
+  RadioButton,
+  Select,
+  TextArea,
+  TextInput
+} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -20,7 +25,8 @@ import {
   DataSetQuery,
   DataSetRequest,
   DomainValuePair,
-  FileDetail
+  FileDetail,
+  KernelTypeEnum
 } from 'generated/fetch';
 
 interface Props {
@@ -37,6 +43,7 @@ interface State {
   conflictDataSetName: boolean;
   existingNotebooks: FileDetail[];
   exportToNotebook: boolean;
+  kernelType: KernelTypeEnum;
   loading: boolean;
   missingDataSetInfo: boolean;
   name: string;
@@ -55,6 +62,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       conflictDataSetName: false,
       existingNotebooks: [],
       exportToNotebook: false,
+      kernelType: KernelTypeEnum.Python,
       loading: false,
       missingDataSetInfo: false,
       name: '',
@@ -109,6 +117,7 @@ class NewDataSetModal extends React.Component<Props, State> {
           workspaceNamespace, workspaceId,
           {
             dataSetRequest: request,
+            kernelType: this.state.kernelType,
             notebookName: this.state.notebookName,
             newNotebook: this.state.newNotebook
           });
@@ -196,7 +205,7 @@ class NewDataSetModal extends React.Component<Props, State> {
                     data-test-id='export-to-notebook'
                     onChange={() => this.changeExportToNotebook()} />
           <div style={{marginLeft: '.5rem',
-            color: colors.black[0]}}>Export to Python notebook</div>
+            color: colors.black[0]}}>Export to notebook</div>
         </div>
         {exportToNotebook && <React.Fragment>
           {notebooksLoading && <SpinnerOverlay />}
@@ -220,6 +229,23 @@ class NewDataSetModal extends React.Component<Props, State> {
             <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
             <TextInput onChange={(v) => this.setState({notebookName: v})}
                        value={notebookName} data-test-id='notebook-name-input'/>
+            <div style={headerStyles.formLabel}>
+              Programming Language:
+            </div>
+            <label style={{display: 'block'}}>
+              <RadioButton
+                checked={this.state.kernelType === KernelTypeEnum.Python}
+                onChange={() => this.setState({kernelType: KernelTypeEnum.Python})}
+              />
+              &nbsp;Python 3
+            </label>
+            <label style={{display: 'block'}}>
+              <RadioButton
+                checked={this.state.kernelType === KernelTypeEnum.R}
+                onChange={() => this.setState({kernelType: KernelTypeEnum.R})}
+              />
+              &nbsp;R
+            </label>
           </React.Fragment>}
         </React.Fragment>}
       </ModalBody>

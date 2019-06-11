@@ -2,8 +2,8 @@ import * as React from 'react';
 import {validate} from 'validate.js';
 
 import {Button} from 'app/components/buttons';
-import {SmallHeader} from 'app/components/headers';
-import {Select, TextArea, TextInput} from 'app/components/inputs';
+import {SmallHeader, styles as headerStyles} from 'app/components/headers';
+import {RadioButton, Select, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -101,7 +101,7 @@ class ExportDataSetModal extends React.Component<
         dataSetRequest: request,
         notebookName: this.state.notebookName,
         newNotebook: this.state.newNotebook,
-        kernelType: KernelTypeEnum.R
+        kernelType: this.state.kernelType
       });
     navigate(['workspaces',
       workspaceNamespace,
@@ -141,7 +141,7 @@ class ExportDataSetModal extends React.Component<
       }
     });
     return <Modal loading={loading || notebooksLoading}>
-      <ModalTitle>Export {dataSet.name} to Python Notebook</ModalTitle>
+      <ModalTitle>Export {dataSet.name} to Notebook</ModalTitle>
       <ModalBody>
         <Button data-test-id='code-preview-button'
                 onClick={() => this.setState({seePreview: !seePreview})}>
@@ -163,6 +163,23 @@ class ExportDataSetModal extends React.Component<
           <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
           <TextInput onChange={(v) => this.setState({notebookName: v})}
                      value={notebookName} data-test-id='notebook-name-input'/>
+          <div style={headerStyles.formLabel}>
+            Programming Language:
+          </div>
+          <label style={{display: 'block'}}>
+            <RadioButton
+              checked={this.state.kernelType === KernelTypeEnum.Python}
+              onChange={() => this.setState({kernelType: KernelTypeEnum.Python})}
+            />
+            &nbsp;Python 3
+          </label>
+          <label style={{display: 'block'}}>
+            <RadioButton
+              checked={this.state.kernelType === KernelTypeEnum.R}
+              onChange={() => this.setState({kernelType: KernelTypeEnum.R})}
+            />
+            &nbsp;R
+          </label>
          </React.Fragment>}
       </ModalBody>
       <ModalFooter>
