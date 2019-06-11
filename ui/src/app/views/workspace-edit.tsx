@@ -461,7 +461,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     get noSpecificPopulationSelected() {
       return this.state.workspace.researchPurpose.population &&
-        this.state.workspace.researchPurpose.populationDetails.length === 0;
+        (!this.state.workspace.researchPurpose.populationDetails ||
+          this.state.workspace.researchPurpose.populationDetails.length === 0);
     }
 
     get noDiseaseOfFocusSpecified() {
@@ -740,8 +741,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                    disabled={!this.state.workspace.researchPurpose.population}/>
                 <TextInput type='text' autoFocus placeholder='Please specify'
                            value={this.state.workspace.researchPurpose.otherPopulationDetails}
-                           disabled={!this.state.workspace.researchPurpose.populationDetails
-                             .includes(SpecificPopulationEnum.OTHER)}
+                           disabled={!fp.includes(SpecificPopulationEnum.OTHER,
+                             this.state.workspace.researchPurpose.populationDetails)}
                            onChange={v => this.setState(fp.set(
                              ['workspace', 'researchPurpose', 'otherPopulationDetails'], v))}/>
               </div>
