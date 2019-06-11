@@ -1,11 +1,11 @@
 public class Cron {
 
-    public String url;
+  public String url;
 
-    public String schedule;
+  public String schedule;
 
-    public String target;
+  public String target;
 
-    public String description;
+  public String description;
 
 }
