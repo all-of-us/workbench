@@ -13,7 +13,7 @@ export interface Environment {
   debug: boolean;
   // A prefix to add to the site title (shown in the tab title).
   // Example value: 'Test' would cause the following full title:
-  // "Homepage | [Test] All of Us Research Workbench"
+  // "Homepage | [Test] All of Us Researcher Workbench"
   displayTag: string;
   // Indicates if the displayTag should be shown in the web app. If it is true,
   // a small label will be added under the "All of Us" logo in the header.
