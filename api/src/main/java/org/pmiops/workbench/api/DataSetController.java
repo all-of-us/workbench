@@ -364,17 +364,19 @@ public class DataSetController implements DataSetApiDelegate {
         libraries = "import pandas";
         break;
       case R:
-        metaData.put("kernelspec", new JSONObject()
-            .put("display_name", "R")
-            .put("language", "R")
-            .put("name", "ir"))
-            .put("language_info", new JSONObject()
-                .put("codemirror_mode", "r")
-                .put("file_extension", ".r")
-                .put("mimetype", "text/x-r-source")
-                .put("name", "r")
-                .put("pygments_lexer", "r")
-                .put("version", "3.4.4"));
+        metaData
+            .put(
+                "kernelspec",
+                new JSONObject().put("display_name", "R").put("language", "R").put("name", "ir"))
+            .put(
+                "language_info",
+                new JSONObject()
+                    .put("codemirror_mode", "r")
+                    .put("file_extension", ".r")
+                    .put("mimetype", "text/x-r-source")
+                    .put("name", "r")
+                    .put("pygments_lexer", "r")
+                    .put("version", "3.4.4"));
         libraries = "library(reticulate)";
 
         break;
