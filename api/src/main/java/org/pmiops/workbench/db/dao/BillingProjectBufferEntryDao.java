@@ -18,7 +18,8 @@ public interface BillingProjectBufferEntryDao
   @Query("SELECT COUNT(*) FROM BillingProjectBufferEntry WHERE status IN (0, 2)")
   Long getCurrentBufferSize();
 
-  List<BillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(short status, Timestamp timestamp);
+  List<BillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
+      short status, Timestamp timestamp);
 
   BillingProjectBufferEntry findFirstByStatusOrderByLastSyncRequestTimeAsc(short status);
 
