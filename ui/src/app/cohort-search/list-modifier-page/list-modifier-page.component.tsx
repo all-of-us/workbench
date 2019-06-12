@@ -3,7 +3,7 @@ import {FormControl} from '@angular/forms';
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {DatePicker, ValidationError} from 'app/components/inputs';
+import {DatePicker} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -15,11 +15,6 @@ import * as moment from 'moment';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
-import {validate, validators} from 'validate.js';
-validators.dateFormat = (value: string) => {
-  return moment(value, 'YYYY-MM-DD', true).isValid()
-      ? null : 'must be in format \'YYYY-MM-DD\'';
-};
 
 const styles = reactStyles({
   header: {
@@ -28,6 +23,18 @@ const styles = reactStyles({
     fontSize: '16px',
     borderBottom: '1px solid #262262',
     paddingBottom: '0.5rem'
+  },
+  errors: {
+    background: '#f5dbd9',
+    color: '#565656',
+    fontSize: '11px',
+    border: '1px solid #ebafa6',
+    borderRadius: '3px',
+    marginTop: '0.25rem',
+    padding: '3px 5px'
+  },
+  errorItem: {
+    lineHeight: '16px',
   },
   label: {
     color: '#262262',
@@ -114,6 +121,42 @@ const columns = {
   }
 };
 
+const validatorFuncs = {
+  ageAtEvent: (value) => {
+    if (value === '') {
+      return 'Age At Event is required';
+    }
+    if (value < 0 || value > 120) {
+      return 'Age At Event must be between 0 - 120';
+    }
+    if (!Number.isInteger(parseFloat(value))) {
+      return 'Age At Event must be a whole number';
+    }
+    return null;
+  },
+  eventDate: (value) => {
+    if (value === '') {
+      return 'Event Date is required';
+    }
+    if (!moment(value, 'YYYY-MM-DD', true).isValid()) {
+      return 'Dates must be in format \'YYYY-MM-DD\'';
+    }
+    return null;
+  },
+  hasOccurrences: (value) => {
+    if (value === '') {
+      return 'Has Occurrences is required';
+    }
+    if (value < 1 || value > 99) {
+      return 'Has Occurrences must be between 1 - 99';
+    }
+    if (!Number.isInteger(parseFloat(value))) {
+      return 'Has Occurrences must be a whole number';
+    }
+    return null;
+  }
+}
+
 interface Props {
   disabled: Function;
   wizard: any;
@@ -191,7 +234,6 @@ export const ListModifierPage = withCurrentWorkspace()(
       };
     }
 
-    formChanges = false;
     existing = List();
     preview: any = {count: -1};
     dateObjs = [null, null];
@@ -258,10 +300,6 @@ export const ListModifierPage = withCurrentWorkspace()(
         value: 'GREATER_THAN_OR_EQUAL_TO',
       }]
     }];
-
-    dateA = new FormControl();
-    dateB = new FormControl();
-    errors = new Set();
 
     componentDidMount() {
       const {workspace: {cdrVersionId}, wizard} = this.props;
@@ -452,10 +490,34 @@ export const ListModifierPage = withCurrentWorkspace()(
       const {formState, preview} = this.state;
       const tooltip = `Dates are consistently shifted within a participant’s record by a time period
         of up to 364 days backwards. The date shift differs across participants.`;
+      let initialState = true;
+      let untouched = false;
+      const errors = formState.reduce((acc, item) => {
+        item.values.forEach((val, v) => {
+          if (val !== undefined) {
+            initialState = false;
+            const error = validatorFuncs[item.name](val);
+            if (error) {
+              acc.add(error);
+            }
+          } else if (item.operator !== undefined) {
+            initialState = false;
+            if (v === 0 || (v === 1 && item.operator === 'BETWEEN')) {
+              untouched = true;
+            }
+          }
+        });
+        return acc;
+      }, new Set());
       return <div style={{marginTop: '1rem'}}>
         <div style={styles.header}>
           The following modifiers are optional and apply to all selected criteria
         </div>
+        {!!errors.size && <div style={styles.errors}>
+          {Array.from(errors).map((error, e) => <div key={e} style={styles.errorItem}>
+            {error}
+          </div>)}
+        </div>}
         {formState.map((mod, i) => {
           const {label, name, options, operator} = mod;
           return <div key={i} style={{marginTop: '1rem'}}>
@@ -485,7 +547,8 @@ export const ListModifierPage = withCurrentWorkspace()(
         <div style={styles.footer}>
           <div style={styles.row}>
             <div style={columns.col3}>
-              <Button type='primary' style={styles.calculate}>Calculate</Button>
+              <Button type='primary' style={styles.calculate}
+                disabled={!!errors.size || initialState || untouched}>Calculate</Button>
             </div>
             {!preview.loading && preview.count && <div style={columns.col8}>
               <div style={{color: '#262262'}}>Results</div>
