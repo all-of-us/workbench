@@ -454,7 +454,8 @@ public class DataSetControllerTest {
     DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
-    dataSetController.generateCode(WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
+    dataSetController.generateCode(
+        WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
   }
 
   @Test(expected = BadRequestException.class)
@@ -462,7 +463,8 @@ public class DataSetControllerTest {
     DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
 
-    dataSetController.generateCode(WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
+    dataSetController.generateCode(
+        WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
   }
 
   @Test
@@ -472,7 +474,10 @@ public class DataSetControllerTest {
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
     DataSetCodeResponse response =
-        dataSetController.generateCode(WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet).getBody();
+        dataSetController
+            .generateCode(
+                WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+            .getBody();
     assertThat(response.getCode()).isEqualTo("import pandas\n\n");
   }
 
@@ -490,28 +495,31 @@ public class DataSetControllerTest {
     mockLinkingTableQuery(tables);
 
     DataSetCodeResponse response =
-        dataSetController.generateCode(WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet).getBody();
+        dataSetController
+            .generateCode(
+                WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+            .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
     assertThat(response.getCode())
         .isEqualTo(
-            "import pandas\n\n" +
-                "blah_condition_sql = \"\"\"SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence WHERE \n" +
-                "(condition_concept_id IN (123) OR \n" +
-                "condition_source_concept_id IN (123)) \n" +
-                "AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))\"\"\"\n" +
-                "\n" +
-                "blah_condition_query_config = {\n" +
-                "  'query': {\n" +
-                "  'parameterMode': 'NAMED',\n" +
-                "  'queryParameters': [\n" +
-                "\n" +
-                "    ]\n" +
-                "  }\n" +
-                "}\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "blah_condition_df = pandas.read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)");
+            "import pandas\n\n"
+                + "blah_condition_sql = \"\"\"SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence WHERE \n"
+                + "(condition_concept_id IN (123) OR \n"
+                + "condition_source_concept_id IN (123)) \n"
+                + "AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))\"\"\"\n"
+                + "\n"
+                + "blah_condition_query_config = {\n"
+                + "  'query': {\n"
+                + "  'parameterMode': 'NAMED',\n"
+                + "  'queryParameters': [\n"
+                + "\n"
+                + "    ]\n"
+                + "  }\n"
+                + "}\n"
+                + "\n"
+                + "\n"
+                + "\n"
+                + "blah_condition_df = pandas.read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)");
   }
 
   @Test
@@ -528,28 +536,30 @@ public class DataSetControllerTest {
     mockLinkingTableQuery(tables);
 
     DataSetCodeResponse response =
-        dataSetController.generateCode(WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.R.toString(), dataSet).getBody();
+        dataSetController
+            .generateCode(WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.R.toString(), dataSet)
+            .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
     assertThat(response.getCode())
         .isEqualTo(
-            "install.packages(\"reticulate\")\n" +
-                "library(reticulate)\n" +
-                "pd <- reticulate::import(\"pandas\")\n\n" +
-                "blah_condition_sql <- \"SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence WHERE \n" +
-                "(condition_concept_id IN (123) OR \n" +
-                "condition_source_concept_id IN (123)) \n" +
-                "AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))\"\n" +
-                "\n" +
-                "blah_condition_query_config <- list(\n" +
-                "  query = list(\n" +
-                "    parameterMode = 'NAMED',\n" +
-                "    queryParameters = list(\n" +
-                "\n" +
-                "    )\n" +
-                "  )\n" +
-                ")\n" +
-                "\n" +
-                "blah_condition_df <- pd$read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)");
+            "install.packages(\"reticulate\")\n"
+                + "library(reticulate)\n"
+                + "pd <- reticulate::import(\"pandas\")\n\n"
+                + "blah_condition_sql <- \"SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence WHERE \n"
+                + "(condition_concept_id IN (123) OR \n"
+                + "condition_source_concept_id IN (123)) \n"
+                + "AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))\"\n"
+                + "\n"
+                + "blah_condition_query_config <- list(\n"
+                + "  query = list(\n"
+                + "    parameterMode = 'NAMED',\n"
+                + "    queryParameters = list(\n"
+                + "\n"
+                + "    )\n"
+                + "  )\n"
+                + ")\n"
+                + "\n"
+                + "blah_condition_df <- pd$read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)");
   }
 
   @Test
@@ -573,7 +583,10 @@ public class DataSetControllerTest {
     mockLinkingTableQuery(tables);
 
     DataSetCodeResponse response =
-        dataSetController.generateCode(WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet).getBody();
+        dataSetController
+            .generateCode(
+                WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+            .getBody();
     verify(bigQueryService, times(2)).executeQuery(any());
     assertThat(response.getCode()).contains("blah_condition_df");
     assertThat(response.getCode()).contains("blah_drug_df");
@@ -594,7 +607,10 @@ public class DataSetControllerTest {
     mockLinkingTableQuery(tables);
 
     DataSetCodeResponse response =
-        dataSetController.generateCode(WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet).getBody();
+        dataSetController
+            .generateCode(
+                WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+            .getBody();
     assertThat(response.getCode()).contains("OR PERSON_ID IN");
   }
 
