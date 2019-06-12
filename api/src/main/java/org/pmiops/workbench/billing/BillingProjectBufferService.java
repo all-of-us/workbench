@@ -114,10 +114,18 @@ public class BillingProjectBufferService {
     Iterables.concat(
             billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
                 StorageEnums.billingProjectBufferStatusToStorage(CREATING),
-                new Timestamp(clock.instant().minus(CREATING_TIMEOUT_MINUTES, ChronoUnit.MINUTES).toEpochMilli())),
+                new Timestamp(
+                    clock
+                        .instant()
+                        .minus(CREATING_TIMEOUT_MINUTES, ChronoUnit.MINUTES)
+                        .toEpochMilli())),
             billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
                 StorageEnums.billingProjectBufferStatusToStorage(ASSIGNING),
-                new Timestamp(clock.instant().minus(ASSIGNING_TIMEOUT_MINUTES, ChronoUnit.MINUTES).toEpochMilli())))
+                new Timestamp(
+                    clock
+                        .instant()
+                        .minus(ASSIGNING_TIMEOUT_MINUTES, ChronoUnit.MINUTES)
+                        .toEpochMilli())))
         .forEach(
             entry -> {
               entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
