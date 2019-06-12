@@ -91,4 +91,5 @@
   <include file="changelog/db.changelog-81-add-billing_migration_status-workspace.xml"/>
   <include file="changelog/db.changelog-82-add-cascade-delete-admin-actions-after-user-delete.xml"/>
   <include file="changelog/db.changelog-83-other-population.xml"/>
+  <include file="changelog/db.changelog-84-add-last_status_changed_time.xml"/>
 </databaseChangeLog>

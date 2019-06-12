@@ -6,9 +6,11 @@ import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingPro
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
 
+import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,9 +28,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class BillingProjectBufferService {
 
+  private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
+
   private static final int SYNCS_PER_INVOCATION = 5;
   private static final int PROJECT_BILLING_ID_SIZE = 8;
-  private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
+  private static final int CREATING_TIMEOUT_MINUTES = 60;
+  private static final int ASSIGNING_TIMEOUT_MINUTES = 10;
 
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
@@ -47,6 +52,10 @@ public class BillingProjectBufferService {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
+  private Timestamp getCurrentTimestamp() {
+    return new Timestamp(clock.instant().toEpochMilli());
+  }
+
   public void bufferBillingProject() {
     if (getUnfilledBufferSpace() <= 0) {
       return;
@@ -58,7 +67,7 @@ public class BillingProjectBufferService {
     BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
     entry.setFireCloudProjectName(projectName);
     entry.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
-    entry.setStatusEnum(CREATING);
+    entry.setStatusEnum(CREATING, this::getCurrentTimestamp);
 
     billingProjectBufferEntryDao.save(entry);
   }
@@ -80,14 +89,14 @@ public class BillingProjectBufferService {
             .getBillingProjectStatus(entry.getFireCloudProjectName())
             .getCreationStatus()) {
           case READY:
-            entry.setStatusEnum(AVAILABLE);
+            entry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
             break;
           case ERROR:
             log.warning(
                 String.format(
                     "SyncBillingProjectStatus: BillingProject %s creation failed",
                     entry.getFireCloudProjectName()));
-            entry.setStatusEnum(ERROR);
+            entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
             break;
           case CREATING:
           default:
@@ -101,11 +110,34 @@ public class BillingProjectBufferService {
     }
   }
 
+  public void cleanBillingBuffer() {
+    Iterables.concat(
+            billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
+                StorageEnums.billingProjectBufferStatusToStorage(CREATING),
+                new Timestamp(
+                    clock
+                        .instant()
+                        .minus(CREATING_TIMEOUT_MINUTES, ChronoUnit.MINUTES)
+                        .toEpochMilli())),
+            billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
+                StorageEnums.billingProjectBufferStatusToStorage(ASSIGNING),
+                new Timestamp(
+                    clock
+                        .instant()
+                        .minus(ASSIGNING_TIMEOUT_MINUTES, ChronoUnit.MINUTES)
+                        .toEpochMilli())))
+        .forEach(
+            entry -> {
+              entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
+              billingProjectBufferEntryDao.save(entry);
+            });
+  }
+
   public BillingProjectBufferEntry assignBillingProject(User user) {
     BillingProjectBufferEntry entry = consumeBufferEntryForAssignment();
 
     fireCloudService.addUserToBillingProject(user.getEmail(), entry.getFireCloudProjectName());
-    entry.setStatusEnum(ASSIGNED);
+    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     entry.setAssignedUser(user);
     billingProjectBufferEntryDao.save(entry);
 
@@ -127,7 +159,7 @@ public class BillingProjectBufferService {
         throw new EmptyBufferException();
       }
 
-      entry.setStatusEnum(ASSIGNING);
+      entry.setStatusEnum(ASSIGNING, this::getCurrentTimestamp);
       billingProjectBufferEntryDao.save(entry);
     } finally {
       billingProjectBufferEntryDao.releaseAssigningLock();

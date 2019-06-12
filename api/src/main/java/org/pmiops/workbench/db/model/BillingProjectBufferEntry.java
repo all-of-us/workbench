@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.util.function.Supplier;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,6 +20,7 @@ public class BillingProjectBufferEntry {
   private String fireCloudProjectName;
   private Timestamp creationTime;
   private Timestamp lastSyncRequestTime;
+  private Timestamp lastStatusChangedTime;
   private Short status;
   private User assignedUser;
 
@@ -69,6 +71,15 @@ public class BillingProjectBufferEntry {
     this.lastSyncRequestTime = lastSyncRequestTime;
   }
 
+  @Column(name = "last_status_changed_time")
+  public Timestamp getLastStatusChangedTime() {
+    return lastStatusChangedTime;
+  }
+
+  private void setLastStatusChangedTime(Timestamp lastStatusChangedTime) {
+    this.lastStatusChangedTime = lastStatusChangedTime;
+  }
+
   @ManyToOne
   @JoinColumn(name = "assigned_user_id")
   public User getAssignedUser() {
@@ -84,7 +95,9 @@ public class BillingProjectBufferEntry {
     return StorageEnums.billingProjectBufferStatusFromStorage(status);
   }
 
-  public void setStatusEnum(BillingProjectBufferStatus status) {
+  public void setStatusEnum(
+      BillingProjectBufferStatus status, Supplier<Timestamp> currentTimestamp) {
+    this.setLastStatusChangedTime(currentTimestamp.get());
     this.status = StorageEnums.billingProjectBufferStatusToStorage(status);
   }
 

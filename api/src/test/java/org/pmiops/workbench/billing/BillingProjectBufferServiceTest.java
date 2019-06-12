@@ -11,6 +11,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
+import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNING;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
 import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
@@ -19,6 +20,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -160,7 +162,7 @@ public class BillingProjectBufferServiceTest {
 
     // free up buffer
     BillingProjectBufferEntry entry = billingProjectBufferEntryDao.findAll().iterator().next();
-    entry.setStatusEnum(ASSIGNED);
+    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     expectedCallCount++;
     billingProjectBufferService.bufferBillingProject();
@@ -197,21 +199,21 @@ public class BillingProjectBufferServiceTest {
     Iterator<BillingProjectBufferEntry> bufferEntries =
         billingProjectBufferEntryDao.findAll().iterator();
     BillingProjectBufferEntry entry = bufferEntries.next();
-    entry.setStatusEnum(ASSIGNED);
+    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProject();
     verify(fireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
 
     // should no op since we're at capacity
     entry = bufferEntries.next();
-    entry.setStatusEnum(ASSIGNED);
+    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProject();
     verify(fireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
 
     // should invoke since we're below capacity
     entry = bufferEntries.next();
-    entry.setStatusEnum(ASSIGNED);
+    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProject();
     verify(fireCloudService, times((int) BUFFER_CAPACITY + 1))
@@ -352,9 +354,9 @@ public class BillingProjectBufferServiceTest {
   @Test
   public void assignBillingProject() {
     BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
-    entry.setStatusEnum(AVAILABLE);
+    entry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
     entry.setFireCloudProjectName("test-project-name");
-    entry.setCreationTime(new Timestamp(NOW.toEpochMilli()));
+    entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
     User user = mock(User.class);
@@ -381,9 +383,9 @@ public class BillingProjectBufferServiceTest {
   @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   public void assignBillingProject_locking() throws InterruptedException, ExecutionException {
     BillingProjectBufferEntry firstEntry = new BillingProjectBufferEntry();
-    firstEntry.setStatusEnum(AVAILABLE);
+    firstEntry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
     firstEntry.setFireCloudProjectName("test-project-name-1");
-    firstEntry.setCreationTime(new Timestamp(NOW.toEpochMilli()));
+    firstEntry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(firstEntry);
 
     User firstUser = new User();
@@ -391,9 +393,9 @@ public class BillingProjectBufferServiceTest {
     userDao.save(firstUser);
 
     BillingProjectBufferEntry secondEntry = new BillingProjectBufferEntry();
-    secondEntry.setStatusEnum(AVAILABLE);
+    secondEntry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
     secondEntry.setFireCloudProjectName("test-project-name-2");
-    secondEntry.setCreationTime(new Timestamp(NOW.toEpochMilli()));
+    secondEntry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(secondEntry);
 
     User secondUser = new User();
@@ -418,5 +420,62 @@ public class BillingProjectBufferServiceTest {
 
     assertThat(futures.get(0).get().getFireCloudProjectName())
         .isNotEqualTo(futures.get(1).get().getFireCloudProjectName());
+  }
+
+  @Test
+  public void cleanBillingBuffer_creating() {
+    BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
+    entry.setStatusEnum(CREATING, this::getCurrentTimestamp);
+    entry.setCreationTime(getCurrentTimestamp());
+    billingProjectBufferEntryDao.save(entry);
+
+    CLOCK.setInstant(NOW.plus(61, ChronoUnit.MINUTES));
+    billingProjectBufferService.cleanBillingBuffer();
+
+    assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
+        .isEqualTo(ERROR);
+  }
+
+  @Test
+  public void cleanBillingBuffer_assigning() {
+    BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
+    entry.setStatusEnum(ASSIGNING, this::getCurrentTimestamp);
+    entry.setCreationTime(getCurrentTimestamp());
+    billingProjectBufferEntryDao.save(entry);
+
+    CLOCK.setInstant(NOW.plus(11, ChronoUnit.MINUTES));
+    billingProjectBufferService.cleanBillingBuffer();
+
+    assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
+        .isEqualTo(ERROR);
+  }
+
+  @Test
+  public void cleanBillingBuffer_ignoreValidEntries() {
+    BillingProjectBufferEntry creating = new BillingProjectBufferEntry();
+    creating.setStatusEnum(CREATING, this::getCurrentTimestamp);
+    creating.setCreationTime(getCurrentTimestamp());
+    billingProjectBufferEntryDao.save(creating);
+
+    CLOCK.setInstant(NOW.plus(59, ChronoUnit.MINUTES));
+    billingProjectBufferService.cleanBillingBuffer();
+
+    assertThat(billingProjectBufferEntryDao.findOne(creating.getId()).getStatusEnum())
+        .isEqualTo(CREATING);
+
+    BillingProjectBufferEntry assigning = new BillingProjectBufferEntry();
+    assigning.setStatusEnum(ASSIGNING, this::getCurrentTimestamp);
+    assigning.setCreationTime(getCurrentTimestamp());
+    billingProjectBufferEntryDao.save(assigning);
+
+    CLOCK.setInstant(NOW.plus(9, ChronoUnit.MINUTES));
+    billingProjectBufferService.cleanBillingBuffer();
+
+    assertThat(billingProjectBufferEntryDao.findOne(assigning.getId()).getStatusEnum())
+        .isEqualTo(ASSIGNING);
+  }
+
+  private Timestamp getCurrentTimestamp() {
+    return new Timestamp(NOW.toEpochMilli());
   }
 }
