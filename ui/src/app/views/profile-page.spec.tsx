@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {TextInput} from 'app/components/inputs';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {userProfileStore} from 'app/utils/navigation';
+import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {Profile} from 'generated';
 import {ProfileApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -34,6 +34,14 @@ describe('ProfilePageComponent', () => {
     });
 
     userProfileStore.next({profile, reload, updateCache});
+    serverConfigStore.next({
+      enableDataUseAgreement: true,
+      enforceRegistered: true,
+      gsuiteDomain: 'fake-research-aou.org',
+      projectId: 'aaa',
+      publicApiKeyForErrorReports: 'aaa',
+      useBillingProjectBuffer: true
+    });
   });
 
   it('should render the profile', () => {
