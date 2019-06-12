@@ -7,6 +7,7 @@ import java.util.Map;
 import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.KernelTypeEnum;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,4 +24,6 @@ public interface DataSetService {
       Timestamp creationTime);
 
   Map<String, QueryJobConfiguration> generateQuery(DataSetRequest dataSet);
+
+  String generateCodeFromQueryAndKernelType(KernelTypeEnum kernelTypeEnum, String dataSetName, Map<String, QueryJobConfiguration> queryJobConfigurationMap);
 }

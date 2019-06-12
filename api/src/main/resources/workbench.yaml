@@ -1498,16 +1498,20 @@ paths:
               $ref: "#/definitions/DomainValuesResponse"
 
 ### Data set ############################################
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateQuery:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
     post:
       tags:
         - dataSet
       description: >
         Given a Data Set, return the SQL query built from it.
-      operationId: "generateQuery"
+      operationId: "generateCode"
       parameters:
         - $ref: '#/parameters/workspaceNamespace'
         - $ref: '#/parameters/workspaceId'
+        - in: path
+          name: kernelType
+          required: true
+          type: string
         - in: body
           name: dataSet
           required: true
@@ -1518,7 +1522,7 @@ paths:
           description: >
             A SQL query for each domain in the Data Set
           schema:
-            $ref: "#/definitions/DataSetQueryList"
+            $ref: "#/definitions/DataSetCodeResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets:
       parameters:
@@ -2450,13 +2454,14 @@ definitions:
            $ref: "#/definitions/DataSet"
 
 
-  DataSetQueryList:
+  DataSetCodeResponse:
     type: object
     properties:
-      queryList:
-        type: array
-        items:
-          $ref: "#/definitions/DataSetQuery"
+      kernelType:
+       $ref: "#/definitions/KernelTypeEnum"
+      code:
+        type: string
+        description: The code required to generate the query for the data set.
 
   DataSetQuery:
     type: object

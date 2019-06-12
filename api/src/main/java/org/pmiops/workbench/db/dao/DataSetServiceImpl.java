@@ -27,6 +27,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
+import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -264,6 +265,35 @@ public class DataSetServiceImpl implements DataSetService {
     return dataSetUtil;
   }
 
+  @Override
+  public String generateCodeFromQueryAndKernelType(KernelTypeEnum kernelTypeEnum, String dataSetName, Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
+    String libraries;
+    switch (kernelTypeEnum) {
+      case R:
+        libraries =
+            "install.packages(\"reticulate\")\n"
+                + "library(reticulate)\n"
+                + "pd <- reticulate::import(\"pandas\")";
+        break;
+      case PYTHON:
+        libraries = "import pandas";
+        break;
+      default:
+        throw new BadRequestException("Kernel Type " + kernelTypeEnum.toString() + " not supported");
+    }
+    return
+        libraries
+            + "\n\n"
+            + queryJobConfigurationMap.entrySet().stream()
+            .map(
+                entry ->
+                    convertQueryToString(
+                        entry.getValue(), Domain.fromValue(entry.getKey()),
+                        dataSetName,
+                        kernelTypeEnum))
+            .collect(Collectors.joining("\n\n"));
+  }
+
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {
     Optional<CdrBigQuerySchemaConfig.ColumnConfig> conceptColumn =
         config.columns.stream().filter(column -> type.equals(column.domainConcept)).findFirst();
@@ -309,5 +339,150 @@ public class DataSetServiceImpl implements DataSetService {
             });
 
     return new ValuesLinkingPair(valueSelects, valueJoins);
+  }
+
+  private String convertQueryToString(
+      QueryJobConfiguration queryJobConfiguration, Domain domain, String prefix, KernelTypeEnum kernelTypeEnum) {
+    String namespace =
+        prefix.toLowerCase().replaceAll(" ", "_")
+            + "_"
+            + domain.toString().toLowerCase()
+            + "_";
+
+    String sqlSection;
+    String namedParamsSection;
+    String dataFrameSection;
+
+    switch (kernelTypeEnum) {
+      case PYTHON:
+        sqlSection = namespace + "sql = \"\"\"" + queryJobConfiguration.getQuery() + "\"\"\"";
+        namedParamsSection =
+            namespace
+                + "query_config = {\n"
+                + "  \'query\': {\n"
+                + "  \'parameterMode\': \'NAMED\',\n"
+                + "  \'queryParameters\': [\n"
+                + queryJobConfiguration.getNamedParameters().entrySet().stream()
+                .map(
+                    entry ->
+                        convertNamedParameterToString(
+                            entry.getKey(), entry.getValue(), KernelTypeEnum.PYTHON))
+                .collect(Collectors.joining(",\n"))
+                + "\n"
+                + "    ]\n"
+                + "  }\n"
+                + "}\n\n";
+        dataFrameSection =
+            namespace
+                + "df = pandas.read_gbq("
+                + namespace
+                + "sql, dialect=\"standard\", configuration="
+                + namespace
+                + "query_config)";
+        break;
+      case R:
+        sqlSection = namespace + "sql <- \"" + queryJobConfiguration.getQuery() + "\"";
+        namedParamsSection =
+            namespace
+                + "query_config <- list(\n"
+                + "  query = list(\n"
+                + "    parameterMode = 'NAMED',\n"
+                + "    queryParameters = list(\n"
+                + queryJobConfiguration.getNamedParameters().entrySet().stream()
+                .map(
+                    entry ->
+                        convertNamedParameterToString(entry.getKey(), entry.getValue(), KernelTypeEnum.R))
+                .collect(Collectors.joining(",\n"))
+                + "\n"
+                + "    )\n"
+                + "  )\n"
+                + ")";
+        dataFrameSection =
+            namespace
+                + "df <- pd$read_gbq("
+                + namespace
+                + "sql, dialect=\"standard\", configuration="
+                + namespace
+                + "query_config)";
+        break;
+      default:
+        throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
+    }
+
+    return sqlSection + "\n\n" + namedParamsSection + "\n\n" + dataFrameSection;
+  }
+
+  // BigQuery api returns parameter values either as a list or an object.
+  // To avoid warnings on our cast to list, we suppress those warnings here,
+  // as they are expected.
+  @SuppressWarnings("unchecked")
+  private String convertNamedParameterToString(
+      String key, QueryParameterValue namedParameterValue, KernelTypeEnum kernelTypeEnum) {
+    if (namedParameterValue == null) {
+      return "";
+    }
+    boolean isArrayParameter =
+        namedParameterValue.getArrayType() != null;
+
+    List<QueryParameterValue> arrayValues = Optional.ofNullable(namedParameterValue.getArrayValues())
+        .orElse(new ArrayList<>());
+
+    switch (kernelTypeEnum) {
+      case PYTHON:
+        return "      {\n"
+            + "        'name': \""
+            + key
+            + "\",\n"
+            + "        'parameterType': {'type': \""
+            + namedParameterValue.getType().toString()
+            + "\""
+            + (isArrayParameter
+            ? ",'arrayType': {'type': \""
+            + namedParameterValue.getArrayType()
+            + "\"},"
+            : "")
+            + "},\n"
+            + "        \'parameterValue\': {"
+            + (isArrayParameter
+            ? "\'arrayValues\': ["
+            + arrayValues.stream()
+            .map(
+                arrayValue ->
+                    "{\'value\': " + arrayValue.getValue() + "}")
+            .collect(Collectors.joining(","))
+            + "]"
+            : "'value': \"" + namedParameterValue.getValue() + "\"")
+            + "}\n"
+            + "      }";
+      case R:
+        return "      list(\n"
+            + "        name = \""
+            + key
+            + "\",\n"
+            + "        parameterType = list(type = \""
+            + namedParameterValue.getType().toString()
+            + "\""
+            + (isArrayParameter
+            ? ", arrayType = list(type = "
+            + namedParameterValue.getArrayType()
+            + "),"
+            : "")
+            + "),\n"
+            + "        parameterValue = list("
+            + (isArrayParameter
+            ? "arrayValues = list("
+            + arrayValues.stream()
+            .map(
+                arrayValue ->
+                    "list(value = " + arrayValue.getValue() + ")")
+            .collect(Collectors.joining(","))
+            + ")"
+            : "value = \"" + namedParameterValue.getValue())
+            + "\""
+            + ")\n"
+            + "      )";
+      default:
+        throw new BadRequestException("Language not supported");
+    }
   }
 }

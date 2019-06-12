@@ -41,15 +41,14 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewList;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetQuery;
-import org.pmiops.workbench.model.DataSetQueryList;
 import org.pmiops.workbench.model.DataSetRequest;
-import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -218,31 +217,17 @@ public class DataSetController implements DataSetApiDelegate {
         }
       };
 
-  public ResponseEntity<DataSetQueryList> generateQuery(
-      String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
+  public ResponseEntity<DataSetCodeResponse> generateCode(
+      String workspaceNamespace, String workspaceId, String kernelTypeEnum, DataSetRequest dataSet) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<DataSetQuery> respQueryList = new ArrayList<>();
+    KernelTypeEnum kernelType = KernelTypeEnum.fromValue(kernelTypeEnum);
 
     // Generate query per domain for the selected concept set, cohort and values
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
 
-    // Loop through and run the query for each domain and create LIST of
-    // domain, value and their corresponding query result
-    bigQueryJobConfig.forEach(
-        (domain, queryJobConfiguration) -> {
-          List<NamedParameterEntry> parameters = new ArrayList<>();
-          queryJobConfiguration
-              .getNamedParameters()
-              .forEach(
-                  (key, value) -> parameters.add(generateResponseFromQueryParameter(key, value)));
-          respQueryList.add(
-              new DataSetQuery()
-                  .domain(Domain.fromValue(domain))
-                  .query(queryJobConfiguration.getQuery())
-                  .namedParameters(parameters));
-        });
-    return ResponseEntity.ok(new DataSetQueryList().queryList(respQueryList));
+
+    return ResponseEntity.ok(new DataSetCodeResponse().code(dataSetService.generateCodeFromQueryAndKernelType(kernelType, dataSet.getName(), bigQueryJobConfig)).kernelType(kernelType));
   }
 
   @Override
@@ -353,12 +338,11 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    Map<String, QueryJobConfiguration> queryList =
-        dataSetService.generateQuery(dataSetExportRequest.getDataSetRequest());
     // This suppresses 'may not be initialized errors. We will always init to something else before
     // used.
     JSONObject notebookFile = new JSONObject();
     WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+    JSONObject metaData = new JSONObject();
 
     if (!dataSetExportRequest.getNewNotebook()) {
       notebookFile =
@@ -366,7 +350,7 @@ public class DataSetController implements DataSetApiDelegate {
               workspace.getWorkspace().getBucketName(), dataSetExportRequest.getNotebookName());
       String language =
           Optional.of(notebookFile.getJSONObject("metadata"))
-              .flatMap(metaData -> Optional.of(metaData.getJSONObject("kernelspec")))
+              .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
               .map(kernelSpec -> kernelSpec.getString("language"))
               .orElse("Python");
       if (language.equals("R")) {
@@ -374,50 +358,35 @@ public class DataSetController implements DataSetApiDelegate {
       } else {
         dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
       }
+    } else {
+      switch (dataSetExportRequest.getKernelType()) {
+        case PYTHON:
+          break;
+        case R:
+          metaData
+              .put(
+                  "kernelspec",
+                  new JSONObject().put("display_name", "R").put("language", "R").put("name", "ir"))
+              .put(
+                  "language_info",
+                  new JSONObject()
+                      .put("codemirror_mode", "r")
+                      .put("file_extension", ".r")
+                      .put("mimetype", "text/x-r-source")
+                      .put("name", "r")
+                      .put("pygments_lexer", "r")
+                      .put("version", "3.4.4"));
+          break;
+        default:
+          throw new BadRequestException(
+              "Kernel Type " + dataSetExportRequest.getKernelType() + " is not supported");
+      }
     }
 
-    String libraries;
-    JSONObject metaData = new JSONObject();
-    switch (dataSetExportRequest.getKernelType()) {
-      case PYTHON:
-        libraries = "import pandas";
-        break;
-      case R:
-        metaData
-            .put(
-                "kernelspec",
-                new JSONObject().put("display_name", "R").put("language", "R").put("name", "ir"))
-            .put(
-                "language_info",
-                new JSONObject()
-                    .put("codemirror_mode", "r")
-                    .put("file_extension", ".r")
-                    .put("mimetype", "text/x-r-source")
-                    .put("name", "r")
-                    .put("pygments_lexer", "r")
-                    .put("version", "3.4.4"));
-        libraries =
-            "install.packages(\"reticulate\")\n"
-                + "library(reticulate)\n"
-                + "pd <- reticulate::import(\"pandas\")";
-
-        break;
-      default:
-        throw new BadRequestException(
-            "Language " + dataSetExportRequest.getKernelType() + " is not supported");
-    }
-
-    String queriesAsStrings =
-        libraries
-            + "\n\n"
-            + queryList.entrySet().stream()
-                .map(
-                    entry ->
-                        convertQueryToString(
-                            entry.getValue(), Domain.fromValue(entry.getKey()),
-                            dataSetExportRequest.getDataSetRequest().getName(),
-                            dataSetExportRequest.getKernelType()))
-                .collect(Collectors.joining("\n\n"));
+    Map<String, QueryJobConfiguration> queryList =
+        dataSetService.generateQuery(dataSetExportRequest.getDataSetRequest());
+    String queriesAsStrings = dataSetService
+        .generateCodeFromQueryAndKernelType(dataSetExportRequest.getKernelType(), dataSetExportRequest.getDataSetRequest().getName(), queryList);
 
     if (dataSetExportRequest.getNewNotebook()) {
       notebookFile =
@@ -528,150 +497,7 @@ public class DataSetController implements DataSetApiDelegate {
         .put("source", new JSONArray().put(cellInformation));
   }
 
-  private String convertQueryToString(
-      QueryJobConfiguration queryJobConfiguration, Domain domain, String prefix, KernelTypeEnum kernelTypeEnum) {
-    String namespace =
-        prefix.toLowerCase().replaceAll(" ", "_")
-            + "_"
-            + domain.toString().toLowerCase()
-            + "_";
 
-    String sqlSection;
-    String namedParamsSection;
-    String dataFrameSection;
-
-    switch (kernelTypeEnum) {
-      case PYTHON:
-        sqlSection = namespace + "sql = \"\"\"" + queryJobConfiguration.getQuery() + "\"\"\"";
-        namedParamsSection =
-            namespace
-                + "query_config = {\n"
-                + "  \'query\': {\n"
-                + "  \'parameterMode\': \'NAMED\',\n"
-                + "  \'queryParameters\': [\n"
-                + queryJobConfiguration.getNamedParameters().entrySet().stream()
-                    .map(
-                        entry ->
-                            convertNamedParameterToString(
-                                entry.getKey(), entry.getValue(), KernelTypeEnum.PYTHON))
-                    .collect(Collectors.joining(",\n"))
-                + "\n"
-                + "    ]\n"
-                + "  }\n"
-                + "}\n\n";
-        dataFrameSection =
-            namespace
-                + "df = pandas.read_gbq("
-                + namespace
-                + "sql, dialect=\"standard\", configuration="
-                + namespace
-                + "query_config)";
-        break;
-      case R:
-        sqlSection = namespace + "sql <- \"" + queryJobConfiguration.getQuery() + "\"";
-        namedParamsSection =
-            namespace
-                + "query_config <- list(\n"
-                + "  query = list(\n"
-                + "    parameterMode = 'NAMED',\n"
-                + "    queryParameters = list(\n"
-                + queryJobConfiguration.getNamedParameters().entrySet().stream()
-                    .map(
-                        entry ->
-                            convertNamedParameterToString(entry.getKey(), entry.getValue(), KernelTypeEnum.R))
-                    .collect(Collectors.joining(",\n"))
-                + "\n"
-                + "    )\n"
-                + "  )\n"
-                + ")";
-        dataFrameSection =
-            namespace
-                + "df <- pd$read_gbq("
-                + namespace
-                + "sql, dialect=\"standard\", configuration="
-                + namespace
-                + "query_config)";
-        break;
-      default:
-        throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
-    }
-
-    return sqlSection + "\n\n" + namedParamsSection + "\n\n" + dataFrameSection;
-  }
-
-  // BigQuery api returns parameter values either as a list or an object.
-  // To avoid warnings on our cast to list, we suppress those warnings here,
-  // as they are expected.
-  @SuppressWarnings("unchecked")
-  private String convertNamedParameterToString(
-      String key, QueryParameterValue namedParameterValue, KernelTypeEnum kernelTypeEnum) {
-    if (namedParameterValue == null) {
-      return "";
-    }
-    boolean isArrayParameter =
-        namedParameterValue.getArrayType() != null;
-    
-    List<QueryParameterValue> arrayValues = Optional.ofNullable(namedParameterValue.getArrayValues())
-        .orElse(new ArrayList<>());
-
-    switch (kernelTypeEnum) {
-      case PYTHON:
-        return "      {\n"
-            + "        'name': \""
-            + key
-            + "\",\n"
-            + "        'parameterType': {'type': \""
-            + namedParameterValue.getType().toString()
-            + "\""
-            + (isArrayParameter
-                ? ",'arrayType': {'type': \""
-                    + namedParameterValue.getArrayType()
-                    + "\"},"
-                : "")
-            + "},\n"
-            + "        \'parameterValue\': {"
-            + (isArrayParameter
-                ? "\'arrayValues\': ["
-                    + arrayValues.stream()
-                        .map(
-                            arrayValue ->
-                                "{\'value\': " + arrayValue.getValue() + "}")
-                        .collect(Collectors.joining(","))
-                    + "]"
-                : "'value': \"" + namedParameterValue.getValue() + "\"")
-            + "}\n"
-            + "      }";
-      case R:
-        return "      list(\n"
-            + "        name = \""
-            + key
-            + "\",\n"
-            + "        parameterType = list(type = \""
-            + namedParameterValue.getType().toString()
-            + "\""
-            + (isArrayParameter
-                ? ", arrayType = list(type = "
-                    + namedParameterValue.getArrayType()
-                    + "),"
-                : "")
-            + "),\n"
-            + "        parameterValue = list("
-            + (isArrayParameter
-                ? "arrayValues = list("
-                    + arrayValues.stream()
-                        .map(
-                            arrayValue ->
-                                "list(value = " + arrayValue.getValue() + ")")
-                        .collect(Collectors.joining(","))
-                    + ")"
-                : "value = \"" + namedParameterValue.getValue())
-            + "\""
-            + ")\n"
-            + "      )";
-      default:
-        throw new BadRequestException("Language not supported");
-    }
-  }
 
   private NamedParameterEntry generateResponseFromQueryParameter(
       String key, QueryParameterValue value) {

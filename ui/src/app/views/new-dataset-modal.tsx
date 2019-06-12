@@ -5,7 +5,7 @@ import {validate} from 'validate.js';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {AlertDanger} from 'app/components/alert';
-import {Button} from 'app/components/buttons';
+import {Button, TabButton} from 'app/components/buttons';
 import {SmallHeader, styles as headerStyles} from 'app/components/headers';
 import {
   CheckBox,
@@ -19,10 +19,8 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
-import {convertQueryToText} from 'app/utils/big-query-queries';
 import {navigate} from 'app/utils/navigation';
 import {
-  DataSetQuery,
   DataSetRequest,
   DomainValuePair,
   FileDetail,
@@ -50,9 +48,20 @@ interface State {
   newNotebook: boolean;
   notebookName: string;
   notebooksLoading: boolean;
-  queries: Array<DataSetQuery>;
+  previewedKernelType: KernelTypeEnum;
+  queries: Map<KernelTypeEnum, String>;
   seePreview: boolean;
 }
+
+const styles = {
+  codePreviewSelector: {
+    display: 'flex',
+    marginTop: '1rem'
+  },
+  codePreviewSelectorTab: {
+    width: '2.6rem'
+  }
+};
 
 
 class NewDataSetModal extends React.Component<Props, State> {
@@ -69,7 +78,8 @@ class NewDataSetModal extends React.Component<Props, State> {
       newNotebook: true,
       notebookName: '',
       notebooksLoading: false,
-      queries: [],
+      previewedKernelType: KernelTypeEnum.Python,
+      queries: new Map([[KernelTypeEnum.Python, undefined], [KernelTypeEnum.R, undefined]]),
       seePreview: false
     };
   }
@@ -140,15 +150,31 @@ class NewDataSetModal extends React.Component<Props, State> {
 
   async generateQuery() {
     const {workspaceNamespace, workspaceId} = this.props;
-    const dataSet: DataSetRequest = {
-      name: '',
+    const dataSetRequest: DataSetRequest = {
+      name: 'dataSet',
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
       values: this.props.selectedValues,
       includesAllParticipants: this.props.includesAllParticipants,
     };
-    const sqlQueries = await dataSetApi().generateQuery(workspaceNamespace, workspaceId, dataSet);
-    this.setState({queries: sqlQueries.queryList});
+    dataSetApi().generateCode(
+      workspaceNamespace,
+      workspaceId,
+      KernelTypeEnum.Python.toString(),
+      dataSetRequest).then(pythonCode => {
+        const queries = this.state.queries;
+        queries.set(KernelTypeEnum.Python, pythonCode.code);
+        this.setState({queries: queries});
+      });
+    dataSetApi().generateCode(
+      workspaceNamespace,
+      workspaceId,
+      KernelTypeEnum.R.toString(),
+      dataSetRequest).then(rCode => {
+        const queries = this.state.queries;
+        queries.set(KernelTypeEnum.R, rCode.code);
+        this.setState({queries: queries});
+      });
   }
 
   render() {
@@ -162,6 +188,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       notebookName,
       notebooksLoading,
       existingNotebooks,
+      previewedKernelType,
       queries,
       seePreview
     } = this.state;
@@ -214,11 +241,25 @@ class NewDataSetModal extends React.Component<Props, State> {
             {seePreview ? 'Hide Preview' : 'See Code Preview'}
           </Button>
           {seePreview && <React.Fragment>
-            {queries.length === 0 && <SpinnerOverlay />}
-            <TextArea disabled={true} onChange={() => {}} style={{marginTop: '1rem'}}
+            {Array.from(queries.values())
+              .filter(query => query !== undefined).length === 0 && <SpinnerOverlay />}
+            <div style={styles.codePreviewSelector}>
+              <TabButton onClick={() => this.setState({previewedKernelType: KernelTypeEnum.Python})}
+                         active={previewedKernelType === KernelTypeEnum.Python}
+                         style={styles.codePreviewSelectorTab}
+                         disabled={queries.get(KernelTypeEnum.Python) === undefined}>
+                Python
+              </TabButton>
+              <TabButton onClick={() => this.setState({previewedKernelType: KernelTypeEnum.R})}
+                         active={previewedKernelType === KernelTypeEnum.R}
+                         style={styles.codePreviewSelectorTab}
+                         disabled={queries.get(KernelTypeEnum.R) === undefined}>
+                R
+              </TabButton>
+            </div>
+            <TextArea disabled={true} onChange={() => {}}
                       data-test-id='code-text-box'
-                      value={queries.map(query =>
-                        convertQueryToText(name, query.domain, query))} />
+                      value={queries.get(previewedKernelType)} />
           </React.Fragment>}
           <div style={{marginTop: '1rem'}}>
             <Select value={this.state.notebookName}

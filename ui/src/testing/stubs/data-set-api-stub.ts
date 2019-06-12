@@ -1,12 +1,13 @@
 import {
   DataSet,
   DataSetApi,
+  DataSetCodeResponse,
   DataSetExportRequest,
   DataSetListResponse,
   DataSetPreviewResponse,
-  DataSetQueryList,
   DataSetRequest,
-  EmptyResponse
+  EmptyResponse,
+  KernelTypeEnum
 } from 'generated/fetch';
 
 export class DataSetApiStub extends DataSetApi {
@@ -30,11 +31,12 @@ export class DataSetApiStub extends DataSetApi {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
   }
 
-  generateQuery(workspaceNamespace: string,
+  generateCode(workspaceNamespace: string,
     workspaceId: string,
-    dataSet: DataSetRequest): Promise<DataSetQueryList> {
-    return new Promise<DataSetQueryList>(resolve => {
-      resolve({queryList: []});
+    kernelType: string,
+    dataSet: DataSetRequest): Promise<DataSetCodeResponse> {
+    return new Promise<DataSetCodeResponse>(resolve => {
+      resolve({kernelType: KernelTypeEnum[kernelType], code: ''});
     });
   }
 
