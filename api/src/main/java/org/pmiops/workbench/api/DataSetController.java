@@ -24,6 +24,7 @@ import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -354,14 +355,19 @@ public class DataSetController implements DataSetApiDelegate {
       notebookFile =
           notebooksService.getNotebookContents(
               workspace.getWorkspace().getBucketName(), dataSetExportRequest.getNotebookName());
-      String language =
-          Optional.of(notebookFile.getJSONObject("metadata"))
-              .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
-              .map(kernelSpec -> kernelSpec.getString("language"))
-              .orElse("Python");
-      if (language.equals("R")) {
-        dataSetExportRequest.setKernelType(KernelTypeEnum.R);
-      } else {
+      try {
+        String language =
+            Optional.of(notebookFile.getJSONObject("metadata"))
+                .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
+                .map(kernelSpec -> kernelSpec.getString("language"))
+                .orElse("Python");
+        if (language.equals("R")) {
+          dataSetExportRequest.setKernelType(KernelTypeEnum.R);
+        } else {
+          dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
+        }
+      } catch (JSONException e) {
+        // If we can't find metadata to parse, default to python.
         dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
       }
     } else {
