@@ -135,10 +135,11 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
 };
 
 export const MenuItem = ({tooltip = '', disabled = false, children, ...props}) => {
-  const menuItemTextWithoutSpaces = children.toString().replace(/\s/g, '');
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
-      data-test-id={menuItemTextWithoutSpaces + '-menu-item'}
+      // data-test-id is the text within the MenuItem, with whitespace removed
+      // and appended with '-menu-item'
+      data-test-id={children.toString().replace(/\s/g, '') + '-menu-item'}
       disabled={disabled}
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'start',
