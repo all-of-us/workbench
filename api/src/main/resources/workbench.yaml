@@ -1084,7 +1084,7 @@ paths:
       tags:
         - billing
         - cron
-      description: ind BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR
+      description: Find BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR
       operationId: cleanBillingBuffer
       responses:
         200:
