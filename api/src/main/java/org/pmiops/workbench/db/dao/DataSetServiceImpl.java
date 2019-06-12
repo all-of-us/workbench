@@ -266,7 +266,10 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public String generateCodeFromQueryAndKernelType(KernelTypeEnum kernelTypeEnum, String dataSetName, Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
+  public String generateCodeFromQueryAndKernelType(
+      KernelTypeEnum kernelTypeEnum,
+      String dataSetName,
+      Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
     String libraries;
     switch (kernelTypeEnum) {
       case R:
@@ -279,16 +282,17 @@ public class DataSetServiceImpl implements DataSetService {
         libraries = "import pandas";
         break;
       default:
-        throw new BadRequestException("Kernel Type " + kernelTypeEnum.toString() + " not supported");
+        throw new BadRequestException(
+            "Kernel Type " + kernelTypeEnum.toString() + " not supported");
     }
-    return
-        libraries
-            + "\n\n"
-            + queryJobConfigurationMap.entrySet().stream()
+    return libraries
+        + "\n\n"
+        + queryJobConfigurationMap.entrySet().stream()
             .map(
                 entry ->
                     convertQueryToString(
-                        entry.getValue(), Domain.fromValue(entry.getKey()),
+                        entry.getValue(),
+                        Domain.fromValue(entry.getKey()),
                         dataSetName,
                         kernelTypeEnum))
             .collect(Collectors.joining("\n\n"));
@@ -342,12 +346,12 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   private String convertQueryToString(
-      QueryJobConfiguration queryJobConfiguration, Domain domain, String prefix, KernelTypeEnum kernelTypeEnum) {
+      QueryJobConfiguration queryJobConfiguration,
+      Domain domain,
+      String prefix,
+      KernelTypeEnum kernelTypeEnum) {
     String namespace =
-        prefix.toLowerCase().replaceAll(" ", "_")
-            + "_"
-            + domain.toString().toLowerCase()
-            + "_";
+        prefix.toLowerCase().replaceAll(" ", "_") + "_" + domain.toString().toLowerCase() + "_";
 
     String sqlSection;
     String namedParamsSection;
@@ -363,11 +367,11 @@ public class DataSetServiceImpl implements DataSetService {
                 + "  \'parameterMode\': \'NAMED\',\n"
                 + "  \'queryParameters\': [\n"
                 + queryJobConfiguration.getNamedParameters().entrySet().stream()
-                .map(
-                    entry ->
-                        convertNamedParameterToString(
-                            entry.getKey(), entry.getValue(), KernelTypeEnum.PYTHON))
-                .collect(Collectors.joining(",\n"))
+                    .map(
+                        entry ->
+                            convertNamedParameterToString(
+                                entry.getKey(), entry.getValue(), KernelTypeEnum.PYTHON))
+                    .collect(Collectors.joining(",\n"))
                 + "\n"
                 + "    ]\n"
                 + "  }\n"
@@ -389,10 +393,11 @@ public class DataSetServiceImpl implements DataSetService {
                 + "    parameterMode = 'NAMED',\n"
                 + "    queryParameters = list(\n"
                 + queryJobConfiguration.getNamedParameters().entrySet().stream()
-                .map(
-                    entry ->
-                        convertNamedParameterToString(entry.getKey(), entry.getValue(), KernelTypeEnum.R))
-                .collect(Collectors.joining(",\n"))
+                    .map(
+                        entry ->
+                            convertNamedParameterToString(
+                                entry.getKey(), entry.getValue(), KernelTypeEnum.R))
+                    .collect(Collectors.joining(",\n"))
                 + "\n"
                 + "    )\n"
                 + "  )\n"
@@ -421,11 +426,10 @@ public class DataSetServiceImpl implements DataSetService {
     if (namedParameterValue == null) {
       return "";
     }
-    boolean isArrayParameter =
-        namedParameterValue.getArrayType() != null;
+    boolean isArrayParameter = namedParameterValue.getArrayType() != null;
 
-    List<QueryParameterValue> arrayValues = Optional.ofNullable(namedParameterValue.getArrayValues())
-        .orElse(new ArrayList<>());
+    List<QueryParameterValue> arrayValues =
+        Optional.ofNullable(namedParameterValue.getArrayValues()).orElse(new ArrayList<>());
 
     switch (kernelTypeEnum) {
       case PYTHON:
@@ -437,21 +441,17 @@ public class DataSetServiceImpl implements DataSetService {
             + namedParameterValue.getType().toString()
             + "\""
             + (isArrayParameter
-            ? ",'arrayType': {'type': \""
-            + namedParameterValue.getArrayType()
-            + "\"},"
-            : "")
+                ? ",'arrayType': {'type': \"" + namedParameterValue.getArrayType() + "\"},"
+                : "")
             + "},\n"
             + "        \'parameterValue\': {"
             + (isArrayParameter
-            ? "\'arrayValues\': ["
-            + arrayValues.stream()
-            .map(
-                arrayValue ->
-                    "{\'value\': " + arrayValue.getValue() + "}")
-            .collect(Collectors.joining(","))
-            + "]"
-            : "'value': \"" + namedParameterValue.getValue() + "\"")
+                ? "\'arrayValues\': ["
+                    + arrayValues.stream()
+                        .map(arrayValue -> "{\'value\': " + arrayValue.getValue() + "}")
+                        .collect(Collectors.joining(","))
+                    + "]"
+                : "'value': \"" + namedParameterValue.getValue() + "\"")
             + "}\n"
             + "      }";
       case R:
@@ -463,21 +463,17 @@ public class DataSetServiceImpl implements DataSetService {
             + namedParameterValue.getType().toString()
             + "\""
             + (isArrayParameter
-            ? ", arrayType = list(type = "
-            + namedParameterValue.getArrayType()
-            + "),"
-            : "")
+                ? ", arrayType = list(type = " + namedParameterValue.getArrayType() + "),"
+                : "")
             + "),\n"
             + "        parameterValue = list("
             + (isArrayParameter
-            ? "arrayValues = list("
-            + arrayValues.stream()
-            .map(
-                arrayValue ->
-                    "list(value = " + arrayValue.getValue() + ")")
-            .collect(Collectors.joining(","))
-            + ")"
-            : "value = \"" + namedParameterValue.getValue())
+                ? "arrayValues = list("
+                    + arrayValues.stream()
+                        .map(arrayValue -> "list(value = " + arrayValue.getValue() + ")")
+                        .collect(Collectors.joining(","))
+                    + ")"
+                : "value = \"" + namedParameterValue.getValue())
             + "\""
             + ")\n"
             + "      )";

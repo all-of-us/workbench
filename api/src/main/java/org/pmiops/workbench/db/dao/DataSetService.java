@@ -25,5 +25,8 @@ public interface DataSetService {
 
   Map<String, QueryJobConfiguration> generateQuery(DataSetRequest dataSet);
 
-  String generateCodeFromQueryAndKernelType(KernelTypeEnum kernelTypeEnum, String dataSetName, Map<String, QueryJobConfiguration> queryJobConfigurationMap);
+  String generateCodeFromQueryAndKernelType(
+      KernelTypeEnum kernelTypeEnum,
+      String dataSetName,
+      Map<String, QueryJobConfiguration> queryJobConfigurationMap);
 }

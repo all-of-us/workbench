@@ -47,7 +47,6 @@ import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewList;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
-import org.pmiops.workbench.model.DataSetQuery;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -218,7 +217,10 @@ public class DataSetController implements DataSetApiDelegate {
       };
 
   public ResponseEntity<DataSetCodeResponse> generateCode(
-      String workspaceNamespace, String workspaceId, String kernelTypeEnum, DataSetRequest dataSet) {
+      String workspaceNamespace,
+      String workspaceId,
+      String kernelTypeEnum,
+      DataSetRequest dataSet) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     KernelTypeEnum kernelType = KernelTypeEnum.fromValue(kernelTypeEnum);
@@ -226,8 +228,12 @@ public class DataSetController implements DataSetApiDelegate {
     // Generate query per domain for the selected concept set, cohort and values
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
 
-
-    return ResponseEntity.ok(new DataSetCodeResponse().code(dataSetService.generateCodeFromQueryAndKernelType(kernelType, dataSet.getName(), bigQueryJobConfig)).kernelType(kernelType));
+    return ResponseEntity.ok(
+        new DataSetCodeResponse()
+            .code(
+                dataSetService.generateCodeFromQueryAndKernelType(
+                    kernelType, dataSet.getName(), bigQueryJobConfig))
+            .kernelType(kernelType));
   }
 
   @Override
@@ -385,8 +391,11 @@ public class DataSetController implements DataSetApiDelegate {
 
     Map<String, QueryJobConfiguration> queryList =
         dataSetService.generateQuery(dataSetExportRequest.getDataSetRequest());
-    String queriesAsStrings = dataSetService
-        .generateCodeFromQueryAndKernelType(dataSetExportRequest.getKernelType(), dataSetExportRequest.getDataSetRequest().getName(), queryList);
+    String queriesAsStrings =
+        dataSetService.generateCodeFromQueryAndKernelType(
+            dataSetExportRequest.getKernelType(),
+            dataSetExportRequest.getDataSetRequest().getName(),
+            queryList);
 
     if (dataSetExportRequest.getNewNotebook()) {
       notebookFile =
@@ -496,8 +505,6 @@ public class DataSetController implements DataSetApiDelegate {
         .put("outputs", new JSONArray())
         .put("source", new JSONArray().put(cellInformation));
   }
-
-
 
   private NamedParameterEntry generateResponseFromQueryParameter(
       String key, QueryParameterValue value) {
