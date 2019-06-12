@@ -1,5 +1,4 @@
 import {Component, Input} from '@angular/core';
-import {FormControl} from '@angular/forms';
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -8,9 +7,10 @@ import {TooltipTrigger} from 'app/components/popups';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {ModifierType, TreeType} from 'generated';
-import {CriteriaType, DomainType} from 'generated/fetch';
+import {TreeType} from 'generated';
+import {CriteriaType, DomainType, ModifierType} from 'generated/fetch';
 import {List} from 'immutable';
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
@@ -122,7 +122,7 @@ const columns = {
 };
 
 const validatorFuncs = {
-  ageAtEvent: (value) => {
+  AGE_AT_EVENT: (value) => {
     if (value === '') {
       return 'Age At Event is required';
     }
@@ -134,7 +134,7 @@ const validatorFuncs = {
     }
     return null;
   },
-  eventDate: (value) => {
+  EVENT_DATE: (value) => {
     if (value === '') {
       return 'Event Date is required';
     }
@@ -143,7 +143,7 @@ const validatorFuncs = {
     }
     return null;
   },
-  hasOccurrences: (value) => {
+  NUM_OF_OCCURRENCES: (value) => {
     if (value === '') {
       return 'Has Occurrences is required';
     }
@@ -171,11 +171,12 @@ interface State {
 
 export const ListModifierPage = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
+    updateInput: Function;
     constructor(props: Props) {
       super(props);
       this.state = {
         formState: [{
-          name: 'ageAtEvent',
+          name: 'AGE_AT_EVENT',
           label: 'Age At Event',
           type: 'number',
           operator: undefined,
@@ -194,7 +195,7 @@ export const ListModifierPage = withCurrentWorkspace()(
             value: 'BETWEEN',
           }]
         }, {
-          name: 'hasOccurrences',
+          name: 'NUM_OF_OCCURRENCES',
           label: 'Has Occurrences',
           type: 'number',
           operator: undefined,
@@ -207,7 +208,7 @@ export const ListModifierPage = withCurrentWorkspace()(
             value: 'GREATER_THAN_OR_EQUAL_TO',
           }]
         }, {
-          name: 'eventDate',
+          name: 'EVENT_DATE',
           label: 'Shifted Event Date',
           type: 'date',
           operator: undefined,
@@ -232,6 +233,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         },
         visitCounts: undefined
       };
+      this.updateInput = fp.debounce(300, () => this.updateMods());
     }
 
     existing = List();
@@ -243,7 +245,7 @@ export const ListModifierPage = withCurrentWorkspace()(
     };
 
     readonly modifiers = [{
-      name: 'ageAtEvent',
+      name: 'AGE_AT_EVENT',
       label: 'Age At Event',
       inputType: 'number',
       min: 1,
@@ -264,7 +266,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         value: 'BETWEEN',
       }],
     }, {
-      name: 'eventDate',
+      name: 'EVENT_DATE',
       label: 'Shifted Event Date',
       inputType: 'date',
       min: null,
@@ -285,7 +287,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         value: 'BETWEEN',
       }]
     }, {
-      name: 'hasOccurrences',
+      name: 'NUM_OF_OCCURRENCES',
       label: 'Has Occurrences',
       inputType: 'number',
       min: 1,
@@ -306,7 +308,7 @@ export const ListModifierPage = withCurrentWorkspace()(
       const {formState} = this.state;
       if (this.addEncounters) {
         this.modifiers.push({
-          name: 'encounters',
+          name: 'ENCOUNTERS',
           label: 'During Visit Type',
           inputType: null,
           min: null,
@@ -325,7 +327,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         .then(response => {
           const visitCounts = {};
           const encounters = {
-            name: 'encounters',
+            name: 'ENCOUNTERS',
             label: 'During Visit Type',
             type: null,
             operator: undefined,
@@ -413,13 +415,13 @@ export const ListModifierPage = withCurrentWorkspace()(
     }
 
     showCount(modName: string, optName: string) {
-      return modName === 'encounters' && optName !== 'Any';
+      return modName === 'ENCOUNTERS' && optName !== 'Any';
     }
 
     selectChange = (sel, index) => {
       const {formState} = this.state;
       const {name} = formState[index];
-      if (name === 'encounters') {
+      if (name === 'ENCOUNTERS') {
         formState[index].values = [sel];
       } else if (!sel) {
         formState[index].values = [undefined, undefined];
@@ -428,12 +430,32 @@ export const ListModifierPage = withCurrentWorkspace()(
       }
       formState[index].operator = sel;
       this.setState({formState});
+      this.updateMods();
+
     }
 
     inputChange = (index: string, field: string, value: any) => {
       const {formState} = this.state;
       formState[index].values[field] = value;
       this.setState({formState});
+      this.updateInput();
+    }
+
+    updateMods() {
+      const {wizard} = this.props;
+      const {formState} = this.state;
+      wizard.item.modifiers = formState.reduce((acc, mod) => {
+        const {name, operator, values} = mod;
+        if (operator) {
+          if (name === ModifierType.ENCOUNTERS) {
+            acc.push({name, operator: 'IN', operands: [operator.toString()]});
+          } else {
+            acc.push({name, operator, operands: values});
+          }
+        }
+        return acc;
+      }, []);
+      wizardStore.next(wizard);
     }
 
     get addEncounters() {
@@ -445,12 +467,6 @@ export const ListModifierPage = withCurrentWorkspace()(
     requestPreview() {
       // TODO calculate count when new api call is ready
     }
-
-    // dateBlur(index: number) {
-    //   const control = index === 0 ? 'valueA' : 'valueB';
-    //   this.dateObjs[index] = new Date(this.form.get(['eventDate', control]).value + 'T08:00:00');
-    // }
-    //
     // get disableCalculate() {
     //   const disable = !!this.preview.requesting || !!this.errors.size || this.form.invalid;
     //   this.props.disabled(disable);
@@ -458,7 +474,7 @@ export const ListModifierPage = withCurrentWorkspace()(
     // }
 
     optionTemplate = (opt: any, name: string) => {
-      if (name !== 'encounters' || !opt.value) {
+      if (name !== 'ENCOUNTERS' || !opt.value) {
         return opt.label;
       }
       const {visitCounts} = this.state;
@@ -522,7 +538,7 @@ export const ListModifierPage = withCurrentWorkspace()(
           const {label, name, options, operator} = mod;
           return <div key={i} style={{marginTop: '1rem'}}>
             <label style={styles.label}>{label}</label>
-            {name === 'eventDate' &&
+            {name === 'EVENT_DATE' &&
               <TooltipTrigger content={<div>{tooltip}</div>}>
                 <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
               </TooltipTrigger>
@@ -534,7 +550,7 @@ export const ListModifierPage = withCurrentWorkspace()(
                 onChange={(e) => this.selectChange(e.value, i)}
                 options={options}
                 itemTemplate={(e) => this.optionTemplate(e, name)}/>
-              {operator && name !== 'encounters' && <React.Fragment>
+              {operator && name !== 'ENCOUNTERS' && <React.Fragment>
                 {this.renderInput(i, '0', mod.type)}
                 {operator === 'BETWEEN' && <React.Fragment>
                   <span style={{margin: '0 0.25rem'}}>and</span>
