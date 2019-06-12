@@ -98,6 +98,11 @@ public class Application {
     return vmName.substring(0, p);
   }
 
+  /*
+   * Currently only parses the `every X hours` and `every X minutes` case since that is what
+   * is used in the All of Us project. The plan is to expand the functionality of this parser
+   * as needed.
+   */
   private static Schedule parseCronSchedule(String scheduleString) {
     Matcher hoursMatcher = Pattern.compile("every (\\d+) hours").matcher(scheduleString);
     Matcher minutesMatcher = Pattern.compile("every (\\d+) minutes").matcher(scheduleString);
