@@ -423,31 +423,56 @@ public class BillingProjectBufferServiceTest {
   }
 
   @Test
-  public void cleanupBufferEntry_creating() {
+  public void cleanBillingBuffer_creating() {
     BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
     entry.setStatusEnum(CREATING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
     CLOCK.setInstant(NOW.plus(61, ChronoUnit.MINUTES));
-    billingProjectBufferService.cleanBufferEntries();
+    billingProjectBufferService.cleanBillingBuffer();
 
     assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
         .isEqualTo(ERROR);
   }
 
   @Test
-  public void cleanupBufferEntry_assigning() {
+  public void cleanBillingBuffer_assigning() {
     BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
     entry.setStatusEnum(ASSIGNING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
     CLOCK.setInstant(NOW.plus(11, ChronoUnit.MINUTES));
-    billingProjectBufferService.cleanBufferEntries();
+    billingProjectBufferService.cleanBillingBuffer();
 
     assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
         .isEqualTo(ERROR);
+  }
+
+  @Test
+  public void cleanBillingBuffer_ignoreValidEntries() {
+    BillingProjectBufferEntry creating = new BillingProjectBufferEntry();
+    creating.setStatusEnum(CREATING, this::getCurrentTimestamp);
+    creating.setCreationTime(getCurrentTimestamp());
+    billingProjectBufferEntryDao.save(creating);
+
+    CLOCK.setInstant(NOW.plus(59, ChronoUnit.MINUTES));
+    billingProjectBufferService.cleanBillingBuffer();
+
+    assertThat(billingProjectBufferEntryDao.findOne(creating.getId()).getStatusEnum())
+        .isEqualTo(CREATING);
+
+    BillingProjectBufferEntry assigning = new BillingProjectBufferEntry();
+    assigning.setStatusEnum(ASSIGNING, this::getCurrentTimestamp);
+    assigning.setCreationTime(getCurrentTimestamp());
+    billingProjectBufferEntryDao.save(assigning);
+
+    CLOCK.setInstant(NOW.plus(9, ChronoUnit.MINUTES));
+    billingProjectBufferService.cleanBillingBuffer();
+
+    assertThat(billingProjectBufferEntryDao.findOne(assigning.getId()).getStatusEnum())
+        .isEqualTo(ASSIGNING);
   }
 
   private Timestamp getCurrentTimestamp() {

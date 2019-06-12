@@ -1078,14 +1078,14 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  /v1/cron/cleanBufferEntries:
+  /v1/cron/cleanBillingBuffer:
     get:
       security: []
       tags:
         - billing
         - cron
       description: ind BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR
-      operationId: cleanBufferEntries
+      operationId: cleanBillingBuffer
       responses:
         200:
           description: No Error

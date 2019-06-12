@@ -28,9 +28,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class BillingProjectBufferService {
 
+  private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
+
   private static final int SYNCS_PER_INVOCATION = 5;
   private static final int PROJECT_BILLING_ID_SIZE = 8;
-  private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
+  private static final int CREATING_TIMEOUT_MINUTES = 60;
+  private static final int ASSIGNING_TIMEOUT_MINUTES = 10;
 
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
@@ -107,14 +110,14 @@ public class BillingProjectBufferService {
     }
   }
 
-  public void cleanBufferEntries() {
+  public void cleanBillingBuffer() {
     Iterables.concat(
             billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
                 StorageEnums.billingProjectBufferStatusToStorage(CREATING),
-                new Timestamp(clock.instant().minus(60, ChronoUnit.MINUTES).toEpochMilli())),
+                new Timestamp(clock.instant().minus(CREATING_TIMEOUT_MINUTES, ChronoUnit.MINUTES).toEpochMilli())),
             billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
                 StorageEnums.billingProjectBufferStatusToStorage(ASSIGNING),
-                new Timestamp(clock.instant().minus(10, ChronoUnit.MINUTES).toEpochMilli())))
+                new Timestamp(clock.instant().minus(ASSIGNING_TIMEOUT_MINUTES, ChronoUnit.MINUTES).toEpochMilli())))
         .forEach(
             entry -> {
               entry.setStatusEnum(ERROR, this::getCurrentTimestamp);

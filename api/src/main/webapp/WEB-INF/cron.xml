@@ -43,7 +43,7 @@
     <schedule>every 1 minutes</schedule>
   </cron>
   <cron>
-    <url>/v1/cron/cleanBufferEntries</url>
+    <url>/v1/cron/cleanBillingBuffer</url>
     <target>api</target>
     <description>Find BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR</description>
     <schedule>every 24 hours</schedule>

@@ -29,8 +29,8 @@ public class BillingController implements BillingApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> cleanBufferEntries() {
-    billingProjectBufferService.cleanBufferEntries();
+  public ResponseEntity<Void> cleanBillingBuffer() {
+    billingProjectBufferService.cleanBillingBuffer();
     return ResponseEntity.status(HttpStatus.OK).build();
   }
 }
