@@ -26,10 +26,10 @@ export const ResourceCardMenu: React.FunctionComponent<{
       switchCase(resourceType,
         ['notebook', () => {
           return <React.Fragment>
-            <MenuItem icon='pencil' onClick={onRenameNotebook}>Rename</MenuItem>
-            <MenuItem icon='copy' onClick={onCloneResource}>Duplicate</MenuItem>
-            <MenuItem icon='copy' onClick={onCopyResource}>Copy to another Workspace</MenuItem>
-            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
+            <MenuItem onClick={onRenameNotebook}>Rename</MenuItem>
+            <MenuItem onClick={onCloneResource}>Duplicate</MenuItem>
+            <MenuItem onClick={onCopyResource}>Copy to another Workspace</MenuItem>
+            <MenuItem onClick={onDeleteResource}>Delete</MenuItem>
             {
               environment.enableJupyterLab &&
               /*
@@ -39,33 +39,31 @@ export const ResourceCardMenu: React.FunctionComponent<{
                access, and playground mode is currently only enabled if you do
                not have write access.
               */
-              <MenuItem icon='grid-view' onClick={onOpenJupyterLabNotebook}>
-                Open in Jupyter Lab
-              </MenuItem>
+              <MenuItem onClick={onOpenJupyterLabNotebook}>Open in Jupyter Lab</MenuItem>
             }
           </React.Fragment>;
         }],
         ['cohort', () => {
           return <React.Fragment>
-            <MenuItem icon='note' onClick={onRenameCohort}>Rename</MenuItem>
-            <MenuItem icon='copy' onClick={onCloneResource}>Duplicate</MenuItem>
-            <MenuItem icon='pencil' onClick={onEdit}>Edit</MenuItem>
-            <MenuItem icon='grid-view' onClick={onReviewCohort}>Review</MenuItem>
-            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
+            <MenuItem onClick={onRenameCohort}>Rename</MenuItem>
+            <MenuItem onClick={onCloneResource}>Duplicate</MenuItem>
+            <MenuItem onClick={onEdit}>Edit</MenuItem>
+            <MenuItem onClick={onReviewCohort}>Review</MenuItem>
+            <MenuItem onClick={onDeleteResource}>Delete</MenuItem>
           </React.Fragment>;
         }],
         ['conceptSet', () => {
           return <React.Fragment>
-            <MenuItem icon='pencil' onClick={onEdit}>Rename</MenuItem>
-            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
+            <MenuItem onClick={onEdit}>Rename</MenuItem>
+            <MenuItem onClick={onDeleteResource}>Delete</MenuItem>
           </React.Fragment>;
         }],
         ['dataSet', () => {
           return <React.Fragment>
-            <MenuItem icon='pencil' onClick={onRenameDataSet}>Rename Data Set</MenuItem>
-            <MenuItem icon='pencil' onClick={onEdit}>Edit</MenuItem>
-            <MenuItem icon='clipboard' onClick={onExportDataSet}>Export to Notebook</MenuItem>
-            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
+            <MenuItem onClick={onRenameDataSet}>Rename Data Set</MenuItem>
+            <MenuItem onClick={onEdit}>Edit</MenuItem>
+            <MenuItem onClick={onExportDataSet}>Export to Notebook</MenuItem>
+            <MenuItem onClick={onDeleteResource}>Delete</MenuItem>
           </React.Fragment>;
         }]
       )

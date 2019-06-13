@@ -1,5 +1,4 @@
 import {styles as cardStyles} from 'app/components/card';
-import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {IconComponent} from 'app/icons/icon';
 import colors from 'app/styles/colors';
@@ -135,10 +134,12 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
   />;
 };
 
-export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...props}) => {
+export const MenuItem = ({tooltip = '', disabled = false, children, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
-      data-test-id={icon}
+      // data-test-id is the text within the MenuItem, with whitespace removed
+      // and appended with '-menu-item'
+      data-test-id={children.toString().replace(/\s/g, '') + '-menu-item'}
       disabled={disabled}
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'start',
@@ -150,7 +151,6 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...pro
       hover={!disabled ? {backgroundColor: colors.blue[4]} : undefined}
       {...props}
     >
-      <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>
       {children}
     </Clickable>
   </TooltipTrigger>;
