@@ -29,6 +29,7 @@ import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.firecloud.model.Profile;
+import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceIngest;
@@ -274,6 +275,12 @@ public class FireCloudServiceImpl implements FireCloudService {
     return retryHandler.run(
         (context) ->
             workspacesApi.updateWorkspaceACL(projectName, workspaceName, false, aclUpdates));
+  }
+
+  @Override
+  public WorkspaceACL getWorkspaceAcl(String projectName, String workspaceName) {
+    WorkspacesApi workspacesApi = workspacesApiProvider.get();
+    return retryHandler.run((context) -> workspacesApi.getWorkspaceAcl(projectName, workspaceName));
   }
 
   @Override
