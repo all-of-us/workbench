@@ -361,7 +361,7 @@ public class DataSetController implements DataSetApiDelegate {
                 .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
                 .map(kernelSpec -> kernelSpec.getString("language"))
                 .orElse("Python");
-        if (language.equals("R")) {
+        if ("R".equals(language)) {
           dataSetExportRequest.setKernelType(KernelTypeEnum.R);
         } else {
           dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
