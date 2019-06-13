@@ -25,6 +25,12 @@
     <schedule>every 24 hours</schedule>
   </cron>
   <cron>
+    <url>/v1/cron/bulkSyncTwoFactorAuthStatus</url>
+    <target>api</target>
+    <description>Daily sync of 2FA set up status (via Google Directory Service)</description>
+    <schedule>every 24 hours</schedule>
+  </cron>
+  <cron>
     <url>/v1/cron/bulkAuditProjectAccess</url>
     <target>api</target>
     <description>Daily audit of gcp resources that users have access to</description>
