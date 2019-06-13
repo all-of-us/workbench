@@ -6,12 +6,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -43,6 +38,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
@@ -285,6 +281,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
 
+    // TODO: get rid of WorkspaceUserRole
     WorkspaceUserRole permissions = new WorkspaceUserRole();
     permissions.setRoleEnum(WorkspaceAccessLevel.OWNER);
     permissions.setWorkspace(dbWorkspace);
@@ -357,7 +354,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 dbConceptSet.getConceptSetId()));
       }
     }
-    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace,
+            workspaceService.getFirecloudWorkspaceAcls(dbWorkspace)));
   }
 
   @Override
@@ -401,7 +399,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    response.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    response.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace,
+            workspaceService.getFirecloudWorkspaceAcls(dbWorkspace)));
     return ResponseEntity.ok(response);
   }
 
@@ -451,7 +450,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace,
+            workspaceService.getFirecloudWorkspaceAcls(dbWorkspace)));
   }
 
   @Override
@@ -614,7 +614,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
-            .workspace(workspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
+            .workspace(workspaceMapper.toApiWorkspace(savedWorkspace,
+                    workspaceService.getFirecloudWorkspaceAcls(savedWorkspace))));
   }
 
   @Override
@@ -695,7 +696,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
     response.setItems(
-        workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
+        workspaces.stream().map(ws -> {
+          Map<User, WorkspaceAccessEntry> firecloudAcls = workspaceService.getFirecloudWorkspaceAcls(ws);
+          return workspaceMapper.toApiWorkspace(ws, firecloudAcls);
+        } ).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 

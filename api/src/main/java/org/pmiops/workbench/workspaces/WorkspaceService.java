@@ -1,11 +1,14 @@
 package org.pmiops.workbench.workspaces;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
 
@@ -46,4 +49,8 @@ public interface WorkspaceService {
 
   Workspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel);
+
+  Map<User, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(
+    Workspace workspace
+  );
 }

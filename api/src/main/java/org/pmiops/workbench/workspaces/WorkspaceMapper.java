@@ -3,10 +3,12 @@ package org.pmiops.workbench.workspaces;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
+import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
@@ -24,7 +26,9 @@ public class WorkspaceMapper {
     }
   }
 
-  public Workspace toApiWorkspace(org.pmiops.workbench.db.model.Workspace workspace) {
+  public Workspace toApiWorkspace(
+          org.pmiops.workbench.db.model.Workspace workspace,
+          Map<org.pmiops.workbench.db.model.User, WorkspaceAccessEntry> firecloudAcls) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
 
@@ -46,16 +50,18 @@ public class WorkspaceMapper {
     }
 
     result.setUserRoles(
-        workspace.getWorkspaceUserRoles().stream()
+        firecloudAcls.entrySet().stream()
             .map(this::toApiUserRole)
             .collect(Collectors.toList()));
 
     return result;
   }
 
+  // TODO: delete this method? it is never used
   public Workspace toApiWorkspace(
       org.pmiops.workbench.db.model.Workspace workspace,
-      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
+      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+      Map<org.pmiops.workbench.db.model.User, WorkspaceAccessEntry> firecloudAcls) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     if (workspace.getPopulation()) {
       researchPurpose.setPopulationDetails(new ArrayList<>(workspace.getSpecificPopulationsEnum()));
@@ -80,7 +86,7 @@ public class WorkspaceMapper {
     }
 
     result.setUserRoles(
-        workspace.getWorkspaceUserRoles().stream()
+            firecloudAcls.entrySet().stream()
             .map(this::toApiUserRole)
             .collect(Collectors.toList()));
 
@@ -108,12 +114,13 @@ public class WorkspaceMapper {
     return result;
   }
 
-  public UserRole toApiUserRole(WorkspaceUserRole workspaceUserRole) {
+  private UserRole toApiUserRole(Map.Entry<org.pmiops.workbench.db.model.User, WorkspaceAccessEntry> aclEntry) {
+    org.pmiops.workbench.db.model.User user = aclEntry.getKey();
     UserRole result = new UserRole();
-    result.setEmail(workspaceUserRole.getUser().getEmail());
-    result.setGivenName(workspaceUserRole.getUser().getGivenName());
-    result.setFamilyName(workspaceUserRole.getUser().getFamilyName());
-    result.setRole(workspaceUserRole.getRoleEnum());
+    result.setEmail(user.getEmail());
+    result.setGivenName(user.getGivenName());
+    result.setFamilyName(user.getFamilyName());
+    result.setRole(WorkspaceAccessLevel.fromValue(aclEntry.getValue().getAccessLevel()));
     return result;
   }
 

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -111,8 +112,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             dbWorkspace -> {
               String fcWorkspaceAccessLevel =
                   fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
+              Map<User, WorkspaceAccessEntry> firecloudAcls = getFirecloudWorkspaceAcls(dbWorkspace);
               WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
+              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudAcls));
               currentWorkspace.setAccessLevel(
                   workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;
@@ -127,6 +129,22 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             Collectors.toMap(
                 fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
                 fcWorkspace -> fcWorkspace));
+  }
+
+  @Override
+  public Map<User, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(Workspace workspace) {
+    log.log(Level.INFO, workspace.getName() + ' ' + workspace.getFirecloudWorkspaceId() + ' ' + workspace.getFirecloudUuid());
+    WorkspaceACL firecloudWorkspaceAcls =
+            fireCloudService.getWorkspaceAcl(
+                    workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+    Map<String, Object> aclsMap = (Map) firecloudWorkspaceAcls.getAcl();
+    Map<User, WorkspaceAccessEntry> userToAcl = new HashMap<>();
+    for (Map.Entry<String, Object> entry : aclsMap.entrySet()) {
+      WorkspaceAccessEntry acl = new Gson().fromJson(entry.getValue().toString(), WorkspaceAccessEntry.class);
+      User currentUser = userDao.findUserByEmail(entry.getKey());
+      userToAcl.put(currentUser, acl);
+    }
+    return userToAcl;
   }
 
   /**
@@ -230,10 +248,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       userRoleMap.put(userRole.getUser().getUserId(), userRole);
     }
 
-    WorkspaceACL firecloudWorkspaceAcls =
-        fireCloudService.getWorkspaceAcl(
-            workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-    Map<String, WorkspaceAccessEntry> aclsMap = (Map) firecloudWorkspaceAcls.getAcl();
+    Map<User, WorkspaceAccessEntry> aclsMap = getFirecloudWorkspaceAcls(workspace);
     ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
 
     // TODO: remove once user_workspace table is removed.  this updates in our db
@@ -250,18 +265,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     // Iterate through existing roles, update/remove them
-    for (Map.Entry<String, WorkspaceAccessEntry> entry : aclsMap.entrySet()) {
-      String userEmail = entry.getKey();
-      // log.log(Level.SEVERE, entry.getValue().toString());
-      // WorkspaceAccessEntry acl = (WorkspaceAccessEntry) entry.getValue();
-      User currentUser = userDao.findUserByEmail(userEmail);
+    for (Map.Entry<User, WorkspaceAccessEntry> entry : aclsMap.entrySet()) {
+      User currentUser = entry.getKey();
 
       // TODO: this will change when userRoleSet changes type
       WorkspaceUserRole mapValue = userRoleMap.get(currentUser.getUserId());
 
       if (mapValue != null) {
         WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
-        currentUpdate.setEmail(userEmail);
+        currentUpdate.setEmail(currentUser.getEmail());
         WorkspaceAccessLevel updatedAccess = mapValue.getRoleEnum();
 
         updateFirecloudAclsOnUser(updatedAccess, currentUpdate);
@@ -273,7 +285,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         // This is how to remove a user from the FireCloud ACL:
         // Pass along an update request with NO ACCESS as the given access level.
         WorkspaceACLUpdate removedUser = new WorkspaceACLUpdate();
-        removedUser.setEmail(userEmail);
+        removedUser.setEmail(currentUser.getEmail());
         updateFirecloudAclsOnUser(WorkspaceAccessLevel.NO_ACCESS, removedUser);
         updateACLRequestList.add(removedUser);
       }
