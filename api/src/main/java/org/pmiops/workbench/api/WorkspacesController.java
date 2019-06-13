@@ -354,8 +354,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 dbConceptSet.getConceptSetId()));
       }
     }
-    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace,
-            workspaceService.getFirecloudWorkspaceAcls(dbWorkspace)));
+    return ResponseEntity.ok(
+        workspaceMapper.toApiWorkspace(
+            dbWorkspace, workspaceService.getFirecloudWorkspaceAcls(dbWorkspace)));
   }
 
   @Override
@@ -399,8 +400,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    response.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace,
-            workspaceService.getFirecloudWorkspaceAcls(dbWorkspace)));
+    response.setWorkspace(
+        workspaceMapper.toApiWorkspace(
+            dbWorkspace, fcWorkspace, workspaceService.getFirecloudWorkspaceAcls(dbWorkspace)));
     return ResponseEntity.ok(response);
   }
 
@@ -450,8 +452,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace,
-            workspaceService.getFirecloudWorkspaceAcls(dbWorkspace)));
+    return ResponseEntity.ok(
+        workspaceMapper.toApiWorkspace(
+            dbWorkspace, fcWorkspace, workspaceService.getFirecloudWorkspaceAcls(dbWorkspace)));
   }
 
   @Override
@@ -614,8 +617,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
-            .workspace(workspaceMapper.toApiWorkspace(savedWorkspace,
-                    workspaceService.getFirecloudWorkspaceAcls(savedWorkspace))));
+            .workspace(
+                workspaceMapper.toApiWorkspace(
+                    savedWorkspace, workspaceService.getFirecloudWorkspaceAcls(savedWorkspace))));
   }
 
   @Override
@@ -696,10 +700,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
     response.setItems(
-        workspaces.stream().map(ws -> {
-          Map<User, WorkspaceAccessEntry> firecloudAcls = workspaceService.getFirecloudWorkspaceAcls(ws);
-          return workspaceMapper.toApiWorkspace(ws, firecloudAcls);
-        } ).collect(Collectors.toList()));
+        workspaces.stream()
+            .map(
+                ws -> {
+                  Map<User, WorkspaceAccessEntry> firecloudAcls =
+                      workspaceService.getFirecloudWorkspaceAcls(ws);
+                  return workspaceMapper.toApiWorkspace(ws, firecloudAcls);
+                })
+            .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 

@@ -112,9 +112,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             dbWorkspace -> {
               String fcWorkspaceAccessLevel =
                   fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
-              Map<User, WorkspaceAccessEntry> firecloudAcls = getFirecloudWorkspaceAcls(dbWorkspace);
+              Map<User, WorkspaceAccessEntry> firecloudAcls =
+                  getFirecloudWorkspaceAcls(dbWorkspace);
               WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, firecloudAcls));
+              currentWorkspace.setWorkspace(
+                  workspaceMapper.toApiWorkspace(dbWorkspace, firecloudAcls));
               currentWorkspace.setAccessLevel(
                   workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;
@@ -133,14 +135,21 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Map<User, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(Workspace workspace) {
-    log.log(Level.INFO, workspace.getName() + ' ' + workspace.getFirecloudWorkspaceId() + ' ' + workspace.getFirecloudUuid());
+    log.log(
+        Level.INFO,
+        workspace.getName()
+            + ' '
+            + workspace.getFirecloudWorkspaceId()
+            + ' '
+            + workspace.getFirecloudUuid());
     WorkspaceACL firecloudWorkspaceAcls =
-            fireCloudService.getWorkspaceAcl(
-                    workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+        fireCloudService.getWorkspaceAcl(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
     Map<String, Object> aclsMap = (Map) firecloudWorkspaceAcls.getAcl();
     Map<User, WorkspaceAccessEntry> userToAcl = new HashMap<>();
     for (Map.Entry<String, Object> entry : aclsMap.entrySet()) {
-      WorkspaceAccessEntry acl = new Gson().fromJson(entry.getValue().toString(), WorkspaceAccessEntry.class);
+      WorkspaceAccessEntry acl =
+          new Gson().fromJson(entry.getValue().toString(), WorkspaceAccessEntry.class);
       User currentUser = userDao.findUserByEmail(entry.getKey());
       userToAcl.put(currentUser, acl);
     }

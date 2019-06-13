@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
-import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
@@ -27,8 +26,8 @@ public class WorkspaceMapper {
   }
 
   public Workspace toApiWorkspace(
-          org.pmiops.workbench.db.model.Workspace workspace,
-          Map<org.pmiops.workbench.db.model.User, WorkspaceAccessEntry> firecloudAcls) {
+      org.pmiops.workbench.db.model.Workspace workspace,
+      Map<org.pmiops.workbench.db.model.User, WorkspaceAccessEntry> firecloudAcls) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
 
@@ -50,9 +49,7 @@ public class WorkspaceMapper {
     }
 
     result.setUserRoles(
-        firecloudAcls.entrySet().stream()
-            .map(this::toApiUserRole)
-            .collect(Collectors.toList()));
+        firecloudAcls.entrySet().stream().map(this::toApiUserRole).collect(Collectors.toList()));
 
     return result;
   }
@@ -86,9 +83,7 @@ public class WorkspaceMapper {
     }
 
     result.setUserRoles(
-            firecloudAcls.entrySet().stream()
-            .map(this::toApiUserRole)
-            .collect(Collectors.toList()));
+        firecloudAcls.entrySet().stream().map(this::toApiUserRole).collect(Collectors.toList()));
 
     return result;
   }
@@ -114,7 +109,8 @@ public class WorkspaceMapper {
     return result;
   }
 
-  private UserRole toApiUserRole(Map.Entry<org.pmiops.workbench.db.model.User, WorkspaceAccessEntry> aclEntry) {
+  private UserRole toApiUserRole(
+      Map.Entry<org.pmiops.workbench.db.model.User, WorkspaceAccessEntry> aclEntry) {
     org.pmiops.workbench.db.model.User user = aclEntry.getKey();
     UserRole result = new UserRole();
     result.setEmail(user.getEmail());
