@@ -249,6 +249,7 @@ export const ListModifierPage = withCurrentWorkspace()(
       const {workspace: {cdrVersionId}} = this.props;
       const {formState} = this.state;
       if (this.addEncounters) {
+        // get options for visit modifier from api
         cohortBuilderApi()
         .getCriteriaBy(
             +cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]
@@ -287,10 +288,10 @@ export const ListModifierPage = withCurrentWorkspace()(
     getExisting() {
       const {wizard} = this.props;
       const {formState} = this.state;
-      // This reseeds the form with existing data if we're editing an existing group
+      // This reseeds the form state with existing data if we're editing an existing item
       wizard.item.modifiers.forEach(existing => {
         const index = formState.findIndex(mod => existing.name === mod.name);
-        if (index) {
+        if (index > -1) {
           const mod = formState[index];
           const values = existing.operands.filter(val => !!val);
           switch (mod.name) {
@@ -300,7 +301,7 @@ export const ListModifierPage = withCurrentWorkspace()(
             case ModifierType.EVENTDATE:
               formState[index] = {
                 ...mod,
-                operator: existing.operands[0],
+                operator: existing.operator,
                 values: values.map(val => new Date(val + 'T08:00:00'))
               };
               break;
@@ -312,7 +313,7 @@ export const ListModifierPage = withCurrentWorkspace()(
       this.setState({formState});
     }
 
-    selectChange = (sel, index) => {
+    selectChange = (sel: any, index: number) => {
       const {formState} = this.state;
       const {name} = formState[index];
       if (name === ModifierType.ENCOUNTERS) {
@@ -346,13 +347,12 @@ export const ListModifierPage = withCurrentWorkspace()(
               acc.push({name, operator: Operator.IN, operands: [operator.toString()]});
               break;
             case ModifierType.EVENTDATE:
-              acc.push({name, operator, operands: values.map(val => {
-                return moment(val, 'YYYY-MM-DD', true).isValid()
-                  ? moment(val).format('YYYY-MM-DD') : undefined;
-              })});
+              const formatted = values.map(val => moment(val, 'YYYY-MM-DD', true).isValid()
+                    ? moment(val).format('YYYY-MM-DD') : undefined);
+              acc.push({name, operator, operands: formatted.filter(val => !!val)});
               break;
             default:
-              acc.push({name, operator, operands: values});
+              acc.push({name, operator, operands: values.filter(val => !!val)});
           }
         }
         return acc;
@@ -365,8 +365,34 @@ export const ListModifierPage = withCurrentWorkspace()(
       return ![DomainType.PHYSICALMEASUREMENT, DomainType.VISIT].includes(domain);
     }
 
-    requestPreview() {
+    calculate() {
       // TODO calculate count when new api call is ready
+    }
+
+    validateValues() {
+      const {formState} = this.state;
+      let initialState = true;
+      let untouched = false;
+      const errors = formState.reduce((acc, item) => {
+        if (item.name !== ModifierType.ENCOUNTERS) {
+          item.values.forEach((val, v) => {
+            if (val !== undefined) {
+              initialState = false;
+              const error = validatorFuncs[item.name](val);
+              if (error) {
+                acc.add(error);
+              }
+            } else if (item.operator !== undefined) {
+              initialState = false;
+              if (v === 0 || (v === 1 && item.operator === Operator.BETWEEN)) {
+                untouched = true;
+              }
+            }
+          });
+        }
+        return acc;
+      }, new Set());
+      return {errors, initialState, untouched};
     }
 
     optionTemplate = (opt: any, name: any) => {
@@ -402,25 +428,7 @@ export const ListModifierPage = withCurrentWorkspace()(
       const {formState, preview} = this.state;
       const tooltip = `Dates are consistently shifted within a participant’s record by a time period
         of up to 364 days backwards. The date shift differs across participants.`;
-      let initialState = true;
-      let untouched = false;
-      const errors = formState.reduce((acc, item) => {
-        item.values.forEach((val, v) => {
-          if (val !== undefined) {
-            initialState = false;
-            const error = validatorFuncs[item.name](val);
-            if (error) {
-              acc.add(error);
-            }
-          } else if (item.operator !== undefined) {
-            initialState = false;
-            if (v === 0 || (v === 1 && item.operator === Operator.BETWEEN)) {
-              untouched = true;
-            }
-          }
-        });
-        return acc;
-      }, new Set());
+      const {errors, initialState, untouched} = this.validateValues();
       const disableFinish = !!errors.size || untouched || preview.loading;
       this.props.disabled(disableFinish);
       const disabled = disableFinish || initialState;
@@ -462,7 +470,7 @@ export const ListModifierPage = withCurrentWorkspace()(
           <div style={styles.row}>
             <div style={columns.col3}>
               <Button type='primary' style={disabled ? button.disabled : button.active}
-                disabled={disabled}>Calculate</Button>
+                disabled={disabled} onClick={this.calculate()}>Calculate</Button>
             </div>
             {!preview.loading && preview.count && <div style={columns.col8}>
               <div style={{color: '#262262'}}>Results</div>
