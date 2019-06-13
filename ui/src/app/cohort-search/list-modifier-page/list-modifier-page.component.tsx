@@ -9,12 +9,10 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {TreeType} from 'generated';
 import {CriteriaType, DomainType, ModifierType} from 'generated/fetch';
-import {List} from 'immutable';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
-import {Subscription} from 'rxjs/Subscription';
 
 const styles = reactStyles({
   header: {
@@ -41,7 +39,7 @@ const styles = reactStyles({
     fontWeight: 500,
   },
   modifier: {
-    marginTop: '0.5rem'
+    marginTop: '0.4rem'
   },
   select: {
     width: '12rem',
@@ -95,11 +93,9 @@ const styles = reactStyles({
     paddingLeft: '0.5rem',
     paddingRight: '0.5rem',
   },
-  calculate: {
-    background: '#2691d0',
+  button: {
     color: '#ffffff',
     margin: '0.25rem 0.5rem 0.25rem 0',
-    border: '1px solid #0077b7',
     borderRadius: '3px',
   },
   previewCount: {
@@ -107,6 +103,20 @@ const styles = reactStyles({
     fontWeight: 'bold'
   }
 });
+
+const button = {
+  active: {
+    ...styles.button,
+    background: '#2691d0',
+    border: '1px solid #0077b7',
+  },
+  disabled: {
+    ...styles.button,
+    background: '#c3c3c3',
+    border: 'transparent',
+    opacity: 0.3,
+  }
+}
 
 const columns = {
   col3: {
@@ -236,90 +246,10 @@ export const ListModifierPage = withCurrentWorkspace()(
       this.updateInput = fp.debounce(300, () => this.updateMods());
     }
 
-    existing = List();
-    preview: any = {count: -1};
-    dateObjs = [null, null];
-    subscription: Subscription;
-    dropdownOption = {
-      selected: ['Any', 'Any', 'Any', 'Any']
-    };
-
-    readonly modifiers = [{
-      name: 'AGE_AT_EVENT',
-      label: 'Age At Event',
-      inputType: 'number',
-      min: 1,
-      max: 120,
-      maxLength: 3,
-      modType: ModifierType.AGEATEVENT,
-      operators: [{
-        label: 'Any',
-        value: undefined,
-      }, {
-        label: 'Greater Than or Equal To',
-        value: 'GREATER_THAN_OR_EQUAL_TO',
-      }, {
-        label: 'Less Than or Equal To',
-        value: 'LESS_THAN_OR_EQUAL_TO',
-      }, {
-        label: 'Between',
-        value: 'BETWEEN',
-      }],
-    }, {
-      name: 'EVENT_DATE',
-      label: 'Shifted Event Date',
-      inputType: 'date',
-      min: null,
-      max: null,
-      maxLength: null,
-      modType: ModifierType.EVENTDATE,
-      operators: [{
-        label: 'Any',
-        value: undefined,
-      }, {
-        label: 'Is On or Before',
-        value: 'LESS_THAN_OR_EQUAL_TO',
-      }, {
-        label: 'Is On or After',
-        value: 'GREATER_THAN_OR_EQUAL_TO',
-      }, {
-        label: 'Is Between',
-        value: 'BETWEEN',
-      }]
-    }, {
-      name: 'NUM_OF_OCCURRENCES',
-      label: 'Has Occurrences',
-      inputType: 'number',
-      min: 1,
-      max: 99,
-      maxLength: 2,
-      modType: ModifierType.NUMOFOCCURRENCES,
-      operators: [{
-        label: 'Any',
-        value: undefined,
-      }, {
-        label: 'N or More',
-        value: 'GREATER_THAN_OR_EQUAL_TO',
-      }]
-    }];
-
     componentDidMount() {
       const {workspace: {cdrVersionId}, wizard} = this.props;
       const {formState} = this.state;
       if (this.addEncounters) {
-        this.modifiers.push({
-          name: 'ENCOUNTERS',
-          label: 'During Visit Type',
-          inputType: null,
-          min: null,
-          max: null,
-          maxLength: null,
-          modType: ModifierType.ENCOUNTERS,
-          operators: [{
-            label: 'Any',
-            value: undefined,
-          }]
-        });
         cohortBuilderApi()
         .getCriteriaBy(
             +cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]
@@ -353,69 +283,34 @@ export const ListModifierPage = withCurrentWorkspace()(
       } else {
         this.getExisting();
       }
-
-      // this.subscription = this.form.valueChanges
-      // .map(this.currentMods)
-      // .subscribe(newMods => {
-      //   wizard.item.modifiers = newMods.filter(mod => !!mod);
-      //   wizardStore.next(wizard);
-      // });
-      //
-      // this.subscription.add(this.dateA.valueChanges.subscribe(value => {
-      //   const formatted = moment(value).format('YYYY-MM-DD');
-      //   this.form.get(['eventDate', 'valueA']).setValue(formatted);
-      // }));
-      //
-      // this.subscription.add(this.dateB.valueChanges.subscribe(value => {
-      //   const formatted = moment(value).format('YYYY-MM-DD');
-      //   this.form.get(['eventDate', 'valueB']).setValue(formatted);
-      // }));
     }
 
     getExisting() {
       const {wizard} = this.props;
       const {formState} = this.state;
       // This reseeds the form with existing data if we're editing an existing group
-      wizard.item.modifiers.forEach(mod => {
-        const meta = this.modifiers.find(_mod => mod.name === _mod.modType);
-        if (meta) {
-          if (meta.modType === ModifierType.ENCOUNTERS) {
-            const selected = meta.operators.find(
-              operator => operator.value
-                && operator.value.toString() === mod.operands[0]
-            );
-            if (selected) {
-              this.dropdownOption.selected[3] = selected.label;
-              formState[meta.name] = {
-                operator: mod.operands[0],
-                encounterType: mod.encounterType
+      wizard.item.modifiers.forEach(existing => {
+        const index = formState.findIndex(mod => existing.name === mod.name);
+        if (index) {
+          const mod = formState[index];
+          const values = existing.operands.filter(val => !!val);
+          switch (mod.name) {
+            case ModifierType.ENCOUNTERS:
+              formState[index] = {...mod, operator: existing.operands[0], values};
+              break;
+            case ModifierType.EVENTDATE:
+              formState[index] = {
+                ...mod,
+                operator: existing.operands[0],
+                values: values.map(val => new Date(val + 'T08:00:00'))
               };
-            }
-          } else {
-            const selected = meta.operators.find(
-              operator => operator.value === mod.operator
-            );
-            const index = this.modifiers.indexOf(meta);
-            this.dropdownOption.selected[index] = selected.label;
-            if (meta.modType === ModifierType.EVENTDATE) {
-              this.dateObjs = [
-                new Date(mod.operands[0] + 'T08:00:00'),
-                new Date(mod.operands[1] + 'T08:00:00')
-              ];
-            }
-            formState[meta.name] = {
-              operator: mod.operator,
-              valueA: mod.operands[0],
-              valueB: mod.operands[1],
-            };
+              break;
+            default:
+              formState[index] = {...mod, operator: existing.operator, values};
           }
         }
       });
       this.setState({formState});
-    }
-
-    showCount(modName: string, optName: string) {
-      return modName === 'ENCOUNTERS' && optName !== 'Any';
     }
 
     selectChange = (sel, index) => {
@@ -447,10 +342,18 @@ export const ListModifierPage = withCurrentWorkspace()(
       wizard.item.modifiers = formState.reduce((acc, mod) => {
         const {name, operator, values} = mod;
         if (operator) {
-          if (name === ModifierType.ENCOUNTERS) {
-            acc.push({name, operator: 'IN', operands: [operator.toString()]});
-          } else {
-            acc.push({name, operator, operands: values});
+          switch (name) {
+            case ModifierType.ENCOUNTERS:
+              acc.push({name, operator: 'IN', operands: [operator.toString()]});
+              break;
+            case ModifierType.EVENTDATE:
+              acc.push({name, operator, operands: values.map(val => {
+                return moment(val, 'YYYY-MM-DD', true).isValid()
+                  ? moment(val).format('YYYY-MM-DD') : undefined;
+              })});
+              break;
+            default:
+              acc.push({name, operator, operands: values});
           }
         }
         return acc;
@@ -460,8 +363,7 @@ export const ListModifierPage = withCurrentWorkspace()(
 
     get addEncounters() {
       const {wizard: {domain}} = this.props;
-      return [TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(TreeType[domain]) === -1
-          && !this.modifiers.find(modifier => modifier.modType === ModifierType.ENCOUNTERS);
+      return [TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(TreeType[domain]) === -1;
     }
 
     requestPreview() {
@@ -525,6 +427,8 @@ export const ListModifierPage = withCurrentWorkspace()(
         });
         return acc;
       }, new Set());
+      const disabled = !!errors.size || initialState || untouched;
+      this.props.disabled(disabled);
       return <div style={{marginTop: '1rem'}}>
         <div style={styles.header}>
           The following modifiers are optional and apply to all selected criteria
@@ -536,7 +440,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         </div>}
         {formState.map((mod, i) => {
           const {label, name, options, operator} = mod;
-          return <div key={i} style={{marginTop: '1rem'}}>
+          return <div key={i} style={{marginTop: '0.75rem'}}>
             <label style={styles.label}>{label}</label>
             {name === 'EVENT_DATE' &&
               <TooltipTrigger content={<div>{tooltip}</div>}>
@@ -546,7 +450,6 @@ export const ListModifierPage = withCurrentWorkspace()(
             <div style={styles.modifier}>
               <Dropdown value={operator}
                 style={styles.select}
-                panelStyle={{color: 'red'}}
                 onChange={(e) => this.selectChange(e.value, i)}
                 options={options}
                 itemTemplate={(e) => this.optionTemplate(e, name)}/>
@@ -563,8 +466,8 @@ export const ListModifierPage = withCurrentWorkspace()(
         <div style={styles.footer}>
           <div style={styles.row}>
             <div style={columns.col3}>
-              <Button type='primary' style={styles.calculate}
-                disabled={!!errors.size || initialState || untouched}>Calculate</Button>
+              <Button type='primary' style={disabled ? button.disabled : button.active}
+                disabled={disabled}>Calculate</Button>
             </div>
             {!preview.loading && preview.count && <div style={columns.col8}>
               <div style={{color: '#262262'}}>Results</div>
