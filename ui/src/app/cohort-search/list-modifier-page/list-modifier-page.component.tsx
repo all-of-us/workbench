@@ -7,8 +7,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {TreeType} from 'generated';
-import {CriteriaType, DomainType, ModifierType} from 'generated/fetch';
+import {CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Dropdown} from 'primereact/dropdown';
@@ -116,7 +115,7 @@ const button = {
     border: 'transparent',
     opacity: 0.3,
   }
-}
+};
 
 const columns = {
   col3: {
@@ -165,7 +164,7 @@ const validatorFuncs = {
     }
     return null;
   }
-}
+};
 
 interface Props {
   disabled: Function;
@@ -186,7 +185,7 @@ export const ListModifierPage = withCurrentWorkspace()(
       super(props);
       this.state = {
         formState: [{
-          name: 'AGE_AT_EVENT',
+          name: ModifierType.AGEATEVENT,
           label: 'Age At Event',
           type: 'number',
           operator: undefined,
@@ -196,16 +195,16 @@ export const ListModifierPage = withCurrentWorkspace()(
             value: undefined,
           }, {
             label: 'Greater Than or Equal To',
-            value: 'GREATER_THAN_OR_EQUAL_TO',
+            value: Operator.GREATERTHANOREQUALTO,
           }, {
             label: 'Less Than or Equal To',
-            value: 'LESS_THAN_OR_EQUAL_TO',
+            value: Operator.LESSTHANOREQUALTO,
           }, {
             label: 'Between',
-            value: 'BETWEEN',
+            value: Operator.BETWEEN,
           }]
         }, {
-          name: 'NUM_OF_OCCURRENCES',
+          name: ModifierType.NUMOFOCCURRENCES,
           label: 'Has Occurrences',
           type: 'number',
           operator: undefined,
@@ -215,10 +214,10 @@ export const ListModifierPage = withCurrentWorkspace()(
             value: undefined,
           }, {
             label: 'N or More',
-            value: 'GREATER_THAN_OR_EQUAL_TO',
+            value: Operator.GREATERTHANOREQUALTO,
           }]
         }, {
-          name: 'EVENT_DATE',
+          name: ModifierType.EVENTDATE,
           label: 'Shifted Event Date',
           type: 'date',
           operator: undefined,
@@ -228,18 +227,18 @@ export const ListModifierPage = withCurrentWorkspace()(
             value: undefined,
           }, {
             label: 'Is On or Before',
-            value: 'LESS_THAN_OR_EQUAL_TO',
+            value: Operator.LESSTHANOREQUALTO,
           }, {
             label: 'Is On or After',
-            value: 'GREATER_THAN_OR_EQUAL_TO',
+            value: Operator.GREATERTHANOREQUALTO,
           }, {
             label: 'Is Between',
-            value: 'BETWEEN',
+            value: Operator.BETWEEN,
           }]
         }],
         preview: {
           loading: false,
-          count: 10,
+          count: null,
         },
         visitCounts: undefined
       };
@@ -247,7 +246,7 @@ export const ListModifierPage = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      const {workspace: {cdrVersionId}, wizard} = this.props;
+      const {workspace: {cdrVersionId}} = this.props;
       const {formState} = this.state;
       if (this.addEncounters) {
         cohortBuilderApi()
@@ -257,7 +256,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         .then(response => {
           const visitCounts = {};
           const encounters = {
-            name: 'ENCOUNTERS',
+            name: ModifierType.ENCOUNTERS,
             label: 'During Visit Type',
             type: null,
             operator: undefined,
@@ -316,11 +315,11 @@ export const ListModifierPage = withCurrentWorkspace()(
     selectChange = (sel, index) => {
       const {formState} = this.state;
       const {name} = formState[index];
-      if (name === 'ENCOUNTERS') {
+      if (name === ModifierType.ENCOUNTERS) {
         formState[index].values = [sel];
       } else if (!sel) {
         formState[index].values = [undefined, undefined];
-      } else if (sel !== 'BETWEEN') {
+      } else if (sel !== Operator.BETWEEN) {
         formState[index].values[1] = undefined;
       }
       formState[index].operator = sel;
@@ -344,7 +343,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         if (operator) {
           switch (name) {
             case ModifierType.ENCOUNTERS:
-              acc.push({name, operator: 'IN', operands: [operator.toString()]});
+              acc.push({name, operator: Operator.IN, operands: [operator.toString()]});
               break;
             case ModifierType.EVENTDATE:
               acc.push({name, operator, operands: values.map(val => {
@@ -363,20 +362,15 @@ export const ListModifierPage = withCurrentWorkspace()(
 
     get addEncounters() {
       const {wizard: {domain}} = this.props;
-      return [TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(TreeType[domain]) === -1;
+      return ![DomainType.PHYSICALMEASUREMENT, DomainType.VISIT].includes(domain);
     }
 
     requestPreview() {
       // TODO calculate count when new api call is ready
     }
-    // get disableCalculate() {
-    //   const disable = !!this.preview.requesting || !!this.errors.size || this.form.invalid;
-    //   this.props.disabled(disable);
-    //   return disable;
-    // }
 
-    optionTemplate = (opt: any, name: string) => {
-      if (name !== 'ENCOUNTERS' || !opt.value) {
+    optionTemplate = (opt: any, name: any) => {
+      if (name !== ModifierType.ENCOUNTERS || !opt.value) {
         return opt.label;
       }
       const {visitCounts} = this.state;
@@ -420,15 +414,16 @@ export const ListModifierPage = withCurrentWorkspace()(
             }
           } else if (item.operator !== undefined) {
             initialState = false;
-            if (v === 0 || (v === 1 && item.operator === 'BETWEEN')) {
+            if (v === 0 || (v === 1 && item.operator === Operator.BETWEEN)) {
               untouched = true;
             }
           }
         });
         return acc;
       }, new Set());
-      const disabled = !!errors.size || initialState || untouched;
-      this.props.disabled(disabled);
+      const disableFinish = !!errors.size || untouched || preview.loading;
+      this.props.disabled(disableFinish);
+      const disabled = disableFinish || initialState;
       return <div style={{marginTop: '1rem'}}>
         <div style={styles.header}>
           The following modifiers are optional and apply to all selected criteria
@@ -442,7 +437,7 @@ export const ListModifierPage = withCurrentWorkspace()(
           const {label, name, options, operator} = mod;
           return <div key={i} style={{marginTop: '0.75rem'}}>
             <label style={styles.label}>{label}</label>
-            {name === 'EVENT_DATE' &&
+            {name === ModifierType.EVENTDATE &&
               <TooltipTrigger content={<div>{tooltip}</div>}>
                 <ClrIcon style={styles.info} className='is-solid' shape='info-standard'/>
               </TooltipTrigger>
@@ -453,9 +448,9 @@ export const ListModifierPage = withCurrentWorkspace()(
                 onChange={(e) => this.selectChange(e.value, i)}
                 options={options}
                 itemTemplate={(e) => this.optionTemplate(e, name)}/>
-              {operator && name !== 'ENCOUNTERS' && <React.Fragment>
+              {operator && name !== ModifierType.ENCOUNTERS && <React.Fragment>
                 {this.renderInput(i, '0', mod.type)}
-                {operator === 'BETWEEN' && <React.Fragment>
+                {operator === Operator.BETWEEN && <React.Fragment>
                   <span style={{margin: '0 0.25rem'}}>and</span>
                   {this.renderInput(i, '1', mod.type)}
                 </React.Fragment>}
