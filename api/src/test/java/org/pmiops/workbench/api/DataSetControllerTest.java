@@ -112,6 +112,8 @@ public class DataSetControllerTest {
   private static final String WORKSPACE_BUCKET_NAME = "fc://bucket-hash";
   private static final String USER_EMAIL = "bob@gmail.com";
   private static final String TEST_CDR_TABLE = "all-of-us-ehr-dev.synthetic_cdr20180606";
+  private static final String NAMED_PARAMETER_NAME = "p1_706";
+  private static final String NAMED_PARAMETER_VALUE = "ICD9";
 
   private Long COHORT_ONE_ID;
   private Long CONCEPT_SET_ONE_ID;
@@ -398,7 +400,7 @@ public class DataSetControllerTest {
         .thenReturn(
             QueryJobConfiguration.newBuilder(
                     "SELECT * FROM person_id from `" + TEST_CDR_TABLE + "` person")
-                .addNamedParameter("p1_706", QueryParameterValue.string("ICD9"))
+                .addNamedParameter(NAMED_PARAMETER_NAME, QueryParameterValue.string(NAMED_PARAMETER_VALUE))
                 .build());
   }
 
@@ -521,9 +523,9 @@ public class DataSetControllerTest {
                 + "  'parameterMode': 'NAMED',\n"
                 + "  'queryParameters': [\n"
                 + "      {\n"
-                + "        'name': \"p1_706_1\",\n"
+                + "        'name': \"" + NAMED_PARAMETER_NAME + "_" + COHORT_ONE_ID + "\",\n"
                 + "        'parameterType': {'type': \"STRING\"},\n"
-                + "        'parameterValue': {'value': \"ICD9\"}\n"
+                + "        'parameterValue': {'value': \"" + NAMED_PARAMETER_VALUE + "\"}\n"
                 + "      }\n"
                 + "    ]\n"
                 + "  }\n"
@@ -571,9 +573,9 @@ public class DataSetControllerTest {
                 + "    parameterMode = 'NAMED',\n"
                 + "    queryParameters = list(\n"
                 + "      list(\n"
-                + "        name = \"p1_706_1\",\n"
+                + "        name = \"" + NAMED_PARAMETER_NAME + "_" + COHORT_ONE_ID + "\",\n"
                 + "        parameterType = list(type = \"STRING\"),\n"
-                + "        parameterValue = list(value = \"ICD9\")\n"
+                + "        parameterValue = list(value = \"" + NAMED_PARAMETER_VALUE + "\")\n"
                 + "      )\n"
                 + "    )\n"
                 + "  )\n"
