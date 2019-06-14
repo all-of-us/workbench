@@ -56,8 +56,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
         if (!this.open) {
           this.title = wizard.domain;
           this.backMode = 'list';
-          // TODO switch mode back to 'list' after modifiers conversion
-          this.mode = 'modifiers';
+          this.mode = 'list';
           this.open = true;
         }
       });
