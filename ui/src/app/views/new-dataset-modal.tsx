@@ -244,18 +244,15 @@ class NewDataSetModal extends React.Component<Props, State> {
             {Array.from(queries.values())
               .filter(query => query !== undefined).length === 0 && <SpinnerOverlay />}
             <div style={styles.codePreviewSelector}>
-              <TabButton onClick={() => this.setState({previewedKernelType: KernelTypeEnum.Python})}
-                         active={previewedKernelType === KernelTypeEnum.Python}
-                         style={styles.codePreviewSelectorTab}
-                         disabled={queries.get(KernelTypeEnum.Python) === undefined}>
-                Python
-              </TabButton>
-              <TabButton onClick={() => this.setState({previewedKernelType: KernelTypeEnum.R})}
-                         active={previewedKernelType === KernelTypeEnum.R}
-                         style={styles.codePreviewSelectorTab}
-                         disabled={queries.get(KernelTypeEnum.R) === undefined}>
-                R
-              </TabButton>
+              {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
+                .map((kernelTypeEnum, i) =>
+                  <TabButton onClick={() => this.setState({previewedKernelType: kernelTypeEnum})}
+                             key={i}
+                             active={previewedKernelType === kernelTypeEnum}
+                             style={styles.codePreviewSelectorTab}
+                             disabled={queries.get(kernelTypeEnum) === undefined}>
+                    {kernelTypeEnum}
+                  </TabButton>)}
             </div>
             <TextArea disabled={true} onChange={() => {}}
                       data-test-id='code-text-box'
@@ -273,20 +270,16 @@ class NewDataSetModal extends React.Component<Props, State> {
             <div style={headerStyles.formLabel}>
               Programming Language:
             </div>
-            <label style={{display: 'block'}}>
-              <RadioButton
-                checked={this.state.kernelType === KernelTypeEnum.Python}
-                onChange={() => this.setState({kernelType: KernelTypeEnum.Python})}
-              />
-              &nbsp;Python 3
-            </label>
-            <label style={{display: 'block'}}>
-              <RadioButton
-                checked={this.state.kernelType === KernelTypeEnum.R}
-                onChange={() => this.setState({kernelType: KernelTypeEnum.R})}
-              />
-              &nbsp;R
-            </label>
+            {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
+              .map((kernelTypeEnum, i) =>
+                <label key={i} style={{display: 'block'}}>
+                  <RadioButton
+                    checked={this.state.kernelType === kernelTypeEnum}
+                    onChange={() => this.setState({kernelType: kernelTypeEnum})}
+                  />
+                  &nbsp;{kernelTypeEnum}
+                </label>
+              )}
           </React.Fragment>}
         </React.Fragment>}
       </ModalBody>

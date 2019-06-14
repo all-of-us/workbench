@@ -2388,8 +2388,8 @@ definitions:
   KernelTypeEnum:
     type: string
     enum:
-      - R
       - Python
+      - R
 
   DomainValuePair:
     type: object
@@ -2458,7 +2458,7 @@ definitions:
     type: object
     properties:
       kernelType:
-       $ref: "#/definitions/KernelTypeEnum"
+        $ref: "#/definitions/KernelTypeEnum"
       code:
         type: string
         description: The code required to generate the query for the data set.

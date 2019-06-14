@@ -9,6 +9,7 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.gson.Gson;
 import java.io.FileReader;
@@ -110,6 +111,7 @@ public class DataSetControllerTest {
   private static final String WORKSPACE_NAME = "name";
   private static final String WORKSPACE_BUCKET_NAME = "fc://bucket-hash";
   private static final String USER_EMAIL = "bob@gmail.com";
+  private static final String TEST_CDR_TABLE = "all-of-us-ehr-dev.synthetic_cdr20180606";
 
   private Long COHORT_ONE_ID;
   private Long CONCEPT_SET_ONE_ID;
@@ -318,6 +320,7 @@ public class DataSetControllerTest {
     workspacesController.createWorkspace(workspace);
 
     searchRequest = SearchRequests.males();
+
     cohortCriteria = new Gson().toJson(searchRequest);
 
     Cohort cohort = new Cohort().name(COHORT_ONE_NAME).criteria(cohortCriteria);
@@ -394,7 +397,8 @@ public class DataSetControllerTest {
     when(bigQueryService.filterBigQueryConfig(any()))
         .thenReturn(
             QueryJobConfiguration.newBuilder(
-                    "SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person")
+                    "SELECT * FROM person_id from `" + TEST_CDR_TABLE + "` person")
+                .addNamedParameter("p1_706", QueryParameterValue.string("ICD9"))
                 .build());
   }
 
@@ -482,7 +486,7 @@ public class DataSetControllerTest {
   }
 
   @Test
-  public void testGetQuery() {
+  public void testGetPythonQuery() {
     DataSetRequest dataSet = buildEmptyDataSet();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
@@ -490,7 +494,7 @@ public class DataSetControllerTest {
     dataSet.setValues(domainValues);
 
     ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
+    tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
 
     mockLinkingTableQuery(tables);
 
@@ -503,16 +507,20 @@ public class DataSetControllerTest {
     assertThat(response.getCode())
         .isEqualTo(
             "import pandas\n\n"
-                + "blah_condition_sql = \"\"\"SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence WHERE \n"
+                + "blah_condition_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
                 + "condition_source_concept_id IN (123)) \n"
-                + "AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))\"\"\"\n"
+                + "AND (PERSON_ID IN (SELECT * FROM person_id from `" + TEST_CDR_TABLE + "` person))\"\"\"\n"
                 + "\n"
                 + "blah_condition_query_config = {\n"
                 + "  'query': {\n"
                 + "  'parameterMode': 'NAMED',\n"
                 + "  'queryParameters': [\n"
-                + "\n"
+                + "      {\n"
+                + "        'name': \"p1_706_1\",\n"
+                + "        'parameterType': {'type': \"STRING\"},\n"
+                + "        'parameterValue': {'value': \"ICD9\"}\n"
+                + "      }\n"
                 + "    ]\n"
                 + "  }\n"
                 + "}\n"
@@ -531,7 +539,7 @@ public class DataSetControllerTest {
     dataSet.setValues(domainValues);
 
     ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
+    tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
 
     mockLinkingTableQuery(tables);
 
@@ -545,16 +553,20 @@ public class DataSetControllerTest {
             "install.packages(\"reticulate\")\n"
                 + "library(reticulate)\n"
                 + "pd <- reticulate::import(\"pandas\")\n\n"
-                + "blah_condition_sql <- \"SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence WHERE \n"
+                + "blah_condition_sql <- \"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
                 + "condition_source_concept_id IN (123)) \n"
-                + "AND (PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person))\"\n"
+                + "AND (PERSON_ID IN (SELECT * FROM person_id from `" + TEST_CDR_TABLE + "` person))\"\n"
                 + "\n"
                 + "blah_condition_query_config <- list(\n"
                 + "  query = list(\n"
                 + "    parameterMode = 'NAMED',\n"
                 + "    queryParameters = list(\n"
-                + "\n"
+                + "      list(\n"
+                + "        name = \"p1_706_1\",\n"
+                + "        parameterType = list(type = \"STRING\"),\n"
+                + "        parameterValue = list(value = \"ICD9\")\n"
+                + "      )\n"
                 + "    )\n"
                 + "  )\n"
                 + ")\n"
@@ -577,8 +589,8 @@ public class DataSetControllerTest {
     dataSet.setValues(domainValues);
 
     ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
-    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.drug_exposure` d_exposure");
+    tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
+    tables.add("FROM `" + TEST_CDR_TABLE + ".drug_exposure` d_exposure");
 
     mockLinkingTableQuery(tables);
 
@@ -602,7 +614,7 @@ public class DataSetControllerTest {
     dataSet.setValues(domainValuePairList);
 
     ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
+    tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
 
     mockLinkingTableQuery(tables);
 
@@ -676,7 +688,7 @@ public class DataSetControllerTest {
     dataSet.setValues(domainValues);
 
     ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
+    tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
 
     mockLinkingTableQuery(tables);
     String notebookName = "Hello World";
@@ -705,7 +717,7 @@ public class DataSetControllerTest {
     dataSet.setValues(domainValues);
 
     ArrayList<String> tables = new ArrayList<>();
-    tables.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
+    tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
 
     mockLinkingTableQuery(tables);
 

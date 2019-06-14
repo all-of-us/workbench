@@ -512,35 +512,6 @@ public class DataSetController implements DataSetApiDelegate {
         .put("source", new JSONArray().put(cellInformation));
   }
 
-  private NamedParameterEntry generateResponseFromQueryParameter(
-      String key, QueryParameterValue value) {
-    if (value.getValue() != null) {
-      return new NamedParameterEntry()
-          .key(key)
-          .value(
-              new NamedParameterValue()
-                  .name(key)
-                  .parameterType(value.getType().toString())
-                  .parameterValue(value.getValue()));
-    } else if (value.getArrayValues() != null) {
-      List<NamedParameterValue> values =
-          value.getArrayValues().stream()
-              .map(arrayValue -> generateResponseFromQueryParameter(key, arrayValue).getValue())
-              .collect(Collectors.toList());
-      return new NamedParameterEntry()
-          .key(key)
-          .value(
-              new NamedParameterValue()
-                  .name(key)
-                  .parameterType(value.getType().toString())
-                  .arrayType(value.getArrayType() == null ? null : value.getArrayType().toString())
-                  .parameterValue(values));
-    } else {
-      throw new ServerErrorException(
-          "Unsupported query parameter type in query generation: " + value.getType().toString());
-    }
-  }
-
   private org.pmiops.workbench.db.model.DataSet getDbDataSet(
       String workspaceNamespace,
       String workspaceId,

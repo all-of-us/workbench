@@ -63,11 +63,11 @@ class DomainConceptIds {
 public class DataSetServiceImpl implements DataSetService {
 
   @VisibleForTesting
-  public static class ValuesLinkingPair {
+  private static class ValuesLinkingPair {
     private List<String> selects;
     private List<String> joins;
 
-    public ValuesLinkingPair(List<String> selects, List<String> joins) {
+    private ValuesLinkingPair(List<String> selects, List<String> joins) {
       this.selects = selects;
       this.joins = joins;
     }
@@ -270,22 +270,22 @@ public class DataSetServiceImpl implements DataSetService {
       KernelTypeEnum kernelTypeEnum,
       String dataSetName,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
-    String libraries;
+    String prerequisites;
     switch (kernelTypeEnum) {
       case R:
-        libraries =
+        prerequisites =
             "install.packages(\"reticulate\")\n"
                 + "library(reticulate)\n"
                 + "pd <- reticulate::import(\"pandas\")";
         break;
       case PYTHON:
-        libraries = "import pandas";
+        prerequisites = "import pandas";
         break;
       default:
         throw new BadRequestException(
             "Kernel Type " + kernelTypeEnum.toString() + " not supported");
     }
-    return libraries
+    return prerequisites
         + "\n\n"
         + queryJobConfigurationMap.entrySet().stream()
             .map(
@@ -345,14 +345,15 @@ public class DataSetServiceImpl implements DataSetService {
     return new ValuesLinkingPair(valueSelects, valueJoins);
   }
 
-  private String convertQueryToString(
+  private static String convertQueryToString(
       QueryJobConfiguration queryJobConfiguration,
       Domain domain,
       String prefix,
       KernelTypeEnum kernelTypeEnum) {
+
+    // Define [namespace]_sql, [namespace]_query_config, and [namespace]_df variables
     String namespace =
         prefix.toLowerCase().replaceAll(" ", "_") + "_" + domain.toString().toLowerCase() + "_";
-
     String sqlSection;
     String namedParamsSection;
     String dataFrameSection;
@@ -421,7 +422,7 @@ public class DataSetServiceImpl implements DataSetService {
   // To avoid warnings on our cast to list, we suppress those warnings here,
   // as they are expected.
   @SuppressWarnings("unchecked")
-  private String convertNamedParameterToString(
+  private static String convertNamedParameterToString(
       String key, QueryParameterValue namedParameterValue, KernelTypeEnum kernelTypeEnum) {
     if (namedParameterValue == null) {
       return "";
