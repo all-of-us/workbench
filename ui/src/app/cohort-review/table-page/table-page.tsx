@@ -37,6 +37,7 @@ import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
+import {ClrIcon} from '../../components/icons';
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},
@@ -164,7 +165,18 @@ const styles = reactStyles({
     left: '359.531px!important',
     maxHeight: 'calc(100vh - 360px)',
     overflow: 'auto'
-  }
+  },
+  error: {
+    background: '#F7981C',
+    color: '#ffffff',
+    fontSize: '12px',
+    fontWeight: 500,
+    textAlign: 'left',
+    border: '1px solid #ebafa6',
+    borderRadius: '5px',
+    marginTop: '0.25rem',
+    padding: '8px'
+  },
 });
 const filterIcons = {
   active: {
@@ -192,7 +204,11 @@ const reverseColumnEnum = {
   status: Columns.STATUS
 };
 
-export interface ParticipantsTableState {
+interface Props {
+  workspace: WorkspaceData
+}
+
+interface State {
   data: Array<any>;
   loading: boolean;
   page: number;
@@ -201,10 +217,11 @@ export interface ParticipantsTableState {
   total: number;
   filters: any;
   cohortDescription: boolean;
+  error: boolean;
 }
 
 export const ParticipantsTable = withCurrentWorkspace()(
-  class extends React.Component<{workspace: WorkspaceData}, ParticipantsTableState> {
+  class extends React.Component<Props, State> {
     filterInput: Function;
     constructor(props: any) {
       super(props);
@@ -217,6 +234,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
         total: null,
         filters: filterStateStore.getValue().participants,
         cohortDescription: false,
+        error: false,
       };
       this.filterInput = fp.debounce(300, () => this.getTableData());
     }
@@ -323,7 +341,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
       } catch (error) {
         console.log(error);
         this.setState({
-          loading: false
+          loading: false,
+          error: true
         });
       }
     }
@@ -417,7 +436,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     onPage = (event: any) => {
       const {page} = this.state;
       if (event.page !== page) {
-        this.setState({loading: true, page: event.page});
+        this.setState({loading: true, error: false, page: event.page});
         setTimeout(() => this.getTableData());
       }
     }
@@ -425,9 +444,9 @@ export const ParticipantsTable = withCurrentWorkspace()(
     columnSort = (sortField: string) => {
       if (this.state.sortField === sortField) {
         const sortOrder = this.state.sortOrder === 1 ? -1 : 1;
-        this.setState({loading: true, sortOrder});
+        this.setState({loading: true, error: false, sortOrder});
       } else {
-        this.setState({loading: true, sortField, sortOrder: 1});
+        this.setState({loading: true, error: false, sortField, sortOrder: 1});
       }
       setTimeout(() => this.getTableData());
     }
@@ -435,7 +454,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     filterTemplate(column: string) {
       const {data, filters, loading} = this.state;
       if (!data) {
-        return {};
+        return '';
       }
       const colType = reverseColumnEnum[column];
       const options = multiFilters[colType];
@@ -499,15 +518,34 @@ export const ParticipantsTable = withCurrentWorkspace()(
           }
         }
       }
-      this.setState({loading: true, filters});
+      this.setState({loading: true, error: false, filters});
       setTimeout(() => this.getTableData());
     }
 
     onInputChange = (value: any) => {
       const {filters} = this.state;
       filters.PARTICIPANTID = value;
-      this.setState({loading: true, filters});
+      this.setState({loading: true, error: false, filters});
       this.filterInput(value);
+    }
+
+    errorMessage = () => {
+      const {data, error} = this.state;
+      if ((data && data.length) || (!data && !error)) {
+        return false;
+      }
+      let message: string;
+      if (data && data.length === 0) {
+        // TODO verify correct text here: changed 'the selected criteria' to 'your filters'
+        message = 'Data cannot be found. Please review your filters and try again.';
+      } else if (!data && error) {
+        message = 'Sorry, the request cannot be completed.';
+      }
+      return <div style={styles.error}>
+        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+          shape='exclamation-triangle' size='22'/>
+          {message}
+      </div>;
     }
 
     render() {
@@ -566,7 +604,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           <div style={styles.description}>
             {cohort.description}
           </div>
-          {data && <DataTable
+          <DataTable
             style={styles.table}
             value={data}
             first={start}
@@ -575,15 +613,17 @@ export const ParticipantsTable = withCurrentWorkspace()(
             lazy
             paginator
             onPage={this.onPage}
-            paginatorTemplate={data.length ? paginatorTemplate : ''}
-            currentPageReportTemplate={data.length ? pageReportTemplate : ''}
+            alwaysShowPaginator={false}
+            paginatorTemplate={data && data.length ? paginatorTemplate : ''}
+            currentPageReportTemplate={data && data.length ? pageReportTemplate : ''}
             rows={rows}
             totalRecords={total}
             onRowClick={this.onRowClick}
             scrollable
-            scrollHeight='calc(100vh - 350px)'>
+            scrollHeight='calc(100vh - 350px)'
+            footer={this.errorMessage()}>
             {columns}
-          </DataTable>}
+          </DataTable>
         </React.Fragment>}
         {cohortDescription && <React.Fragment>
           <button
