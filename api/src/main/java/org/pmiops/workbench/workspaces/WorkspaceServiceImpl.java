@@ -135,13 +135,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Map<User, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(Workspace workspace) {
-    log.log(
-        Level.INFO,
-        workspace.getName()
-            + ' '
-            + workspace.getFirecloudWorkspaceId()
-            + ' '
-            + workspace.getFirecloudUuid());
     WorkspaceACL firecloudWorkspaceAcls =
         fireCloudService.getWorkspaceAcl(
             workspace.getWorkspaceNamespace(), workspace.getFirecloudName());

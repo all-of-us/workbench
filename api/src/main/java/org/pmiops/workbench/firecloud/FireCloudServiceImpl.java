@@ -50,6 +50,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<NihApi> nihApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
+  private final Provider<WorkspacesApi> workspaceAclsApiProvider;
   private final Provider<StatusApi> statusApiProvider;
   private final FirecloudRetryHandler retryHandler;
   private final Provider<GoogleCredential> fcAdminCredsProvider;
@@ -80,7 +81,8 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<BillingApi> billingApiProvider,
       Provider<GroupsApi> groupsApiProvider,
       Provider<NihApi> nihApiProvider,
-      Provider<WorkspacesApi> workspacesApiProvider,
+      @Qualifier("workspacesApi") Provider<WorkspacesApi> workspacesApiProvider,
+      @Qualifier("workspaceAclsApi") Provider<WorkspacesApi> workspaceAclsApiProvider,
       Provider<StatusApi> statusApiProvider,
       FirecloudRetryHandler retryHandler,
       ServiceAccounts serviceAccounts,
@@ -91,6 +93,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.groupsApiProvider = groupsApiProvider;
     this.nihApiProvider = nihApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
+    this.workspaceAclsApiProvider = workspaceAclsApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
     this.serviceAccounts = serviceAccounts;
@@ -279,8 +282,8 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public WorkspaceACL getWorkspaceAcl(String projectName, String workspaceName) {
-    WorkspacesApi workspacesApi = workspacesApiProvider.get();
-    return retryHandler.run((context) -> workspacesApi.getWorkspaceAcl(projectName, workspaceName));
+    WorkspacesApi workspaceAclsApi = workspaceAclsApiProvider.get();
+    return retryHandler.run((context) -> workspaceAclsApi.getWorkspaceAcl(projectName, workspaceName));
   }
 
   @Override
