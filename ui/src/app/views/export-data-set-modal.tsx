@@ -95,18 +95,15 @@ class ExportDataSetModal extends React.Component<
       workspaceFirecloudName,
       KernelTypeEnum.Python.toString(),
       dataSetRequest).then(pythonCode => {
-        const queries = this.state.queries;
-        queries.set(KernelTypeEnum.Python, pythonCode.code);
-        this.setState({queries: queries});
+        this.setState(({queries}) => ({
+          queries: queries.set(KernelTypeEnum.Python, pythonCode.code)}));
       });
     dataSetApi().generateCode(
       workspaceNamespace,
       workspaceFirecloudName,
       KernelTypeEnum.R.toString(),
       dataSetRequest).then(rCode => {
-        const queries = this.state.queries;
-        queries.set(KernelTypeEnum.R, rCode.code);
-        this.setState({queries: queries});
+        this.setState(({queries}) => ({queries: queries.set(KernelTypeEnum.R, rCode.code)}));
       });
   }
 
@@ -146,10 +143,6 @@ class ExportDataSetModal extends React.Component<
       queries,
       seePreview
     } = this.state;
-    console.log('Keys: ');
-    console.log(Object.keys(KernelTypeEnum));
-    console.log('Single Map: ');
-    console.log(Object.keys(KernelTypeEnum).map(str => KernelTypeEnum[str]));
     const selectOptions = [{label: '(Create a new notebook)', value: ''}]
       .concat(existingNotebooks.map(notebook => ({
         value: notebook.name.slice(0, -6),
