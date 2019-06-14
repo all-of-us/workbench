@@ -5,22 +5,26 @@ import {validate} from 'validate.js';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {AlertDanger} from 'app/components/alert';
-import {Button} from 'app/components/buttons';
-import {SmallHeader} from 'app/components/headers';
-import {Select, TextArea} from 'app/components/inputs';
-import {CheckBox, TextInput} from 'app/components/inputs';
+import {Button, TabButton} from 'app/components/buttons';
+import {SmallHeader, styles as headerStyles} from 'app/components/headers';
+import {
+  CheckBox,
+  RadioButton,
+  Select,
+  TextArea,
+  TextInput
+} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
-import {convertQueryToText} from 'app/utils/big-query-queries';
 import {navigate} from 'app/utils/navigation';
 import {
-  DataSetQuery,
   DataSetRequest,
   DomainValuePair,
-  FileDetail
+  FileDetail,
+  KernelTypeEnum
 } from 'generated/fetch';
 
 interface Props {
@@ -37,15 +41,27 @@ interface State {
   conflictDataSetName: boolean;
   existingNotebooks: FileDetail[];
   exportToNotebook: boolean;
+  kernelType: KernelTypeEnum;
   loading: boolean;
   missingDataSetInfo: boolean;
   name: string;
   newNotebook: boolean;
   notebookName: string;
   notebooksLoading: boolean;
-  queries: Array<DataSetQuery>;
+  previewedKernelType: KernelTypeEnum;
+  queries: Map<KernelTypeEnum, String>;
   seePreview: boolean;
 }
+
+const styles = {
+  codePreviewSelector: {
+    display: 'flex',
+    marginTop: '1rem'
+  },
+  codePreviewSelectorTab: {
+    width: '2.6rem'
+  }
+};
 
 
 class NewDataSetModal extends React.Component<Props, State> {
@@ -55,13 +71,15 @@ class NewDataSetModal extends React.Component<Props, State> {
       conflictDataSetName: false,
       existingNotebooks: [],
       exportToNotebook: false,
+      kernelType: KernelTypeEnum.Python,
       loading: false,
       missingDataSetInfo: false,
       name: '',
       newNotebook: true,
       notebookName: '',
       notebooksLoading: false,
-      queries: [],
+      previewedKernelType: KernelTypeEnum.Python,
+      queries: new Map([[KernelTypeEnum.Python, undefined], [KernelTypeEnum.R, undefined]]),
       seePreview: false
     };
   }
@@ -109,6 +127,7 @@ class NewDataSetModal extends React.Component<Props, State> {
           workspaceNamespace, workspaceId,
           {
             dataSetRequest: request,
+            kernelType: this.state.kernelType,
             notebookName: this.state.notebookName,
             newNotebook: this.state.newNotebook
           });
@@ -131,15 +150,28 @@ class NewDataSetModal extends React.Component<Props, State> {
 
   async generateQuery() {
     const {workspaceNamespace, workspaceId} = this.props;
-    const dataSet: DataSetRequest = {
-      name: '',
+    const dataSetRequest: DataSetRequest = {
+      name: 'dataSet',
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
       values: this.props.selectedValues,
       includesAllParticipants: this.props.includesAllParticipants,
     };
-    const sqlQueries = await dataSetApi().generateQuery(workspaceNamespace, workspaceId, dataSet);
-    this.setState({queries: sqlQueries.queryList});
+    dataSetApi().generateCode(
+      workspaceNamespace,
+      workspaceId,
+      KernelTypeEnum.Python.toString(),
+      dataSetRequest).then(pythonCode => {
+        this.setState(({queries}) => ({
+          queries: queries.set(KernelTypeEnum.Python, pythonCode.code)}));
+      });
+    dataSetApi().generateCode(
+      workspaceNamespace,
+      workspaceId,
+      KernelTypeEnum.R.toString(),
+      dataSetRequest).then(rCode => {
+        this.setState(({queries}) => ({queries: queries.set(KernelTypeEnum.R, rCode.code)}));
+      });
   }
 
   render() {
@@ -153,6 +185,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       notebookName,
       notebooksLoading,
       existingNotebooks,
+      previewedKernelType,
       queries,
       seePreview
     } = this.state;
@@ -196,7 +229,7 @@ class NewDataSetModal extends React.Component<Props, State> {
                     data-test-id='export-to-notebook'
                     onChange={() => this.changeExportToNotebook()} />
           <div style={{marginLeft: '.5rem',
-            color: colors.black[0]}}>Export to Python notebook</div>
+            color: colors.black[0]}}>Export to notebook</div>
         </div>
         {exportToNotebook && <React.Fragment>
           {notebooksLoading && <SpinnerOverlay />}
@@ -205,11 +238,23 @@ class NewDataSetModal extends React.Component<Props, State> {
             {seePreview ? 'Hide Preview' : 'See Code Preview'}
           </Button>
           {seePreview && <React.Fragment>
-            {queries.length === 0 && <SpinnerOverlay />}
-            <TextArea disabled={true} onChange={() => {}} style={{marginTop: '1rem'}}
+            {Array.from(queries.values())
+              .filter(query => query !== undefined).length === 0 && <SpinnerOverlay />}
+            <div style={styles.codePreviewSelector}>
+              {Object.keys(KernelTypeEnum)
+                .map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
+                .map((kernelTypeEnum, i) =>
+                  <TabButton onClick={() => this.setState({previewedKernelType: kernelTypeEnum})}
+                             key={i}
+                             active={previewedKernelType === kernelTypeEnum}
+                             style={styles.codePreviewSelectorTab}
+                             disabled={queries.get(kernelTypeEnum) === undefined}>
+                    {kernelTypeEnum}
+                  </TabButton>)}
+            </div>
+            <TextArea disabled={true} onChange={() => {}}
                       data-test-id='code-text-box'
-                      value={queries.map(query =>
-                        convertQueryToText(name, query.domain, query))} />
+                      value={queries.get(previewedKernelType)} />
           </React.Fragment>}
           <div style={{marginTop: '1rem'}}>
             <Select value={this.state.notebookName}
@@ -220,6 +265,19 @@ class NewDataSetModal extends React.Component<Props, State> {
             <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
             <TextInput onChange={(v) => this.setState({notebookName: v})}
                        value={notebookName} data-test-id='notebook-name-input'/>
+            <div style={headerStyles.formLabel}>
+              Programming Language:
+            </div>
+            {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
+              .map((kernelTypeEnum, i) =>
+                <label key={i} style={{display: 'block'}}>
+                  <RadioButton
+                    checked={this.state.kernelType === kernelTypeEnum}
+                    onChange={() => this.setState({kernelType: kernelTypeEnum})}
+                  />
+                  &nbsp;{kernelTypeEnum}
+                </label>
+              )}
           </React.Fragment>}
         </React.Fragment>}
       </ModalBody>

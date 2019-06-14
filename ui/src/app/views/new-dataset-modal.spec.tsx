@@ -2,7 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {NewDataSetModal} from './new-dataset-modal';
-import {DataSetApi, WorkspacesApi} from 'generated/fetch';
+import {DataSetApi, KernelTypeEnum, WorkspacesApi} from 'generated/fetch';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -127,7 +127,8 @@ describe('NewDataSetModal', () => {
     expect(exportSpy).toHaveBeenCalledWith(workspaceNamespace, workspaceId, {
       dataSetRequest: dataSetRequestStub,
       newNotebook: true,
-      notebookName: notebookNameStub
+      notebookName: notebookNameStub,
+      kernelType: KernelTypeEnum.Python
     });
   });
 });

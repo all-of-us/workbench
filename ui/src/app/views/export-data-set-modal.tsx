@@ -1,19 +1,18 @@
 import * as React from 'react';
 import {validate} from 'validate.js';
 
-import {Button} from 'app/components/buttons';
-import {SmallHeader} from 'app/components/headers';
-import {Select, TextArea, TextInput} from 'app/components/inputs';
+import {Button, TabButton} from 'app/components/buttons';
+import {SmallHeader, styles as headerStyles} from 'app/components/headers';
+import {RadioButton, Select, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {summarizeErrors} from 'app/utils';
-import {convertQueryToText} from 'app/utils/big-query-queries';
 import {navigate} from 'app/utils/navigation';
 
 
-import {DataSet, DataSetQuery, DataSetRequest, FileDetail} from 'generated/fetch';
+import {DataSet, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
 
 interface Props {
   closeFunction: Function;
@@ -24,13 +23,25 @@ interface Props {
 
 interface State {
   existingNotebooks: FileDetail[];
+  kernelType: KernelTypeEnum;
   loading: boolean;
   newNotebook: boolean;
   notebookName: string;
   notebooksLoading: boolean;
-  queries: Array<DataSetQuery>;
+  previewedKernelType: KernelTypeEnum;
+  queries: Map<KernelTypeEnum, String>;
   seePreview: boolean;
 }
+
+const styles = {
+  codePreviewSelector: {
+    display: 'flex',
+    marginTop: '1rem'
+  },
+  codePreviewSelectorTab: {
+    width: '2.6rem'
+  }
+};
 
 class ExportDataSetModal extends React.Component<
   Props,
@@ -40,11 +51,13 @@ class ExportDataSetModal extends React.Component<
     super(props);
     this.state = {
       existingNotebooks: [],
+      kernelType: KernelTypeEnum.Python,
       loading: false,
       newNotebook: true,
       notebookName: '',
       notebooksLoading: true,
-      queries: [],
+      previewedKernelType: KernelTypeEnum.Python,
+      queries: new Map([[KernelTypeEnum.Python, undefined], [KernelTypeEnum.R, undefined]]),
       seePreview: false,
     };
   }
@@ -69,17 +82,29 @@ class ExportDataSetModal extends React.Component<
   }
 
   async generateQuery() {
-    const {workspaceNamespace, workspaceFirecloudName} = this.props;
-    const dataSet: DataSetRequest = {
-      name: '',
-      conceptSetIds: this.props.dataSet.conceptSets.map(cs => cs.id),
-      cohortIds: this.props.dataSet.cohorts.map(c => c.id),
-      values: this.props.dataSet.values,
-      includesAllParticipants: this.props.dataSet.includesAllParticipants,
+    const {dataSet, workspaceNamespace, workspaceFirecloudName} = this.props;
+    const dataSetRequest: DataSetRequest = {
+      name: dataSet.name,
+      conceptSetIds: dataSet.conceptSets.map(cs => cs.id),
+      cohortIds: dataSet.cohorts.map(c => c.id),
+      values: dataSet.values,
+      includesAllParticipants: dataSet.includesAllParticipants,
     };
-    const sqlQueries = await dataSetApi().generateQuery(
-      workspaceNamespace, workspaceFirecloudName, dataSet);
-    this.setState({queries: sqlQueries.queryList});
+    dataSetApi().generateCode(
+      workspaceNamespace,
+      workspaceFirecloudName,
+      KernelTypeEnum.Python.toString(),
+      dataSetRequest).then(pythonCode => {
+        this.setState(({queries}) => ({
+          queries: queries.set(KernelTypeEnum.Python, pythonCode.code)}));
+      });
+    dataSetApi().generateCode(
+      workspaceNamespace,
+      workspaceFirecloudName,
+      KernelTypeEnum.R.toString(),
+      dataSetRequest).then(rCode => {
+        this.setState(({queries}) => ({queries: queries.set(KernelTypeEnum.R, rCode.code)}));
+      });
   }
 
   async exportDataSet() {
@@ -98,7 +123,8 @@ class ExportDataSetModal extends React.Component<
       {
         dataSetRequest: request,
         notebookName: this.state.notebookName,
-        newNotebook: this.state.newNotebook
+        newNotebook: this.state.newNotebook,
+        kernelType: this.state.kernelType
       });
     navigate(['workspaces',
       workspaceNamespace,
@@ -113,6 +139,7 @@ class ExportDataSetModal extends React.Component<
       newNotebook,
       notebookName,
       notebooksLoading,
+      previewedKernelType,
       queries,
       seePreview
     } = this.state;
@@ -132,18 +159,29 @@ class ExportDataSetModal extends React.Component<
       }
     });
     return <Modal loading={loading || notebooksLoading}>
-      <ModalTitle>Export {dataSet.name} to Python Notebook</ModalTitle>
+      <ModalTitle>Export {dataSet.name} to Notebook</ModalTitle>
       <ModalBody>
         <Button data-test-id='code-preview-button'
                 onClick={() => this.setState({seePreview: !seePreview})}>
           {seePreview ? 'Hide Preview' : 'See Code Preview'}
         </Button>
         {seePreview && <React.Fragment>
-          {queries.length === 0 && <SpinnerOverlay />}
-          <TextArea disabled={true} onChange={() => {}} style={{marginTop: '1rem'}}
+          {Array.from(queries.values())
+            .filter(query => query !== undefined).length === 0 && <SpinnerOverlay />}
+          <div style={styles.codePreviewSelector}>
+            {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
+              .map((kernelTypeEnum, i) =>
+              <TabButton onClick={() => this.setState({previewedKernelType: kernelTypeEnum})}
+                key={i}
+                active={previewedKernelType === kernelTypeEnum}
+                style={styles.codePreviewSelectorTab}
+                disabled={queries.get(kernelTypeEnum) === undefined}>
+              {kernelTypeEnum}
+            </TabButton>)}
+          </div>
+          <TextArea disabled={true} onChange={() => {}}
                     data-test-id='code-text-box'
-                    value={queries.map(query =>
-                      convertQueryToText(dataSet.name, query.domain, query))} />
+                    value={queries.get(previewedKernelType)} />
         </React.Fragment>}
         <div style={{marginTop: '1rem'}}>
           <Select value={this.state.notebookName}
@@ -154,7 +192,20 @@ class ExportDataSetModal extends React.Component<
           <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
           <TextInput onChange={(v) => this.setState({notebookName: v})}
                      value={notebookName} data-test-id='notebook-name-input'/>
-        </React.Fragment>}
+          <div style={headerStyles.formLabel}>
+            Programming Language:
+          </div>
+          {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
+            .map((kernelTypeEnum, i) =>
+              <label key={i} style={{display: 'block'}}>
+                <RadioButton
+                  checked={this.state.kernelType === kernelTypeEnum}
+                  onChange={() => this.setState({kernelType: kernelTypeEnum})}
+                />
+                &nbsp;{kernelTypeEnum}
+              </label>
+            )}
+         </React.Fragment>}
       </ModalBody>
       <ModalFooter>
         <Button type='secondary'
