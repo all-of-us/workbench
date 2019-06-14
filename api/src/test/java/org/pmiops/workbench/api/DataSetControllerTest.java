@@ -400,7 +400,8 @@ public class DataSetControllerTest {
         .thenReturn(
             QueryJobConfiguration.newBuilder(
                     "SELECT * FROM person_id from `" + TEST_CDR_TABLE + "` person")
-                .addNamedParameter(NAMED_PARAMETER_NAME, QueryParameterValue.string(NAMED_PARAMETER_VALUE))
+                .addNamedParameter(
+                    NAMED_PARAMETER_NAME, QueryParameterValue.string(NAMED_PARAMETER_VALUE))
                 .build());
   }
 
@@ -523,9 +524,15 @@ public class DataSetControllerTest {
                 + "  'parameterMode': 'NAMED',\n"
                 + "  'queryParameters': [\n"
                 + "      {\n"
-                + "        'name': \"" + NAMED_PARAMETER_NAME + "_" + COHORT_ONE_ID + "\",\n"
+                + "        'name': \""
+                + NAMED_PARAMETER_NAME
+                + "_"
+                + COHORT_ONE_ID
+                + "\",\n"
                 + "        'parameterType': {'type': \"STRING\"},\n"
-                + "        'parameterValue': {'value': \"" + NAMED_PARAMETER_VALUE + "\"}\n"
+                + "        'parameterValue': {'value': \""
+                + NAMED_PARAMETER_VALUE
+                + "\"}\n"
                 + "      }\n"
                 + "    ]\n"
                 + "  }\n"
@@ -573,9 +580,15 @@ public class DataSetControllerTest {
                 + "    parameterMode = 'NAMED',\n"
                 + "    queryParameters = list(\n"
                 + "      list(\n"
-                + "        name = \"" + NAMED_PARAMETER_NAME + "_" + COHORT_ONE_ID + "\",\n"
+                + "        name = \""
+                + NAMED_PARAMETER_NAME
+                + "_"
+                + COHORT_ONE_ID
+                + "\",\n"
                 + "        parameterType = list(type = \"STRING\"),\n"
-                + "        parameterValue = list(value = \"" + NAMED_PARAMETER_VALUE + "\")\n"
+                + "        parameterValue = list(value = \""
+                + NAMED_PARAMETER_VALUE
+                + "\")\n"
                 + "      )\n"
                 + "    )\n"
                 + "  )\n"
