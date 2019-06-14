@@ -162,18 +162,15 @@ class NewDataSetModal extends React.Component<Props, State> {
       workspaceId,
       KernelTypeEnum.Python.toString(),
       dataSetRequest).then(pythonCode => {
-        const queries = this.state.queries;
-        queries.set(KernelTypeEnum.Python, pythonCode.code);
-        this.setState({queries: queries});
+        this.setState(({queries}) => ({
+          queries: queries.set(KernelTypeEnum.Python, pythonCode.code)}));
       });
     dataSetApi().generateCode(
       workspaceNamespace,
       workspaceId,
       KernelTypeEnum.R.toString(),
       dataSetRequest).then(rCode => {
-        const queries = this.state.queries;
-        queries.set(KernelTypeEnum.R, rCode.code);
-        this.setState({queries: queries});
+        this.setState(({queries}) => ({queries: queries.set(KernelTypeEnum.R, rCode.code)}));
       });
   }
 
@@ -244,7 +241,8 @@ class NewDataSetModal extends React.Component<Props, State> {
             {Array.from(queries.values())
               .filter(query => query !== undefined).length === 0 && <SpinnerOverlay />}
             <div style={styles.codePreviewSelector}>
-              {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
+              {Object.keys(KernelTypeEnum)
+                .map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
                 .map((kernelTypeEnum, i) =>
                   <TabButton onClick={() => this.setState({previewedKernelType: kernelTypeEnum})}
                              key={i}
