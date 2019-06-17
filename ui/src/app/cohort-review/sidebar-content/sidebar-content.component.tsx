@@ -11,7 +11,7 @@ import {CheckBox, DatePicker, NumberInput, Select, TextArea} from 'app/component
 import {Spinner} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {withCurrentWorkspace, withUrlParams} from 'app/utils/index';
+import {withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {AnnotationType, CohortAnnotationDefinition, CohortStatus, ParticipantCohortAnnotation, WorkspaceAccessLevel} from 'generated/fetch';
 
@@ -19,6 +19,19 @@ const styles = {
   header: {
     fontSize: 18,
     color: colors.purple[0],
+  },
+  error: {
+    color: '#F7981C',
+    marginTop: '-3px',
+  },
+  success: {
+    color: '#7CC79B',
+    marginTop: '-3px',
+  },
+  message: {
+    color: '#000000',
+    fontSize: '13px',
+    fontWeight: 400
   }
 };
 
@@ -55,16 +68,23 @@ const AnnotationItem = fp.flow(
 }, {
   editValue: number | string | boolean | Date,
   savingValue: number | string | boolean | Date,
+  saving: boolean,
+  error: boolean,
+  success: boolean,
 }> {
   constructor(props) {
     super(props);
     this.state = {
       editValue: undefined,
       savingValue: undefined,
+      saving: false,
+      error: false,
+      success: false,
     };
   }
 
   async save(newValue) {
+    this.setState({saving: true});
     try {
       const {
         annotation, setAnnotation,
@@ -79,23 +99,31 @@ const AnnotationItem = fp.flow(
         setAnnotation(await cohortReviewApi()
           .deleteParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, aid));
       } else if (aid && newValue !== value) {
-        setAnnotation(await cohortReviewApi()
+        cohortReviewApi()
           .updateParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, aid, {
             ...writeValue(annotationType, newValue),
-          }));
+          }).then(res => {
+            setAnnotation(res);
+            this.setState({saving: false, success: true});
+          });
       } else if (!aid && newValue) {
-        setAnnotation(await cohortReviewApi()
+        cohortReviewApi()
           .createParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, {
             cohortAnnotationDefinitionId,
             cohortReviewId: cohortReviewStore.getValue().cohortReviewId,
             participantId: pid,
             ...writeValue(annotationType, newValue),
-          }));
+          }).then(res => {
+            setAnnotation(res);
+            this.setState({saving: false, success: true});
+          });
       }
     } catch (error) {
       console.error(error);
+      this.setState({saving: false, error: true});
     } finally {
       this.setState({savingValue: undefined});
+      setTimeout(() => this.setState({error: false, success: false}), 5000);
     }
   }
 
@@ -170,13 +198,21 @@ const AnnotationItem = fp.flow(
 
   render() {
     const {definition: {columnName}} = this.props;
-    const {savingValue} = this.state;
+    const {error, saving, success} = this.state;
     return <React.Fragment>
-      <div style={{display: 'flex', alignItems: 'center', ...headerStyles.formLabel}}>
+      <div style={{alignItems: 'center', ...headerStyles.formLabel}}>
         <div>{columnName}</div>
-        {savingValue !== undefined &&
-          <Spinner style={{marginLeft: 'auto'}} width={16} height={16}/>
-        }
+        {error && <div>
+          <ClrIcon style={styles.error} shape='exclamation-triangle'
+            size='20' className='is-solid' />
+          <span style={styles.message}> Save Failed</span>
+        </div>}
+        {success && <div>
+          <ClrIcon style={styles.success} shape='check-circle' size='20' className='is-solid' />
+          <span style={styles.message}> Annotation Saved</span>
+        </div>}
+        {/*TODO fix infinite spinner on participant navigation after annotation update*/}
+        {saving && <Spinner size={16}/>}
       </div>
       {this.renderInput()}
     </React.Fragment>;
