@@ -307,22 +307,9 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaLeavesAndParentsByRegExp() throws Exception {
-    CBCriteria criteria =
-        new CBCriteria()
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .standard(false)
-            .path("1.5.99");
+  public void findCriteriaLeavesAndParentsByPath() throws Exception {
+    CBCriteria criteria = new CBCriteria().path("1.5.99");
     cbCriteriaDao.save(criteria);
-    assertEquals(
-        criteria,
-        cbCriteriaDao
-            .findCriteriaLeavesAndParentsByRegExp(
-                "([.]|^)5($|[.])",
-                DomainType.CONDITION.toString(),
-                CriteriaType.ICD9CM.toString(),
-                false)
-            .get(0));
+    assertEquals(criteria, cbCriteriaDao.findCriteriaLeavesAndParentsByPath("1.5").get(0));
   }
 }
