@@ -283,7 +283,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public WorkspaceACL getWorkspaceAcl(String projectName, String workspaceName) {
     WorkspacesApi workspaceAclsApi = workspaceAclsApiProvider.get();
-    return retryHandler.run((context) -> workspaceAclsApi.getWorkspaceAcl(projectName, workspaceName));
+    return retryHandler.run(
+        (context) -> workspaceAclsApi.getWorkspaceAcl(projectName, workspaceName));
   }
 
   @Override

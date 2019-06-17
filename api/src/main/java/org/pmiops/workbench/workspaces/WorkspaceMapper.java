@@ -54,7 +54,6 @@ public class WorkspaceMapper {
     return result;
   }
 
-  // TODO: delete this method? it is never used
   public Workspace toApiWorkspace(
       org.pmiops.workbench.db.model.Workspace workspace,
       org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,

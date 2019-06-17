@@ -85,7 +85,8 @@ public class FireCloudConfig {
 
   @Bean(name = WORKSPACE_ACLS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public WorkspacesApi workspacesApiAcls(@Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
+  public WorkspacesApi workspacesApiAcls(
+      @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     WorkspacesApi api = new WorkspacesApi();
     api.setApiClient(apiClient);
     return api;
