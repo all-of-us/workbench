@@ -1,6 +1,7 @@
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
 import {vocabOptions} from 'app/cohort-review/review-state.service';
 import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
+import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
@@ -116,7 +117,7 @@ const styles = reactStyles({
     marginLeft: '5px'
   },
   textInput: {
-    width: 'auto',
+    width: '85%',
     padding: '0 0 0 5px',
     border: 0,
     backgroundColor: 'transparent',
@@ -151,7 +152,19 @@ const styles = reactStyles({
     paddingLeft: '10px',
     textAlign: 'left',
     cursor: 'pointer',
-  }
+  },
+  error: {
+    width: '50%',
+    background: '#F7981C',
+    color: '#ffffff',
+    fontSize: '12px',
+    fontWeight: 500,
+    textAlign: 'left',
+    border: '1px solid #ebafa6',
+    borderRadius: '5px',
+    marginTop: '0.25rem',
+    padding: '8px',
+  },
 });
 const filterIcons = {
   active: {
@@ -177,7 +190,7 @@ const domains = [
   DomainType.SURVEY,
 ];
 
-export interface DetailTabTableProps {
+interface Props {
   tabName: string;
   columns: Array<any>;
   domain: string;
@@ -189,7 +202,7 @@ export interface DetailTabTableProps {
   updateState: number;
 }
 
-export interface DetailTabTableState {
+interface State {
   data: Array<any>;
   filteredData: Array<any>;
   loading: boolean;
@@ -198,12 +211,13 @@ export interface DetailTabTableState {
   sortOrder: number;
   expandedRows: Array<any>;
   codeResults: any;
+  error: boolean;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
-  class extends React.Component<DetailTabTableProps, DetailTabTableState> {
+  class extends React.Component<Props, State> {
     codeInputChange: Function;
-    constructor(props: DetailTabTableProps) {
+    constructor(props: Props) {
       super(props);
       this.state = {
         data: null,
@@ -214,6 +228,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         sortOrder: 1,
         expandedRows: [],
         codeResults: null,
+        error: false,
       };
       this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
     }
@@ -223,29 +238,32 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     componentDidUpdate(prevProps: any) {
-      if (prevProps.participantId !== this.props.participantId) {
+      const {participantId, updateState} = this.props;
+      if (prevProps.participantId !== participantId) {
         this.setState({
           data: null,
           filteredData: null,
           loading: true,
+          error: false,
         });
         this.getParticipantData();
-      } else if (prevProps.updateState !== this.props.updateState) {
+      } else if (prevProps.updateState !== updateState) {
         this.filterData();
       }
     }
 
     getParticipantData() {
       try {
-        const {cdrVersionId, id, namespace} = this.props.workspace;
+        const {columns, domain, filterType, participantId,
+          workspace: {cdrVersionId, id, namespace}} = this.props;
         const {cid} = urlParamsStore.getValue();
         const pageFilterRequest = {
           page: 0,
           pageSize: 10000,
           sortOrder: SortOrder.Asc,
-          sortColumn: this.props.columns[0].name,
-          pageFilterType: this.props.filterType,
-          domain: this.props.domain,
+          sortColumn: columns[0].name,
+          pageFilterType: filterType,
+          domain: domain,
         } as PageFilterRequest;
 
         cohortReviewApi().getParticipantData(
@@ -253,12 +271,11 @@ export const DetailTabTable = withCurrentWorkspace()(
           id,
           +cid,
           +cdrVersionId,
-          this.props.participantId,
+          participantId,
           pageFilterRequest
         ).then(response => {
           response.items.forEach(item => {
-            if (this.props.domain === DomainType[DomainType.VITAL]
-              || this.props.domain === DomainType[DomainType.LAB]) {
+            if (domain === DomainType[DomainType.VITAL] || domain === DomainType[DomainType.LAB]) {
               item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
             }
             item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
@@ -271,6 +288,10 @@ export const DetailTabTable = withCurrentWorkspace()(
         });
       } catch (error) {
         console.log(error);
+        this.setState({
+          loading: false,
+          error: true
+        });
       }
     }
 
@@ -328,7 +349,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     updateData = (event, colName, namesArray) => {
       const {checked, name} = event.target;
-      const {domain, filterState} = this.props;
+      const {domain, filterState, getFilteredData} = this.props;
       let checkedItems = filterState.tabs[domain][colName];
       if (checked) {
         if (name === 'Select All') {
@@ -351,7 +372,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         }
       }
       filterState.tabs[domain][colName] = checkedItems;
-      this.props.getFilteredData(filterState);
+      getFilteredData(filterState);
     }
 
     filterData() {
@@ -370,13 +391,13 @@ export const DetailTabTable = withCurrentWorkspace()(
           return itemDate >= min && itemDate <= max;
         });
       }
-      if (this.props.domain !== DomainType[DomainType.SURVEY] && (ageMin || ageMax)) {
+      if (domain !== DomainType[DomainType.SURVEY] && (ageMin || ageMax)) {
         const min = ageMin || 0;
         const max = ageMax || 120;
         data = data.filter(item => item.ageAtEvent >= min && item.ageAtEvent <= max);
       }
-      if (this.props.domain !== DomainType[DomainType.SURVEY]
-        && this.props.domain !== DomainType[DomainType.PHYSICALMEASUREMENT]
+      if (domain !== DomainType[DomainType.SURVEY]
+        && domain !== DomainType[DomainType.PHYSICALMEASUREMENT]
         && visits) {
         data = data.filter(item => visits === item.visitType);
       }
@@ -428,13 +449,25 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    emptyMessage = () => {
-      const {data, filteredData} = this.state;
-      if (data && data.length === 0) {
-        return  'No ' + this.props.tabName + ' Data';
-      } else if (data && data.length > 0 && filteredData && filteredData.length === 0) {
-        return 'Data does not match the specified filters';
+    errorMessage = () => {
+      const {tabName} = this.props;
+      const {data, filteredData, error} = this.state;
+      if ((filteredData && filteredData.length) || (!data && !error)) {
+        return false;
       }
+      let message: string;
+      if (data && data.length === 0) {
+        message = 'No ' + tabName + ' data found';
+      } else if (data && data.length > 0 && filteredData && filteredData.length === 0) {
+        message = 'Data cannot be found. Please review your filters and try again.';
+      } else if (error) {
+        message = 'Sorry, the request cannot be completed.';
+      }
+      return <div style={styles.error}>
+        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+        shape='exclamation-triangle' size='22'/>
+        {message}
+      </div>;
     }
 
     filterCodes = (input: string) => {
@@ -455,9 +488,9 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     filterText = (input: string, column: string) => {
-      const {domain, filterState} = this.props;
+      const {domain, filterState, getFilteredData} = this.props;
       filterState.tabs[domain][column] = input;
-      this.props.getFilteredData(filterState);
+      getFilteredData(filterState);
     }
 
     checkboxFilter(column: string) {
@@ -465,7 +498,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {domain, filterState, filterState: {vocab}} = this.props;
       const columnFilters = filterState.tabs[domain];
       if (!data) {
-        return {};
+        return '';
       }
       const counts = {total: 0};
       let options: Array<any>;
@@ -613,7 +646,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     render() {
       const {filteredData, loading, start, sortField, sortOrder} = this.state;
-      const {filterState: {vocab}, tabName} = this.props;
+      const {columns, filterState: {vocab}, tabName} = this.props;
       let pageReportTemplate;
       if (filteredData !== null) {
         const lastRowOfPage = (start + rows) > filteredData.length
@@ -624,7 +657,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (filteredData && filteredData.length > rows) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
-      const columns = this.props.columns.map((col) => {
+      const cols = columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === `${vocab}Name`;
@@ -668,14 +701,14 @@ export const DetailTabTable = withCurrentWorkspace()(
           key={col.name}
           field={col.name}
           header={header}
-          headerStyle={isExpanderNeeded && styles.graphStyle}
+          headerStyle={isExpanderNeeded ? styles.graphStyle : {}}
           sortable
           body={overlayTemplate}/>;
       });
 
       return <div style={styles.container}>
         <style>{datatableStyles + css}</style>
-        {filteredData && <DataTable
+        <DataTable
           expandedRows={this.state.expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
           rowExpansionTemplate={this.rowExpansionTemplate}
@@ -686,18 +719,19 @@ export const DetailTabTable = withCurrentWorkspace()(
           sortOrder={sortOrder}
           onSort={this.onSort}
           paginator
-          paginatorTemplate={filteredData.length ? paginatorTemplate : ''}
-          currentPageReportTemplate={filteredData.length ? pageReportTemplate : ''}
+          alwaysShowPaginator={false}
+          paginatorTemplate={filteredData && filteredData.length ? paginatorTemplate : ''}
+          currentPageReportTemplate={filteredData && filteredData.length ? pageReportTemplate : ''}
           onPage={this.onPage}
           first={start}
           rows={rows}
-          totalRecords={filteredData.length}
+          totalRecords={filteredData && filteredData.length}
           scrollable
           scrollHeight='calc(100vh - 350px)'
           autoLayout
-          emptyMessage={this.emptyMessage()}>
-          {columns}
-        </DataTable>}
+          footer={this.errorMessage()}>
+          {cols}
+        </DataTable>
         {loading && <SpinnerOverlay />}
       </div>;
     }

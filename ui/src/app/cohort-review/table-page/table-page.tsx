@@ -10,7 +10,6 @@ import {
 } from 'app/cohort-review/review-state.service';
 import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {Button} from 'app/components/buttons';
-import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
