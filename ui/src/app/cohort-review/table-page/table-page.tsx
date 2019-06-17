@@ -155,7 +155,8 @@ const styles = reactStyles({
     marginLeft: '5px'
   },
   textInput: {
-    width: 'auto',
+    width: '85%',
+    height: '1.5rem',
     padding: '0 0 0 5px',
     border: 0,
     backgroundColor: 'transparent',
@@ -167,6 +168,7 @@ const styles = reactStyles({
     overflow: 'auto'
   },
   error: {
+    width: '50%',
     background: '#F7981C',
     color: '#ffffff',
     fontSize: '12px',
@@ -175,7 +177,7 @@ const styles = reactStyles({
     border: '1px solid #ebafa6',
     borderRadius: '5px',
     marginTop: '0.25rem',
-    padding: '8px'
+    padding: '8px',
   },
 });
 const filterIcons = {
@@ -475,11 +477,12 @@ export const ParticipantsTable = withCurrentWorkspace()(
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           {column === 'participantId' && <div style={styles.textSearch}>
             <i className='pi pi-search' style={{margin: '0 5px'}} />
-            <TextInput
+            <input
+              type='number'
               ref={(i) => ip = i}
               style={styles.textInput}
               value={filters.PARTICIPANTID}
-              onChange={this.onInputChange}
+              onChange={(e) => this.onInputChange(e.target.value)}
               placeholder={'Search'} />
           </div>}
           {column !== 'participantId' && options.map((opt, i) => (
