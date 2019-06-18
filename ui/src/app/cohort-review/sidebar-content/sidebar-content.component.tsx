@@ -14,6 +14,7 @@ import colors from 'app/styles/colors';
 import {withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {AnnotationType, CohortAnnotationDefinition, CohortStatus, ParticipantCohortAnnotation, WorkspaceAccessLevel} from 'generated/fetch';
+import Timeout = NodeJS.Timeout;
 
 const styles = {
   header: {
@@ -71,6 +72,7 @@ const AnnotationItem = fp.flow(
   saving: boolean,
   error: boolean,
   success: boolean,
+  timeout: Timeout
 }> {
   constructor(props) {
     super(props);
@@ -80,11 +82,23 @@ const AnnotationItem = fp.flow(
       saving: false,
       error: false,
       success: false,
+      timeout: undefined
     };
   }
 
+  componentDidUpdate(prevProps: any): void {
+    const {annotation} = this.props;
+    const {timeout} = this.state;
+    if (
+      !annotation || (annotation && annotation.annotationId !== prevProps.annotation.annotationId)
+    ) {
+      // get rid of spinners and save messages when switching participants
+      clearTimeout(timeout);
+      this.setState({saving: false, error: false, success: false});
+    }
+  }
+
   async save(newValue) {
-    this.setState({saving: true});
     try {
       const {
         annotation, setAnnotation,
@@ -92,6 +106,7 @@ const AnnotationItem = fp.flow(
         urlParams: {ns, wsid, cid, pid},
         workspace: {cdrVersionId},
       } = this.props;
+      const {timeout} = this.state;
       const aid = annotation ? annotation.annotationId : undefined;
       const value = readValue(annotationType, annotation);
       this.setState({savingValue: newValue});
@@ -99,7 +114,9 @@ const AnnotationItem = fp.flow(
         setAnnotation(await cohortReviewApi()
           .deleteParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, aid));
       } else if (aid && newValue !== value) {
-        cohortReviewApi()
+        clearTimeout(timeout);
+        this.setState({error: false, success: false, saving: true});
+        await cohortReviewApi()
           .updateParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, aid, {
             ...writeValue(annotationType, newValue),
           }).then(res => {
@@ -107,7 +124,9 @@ const AnnotationItem = fp.flow(
             this.setState({saving: false, success: true});
           });
       } else if (!aid && newValue) {
-        cohortReviewApi()
+        clearTimeout(timeout);
+        this.setState({error: false, success: false, saving: true});
+        await cohortReviewApi()
           .createParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, {
             cohortAnnotationDefinitionId,
             cohortReviewId: cohortReviewStore.getValue().cohortReviewId,
@@ -122,8 +141,8 @@ const AnnotationItem = fp.flow(
       console.error(error);
       this.setState({saving: false, error: true});
     } finally {
-      this.setState({savingValue: undefined});
-      setTimeout(() => this.setState({error: false, success: false}), 5000);
+      const timeout = setTimeout(() => this.setState({error: false, success: false}), 5000);
+      this.setState({savingValue: undefined, timeout});
     }
   }
 
@@ -211,7 +230,6 @@ const AnnotationItem = fp.flow(
           <ClrIcon style={styles.success} shape='check-circle' size='20' className='is-solid' />
           <span style={styles.message}> Annotation Saved</span>
         </div>}
-        {/*TODO fix infinite spinner on participant navigation after annotation update*/}
         {saving && <Spinner size={16}/>}
       </div>
       {this.renderInput()}
