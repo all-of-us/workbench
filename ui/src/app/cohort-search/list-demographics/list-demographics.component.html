@@ -1,6 +1,6 @@
-<form class="form-container" [class.age]="subtype === treeSubType.AGE" [formGroup]="demoForm" [ngSwitch]="subtype">
+<form class="form-container" [class.age]="wizard.type === criteriaType.AGE" [formGroup]="demoForm" [ngSwitch]="wizard.type">
   <!-- Age -->
-  <div *ngSwitchCase="treeSubType.AGE">
+  <div *ngSwitchCase="criteriaType.AGE">
     <ng-container *ngIf="!loading">
       <div class="age-label">
         Age Range
@@ -39,7 +39,7 @@
       <clr-checkbox formControlName="deceased" [clrDisabled]="loading">
         Is Deceased
         <span *ngIf="deceasedNode" class="badge badge-info">
-          {{ deceasedNode.get('count') | number }}
+          {{ deceasedNode.count | number }}
         </span>
       </clr-checkbox>
     </ng-container>
@@ -47,42 +47,42 @@
   </div>
 
   <!-- Genders -->
-    <div *ngSwitchCase="treeSubType.GEN">
+    <div *ngSwitchCase="criteriaType.GENDER">
       <div class="control-wrapper">
         <crit-multi-select
-                [options]="genderNodes"
+                [options]="nodes"
                 [includeSearchBox]="false"
-                [initialSelection]="initialGenders"
+                [initialSelection]="selections"
                 [loading]="loading">
         </crit-multi-select>
       </div>
     </div>
 
     <!-- Races -->
-    <div *ngSwitchCase="treeSubType.RACE">
+    <div *ngSwitchCase="criteriaType.RACE">
       <div class="control-wrapper">
         <crit-multi-select
-                [options]="raceNodes"
+                [options]="nodes"
                 [includeSearchBox]="false"
-                [initialSelection]="initialRaces"
+                [initialSelection]="selections"
                 [loading]="loading">
         </crit-multi-select>
       </div>
     </div>
 
     <!-- Ethnicities -->
-    <div *ngSwitchCase="treeSubType.ETH">
+    <div *ngSwitchCase="criteriaType.ETHNICITY">
       <div class="control-wrapper">
         <crit-multi-select
                 [includeSearchBox]="false"
-                [options]="ethnicityNodes"
-                [initialSelection]="initialEthnicities"
+                [options]="nodes"
+                [initialSelection]="selections"
                 [loading]="loading">
         </crit-multi-select>
       </div>
     </div>
 </form>
-<div class="container count-preview" *ngIf="(selections && selections.length) && subtype !== treeSubType.AGE">
+<div class="container count-preview" *ngIf="(selections && selections.length) && wizard.type !== criteriaType.AGE">
   <div class="row">
     <ng-container>
       <div class="col-lg-12 text-padding" *ngIf="count">
