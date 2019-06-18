@@ -16,6 +16,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {ConceptAddModal} from 'app/views/concept-add-modal';
 import {ConceptNavigationBar} from 'app/views/concept-navigation-bar';
+import {ConceptSurveyAddModal} from 'app/views/concept-survey-add-modal';
 import {ConceptTable} from 'app/views/concept-table';
 import {SlidingFabReact} from 'app/views/sliding-fab';
 import * as Color from 'color';
@@ -25,10 +26,11 @@ import {
   Domain,
   DomainCount,
   DomainInfo,
-  StandardConceptFilter,
+  StandardConceptFilter, SurveyDetailsResponse,
   SurveyModule,
   VocabularyCount,
 } from 'generated/fetch';
+import {SurveyDetails} from './survey-details';
 
 const styles = reactStyles({
   searchBar: {
@@ -108,24 +110,28 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
       </WorkspaceCardBase>;
     };
 
-const SurveyCard: React.FunctionComponent<{survey}> = ({survey}) => {
-  return <WorkspaceCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
-    <div style={styles.domainBoxHeader} data-test-id='survey-box-name'>{survey.name}</div>
-    <div style={styles.conceptText}>
-      <span style={{fontSize: 30}}>{survey.questionCount}</span> survey questions with
-      <div><b>{survey.participantCount}</b> participants</div>
-    </div>
-    <div style={{...styles.conceptText, height: '3.5rem'}}>
-      {survey.description}
-    </div>
-    <Clickable style={{...styles.domainBoxLink}}>Browse Survey</Clickable>
-  </WorkspaceCardBase>;
-};
+const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: Function}> =
+    ({survey, browseSurvey}) => {
+      return <WorkspaceCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
+        <div style={styles.domainBoxHeader} data-test-id='survey-box-name'>{survey.name}</div>
+        <div style={styles.conceptText}>
+          <span style={{fontSize: 30}}>{survey.questionCount}</span> survey questions with
+          <div><b>{survey.participantCount}</b> participants</div>
+        </div>
+        <div style={{...styles.conceptText, height: '3.5rem'}}>
+          {survey.description}
+        </div>
+        <Clickable style={{...styles.domainBoxLink}} onClick={browseSurvey}>Browse
+          Survey</Clickable>
+      </WorkspaceCardBase>;
+    };
 
 
 export const ConceptHomepage = withCurrentWorkspace()(
   class extends React.Component<{workspace: WorkspaceData},
-    { // Array of domains that have finished being searched for concepts with search string
+    { // Browse survey
+      browseSurvey: boolean,
+      // Array of domains that have finished being searched for concepts with search string
       completedDomainSearches: Array<Domain>,
       // If modal to add concepts to set is open
       conceptAddModalOpen: boolean,
@@ -160,15 +166,20 @@ export const ConceptHomepage = withCurrentWorkspace()(
       standardConceptsOnly: boolean,
       // Array of vocabulary id and number of concepts in vocabulary
       vocabularies: Array<VocabularyCount>,
-      workspacePermissions: WorkspacePermissions
+      workspacePermissions: WorkspacePermissions,
+      selectedSurvey: string,
+      selectedSurveyQuestions: Array<SurveyDetailsResponse>,
+      surveyAddModalOpen: boolean
     }> {
 
     private MAX_CONCEPT_FETCH = 100;
     constructor(props) {
       super(props);
       this.state = {
+        browseSurvey: false,
         completedDomainSearches: [],
         conceptAddModalOpen: false,
+        surveyAddModalOpen: false,
         conceptDomainCounts: [],
         conceptDomainList: [],
         concepts: [],
@@ -189,7 +200,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
         showSearchError: false,
         standardConceptsOnly: true,
         vocabularies: [],
-        workspacePermissions: new WorkspacePermissions(props.workspace)
+        workspacePermissions: new WorkspacePermissions(props.workspace),
+        selectedSurvey: '',
+        selectedSurveyQuestions: []
       };
     }
 
@@ -332,10 +345,17 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     browseDomain(domain: DomainInfo) {
       const {conceptDomainCounts} = this.state;
-      this.setState({currentSearchString: '',
+      this.setState({browseSurvey: false, currentSearchString: '',
         selectedDomain: conceptDomainCounts
           .find(domainCount => domainCount.domain === domain.domain)},
         this.searchConcepts);
+    }
+
+    browseSurveyInfo(surveys) {
+      this.setState({
+        browseSurvey: true,
+        selectedSurvey: surveys.name
+      });
     }
 
     domainLoading(domain) {
@@ -357,8 +377,20 @@ export const ConceptHomepage = withCurrentWorkspace()(
       return selectedConceptDomainMap[selectedDomain.domain];
     }
 
+    selectedQuestion(selectedQues) {
+      this.setState({selectedSurveyQuestions: selectedQues});
+    }
+    get activeSelectedSurvey(): number {
+      return this.state.selectedSurveyQuestions.length;
+    }
+
     get addToSetText(): string {
       const count = this.activeSelectedConceptCount;
+      return count === 0 ? 'Add to set' : 'Add (' + count + ') to set';
+    }
+
+    get addSurveyToSetText(): string {
+      const count = this.state.selectedSurveyQuestions.length;
       return count === 0 ? 'Add to set' : 'Add (' + count + ') to set';
     }
 
@@ -368,11 +400,64 @@ export const ConceptHomepage = withCurrentWorkspace()(
         'concepts', 'sets', conceptSet.id, 'actions']);
     }
 
+    renderConceptSets() {
+      const {concepts, searchLoading, conceptDomainCounts, selectedDomain,
+        conceptsToAdd, selectedConceptDomainMap} = this.state;
+
+      return <FadeBox>
+        <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
+          {conceptDomainCounts.map((domain) => {
+            return <div style={{display: 'flex', flexDirection: 'column'}} key={domain.name}>
+              <Clickable style={styles.domainHeaderLink}
+                         onClick={() => this.selectDomain(domain)}
+                         disabled={this.domainLoading(domain)}
+                         data-test-id={'domain-header-' + domain.name}>
+                <div style={{fontSize: '16px'}}>{domain.name}</div>
+                {this.domainLoading(domain) ?
+                    <Spinner style={{height: '15px', width: '15px'}}/> :
+                    <div style={{display: 'flex', flexDirection: 'row',
+                      justifyContent: 'space-between'}}>
+                      <div>{domain.conceptCount}</div>
+                      {(selectedConceptDomainMap[domain.domain] > 0) &&
+                      <div style={styles.selectedConceptsCount} data-test-id='selectedConcepts'>
+                        {selectedConceptDomainMap[domain.domain]}
+                      </div>}
+                    </div>
+                }
+              </Clickable>
+              {domain === selectedDomain && <hr data-test-id='active-domain'
+                                                key={selectedDomain.domain}
+                                                style={styles.domainHeaderSelected}/>}
+            </div>;
+          })}
+        </div>
+        <div style={styles.conceptCounts}>
+          Showing top {concepts.length} of {selectedDomain.conceptCount} {selectedDomain.name}
+        </div>
+        <ConceptTable concepts={concepts}
+                      loading={searchLoading}
+                      onSelectConcepts={this.selectConcepts.bind(this)}
+                      placeholderValue={this.noConceptsConstant}
+                      searchTerm={this.state.currentSearchString}
+                      selectedConcepts={conceptsToAdd}
+                      reactKey={selectedDomain.name}
+                      nextPage={(page) => this.getNextConceptSet(page)}/>
+        <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
+                         iconShape='plus'
+                         tooltip={!this.state.workspacePermissions.canWrite}
+                         tooltipContent={<div>Requires Owner or Writer permission</div>}
+                         expanded={this.addToSetText}
+                         disable={this.activeSelectedConceptCount === 0 ||
+                         !this.state.workspacePermissions.canWrite}/>
+      </FadeBox>;
+    }
+
     render() {
-      const {loadingDomains, conceptDomainList, conceptSurveysList, standardConceptsOnly,
-        showSearchError, searching, concepts, searchLoading, conceptDomainCounts, selectedDomain,
-        conceptAddModalOpen, conceptsToAdd, selectedConceptDomainMap,
-        currentSearchString, conceptsSavedText} = this.state;
+      const {loadingDomains, browseSurvey, conceptDomainList, conceptSurveysList,
+        standardConceptsOnly, showSearchError, searching, selectedDomain, conceptAddModalOpen,
+        conceptsToAdd, currentSearchString, conceptsSavedText, selectedSurvey, surveyAddModalOpen,
+        selectedSurveyQuestions} =
+          this.state;
       const {workspace} = this.props;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <ConceptNavigationBar showConcepts={true} ns={workspace.namespace} wsId={workspace.id}/>
@@ -405,55 +490,19 @@ export const ConceptHomepage = withCurrentWorkspace()(
           </AlertDanger>}
           <div style={{marginTop: '0.5rem'}}>{conceptsSavedText}</div>
         </div>
-
-        {loadingDomains ? <SpinnerOverlay/> :
+        {browseSurvey && <div><SurveyDetails surveyName={selectedSurvey}
+                                             surveySelected={(selectedQuestion) =>
+                                                   this.selectedQuestion(selectedQuestion)}/>
+          <SlidingFabReact submitFunction={() => this.setState({surveyAddModalOpen: true})}
+                           iconShape='plus'
+                           tooltip={!this.state.workspacePermissions.canWrite}
+                           tooltipContent={<div>Requires Owner or Writer permission</div>}
+                           expanded={this.addSurveyToSetText}
+                           disable={selectedSurveyQuestions.length === 0}/>
+        </div>}
+        {!browseSurvey && loadingDomains ? <SpinnerOverlay/> :
           searching ?
-            <FadeBox>
-              <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
-                {conceptDomainCounts.map((domain) => {
-                  return <div style={{display: 'flex', flexDirection: 'column'}} key={domain.name}>
-                    <Clickable style={styles.domainHeaderLink}
-                               onClick={() => this.selectDomain(domain)}
-                               disabled={this.domainLoading(domain)}
-                               data-test-id={'domain-header-' + domain.name}>
-                    <div style={{fontSize: '16px'}}>{domain.name}</div>
-                    {this.domainLoading(domain) ?
-                      <Spinner style={{height: '15px', width: '15px'}}/> :
-                      <div style={{display: 'flex', flexDirection: 'row',
-                        justifyContent: 'space-between'}}>
-                        <div>{domain.conceptCount}</div>
-                        {(selectedConceptDomainMap[domain.domain] > 0) &&
-                        <div style={styles.selectedConceptsCount} data-test-id='selectedConcepts'>
-                          {selectedConceptDomainMap[domain.domain]}
-                        </div>}
-                      </div>
-                    }
-                  </Clickable>
-                  {domain === selectedDomain && <hr data-test-id='active-domain'
-                                                    key={selectedDomain.domain}
-                                                    style={styles.domainHeaderSelected}/>}
-                  </div>;
-                })}
-              </div>
-              <div style={styles.conceptCounts}>
-                Showing top {concepts.length} of {selectedDomain.conceptCount} {selectedDomain.name}
-              </div>
-              <ConceptTable concepts={concepts}
-                            loading={searchLoading}
-                            onSelectConcepts={this.selectConcepts.bind(this)}
-                            placeholderValue={this.noConceptsConstant}
-                            searchTerm={this.state.currentSearchString}
-                            selectedConcepts={conceptsToAdd}
-                            reactKey={selectedDomain.name}
-                            nextPage={(page) => this.getNextConceptSet(page)}/>
-              <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
-                               iconShape='plus'
-                               tooltip={!this.state.workspacePermissions.canWrite}
-                               tooltipContent={<div>Requires Owner or Writer permission</div>}
-                               expanded={this.addToSetText}
-                               disable={this.activeSelectedConceptCount === 0 ||
-                                !this.state.workspacePermissions.canWrite}/>
-            </FadeBox> :
+            this.renderConceptSets() : !browseSurvey &&
                 <div>
                   <div style={styles.sectionHeader}>
                     EHR Domain
@@ -471,7 +520,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
                   </div>
                   <div style={styles.cardList}>
                     {conceptSurveysList.map((surveys) => {
-                      return <SurveyCard survey={surveys} key={surveys.orderNumber}/>;
+                      return <SurveyCard survey={surveys} key={surveys.orderNumber}
+                                         browseSurvey={() => this.browseSurveyInfo(surveys)}/>;
                     })}
                    </div>
                 </div>
@@ -481,6 +531,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
                            selectedConcepts={conceptsToAdd}
                            onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
                            onClose={() => this.setState({conceptAddModalOpen: false})}/>}
+        {surveyAddModalOpen &&
+        <ConceptSurveyAddModal selectedSurvey={selectedSurveyQuestions}
+                               onClose={() => this.setState({surveyAddModalOpen: false})}
+                               onSave={() => this.setState({surveyAddModalOpen: false})}
+                               surveyName={selectedSurvey}/>}
       </FadeBox>;
     }
   }

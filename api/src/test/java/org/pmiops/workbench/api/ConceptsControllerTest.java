@@ -17,6 +17,7 @@ import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
@@ -235,6 +236,7 @@ public class ConceptsControllerTest {
   @Autowired private DomainVocabularyInfoDao domainVocabularyInfoDao;
   @Autowired FireCloudService fireCloudService;
   @Autowired SurveyModuleDao surveyModuleDao;
+  @Autowired private ConceptBigQueryService conceptBigQueryService;
 
   @PersistenceContext private EntityManager entityManager;
 
@@ -250,6 +252,7 @@ public class ConceptsControllerTest {
         new ConceptsController(
             bigQueryService,
             conceptService,
+            conceptBigQueryService,
             workspaceService,
             domainInfoDao,
             domainVocabularyInfoDao,

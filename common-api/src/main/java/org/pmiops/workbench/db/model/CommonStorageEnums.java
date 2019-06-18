@@ -4,6 +4,8 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.Survey;
+import org.pmiops.workbench.model.Surveys;
 
 public class CommonStorageEnums {
 
@@ -62,4 +64,35 @@ public class CommonStorageEnums {
   public static Short dataAccessLevelToStorage(DataAccessLevel level) {
     return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.get(level);
   }
+
+  private static final BiMap<Surveys, Short> CLIENT_TO_STORAGE_SURVEY =
+      ImmutableBiMap.<Surveys, Short>builder()
+          .put(Surveys.BASICS, (short) 0)
+          .put(Surveys.LIFESTYLE, (short) 1)
+          .put(Surveys.OVERALLHEALTH, (short) 2)
+          .build();
+
+  private static final BiMap<Surveys, String> SURVEY_ID_MAP =
+      ImmutableBiMap.<Surveys, String>builder()
+          .put(Surveys.BASICS, "The Basics")
+          .put(Surveys.LIFESTYLE, "Lifestyle")
+          .put(Surveys.OVERALLHEALTH, "Overall Health")
+          .build();
+
+  public static Surveys surveysFromStorage(Short survey) {
+    return CLIENT_TO_STORAGE_SURVEY.inverse().get(survey);
+  }
+
+  public static Short surveysToStorage(Surveys survey) {
+    return CLIENT_TO_STORAGE_SURVEY.get(survey);
+  }
+
+  public static String surveyToSurveyId(Surveys survey) {
+    return SURVEY_ID_MAP.get(survey);
+  }
+
+  public static Surveys surveyIdToSurvey(String survey) {
+    return SURVEY_ID_MAP.inverse().get(survey);
+  }
+
 }

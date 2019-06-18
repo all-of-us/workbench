@@ -43,6 +43,11 @@ definitions:
     description: a domain for concepts corresponding to a table in the OMOP schema
     enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT]
 
+  Surveys:
+    type: string
+    description: a survey for concepts
+    enum: &SURVEYS [BASICS, LIFESTYLE, OVERALLHEALTH]
+
   CdrVersionListResponse:
     type: object
     required:

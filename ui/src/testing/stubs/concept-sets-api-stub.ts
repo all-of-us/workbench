@@ -3,13 +3,16 @@ import {UpdateConceptSetRequest} from 'generated';
 import {
   ConceptSet,
   ConceptSetListResponse,
-  Domain
+  Domain,
+  Surveys
 } from 'generated/fetch';
+
 import {ConceptSetsApi, CreateConceptSetRequest, EmptyResponse} from 'generated/fetch/api';
 import {ConceptsApiStub, ConceptStubVariables} from './concepts-api-stub';
 
 export class ConceptSetsApiStub extends ConceptSetsApi {
   public conceptSets: ConceptSet[];
+  public surveyConceptSets: ConceptSet[];
   // TODO when this piece is converted
   public conceptsStub?: ConceptsApiStub;
 
@@ -18,7 +21,9 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
 
     this.conceptSets = ConceptSetsApiStub.stubConceptSets();
     this.conceptsStub = new ConceptsApiStub();
-
+    this.surveyConceptSets  =  ConceptSetsApiStub.stubConceptSets().filter((concepts) => {
+      return concepts.domain === Domain.OBSERVATION;
+    });
   }
 
   static stubConceptSets(): ConceptSet[] {
@@ -43,6 +48,27 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         description: 'Mocked for tests',
         domain: Domain.CONDITION,
         lastModifiedTime: new Date().getTime() - 2000
+      }, {
+        id: 348,
+        name: 'Mock Concept Set for survey overAll health',
+        description: 'Mocked for tests',
+        domain: Domain.OBSERVATION,
+        survey: Surveys.OVERALLHEALTH,
+        lastModifiedTime: new Date().getTime() - 2000
+      }, {
+        id: 349,
+        name: 'Mock Concept Set for survey Lifestyle',
+        description: 'Mocked for tests',
+        domain: Domain.OBSERVATION,
+        survey: Surveys.LIFESTYLE,
+        lastModifiedTime: new Date().getTime() - 2000
+      }, {
+        id: 350,
+        name: 'Mock Concept Set for survey Basic health',
+        description: 'Mocked for tests',
+        domain: Domain.OBSERVATION,
+        survey: Surveys.BASICS,
+        lastModifiedTime: new Date().getTime() - 2000
       }
     ];
   }
@@ -59,6 +85,16 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
     workspaceNamespace: string, workspaceId: string): Promise<ConceptSetListResponse> {
     return new Promise<ConceptSetListResponse>(resolve => {
       resolve({items: this.conceptSets});
+    });
+  }
+
+  public getSurveyConceptSetsInWorkspace(
+    workspaceNamespace: string, workspaceId: string, surveyName: string):
+  Promise<ConceptSetListResponse> {
+    return new Promise<ConceptSetListResponse>(resolve => {
+      resolve({items: this.surveyConceptSets.filter((survey) => {
+        return survey.survey.toString() === surveyName;
+      })});
     });
   }
 

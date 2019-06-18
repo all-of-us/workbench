@@ -31,6 +31,7 @@ import org.pmiops.workbench.model.ConceptSetListResponse;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -85,6 +86,9 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
               org.pmiops.workbench.db.model.ConceptSet dbConceptSet =
                   new org.pmiops.workbench.db.model.ConceptSet();
               dbConceptSet.setDomainEnum(conceptSet.getDomain());
+              if (conceptSet.getSurvey() != null) {
+                dbConceptSet.setSurveysEnum(conceptSet.getSurvey());
+              }
               if (dbConceptSet.getDomainEnum() == null) {
                 throw new BadRequestException(
                     "Domain " + conceptSet.getDomain() + " is not allowed for concept sets");
@@ -219,6 +223,24 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   }
 
   @Override
+  public ResponseEntity<ConceptSetListResponse> getSurveyConceptSetsInWorkspace(
+      String workspaceNamespace, String workspaceId, String survey) {
+    Workspace workspace =
+        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    short surveyId = CommonStorageEnums.surveysToStorage(Surveys.fromValue(survey));
+    List<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
+        conceptSetDao.findByWorkspaceIdAndSurvey(workspace.getWorkspaceId(), surveyId);
+    ConceptSetListResponse response = new ConceptSetListResponse();
+    response.setItems(
+        conceptSets.stream()
+            .map(TO_CLIENT_CONCEPT_SET)
+            .sorted(Comparator.comparing(c -> c.getName()))
+            .collect(Collectors.toList()));
+    return ResponseEntity.ok(response);
+  }
+
+  @Override
   public ResponseEntity<ConceptSet> updateConceptSet(
       String workspaceNamespace, String workspaceId, Long conceptSetId, ConceptSet conceptSet) {
     org.pmiops.workbench.db.model.ConceptSet dbConceptSet =
@@ -272,6 +294,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new BadRequestException(
           String.format("Concepts [%s] are not in domain %s", mismatchedConceptIds, domainEnum));
     }
+
     dbConceptSet.getConceptIds().addAll(addedIds);
   }
 

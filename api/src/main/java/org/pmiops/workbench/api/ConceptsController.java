@@ -3,11 +3,15 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldList;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
@@ -26,6 +30,8 @@ import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
+import org.pmiops.workbench.model.Survey;
+import org.pmiops.workbench.model.SurveyDetailsResponse;
 import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.VocabularyCount;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -43,6 +49,7 @@ public class ConceptsController implements ConceptsApiDelegate {
 
   private final BigQueryService bigQueryService;
   private final ConceptService conceptService;
+  private final ConceptBigQueryService conceptBigQueryService;
   private final WorkspaceService workspaceService;
   private final DomainInfoDao domainInfoDao;
   private final DomainVocabularyInfoDao domainVocabularyInfoDao;
@@ -91,6 +98,7 @@ public class ConceptsController implements ConceptsApiDelegate {
   public ConceptsController(
       BigQueryService bigQueryService,
       ConceptService conceptService,
+      ConceptBigQueryService conceptBigQueryService,
       WorkspaceService workspaceService,
       DomainInfoDao domainInfoDao,
       DomainVocabularyInfoDao domainVocabularyInfoDao,
@@ -98,6 +106,7 @@ public class ConceptsController implements ConceptsApiDelegate {
       SurveyModuleDao surveyModuleDao) {
     this.bigQueryService = bigQueryService;
     this.conceptService = conceptService;
+    this.conceptBigQueryService = conceptBigQueryService;
     this.workspaceService = workspaceService;
     this.domainInfoDao = domainInfoDao;
     this.domainVocabularyInfoDao = domainVocabularyInfoDao;
@@ -119,6 +128,15 @@ public class ConceptsController implements ConceptsApiDelegate {
                     .map(org.pmiops.workbench.cdr.model.DomainInfo.TO_CLIENT_DOMAIN_INFO)
                     .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<List<SurveyDetailsResponse>> getSurveyDetails(String workspaceNamespace,
+      String workspaceId, String survey) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    List<SurveyDetailsResponse> surveyQuestionAnswerList = conceptBigQueryService.getSurveys(survey);
+    return ResponseEntity.ok(surveyQuestionAnswerList);
   }
 
   @Override

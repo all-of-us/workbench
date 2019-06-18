@@ -70,6 +70,20 @@ export class ConceptStubVariables {
       conceptSynonyms: [
         'fake measure', 'very measure: wow'
       ]
+    },
+    {
+      conceptId: 5,
+      conceptName: 'Stub Survey Question Concept 1',
+      domainId: 'Observation',
+      vocabularyId: 'SNOMED',
+      conceptCode: 'G8107',
+      conceptClassId: 'Ingredient',
+      standardConcept: true,
+      countValue: 1,
+      prevalence: 1,
+      conceptSynonyms: [
+        'blah', 'blahblah'
+      ]
     }
   ];
 }

@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.Surveys;
 
 @Entity
 @Table(name = "concept_set")
@@ -26,6 +27,7 @@ public class ConceptSet {
   private int version;
   private String name;
   private short domain;
+  private Short survey;
   private String description;
   private long workspaceId;
   private User creator;
@@ -86,6 +88,16 @@ public class ConceptSet {
     this.domain = domain;
   }
 
+  @Column(name = "survey")
+  public Short getSurvey() {
+    return survey;
+  }
+
+  public void setSurvey(Short survey) {
+    this.survey = survey;
+  }
+
+
   @Transient
   public Domain getDomainEnum() {
     return CommonStorageEnums.domainFromStorage(domain);
@@ -95,6 +107,14 @@ public class ConceptSet {
     this.domain = CommonStorageEnums.domainToStorage(domain);
   }
 
+  @Transient
+  public Surveys getSurveysEnum() {
+    return CommonStorageEnums.surveysFromStorage(survey);
+  }
+
+  public void setSurveysEnum(Surveys survey) {
+    this.survey = CommonStorageEnums.surveysToStorage(survey);
+  }
   @Column(name = "description")
   public String getDescription() {
     return description;
