@@ -108,7 +108,7 @@ public class WorkspaceMapper {
     return result;
   }
 
-  private UserRole toApiUserRole(
+  public UserRole toApiUserRole(
       Map.Entry<org.pmiops.workbench.db.model.User, WorkspaceAccessEntry> aclEntry) {
     org.pmiops.workbench.db.model.User user = aclEntry.getKey();
     UserRole result = new UserRole();

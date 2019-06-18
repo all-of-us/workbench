@@ -7,6 +7,7 @@ import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -30,7 +31,6 @@ import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
-import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
@@ -282,12 +282,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
 
     // TODO: get rid of WorkspaceUserRole
-    WorkspaceUserRole permissions = new WorkspaceUserRole();
-    permissions.setRoleEnum(WorkspaceAccessLevel.OWNER);
-    permissions.setWorkspace(dbWorkspace);
-    permissions.setUser(user);
-
-    dbWorkspace.addWorkspaceUserRole(permissions);
+    //    WorkspaceUserRole permissions = new WorkspaceUserRole();
+    //    permissions.setRoleEnum(WorkspaceAccessLevel.OWNER);
+    //    permissions.setWorkspace(dbWorkspace);
+    //    permissions.setUser(user);
+    //
+    //    dbWorkspace.addWorkspaceUserRole(permissions);
 
     if (useBillingProjectBuffer) {
       dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
@@ -583,13 +583,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
     }
 
-    WorkspaceUserRole ownerRole = new WorkspaceUserRole();
-    ownerRole.setRoleEnum(WorkspaceAccessLevel.OWNER);
-    ownerRole.setWorkspace(dbWorkspace);
-    ownerRole.setUser(user);
-
-    dbWorkspace.addWorkspaceUserRole(ownerRole);
-
     if (useBillingProjectBuffer) {
       dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
     } else {
@@ -600,19 +593,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
 
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
-      Set<WorkspaceUserRole> clonedRoles =
-          fromWorkspace.getWorkspaceUserRoles().stream()
-              .filter((role) -> role.getUser().getUserId() != user.getUserId())
-              .map(
-                  (role) -> {
-                    WorkspaceUserRole to = new WorkspaceUserRole();
-                    to.setUser(role.getUser());
-                    to.setWorkspace(dbWorkspace);
-                    to.setRole(role.getRole());
-                    return to;
-                  })
-              .collect(Collectors.toSet());
-      clonedRoles.add(ownerRole);
+      Map<User, WorkspaceAccessEntry> fromAclsMap =
+          workspaceService.getFirecloudWorkspaceAcls(fromWorkspace);
+
+      Map<User, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
+      for (Map.Entry<User, WorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
+        if (!entry.getKey().getEmail().equals(user.getEmail())) {
+          clonedRoles.put(
+                  entry.getKey(), WorkspaceAccessLevel.fromValue(entry.getValue().getAccessLevel()));
+        } else {
+          clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
+        }
+      }
       savedWorkspace = workspaceService.updateUserRoles(savedWorkspace, clonedRoles);
     }
     return ResponseEntity.ok(
@@ -635,41 +627,36 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify user roles with outdated workspace etag");
     }
-    Set<WorkspaceUserRole> dbUserRoles = new HashSet<WorkspaceUserRole>();
+    Map<User, WorkspaceAccessLevel> shareRolesMap = new HashMap<>();
     for (UserRole role : request.getItems()) {
       if (role.getRole() == null || role.getRole().toString().trim().isEmpty()) {
         throw new BadRequestException("Role required.");
       }
-      WorkspaceUserRole newUserRole = new WorkspaceUserRole();
       User newUser = userDao.findUserByEmail(role.getEmail());
       if (newUser == null) {
         throw new BadRequestException(String.format("User %s doesn't exist", role.getEmail()));
       }
-      newUserRole.setUser(newUser);
-      newUserRole.setRoleEnum(role.getRole());
-      dbUserRoles.add(newUserRole);
+      shareRolesMap.put(newUser, role.getRole());
     }
     // This automatically enforces the "canShare" permission.
-    dbWorkspace = workspaceService.updateUserRoles(dbWorkspace, dbUserRoles);
+    dbWorkspace = workspaceService.updateUserRoles(dbWorkspace, shareRolesMap);
     ShareWorkspaceResponse resp = new ShareWorkspaceResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
-    List<UserRole> updatedUserRoles =
-        dbWorkspace.getWorkspaceUserRoles().stream()
-            .map(
-                r ->
-                    new UserRole()
-                        .email(r.getUser().getEmail())
-                        .givenName(r.getUser().getGivenName())
-                        .familyName(r.getUser().getFamilyName())
-                        .role(r.getRoleEnum()))
-            // Reverse sorting arranges the role list in a logical order - owners first, then by
-            // email.
+
+    Map<User, WorkspaceAccessEntry> rolesMap =
+        workspaceService.getFirecloudWorkspaceAcls(dbWorkspace);
+    List<UserRole> updatedUserRoles = new ArrayList<>();
+    for (Map.Entry<User, WorkspaceAccessEntry> entry : rolesMap.entrySet()) {
+      updatedUserRoles.add(workspaceMapper.toApiUserRole(entry));
+    }
+    List<UserRole> sortedUpdatedUserRoles =
+        updatedUserRoles.stream()
             .sorted(
                 Comparator.comparing(UserRole::getRole)
                     .thenComparing(UserRole::getEmail)
                     .reversed())
             .collect(Collectors.toList());
-    resp.setItems(updatedUserRoles);
+    resp.setItems(sortedUpdatedUserRoles);
     return ResponseEntity.ok(resp);
   }
 

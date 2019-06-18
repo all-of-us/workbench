@@ -109,9 +109,7 @@ public class Workspace {
   private Boolean reviewRequested;
   private Boolean approved;
   private Timestamp timeRequested;
-
-  private Set<WorkspaceUserRole> usersWithAccess = new HashSet<WorkspaceUserRole>();
-
+  
   public Workspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
@@ -490,15 +488,6 @@ public class Workspace {
     return new FirecloudWorkspaceId(workspaceNamespace, firecloudName);
   }
 
-  @OneToMany(
-      fetch = FetchType.EAGER,
-      mappedBy = "workspace",
-      orphanRemoval = true,
-      cascade = CascadeType.ALL)
-  public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
-    return usersWithAccess;
-  }
-
   @Column(name = "firecloud_uuid")
   public String getFirecloudUuid() {
     return this.firecloudUuid;
@@ -524,18 +513,6 @@ public class Workspace {
 
   public void setWorkspaceActiveStatusEnum(WorkspaceActiveStatus activeStatus) {
     setActiveStatus(StorageEnums.workspaceActiveStatusToStorage(activeStatus));
-  }
-
-  /**
-   * Necessary for Spring initialization of the object. Not actually supported because it won't
-   * delete old entries.
-   */
-  public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
-    this.usersWithAccess = userRoles;
-  }
-
-  public void addWorkspaceUserRole(WorkspaceUserRole userRole) {
-    this.usersWithAccess.add(userRole);
   }
 
   @Transient

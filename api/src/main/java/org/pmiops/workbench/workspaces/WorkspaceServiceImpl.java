@@ -5,11 +5,9 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -243,46 +241,22 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Workspace updateUserRoles(Workspace workspace, Set<WorkspaceUserRole> userRoleSet) {
-    Map<Long, WorkspaceUserRole> userRoleMap = new HashMap<Long, WorkspaceUserRole>();
-    for (WorkspaceUserRole userRole : userRoleSet) {
-      userRole.setWorkspace(workspace);
-      userRoleMap.put(userRole.getUser().getUserId(), userRole);
-    }
-
+  public Workspace updateUserRoles(
+      Workspace workspace, Map<User, WorkspaceAccessLevel> userRoleMap) {
+    // userRoleMap is a map of the new permissions for ALL users on the ws
     Map<User, WorkspaceAccessEntry> aclsMap = getFirecloudWorkspaceAcls(workspace);
     ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
-
-    // TODO: remove once user_workspace table is removed.  this updates in our db
-    Iterator<WorkspaceUserRole> dbUserRoles = workspace.getWorkspaceUserRoles().iterator();
-    while (dbUserRoles.hasNext()) {
-      WorkspaceUserRole currentUserRole = dbUserRoles.next();
-
-      WorkspaceUserRole mapValue = userRoleMap.get(currentUserRole.getUser().getUserId());
-      if (mapValue != null) {
-        currentUserRole.setRoleEnum(mapValue.getRoleEnum());
-      } else {
-        dbUserRoles.remove();
-      }
-    }
 
     // Iterate through existing roles, update/remove them
     for (Map.Entry<User, WorkspaceAccessEntry> entry : aclsMap.entrySet()) {
       User currentUser = entry.getKey();
-
-      // TODO: this will change when userRoleSet changes type
-      WorkspaceUserRole mapValue = userRoleMap.get(currentUser.getUserId());
-
-      if (mapValue != null) {
+      WorkspaceAccessLevel updatedAccess = userRoleMap.get(currentUser);
+      if (updatedAccess != null) {
         WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
         currentUpdate.setEmail(currentUser.getEmail());
-        WorkspaceAccessLevel updatedAccess = mapValue.getRoleEnum();
-
         updateFirecloudAclsOnUser(updatedAccess, currentUpdate);
         updateACLRequestList.add(currentUpdate);
-
-        userRoleMap.remove(currentUser.getUserId());
-
+        userRoleMap.remove(currentUser);
       } else {
         // This is how to remove a user from the FireCloud ACL:
         // Pass along an update request with NO ACCESS as the given access level.
@@ -294,17 +268,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     // Iterate through remaining new roles; add them
-    for (Entry<Long, WorkspaceUserRole> remainingRole : userRoleMap.entrySet()) {
-
-      // TODO: remove when user_workspace table is removed
-      workspace.getWorkspaceUserRoles().add(remainingRole.getValue());
-
+    for (Entry<User, WorkspaceAccessLevel> remainingRole : userRoleMap.entrySet()) {
       WorkspaceACLUpdate newUser = new WorkspaceACLUpdate();
-      newUser.setEmail(remainingRole.getValue().getUser().getEmail());
-      updateFirecloudAclsOnUser(remainingRole.getValue().getRoleEnum(), newUser);
+      newUser.setEmail(remainingRole.getKey().getEmail());
+      updateFirecloudAclsOnUser(remainingRole.getValue(), newUser);
       updateACLRequestList.add(newUser);
     }
-
     WorkspaceACLUpdateResponseList fireCloudResponse =
         fireCloudService.updateWorkspaceACL(
             workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
