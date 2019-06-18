@@ -10,9 +10,11 @@ import {
   CohortSearchActions,
   participantsCount,
 } from 'app/cohort-search/redux';
+import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 
-import {Attribute, AttrName, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
+import {Attribute, AttrName, CohortBuilderService, Operator, TreeSubType} from 'generated';
+import {CriteriaType, DomainType} from 'generated/fetch';
 
 const minAge = 18;
 const maxAge = 120;
@@ -48,7 +50,6 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
   readonly maxAge = maxAge;
   loading = false;
   subscription = new Subscription();
-  hasSelection = false;
   selectedNode: any;
   ageClicked = false;
 
@@ -69,17 +70,10 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
   ageCount: number;
   deceasedNode;
 
-  genderNodes = List();
-  initialGenders = List();
-
-  raceNodes = List();
-  initialRaces = List();
-
-  ethnicityNodes = List();
-  initialEthnicities = List();
+  nodes = [];
   selections: Array<any>;
   count: any;
-  subtype: string;
+  wizard: any;
 
   constructor(
     private api: CohortBuilderService,
@@ -87,67 +81,25 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.subscription.add(this.subtype$.subscribe(sub => {
-      this.subtype = sub;
-      if (sub === TreeSubType.AGE) {
-        this.initAgeControls();
-      }
-    }));
-    this.subscription = this.selection$.subscribe(sel => this.hasSelection = sel.size > 0);
-    this.selection$.first().subscribe(selections => {
-      /*
-       * Each subtype of DEMO requires subtly different initialization, which
-       * is handled by special-case methods which each receive any selected
-       * criteria already in the state (i.e. if we're editing a search group
-       * item).  Finally we load the relevant criteria from the API.
-       */
-      switch (this.subtype) {
-        case TreeSubType.GEN:
-          this.initialGenders = selections
-            .filter(s => s.get('subtype') === TreeSubType[TreeSubType.GEN]);
-          break;
-        case TreeSubType.RACE:
-          this.initialRaces = selections
-            .filter(s => s.get('subtype') === TreeSubType[TreeSubType.RACE]);
-          break;
-        case TreeSubType.ETH:
-          this.initialEthnicities = selections
-            .filter(s => s.get('subtype') === TreeSubType[TreeSubType.ETH]);
-          break;
-        case TreeSubType.AGE:
-          this.initDeceased(selections);
-          this.initAgeRange(selections);
-          this.loadNodesFromApi(TreeSubType.DEC);
-      }
-      this.loadNodesFromApi();
-    });
-
-    this.subscription.add(this.selection$
-      .subscribe(selections => {
-        this.selections = [];
-        selections.forEach(selection => {
-          if (this.subtype === TreeSubType.AGE
-            && (selection.get('subtype') === TreeSubType.AGE
-            || selection.get('subtype') === TreeSubType.DEC)) {
-            this.selections.push(selection.toJS());
-          } else if (selection.get('subtype') === this.subtype) {
-            this.selections.push(selection.toJS());
-          }
-        });
-        if (this.subtype !== TreeSubType.AGE && this.selections.length) {
-          this.calculate();
-        }
-      })
-    );
+    this.wizard = wizardStore.getValue();
+    this.selections = this.wizard.item.searchParameters;
+    if (this.wizard.type === CriteriaType.AGE) {
+      this.initDeceased(this.selections);
+      this.initAgeRange(this.selections);
+      this.loadNodesFromApi(CriteriaType[CriteriaType.DECEASED]);
+    } else if (this.selections.length) {
+      this.calculate();
+    }
+    this.loadNodesFromApi();
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  loadNodesFromApi(subtype?: string) {
+  loadNodesFromApi(type?: string) {
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    subtype = subtype || this.subtype;
+    type = type || this.wizard.type;
     /*
      * Each subtype's possible criteria is loaded via the API.  Race and Gender
      * criteria nodes become options in their respective dropdowns; deceased
@@ -157,61 +109,56 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
      * sort them by count, then by name.
      */
     this.loading = true;
-    this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], subtype, null, null)
+    this.api.getCriteriaBy(cdrid, DomainType[DomainType.PERSON], type)
       .toPromise()
       .then(response => {
         const items = response.items
                   .filter(item => item.parentId !== 0
-                      || subtype === TreeSubType[TreeSubType.DEC]);
-        if (subtype !== TreeSubType[TreeSubType.AGE]) {
+                      || type === CriteriaType[CriteriaType.DECEASED]);
+        if (type !== CriteriaType[CriteriaType.AGE]) {
           items.sort(sortByCountThenName);
         }
-        const nodes = fromJS(items).map(node => {
-          if (subtype !== TreeSubType[TreeSubType.AGE]) {
-            const paramId = subtype === TreeSubType[TreeSubType.DEC] ? 'param-dec' :
-                          `param${node.get('conceptId', node.get('code'))}`;
-            node = node.set('parameterId', paramId);
+        const nodes = items.map(node => {
+          if (type !== CriteriaType[CriteriaType.AGE]) {
+            node['parameterId'] = type === CriteriaType[CriteriaType.DECEASED] ? 'param-dec' :
+              `param${node.conceptId || node.code}`;
           }
           return node;
         });
-        this.loadOptions(nodes, subtype);
+        this.loadOptions(nodes, type);
       });
   }
 
-  loadOptions(nodes: any, subtype: string) {
-    switch (subtype) {
+  loadOptions(nodes: any, type: string) {
+    switch (type) {
       /* Age and Deceased are single nodes we use as templates */
-      case TreeSubType[TreeSubType.AGE]:
-        this.ageNode = nodes.get(0);
-        this.ageNodes = nodes.toJS();
+      case CriteriaType[CriteriaType.AGE]:
+        this.ageNode = nodes[0];
+        this.ageNodes = nodes;
         this.calculateAgeCount();
         const attr = fromJS(<Attribute>{
           name: AttrName.AGE,
           operator: Operator.BETWEEN,
           operands: [minAge.toString(), maxAge.toString()]
         });
-        const paramId = `age-param${this.ageNode.get('id')}`;
-        this.selectedNode = this.ageNode
-          .set('name', `${minAge.toString()} - ${maxAge.toString()}`)
-          .set('parameterId', paramId)
-          .set('attributes', [attr]);
-        this.actions.addParameter(this.selectedNode);
+        const paramId = `age-param${this.ageNode.id}`;
+        this.selectedNode = {
+          ...this.ageNode,
+          name: `${minAge.toString()} - ${maxAge.toString()}`,
+          parameterId: paramId,
+          attributes: [attr],
+        };
+        this.wizard.item.searchParameters.push(this.selectedNode);
+        this.selections = [paramId, ...this.selections];
+        selectionsStore.next(this.selections);
+        wizardStore.next(this.wizard);
         break;
-      case TreeSubType[TreeSubType.DEC]:
-        this.deceasedNode = nodes.get(0);
+      case CriteriaType[CriteriaType.DECEASED]:
+        this.deceasedNode = nodes[0];
         break;
-      case TreeSubType[TreeSubType.GEN]:
-        this.genderNodes = nodes;
+      default:
+        this.nodes = nodes;
         this.loading = false;
-        break;
-      case TreeSubType[TreeSubType.RACE]:
-        this.raceNodes = nodes;
-        this.loading = false;
-        break;
-      case TreeSubType[TreeSubType.ETH]:
-        this.ethnicityNodes = nodes;
-        this.loading = false;
-        break;
     }
   }
 
