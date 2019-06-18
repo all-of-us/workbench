@@ -261,7 +261,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       </AlertWarning>}
       {(this.allTasksCompleted() && betaAccessGranted) &&
       <div style={{...baseStyles.card, ...styles.warningModal}} data-test-id='success-message'>
-        You successfully completed all the required steps to access the Research Workbench.
+        You successfully completed all the required steps to access the Researcher Workbench.
         <Button style={{marginLeft: '0.5rem'}}
                 onClick={() => window.location.reload()}>Get Started</Button>
       </div>}

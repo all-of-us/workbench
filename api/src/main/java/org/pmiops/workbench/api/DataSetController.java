@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.base.Strings;
 import java.sql.Date;
@@ -24,6 +23,7 @@ import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -36,24 +36,20 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewList;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
-import org.pmiops.workbench.model.DataSetQuery;
-import org.pmiops.workbench.model.DataSetQueryList;
 import org.pmiops.workbench.model.DataSetRequest;
-import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.NamedParameterEntry;
-import org.pmiops.workbench.model.NamedParameterValue;
+import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -217,31 +213,24 @@ public class DataSetController implements DataSetApiDelegate {
         }
       };
 
-  public ResponseEntity<DataSetQueryList> generateQuery(
-      String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
+  public ResponseEntity<DataSetCodeResponse> generateCode(
+      String workspaceNamespace,
+      String workspaceId,
+      String kernelTypeEnum,
+      DataSetRequest dataSet) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<DataSetQuery> respQueryList = new ArrayList<>();
+    KernelTypeEnum kernelType = KernelTypeEnum.fromValue(kernelTypeEnum);
 
     // Generate query per domain for the selected concept set, cohort and values
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
 
-    // Loop through and run the query for each domain and create LIST of
-    // domain, value and their corresponding query result
-    bigQueryJobConfig.forEach(
-        (domain, queryJobConfiguration) -> {
-          List<NamedParameterEntry> parameters = new ArrayList<>();
-          queryJobConfiguration
-              .getNamedParameters()
-              .forEach(
-                  (key, value) -> parameters.add(generateResponseFromQueryParameter(key, value)));
-          respQueryList.add(
-              new DataSetQuery()
-                  .domain(Domain.fromValue(domain))
-                  .query(queryJobConfiguration.getQuery())
-                  .namedParameters(parameters));
-        });
-    return ResponseEntity.ok(new DataSetQueryList().queryList(respQueryList));
+    return ResponseEntity.ok(
+        new DataSetCodeResponse()
+            .code(
+                dataSetService.generateCodeFromQueryAndKernelType(
+                    kernelType, dataSet.getName(), bigQueryJobConfig))
+            .kernelType(kernelType));
   }
 
   @Override
@@ -352,24 +341,69 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    DataSetQueryList queryList =
-        generateQuery(workspaceNamespace, workspaceId, dataSetExportRequest.getDataSetRequest())
-            .getBody();
-    String queriesAsStrings =
-        "import pandas\n\n"
-            + queryList.getQueryList().stream()
-                .map(
-                    query ->
-                        convertQueryToString(
-                            query, dataSetExportRequest.getDataSetRequest().getName()))
-                .collect(Collectors.joining("\n\n"));
-    JSONObject notebookFile;
+    // This suppresses 'may not be initialized errors. We will always init to something else before
+    // used.
+    JSONObject notebookFile = new JSONObject();
     WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+    JSONObject metaData = new JSONObject();
+
+    if (!dataSetExportRequest.getNewNotebook()) {
+      notebookFile =
+          notebooksService.getNotebookContents(
+              workspace.getWorkspace().getBucketName(), dataSetExportRequest.getNotebookName());
+      try {
+        String language =
+            Optional.of(notebookFile.getJSONObject("metadata"))
+                .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
+                .map(kernelSpec -> kernelSpec.getString("language"))
+                .orElse("Python");
+        if ("R".equals(language)) {
+          dataSetExportRequest.setKernelType(KernelTypeEnum.R);
+        } else {
+          dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
+        }
+      } catch (JSONException e) {
+        // If we can't find metadata to parse, default to python.
+        dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
+      }
+    } else {
+      switch (dataSetExportRequest.getKernelType()) {
+        case PYTHON:
+          break;
+        case R:
+          metaData
+              .put(
+                  "kernelspec",
+                  new JSONObject().put("display_name", "R").put("language", "R").put("name", "ir"))
+              .put(
+                  "language_info",
+                  new JSONObject()
+                      .put("codemirror_mode", "r")
+                      .put("file_extension", ".r")
+                      .put("mimetype", "text/x-r-source")
+                      .put("name", "r")
+                      .put("pygments_lexer", "r")
+                      .put("version", "3.4.4"));
+          break;
+        default:
+          throw new BadRequestException(
+              "Kernel Type " + dataSetExportRequest.getKernelType() + " is not supported");
+      }
+    }
+
+    Map<String, QueryJobConfiguration> queryList =
+        dataSetService.generateQuery(dataSetExportRequest.getDataSetRequest());
+    String queriesAsStrings =
+        dataSetService.generateCodeFromQueryAndKernelType(
+            dataSetExportRequest.getKernelType(),
+            dataSetExportRequest.getDataSetRequest().getName(),
+            queryList);
+
     if (dataSetExportRequest.getNewNotebook()) {
       notebookFile =
           new JSONObject()
               .put("cells", new JSONArray().put(createNotebookCodeCellWithString(queriesAsStrings)))
-              .put("metadata", new JSONObject())
+              .put("metadata", metaData)
               // nbformat and nbformat_minor are the notebook major and minor version we are
               // creating.
               // Specifically, here we create notebook version 4.2 (I believe)
@@ -377,9 +411,6 @@ public class DataSetController implements DataSetApiDelegate {
               .put("nbformat", 4)
               .put("nbformat_minor", 2);
     } else {
-      notebookFile =
-          notebooksService.getNotebookContents(
-              workspace.getWorkspace().getBucketName(), dataSetExportRequest.getNotebookName());
       notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(queriesAsStrings));
     }
 
@@ -475,109 +506,6 @@ public class DataSetController implements DataSetApiDelegate {
         .put("execution_count", JSONObject.NULL)
         .put("outputs", new JSONArray())
         .put("source", new JSONArray().put(cellInformation));
-  }
-
-  private String convertQueryToString(DataSetQuery query, String prefix) {
-    String namespace =
-        prefix.toLowerCase().replaceAll(" ", "_")
-            + "_"
-            + query.getDomain().toString().toLowerCase()
-            + "_";
-    String sqlSection = namespace + "sql = \"\"\"" + query.getQuery() + "\"\"\"";
-
-    String namedParamsSection =
-        namespace
-            + "query_config = {\n"
-            + "  \'query\': {\n"
-            + "  \'parameterMode\': \'NAMED\',\n"
-            + "  \'queryParameters\': [\n"
-            + query.getNamedParameters().stream()
-                .map(
-                    namedParameterEntry ->
-                        convertNamedParameterToString(namedParameterEntry) + "\n")
-                .collect(Collectors.joining(""))
-            + "    ]\n"
-            + "  }\n"
-            + "}\n\n";
-
-    String dataFrameSection =
-        namespace
-            + "df = pandas.read_gbq("
-            + namespace
-            + "sql, dialect=\"standard\", configuration="
-            + namespace
-            + "query_config)";
-
-    return sqlSection + "\n\n" + namedParamsSection + "\n\n" + dataFrameSection;
-  }
-
-  // BigQuery api returns parameter values either as a list or an object.
-  // To avoid warnings on our cast to list, we suppress those warnings here,
-  // as they are expected.
-  @SuppressWarnings("unchecked")
-  private String convertNamedParameterToString(NamedParameterEntry namedParameterEntry) {
-    if (namedParameterEntry.getValue() == null) {
-      return "";
-    }
-    boolean isArrayParameter =
-        !(namedParameterEntry.getValue().getParameterValue() instanceof String);
-
-    List<NamedParameterValue> arrayValues = new ArrayList<>();
-    Object value = namedParameterEntry.getValue().getParameterValue();
-    if (value instanceof List) {
-      arrayValues = (List<NamedParameterValue>) value;
-    }
-    return "      {\n"
-        + "        'name': \""
-        + namedParameterEntry.getValue().getName()
-        + "\",\n"
-        + "        'parameterType': {'type': \""
-        + namedParameterEntry.getValue().getParameterType()
-        + "\""
-        + (isArrayParameter
-            ? ",'arrayType': {'type': \"" + namedParameterEntry.getValue().getArrayType() + "\"},"
-            : "")
-        + "},\n"
-        + "        \'parameterValue\': {"
-        + (isArrayParameter
-            ? "\'arrayValues\': ["
-                + arrayValues.stream()
-                    .map(
-                        namedParameterValue ->
-                            "{\'value\': " + namedParameterValue.getParameterValue() + "}")
-                + "]"
-            : "'value': \"" + namedParameterEntry.getValue().getParameterValue() + "\"")
-        + "}\n"
-        + "      },";
-  }
-
-  private NamedParameterEntry generateResponseFromQueryParameter(
-      String key, QueryParameterValue value) {
-    if (value.getValue() != null) {
-      return new NamedParameterEntry()
-          .key(key)
-          .value(
-              new NamedParameterValue()
-                  .name(key)
-                  .parameterType(value.getType().toString())
-                  .parameterValue(value.getValue()));
-    } else if (value.getArrayValues() != null) {
-      List<NamedParameterValue> values =
-          value.getArrayValues().stream()
-              .map(arrayValue -> generateResponseFromQueryParameter(key, arrayValue).getValue())
-              .collect(Collectors.toList());
-      return new NamedParameterEntry()
-          .key(key)
-          .value(
-              new NamedParameterValue()
-                  .name(key)
-                  .parameterType(value.getType().toString())
-                  .arrayType(value.getArrayType() == null ? null : value.getArrayType().toString())
-                  .parameterValue(values));
-    } else {
-      throw new ServerErrorException(
-          "Unsupported query parameter type in query generation: " + value.getType().toString());
-    }
   }
 
   private org.pmiops.workbench.db.model.DataSet getDbDataSet(

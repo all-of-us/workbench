@@ -1078,6 +1078,22 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/cron/cleanBillingBuffer:
+    get:
+      security: []
+      tags:
+        - billing
+        - cron
+      description: Find BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR
+      operationId: cleanBillingBuffer
+      responses:
+        200:
+          description: No Error
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # Notebooks ############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:
@@ -1573,16 +1589,20 @@ paths:
                $ref: "#/definitions/SurveyDetailsResponse"
 
 ### Data set ############################################
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateQuery:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
     post:
       tags:
         - dataSet
       description: >
         Given a Data Set, return the SQL query built from it.
-      operationId: "generateQuery"
+      operationId: "generateCode"
       parameters:
         - $ref: '#/parameters/workspaceNamespace'
         - $ref: '#/parameters/workspaceId'
+        - in: path
+          name: kernelType
+          required: true
+          type: string
         - in: body
           name: dataSet
           required: true
@@ -1593,7 +1613,7 @@ paths:
           description: >
             A SQL query for each domain in the Data Set
           schema:
-            $ref: "#/definitions/DataSetQueryList"
+            $ref: "#/definitions/DataSetCodeResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets:
       parameters:
@@ -1768,6 +1788,9 @@ definitions:
         description: |
           Stackdriver API key for error reporting, scoped to a particular
           domain. If unset, Stackdriver error reporting should be disabled.
+      enableDataUseAgreement:
+        type: boolean
+        description: Feature flag for enabling data use agreement
 
   # Mirrors BillingProjectMembership from fireCloud.yaml
   BillingProjectMembership:
@@ -2459,6 +2482,14 @@ definitions:
         type: string
       newNotebook:
         type: boolean
+      kernelType:
+        $ref: "#/definitions/KernelTypeEnum"
+
+  KernelTypeEnum:
+    type: string
+    enum:
+      - Python
+      - R
 
   DomainValuePair:
     type: object
@@ -2523,13 +2554,14 @@ definitions:
            $ref: "#/definitions/DataSet"
 
 
-  DataSetQueryList:
+  DataSetCodeResponse:
     type: object
     properties:
-      queryList:
-        type: array
-        items:
-          $ref: "#/definitions/DataSetQuery"
+      kernelType:
+        $ref: "#/definitions/KernelTypeEnum"
+      code:
+        type: string
+        description: The code required to generate the query for the data set.
 
   DataSetQuery:
     type: object

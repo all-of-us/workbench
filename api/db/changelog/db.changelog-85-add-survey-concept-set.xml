@@ -4,7 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="nsaxena" id="changelog-84-add-survey-concept-set">
+  <changeSet author="nsaxena" id="changelog-85-add-survey-concept-set">
     <addColumn tableName="concept_set">
       <column name="survey" type="tinyint"/>
     </addColumn>
