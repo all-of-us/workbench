@@ -56,6 +56,11 @@
   },
   {
     "mode": "NULLABLE",
+    "name": "value_source_concept_id",
+    "type": "integer"
+  },
+  {
+    "mode": "NULLABLE",
     "name": "systolic",
     "type": "float"
   },
