@@ -4,21 +4,16 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
-import org.pmiops.workbench.model.Survey;
 import org.pmiops.workbench.model.SurveyDetailsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -105,15 +100,16 @@ public class ConceptBigQueryService {
 
     TableResult result =
         bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                buildSurveyQuery(survey)), 360000L);
-    result.getValues().forEach(surveyValue -> {
-      String question = surveyValue.get(0).getValue().toString();
-      Long concept_id = Long.parseLong(surveyValue.get(1).getValue().toString());
-      responseList.add(new SurveyDetailsResponse()
-          .question(question)
-          .conceptId(concept_id));
-    });
+            bigQueryService.filterBigQueryConfig(buildSurveyQuery(survey)), 360000L);
+    result
+        .getValues()
+        .forEach(
+            surveyValue -> {
+              String question = surveyValue.get(0).getValue().toString();
+              Long concept_id = Long.parseLong(surveyValue.get(1).getValue().toString());
+              responseList.add(
+                  new SurveyDetailsResponse().question(question).conceptId(concept_id));
+            });
     return responseList;
   }
 }

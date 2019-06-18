@@ -3,14 +3,11 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldList;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
@@ -30,7 +27,6 @@ import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
-import org.pmiops.workbench.model.Survey;
 import org.pmiops.workbench.model.SurveyDetailsResponse;
 import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.VocabularyCount;
@@ -131,11 +127,12 @@ public class ConceptsController implements ConceptsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<List<SurveyDetailsResponse>> getSurveyDetails(String workspaceNamespace,
-      String workspaceId, String survey) {
+  public ResponseEntity<List<SurveyDetailsResponse>> getSurveyDetails(
+      String workspaceNamespace, String workspaceId, String survey) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<SurveyDetailsResponse> surveyQuestionAnswerList = conceptBigQueryService.getSurveys(survey);
+    List<SurveyDetailsResponse> surveyQuestionAnswerList =
+        conceptBigQueryService.getSurveys(survey);
     return ResponseEntity.ok(surveyQuestionAnswerList);
   }
 

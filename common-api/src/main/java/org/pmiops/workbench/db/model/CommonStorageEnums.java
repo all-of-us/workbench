@@ -4,7 +4,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.Survey;
 import org.pmiops.workbench.model.Surveys;
 
 public class CommonStorageEnums {
@@ -94,5 +93,4 @@ public class CommonStorageEnums {
   public static Surveys surveyIdToSurvey(String survey) {
     return SURVEY_ID_MAP.inverse().get(survey);
   }
-
 }

@@ -97,7 +97,6 @@ public class ConceptSet {
     this.survey = survey;
   }
 
-
   @Transient
   public Domain getDomainEnum() {
     return CommonStorageEnums.domainFromStorage(domain);
@@ -115,6 +114,7 @@ public class ConceptSet {
   public void setSurveysEnum(Surveys survey) {
     this.survey = CommonStorageEnums.surveysToStorage(survey);
   }
+
   @Column(name = "description")
   public String getDescription() {
     return description;

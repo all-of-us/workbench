@@ -394,21 +394,21 @@ public class ConceptSetsControllerTest {
   public void testGetSurveyConceptSet() {
     ConceptSet surveyConceptSet = makeSurveyConceptSet1();
     assertThat(
-        conceptSetsController
-            .getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, surveyConceptSet.getId())
-            .getBody())
+            conceptSetsController
+                .getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, surveyConceptSet.getId())
+                .getBody())
         .isEqualTo(surveyConceptSet);
     assertThat(
-        conceptSetsController
-            .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-            .getBody()
-            .getItems())
+            conceptSetsController
+                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
+                .getBody()
+                .getItems())
         .contains(surveyConceptSet.concepts(null));
     assertThat(
-        conceptSetsController
-            .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
-            .getBody()
-            .getItems())
+            conceptSetsController
+                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
+                .getBody()
+                .getItems())
         .isEmpty();
   }
 
@@ -429,16 +429,16 @@ public class ConceptSetsControllerTest {
     // Get concept sets will not return the full information, because concepts can have a lot of
     // information.
     assertThat(
-        conceptSetsController
-            .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
-            .getBody()
-            .getItems())
+            conceptSetsController
+                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
+                .getBody()
+                .getItems())
         .contains(conceptSet.concepts(null));
     assertThat(
-        conceptSetsController
-            .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
-            .getBody()
-            .getItems())
+            conceptSetsController
+                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
+                .getBody()
+                .getItems())
         .isEmpty();
   }
 
