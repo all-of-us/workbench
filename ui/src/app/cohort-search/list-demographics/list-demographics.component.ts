@@ -64,8 +64,14 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
   wizard: any;
 
   ngOnInit() {
-    this.wizard = wizardStore.getValue();
-    this.selections = this.wizard.item.searchParameters;
+    wizardStore.subscribe(wizard => this.wizard = wizard);
+    selectionsStore
+      .subscribe(selections => {
+        this.selections = selections;
+        if (this.wizard && this.wizard.type !== CriteriaType.AGE) {
+          this.calculate();
+        }
+      });
     if (this.wizard.type === CriteriaType.AGE) {
       this.initAgeControls();
       this.initDeceased();
@@ -131,10 +137,11 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
           parameterId: paramId,
           attributes: [attr],
         };
-        this.wizard.item.searchParameters.push(this.selectedNode);
-        this.selections = [paramId, ...this.selections];
-        selectionsStore.next(this.selections);
-        wizardStore.next(this.wizard);
+        const wizard = this.wizard;
+        wizard.item.searchParameters.push(this.selectedNode);
+        const selections = [paramId, ...this.selections];
+        selectionsStore.next(selections);
+        wizardStore.next(wizard);
         break;
       case CriteriaType[CriteriaType.DECEASED]:
         this.deceasedNode = nodes[0];
@@ -248,11 +255,12 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
       }).subscribe(newNode => {
         const {parameterId} = this.selectedNode;
         this.selectedNode = newNode;
-        this.wizard.item.searchParameters = [this.selectedNode];
-        wizardStore.next(this.wizard);
+        const wizard = this.wizard;
+        wizard.item.searchParameters = [this.selectedNode];
+        wizardStore.next(wizard);
         if (parameterId !== newNode.parameterId) {
-          this.selections = [parameterId];
-          selectionsStore.next(this.selections);
+          const selections = [parameterId];
+          selectionsStore.next(selections);
         }
       });
     this.subscription.add(ageDiff);
@@ -269,12 +277,13 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
         console.warn('No node from which to make parameter for deceased status');
         return ;
       }
-      this.wizard.item.searchParameters = [includeDeceased ? this.deceasedNode : this.selectedNode];
-      this.selections = [
+      const wizard = this.wizard
+      wizard.item.searchParameters = [includeDeceased ? this.deceasedNode : this.selectedNode];
+      const selections = [
         includeDeceased ? this.deceasedNode.parameterId : this.selectedNode.parameterId
       ];
-      wizardStore.next(this.wizard);
-      selectionsStore.next(this.selections);
+      wizardStore.next(wizard);
+      selectionsStore.next(selections);
     });
   }
 
@@ -311,9 +320,18 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
     }
   }
 
+  selectOption = (opt: any) => {
+    console.log(opt);
+    const wizard = this.wizard;
+    wizard.item.searchParameters.push(opt);
+    const selections = [...this.selections, opt.parameterId];
+    wizardStore.next(wizard);
+    selectionsStore.next(selections);
+  }
+
   calculate() {
     this.count = 0;
-    this.selections.forEach(selection => {
+    this.wizard.item.searchParameters.forEach(selection => {
       this.count += selection.count;
     });
   }
