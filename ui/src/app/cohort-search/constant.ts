@@ -1,5 +1,5 @@
 import {AttrName, Operator, TreeSubType, TreeType} from 'generated';
-import {DomainType} from 'generated/fetch';
+import {CriteriaType, DomainType} from 'generated/fetch';
 
 export const PROGRAM_TYPES = [
   { name: 'Surveys', type: TreeType.PPI, subtype: null },
@@ -33,7 +33,16 @@ export const DOMAIN_TYPES = [
   {name: 'Visits', type: TreeType.VISIT, fullTree: true, subtype: null}
 ];
 
-export const LIST_PROGRAM_TYPES = [];
+export const LIST_PROGRAM_TYPES = [
+  {
+    name: 'Demographics', domain: DomainType.PERSON, children: [
+      {name: 'Current Age/Deceased', domain: DomainType.PERSON, type: CriteriaType.AGE},
+      {name: 'Gender', domain: DomainType.PERSON, type: CriteriaType.GENDER},
+      {name: 'Race', domain: DomainType.PERSON, type: CriteriaType.RACE},
+      {name: 'Ethnicity', domain: DomainType.PERSON, type: CriteriaType.ETHNICITY},
+    ]
+  }
+];
 
 export const LIST_DOMAIN_TYPES = [
   {name: 'Conditions', domain: DomainType.CONDITION},
