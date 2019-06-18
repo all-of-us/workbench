@@ -593,7 +593,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       savedWorkspace = workspaceService.updateUserRoles(savedWorkspace, clonedRoles);
     }
     return ResponseEntity.ok(
-        new CloneWorkspaceResponse().workspace(workspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
+        new CloneWorkspaceResponse()
+            .workspace(workspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
   }
 
   @Override

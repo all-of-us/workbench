@@ -10,7 +10,6 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -110,7 +109,6 @@ import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
@@ -381,8 +379,7 @@ public class WorkspacesControllerTest {
   }
 
   private void stubFcGetWorkspaceACL() {
-    when(fireCloudService.getWorkspaceAcl(anyString(), anyString()))
-            .thenReturn(new WorkspaceACL());
+    when(fireCloudService.getWorkspaceAcl(anyString(), anyString())).thenReturn(new WorkspaceACL());
   }
 
   private void stubGetWorkspace(
@@ -539,7 +536,6 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getNamespace()).isEqualTo(workspace.getNamespace());
     assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
     assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
-
   }
 
   @Test
@@ -1342,9 +1338,10 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getCreator()).isEqualTo(cloner.getEmail());
 
     // TODO: how to test this?
-//    assertThat(workspace2.getUserRoles().size()).isEqualTo(1);
-//    assertThat(workspace2.getUserRoles().get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
-//    assertThat(workspace2.getUserRoles().get(0).getEmail()).isEqualTo(cloner.getEmail());
+    //    assertThat(workspace2.getUserRoles().size()).isEqualTo(1);
+    //
+    // assertThat(workspace2.getUserRoles().get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
+    //    assertThat(workspace2.getUserRoles().get(0).getEmail()).isEqualTo(cloner.getEmail());
   }
 
   @Test
@@ -1404,57 +1401,58 @@ public class WorkspacesControllerTest {
   }
 
   // TODO: how to test this?
-//  @Test
-//  public void testCloneWorkspaceIncludeUserRoles() throws Exception {
-//    User cloner = createUser("cloner@gmail.com");
-//    User reader = createUser("reader@gmail.com");
-//    User writer = createUser("writer@gmail.com");
-//
-//    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
-//    stubFcUpdateWorkspaceACL();
-//    workspacesController.shareWorkspace(
-//        workspace.getNamespace(),
-//        workspace.getId(),
-//        new ShareWorkspaceRequest()
-//            .workspaceEtag(workspace.getEtag())
-//            .items(
-//                ImmutableList.of(
-//                    new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
-//                    new UserRole().email(cloner.getEmail()).role(WorkspaceAccessLevel.READER),
-//                    new UserRole().email(reader.getEmail()).role(WorkspaceAccessLevel.READER),
-//                    new UserRole().email(writer.getEmail()).role(WorkspaceAccessLevel.WRITER))));
-//
-//    currentUser = cloner;
-//
-//    Workspace modWorkspace =
-//        new Workspace()
-//            .namespace("cloned-ns")
-//            .name("cloned")
-//            .researchPurpose(workspace.getResearchPurpose());
-//
-//    stubGetWorkspace("cloned-ns", "cloned", cloner.getEmail(), WorkspaceAccessLevel.OWNER);
-//    mockBillingProjectBuffer("cloned-ns");
-//
-//    Workspace workspace2 =
-//        workspacesController
-//            .cloneWorkspace(
-//                workspace.getNamespace(),
-//                workspace.getId(),
-//                new CloneWorkspaceRequest().includeUserRoles(true).workspace(modWorkspace))
-//            .getBody()
-//            .getWorkspace();
-//
-//    assertThat(workspace2.getCreator()).isEqualTo(cloner.getEmail());
-//    assertThat(workspace2.getUserRoles().size()).isEqualTo(4);
-//    List<UserRole> clonerRoles =
-//        workspace2.getUserRoles().stream()
-//            .filter((role) -> cloner.getEmail().equals(role.getEmail()))
-//            .collect(Collectors.toList());
-//    assertThat(clonerRoles.size()).isEqualTo(1);
-//    assertThat(clonerRoles.get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
-//
-//    verify(fireCloudService).updateWorkspaceACL(eq("cloned-ns"), eq("cloned"), any());
-//  }
+  //  @Test
+  //  public void testCloneWorkspaceIncludeUserRoles() throws Exception {
+  //    User cloner = createUser("cloner@gmail.com");
+  //    User reader = createUser("reader@gmail.com");
+  //    User writer = createUser("writer@gmail.com");
+  //
+  //    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+  //    stubFcUpdateWorkspaceACL();
+  //    workspacesController.shareWorkspace(
+  //        workspace.getNamespace(),
+  //        workspace.getId(),
+  //        new ShareWorkspaceRequest()
+  //            .workspaceEtag(workspace.getEtag())
+  //            .items(
+  //                ImmutableList.of(
+  //                    new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
+  //                    new UserRole().email(cloner.getEmail()).role(WorkspaceAccessLevel.READER),
+  //                    new UserRole().email(reader.getEmail()).role(WorkspaceAccessLevel.READER),
+  //                    new
+  // UserRole().email(writer.getEmail()).role(WorkspaceAccessLevel.WRITER))));
+  //
+  //    currentUser = cloner;
+  //
+  //    Workspace modWorkspace =
+  //        new Workspace()
+  //            .namespace("cloned-ns")
+  //            .name("cloned")
+  //            .researchPurpose(workspace.getResearchPurpose());
+  //
+  //    stubGetWorkspace("cloned-ns", "cloned", cloner.getEmail(), WorkspaceAccessLevel.OWNER);
+  //    mockBillingProjectBuffer("cloned-ns");
+  //
+  //    Workspace workspace2 =
+  //        workspacesController
+  //            .cloneWorkspace(
+  //                workspace.getNamespace(),
+  //                workspace.getId(),
+  //                new CloneWorkspaceRequest().includeUserRoles(true).workspace(modWorkspace))
+  //            .getBody()
+  //            .getWorkspace();
+  //
+  //    assertThat(workspace2.getCreator()).isEqualTo(cloner.getEmail());
+  //    assertThat(workspace2.getUserRoles().size()).isEqualTo(4);
+  //    List<UserRole> clonerRoles =
+  //        workspace2.getUserRoles().stream()
+  //            .filter((role) -> cloner.getEmail().equals(role.getEmail()))
+  //            .collect(Collectors.toList());
+  //    assertThat(clonerRoles.size()).isEqualTo(1);
+  //    assertThat(clonerRoles.get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
+  //
+  //    verify(fireCloudService).updateWorkspaceACL(eq("cloned-ns"), eq("cloned"), any());
+  //  }
 
   @Test(expected = BadRequestException.class)
   public void testCloneWorkspaceBadRequest() throws Exception {
@@ -1528,74 +1526,75 @@ public class WorkspacesControllerTest {
   }
 
   // TODO: how to test this?
-//  @Test
-//  public void testShareWorkspace() throws Exception {
-//    User writerUser = new User();
-//    writerUser.setEmail("writerfriend@gmail.com");
-//    writerUser.setUserId(124L);
-//    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
-//    writerUser.setDisabled(false);
-//
-//    writerUser = userDao.save(writerUser);
-//    User readerUser = new User();
-//    readerUser.setEmail("readerfriend@gmail.com");
-//    readerUser.setUserId(125L);
-//    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
-//    readerUser.setDisabled(false);
-//    readerUser = userDao.save(readerUser);
-//
-//    Workspace workspace = createWorkspace();
-//    workspace = workspacesController.createWorkspace(workspace).getBody();
-//    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
-//    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-//    UserRole creator = new UserRole();
-//    creator.setEmail(LOGGED_IN_USER_EMAIL);
-//    creator.setRole(WorkspaceAccessLevel.OWNER);
-//    shareWorkspaceRequest.addItemsItem(creator);
-//    UserRole writer = new UserRole();
-//    writer.setEmail("writerfriend@gmail.com");
-//    writer.setRole(WorkspaceAccessLevel.WRITER);
-//    shareWorkspaceRequest.addItemsItem(writer);
-//    UserRole reader = new UserRole();
-//    reader.setEmail("readerfriend@gmail.com");
-//    reader.setRole(WorkspaceAccessLevel.READER);
-//    shareWorkspaceRequest.addItemsItem(reader);
-//
-//    // Simulate time between API calls to trigger last-modified/@Version changes.
-//    CLOCK.increment(1000);
-//    stubFcUpdateWorkspaceACL();
-//    WorkspaceUserRolesResponse shareResp =
-//        workspacesController
-//            .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
-//            .getBody();
-//    Workspace workspace2 =
-//        workspacesController
-//            .getWorkspace(workspace.getNamespace(), workspace.getName())
-//            .getBody()
-//            .getWorkspace();
-//    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
-//
-//    assertThat(workspace2.getUserRoles().size()).isEqualTo(3);
-//    int numOwners = 0;
-//    int numWriters = 0;
-//    int numReaders = 0;
-//    for (UserRole userRole : workspace2.getUserRoles()) {
-//      if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
-//        assertThat(userRole.getEmail()).isEqualTo(LOGGED_IN_USER_EMAIL);
-//        numOwners++;
-//      } else if (userRole.getRole().equals(WorkspaceAccessLevel.WRITER)) {
-//        assertThat(userRole.getEmail()).isEqualTo("writerfriend@gmail.com");
-//        numWriters++;
-//      } else {
-//        assertThat(userRole.getEmail()).isEqualTo("readerfriend@gmail.com");
-//        numReaders++;
-//      }
-//    }
-//    assertThat(numOwners).isEqualTo(1);
-//    assertThat(numWriters).isEqualTo(1);
-//    assertThat(numReaders).isEqualTo(1);
-//    assertThat(workspace.getEtag()).isNotEqualTo(workspace2.getEtag());
-//  }
+  //  @Test
+  //  public void testShareWorkspace() throws Exception {
+  //    User writerUser = new User();
+  //    writerUser.setEmail("writerfriend@gmail.com");
+  //    writerUser.setUserId(124L);
+  //    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
+  //    writerUser.setDisabled(false);
+  //
+  //    writerUser = userDao.save(writerUser);
+  //    User readerUser = new User();
+  //    readerUser.setEmail("readerfriend@gmail.com");
+  //    readerUser.setUserId(125L);
+  //    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
+  //    readerUser.setDisabled(false);
+  //    readerUser = userDao.save(readerUser);
+  //
+  //    Workspace workspace = createWorkspace();
+  //    workspace = workspacesController.createWorkspace(workspace).getBody();
+  //    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+  //    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+  //    UserRole creator = new UserRole();
+  //    creator.setEmail(LOGGED_IN_USER_EMAIL);
+  //    creator.setRole(WorkspaceAccessLevel.OWNER);
+  //    shareWorkspaceRequest.addItemsItem(creator);
+  //    UserRole writer = new UserRole();
+  //    writer.setEmail("writerfriend@gmail.com");
+  //    writer.setRole(WorkspaceAccessLevel.WRITER);
+  //    shareWorkspaceRequest.addItemsItem(writer);
+  //    UserRole reader = new UserRole();
+  //    reader.setEmail("readerfriend@gmail.com");
+  //    reader.setRole(WorkspaceAccessLevel.READER);
+  //    shareWorkspaceRequest.addItemsItem(reader);
+  //
+  //    // Simulate time between API calls to trigger last-modified/@Version changes.
+  //    CLOCK.increment(1000);
+  //    stubFcUpdateWorkspaceACL();
+  //    WorkspaceUserRolesResponse shareResp =
+  //        workspacesController
+  //            .shareWorkspace(workspace.getNamespace(), workspace.getName(),
+  // shareWorkspaceRequest)
+  //            .getBody();
+  //    Workspace workspace2 =
+  //        workspacesController
+  //            .getWorkspace(workspace.getNamespace(), workspace.getName())
+  //            .getBody()
+  //            .getWorkspace();
+  //    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
+  //
+  //    assertThat(workspace2.getUserRoles().size()).isEqualTo(3);
+  //    int numOwners = 0;
+  //    int numWriters = 0;
+  //    int numReaders = 0;
+  //    for (UserRole userRole : workspace2.getUserRoles()) {
+  //      if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
+  //        assertThat(userRole.getEmail()).isEqualTo(LOGGED_IN_USER_EMAIL);
+  //        numOwners++;
+  //      } else if (userRole.getRole().equals(WorkspaceAccessLevel.WRITER)) {
+  //        assertThat(userRole.getEmail()).isEqualTo("writerfriend@gmail.com");
+  //        numWriters++;
+  //      } else {
+  //        assertThat(userRole.getEmail()).isEqualTo("readerfriend@gmail.com");
+  //        numReaders++;
+  //      }
+  //    }
+  //    assertThat(numOwners).isEqualTo(1);
+  //    assertThat(numWriters).isEqualTo(1);
+  //    assertThat(numReaders).isEqualTo(1);
+  //    assertThat(workspace.getEtag()).isNotEqualTo(workspace2.getEtag());
+  //  }
 
   @Test
   public void testShareWorkspaceNoRoleFailure() throws Exception {
@@ -1632,96 +1631,98 @@ public class WorkspacesControllerTest {
   }
 
   // TODO: how to test this?
-//  @Test
-//  public void testUnshareWorkspace() throws Exception {
-//    User writerUser = new User();
-//    writerUser.setEmail("writerfriend@gmail.com");
-//    writerUser.setUserId(124L);
-//    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
-//    writerUser.setDisabled(false);
-//    writerUser = userDao.save(writerUser);
-//    User readerUser = new User();
-//    readerUser.setEmail("readerfriend@gmail.com");
-//    readerUser.setUserId(125L);
-//    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
-//    readerUser.setDisabled(false);
-//    readerUser = userDao.save(readerUser);
-//
-//    Workspace workspace = createWorkspace();
-//    workspace = workspacesController.createWorkspace(workspace).getBody();
-//    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
-//    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-//    UserRole creator = new UserRole();
-//    creator.setEmail(LOGGED_IN_USER_EMAIL);
-//    creator.setRole(WorkspaceAccessLevel.OWNER);
-//    shareWorkspaceRequest.addItemsItem(creator);
-//    UserRole writer = new UserRole();
-//    writer.setEmail("writerfriend@gmail.com");
-//    writer.setRole(WorkspaceAccessLevel.WRITER);
-//    shareWorkspaceRequest.addItemsItem(writer);
-//    UserRole reader = new UserRole();
-//    reader.setEmail("readerfriend@gmail.com");
-//    reader.setRole(WorkspaceAccessLevel.READER);
-//    shareWorkspaceRequest.addItemsItem(reader);
-//
-//    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
-//    responseValue.setUsersNotFound(new ArrayList<WorkspaceACLUpdate>());
-//
-//    // Simulate time between API calls to trigger last-modified/@Version changes.
-//    CLOCK.increment(1000);
-//    when(fireCloudService.updateWorkspaceACL(
-//            anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class)))
-//        .thenReturn(responseValue);
-//    WorkspaceUserRolesResponse shareResp =
-//        workspacesController
-//            .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
-//            .getBody();
-//    Workspace workspace2 =
-//        workspacesController
-//            .getWorkspace(workspace.getNamespace(), workspace.getId())
-//            .getBody()
-//            .getWorkspace();
-//    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
-//
-//    CLOCK.increment(1000);
-//    shareWorkspaceRequest = new ShareWorkspaceRequest();
-//    shareWorkspaceRequest.setWorkspaceEtag(workspace2.getEtag());
-//    shareWorkspaceRequest.addItemsItem(creator);
-//    shareWorkspaceRequest.addItemsItem(writer);
-//
-//    shareResp =
-//        workspacesController
-//            .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
-//            .getBody();
-//    Workspace workspace3 =
-//        workspacesController
-//            .getWorkspace(workspace.getNamespace(), workspace.getId())
-//            .getBody()
-//            .getWorkspace();
-//    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace3.getEtag());
-//
-//    assertThat(workspace3.getUserRoles().size()).isEqualTo(2);
-//    int numOwners = 0;
-//    int numWriters = 0;
-//    int numReaders = 0;
-//    for (UserRole userRole : workspace3.getUserRoles()) {
-//      if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
-//        assertThat(userRole.getEmail()).isEqualTo(LOGGED_IN_USER_EMAIL);
-//        numOwners++;
-//      } else if (userRole.getRole().equals(WorkspaceAccessLevel.WRITER)) {
-//        assertThat(userRole.getEmail()).isEqualTo("writerfriend@gmail.com");
-//        numWriters++;
-//      } else {
-//        assertThat(userRole.getEmail()).isEqualTo("readerfriend@gmail.com");
-//        numReaders++;
-//      }
-//    }
-//    assertThat(numOwners).isEqualTo(1);
-//    assertThat(numWriters).isEqualTo(1);
-//    assertThat(numReaders).isEqualTo(0);
-//    assertThat(workspace.getEtag()).isNotEqualTo(workspace2.getEtag());
-//    assertThat(workspace2.getEtag()).isNotEqualTo(workspace3.getEtag());
-//  }
+  //  @Test
+  //  public void testUnshareWorkspace() throws Exception {
+  //    User writerUser = new User();
+  //    writerUser.setEmail("writerfriend@gmail.com");
+  //    writerUser.setUserId(124L);
+  //    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
+  //    writerUser.setDisabled(false);
+  //    writerUser = userDao.save(writerUser);
+  //    User readerUser = new User();
+  //    readerUser.setEmail("readerfriend@gmail.com");
+  //    readerUser.setUserId(125L);
+  //    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
+  //    readerUser.setDisabled(false);
+  //    readerUser = userDao.save(readerUser);
+  //
+  //    Workspace workspace = createWorkspace();
+  //    workspace = workspacesController.createWorkspace(workspace).getBody();
+  //    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+  //    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+  //    UserRole creator = new UserRole();
+  //    creator.setEmail(LOGGED_IN_USER_EMAIL);
+  //    creator.setRole(WorkspaceAccessLevel.OWNER);
+  //    shareWorkspaceRequest.addItemsItem(creator);
+  //    UserRole writer = new UserRole();
+  //    writer.setEmail("writerfriend@gmail.com");
+  //    writer.setRole(WorkspaceAccessLevel.WRITER);
+  //    shareWorkspaceRequest.addItemsItem(writer);
+  //    UserRole reader = new UserRole();
+  //    reader.setEmail("readerfriend@gmail.com");
+  //    reader.setRole(WorkspaceAccessLevel.READER);
+  //    shareWorkspaceRequest.addItemsItem(reader);
+  //
+  //    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
+  //    responseValue.setUsersNotFound(new ArrayList<WorkspaceACLUpdate>());
+  //
+  //    // Simulate time between API calls to trigger last-modified/@Version changes.
+  //    CLOCK.increment(1000);
+  //    when(fireCloudService.updateWorkspaceACL(
+  //            anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class)))
+  //        .thenReturn(responseValue);
+  //    WorkspaceUserRolesResponse shareResp =
+  //        workspacesController
+  //            .shareWorkspace(workspace.getNamespace(), workspace.getName(),
+  // shareWorkspaceRequest)
+  //            .getBody();
+  //    Workspace workspace2 =
+  //        workspacesController
+  //            .getWorkspace(workspace.getNamespace(), workspace.getId())
+  //            .getBody()
+  //            .getWorkspace();
+  //    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
+  //
+  //    CLOCK.increment(1000);
+  //    shareWorkspaceRequest = new ShareWorkspaceRequest();
+  //    shareWorkspaceRequest.setWorkspaceEtag(workspace2.getEtag());
+  //    shareWorkspaceRequest.addItemsItem(creator);
+  //    shareWorkspaceRequest.addItemsItem(writer);
+  //
+  //    shareResp =
+  //        workspacesController
+  //            .shareWorkspace(workspace.getNamespace(), workspace.getName(),
+  // shareWorkspaceRequest)
+  //            .getBody();
+  //    Workspace workspace3 =
+  //        workspacesController
+  //            .getWorkspace(workspace.getNamespace(), workspace.getId())
+  //            .getBody()
+  //            .getWorkspace();
+  //    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace3.getEtag());
+  //
+  //    assertThat(workspace3.getUserRoles().size()).isEqualTo(2);
+  //    int numOwners = 0;
+  //    int numWriters = 0;
+  //    int numReaders = 0;
+  //    for (UserRole userRole : workspace3.getUserRoles()) {
+  //      if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
+  //        assertThat(userRole.getEmail()).isEqualTo(LOGGED_IN_USER_EMAIL);
+  //        numOwners++;
+  //      } else if (userRole.getRole().equals(WorkspaceAccessLevel.WRITER)) {
+  //        assertThat(userRole.getEmail()).isEqualTo("writerfriend@gmail.com");
+  //        numWriters++;
+  //      } else {
+  //        assertThat(userRole.getEmail()).isEqualTo("readerfriend@gmail.com");
+  //        numReaders++;
+  //      }
+  //    }
+  //    assertThat(numOwners).isEqualTo(1);
+  //    assertThat(numWriters).isEqualTo(1);
+  //    assertThat(numReaders).isEqualTo(0);
+  //    assertThat(workspace.getEtag()).isNotEqualTo(workspace2.getEtag());
+  //    assertThat(workspace2.getEtag()).isNotEqualTo(workspace3.getEtag());
+  //  }
 
   @Test
   public void testStaleShareWorkspace() throws Exception {
