@@ -708,7 +708,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
       return <div style={styles.container}>
         <style>{datatableStyles + css}</style>
-        <DataTable
+        {!loading && <DataTable
           expandedRows={this.state.expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
           rowExpansionTemplate={this.rowExpansionTemplate}
@@ -731,7 +731,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           autoLayout
           footer={this.errorMessage()}>
           {cols}
-        </DataTable>
+        </DataTable>}
         {loading && <SpinnerOverlay />}
       </div>;
     }
