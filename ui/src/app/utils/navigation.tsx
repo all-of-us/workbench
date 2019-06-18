@@ -58,6 +58,15 @@ export const navigateByUrl = (...args) => {
   return NavStore.navigateByUrl(...args);
 };
 
+// if modifier keys are pressed (like shift or cmd) use the href
+// if no keys are pressed, prevent default behavior and route using navigateByUrl
+export const navigateAndPreventDefaultIfNoKeysPressed = (e: React.MouseEvent, url: string) => {
+  if (!(e.shiftKey || e.altKey || e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    navigateByUrl(url);
+  }
+};
+
 export enum BreadcrumbType {
   Workspaces = 'Workspaces',
   Workspace = 'Workspace',
