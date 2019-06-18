@@ -288,7 +288,7 @@ and sad.is_standard = 1 and sad.concept_id = 903115"
 echo "Inserting observation data into search_all_domains"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
- (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id, value_as_number, value_as_concept_id)
+ (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id, value_as_number, value_as_concept_id, value_source_concept_id)
 select p.person_id,
 o.observation_date as entry_date,
 o.observation_datetime as entry_datetime,
@@ -299,7 +299,8 @@ cast(floor(date_diff(o.observation_date, date(p.year_of_birth, p.month_of_birth,
 vo.visit_concept_id,
 vo.visit_occurrence_id,
 o.value_as_number,
-o.value_as_concept_id
+o.value_as_concept_id,
+o.value_source_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = o.person_id
 join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = o.observation_source_concept_id)
@@ -312,7 +313,7 @@ where o.observation_source_concept_id is not null and o.observation_source_conce
 echo "Inserting observation data into search_all_domains"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
- (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id, value_as_number, value_as_concept_id)
+ (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id, value_as_number, value_as_concept_id, value_source_concept_id)
 select p.person_id,
 o.observation_date as entry_date,
 o.observation_datetime as entry_datetime,
@@ -323,7 +324,8 @@ cast(floor(date_diff(o.observation_date, date(p.year_of_birth, p.month_of_birth,
 vo.visit_concept_id,
 vo.visit_occurrence_id,
 o.value_as_number,
-o.value_as_concept_id
+o.value_as_concept_id,
+o.value_source_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = o.person_id
 join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = o.observation_concept_id)
