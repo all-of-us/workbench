@@ -1,4 +1,4 @@
-<form class="form-container" [class.age]="wizard.type === criteriaType.AGE" [formGroup]="demoForm" [ngSwitch]="wizard.type">
+<form *ngIf="wizard" class="form-container" [class.age]="wizard.type === criteriaType.AGE" [formGroup]="demoForm" [ngSwitch]="wizard.type">
   <!-- Age -->
   <div *ngSwitchCase="criteriaType.AGE">
     <ng-container *ngIf="!loading">
@@ -7,33 +7,33 @@
       </div>
       <div class="control-wrapper slider-wrapper" [class.disabled]="deceased.value">
         <input type="number"
-               id="min-age"
-               [min]="minAge" [max]="maxAge"
-               [disabled]="loading"
-               formControlName="ageMin"
-               class="number-display"
-               (blur)="checkMin()">
+          id="min-age"
+          [min]="minAge" [max]="maxAge"
+          [disabled]="loading"
+          formControlName="ageMin"
+          class="number-display"
+          (blur)="checkMin()">
         <div class="slider">
           <div id="count-wrapper">
-              <span *ngIf="ageCount !== null" id="age-count" class="badge badge-info">
-                {{ ageCount | number }}
-              </span>
+            <span *ngIf="ageCount !== null" id="age-count" class="badge badge-info">
+              {{ ageCount | number }}
+            </span>
           </div>
           <nouislider
-                  [min]="minAge" [max]="maxAge" [step]="1"
-                  [behaviour]="'drag'"
-                  [connect]="true"
-                  (slide)="centerAgeCount()"
-                  [formControl]="demoForm.controls.ageRange">
+            [min]="minAge" [max]="maxAge" [step]="1"
+            [behaviour]="'drag'"
+            [connect]="true"
+            (slide)="centerAgeCount()"
+            [formControl]="demoForm.controls.ageRange">
           </nouislider>
         </div>
         <input type="number"
-               id="max-age"
-               [min]="minAge" [max]="maxAge"
-               [disabled]="loading"
-               formControlName="ageMax"
-               class="number-display"
-               (blur)="checkMax()">
+          id="max-age"
+          [min]="minAge" [max]="maxAge"
+          [disabled]="loading"
+          formControlName="ageMax"
+          class="number-display"
+          (blur)="checkMax()">
       </div>
 
       <clr-checkbox formControlName="deceased" [clrDisabled]="loading">
@@ -46,38 +46,14 @@
     <div *ngIf="loading" class="spinner" style="left: 45%"></div>
   </div>
 
-  <!-- Genders -->
-    <div *ngSwitchCase="criteriaType.GENDER">
+  <!-- Gender/Race/Ethnicity -->
+    <div *ngSwitchDefault>
       <div class="control-wrapper">
         <crit-list-multi-select
-                [options]="nodes"
-                [includeSearchBox]="false"
-                [initialSelection]="selections"
-                [loading]="loading">
-        </crit-list-multi-select>
-      </div>
-    </div>
-
-    <!-- Races -->
-    <div *ngSwitchCase="criteriaType.RACE">
-      <div class="control-wrapper">
-        <crit-list-multi-select
-                [options]="nodes"
-                [includeSearchBox]="false"
-                [initialSelection]="selections"
-                [loading]="loading">
-        </crit-list-multi-select>
-      </div>
-    </div>
-
-    <!-- Ethnicities -->
-    <div *ngSwitchCase="criteriaType.ETHNICITY">
-      <div class="control-wrapper">
-        <crit-list-multi-select
-                [includeSearchBox]="false"
-                [options]="nodes"
-                [initialSelection]="selections"
-                [loading]="loading">
+          [options]="nodes"
+          [select]="selectOption"
+          [selections]="selections"
+          [loading]="loading">
         </crit-list-multi-select>
       </div>
     </div>

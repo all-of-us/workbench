@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 
-import {DomainType, SearchRequest, TreeSubType} from 'generated';
+import {CriteriaType, DomainType, SearchRequest, TreeSubType} from 'generated';
 
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, getCodeOptions, listAttributeDisplay, listNameDisplay, listTypeDisplay} from 'app/cohort-search/utils';
@@ -79,14 +79,14 @@ export class ListSearchGroupItemComponent {
 
   get itemSubtype() {
     if (this.item.type === DomainType.PERSON) {
-      const subtype = this.parameters[0].subtype;
-      return subtype === TreeSubType.DEC ? TreeSubType.AGE : subtype;
+      const subtype = this.parameters[0].type;
+      return subtype === CriteriaType.DECEASED ? CriteriaType.AGE : subtype;
     }
     return null;
   }
 
   launchWizard() {
-    const selections = this.item.searchParameters.map(sp => sp.paramId);
+    const selections = this.item.searchParameters.map(sp => sp.parameterId);
     selectionsStore.next(selections);
     const codes = getCodeOptions(this.item.type);
     const fullTree = this.item.fullTree;

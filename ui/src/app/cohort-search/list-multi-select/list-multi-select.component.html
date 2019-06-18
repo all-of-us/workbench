@@ -1,31 +1,14 @@
 <div class="ds-wrapper">
   <div class="ds-options">
     <div class="select-box">
-      <div *ngIf="includeSearchBox" class="box-header demo-search-box">
-        <input
-                [formControl]="filter"
-                [name]="filter"
-                [id]="filter"
-                type="text"
-                placeholder="Search" />
-        <label for="filter">
-          <clr-icon *ngIf="filter.value && filter.value.trim()"
-                    shape="window-close"
-                    (click)="unsetFilter()">
-          </clr-icon>
-          <clr-icon *ngIf="!filter.value || !filter.value.trim()"
-                    shape="search">
-          </clr-icon>
-        </label>
-      </div>
-      <div class="" [ngClass]="[includeSearchBox? 'search-option-list' :'option-list']" >
+      <div class="option-list" >
         <span *ngIf="loading" class="spinner spinner-md"></span>
-        <div *ngFor="let opt of filteredOptions; let i = index" class="option" (click)="select(opt)">
-          <clr-icon  *ngIf="!selectedOption.includes(opt.get('parameterId'))"  shape="plus-circle"  size="20" class="selection-icon items-selection-icon" ></clr-icon>
-          <clr-icon  *ngIf="selectedOption.includes(opt.get('parameterId'))" shape="check-circle" size="20"  class="selection-icon items-disabled-icon"></clr-icon>
-          {{ opt.get('name', '') | titlecase }}
-          <span *ngIf="opt.get('count')" class="badge badge-info">
-            {{ opt.get('count') | number }}
+        <div *ngFor="let opt of options; let i = index" class="option" (click)="select(opt)">
+          <clr-icon  *ngIf="!selections.includes(opt.parameterId)"  shape="plus-circle"  size="20" class="selection-icon items-selection-icon" ></clr-icon>
+          <clr-icon  *ngIf="selections.includes(opt.parameterId)" shape="check-circle" size="20"  class="selection-icon items-disabled-icon"></clr-icon>
+          {{ opt.name | titlecase }}
+          <span *ngIf="opt.count" class="badge badge-info">
+            {{ opt.count | number }}
           </span>
         </div>
       </div>
