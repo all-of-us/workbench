@@ -1,20 +1,11 @@
-import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
-import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {
-  activeCriteriaSubtype,
-  activeParameterList,
-  CohortSearchActions,
-  participantsCount,
-} from 'app/cohort-search/redux';
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-
-import {Attribute, AttrName, CohortBuilderService, Operator, TreeSubType} from 'generated';
-import {CriteriaType, DomainType} from 'generated/fetch';
+import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const minAge = 18;
 const maxAge = 120;
@@ -42,10 +33,7 @@ function sortByCountThenName(critA, critB) {
   ]
 })
 export class ListDemographicsComponent implements OnInit, OnDestroy {
-  @select(activeCriteriaSubtype) subtype$;
-  @select(activeParameterList) selection$;
-  @select(participantsCount) count$;
-  readonly treeSubType = TreeSubType;
+  readonly criteriaType = CriteriaType;
   readonly minAge = minAge;
   readonly maxAge = maxAge;
   loading = false;
@@ -75,17 +63,13 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
   count: any;
   wizard: any;
 
-  constructor(
-    private api: CohortBuilderService,
-    private actions: CohortSearchActions,
-  ) {}
-
   ngOnInit() {
     this.wizard = wizardStore.getValue();
     this.selections = this.wizard.item.searchParameters;
     if (this.wizard.type === CriteriaType.AGE) {
-      this.initDeceased(this.selections);
-      this.initAgeRange(this.selections);
+      this.initAgeControls();
+      this.initDeceased();
+      this.initAgeRange();
       this.loadNodesFromApi(CriteriaType[CriteriaType.DECEASED]);
     } else if (this.selections.length) {
       this.calculate();
@@ -109,8 +93,7 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
      * sort them by count, then by name.
      */
     this.loading = true;
-    this.api.getCriteriaBy(cdrid, DomainType[DomainType.PERSON], type)
-      .toPromise()
+    cohortBuilderApi().getCriteriaBy(cdrid, DomainType[DomainType.PERSON], type)
       .then(response => {
         const items = response.items
                   .filter(item => item.parentId !== 0
@@ -136,11 +119,11 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
         this.ageNode = nodes[0];
         this.ageNodes = nodes;
         this.calculateAgeCount();
-        const attr = fromJS(<Attribute>{
+        const attr = {
           name: AttrName.AGE,
           operator: Operator.BETWEEN,
           operands: [minAge.toString(), maxAge.toString()]
-        });
+        };
         const paramId = `age-param${this.ageNode.id}`;
         this.selectedNode = {
           ...this.ageNode,
@@ -235,72 +218,64 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
      * parameterId by stringifying the attribute (which may be more stable than
      * using a hash?)
      */
-  initAgeRange(selections) {
+  initAgeRange() {
     const min = this.demoForm.get('ageMin');
     const max = this.demoForm.get('ageMax');
-
-    const existent = selections.find(s => s.get('subtype') === TreeSubType[TreeSubType.AGE]);
-    if (existent) {
-      const range = existent.getIn(['attributes', '0', 'operands']).toArray();
+    const params = this.wizard.item.searchParameters;
+    if (params.length) {
+      const range = params[0].attributes[0].operands;
       this.ageRange.setValue(range);
       min.setValue(range[0]);
       max.setValue(range[1]);
     }
-    const selectedAge = this.selection$
-            .map(selectedNodes => selectedNodes
-              .find(node => node.get('subtype') === TreeSubType[TreeSubType.AGE])
-            );
 
     const ageDiff = this.ageRange.valueChanges
-            .debounceTime(250)
-            .distinctUntilChanged()
-            .map(([lo, hi]) => {
-                const attr = fromJS(<Attribute>{
-                    name: AttrName.AGE,
-                    operator: Operator.BETWEEN,
-                    operands: [lo, hi]
-                });
-                const paramId = `age-param${this.ageNode.get('id')}`;
-                return this.ageNode
-                    .set('name', `${lo} - ${hi}`)
-                    .set('parameterId', paramId)
-                    .set('attributes', [attr]);
-            })
-            .withLatestFrom(selectedAge)
-            .filter(([newNode, oldNode]) => {
-              this.selectedNode = newNode;
-              this.actions.addParameter(newNode);
-              if (oldNode) {
-                return oldNode.get('parameterId') !== newNode.get('parameterId');
-              }
-              return true;
-            });
-    this.subscription.add(ageDiff.subscribe(([newNode, oldNode]) => {
-      if (oldNode) {
-        this.actions.removeParameter(oldNode.get('parameterId'));
-      }
-      this.selectedNode = newNode;
-    }));
+      .debounceTime(250)
+      .distinctUntilChanged()
+      .map(([lo, hi]) => {
+        const attr = {
+          name: AttrName.AGE,
+          operator: Operator.BETWEEN,
+          operands: [lo, hi]
+        };
+        const paramId = `age-param${this.ageNode.id}`;
+        return {
+          ...this.ageNode,
+          name: `${lo} - ${hi}`,
+          parameterId: paramId,
+          attributes: [attr],
+        };
+      }).subscribe(newNode => {
+        const {parameterId} = this.selectedNode;
+        this.selectedNode = newNode;
+        this.wizard.item.searchParameters = [this.selectedNode];
+        wizardStore.next(this.wizard);
+        if (parameterId !== newNode.parameterId) {
+          this.selections = [parameterId];
+          selectionsStore.next(this.selections);
+        }
+      });
+    this.subscription.add(ageDiff);
   }
 
-  initDeceased(selections) {
-    const existent = selections.find(s => s.get('subtype') === TreeSubType[TreeSubType.DEC]);
+  initDeceased() {
+    const existent = this.wizard.item.searchParameters
+      .find(s => s.type === CriteriaType[CriteriaType.DECEASED]);
     if (existent !== undefined) {
       this.deceased.setValue(true);
     }
-    this.subscription.add(this.deceased.valueChanges.subscribe(includeDeceased => {
+    this.subscription = this.deceased.valueChanges.subscribe(includeDeceased => {
       if (!this.deceasedNode) {
         console.warn('No node from which to make parameter for deceased status');
         return ;
       }
-      if (includeDeceased) {
-        this.actions.removeParameter(this.selectedNode.get('parameterId'));
-        this.actions.addParameter(this.deceasedNode);
-      } else {
-        this.actions.removeParameter(this.deceasedNode.get('parameterId'));
-        this.actions.addParameter(this.selectedNode);
-      }
-    }));
+      this.wizard.item.searchParameters = [includeDeceased ? this.deceasedNode : this.selectedNode];
+      this.selections = [
+        includeDeceased ? this.deceasedNode.parameterId : this.selectedNode.parameterId
+      ];
+      wizardStore.next(this.wizard);
+      selectionsStore.next(this.selections);
+    });
   }
 
   calculateAgeCount() {
