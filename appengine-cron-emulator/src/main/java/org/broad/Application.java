@@ -1,3 +1,5 @@
+package org.broad;
+
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.OkHttpClient;
@@ -18,17 +20,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-class Schedule {
-
-  public TimeUnit timeUnit;
-  public int period;
-
-  public Schedule(TimeUnit timeUnit, int period) {
-    this.timeUnit = timeUnit;
-    this.period = period;
-  }
-}
 
 public class Application {
 
@@ -62,7 +53,7 @@ public class Application {
 
       scheduledExecutorService.scheduleAtFixedRate(() -> {
         Request request = new Request.Builder()
-            .addHeader("X-AppEngine-Cron", "true")
+            .addHeader("X-AppEngine-org.broad.Cron", "true")
             .url(BASE_URL + cron.url)
             .build();
 
