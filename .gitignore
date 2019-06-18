@@ -5,6 +5,7 @@
 .project
 .externalToolBuilders
 .settings
+cron-emulator.log
 /api/?/
 /api/cluster-resources/generated/*
 /api/db/?/
