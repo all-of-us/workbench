@@ -116,7 +116,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   private reloadWorkspace(workspace: WorkspaceData) {
     this.workspace = workspace;
-    // this.loadUserRoles();
     this.accessLevel = workspace.accessLevel;
     this.researchPurposeArray = [];
     ResearchPurposeItems.forEach((item) => {

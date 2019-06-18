@@ -157,6 +157,7 @@ export interface Props {
   accessLevel: WorkspaceAccessLevel;
   userEmail: string;
   onClose: Function;
+  userRoles: UserRole[];
 }
 
 export const WorkspaceShare = withCurrentWorkspace()(class extends React.Component<Props, State> {
@@ -173,7 +174,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       saving: false,
       workspaceFound: (this.props.workspace !== null),
       workspaceUpdateConflictError: false,
-      userRoles: [],
+      userRoles: fp.sortBy('familyName', this.props.userRoles),
       searchTerm: '',
       dropDown: false,
     };
@@ -182,7 +183,6 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
 
   componentDidMount(): void {
     document.addEventListener('mousedown', this.handleClickOutsideSearch, false);
-    this.loadUserRoles();
   }
 
   componentWillUnmount(): void {
@@ -193,7 +193,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
     try {
       const resp = await workspacesApi()
         .getWorkspaceUserRoles(this.props.workspace.namespace, this.props.workspace.id);
-      this.setState({userRoles: resp.items});
+      this.setState({userRoles: fp.sortBy('familyName', resp.items)});
     } catch (error) {
       if (error.status === 404) {
         this.setState({workspaceFound: false});
@@ -456,9 +456,10 @@ export class WorkspaceShareComponent extends ReactWrapperBase implements OnInit 
   @Input('accessLevel') accessLevel: WorkspaceAccessLevel;
   @Input('userEmail') userEmail: Props['userEmail'];
   @Input('onClose') onClose: Props['onClose'];
+  @Input('userRoles') userRoles: Props['userRoles'];
 
   constructor() {
-    super(WorkspaceShare, ['workspace', 'accessLevel', 'onClose', 'userEmail']);
+    super(WorkspaceShare, ['workspace', 'accessLevel', 'onClose', 'userEmail', 'userRoles']);
   }
 
 }

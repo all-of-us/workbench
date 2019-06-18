@@ -37,10 +37,10 @@ describe('WorkspaceShareComponent', () => {
 
   const tomRiddleDiary = {
     namespace: 'Horcrux', name: 'The Diary of Tom Marvolo Riddle',
-    userRoles: [harryRole, hermioneRole, ronRole],
     etag: '1', id: 'The Diary of Tom Marvolo Riddle',
     accessLevel: WorkspaceAccessLevel.OWNER
   } as WorkspaceData;
+  const tomRiddleDiaryUserRoles = [harryRole, hermioneRole, ronRole];
 
   const getSelectString = (user: UserRole) => {
     return '.' + (user.email).replace(/[@\.]/g, '')
@@ -49,12 +49,14 @@ describe('WorkspaceShareComponent', () => {
 
   beforeEach(() => {
     registerApiClient(UserApi, new UserApiStub([harryRole, hermioneRole, ronRole, lunaRole]));
-    registerApiClient(WorkspacesApi, new WorkspacesApiStub([tomRiddleDiary]));
+    registerApiClient(WorkspacesApi,
+      new WorkspacesApiStub([tomRiddleDiary], tomRiddleDiaryUserRoles));
     props = {
       onClose: () => {},
       workspace: tomRiddleDiary,
       accessLevel: WorkspaceAccessLevel.OWNER,
-      userEmail: 'harry.potter@hogwarts.edu'
+      userEmail: 'harry.potter@hogwarts.edu',
+      userRoles: tomRiddleDiaryUserRoles
     };
     currentWorkspaceStore.next(tomRiddleDiary);
   });

@@ -280,14 +280,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
 
-    // TODO: get rid of WorkspaceUserRole
-    //    WorkspaceUserRole permissions = new WorkspaceUserRole();
-    //    permissions.setRoleEnum(WorkspaceAccessLevel.OWNER);
-    //    permissions.setWorkspace(dbWorkspace);
-    //    permissions.setUser(user);
-    //
-    //    dbWorkspace.addWorkspaceUserRole(permissions);
-
     if (useBillingProjectBuffer) {
       dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
     } else {
@@ -353,7 +345,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 dbConceptSet.getConceptSetId()));
       }
     }
-    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace));
+    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
   @Override
@@ -601,7 +593,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       savedWorkspace = workspaceService.updateUserRoles(savedWorkspace, clonedRoles);
     }
     return ResponseEntity.ok(
-        new CloneWorkspaceResponse().workspace(workspaceMapper.toApiWorkspace(savedWorkspace)));
+        new CloneWorkspaceResponse().workspace(workspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
   }
 
   @Override

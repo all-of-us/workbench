@@ -177,7 +177,8 @@
 <app-workspace-share *ngIf="sharing" [workspace]="workspace"
                      [accessLevel]="accessLevel"
                      [onClose]="closeShare.bind(this)"
-                     [userEmail]="username"></app-workspace-share>
+                     [userEmail]="username"
+                     [userRoles]="workspaceUserRoles"></app-workspace-share>
 <clr-modal [(clrModalOpen)]="googleBucketModal">
   <h3 class="modal-title">Note</h3>
   <div class="modal-body">It is All of Us data use policy that researchers should not make copies of or download

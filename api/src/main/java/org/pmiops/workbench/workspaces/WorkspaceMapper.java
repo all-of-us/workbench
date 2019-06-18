@@ -45,10 +45,6 @@ public class WorkspaceMapper {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
 
-    //    result.setUserRoles(
-    //
-    // firecloudAcls.entrySet().stream().map(this::toApiUserRole).collect(Collectors.toList()));
-
     return result;
   }
 
@@ -77,10 +73,6 @@ public class WorkspaceMapper {
     if (workspace.getCdrVersion() != null) {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
-
-    //    result.setUserRoles(
-    //
-    // firecloudAcls.entrySet().stream().map(this::toApiUserRole).collect(Collectors.toList()));
 
     return result;
   }

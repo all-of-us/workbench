@@ -83,14 +83,14 @@ export class WorkspacesApiStub extends WorkspacesApi {
   notebookList: FileDetail[];
   workspaceUserRoles: Map< string, UserRole[]>;
 
-  constructor(workspaces?: Workspace[]) {
+  constructor(workspaces?: Workspace[], workspaceUserRoles?: UserRole[]) {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
     this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.notebookList = WorkspacesApiStub.stubNotebookList();
     this.workspaceUserRoles = new Map<string, UserRole[]>();
     this.workspaceUserRoles
-      .set(this.workspaces[0].id, userRolesStub);
+      .set(this.workspaces[0].id, fp.defaultTo(userRolesStub, workspaceUserRoles));
   }
 
   static stubNotebookList(): FileDetail[] {
