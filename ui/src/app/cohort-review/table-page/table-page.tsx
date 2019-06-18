@@ -194,7 +194,20 @@ const idColumn = {
   ...styles.columnBody,
   color: '#2691D0'
 };
-let multiFilters: any;
+let multiFilters: any = {
+  DECEASED: [
+    {name: 'Yes', value: '1'},
+    {name: 'No', value: '0'},
+    {name: 'Select All', value: 'Select All'}
+  ],
+  STATUS: [
+    {name: 'Included', value: CohortStatus.INCLUDED},
+    {name: 'Excluded', value: CohortStatus.EXCLUDED},
+    {name: 'Needs Further Review', value: CohortStatus.NEEDSFURTHERREVIEW},
+    {name: 'Unreviewed', value: CohortStatus.NOTREVIEWED},
+    {name: 'Select All', value: 'Select All'}
+  ]
+};
 const reverseColumnEnum = {
   participantId: Columns.PARTICIPANTID,
   gender: Columns.GENDER,
@@ -206,7 +219,7 @@ const reverseColumnEnum = {
 };
 
 interface Props {
-  workspace: WorkspaceData
+  workspace: WorkspaceData;
 }
 
 interface State {
@@ -240,44 +253,44 @@ export const ParticipantsTable = withCurrentWorkspace()(
       this.filterInput = fp.debounce(300, () => this.getTableData());
     }
 
-    componentDidMount() {
+    async componentDidMount() {
       const {filters} = this.state;
       const {cdrVersionId, id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
       if (!multiOptions.getValue()) {
-        cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
-          const extract = (arr, _type?) => fp.uniq([
-            ...arr.map(i => {
-              filters[_type].push(i.conceptName);
-              return {
-                name: _type === Columns.GENDER
-                  ? this.formatGenderForText(i.conceptName) : i.conceptName,
-                value: i.conceptName
-              };
-            }),
-            {name: 'Select All', value: 'Select All'}
-          ]) as string[];
+        try {
+          await cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
+            const extract = (arr, _type?) => fp.uniq([
+              ...arr.map(i => {
+                filters[_type].push(i.conceptName);
+                return {
+                  name: _type === Columns.GENDER
+                      ? this.formatGenderForText(i.conceptName) : i.conceptName,
+                  value: i.conceptName
+                };
+              }),
+              {name: 'Select All', value: 'Select All'}
+            ]) as string[];
+            multiFilters = {
+              ...multiFilters,
+              RACE: extract(data.raceList, Columns.RACE),
+              GENDER: extract(data.genderList, Columns.GENDER),
+              ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY)
+            };
+            multiOptions.next(multiFilters);
+            this.setState({filters});
+          });
+        } catch (error) {
+          console.error(error);
           multiFilters = {
-            RACE: extract(data.raceList, Columns.RACE),
-            GENDER: extract(data.genderList, Columns.GENDER),
-            ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY),
-            DECEASED: [
-              {name: 'Yes', value: '1'},
-              {name: 'No', value: '0'},
-              {name: 'Select All', value: 'Select All'}
-            ],
-            STATUS: [
-              {name: 'Included', value: CohortStatus.INCLUDED},
-              {name: 'Excluded', value: CohortStatus.EXCLUDED},
-              {name: 'Needs Further Review', value: CohortStatus.NEEDSFURTHERREVIEW},
-              {name: 'Unreviewed', value: CohortStatus.NOTREVIEWED},
-              {name: 'Select All', value: 'Select All'}
-            ]
+            ...multiFilters,
+            RACE: [{name: 'Select All', value: 'Select All'}],
+            GENDER: [{name: 'Select All', value: 'Select All'}],
+            ETHNICITY: [{name: 'Select All', value: 'Select All'}]
           };
-          multiOptions.next(multiFilters);
-          this.setState({filters});
-          setTimeout(() => this.getTableData());
-        });
+        } finally {
+          this.getTableData();
+        }
       } else {
         multiFilters = multiOptions.getValue();
         const review = cohortReviewStore.getValue();
@@ -287,18 +300,23 @@ export const ParticipantsTable = withCurrentWorkspace()(
         setTimeout(() => this.getTableData());
       }
       if (!vocabOptions.getValue()) {
-        cohortReviewApi().getVocabularies(namespace, id, cid, +cdrVersionId)
-          .then(response => {
-            const vocabFilters = {source: {}, standard: {}};
-            response.items.forEach(item => {
-              const type = item.type.toLowerCase();
-              vocabFilters[type][item.domain] = [
-                ...(vocabFilters[type][item.domain] || []),
-                item.vocabulary
-              ];
+        const vocabFilters = {source: {}, standard: {}};
+        try {
+          await cohortReviewApi().getVocabularies(namespace, id, cid, +cdrVersionId)
+            .then(response => {
+              response.items.forEach(item => {
+                const type = item.type.toLowerCase();
+                vocabFilters[type][item.domain] = [
+                  ...(vocabFilters[type][item.domain] || []),
+                  item.vocabulary
+                ];
+              });
             });
-            vocabOptions.next(vocabFilters);
-          });
+        } catch (error) {
+          console.error(error);
+        } finally {
+          vocabOptions.next(vocabFilters);
+        }
       }
     }
 
@@ -485,8 +503,10 @@ export const ParticipantsTable = withCurrentWorkspace()(
               placeholder={'Search'} />
           </div>}
           {column !== 'participantId' && options.map((opt, i) => (
-            <div key={i} style={{borderTop: opt.name === 'Select All' ? '1px solid #ccc' : 'none',
-              padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
+            <div key={i} style={{
+              borderTop: opt.name === 'Select All' && options.length > 1 ? '1px solid #ccc' : 0,
+              padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'
+            }}>
               <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
                      checked={filters[colType].includes(opt.value)} value={opt.value}
                      onChange={(e) => this.onCheckboxChange(e, colType)} disabled={loading}/>
@@ -606,7 +626,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           <div style={styles.description}>
             {cohort.description}
           </div>
-          <DataTable
+          {!loading && <DataTable
             style={styles.table}
             value={data}
             first={start}
@@ -625,7 +645,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             scrollHeight='calc(100vh - 350px)'
             footer={this.errorMessage()}>
             {columns}
-          </DataTable>
+          </DataTable>}
         </React.Fragment>}
         {cohortDescription && <React.Fragment>
           <button
