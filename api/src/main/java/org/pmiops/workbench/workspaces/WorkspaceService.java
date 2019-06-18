@@ -7,6 +7,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
 
@@ -49,4 +50,6 @@ public interface WorkspaceService {
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel);
 
   Map<User, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(Workspace workspace);
+
+  List<UserRole> getWorkspaceUserRoles(Workspace workspace);
 }

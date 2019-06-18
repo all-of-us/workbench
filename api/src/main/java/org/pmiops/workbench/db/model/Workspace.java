@@ -109,7 +109,7 @@ public class Workspace {
   private Boolean reviewRequested;
   private Boolean approved;
   private Timestamp timeRequested;
-  
+
   public Workspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }

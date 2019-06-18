@@ -110,8 +110,11 @@
         </span>
       </span>
     </div>
-      <div *ngFor="let user of workspace.userRoles">
-        <div>{{user.role}}: {{user.email}}</div>
+      <span *ngIf="workspaceUserRoles.length === 0" class="spinner spinner-md" style="display: block; margin-left: auto; margin-right: auto"></span>
+      <div *ngIf="workspaceUserRoles">
+        <div *ngFor="let user of workspaceUserRoles">
+          <div>{{user.role}}: {{user.email}}</div>
+        </div>
       </div>
     <h6>
       Workspace Information

@@ -14,10 +14,10 @@ import * as React from 'react';
 import {User} from 'generated';
 
 import {
-  ShareWorkspaceResponse,
   UserRole,
   Workspace,
   WorkspaceAccessLevel,
+  WorkspaceUserRolesResponse,
 } from 'generated/fetch/api';
 
 import {Button} from 'app/components/buttons';
@@ -173,7 +173,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       saving: false,
       workspaceFound: (this.props.workspace !== null),
       workspaceUpdateConflictError: false,
-      userRoles: fp.sortBy('familyName', this.props.workspace.userRoles),
+      userRoles: [],
       searchTerm: '',
       dropDown: false,
     };
@@ -182,10 +182,23 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
 
   componentDidMount(): void {
     document.addEventListener('mousedown', this.handleClickOutsideSearch, false);
+    this.loadUserRoles();
   }
 
   componentWillUnmount(): void {
     document.removeEventListener('mousedown', this.handleClickOutsideSearch, false);
+  }
+
+  async loadUserRoles() {
+    try {
+      const resp = await workspacesApi()
+        .getWorkspaceUserRoles(this.props.workspace.namespace, this.props.workspace.id);
+      this.setState({userRoles: resp.items});
+    } catch (error) {
+      if (error.status === 404) {
+        this.setState({workspaceFound: false});
+      }
+    }
   }
 
   save(): void {
@@ -196,7 +209,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
     workspacesApi().shareWorkspace(this.props.workspace.namespace,
       this.props.workspace.id,
       {workspaceEtag: this.props.workspace.etag, items: this.state.userRoles})
-      .then((resp: ShareWorkspaceResponse) => {
+      .then((resp: WorkspaceUserRolesResponse) => {
         currentWorkspaceStore.next({
           ...currentWorkspaceStore.getValue(),
           etag: resp.workspaceEtag,
@@ -224,19 +237,6 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
       userRoles: fp.remove(({email}) => {
         return user.email === email;
       }, this.state.userRoles)});
-  }
-
-  reloadWorkspace(): void {
-    workspacesApi().getWorkspace(this.props.workspace.namespace, this.props.workspace.id)
-      .then((workspaceResponse) => {
-        this.setState({userRoles: workspaceResponse.workspace.userRoles});
-        this.resetModalState();
-      })
-      .catch(({status}) => {
-        if (status === 404) {
-          this.setState({workspaceFound: false});
-        }
-      });
   }
 
   addCollaborator(user: User): void {
@@ -439,7 +439,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
           sharing session. Please reload to avoid overwriting those changes.
         </ModalBody>
         <ModalFooter>
-          <Button onClick={() => this.reloadWorkspace()}>Reload Workspace</Button>
+          <Button onClick={() => this.loadUserRoles()}>Reload Workspace</Button>
           <Button onClick={() => this.onCancel()}>Cancel Sharing</Button>
         </ModalFooter>
       </Modal>}

@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
@@ -25,9 +24,7 @@ public class WorkspaceMapper {
     }
   }
 
-  public Workspace toApiWorkspace(
-      org.pmiops.workbench.db.model.Workspace workspace,
-      Map<org.pmiops.workbench.db.model.User, WorkspaceAccessEntry> firecloudAcls) {
+  public Workspace toApiWorkspace(org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
 
@@ -48,16 +45,16 @@ public class WorkspaceMapper {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
 
-    result.setUserRoles(
-        firecloudAcls.entrySet().stream().map(this::toApiUserRole).collect(Collectors.toList()));
+    //    result.setUserRoles(
+    //
+    // firecloudAcls.entrySet().stream().map(this::toApiUserRole).collect(Collectors.toList()));
 
     return result;
   }
 
   public Workspace toApiWorkspace(
       org.pmiops.workbench.db.model.Workspace workspace,
-      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
-      Map<org.pmiops.workbench.db.model.User, WorkspaceAccessEntry> firecloudAcls) {
+      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     if (workspace.getPopulation()) {
       researchPurpose.setPopulationDetails(new ArrayList<>(workspace.getSpecificPopulationsEnum()));
@@ -81,8 +78,9 @@ public class WorkspaceMapper {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
 
-    result.setUserRoles(
-        firecloudAcls.entrySet().stream().map(this::toApiUserRole).collect(Collectors.toList()));
+    //    result.setUserRoles(
+    //
+    // firecloudAcls.entrySet().stream().map(this::toApiUserRole).collect(Collectors.toList()));
 
     return result;
   }

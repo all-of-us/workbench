@@ -3,10 +3,7 @@ package org.pmiops.workbench.workspaces;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +24,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -110,11 +108,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             dbWorkspace -> {
               String fcWorkspaceAccessLevel =
                   fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
-              Map<User, WorkspaceAccessEntry> firecloudAcls =
-                  getFirecloudWorkspaceAcls(dbWorkspace);
               WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(
-                  workspaceMapper.toApiWorkspace(dbWorkspace, firecloudAcls));
+              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
               currentWorkspace.setAccessLevel(
                   workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;
@@ -356,5 +351,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       throw new NotFoundException(String.format("Workspace %s not found.", workspaceId));
     }
     return workspace;
+  }
+
+  @Override
+  public List<UserRole> getWorkspaceUserRoles(Workspace workspace) {
+    Map<User, WorkspaceAccessEntry> rolesMap = getFirecloudWorkspaceAcls(workspace);
+    List<UserRole> userRoles = new ArrayList<>();
+    for (Map.Entry<User, WorkspaceAccessEntry> entry : rolesMap.entrySet()) {
+      userRoles.add(workspaceMapper.toApiUserRole(entry));
+    }
+    return userRoles.stream()
+        .sorted(
+            Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
+        .collect(Collectors.toList());
   }
 }

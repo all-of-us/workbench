@@ -104,12 +104,12 @@ import org.pmiops.workbench.model.ParticipantCohortStatuses;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
-import org.pmiops.workbench.model.ShareWorkspaceResponse;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
@@ -1562,7 +1562,7 @@ public class WorkspacesControllerTest {
     // Simulate time between API calls to trigger last-modified/@Version changes.
     CLOCK.increment(1000);
     stubFcUpdateWorkspaceACL();
-    ShareWorkspaceResponse shareResp =
+    WorkspaceUserRolesResponse shareResp =
         workspacesController
             .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
             .getBody();
@@ -1669,7 +1669,7 @@ public class WorkspacesControllerTest {
     when(fireCloudService.updateWorkspaceACL(
             anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class)))
         .thenReturn(responseValue);
-    ShareWorkspaceResponse shareResp =
+    WorkspaceUserRolesResponse shareResp =
         workspacesController
             .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
             .getBody();

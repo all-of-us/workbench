@@ -1,9 +1,11 @@
 import {
-  FileDetail, ShareWorkspaceRequest, ShareWorkspaceResponse,
+  FileDetail, ShareWorkspaceRequest,
+  UserRole,
   Workspace,
   WorkspaceAccessLevel,
   WorkspaceResponseListResponse,
-  WorkspacesApi
+  WorkspacesApi,
+  WorkspaceUserRolesResponse
 } from 'generated/fetch';
 
 import * as fp from 'lodash/fp';
@@ -45,28 +47,29 @@ export const workspaceStubs = [
       reviewRequested: false,
       socialBehavioral: false,
       reasonForAllOfUs: '',
-    },
-    userRoles: [
-      {
-        email: 'sampleuser1@fake-research-aou.org',
-        givenName: 'Sample',
-        familyName: 'User1',
-        role: WorkspaceAccessLevel.OWNER
-      },
-      {
-        email: 'sampleuser2@fake-research-aou.org',
-        givenName: 'Sample',
-        familyName: 'User2',
-        role: WorkspaceAccessLevel.WRITER
-      },
-      {
-        email: 'sampleuser3@fake-research-aou.org',
-        givenName: 'Sample',
-        familyName: 'User3',
-        role: WorkspaceAccessLevel.READER
-      },
-    ]
+    }
   }
+];
+
+export const userRolesStub = [
+  {
+    email: 'sampleuser1@fake-research-aou.org',
+    givenName: 'Sample',
+    familyName: 'User1',
+    role: WorkspaceAccessLevel.OWNER
+  },
+  {
+    email: 'sampleuser2@fake-research-aou.org',
+    givenName: 'Sample',
+    familyName: 'User2',
+    role: WorkspaceAccessLevel.WRITER
+  },
+  {
+    email: 'sampleuser3@fake-research-aou.org',
+    givenName: 'Sample',
+    familyName: 'User3',
+    role: WorkspaceAccessLevel.READER
+  },
 ];
 
 export const workspaceDataStub = {
@@ -78,12 +81,16 @@ export class WorkspacesApiStub extends WorkspacesApi {
   public workspaces: Workspace[];
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
   notebookList: FileDetail[];
+  workspaceUserRoles: Map< string, UserRole[]>;
 
   constructor(workspaces?: Workspace[]) {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
     this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.notebookList = WorkspacesApiStub.stubNotebookList();
+    this.workspaceUserRoles = new Map<string, UserRole[]>();
+    this.workspaceUserRoles
+      .set(this.workspaces[0].id, userRolesStub);
   }
 
   static stubNotebookList(): FileDetail[] {
@@ -149,8 +156,8 @@ export class WorkspacesApiStub extends WorkspacesApi {
   }
 
   shareWorkspace(workspaceNamespace: string, workspaceId: string,
-    body?: ShareWorkspaceRequest, options?: any): Promise<ShareWorkspaceResponse> {
-    return new Promise<ShareWorkspaceResponse>(resolve => {
+    body?: ShareWorkspaceRequest, options?: any): Promise<WorkspaceUserRolesResponse> {
+    return new Promise<WorkspaceUserRolesResponse>(resolve => {
       const newEtag = fp.defaults(2, (body.workspaceEtag + 1));
       const newItems = fp.defaults([], body.items);
       resolve({
@@ -172,6 +179,13 @@ export class WorkspacesApiStub extends WorkspacesApi {
       }
       this.workspaces.splice(deletionIndex, 1);
       resolve({});
+    });
+  }
+
+  getWorkspaceUserRoles(workspaceNamespace: string, workspaceId: string):
+  Promise<WorkspaceUserRolesResponse> {
+    return new Promise<WorkspaceUserRolesResponse>(resolve => {
+      resolve({items: this.workspaceUserRoles.get(workspaceId)});
     });
   }
 
