@@ -726,7 +726,7 @@ public class ConceptSetsControllerTest {
     conceptSet.setDescription("description 1");
     conceptSet.setName("Survey Concept set 1");
     conceptSet.setDomain(Domain.OBSERVATION);
-    conceptSet.setSurvey(Surveys.BASICS);
+    conceptSet.setSurvey(Surveys.THE_BASICS);
     CreateConceptSetRequest request =
         new CreateConceptSetRequest()
             .conceptSet(conceptSet)
