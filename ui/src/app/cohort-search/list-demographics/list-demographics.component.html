@@ -49,36 +49,36 @@
   <!-- Genders -->
     <div *ngSwitchCase="criteriaType.GENDER">
       <div class="control-wrapper">
-        <crit-multi-select
+        <crit-list-multi-select
                 [options]="nodes"
                 [includeSearchBox]="false"
                 [initialSelection]="selections"
                 [loading]="loading">
-        </crit-multi-select>
+        </crit-list-multi-select>
       </div>
     </div>
 
     <!-- Races -->
     <div *ngSwitchCase="criteriaType.RACE">
       <div class="control-wrapper">
-        <crit-multi-select
+        <crit-list-multi-select
                 [options]="nodes"
                 [includeSearchBox]="false"
                 [initialSelection]="selections"
                 [loading]="loading">
-        </crit-multi-select>
+        </crit-list-multi-select>
       </div>
     </div>
 
     <!-- Ethnicities -->
     <div *ngSwitchCase="criteriaType.ETHNICITY">
       <div class="control-wrapper">
-        <crit-multi-select
+        <crit-list-multi-select
                 [includeSearchBox]="false"
                 [options]="nodes"
                 [initialSelection]="selections"
                 [loading]="loading">
-        </crit-multi-select>
+        </crit-list-multi-select>
       </div>
     </div>
 </form>

@@ -17,6 +17,7 @@ import {ListAttributesPageComponent} from './list-attributes-page/list-attribute
 import {ListDemographicsComponent} from './list-demographics/list-demographics.component';
 import {ListModalComponent} from './list-modal/list-modal.component';
 import {ListModifierPageComponent} from './list-modifier-page/list-modifier-page.component';
+import {ListMultiSelectComponent} from './list-multi-select/list-multi-select.component';
 import {ListNodeInfoComponent} from './list-node-info/list-node-info.component';
 import {ListNodeComponent} from './list-node/list-node.component';
 import {ListOptionInfoComponent} from './list-option-info/list-option-info.component';
@@ -82,6 +83,7 @@ const routes: Routes = [{
     ListDemographicsComponent,
     ListModalComponent,
     ListModifierPageComponent,
+    ListMultiSelectComponent,
     ListNodeComponent,
     ListNodeInfoComponent,
     ListOptionInfoComponent,
