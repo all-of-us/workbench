@@ -20,7 +20,7 @@ dependencies {
 jar {
     manifest {
         attributes(
-                'Main-Class': 'Application'
+                'Main-Class': 'org.broad.Application'
         )
     }
 

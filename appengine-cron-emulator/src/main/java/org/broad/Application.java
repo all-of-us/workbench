@@ -53,7 +53,7 @@ public class Application {
 
       scheduledExecutorService.scheduleAtFixedRate(() -> {
         Request request = new Request.Builder()
-            .addHeader("X-AppEngine-org.broad.Cron", "true")
+            .addHeader("X-Appengine-Cron", "true")
             .url(BASE_URL + cron.url)
             .build();
 
