@@ -66,16 +66,16 @@ public class CommonStorageEnums {
 
   private static final BiMap<Surveys, Short> CLIENT_TO_STORAGE_SURVEY =
       ImmutableBiMap.<Surveys, Short>builder()
-          .put(Surveys.BASICS, (short) 0)
+          .put(Surveys.THE_BASICS, (short) 0)
           .put(Surveys.LIFESTYLE, (short) 1)
-          .put(Surveys.OVERALLHEALTH, (short) 2)
+          .put(Surveys.OVERALL_HEALTH, (short) 2)
           .build();
 
   private static final BiMap<Surveys, String> SURVEY_ID_MAP =
       ImmutableBiMap.<Surveys, String>builder()
-          .put(Surveys.BASICS, "The Basics")
-          .put(Surveys.LIFESTYLE, "Lifestyle")
-          .put(Surveys.OVERALLHEALTH, "Overall Health")
+          .put(Surveys.THE_BASICS, "THE BASICS")
+          .put(Surveys.LIFESTYLE, "LIFESTYLE")
+          .put(Surveys.OVERALL_HEALTH, "OVERALL HEALTH")
           .build();
 
   public static Surveys surveysFromStorage(Short survey) {

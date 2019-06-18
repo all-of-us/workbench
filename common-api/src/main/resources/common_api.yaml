@@ -46,7 +46,7 @@ definitions:
   Surveys:
     type: string
     description: a survey for concepts
-    enum: &SURVEYS [BASICS, LIFESTYLE, OVERALLHEALTH]
+    enum: &SURVEYS [THE BASICS, LIFESTYLE, OVERALL HEALTH]
 
   CdrVersionListResponse:
     type: object

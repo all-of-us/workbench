@@ -90,14 +90,16 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
   }
 
   async saveConcepts() {
-    const {workspace: {namespace, id}} = this.props;
-    const {onSave} = this.props;
-    const {selectedSet, addingToExistingSet, newSetDescription,
-       name} = this.state;
+    const {workspace: {namespace, id}, onSave} = this.props;
+    const {selectedSet, addingToExistingSet, newSetDescription, name} = this.state;
     this.setState({saving: true});
-     // const conceptIds = fp.map(selected => selected.conceptId, selectedConceptsInDomain);
-    const  conceptIds = this.props.selectedSurvey.map((surveyss) => surveyss.conceptId);
-    const survey = Surveys.valueOf(this.props.surveyName) as Surveys;
+    const conceptIds = this.props.selectedSurvey.map((surveys) => surveys.conceptId);
+    let survey = Surveys.THEBASICS;
+    switch (this.props.surveyName) {
+      case 'Lifestyle': survey = Surveys.LIFESTYLE; break;
+      case 'Overall Health': survey = Surveys.OVERALLHEALTH; break;
+      default: survey = Surveys.THEBASICS;
+    }
     if (addingToExistingSet) {
       const updateConceptSetReq: UpdateConceptSetRequest = {
         etag: selectedSet.etag,

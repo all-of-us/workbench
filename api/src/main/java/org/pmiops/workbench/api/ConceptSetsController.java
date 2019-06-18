@@ -228,7 +228,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    short surveyId = CommonStorageEnums.surveysToStorage(Surveys.fromValue(survey));
+    short surveyId = CommonStorageEnums.surveysToStorage(Surveys.fromValue(survey.toUpperCase()));
     List<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
         conceptSetDao.findByWorkspaceIdAndSurvey(workspace.getWorkspaceId(), surveyId);
     ConceptSetListResponse response = new ConceptSetListResponse();
@@ -278,6 +278,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(addedIds);
     List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
         ImmutableList.copyOf(concepts).stream()
+            .filter ( concept -> !concept.getConceptClassId().equals("Question"))
             .filter(
                 concept -> {
                   Domain domain = CommonStorageEnums.domainIdToDomain(concept.getDomainId());

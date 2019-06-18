@@ -16,7 +16,7 @@ const style = reactStyles({
     width: 351,
     color: colors.purple[0],
     fontFamily: 'Montserrat',
-    fontSize: 20,
+    fontSize: '20px',
     fontWeight: 600,
     lineHeight: '24px',
     paddingTop: '1rem',
@@ -29,15 +29,15 @@ const style = reactStyles({
     width: 76,
     color: colors.blue[8],
     fontFamily: 'Montserrat',
-    fontSize: 14,
+    fontSize: '14px',
     fontWeight: 600,
     lineHeight: '18px'
   },
   question: {
     color: colors.blue[8],
     fontFamily: 'Montserrat',
-    fontSize: 16,
-    lineHeight: 19,
+    fontSize: '16px',
+    lineHeight: '19px',
     paddingTop: '0.3rem',
     paddingBottom: '0.3rem'
   }
@@ -61,7 +61,6 @@ export const SurveyDetails = withCurrentWorkspace()(
     constructor(props) {
       super(props);
       this.state = {
-        surveyMap: undefined,
         surveyList: [],
         loading: true,
         expandedRows: [],
@@ -115,7 +114,7 @@ export const SurveyDetails = withCurrentWorkspace()(
       return <div>
         {loading ? <SpinnerOverlay/> :
         <DataTable value={surveyList} expandedRows={this.state.expandedRows}>
-          <Column headerStyle={...style.questionHeader} header ={this.getTableHeader()}
+          <Column headerStyle={style.questionHeader} header ={this.getTableHeader()}
                   body={(row, col) => this.getQuestion(row, col)}/>
         </DataTable>}
       </div>;
