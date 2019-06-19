@@ -4,7 +4,6 @@ import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 
@@ -147,7 +146,6 @@ interface State {
   creatingConceptSet: boolean;
   dataSet: DataSet;
   dataSetTouched: boolean;
-  defaultPreviewView: boolean;
   includesAllParticipants: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
@@ -173,7 +171,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         creatingConceptSet: false,
         dataSet: undefined,
         dataSetTouched: false,
-        defaultPreviewView: true,
         includesAllParticipants: false,
         loadingResources: true,
         openSaveModal: false,
@@ -283,8 +280,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         }
       } else {
         this.setState({selectedCohortIds: toggleIncludes(resource.id,
-          this.state.selectedCohortIds) as unknown as number[]},
-          () => this.defaultPreviewDataRequest());
+          this.state.selectedCohortIds) as unknown as number[]});
       }
     }
 
@@ -306,16 +302,14 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       valuesSelected = valuesSelected.sort((a, b) =>
           valueSets.findIndex(({value}) => a.value === value) -
           valueSets.findIndex(({value}) => b.value === value));
-      this.setState({selectedValues: valuesSelected, dataSetTouched: true},
-        () => this.defaultPreviewDataRequest());
+      this.setState({selectedValues: valuesSelected, dataSetTouched: true});
     }
 
     selectAllValues() {
       if (this.state.selectAll) {
         this.setState({
           selectedValues: [],
-          selectAll: !this.state.selectAll,
-          defaultPreviewView: true});
+          selectAll: !this.state.selectAll});
         return;
       }
 
@@ -325,8 +319,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           allValuesSelected.push({domain: valueSet.domain, value: value.value});
         });
       });
-      this.setState({selectedValues: allValuesSelected, selectAll: !this.state.selectAll},
-        () => this.defaultPreviewDataRequest());
+      this.setState({selectedValues: allValuesSelected, selectAll: !this.state.selectAll});
     }
 
     disableSave() {
@@ -334,13 +327,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           ((!this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0)
                 && !this.state.includesAllParticipants) ||
             !this.state.selectedValues || this.state.selectedValues.length === 0;
-    }
-
-    defaultPreviewDataRequest() {
-      if (this.state.defaultPreviewView && !this.disableSave()) {
-        this.getPreviewList();
-        this.setState({defaultPreviewView: false});
-      }
     }
 
     getDataTableValue(data) {
@@ -438,12 +424,15 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         .then(() => window.history.back());
     }
 
+    get isRefreshPreviewDisabled() {
+      return this.disableSave() || this.state.previewList.length === 0;
+    }
+
     render() {
       const {namespace, id} = this.props.workspace;
       const {
         dataSet,
         dataSetTouched,
-        defaultPreviewView,
         includesAllParticipants,
         loadingResources,
         openSaveModal,
@@ -549,21 +538,28 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         <FadeBox style={{marginTop: '1rem'}}>
           <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
             <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row',
-              position: 'relative'}}>
-              <div style={styles.previewDataHeader}>
-                Preview Data Set
+              position: 'relative', lineHeight: 'auto', paddingTop: '0.5rem',
+              paddingBottom: '0.5rem', alignItems: 'center', justifyContent: 'space-between',
+              height: 'auto'}}>
+              <div style={{display: 'flex', flexDirection: 'column'}}>
+              <div style={{display: 'flex', alignItems: 'flex-end'}}>
+                <div style={styles.previewDataHeader}>
+                  <div>Preview Data Set</div>
+                </div>
+                <Clickable data-test-id='preview-icon' disabled={this.isRefreshPreviewDisabled}
+                     onClick={() => this.getPreviewList()} style={{fontSize: '12px',
+                       cursor: this.isRefreshPreviewDisabled ? 'not-allowed' : 'pointer',
+                       fontWeight: 600, lineHeight: '15px',
+                       color: this.isRefreshPreviewDisabled ? colors.gray[4] : colors.blue[0]}}>
+                    Refresh Preview
+                  </Clickable>
               </div>
-              {!defaultPreviewView && <Clickable data-test-id='preview-icon'
-                                                 onClick={() => this.getPreviewList()}
-                                                 style={styles.refreshIcon}>
-                  <ClrIcon style={{fill: colors.gray[7]}} shape='refresh'/>
-                </Clickable>
-              }
               <div style={{color: '#000000', fontSize: '14px'}}>A visualization of your data table
                 based on the variable and value you selected above
               </div>
-              <Button data-test-id='save-button' style={{position: 'absolute', right: '1rem',
-                top: '.25rem'}} onClick ={this.editing ? () => this.updateDataSet() :
+              </div>
+              <Button data-test-id='save-button' style={{marginRight: '1rem'}}
+                      onClick={this.editing ? () => this.updateDataSet() :
                 () => this.setState({openSaveModal: true})}
                 disabled={this.disableSave() || (this.editing && !dataSetTouched)}>
                 {this.editing ? 'UPDATE DATA SET' : 'SAVE DATA SET'}
@@ -598,6 +594,19 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   )}
                 </div>
                 {this.renderPreviewDataTable()}
+              </div>
+            }
+            {previewList.length === 0 && !previewDataLoading &&
+              <div style={{width: '100%', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', marginTop: '2.675rem', marginBottom: '2rem'}}>
+                <div style={{color: colors.gray[4], fontSize: '20px', fontWeight: 400}}>
+                  Select cohorts, concept sets, and values above to generate a preview table
+                </div>
+                <Button disabled={this.disableSave()} style={{marginTop: '0.5rem',
+                  height: '1.8rem', width: '6.5rem'}}
+                    onClick={() => this.getPreviewList()}>
+                  Preview Table
+                </Button>
               </div>
             }
           </div>
