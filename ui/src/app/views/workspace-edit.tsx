@@ -574,7 +574,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     render() {
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '95%'}}>
-        <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
+          {this.state.loading && <SpinnerOverlay overrideStylesOverlay={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            height: '100%',
+            width: '100%',
+          }}/>}
+          <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                               section={{marginTop: '24px'}} largeHeader required>
           <div style={{display: 'flex', flexDirection: 'row'}}>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
@@ -810,7 +819,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </ul>]} disabled={!this.disableButton}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
                       disabled={this.disableButton || this.state.loading}>
-                {this.state.loading && <SpinnerOverlay/>}
                 {this.renderButtonText()}
               </Button>
             </TooltipTrigger>
