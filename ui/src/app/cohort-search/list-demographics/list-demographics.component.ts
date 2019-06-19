@@ -53,7 +53,7 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
   get deceased() { return this.demoForm.get('deceased'); }
 
     /* Storage for the demographics options (fetched via the API) */
-  ageNode;
+  ageNode: any;
   ageNodes: Array<any>;
   ageCount: number;
   deceasedNode;
@@ -293,7 +293,9 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
     let count = 0;
     for (let i = min.value; i <= max.value; i++) {
       const ageNode = this.ageNodes.find(node => node.name === i.toString());
-      count += ageNode.count;
+      if (ageNode) {
+        count += ageNode.count;
+      }
     }
     this.ageCount = count;
     this.loading = false;
