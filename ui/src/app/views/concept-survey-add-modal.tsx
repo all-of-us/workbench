@@ -132,7 +132,7 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
         onSave(createdConceptSet);
       } catch (error) {
         console.error(error);
-         this.setState({errorSaving: true});
+        this.setState({errorSaving: true});
       }
     }
   }
