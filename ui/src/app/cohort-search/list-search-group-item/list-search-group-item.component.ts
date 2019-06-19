@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 
-import {CriteriaType, DomainType, SearchRequest, TreeSubType} from 'generated';
+import {CriteriaType, DomainType, SearchRequest} from 'generated';
 
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, getCodeOptions, listAttributeDisplay, listNameDisplay, listTypeDisplay} from 'app/cohort-search/utils';
