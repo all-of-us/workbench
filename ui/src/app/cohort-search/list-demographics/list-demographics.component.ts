@@ -277,7 +277,7 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
         console.warn('No node from which to make parameter for deceased status');
         return ;
       }
-      const wizard = this.wizard
+      const wizard = this.wizard;
       wizard.item.searchParameters = [includeDeceased ? this.deceasedNode : this.selectedNode];
       const selections = [
         includeDeceased ? this.deceasedNode.parameterId : this.selectedNode.parameterId
