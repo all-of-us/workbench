@@ -10,7 +10,10 @@ import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   ConceptSet,
-  CreateConceptSetRequest, Domain, SurveyDetailsResponse, Surveys,
+  CreateConceptSetRequest,
+  Domain,
+  SurveyDetailsResponse,
+  Surveys,
   UpdateConceptSetRequest
 } from 'generated/fetch';
 import {validate} from 'validate.js';
