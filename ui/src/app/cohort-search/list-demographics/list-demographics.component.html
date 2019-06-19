@@ -49,12 +49,23 @@
   <!-- Gender/Race/Ethnicity -->
     <div *ngSwitchDefault>
       <div class="control-wrapper">
-        <crit-list-multi-select
-          [options]="nodes"
-          [select]="selectOption"
-          [selections]="selections"
-          [loading]="loading">
-        </crit-list-multi-select>
+        <div class="ds-wrapper">
+          <div class="ds-options">
+            <div class="select-box">
+              <div class="option-list" >
+                <span *ngIf="loading" class="spinner spinner-md"></span>
+                <div *ngFor="let opt of nodes; let i = index" class="option" (click)="selectOption(opt)">
+                  <clr-icon  *ngIf="!selections.includes(opt.parameterId)"  shape="plus-circle"  size="20" class="selection-icon items-selection-icon" ></clr-icon>
+                  <clr-icon  *ngIf="selections.includes(opt.parameterId)" shape="check-circle" size="20"  class="selection-icon items-disabled-icon"></clr-icon>
+                  {{ opt.name | titlecase }}
+                  <span *ngIf="opt.count" class="badge badge-info">
+                    {{ opt.count | number }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 </form>
