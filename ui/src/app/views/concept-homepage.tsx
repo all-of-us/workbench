@@ -26,7 +26,8 @@ import {
   Domain,
   DomainCount,
   DomainInfo,
-  StandardConceptFilter, SurveyDetailsResponse,
+  StandardConceptFilter,
+  SurveyDetailsResponse,
   SurveyModule,
   VocabularyCount,
 } from 'generated/fetch';
