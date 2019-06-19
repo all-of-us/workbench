@@ -46,13 +46,13 @@ export class ListSearchGroupItemComponent {
     const _type = this.item.type;
     const formatter = (param) => {
       let funcs = [listTypeDisplay, listAttributeDisplay];
-      if (_type === DomainType[DomainType.PERSON]) {
+      if (_type === DomainType.PERSON) {
         funcs = [listTypeDisplay, listNameDisplay, listAttributeDisplay];
-      } else if (_type === DomainType[DomainType.PHYSICALMEASUREMENT]
-        || _type === DomainType[DomainType.VISIT]
-        || _type === DomainType[DomainType.DRUG]
-        || _type === DomainType[DomainType.MEASUREMENT]
-        || _type === DomainType[DomainType.SURVEY]) {
+      } else if (_type === DomainType.PHYSICALMEASUREMENT
+        || _type === DomainType.VISIT
+        || _type === DomainType.DRUG
+        || _type === DomainType.MEASUREMENT
+        || _type === DomainType.SURVEY) {
         funcs = [listNameDisplay];
       }
       return funcs.map(f => f(param)).join(' ').trim();

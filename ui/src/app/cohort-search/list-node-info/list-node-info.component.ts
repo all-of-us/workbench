@@ -179,26 +179,26 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   get showCount() {
     return this.node.count > -1
       && (this.node.selectable
-      || (this.node.subtype === CriteriaSubType[CriteriaSubType.LAB]
+      || (this.node.subtype === CriteriaSubType.LAB
       && this.node.group
       && this.node.code !== null )
-      || this.node.type === CriteriaType[CriteriaType.CPT4]);
+      || this.node.type === CriteriaType.CPT4);
   }
 
   get isPM() {
-    return this.node.domainId === DomainType[DomainType.PHYSICALMEASUREMENT];
+    return this.node.domainId === DomainType.PHYSICALMEASUREMENT;
   }
 
   get isDrug() {
-    return this.node.domainId === DomainType[DomainType.DRUG];
+    return this.node.domainId === DomainType.DRUG;
   }
 
   get isPPI() {
-    return this.node.domainId === DomainType[DomainType.SURVEY];
+    return this.node.domainId === DomainType.SURVEY;
   }
 
   get isSNOMED() {
-    return this.node.type === CriteriaType[CriteriaType.SNOMED];
+    return this.node.type === CriteriaType.SNOMED;
   }
 
   get hasAttributes() {
@@ -210,9 +210,9 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get isPMCat() {
-    return this.node.subtype === CriteriaSubType[CriteriaSubType.WHEEL] ||
-      this.node.subtype === CriteriaSubType[CriteriaSubType.PREG] ||
-      this.node.subtype === CriteriaSubType[CriteriaSubType.HRIRR] ||
-      this.node.subtype === CriteriaSubType[CriteriaSubType.HRNOIRR];
+    return this.node.subtype === CriteriaSubType.WHEEL ||
+      this.node.subtype === CriteriaSubType.PREG ||
+      this.node.subtype === CriteriaSubType.HRIRR ||
+      this.node.subtype === CriteriaSubType.HRNOIRR;
   }
 }
