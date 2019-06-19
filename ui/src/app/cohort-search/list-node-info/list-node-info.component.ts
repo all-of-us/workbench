@@ -1,4 +1,3 @@
-import {NgRedux} from '@angular-redux/store';
 import {
   AfterViewInit,
   Component,
@@ -10,10 +9,6 @@ import {
   ViewChild
 } from '@angular/core';
 import {PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
-import {
-  CohortSearchState,
-  ppiAnswers,
-} from 'app/cohort-search/redux';
 import {attributesStore, groupSelectionsStore, ppiQuestions, selectionsStore, subtreeSelectedStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {stripHtml} from 'app/cohort-search/utils';
 import {AttrName, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
@@ -32,10 +27,6 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('name') name: ElementRef;
   isTruncated = false;
   matched = false;
-
-  constructor(
-    private ngRedux: NgRedux<CohortSearchState>
-  ) {}
 
   ngOnInit() {
     this.subscription = selectionsStore.subscribe(selections => {
