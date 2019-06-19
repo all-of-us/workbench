@@ -229,7 +229,7 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
     const min = this.demoForm.get('ageMin');
     const max = this.demoForm.get('ageMax');
     const params = this.wizard.item.searchParameters;
-    if (params.length) {
+    if (params.length && params[0].type === CriteriaType.AGE) {
       const range = params[0].attributes[0].operands;
       this.ageRange.setValue(range);
       min.setValue(range[0]);
