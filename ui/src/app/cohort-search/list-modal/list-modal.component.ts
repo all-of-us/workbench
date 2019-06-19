@@ -9,7 +9,7 @@ import {
   subtreeSelectedStore,
   wizardStore
 } from 'app/cohort-search/search-state.service';
-import {stripHtml} from 'app/cohort-search/utils';
+import {domainToTitle, stripHtml} from 'app/cohort-search/utils';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -54,9 +54,20 @@ export class ListModalComponent implements OnInit, OnDestroy {
         this.selectionList = wizard.item.searchParameters;
         this.noSelection = this.selectionList.length === 0;
         if (!this.open) {
-          this.title = wizard.domain;
-          this.backMode = 'list';
-          this.mode = 'list';
+          this.title = domainToTitle(wizard.domain);
+          if (wizard.domain === DomainType.PHYSICALMEASUREMENT) {
+            this.hierarchyNode = {
+              domainId: wizard.domain,
+              type: wizard.type,
+              isStandard: wizard.standard,
+              id: 0,    // root parent ID is always 0
+            };
+            this.backMode = 'tree';
+            this.mode = 'tree';
+          } else {
+            this.backMode = 'list';
+            this.mode = 'list';
+          }
           this.open = true;
         }
       });

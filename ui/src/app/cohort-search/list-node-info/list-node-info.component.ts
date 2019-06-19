@@ -194,7 +194,7 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get isPPI() {
-    return this.node.type === CriteriaType[CriteriaType.PPI];
+    return this.node.domainId === DomainType[DomainType.SURVEY];
   }
 
   get isSNOMED() {
