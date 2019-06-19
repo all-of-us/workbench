@@ -153,7 +153,7 @@ public class ConceptSetsControllerTest {
       makeConcept(CLIENT_CONCEPT_3);
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_4 =
       makeConcept(CLIENT_CONCEPT_4);
- 
+
   private static final String USER_EMAIL = "bob@gmail.com";
   private static final String WORKSPACE_NAMESPACE = "ns";
   private static final String WORKSPACE_NAME = "name";
