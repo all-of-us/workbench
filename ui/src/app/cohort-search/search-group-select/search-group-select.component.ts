@@ -53,10 +53,10 @@ export class SearchGroupSelectComponent implements AfterViewInit {
       const {domain, type} = criteria;
       const searchRequest = searchRequestStore.getValue();
       const group = this.initGroup(groupId);
-      const item = this.initItem(itemId, criteria.domain);
+      const item = this.initItem(itemId, domain);
       searchRequest[this.role].push(group);
       searchRequestStore.next(searchRequest);
-      context = {item, domain, type, role, groupId, itemId, fullTree, codes};
+      context = {item, domain, type, role, groupId, itemId, codes};
       wizardStore.next(context);
     } else {
       const itemId = this.actions.generateId('items');

@@ -91,10 +91,11 @@ export class ListSearchGroupItemComponent {
     const codes = getCodeOptions(this.item.type);
     const fullTree = this.item.fullTree;
     const {role, groupId} = this;
+    const item = JSON.parse(JSON.stringify(this.item));
     const itemId = this.item.id;
     const domain = this.item.type;
     const type = this.itemSubtype;
-    const context = {item: this.item, domain, type, role, groupId, itemId, fullTree, codes};
+    const context = {item, domain, type, role, groupId, itemId, fullTree, codes};
     wizardStore.next(context);
   }
 }
