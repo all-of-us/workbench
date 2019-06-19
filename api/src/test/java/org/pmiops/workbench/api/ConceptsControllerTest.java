@@ -223,6 +223,7 @@ public class ConceptsControllerTest {
     FireCloudService.class,
     CohortCloningService.class,
     ConceptSetService.class,
+    ConceptBigQueryService.class,
     Clock.class
   })
   static class Configuration {}
@@ -232,11 +233,11 @@ public class ConceptsControllerTest {
   @Autowired private WorkspaceService workspaceService;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private DomainVocabularyInfoDao domainVocabularyInfoDao;
   @Autowired FireCloudService fireCloudService;
   @Autowired SurveyModuleDao surveyModuleDao;
-  @Autowired private ConceptBigQueryService conceptBigQueryService;
 
   @PersistenceContext private EntityManager entityManager;
 
