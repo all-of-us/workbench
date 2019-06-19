@@ -122,7 +122,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
     const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
     const itemIndex = searchRequest[role][groupIndex].items.findIndex(it => it.id === item.id);
     if (itemIndex > -1) {
-      searchRequest[role][groupIndex][itemIndex] = item;
+      searchRequest[role][groupIndex].items[itemIndex] = item;
     } else {
       searchRequest[role][groupIndex].items.push(item);
     }
