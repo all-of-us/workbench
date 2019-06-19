@@ -15,7 +15,9 @@
     "xAppIdValue": "local-AoU-RW"
   },
   "auth": {
-    "serviceAccountApiUsers": [ "all-of-us-workbench-test@appspot.gserviceaccount.com" ]
+    "serviceAccountApiUsers": [
+      "all-of-us-workbench-test@appspot.gserviceaccount.com"
+    ]
   },
   "cdr": {
     "debugQueries": false
@@ -61,7 +63,7 @@
     "unsafeAllowSelfBypass": true
   },
   "cohortbuilder": {
-    "enableListSearch": false
+    "enableListSearch": true
   },
   "featureFlags": {
     "useBillingProjectBuffer": true,
