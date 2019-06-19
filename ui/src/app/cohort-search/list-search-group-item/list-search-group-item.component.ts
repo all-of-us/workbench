@@ -77,24 +77,30 @@ export class ListSearchGroupItemComponent {
     this.setStatus('active');
   }
 
-  get itemSubtype() {
-    if (this.item.type === DomainType.PERSON) {
-      const subtype = this.parameters[0].subtype;
-      return subtype === TreeSubType.DEC ? TreeSubType.AGE : subtype;
+  get typeAndStandard() {
+    switch (this.item.type) {
+      case DomainType.PERSON:
+        const type = this.parameters[0].subtype === TreeSubType.DEC
+          ? TreeSubType.AGE : this.parameters[0].subtype;
+        return {type, standard: false};
+      case DomainType.PHYSICALMEASUREMENT:
+        return {type: this.parameters[0].type, standard: false};
+      default:
+        return {type: null, standard: null};
     }
-    return null;
   }
 
   launchWizard() {
-    const selections = this.item.searchParameters.map(sp => sp.paramId);
+    const selections = this.item.searchParameters.map(sp => sp.parameterId);
     selectionsStore.next(selections);
     const codes = getCodeOptions(this.item.type);
     const fullTree = this.item.fullTree;
     const {role, groupId} = this;
+    const item = JSON.parse(JSON.stringify(this.item));
     const itemId = this.item.id;
     const domain = this.item.type;
-    const type = this.itemSubtype;
-    const context = {item: this.item, domain, type, role, groupId, itemId, fullTree, codes};
+    const {type, standard} = this.typeAndStandard;
+    const context = {item, domain, type, standard, role, groupId, itemId, fullTree, codes};
     wizardStore.next(context);
   }
 }
