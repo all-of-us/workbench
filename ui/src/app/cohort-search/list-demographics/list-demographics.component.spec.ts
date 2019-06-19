@@ -3,7 +3,6 @@ import {MockNgRedux} from '@angular-redux/store/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
-import {MultiSelectComponent} from 'app/cohort-search/multi-select/multi-select.component';
 import {fromJS} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
@@ -34,10 +33,7 @@ describe('ListDemographicsComponent', () => {
     mockReduxInst.getState = _wrapped;
 
     TestBed.configureTestingModule({
-      declarations: [
-        ListDemographicsComponent,
-        MultiSelectComponent,
-      ],
+      declarations: [ListDemographicsComponent],
       imports: [
         ClarityModule,
         NouisliderModule,
