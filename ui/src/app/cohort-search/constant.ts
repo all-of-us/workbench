@@ -35,6 +35,12 @@ export const DOMAIN_TYPES = [
 
 export const LIST_PROGRAM_TYPES = [
   {
+    name: 'Surveys',
+    domain: DomainType.SURVEY,
+    type: CriteriaType.PPI,
+    standard: false
+  },
+  {
     name: 'Physical Measurements',
     domain: DomainType.PHYSICALMEASUREMENT,
     type: CriteriaType.PPI,

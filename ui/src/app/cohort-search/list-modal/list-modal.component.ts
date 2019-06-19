@@ -55,7 +55,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
         this.noSelection = this.selectionList.length === 0;
         if (!this.open) {
           this.title = domainToTitle(wizard.domain);
-          if (wizard.domain === DomainType.PHYSICALMEASUREMENT) {
+          if (this.initTree) {
             this.hierarchyNode = {
               domainId: wizard.domain,
               type: wizard.type,
@@ -152,6 +152,11 @@ export class ListModalComponent implements OnInit, OnDestroy {
     return this.wizard.domain !== DomainType.PHYSICALMEASUREMENT &&
       this.wizard.domain !== DomainType.PERSON &&
       this.wizard.domain !== DomainType.SURVEY;
+  }
+
+  get initTree() {
+    return this.wizard.domain === DomainType.PHYSICALMEASUREMENT
+      || this.wizard.domain === DomainType.SURVEY;
   }
 
   get showNext() {

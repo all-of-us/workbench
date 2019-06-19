@@ -14,7 +14,7 @@ import {
   CohortSearchState,
   ppiAnswers,
 } from 'app/cohort-search/redux';
-import {attributesStore, groupSelectionsStore, selectionsStore, subtreeSelectedStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {attributesStore, groupSelectionsStore, ppiQuestions, selectionsStore, subtreeSelectedStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {stripHtml} from 'app/cohort-search/utils';
 import {AttrName, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
@@ -81,7 +81,7 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get paramId() {
-    return `param${this.node.conceptId ?
+    return `param${this.node.conceptId && !this.isPPI ?
         (this.node.conceptId + this.node.code) : this.node.id}`;
   }
 
@@ -128,9 +128,11 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
         }
         let modifiedName = this.node.name;
         if (this.isPPI) {
-          // TODO need an alternative to pulling from redux store here
-          const parent = ppiAnswers(this.node.path)(this.ngRedux.getState()).toJS();
-          modifiedName = parent.name + ' - ' + modifiedName;
+          // get PPI question from store
+          const question = ppiQuestions.getValue()[this.node.parentId];
+          if (question) {
+            modifiedName = question + ' - ' + modifiedName;
+          }
         }
         let attributes = [];
         if (this.node.subtype === CriteriaSubType[CriteriaSubType.BP]) {
