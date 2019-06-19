@@ -36,6 +36,7 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
   surveyName: string
 }, {
   conceptSets: ConceptSet[];
+  errorSaving: boolean;
   addingToExistingSet: boolean;
   loading: boolean;
   nameTouched: boolean;
