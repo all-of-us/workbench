@@ -50,7 +50,7 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
     super(props);
     this.state = {
       conceptSets: [],
-    //   errorSaving: false,
+      errorSaving: false,
       addingToExistingSet: true,
       loading: true,
       nameTouched: false,
@@ -58,9 +58,6 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
       newSetDescription: '',
       name: '',
       saving: false
-    //   selectedConceptsInDomain: props.selectedConcepts
-    //       .filter((concept: Concept) =>
-    //           concept.domainId === fp.capitalize(props.selectedDomain.domain))
     };
   }
 
@@ -131,7 +128,7 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
         onSave(createdConceptSet);
       } catch (error) {
         console.error(error);
-//         this.setState({errorSaving: true});
+         this.setState({errorSaving: true});
       }
     }
   }
