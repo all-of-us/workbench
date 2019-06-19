@@ -24,11 +24,11 @@ export function listTypeDisplay(parameter): string {
   const {domainId, type} = parameter;
   if (domainId === DomainType.PERSON) {
     return {
-      'GEN': 'Gender',
+      'GENDER': 'Gender',
       'RACE': 'Race',
-      'ETH': 'Ethnicity',
+      'ETHNICITY': 'Ethnicity',
       'AGE': 'Age',
-      'DEC': 'Deceased'
+      'DECEASED': 'Deceased'
     }[type] || '';
   } else if (type === CriteriaType.SNOMED) {
     return parameter.code;
