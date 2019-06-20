@@ -33,6 +33,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -107,6 +108,7 @@ import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
@@ -1568,76 +1570,62 @@ public class WorkspacesControllerTest {
         .getWorkspace();
   }
 
-  // TODO: how to test this?
-  //  @Test
-  //  public void testShareWorkspace() throws Exception {
-  //    User writerUser = new User();
-  //    writerUser.setEmail("writerfriend@gmail.com");
-  //    writerUser.setUserId(124L);
-  //    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
-  //    writerUser.setDisabled(false);
-  //
-  //    writerUser = userDao.save(writerUser);
-  //    User readerUser = new User();
-  //    readerUser.setEmail("readerfriend@gmail.com");
-  //    readerUser.setUserId(125L);
-  //    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
-  //    readerUser.setDisabled(false);
-  //    readerUser = userDao.save(readerUser);
-  //
-  //    Workspace workspace = createWorkspace();
-  //    workspace = workspacesController.createWorkspace(workspace).getBody();
-  //    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
-  //    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-  //    UserRole creator = new UserRole();
-  //    creator.setEmail(LOGGED_IN_USER_EMAIL);
-  //    creator.setRole(WorkspaceAccessLevel.OWNER);
-  //    shareWorkspaceRequest.addItemsItem(creator);
-  //    UserRole writer = new UserRole();
-  //    writer.setEmail("writerfriend@gmail.com");
-  //    writer.setRole(WorkspaceAccessLevel.WRITER);
-  //    shareWorkspaceRequest.addItemsItem(writer);
-  //    UserRole reader = new UserRole();
-  //    reader.setEmail("readerfriend@gmail.com");
-  //    reader.setRole(WorkspaceAccessLevel.READER);
-  //    shareWorkspaceRequest.addItemsItem(reader);
-  //
-  //    // Simulate time between API calls to trigger last-modified/@Version changes.
-  //    CLOCK.increment(1000);
-  //    stubFcUpdateWorkspaceACL();
-  //    WorkspaceUserRolesResponse shareResp =
-  //        workspacesController
-  //            .shareWorkspace(workspace.getNamespace(), workspace.getName(),
-  // shareWorkspaceRequest)
-  //            .getBody();
-  //    Workspace workspace2 =
-  //        workspacesController
-  //            .getWorkspace(workspace.getNamespace(), workspace.getName())
-  //            .getBody()
-  //            .getWorkspace();
-  //    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
-  //
-  //    assertThat(workspace2.getUserRoles().size()).isEqualTo(3);
-  //    int numOwners = 0;
-  //    int numWriters = 0;
-  //    int numReaders = 0;
-  //    for (UserRole userRole : workspace2.getUserRoles()) {
-  //      if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
-  //        assertThat(userRole.getEmail()).isEqualTo(LOGGED_IN_USER_EMAIL);
-  //        numOwners++;
-  //      } else if (userRole.getRole().equals(WorkspaceAccessLevel.WRITER)) {
-  //        assertThat(userRole.getEmail()).isEqualTo("writerfriend@gmail.com");
-  //        numWriters++;
-  //      } else {
-  //        assertThat(userRole.getEmail()).isEqualTo("readerfriend@gmail.com");
-  //        numReaders++;
-  //      }
-  //    }
-  //    assertThat(numOwners).isEqualTo(1);
-  //    assertThat(numWriters).isEqualTo(1);
-  //    assertThat(numReaders).isEqualTo(1);
-  //    assertThat(workspace.getEtag()).isNotEqualTo(workspace2.getEtag());
-  //  }
+  @Test
+  public void testShareWorkspace() throws Exception {
+    User writerUser = new User();
+    writerUser.setEmail("writerfriend@gmail.com");
+    writerUser.setUserId(124L);
+    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
+    writerUser.setDisabled(false);
+
+    writerUser = userDao.save(writerUser);
+    User readerUser = new User();
+    readerUser.setEmail("readerfriend@gmail.com");
+    readerUser.setUserId(125L);
+    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
+    readerUser.setDisabled(false);
+    readerUser = userDao.save(readerUser);
+
+    stubFcGetWorkspaceACL();
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+    UserRole creator = new UserRole();
+    creator.setEmail(LOGGED_IN_USER_EMAIL);
+    creator.setRole(WorkspaceAccessLevel.OWNER);
+    shareWorkspaceRequest.addItemsItem(creator);
+
+
+    UserRole reader = new UserRole();
+    reader.setEmail("readerfriend@gmail.com");
+    reader.setRole(WorkspaceAccessLevel.READER);
+    shareWorkspaceRequest.addItemsItem(reader);
+    UserRole writer = new UserRole();
+    writer.setEmail("writerfriend@gmail.com");
+    writer.setRole(WorkspaceAccessLevel.WRITER);
+    shareWorkspaceRequest.addItemsItem(writer);
+
+    // Simulate time between API calls to trigger last-modified/@Version changes.
+    CLOCK.increment(1000);
+    stubFcUpdateWorkspaceACL();
+    WorkspaceUserRolesResponse shareResp =
+            workspacesController
+                    .shareWorkspace(workspace.getNamespace(), workspace.getName(),
+                            shareWorkspaceRequest)
+                    .getBody();
+    Workspace workspace2 =
+            workspacesController
+                    .getWorkspace(workspace.getNamespace(), workspace.getName())
+                    .getBody()
+                    .getWorkspace();
+    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
+
+    ArrayList<WorkspaceACLUpdate> updateACLRequestList =
+            convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
+    verify(fireCloudService)
+            .updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
+  }
 
   @Test
   public void testShareWorkspaceNoRoleFailure() throws Exception {
@@ -1673,99 +1661,85 @@ public class WorkspacesControllerTest {
     }
   }
 
-  // TODO: how to test this?
-  //  @Test
-  //  public void testUnshareWorkspace() throws Exception {
-  //    User writerUser = new User();
-  //    writerUser.setEmail("writerfriend@gmail.com");
-  //    writerUser.setUserId(124L);
-  //    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
-  //    writerUser.setDisabled(false);
-  //    writerUser = userDao.save(writerUser);
-  //    User readerUser = new User();
-  //    readerUser.setEmail("readerfriend@gmail.com");
-  //    readerUser.setUserId(125L);
-  //    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
-  //    readerUser.setDisabled(false);
-  //    readerUser = userDao.save(readerUser);
-  //
-  //    Workspace workspace = createWorkspace();
-  //    workspace = workspacesController.createWorkspace(workspace).getBody();
-  //    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
-  //    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-  //    UserRole creator = new UserRole();
-  //    creator.setEmail(LOGGED_IN_USER_EMAIL);
-  //    creator.setRole(WorkspaceAccessLevel.OWNER);
-  //    shareWorkspaceRequest.addItemsItem(creator);
-  //    UserRole writer = new UserRole();
-  //    writer.setEmail("writerfriend@gmail.com");
-  //    writer.setRole(WorkspaceAccessLevel.WRITER);
-  //    shareWorkspaceRequest.addItemsItem(writer);
-  //    UserRole reader = new UserRole();
-  //    reader.setEmail("readerfriend@gmail.com");
-  //    reader.setRole(WorkspaceAccessLevel.READER);
-  //    shareWorkspaceRequest.addItemsItem(reader);
-  //
-  //    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
-  //    responseValue.setUsersNotFound(new ArrayList<WorkspaceACLUpdate>());
-  //
-  //    // Simulate time between API calls to trigger last-modified/@Version changes.
-  //    CLOCK.increment(1000);
-  //    when(fireCloudService.updateWorkspaceACL(
-  //            anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class)))
-  //        .thenReturn(responseValue);
-  //    WorkspaceUserRolesResponse shareResp =
-  //        workspacesController
-  //            .shareWorkspace(workspace.getNamespace(), workspace.getName(),
-  // shareWorkspaceRequest)
-  //            .getBody();
-  //    Workspace workspace2 =
-  //        workspacesController
-  //            .getWorkspace(workspace.getNamespace(), workspace.getId())
-  //            .getBody()
-  //            .getWorkspace();
-  //    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
-  //
-  //    CLOCK.increment(1000);
-  //    shareWorkspaceRequest = new ShareWorkspaceRequest();
-  //    shareWorkspaceRequest.setWorkspaceEtag(workspace2.getEtag());
-  //    shareWorkspaceRequest.addItemsItem(creator);
-  //    shareWorkspaceRequest.addItemsItem(writer);
-  //
-  //    shareResp =
-  //        workspacesController
-  //            .shareWorkspace(workspace.getNamespace(), workspace.getName(),
-  // shareWorkspaceRequest)
-  //            .getBody();
-  //    Workspace workspace3 =
-  //        workspacesController
-  //            .getWorkspace(workspace.getNamespace(), workspace.getId())
-  //            .getBody()
-  //            .getWorkspace();
-  //    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace3.getEtag());
-  //
-  //    assertThat(workspace3.getUserRoles().size()).isEqualTo(2);
-  //    int numOwners = 0;
-  //    int numWriters = 0;
-  //    int numReaders = 0;
-  //    for (UserRole userRole : workspace3.getUserRoles()) {
-  //      if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
-  //        assertThat(userRole.getEmail()).isEqualTo(LOGGED_IN_USER_EMAIL);
-  //        numOwners++;
-  //      } else if (userRole.getRole().equals(WorkspaceAccessLevel.WRITER)) {
-  //        assertThat(userRole.getEmail()).isEqualTo("writerfriend@gmail.com");
-  //        numWriters++;
-  //      } else {
-  //        assertThat(userRole.getEmail()).isEqualTo("readerfriend@gmail.com");
-  //        numReaders++;
-  //      }
-  //    }
-  //    assertThat(numOwners).isEqualTo(1);
-  //    assertThat(numWriters).isEqualTo(1);
-  //    assertThat(numReaders).isEqualTo(0);
-  //    assertThat(workspace.getEtag()).isNotEqualTo(workspace2.getEtag());
-  //    assertThat(workspace2.getEtag()).isNotEqualTo(workspace3.getEtag());
-  //  }
+  @Test
+  public void testUnshareWorkspace() throws Exception {
+    User writerUser = new User();
+    writerUser.setEmail("writerfriend@gmail.com");
+    writerUser.setUserId(124L);
+    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
+    writerUser.setDisabled(false);
+    writerUser = userDao.save(writerUser);
+    User readerUser = new User();
+    readerUser.setEmail("readerfriend@gmail.com");
+    readerUser.setUserId(125L);
+    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
+    readerUser.setDisabled(false);
+    readerUser = userDao.save(readerUser);
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+    UserRole creator = new UserRole();
+    creator.setEmail(LOGGED_IN_USER_EMAIL);
+    creator.setRole(WorkspaceAccessLevel.OWNER);
+    shareWorkspaceRequest.addItemsItem(creator);
+    UserRole writer = new UserRole();
+    writer.setEmail("writerfriend@gmail.com");
+    writer.setRole(WorkspaceAccessLevel.WRITER);
+    shareWorkspaceRequest.addItemsItem(writer);
+    UserRole reader = new UserRole();
+    reader.setEmail("readerfriend@gmail.com");
+    reader.setRole(WorkspaceAccessLevel.NO_ACCESS);
+    shareWorkspaceRequest.addItemsItem(reader);
+
+    // Mock firecloud ACLs
+    WorkspaceACL workspaceACLs = new WorkspaceACL();
+    Map<String, Object> acls = new HashMap<>();
+    acls.put(LOGGED_IN_USER_EMAIL, new JSONObject()
+            .put("accessLevel", "OWNER")
+            .put("canCompute", true)
+            .put("canShare", true));
+    acls.put("writerfriend@gmail.com", new JSONObject()
+            .put("accessLevel", "WRITER")
+            .put("canCompute", true)
+            .put("canShare", false));
+    acls.put("readerfriend@gmail.com", new JSONObject()
+            .put("accessLevel", "READER")
+            .put("canCompute", false)
+            .put("canShare", false));
+    workspaceACLs.setAcl(acls);
+    when(fireCloudService.getWorkspaceAcl(any(), any())).thenReturn(workspaceACLs);
+
+    CLOCK.increment(1000);
+    stubFcUpdateWorkspaceACL();
+    shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+    shareWorkspaceRequest.addItemsItem(creator);
+    shareWorkspaceRequest.addItemsItem(writer);
+
+    WorkspaceUserRolesResponse shareResp =
+            workspacesController
+                    .shareWorkspace(workspace.getNamespace(), workspace.getName(),
+                            shareWorkspaceRequest)
+                    .getBody();
+    Workspace workspace2 =
+            workspacesController
+                    .getWorkspace(workspace.getNamespace(), workspace.getId())
+                    .getBody()
+                    .getWorkspace();
+    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
+
+    // add the reader with NO_ACCESS to mock
+    shareWorkspaceRequest.addItemsItem(reader);
+    ArrayList<WorkspaceACLUpdate> updateACLRequestList =
+            convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
+    verify(fireCloudService)
+            .updateWorkspaceACL(any(), any(), eq(updateACLRequestList
+                    .stream()
+                    .sorted(Comparator.comparing(WorkspaceACLUpdate::getEmail))
+                    .collect(Collectors.toList())));
+  }
 
   @Test
   public void testStaleShareWorkspace() throws Exception {
