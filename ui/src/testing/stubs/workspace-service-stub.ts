@@ -383,7 +383,7 @@ export class WorkspacesServiceStub {
 
   }
 
-  getWorkspaceUserRoles(workspaceNamespace: string, workspaceId: string): Observable<any> {
+  getFirecloudWorkspaceUserRoles(workspaceNamespace: string, workspaceId: string): Observable<any> {
     return new Observable<any>(observer => {
       setTimeout(() => {
         observer.next(this.workspaceUserRoles.get(workspaceId));

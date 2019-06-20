@@ -182,7 +182,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  getWorkspaceUserRoles(workspaceNamespace: string, workspaceId: string):
+  getFirecloudWorkspaceUserRoles(workspaceNamespace: string, workspaceId: string):
   Promise<WorkspaceUserRolesResponse> {
     return new Promise<WorkspaceUserRolesResponse>(resolve => {
       resolve({items: this.workspaceUserRoles.get(workspaceId)});

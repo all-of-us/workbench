@@ -192,7 +192,7 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
   async loadUserRoles() {
     try {
       const resp = await workspacesApi()
-        .getWorkspaceUserRoles(this.props.workspace.namespace, this.props.workspace.id);
+        .getFirecloudWorkspaceUserRoles(this.props.workspace.namespace, this.props.workspace.id);
       this.setState({userRoles: fp.sortBy('familyName', resp.items)});
     } catch (error) {
       if (error.status === 404) {

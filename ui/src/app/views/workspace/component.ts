@@ -142,7 +142,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private loadUserRoles() {
-    workspacesApi().getWorkspaceUserRoles(this.wsNamespace, this.wsId)
+    workspacesApi().getFirecloudWorkspaceUserRoles(this.wsNamespace, this.wsId)
       .then(
         resp => {
           this.workspaceUserRoles = fp.sortBy('familyName', resp.items);
