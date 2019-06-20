@@ -9,7 +9,7 @@ import {
   subtreeSelectedStore,
   wizardStore
 } from 'app/cohort-search/search-state.service';
-import {stripHtml} from 'app/cohort-search/utils';
+import {domainToTitle, stripHtml} from 'app/cohort-search/utils';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -54,9 +54,20 @@ export class ListModalComponent implements OnInit, OnDestroy {
         this.selectionList = wizard.item.searchParameters;
         this.noSelection = this.selectionList.length === 0;
         if (!this.open) {
-          this.title = wizard.domain;
-          this.backMode = 'list';
-          this.mode = 'list';
+          this.title = domainToTitle(wizard.domain);
+          if (this.initTree) {
+            this.hierarchyNode = {
+              domainId: wizard.domain,
+              type: wizard.type,
+              isStandard: wizard.standard,
+              id: 0,
+            };
+            this.backMode = 'tree';
+            this.mode = 'tree';
+          } else {
+            this.backMode = 'list';
+            this.mode = 'list';
+          }
           this.open = true;
         }
       });
@@ -122,7 +133,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
     const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
     const itemIndex = searchRequest[role][groupIndex].items.findIndex(it => it.id === item.id);
     if (itemIndex > -1) {
-      searchRequest[role][groupIndex][itemIndex] = item;
+      searchRequest[role][groupIndex].items[itemIndex] = item;
     } else {
       searchRequest[role][groupIndex].items.push(item);
     }
@@ -141,6 +152,12 @@ export class ListModalComponent implements OnInit, OnDestroy {
     return this.wizard.domain !== DomainType.PHYSICALMEASUREMENT &&
       this.wizard.domain !== DomainType.PERSON &&
       this.wizard.domain !== DomainType.SURVEY;
+  }
+
+  get initTree() {
+    return this.wizard.domain === DomainType.PHYSICALMEASUREMENT
+      || this.wizard.domain === DomainType.SURVEY
+      || this.wizard.domain === DomainType.VISIT;
   }
 
   get showNext() {
