@@ -85,6 +85,8 @@ export class ListSearchGroupItemComponent {
         return {type, standard: false};
       case DomainType.PHYSICALMEASUREMENT:
         return {type: this.parameters[0].type, standard: false};
+      case DomainType.VISIT:
+        return {type: this.parameters[0].type, standard: true};
       default:
         return {type: null, standard: null};
     }
