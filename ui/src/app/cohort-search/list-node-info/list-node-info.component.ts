@@ -140,17 +140,17 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
             operands: [this.node.code]
           });
         } else if (this.isPPI && !this.node.group) {
-          if (this.node.code === '') {
+          if (this.node.conceptId === 1585747) {
             attributes.push({
               name: AttrName.NUM,
               operator: Operator.EQUAL,
-              operands: [this.node.name]
+              operands: [this.node.value]
             });
           } else {
             attributes.push({
               name: AttrName.CAT,
               operator: Operator.IN,
-              operands: [this.node.code]
+              operands: [this.node.value]
             });
           }
         }
