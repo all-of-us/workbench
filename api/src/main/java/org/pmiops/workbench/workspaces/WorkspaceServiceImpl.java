@@ -131,7 +131,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(String workspaceNamespace, String firecloudName) {
+  public Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(
+      String workspaceNamespace, String firecloudName) {
     WorkspaceACL firecloudWorkspaceAcls =
         fireCloudService.getWorkspaceAcl(workspaceNamespace, firecloudName);
     Map<String, Object> aclsMap = (Map) firecloudWorkspaceAcls.getAcl();
@@ -243,8 +244,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public Workspace updateWorkspaceAcls(
       Workspace workspace, Map<String, WorkspaceAccessLevel> updatedAclsMap) {
     // userRoleMap is a map of the new permissions for ALL users on the ws
-    Map<String, WorkspaceAccessEntry> aclsMap = getFirecloudWorkspaceAcls(
-            workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+    Map<String, WorkspaceAccessEntry> aclsMap =
+        getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
     ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
 
     // Iterate through existing roles, update/remove them
@@ -359,7 +360,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public List<UserRole> convertWorkspaceAclsToUserRoles(Map<String, WorkspaceAccessEntry> rolesMap) {
+  public List<UserRole> convertWorkspaceAclsToUserRoles(
+      Map<String, WorkspaceAccessEntry> rolesMap) {
     List<UserRole> userRoles = new ArrayList<>();
     for (Map.Entry<String, WorkspaceAccessEntry> entry : rolesMap.entrySet()) {
       User user = userDao.findUserByEmail(entry.getKey());

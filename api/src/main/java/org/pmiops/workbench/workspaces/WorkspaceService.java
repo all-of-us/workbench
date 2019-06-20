@@ -49,7 +49,8 @@ public interface WorkspaceService {
   Workspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel);
 
-  Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(String workspaceNamespace, String firecloudName);
+  Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(
+      String workspaceNamespace, String firecloudName);
 
   List<UserRole> convertWorkspaceAclsToUserRoles(Map<String, WorkspaceAccessEntry> rolesMap);
 

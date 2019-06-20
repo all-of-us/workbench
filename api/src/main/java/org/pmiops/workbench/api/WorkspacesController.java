@@ -585,7 +585,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, WorkspaceAccessEntry> fromAclsMap =
           workspaceService.getFirecloudWorkspaceAcls(
-                  fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
+              fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
 
       Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
       for (Map.Entry<String, WorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
@@ -633,8 +633,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
     Map<String, WorkspaceAccessEntry> updatedWsAcls =
-            workspaceService.getFirecloudWorkspaceAcls(workspaceNamespace, dbWorkspace.getFirecloudName());
-    List<UserRole> updatedUserRoles = workspaceService.convertWorkspaceAclsToUserRoles(updatedWsAcls);
+        workspaceService.getFirecloudWorkspaceAcls(
+            workspaceNamespace, dbWorkspace.getFirecloudName());
+    List<UserRole> updatedUserRoles =
+        workspaceService.convertWorkspaceAclsToUserRoles(updatedWsAcls);
     resp.setItems(updatedUserRoles);
     return ResponseEntity.ok(resp);
   }
@@ -742,7 +744,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     Map<String, WorkspaceAccessEntry> firecloudAcls =
-            workspaceService.getFirecloudWorkspaceAcls(workspaceNamespace, dbWorkspace.getFirecloudName());
+        workspaceService.getFirecloudWorkspaceAcls(
+            workspaceNamespace, dbWorkspace.getFirecloudName());
     List<UserRole> userRoles = workspaceService.convertWorkspaceAclsToUserRoles(firecloudAcls);
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setItems(userRoles);
