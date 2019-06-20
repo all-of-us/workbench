@@ -1,13 +1,14 @@
 package org.pmiops.workbench.cdr.dao;
 
-import java.util.List;
-import java.util.Set;
 import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cdr.model.StandardProjection;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Set;
 
 public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
@@ -92,7 +93,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(
       value =
-          "select * from cb_criteria where domain_id=:domain and type=:type and is_standard=:standard and parent_id=:parentId and has_hierarchy = 1 order by id asc",
+          "select * from cb_criteria where domain_id=:domain and type=:type and is_standard=:standard and parent_id=:parentId order by id asc",
       nativeQuery = true)
   List<CBCriteria> findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
       @Param("domain") String domain,
