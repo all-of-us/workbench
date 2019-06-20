@@ -11,7 +11,6 @@ import {reactStyles} from 'app/utils';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
-import {Toggle} from "../components/inputs";
 
 const styles = reactStyles({
   registrationPage: {
