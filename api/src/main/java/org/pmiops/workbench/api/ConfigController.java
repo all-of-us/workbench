@@ -29,6 +29,7 @@ public class ConfigController implements ConfigApiDelegate {
             .publicApiKeyForErrorReports(config.server.publicApiKeyForErrorReports)
             .enableDataUseAgreement(config.access.enableDataUseAgreement)
             .enableEraCommons(config.access.enableEraCommons)
-            .firecloudURL(config.firecloud.baseUrl));
+            .firecloudURL(config.firecloud.baseUrl)
+            .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass));
   }
 }

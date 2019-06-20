@@ -9,8 +9,7 @@ import {ClrIcon} from 'app/components/icons';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {navigate, userProfileStore} from 'app/utils/navigation';
-// import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import { Profile } from 'generated/fetch';
 
@@ -218,7 +217,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     const {taskCompletionMap, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
     // todo: move this to the state
-    // const canUnsafeSelfBypass = serverConfigStore.getValue().getUnsafeSelfBypassEnabled;
+    const canUnsafeSelfBypass = serverConfigStore.getValue().unsafeAllowSelfBypass;
 
     return <div style={styles.registrationPage}
                 data-test-id='registration-dashboard'>

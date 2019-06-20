@@ -1901,7 +1901,7 @@ paths:
             A SQL query for each domain in the Data Set
           schema:
             $ref: "#/definitions/DataSetPreviewResponse"
-            
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -1947,6 +1947,9 @@ definitions:
       enableDataUseAgreement:
         type: boolean
         description: Feature flag for enabling data use agreement
+      unsafeAllowSelfBypass:
+        type: boolean
+        description: Enable a user to bypass themself
       enableEraCommons:
         type: boolean
         description: Feature flag for enabling eRA commons
