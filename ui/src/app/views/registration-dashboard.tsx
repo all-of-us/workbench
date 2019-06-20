@@ -227,6 +227,13 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                  style={{color: colors.white, marginRight: '0.3rem'}}/>
         In order to get access to data and tools please complete the following steps:
       </div>
+      {canUnsafeSelfBypass && <div data-test-id='can-unsafe-self-bypass'
+                                  style={{...baseStyles.card, ...styles.warningModal}}>
+        <ClrIcon shape='warning-standard' class='is-solid'
+                 style={styles.warningIcon}/>
+        Your Button Here.
+      </div>}
+
       {!betaAccessGranted && <div data-test-id='beta-access-warning'
                                   style={{...baseStyles.card, ...styles.warningModal}}>
         <ClrIcon shape='warning-standard' class='is-solid'
