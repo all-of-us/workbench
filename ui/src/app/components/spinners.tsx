@@ -5,7 +5,8 @@ const styles = reactStyles({
   overlay: {
     backgroundColor: 'rgba(0, 0, 0, 0)',
     position: 'absolute', top: 0, left: 0, bottom: 0, right: 0,
-    display: 'flex', justifyContent: 'center', alignItems: 'center'
+    display: 'flex', justifyContent: 'center', alignItems: 'center',
+    zIndex: 1
   },
   square: {
     display: 'flex', borderRadius: 4, padding: '0.5rem'
@@ -28,8 +29,10 @@ export const Spinner = ({dark = false, size = 72, style = {}, ...props}) => {
   </svg>;
 };
 
-export const SpinnerOverlay = ({dark = false}) => {
-  return <div style={styles.overlay}>
-    <div style={styles.square}><Spinner dark={dark} /></div>
+export const SpinnerOverlay = ({dark = false,
+                                 overrideStylesOverlay = {},
+                                 overrideStylesSquare = {}}) => {
+  return <div style={{...styles.overlay, ...overrideStylesOverlay}}>
+    <div style={{...styles.square, ...overrideStylesSquare}}><Spinner dark={dark} /></div>
   </div>;
 };

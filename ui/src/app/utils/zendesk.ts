@@ -31,7 +31,7 @@ export function initializeZendeskWidget(
         attachments: true,
         subject: false,
         // We include a tag indicating that this support request was filed via the
-        // research workbench. This helps distinguish from tickets filed via other
+        // Researcher Workbench. This helps distinguish from tickets filed via other
         // AoU sub-products, e.g. Research Hub or Data Browser.
         tags: ['research_workbench'],
         title: {

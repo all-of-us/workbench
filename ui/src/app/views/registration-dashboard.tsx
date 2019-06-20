@@ -102,8 +102,8 @@ export const RegistrationTasks = [
   }, {
     key: 'eraCommons',
     title: 'Login to ERA Commons',
-    description: 'Researchers must maintain up-to-date completion of compliance' +
-      ' training courses hosted at the NNLM’s Moodle installation',
+    description: 'Please login to your ERA Commons account and complete the online training ' +
+      'courses in order to gain full access to the Researcher Workbench data and tools',
     buttonText: 'Login',
     completedText: 'Linked',
     isComplete: (profile: Profile) => {
@@ -261,7 +261,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       </AlertWarning>}
       {(this.allTasksCompleted() && betaAccessGranted) &&
       <div style={{...baseStyles.card, ...styles.warningModal}} data-test-id='success-message'>
-        You successfully completed all the required steps to access the Research Workbench.
+        You successfully completed all the required steps to access the Researcher Workbench.
         <Button style={{marginLeft: '0.5rem'}}
                 onClick={() => window.location.reload()}>Get Started</Button>
       </div>}

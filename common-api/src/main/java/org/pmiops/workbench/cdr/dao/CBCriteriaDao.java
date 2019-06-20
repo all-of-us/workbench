@@ -60,15 +60,8 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
       @Param("standard") Boolean isStandard,
       @Param("parentConceptIds") Set<String> parentConceptIds);
 
-  @Query(
-      value =
-          "select * from cb_criteria where path regexp :regexp and domain_id = :domain and type = :type and is_standard = :standard",
-      nativeQuery = true)
-  List<CBCriteria> findCriteriaLeavesAndParentsByRegExp(
-      @Param("regexp") String regexp,
-      @Param("domain") String domain,
-      @Param("type") String type,
-      @Param("standard") Boolean standard);
+  @Query(value = "select c from CBCriteria c where match(path, :path) > 0")
+  List<CBCriteria> findCriteriaLeavesAndParentsByPath(@Param("path") String path);
 
   @Query(
       value =

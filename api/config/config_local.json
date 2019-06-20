@@ -56,7 +56,7 @@
   "access": {
     "enableComplianceTraining": true,
     "enableEraCommons": true,
-    "enableDataUseAgreement": false,
+    "enableDataUseAgreement": true,
     "enableBetaAccess": true,
     "unsafeAllowSelfBypass": true
   },
@@ -64,7 +64,7 @@
     "enableListSearch": false
   },
   "featureFlags": {
-    "useBillingProjectBuffer": false,
+    "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": true
   }
 }

@@ -16,7 +16,7 @@ export const panels = [
   {
     title: 'Introduction',
     shortTitle: 'Intro',
-    content: <div>Welcome to the All of Us Research Workbench!<br/><br/>All workbench analyses
+    content: <div>Welcome to the All of Us Researcher Workbench!<br/><br/>All workbench analyses
       happen in a “Workspace.” Within a Workspace you can select participants
       using the “Cohort Builder” tool. Another tool, the “Concept Set Builder,”
       allows you to select data types for analysis. The cohorts and concept sets

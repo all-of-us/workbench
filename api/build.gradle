@@ -474,6 +474,22 @@ appengine {  // App Engine tasks configuration
   }
 }
 
+task startCronEmulator(dependsOn: ':appengine-cron-emulator:jar') {
+  doFirst {
+    ext.process = new ProcessBuilder()
+            .redirectOutput(ProcessBuilder.Redirect.to(new File("cron-emulator.log")))
+            .directory(projectDir)
+            .command("java", "-jar",
+                    project(":appengine-cron-emulator").jar.archivePath.getPath(),
+                    "$projectDir/src/main/webapp/WEB-INF/cron.xml"
+            ).start()
+
+    println "Started Cron Emulator"
+  }
+}
+
+appengineRun.dependsOn startCronEmulator
+
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
 
@@ -518,26 +534,6 @@ def commandLineSpringProperties = [
   'spring.datasource.username': System.getenv("WORKBENCH_DB_USER"),
   'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
 ]
-
-// See project.rb command: backfill-gsuite-user-data
-task backfillGSuiteUserData(type: JavaExec) {
-  classpath = sourceSets.tools.runtimeClasspath
-  main = "org.pmiops.workbench.tools.BackfillGSuiteUserData"
-  systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
-
-// See project.rb command: backfill-can-compute
-task backfillCanCompute(type: JavaExec) {
-  classpath = sourceSets.tools.runtimeClasspath
-  main = "org.pmiops.workbench.tools.BackfillCanCompute"
-  systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
 
 // See project.rb command: load-es-index
 task elasticSearchIndexer(type: JavaExec) {

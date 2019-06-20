@@ -26,6 +26,7 @@ public class ConfigController implements ConfigApiDelegate {
             .projectId(config.server.projectId)
             .enforceRegistered(config.firecloud.enforceRegistered)
             .useBillingProjectBuffer(config.featureFlags.useBillingProjectBuffer)
-            .publicApiKeyForErrorReports(config.server.publicApiKeyForErrorReports));
+            .publicApiKeyForErrorReports(config.server.publicApiKeyForErrorReports)
+            .enableDataUseAgreement(config.access.enableDataUseAgreement));
   }
 }

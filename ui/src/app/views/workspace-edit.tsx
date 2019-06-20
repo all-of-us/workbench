@@ -110,26 +110,26 @@ export const toolTipText = {
 export const researchPurposeQuestions = [
   {
     header: '1. What is the primary purpose of your project?',
-    description: ['(Please select as many options below as describe your \
-      research purpose)']
+    description: <div>(Please select as many options below as describe your
+      research purpose)</div>
   }, {
     header: '2. Provide the reason for choosing All of Us data for your investigation',
-    description: ['(Free text; 500 Character limit)']
+    description: <div>(Free text; 500 Character limit)</div>
   }, {
     header: '3. What are the specific scientific question(s) you intend to study?',
-    description: ['If you are exploring the data at this stage to formalize a specific research \
-      question, please describe the reason for exploring the data, and the scientific \
-      question you hope to be able to answer using the data.', <br/>,
-      '(Free text; 500 Character limit)']
+    description: <div>If you are exploring the data at this stage to formalize a specific research
+      question, please describe the reason for exploring the data, and the scientific
+      question you hope to be able to answer using the data. <br/>
+      (Free text; 500 Character limit)</div>
   }, {
     header: '4. What are your anticipated findings from this study?',
-    description: ['(Layperson language; 2000 Character limit)']
+    description: <div>(Layperson language; 2000 Character limit)</div>
   }, {
     header: '5. Will your study or data analysis focus on specific population(s)? \
       Or do you intend to study your phenotype, disease, or condition of interest with \
       a focus on comparative analysis of a specific demographic group (for example \
       a group based on race/ethnicity, gender, or age)?',
-    description: ['']
+    description: <div/>
   }
 ];
 
@@ -574,7 +574,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     render() {
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '95%'}}>
-        <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
+          {this.state.loading && <SpinnerOverlay overrideStylesOverlay={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            height: '100%',
+            width: '100%',
+          }}/>}
+          <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                               section={{marginTop: '24px'}} largeHeader required>
           <div style={{display: 'flex', flexDirection: 'row'}}>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
@@ -614,13 +623,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <WorkspaceEditSection header='Billing Account' subHeader='National Institutes of Health'
             tooltip={toolTipText.billingAccount}/>
         <WorkspaceEditSection header='Research Use Statement Questions'
-            description={[ResearchPurposeDescription, 'Therefore, please provide' +
-            ' sufficiently detailed responses at a 5th grade reading level.  Your responses' +
-            ' will not be used to make decisions about data access.', <br/>, <br/>,
+            description={<div> {ResearchPurposeDescription} Therefore, please provide
+              sufficiently detailed responses at a 5th grade reading level.  Your responses
+              will not be used to make decisions about data access. <br/> <br/>
               <i>Note that you are required to create separate Workspaces for each project
-              for which you access AoU data, hence the responses below are expected to be specific
-              to the project for which you are creating this particular Workspace.</i>
-            ]}/>
+                for which you access AoU data, hence the responses below are expected to be specific
+                to the project for which you are creating this particular Workspace.</i> </div>
+            }/>
         <WorkspaceEditSection header={researchPurposeQuestions[0].header}
             description={researchPurposeQuestions[0].description} required>
           <div style={{display: 'flex', flexDirection: 'row'}}>
@@ -810,7 +819,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </ul>]} disabled={!this.disableButton}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
                       disabled={this.disableButton || this.state.loading}>
-                {this.state.loading && <SpinnerOverlay/>}
                 {this.renderButtonText()}
               </Button>
             </TooltipTrigger>

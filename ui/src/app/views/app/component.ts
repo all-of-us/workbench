@@ -103,18 +103,18 @@ export class AppComponent implements OnInit {
   }
 
   /**
-   * Uses the title service to set the page title after nagivation events
+   * Uses the title service to set the page title after navigation events
    */
   private setTitleFromRoute(event: RouterEvent): void {
     if (event instanceof NavigationEnd) {
 
-      let currentRoute = this.activatedRoute;
-      while (currentRoute.firstChild) {
-        currentRoute = currentRoute.firstChild;
-      }
+      const currentRoute = this.getLeafRoute();
       if (currentRoute.outlet === 'primary') {
-        currentRoute.data.subscribe(value =>
-            this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
+        currentRoute.data.subscribe(value => {
+          const routeTitle = value.title ||
+            decodeURIComponent(currentRoute.params.getValue()[value.pathElementForTitle]);
+          this.titleService.setTitle(`${routeTitle} | ${this.baseTitle}`);
+        });
       }
     }
   }

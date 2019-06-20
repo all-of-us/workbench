@@ -12,6 +12,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {serverConfigStore} from 'app/utils/navigation';
 import { ProfileRegistrationStepStatus } from 'app/views/profile-registration-step-status';
 import { RegistrationTasksMap } from 'app/views/registration-dashboard';
 import {environment} from 'environments/environment';
@@ -312,24 +313,26 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             </div>
           </ProfileRegistrationStepStatus>
 
-          <ProfileRegistrationStepStatus
+          {serverConfigStore.getValue().enableDataUseAgreement && <ProfileRegistrationStepStatus
             title='Data Use Agreement'
             wasBypassed={!!profile.dataUseAgreementBypassTime}
             incompleteButtonText='Sign'
             completedButtonText={RegistrationTasksMap['dataUseAgreement'].completedText}
             isComplete={RegistrationTasksMap['dataUseAgreement'].isComplete(profile)}
             completeStep={RegistrationTasksMap['dataUseAgreement'].onClick} >
-            <div> Agreement Renewal: </div>
-            <div>
-              { moment.unix(profile.dataUseAgreementCompletionTime / 1000)
-                  .add(1, 'year')
-                  .format('MMMM Do, YYYY') }
-            </div>
+            {profile.dataUseAgreementCompletionTime != null && <React.Fragment>
+              <div> Agreement Renewal: </div>
+              <div>
+                { moment.unix(profile.dataUseAgreementCompletionTime / 1000)
+                    .add(1, 'year')
+                    .format('MMMM Do, YYYY') }
+              </div>
+            </React.Fragment>}
             <a
               onClick={RegistrationTasksMap['dataUseAgreement'].onClick}>
               View current agreement
             </a>
-          </ProfileRegistrationStepStatus>
+          </ProfileRegistrationStepStatus>}
         </div>
 
       </div>
