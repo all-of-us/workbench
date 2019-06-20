@@ -217,7 +217,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     const {taskCompletionMap, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
     // todo: move this to the state
-    const canUnsafeSelfBypass = serverConfigStore.getValue().getUnsafeSelfBypassEnabled;
+    // const canUnsafeSelfBypass = serverConfigStore.getValue().getUnsafeSelfBypassEnabled;
 
     return <div style={styles.registrationPage}
                 data-test-id='registration-dashboard'>
