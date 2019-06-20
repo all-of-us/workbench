@@ -499,7 +499,7 @@ public class WorkspacesControllerTest {
     ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
     for (UserRole userRole : collaborators) {
       WorkspaceACLUpdate aclUpdate = new WorkspaceACLUpdate().email(userRole.getEmail());
-      workspaceService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
+      aclUpdate = workspaceService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
       updateACLRequestList.add(aclUpdate);
     }
     return updateACLRequestList;

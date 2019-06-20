@@ -37,7 +37,7 @@ public interface WorkspaceService {
 
   void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
 
-  Workspace updateUserRoles(Workspace workspace, Map<String, WorkspaceAccessLevel> userRoleMap);
+  Workspace updateWorkspaceAcls(Workspace workspace, Map<String, WorkspaceAccessLevel> userRoleMap);
 
   Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to);
 
@@ -49,10 +49,10 @@ public interface WorkspaceService {
   Workspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel);
 
-  Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(Workspace workspace);
+  Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(String workspaceNamespace, String firecloudName);
 
-  List<UserRole> getWorkspaceUserRoles(Workspace workspace);
+  List<UserRole> convertWorkspaceAclsToUserRoles(Map<String, WorkspaceAccessEntry> rolesMap);
 
-  void updateFirecloudAclsOnUser(
+  WorkspaceACLUpdate updateFirecloudAclsOnUser(
       WorkspaceAccessLevel updatedAccess, WorkspaceACLUpdate currentUpdate);
 }

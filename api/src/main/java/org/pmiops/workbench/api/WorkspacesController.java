@@ -6,7 +6,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -579,7 +584,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, WorkspaceAccessEntry> fromAclsMap =
-          workspaceService.getFirecloudWorkspaceAcls(fromWorkspace);
+          workspaceService.getFirecloudWorkspaceAcls(
+                  fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
 
       Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
       for (Map.Entry<String, WorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
@@ -590,7 +596,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      savedWorkspace = workspaceService.updateUserRoles(savedWorkspace, clonedRoles);
+      savedWorkspace = workspaceService.updateWorkspaceAcls(savedWorkspace, clonedRoles);
     }
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
@@ -622,11 +628,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       shareRolesMap.put(role.getEmail(), role.getRole());
     }
     // This automatically enforces the "canShare" permission.
-    dbWorkspace = workspaceService.updateUserRoles(dbWorkspace, shareRolesMap);
+    dbWorkspace = workspaceService.updateWorkspaceAcls(dbWorkspace, shareRolesMap);
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
-    List<UserRole> updatedUserRoles = workspaceService.getWorkspaceUserRoles(dbWorkspace);
+    Map<String, WorkspaceAccessEntry> updatedWsAcls =
+            workspaceService.getFirecloudWorkspaceAcls(workspaceNamespace, dbWorkspace.getFirecloudName());
+    List<UserRole> updatedUserRoles = workspaceService.convertWorkspaceAclsToUserRoles(updatedWsAcls);
     resp.setItems(updatedUserRoles);
     return ResponseEntity.ok(resp);
   }
@@ -728,11 +736,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<WorkspaceUserRolesResponse> getWorkspaceUserRoles(
+  public ResponseEntity<WorkspaceUserRolesResponse> getFirecloudWorkspaceUserRoles(
       String workspaceNamespace, String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
-    List<UserRole> userRoles = workspaceService.getWorkspaceUserRoles(dbWorkspace);
+
+    Map<String, WorkspaceAccessEntry> firecloudAcls =
+            workspaceService.getFirecloudWorkspaceAcls(workspaceNamespace, dbWorkspace.getFirecloudName());
+    List<UserRole> userRoles = workspaceService.convertWorkspaceAclsToUserRoles(firecloudAcls);
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setItems(userRoles);
     return ResponseEntity.ok(resp);

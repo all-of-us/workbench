@@ -33,8 +33,8 @@ public class FireCloudConfig {
   public static final String END_USER_API_CLIENT = "endUserApiClient";
   public static final String SERVICE_ACCOUNT_API_CLIENT = "serviceAccountApiClient";
   public static final String SERVICE_ACCOUNT_GROUPS_API = "serviceAccountGroupsApi";
-  public static final String WORKSPACE_ACLS_API = "workspaceAclsApi";
-  public static final String WORKSPACES_API = "workspacesApi";
+  public static final String SERVICE_ACCOUNT_WORKSPACE_API = "workspaceAclsApi";
+  public static final String END_USER_WORKSPACE_API = "workspacesApi";
 
   private static final List<String> BILLING_SCOPES =
       ImmutableList.of(
@@ -75,7 +75,7 @@ public class FireCloudConfig {
     return api;
   }
 
-  @Bean(name = WORKSPACES_API)
+  @Bean(name = END_USER_WORKSPACE_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public WorkspacesApi workspacesApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
     WorkspacesApi api = new WorkspacesApi();
@@ -83,7 +83,7 @@ public class FireCloudConfig {
     return api;
   }
 
-  @Bean(name = WORKSPACE_ACLS_API)
+  @Bean(name = SERVICE_ACCOUNT_WORKSPACE_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public WorkspacesApi workspacesApiAcls(
       @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
