@@ -1,14 +1,13 @@
 package org.pmiops.workbench.cdr.dao;
 
+import java.util.List;
+import java.util.Set;
 import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cdr.model.StandardProjection;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
-import java.util.Set;
 
 public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
