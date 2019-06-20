@@ -242,6 +242,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     const {bypassInProgress, taskCompletionMap, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
     // todo: move this to the state
+    // react tests fail with -> TypeError: Cannot read property 'unsafeAllowSelfBypass' of undefined
     const canUnsafeSelfBypass = serverConfigStore.getValue().unsafeAllowSelfBypass;
 
     return <div style={styles.registrationPage}
