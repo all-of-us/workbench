@@ -194,13 +194,13 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
   }
 
   launchWizard(criteria: any, tempGroup?: number) {
-    const {domain, type} = criteria;
+    const {domain, type, standard} = criteria;
     const itemId = generateId('items');
     const item = this.initItem(itemId, domain);
     const codes = criteria.codes || false;
     const role = this.role;
     const groupId = this.group.id;
-    const context = {item, domain, type, role, groupId, itemId, codes, tempGroup};
+    const context = {item, domain, type, standard, role, groupId, itemId, codes, tempGroup};
     wizardStore.next(context);
   }
 

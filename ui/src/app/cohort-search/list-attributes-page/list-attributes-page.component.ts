@@ -2,9 +2,9 @@ import {ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
 import {AttrName, Operator, TreeSubType, TreeType} from 'generated';
-import {DomainType} from 'generated/fetch';
+import {CriteriaSubType, DomainType} from 'generated/fetch';
 
-import {PM_UNITS} from 'app/cohort-search/constant';
+import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {stripHtml} from 'app/cohort-search/utils';
 import {numberAndNegativeValidator, rangeValidator} from 'app/cohort-search/validators';
@@ -106,7 +106,15 @@ export class ListAttributesPageComponent implements OnInit {
         });
     } else {
       this.options.unshift({value: AttrName.ANY, name: 'Any', display: 'Any', code: 'Any'});
-      this.attrs.NUM = this.criterion.attributes;
+      this.attrs.NUM = this.criterion.subtype === CriteriaSubType[CriteriaSubType.BP]
+          ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
+          : [{
+            name: this.criterion.subtype,
+            operator: null,
+            operands: [null],
+            MIN: 0,
+            MAX: 10000
+          }];
       if (this.attrs.NUM) {
         const NUM = <FormGroup>this.form.controls.NUM;
         this.selectedCode = 'Any';
