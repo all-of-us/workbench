@@ -3,7 +3,6 @@ package org.pmiops.workbench.workspaces;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
@@ -99,13 +98,12 @@ public class WorkspaceMapper {
   }
 
   public UserRole toApiUserRole(
-      Map.Entry<org.pmiops.workbench.db.model.User, WorkspaceAccessEntry> aclEntry) {
-    org.pmiops.workbench.db.model.User user = aclEntry.getKey();
+      org.pmiops.workbench.db.model.User user, WorkspaceAccessEntry aclEntry) {
     UserRole result = new UserRole();
     result.setEmail(user.getEmail());
     result.setGivenName(user.getGivenName());
     result.setFamilyName(user.getFamilyName());
-    result.setRole(WorkspaceAccessLevel.fromValue(aclEntry.getValue().getAccessLevel()));
+    result.setRole(WorkspaceAccessLevel.fromValue(aclEntry.getAccessLevel()));
     return result;
   }
 

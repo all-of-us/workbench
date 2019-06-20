@@ -578,12 +578,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
 
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
-      Map<User, WorkspaceAccessEntry> fromAclsMap =
+      Map<String, WorkspaceAccessEntry> fromAclsMap =
           workspaceService.getFirecloudWorkspaceAcls(fromWorkspace);
 
-      Map<User, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
-      for (Map.Entry<User, WorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
-        if (!entry.getKey().getEmail().equals(user.getEmail())) {
+      Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
+      for (Map.Entry<String, WorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
+        if (!entry.getKey().equals(user.getEmail())) {
           clonedRoles.put(
               entry.getKey(), WorkspaceAccessLevel.fromValue(entry.getValue().getAccessLevel()));
         } else {
@@ -610,7 +610,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify user roles with outdated workspace etag");
     }
-    Map<User, WorkspaceAccessLevel> shareRolesMap = new HashMap<>();
+    Map<String, WorkspaceAccessLevel> shareRolesMap = new HashMap<>();
     for (UserRole role : request.getItems()) {
       if (role.getRole() == null || role.getRole().toString().trim().isEmpty()) {
         throw new BadRequestException("Role required.");
@@ -619,7 +619,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       if (newUser == null) {
         throw new BadRequestException(String.format("User %s doesn't exist", role.getEmail()));
       }
-      shareRolesMap.put(newUser, role.getRole());
+      shareRolesMap.put(role.getEmail(), role.getRole());
     }
     // This automatically enforces the "canShare" permission.
     dbWorkspace = workspaceService.updateUserRoles(dbWorkspace, shareRolesMap);

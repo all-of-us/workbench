@@ -127,17 +127,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Map<User, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(Workspace workspace) {
+  public Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(Workspace workspace) {
     WorkspaceACL firecloudWorkspaceAcls =
         fireCloudService.getWorkspaceAcl(
             workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
     Map<String, Object> aclsMap = (Map) firecloudWorkspaceAcls.getAcl();
-    Map<User, WorkspaceAccessEntry> userToAcl = new HashMap<>();
+    Map<String, WorkspaceAccessEntry> userToAcl = new HashMap<>();
     for (Map.Entry<String, Object> entry : aclsMap.entrySet()) {
       WorkspaceAccessEntry acl =
           new Gson().fromJson(entry.getValue().toString(), WorkspaceAccessEntry.class);
-      User currentUser = userDao.findUserByEmail(entry.getKey());
-      userToAcl.put(currentUser, acl);
+      userToAcl.put(entry.getKey(), acl);
     }
     return userToAcl;
   }
@@ -214,7 +213,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     saveWithLastModified(workspace, now);
   }
 
-  private void updateFirecloudAclsOnUser(
+  @Override
+  public void updateFirecloudAclsOnUser(
       WorkspaceAccessLevel updatedAccess, WorkspaceACLUpdate currentUpdate) {
     if (updatedAccess == WorkspaceAccessLevel.OWNER) {
       currentUpdate.setCanShare(true);
@@ -237,35 +237,35 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Workspace updateUserRoles(
-      Workspace workspace, Map<User, WorkspaceAccessLevel> userRoleMap) {
+      Workspace workspace, Map<String, WorkspaceAccessLevel> userRoleMap) {
     // userRoleMap is a map of the new permissions for ALL users on the ws
-    Map<User, WorkspaceAccessEntry> aclsMap = getFirecloudWorkspaceAcls(workspace);
+    Map<String, WorkspaceAccessEntry> aclsMap = getFirecloudWorkspaceAcls(workspace);
     ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
 
     // Iterate through existing roles, update/remove them
-    for (Map.Entry<User, WorkspaceAccessEntry> entry : aclsMap.entrySet()) {
-      User currentUser = entry.getKey();
-      WorkspaceAccessLevel updatedAccess = userRoleMap.get(currentUser);
+    for (Map.Entry<String, WorkspaceAccessEntry> entry : aclsMap.entrySet()) {
+      String currentUserEmail = entry.getKey();
+      WorkspaceAccessLevel updatedAccess = userRoleMap.get(currentUserEmail);
       if (updatedAccess != null) {
         WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
-        currentUpdate.setEmail(currentUser.getEmail());
+        currentUpdate.setEmail(currentUserEmail);
         updateFirecloudAclsOnUser(updatedAccess, currentUpdate);
         updateACLRequestList.add(currentUpdate);
-        userRoleMap.remove(currentUser);
+        userRoleMap.remove(currentUserEmail);
       } else {
         // This is how to remove a user from the FireCloud ACL:
         // Pass along an update request with NO ACCESS as the given access level.
         WorkspaceACLUpdate removedUser = new WorkspaceACLUpdate();
-        removedUser.setEmail(currentUser.getEmail());
+        removedUser.setEmail(currentUserEmail);
         updateFirecloudAclsOnUser(WorkspaceAccessLevel.NO_ACCESS, removedUser);
         updateACLRequestList.add(removedUser);
       }
     }
 
     // Iterate through remaining new roles; add them
-    for (Entry<User, WorkspaceAccessLevel> remainingRole : userRoleMap.entrySet()) {
+    for (Entry<String, WorkspaceAccessLevel> remainingRole : userRoleMap.entrySet()) {
       WorkspaceACLUpdate newUser = new WorkspaceACLUpdate();
-      newUser.setEmail(remainingRole.getKey().getEmail());
+      newUser.setEmail(remainingRole.getKey());
       updateFirecloudAclsOnUser(remainingRole.getValue(), newUser);
       updateACLRequestList.add(newUser);
     }
@@ -355,10 +355,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<UserRole> getWorkspaceUserRoles(Workspace workspace) {
-    Map<User, WorkspaceAccessEntry> rolesMap = getFirecloudWorkspaceAcls(workspace);
+    Map<String, WorkspaceAccessEntry> rolesMap = getFirecloudWorkspaceAcls(workspace);
     List<UserRole> userRoles = new ArrayList<>();
-    for (Map.Entry<User, WorkspaceAccessEntry> entry : rolesMap.entrySet()) {
-      userRoles.add(workspaceMapper.toApiUserRole(entry));
+    for (Map.Entry<String, WorkspaceAccessEntry> entry : rolesMap.entrySet()) {
+      User user = userDao.findUserByEmail(entry.getKey());
+      userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
     }
     return userRoles.stream()
         .sorted(

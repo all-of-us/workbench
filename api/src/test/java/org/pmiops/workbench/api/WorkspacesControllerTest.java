@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.anyString;
@@ -76,10 +77,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.WorkspaceACL;
-import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.*;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
@@ -113,6 +111,7 @@ import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -252,7 +251,9 @@ public class WorkspacesControllerTest {
   }
 
   private static User currentUser;
+  private static WorkspaceACL fcWorkspaceAcl;
   @Autowired FireCloudService fireCloudService;
+  @Autowired private WorkspaceService workspaceService;
   @Autowired CloudStorageService cloudStorageService;
   @Autowired BigQueryService bigQueryService;
   @Autowired WorkspaceDao workspaceDao;
@@ -301,6 +302,7 @@ public class WorkspacesControllerTest {
     when(configProvider.get()).thenReturn(testConfig);
 
     cohortReviewController.setConfigProvider(configProvider);
+    fcWorkspaceAcl = createWorkspaceACL();
 
     doAnswer(
             invocation -> {
@@ -336,6 +338,16 @@ public class WorkspacesControllerTest {
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     return userDao.save(user);
+  }
+
+  private WorkspaceACL createWorkspaceACL() {
+    WorkspaceACL fcAcl = new WorkspaceACL();
+    Map<String, Object> acl = new HashMap<>();
+    JSONObject accessEntry =
+        new JSONObject().put("accessLevel", "OWNER").put("canCompute", true).put("canShare", true);
+    acl.put(currentUser.getEmail(), accessEntry);
+    fcAcl.setAcl(acl);
+    return fcAcl;
   }
 
   private JSONObject createDemoCriteria() {
@@ -379,7 +391,7 @@ public class WorkspacesControllerTest {
   }
 
   private void stubFcGetWorkspaceACL() {
-    when(fireCloudService.getWorkspaceAcl(anyString(), anyString())).thenReturn(new WorkspaceACL());
+    when(fireCloudService.getWorkspaceAcl(anyString(), anyString())).thenReturn(fcWorkspaceAcl);
   }
 
   private void stubGetWorkspace(
@@ -478,6 +490,17 @@ public class WorkspacesControllerTest {
     cohort.setName(name);
     cohort.setCriteria(new Gson().toJson(SearchRequests.males()));
     return cohort;
+  }
+
+  public ArrayList<WorkspaceACLUpdate> convertUserRolesToUpdateAclRequestList(
+      List<UserRole> collaborators) {
+    ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
+    for (UserRole userRole : collaborators) {
+      WorkspaceACLUpdate aclUpdate = new WorkspaceACLUpdate().email(userRole.getEmail());
+      workspaceService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
+      updateACLRequestList.add(aclUpdate);
+    }
+    return updateACLRequestList;
   }
 
   @Test
@@ -1336,12 +1359,6 @@ public class WorkspacesControllerTest {
             .getWorkspace();
 
     assertThat(workspace2.getCreator()).isEqualTo(cloner.getEmail());
-
-    // TODO: how to test this?
-    //    assertThat(workspace2.getUserRoles().size()).isEqualTo(1);
-    //
-    // assertThat(workspace2.getUserRoles().get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
-    //    assertThat(workspace2.getUserRoles().get(0).getEmail()).isEqualTo(cloner.getEmail());
   }
 
   @Test
@@ -1400,59 +1417,85 @@ public class WorkspacesControllerTest {
         new CloneWorkspaceRequest().workspace(modWorkspace));
   }
 
-  // TODO: how to test this?
-  //  @Test
-  //  public void testCloneWorkspaceIncludeUserRoles() throws Exception {
-  //    User cloner = createUser("cloner@gmail.com");
-  //    User reader = createUser("reader@gmail.com");
-  //    User writer = createUser("writer@gmail.com");
-  //
-  //    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
-  //    stubFcUpdateWorkspaceACL();
-  //    workspacesController.shareWorkspace(
-  //        workspace.getNamespace(),
-  //        workspace.getId(),
-  //        new ShareWorkspaceRequest()
-  //            .workspaceEtag(workspace.getEtag())
-  //            .items(
-  //                ImmutableList.of(
-  //                    new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
-  //                    new UserRole().email(cloner.getEmail()).role(WorkspaceAccessLevel.READER),
-  //                    new UserRole().email(reader.getEmail()).role(WorkspaceAccessLevel.READER),
-  //                    new
-  // UserRole().email(writer.getEmail()).role(WorkspaceAccessLevel.WRITER))));
-  //
-  //    currentUser = cloner;
-  //
-  //    Workspace modWorkspace =
-  //        new Workspace()
-  //            .namespace("cloned-ns")
-  //            .name("cloned")
-  //            .researchPurpose(workspace.getResearchPurpose());
-  //
-  //    stubGetWorkspace("cloned-ns", "cloned", cloner.getEmail(), WorkspaceAccessLevel.OWNER);
-  //    mockBillingProjectBuffer("cloned-ns");
-  //
-  //    Workspace workspace2 =
-  //        workspacesController
-  //            .cloneWorkspace(
-  //                workspace.getNamespace(),
-  //                workspace.getId(),
-  //                new CloneWorkspaceRequest().includeUserRoles(true).workspace(modWorkspace))
-  //            .getBody()
-  //            .getWorkspace();
-  //
-  //    assertThat(workspace2.getCreator()).isEqualTo(cloner.getEmail());
-  //    assertThat(workspace2.getUserRoles().size()).isEqualTo(4);
-  //    List<UserRole> clonerRoles =
-  //        workspace2.getUserRoles().stream()
-  //            .filter((role) -> cloner.getEmail().equals(role.getEmail()))
-  //            .collect(Collectors.toList());
-  //    assertThat(clonerRoles.size()).isEqualTo(1);
-  //    assertThat(clonerRoles.get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
-  //
-  //    verify(fireCloudService).updateWorkspaceACL(eq("cloned-ns"), eq("cloned"), any());
-  //  }
+  @Test
+  public void testCloneWorkspaceIncludeUserRoles() throws Exception {
+    User cloner = createUser("cloner@gmail.com");
+    User reader = createUser("reader@gmail.com");
+    User writer = createUser("writer@gmail.com");
+    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+    List<UserRole> collaborators =
+        new ArrayList<>(
+            Arrays.asList(
+                new UserRole().email(cloner.getEmail()).role(WorkspaceAccessLevel.OWNER),
+                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
+                new UserRole().email(reader.getEmail()).role(WorkspaceAccessLevel.READER),
+                new UserRole().email(writer.getEmail()).role(WorkspaceAccessLevel.WRITER)));
+
+    stubFcUpdateWorkspaceACL();
+    WorkspaceACL workspaceAclsFromCloned = new WorkspaceACL();
+    Map<String, Object> aclsFromCloned = new HashMap<>();
+    aclsFromCloned.put(
+        "cloner@gmail.com",
+        new JSONObject().put("accessLevel", "OWNER").put("canCompute", true).put("canShare", true));
+    workspaceAclsFromCloned.setAcl(aclsFromCloned);
+
+    WorkspaceACL workspaceAclsFromOriginal = new WorkspaceACL();
+    Map<String, Object> aclsFromOriginal = new HashMap<>();
+    aclsFromOriginal.put(
+        "cloner@gmail.com",
+        new JSONObject()
+            .put("accessLevel", "READER")
+            .put("canCompute", true)
+            .put("canShare", true));
+    aclsFromOriginal.put(
+        "reader@gmail.com",
+        new JSONObject()
+            .put("accessLevel", "READER")
+            .put("canCompute", false)
+            .put("canShare", false));
+    aclsFromOriginal.put(
+        "writer@gmail.com",
+        new JSONObject()
+            .put("accessLevel", "WRITER")
+            .put("canCompute", true)
+            .put("canShare", false));
+    aclsFromOriginal.put(
+        LOGGED_IN_USER_EMAIL,
+        new JSONObject().put("accessLevel", "OWNER").put("canCompute", true).put("canShare", true));
+    workspaceAclsFromOriginal.setAcl(aclsFromOriginal);
+
+    when(fireCloudService.getWorkspaceAcl("cloned-ns", "cloned"))
+        .thenReturn(workspaceAclsFromCloned);
+    when(fireCloudService.getWorkspaceAcl("namespace", "name"))
+        .thenReturn(workspaceAclsFromOriginal);
+
+    currentUser = cloner;
+
+    Workspace modWorkspace =
+        new Workspace()
+            .namespace("cloned-ns")
+            .name("cloned")
+            .researchPurpose(workspace.getResearchPurpose());
+
+    stubGetWorkspace("cloned-ns", "cloned", cloner.getEmail(), WorkspaceAccessLevel.OWNER);
+    mockBillingProjectBuffer("cloned-ns");
+
+    Workspace workspace2 =
+        workspacesController
+            .cloneWorkspace(
+                workspace.getNamespace(),
+                workspace.getId(),
+                new CloneWorkspaceRequest().includeUserRoles(true).workspace(modWorkspace))
+            .getBody()
+            .getWorkspace();
+
+    assertThat(workspace2.getCreator()).isEqualTo(cloner.getEmail());
+    ArrayList<WorkspaceACLUpdate> updateACLRequestList =
+        convertUserRolesToUpdateAclRequestList(collaborators);
+
+    verify(fireCloudService)
+        .updateWorkspaceACL(eq("cloned-ns"), eq("cloned"), eq(updateACLRequestList));
+  }
 
   @Test(expected = BadRequestException.class)
   public void testCloneWorkspaceBadRequest() throws Exception {

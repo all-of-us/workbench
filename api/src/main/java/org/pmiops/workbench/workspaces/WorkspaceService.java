@@ -3,9 +3,9 @@ package org.pmiops.workbench.workspaces;
 import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -37,7 +37,7 @@ public interface WorkspaceService {
 
   void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
 
-  Workspace updateUserRoles(Workspace workspace, Map<User, WorkspaceAccessLevel> userRoleMap);
+  Workspace updateUserRoles(Workspace workspace, Map<String, WorkspaceAccessLevel> userRoleMap);
 
   Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to);
 
@@ -49,7 +49,10 @@ public interface WorkspaceService {
   Workspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel);
 
-  Map<User, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(Workspace workspace);
+  Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(Workspace workspace);
 
   List<UserRole> getWorkspaceUserRoles(Workspace workspace);
+
+  void updateFirecloudAclsOnUser(
+      WorkspaceAccessLevel updatedAccess, WorkspaceACLUpdate currentUpdate);
 }
