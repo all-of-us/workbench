@@ -11,6 +11,7 @@ import {reactStyles} from 'app/utils';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
+import {Toggle} from "../components/inputs";
 
 const styles = reactStyles({
   registrationPage: {
@@ -160,6 +161,7 @@ interface State {
   showRefreshButton: boolean;
   trainingWarningOpen: boolean;
   taskCompletionMap: Map<number, boolean>;
+  bypassInProgress: boolean;
 }
 
 export class RegistrationDashboard extends React.Component<RegistrationDashboardProps, State> {
@@ -169,7 +171,8 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     this.state = {
       trainingWarningOpen: !props.firstVisitTraining,
       taskCompletionMap: new Map<number, boolean>(),
-      showRefreshButton: false
+      showRefreshButton: false,
+      bypassInProgress: false
     };
     this.state.taskCompletionMap.set(0, props.twoFactorAuthCompleted);
     this.state.taskCompletionMap.set(1, props.trainingCompleted);
@@ -213,16 +216,31 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   }
 
   bypass() {
-    Object.keys(AccessModule).forEach(async key => {
+    this.setState({bypassInProgress: true});
+
+    // TypeScript enum iteration is nonfunctional
+    // so just copy the whole list
+    const modules = [
+      AccessModule.COMPLIANCETRAINING,
+      AccessModule.ERACOMMONS,
+      AccessModule.TWOFACTORAUTH,
+      AccessModule.DATAUSEAGREEMENT,
+      AccessModule.BETAACCESS];
+
+    modules.forEach(async module => {
       await profileApi().unsafeSelfBypassAccessRequirement({
-        moduleName: AccessModule[key],
+        moduleName: module,
         isBypassed: true
       });
     });
+    /*
+    //window.location.reload();
+
+     */
   }
 
   render() {
-    const {taskCompletionMap, trainingWarningOpen} = this.state;
+    const {bypassInProgress, taskCompletionMap, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
     // todo: move this to the state
     const canUnsafeSelfBypass = serverConfigStore.getValue().unsafeAllowSelfBypass;
@@ -237,11 +255,12 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       </div>
       {canUnsafeSelfBypass && <div data-test-id='can-unsafe-self-bypass'
                                   style={{...baseStyles.card, ...styles.warningModal}}>
-        <ClrIcon shape='warning-standard' class='is-solid'
-                 style={styles.warningIcon}/>
-        <Button onClick={this.bypass()}>Button Text!</Button>
+        This is a test environment.  Click here to self-bypass all modules ->&nbsp;
+        <Button onClick={() => this.bypass()}
+                disabled={bypassInProgress}>Bypass</Button>
       </div>}
-
+      /* TODO disable if bypassed */
+      /* TODO toggle unbypass? */
       {!betaAccessGranted && <div data-test-id='beta-access-warning'
                                   style={{...baseStyles.card, ...styles.warningModal}}>
         <ClrIcon shape='warning-standard' class='is-solid'
