@@ -50,13 +50,13 @@ export class SearchGroupSelectComponent implements AfterViewInit {
     if (environment.enableCBListSearch) {
       const itemId = generateId('items');
       const groupId = generateId(this.role);
-      const {domain, type} = criteria;
+      const {domain, type, standard} = criteria;
       const searchRequest = searchRequestStore.getValue();
       const group = this.initGroup(groupId);
       const item = this.initItem(itemId, domain);
       searchRequest[this.role].push(group);
       searchRequestStore.next(searchRequest);
-      context = {item, domain, type, role, groupId, itemId, codes};
+      context = {item, domain, type, standard, role, groupId, itemId, codes};
       wizardStore.next(context);
     } else {
       const itemId = this.actions.generateId('items');

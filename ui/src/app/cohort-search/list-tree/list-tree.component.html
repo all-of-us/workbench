@@ -22,8 +22,8 @@
   </div>
 </div>
 
-<div class="tree-container">
-  <div class="tree-header">
+<div class="tree-container" [class.border]="showHeader">
+  <div *ngIf="showHeader" class="tree-header">
     <button class="btn btn-link" (click)="back()">Return to list</button>
   </div>
   <crit-list-node *ngFor="let item of children" [node]="item"></crit-list-node>
