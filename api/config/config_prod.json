@@ -64,6 +64,7 @@
   },
   "featureFlags": {
     "useBillingProjectBuffer": false,
+    "notebooksUIV2": true,
     "unsafeAllowDeleteUser": false
   }
 }

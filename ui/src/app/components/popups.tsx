@@ -252,6 +252,7 @@ export class PopupTrigger extends React.Component {
   }
 
   close() {
+    debugger;
     this.setState({open: false});
     this.props.onClose();
   }

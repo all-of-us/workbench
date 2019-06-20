@@ -1191,6 +1191,26 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      description: Get the HTML for a read only view of the notebook
+      operationId: "readOnlyNotebook"
+      parameters:
+        - in: path
+          name: notebookName
+          required: true
+          type: string
+      responses:
+        200:
+          description: HTML Read Only version of the notebook
+          schema:
+            $ref: '#/definitions/ReadOnlyNotebookResponse'
+
   # Cohorts ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
@@ -2641,6 +2661,12 @@ definitions:
     properties:
       value:
         description: The user facing display name for the value.
+        type: string
+
+  ReadOnlyNotebookResponse:
+    type: object
+    properties:
+      html:
         type: string
 
   SurveysResponse:

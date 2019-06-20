@@ -81,6 +81,7 @@ import {
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
 import {ToolTipComponent} from './views/tooltip/component';
+import {InteractiveNotebookComponent} from "./views/interactive-notebook";
 
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
@@ -153,6 +154,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ErrorHandlerComponent,
     InitialErrorComponent,
     NewNotebookModalComponent,
+    InteractiveNotebookComponent,
     NotebookListComponent,
     NotebookRedirectComponent,
     PageTemplateSignedOutComponent,
