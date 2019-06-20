@@ -9,15 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
 import org.pmiops.workbench.model.SurveyAnswerResponse;
-import org.pmiops.workbench.model.SurveyDetailsResponse;
 import org.pmiops.workbench.model.SurveyQuestionsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +29,6 @@ public class ConceptBigQueryService {
   private static final String SURVEY_PARAM = "survey";
   private static final String QUESTION_PARAM = "question_concept_id";
 
-
   private static final String SURVEY_SQL_TEMPLATE =
       "select DISTINCT(question) as question,\n"
           + "question_concept_id as concept_id \n"
@@ -45,7 +41,8 @@ public class ConceptBigQueryService {
           + "answer_concept_id as concept_id\n"
           + "from `${projectId}.${dataSetId}.ds_survey`\n"
           + "where question_concept_id = @"
-          + QUESTION_PARAM + " LIMIT 20";
+          + QUESTION_PARAM
+          + " LIMIT 20";
 
   @Autowired
   public ConceptBigQueryService(
@@ -140,15 +137,17 @@ public class ConceptBigQueryService {
     List<SurveyAnswerResponse> answerList = new ArrayList<>();
     TableResult result =
         bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                buildSurveyAnswerQuery(questionConceptId)),
+            bigQueryService.filterBigQueryConfig(buildSurveyAnswerQuery(questionConceptId)),
             360000L);
-    result.getValues().forEach(surveyValue -> {
-      SurveyAnswerResponse answer = new SurveyAnswerResponse();
-      answer.setAnswer(surveyValue.get(0).getValue().toString());
-      answer.setConceptId(Long.parseLong(surveyValue.get(1).getValue().toString()));
-      answerList.add(answer);
-    });
+    result
+        .getValues()
+        .forEach(
+            surveyValue -> {
+              SurveyAnswerResponse answer = new SurveyAnswerResponse();
+              answer.setAnswer(surveyValue.get(0).getValue().toString());
+              answer.setConceptId(Long.parseLong(surveyValue.get(1).getValue().toString()));
+              answerList.add(answer);
+            });
     return answerList;
   }
 }
