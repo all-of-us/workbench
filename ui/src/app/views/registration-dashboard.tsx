@@ -3,15 +3,14 @@ import * as React from 'react';
 
 import {AlertClose, AlertDanger, AlertWarning} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
-import {ResourceCardBase} from 'app/components/card';
-import {baseStyles} from 'app/components/card';
+import {baseStyles, ResourceCardBase} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
-import { Profile } from 'generated/fetch';
+import {AccessModule, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   registrationPage: {
@@ -213,6 +212,15 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     }
   }
 
+  bypass() {
+    Object.keys(AccessModule).forEach(async key => {
+      await profileApi().unsafeSelfBypassAccessRequirement({
+        moduleName: AccessModule[key],
+        isBypassed: true
+      });
+    });
+  }
+
   render() {
     const {taskCompletionMap, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
@@ -231,7 +239,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                                   style={{...baseStyles.card, ...styles.warningModal}}>
         <ClrIcon shape='warning-standard' class='is-solid'
                  style={styles.warningIcon}/>
-        Your Button Here.
+        <Button onClick={this.bypass()}>Button Text!</Button>
       </div>}
 
       {!betaAccessGranted && <div data-test-id='beta-access-warning'
