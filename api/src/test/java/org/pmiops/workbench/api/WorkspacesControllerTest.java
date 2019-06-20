@@ -1596,7 +1596,6 @@ public class WorkspacesControllerTest {
     creator.setRole(WorkspaceAccessLevel.OWNER);
     shareWorkspaceRequest.addItemsItem(creator);
 
-
     UserRole reader = new UserRole();
     reader.setEmail("readerfriend@gmail.com");
     reader.setRole(WorkspaceAccessLevel.READER);
@@ -1610,21 +1609,19 @@ public class WorkspacesControllerTest {
     CLOCK.increment(1000);
     stubFcUpdateWorkspaceACL();
     WorkspaceUserRolesResponse shareResp =
-            workspacesController
-                    .shareWorkspace(workspace.getNamespace(), workspace.getName(),
-                            shareWorkspaceRequest)
-                    .getBody();
+        workspacesController
+            .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
+            .getBody();
     Workspace workspace2 =
-            workspacesController
-                    .getWorkspace(workspace.getNamespace(), workspace.getName())
-                    .getBody()
-                    .getWorkspace();
+        workspacesController
+            .getWorkspace(workspace.getNamespace(), workspace.getName())
+            .getBody()
+            .getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
     ArrayList<WorkspaceACLUpdate> updateACLRequestList =
-            convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
-    verify(fireCloudService)
-            .updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
+        convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
+    verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
   }
 
   @Test
@@ -1696,15 +1693,18 @@ public class WorkspacesControllerTest {
     // Mock firecloud ACLs
     WorkspaceACL workspaceACLs = new WorkspaceACL();
     Map<String, Object> acls = new HashMap<>();
-    acls.put(LOGGED_IN_USER_EMAIL, new JSONObject()
-            .put("accessLevel", "OWNER")
-            .put("canCompute", true)
-            .put("canShare", true));
-    acls.put("writerfriend@gmail.com", new JSONObject()
+    acls.put(
+        LOGGED_IN_USER_EMAIL,
+        new JSONObject().put("accessLevel", "OWNER").put("canCompute", true).put("canShare", true));
+    acls.put(
+        "writerfriend@gmail.com",
+        new JSONObject()
             .put("accessLevel", "WRITER")
             .put("canCompute", true)
             .put("canShare", false));
-    acls.put("readerfriend@gmail.com", new JSONObject()
+    acls.put(
+        "readerfriend@gmail.com",
+        new JSONObject()
             .put("accessLevel", "READER")
             .put("canCompute", false)
             .put("canShare", false));
@@ -1719,24 +1719,26 @@ public class WorkspacesControllerTest {
     shareWorkspaceRequest.addItemsItem(writer);
 
     WorkspaceUserRolesResponse shareResp =
-            workspacesController
-                    .shareWorkspace(workspace.getNamespace(), workspace.getName(),
-                            shareWorkspaceRequest)
-                    .getBody();
+        workspacesController
+            .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
+            .getBody();
     Workspace workspace2 =
-            workspacesController
-                    .getWorkspace(workspace.getNamespace(), workspace.getId())
-                    .getBody()
-                    .getWorkspace();
+        workspacesController
+            .getWorkspace(workspace.getNamespace(), workspace.getId())
+            .getBody()
+            .getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
     // add the reader with NO_ACCESS to mock
     shareWorkspaceRequest.addItemsItem(reader);
     ArrayList<WorkspaceACLUpdate> updateACLRequestList =
-            convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
+        convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService)
-            .updateWorkspaceACL(any(), any(), eq(updateACLRequestList
-                    .stream()
+        .updateWorkspaceACL(
+            any(),
+            any(),
+            eq(
+                updateACLRequestList.stream()
                     .sorted(Comparator.comparing(WorkspaceACLUpdate::getEmail))
                     .collect(Collectors.toList())));
   }
