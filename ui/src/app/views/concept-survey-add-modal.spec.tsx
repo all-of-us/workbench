@@ -1,21 +1,18 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {DomainCountStubVariables, ConceptStubVariables} from 'testing/stubs/concepts-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {ConceptSurveyAddModal} from './concept-survey-add-modal';
-import {ConceptSetsApi} from 'generated/fetch/api';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {Domain, SurveyQuestionsResponse, Surveys} from 'generated/fetch';
+import {ConceptSetsApi} from 'generated/fetch/api';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
+import {ConceptStubVariables, DomainCountStubVariables} from 'testing/stubs/concepts-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
-import {SurveyDetailsResponse} from '../../generated/fetch';
-import {WorkspaceData} from '../utils/workspace-data';
-import {Domain, Surveys} from '../../generated/fetch';
+import {ConceptSurveyAddModal} from './concept-survey-add-modal';
 
-const surveyList: Array<SurveyDetailsResponse> = [{
+const surveyList: Array<SurveyQuestionsResponse> = [{
   question: 'Lifestyle',
-  answer: [],
   conceptId: 5
 }];
 
