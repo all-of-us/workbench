@@ -27,7 +27,7 @@ import {
   DomainCount,
   DomainInfo,
   StandardConceptFilter,
-  SurveyDetailsResponse,
+  SurveyQuestionsResponse,
   SurveyModule,
   VocabularyCount,
 } from 'generated/fetch';
@@ -169,7 +169,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
       vocabularies: Array<VocabularyCount>,
       workspacePermissions: WorkspacePermissions,
       selectedSurvey: string,
-      selectedSurveyQuestions: Array<SurveyDetailsResponse>,
+      selectedSurveyQuestions: Array<SurveyQuestionsResponse>,
       surveyAddModalOpen: boolean
     }> {
 

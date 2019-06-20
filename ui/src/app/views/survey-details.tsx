@@ -4,11 +4,16 @@ import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {SurveyDetailsResponse} from 'generated/fetch';
+import {SurveyAnswerResponse, SurveyQuestionsResponse} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 
+interface SurveyDetails {
+  question: SurveyQuestionsResponse;
+  answer: Array<SurveyAnswerResponse>;
+}
 
 const style = reactStyles({
   questionHeader: {
@@ -50,10 +55,11 @@ interface Props {
 }
 
 interface State {
-  surveyList: Array<SurveyDetailsResponse>;
+  surveyList: Array<SurveyDetails>;
   loading: boolean;
   expandedRows: Array<any>;
-  selectedQuestions: Array<SurveyDetailsResponse>;
+  selectedQuestions: Array<SurveyQuestionsResponse>;
+  seeMyAnswers: Array<boolean>;
 }
 
 export const SurveyDetails = withCurrentWorkspace()(
@@ -64,7 +70,8 @@ export const SurveyDetails = withCurrentWorkspace()(
         surveyList: [],
         loading: true,
         expandedRows: [],
-        selectedQuestions: []
+        selectedQuestions: [],
+        seeMyAnswers: [],
       };
     }
 
@@ -77,7 +84,17 @@ export const SurveyDetails = withCurrentWorkspace()(
         const {workspace, surveyName} = this.props;
         const surveys = await conceptsApi().getSurveyDetails(
           workspace.namespace, workspace.id, surveyName);
-        this.setState({surveyList: surveys, loading: false});
+        const seeMyAnsList = [];
+        surveys.forEach(survey => seeMyAnsList.push(false));
+        const surveyDetails = [];
+        surveys.map((survey) => {
+          const surveyQuestionAnswer = {
+            question: survey,
+            answer: []
+          };
+          surveyDetails.push(surveyQuestionAnswer);
+        });
+        this.setState({surveyList: surveyDetails, loading: false, seeMyAnswers: seeMyAnsList});
       } catch (ex) {
         console.log(ex);
       }
@@ -92,7 +109,7 @@ export const SurveyDetails = withCurrentWorkspace()(
     }
 
     getQuestion(row, col) {
-      return <div style={{display: 'flex', flexDirection: 'column'}}>
+      return  <div style={{display: 'flex', flexDirection: 'column'}}>
       <div style={{display: 'flex'}}>
         <CheckBox style={{marginTop: '0.3rem'}}
                   onChange={(value) => this.setSelectedSurveyQuestion(row, value)}/>
@@ -101,8 +118,35 @@ export const SurveyDetails = withCurrentWorkspace()(
          <div style={style.question}>{row.question}</div>
        </div>
       </div>
-        <a>See my Answers</a>
+        <a href='#' onClick={(e) => {e.preventDefault(); this.updateSeeMyAnswer(col.rowIndex); }}>
+          See my Answers
+        </a>
+        {this.state.seeMyAnswers[col.rowIndex] && this.renderAnswerTable(col.rowIndex)}
       </div>;
+    }
+
+    renderAnswerTable(index) {
+      return <DataTable paginator={true} loading={this.state.surveyList[index].answer.length === 0}
+                        rows={10} value={this.state.surveyList[index].answer}>
+        <Column field='answer'/>
+        <Column field='conceptId'/>
+        </DataTable>;
+    }
+
+    async updateSeeMyAnswer(index) {
+      const {workspace} = this.props;
+      const seeMyAnsList = this.state.seeMyAnswers;
+      seeMyAnsList[index] = !this.state.seeMyAnswers[index];
+      this.setState({seeMyAnswers: seeMyAnsList});
+      // Cal api to retrieve answer if it has never been called for the question before
+      if (this.state.surveyList[index].answer && this.state.surveyList[index].answer.length === 0) {
+        const answers =
+            await conceptsApi().getSurveyAnswers(workspace.namespace, workspace.id,
+              this.state.surveyList[index].question.conceptId);
+        const answersList = this.state.surveyList;
+        answersList[index].answer =  answers;
+        this.setState({surveyList: answersList});
+      }
     }
 
     getTableHeader() {
@@ -113,9 +157,9 @@ export const SurveyDetails = withCurrentWorkspace()(
       const {loading, surveyList} = this.state;
       return <div>
         {loading ? <SpinnerOverlay/> :
-        <DataTable value={surveyList} expandedRows={this.state.expandedRows}>
+        <DataTable  value={surveyList} expandedRows={this.state.expandedRows}>
           <Column headerStyle={style.questionHeader} header ={this.getTableHeader()}
-                  body={(row, col) => this.getQuestion(row, col)}/>
+                  body={(row, col) => this.getQuestion(row.question, col)}/>
         </DataTable>}
       </div>;
     }
