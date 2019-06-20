@@ -57,13 +57,17 @@ export const NotebookActionsPopup = fp.flow(
       content={
         <React.Fragment>
           <MenuItem>
-            Duplicate
+            Make a copy
           </MenuItem>
           <MenuItem>
-            Edit
+            Copy to another workspace
           </MenuItem>
           <MenuItem>
-            Share
+            Copy URL to clipboard
+          </MenuItem>
+          <div style={{width: '100%', height: '1px', borderBottom: '1px solid rgb(205, 205, 205)'}}></div>
+          <MenuItem>
+            Rename
           </MenuItem>
           <MenuItem>
             Delete

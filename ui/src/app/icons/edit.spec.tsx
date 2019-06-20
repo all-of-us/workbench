@@ -18,6 +18,7 @@ describe('EditIconComponent', () => {
   beforeEach(() => {
     props = {
       disabled: false,
+      enableHoverEffect: true,
       style: {}
     };
   });

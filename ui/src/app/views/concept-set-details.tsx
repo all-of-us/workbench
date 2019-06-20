@@ -226,7 +226,8 @@ export const ConceptSetDetails =
                     <Clickable disabled={!workspacePermissions.canWrite}
                                data-test-id='edit-concept-set'
                                onClick={() => this.setState({editing: true})}>
-                      <EditComponentReact disabled={!workspacePermissions.canWrite}
+                      <EditComponentReact enableHoverEffect={true}
+                                          disabled={!workspacePermissions.canWrite}
                                           style={{marginTop: '0.1rem'}}/>
                     </Clickable>
                   </div>

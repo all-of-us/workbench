@@ -84,7 +84,8 @@ export const WorkspaceAbout = withCurrentWorkspace()(
                      data-test-id='edit-workspace'
                      onClick={() => navigate(
                        ['workspaces',  workspace.namespace, workspace.id, 'edit'])}>
-            <EditComponentReact disabled={!workspacePermissions.canWrite}
+            <EditComponentReact enableHoverEffect={true}
+                                disabled={!workspacePermissions.canWrite}
                                 style={{marginTop: '0.1rem'}}/>
           </Clickable>
         </div>
