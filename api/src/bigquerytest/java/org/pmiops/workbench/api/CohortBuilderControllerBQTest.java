@@ -107,8 +107,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Mock private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
-  private WorkbenchConfig testConfig;
-
   @Autowired private JdbcTemplate jdbcTemplate;
 
   @Override
@@ -124,7 +122,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
-    testConfig = new WorkbenchConfig();
+    WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.elasticsearch = new WorkbenchConfig.ElasticsearchConfig();
     testConfig.elasticsearch.enableElasticsearchBackend = false;
     testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
