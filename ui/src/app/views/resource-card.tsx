@@ -448,7 +448,7 @@ export class ResourceCard extends React.Component<Props, State> {
       case ResourceType.NOTEBOOK: {
         const queryParams = new URLSearchParams([
           ['playgroundMode', 'false'],
-          ['jupyterLabMode', (jupyterLab || false).toString()]
+          ['jupyterLabMode', String(jupyterLab)]
         ]);
 
         if (this.notebookReadOnly) {
