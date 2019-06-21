@@ -63,7 +63,7 @@
     "unsafeAllowSelfBypass": true
   },
   "cohortbuilder": {
-    "enableListSearch": false
+    "enableListSearch": true
   },
   "featureFlags": {
     "useBillingProjectBuffer": true,

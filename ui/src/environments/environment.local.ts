@@ -18,5 +18,5 @@ export const environment: Environment = {
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   enableJupyterLab: true,
   enableDatasetBuilder: true,
-  enableCBListSearch: false,
+  enableCBListSearch: true,
 };
