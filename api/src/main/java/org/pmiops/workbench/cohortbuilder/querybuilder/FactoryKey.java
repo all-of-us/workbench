@@ -11,6 +11,7 @@ import org.pmiops.workbench.model.TreeType;
  * org.pmiops.workbench.cohortbuilder.QueryBuilderFactory} to get the correct factory
  * implementation.
  */
+// TODO:Remove when new search is finished - freemabd
 public enum FactoryKey {
   CODES,
   DEMO,
