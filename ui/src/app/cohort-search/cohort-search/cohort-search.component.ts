@@ -45,6 +45,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   private subscription;
   listSearch = environment.enableCBListSearch;
   loading = false;
+  criteria = {includes: [], excludes: []};
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -66,8 +67,13 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
             this.loading = false;
             currentCohortStore.next(cohort);
             if (cohort.criteria) {
-              this.actions.loadFromJSON(cohort.criteria);
-              this.actions.runAllRequests();
+              if (!this.listSearch) {
+                this.actions.loadFromJSON(cohort.criteria);
+                this.actions.runAllRequests();
+              } else {
+                console.log(JSON.parse(cohort.criteria));
+                this.criteria = JSON.parse(cohort.criteria);
+              }
             }
           });
       }
