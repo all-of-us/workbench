@@ -10,7 +10,7 @@ import {
   withRouteConfigData,
   withUrlParams
 } from 'app/utils';
-import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed, navigateByUrl} from 'app/utils/navigation';
+import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 
 const styles = {
   firstLink: {

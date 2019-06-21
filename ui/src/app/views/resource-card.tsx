@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Clickable, Link} from 'app/components/buttons';
+import {Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {ResourceCardMenu} from 'app/components/resources';
 import {TextModal} from 'app/components/text-modal';
