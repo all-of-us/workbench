@@ -14,7 +14,7 @@ import {
 
 
 
-const TRANSITIONAL_STATUSES = new Set<ClusterStatus>([
+export const TRANSITIONAL_STATUSES = new Set<ClusterStatus>([
   ClusterStatus.Creating,
   ClusterStatus.Starting,
   ClusterStatus.Stopping,

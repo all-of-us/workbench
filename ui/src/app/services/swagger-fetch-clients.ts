@@ -45,6 +45,12 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import {
+  BaseAPI as NotebooksBaseAPI,
+  Configuration as NotebooksFetchConfiguration,
+  FetchAPI as NotebooksFetchAPI,
+  ClusterApi as NotebooksClusterApi
+} from 'notebooks-generated/fetch';
 
 let frozen = false;
 function checkFrozen() {
@@ -55,10 +61,10 @@ function checkFrozen() {
 }
 
 // All known API client constructors.
-const apiCtors: (new() => BaseAPI)[] = [];
+const apiCtors: (new() => (BaseAPI | NotebooksBaseAPI))[] = [];
 
 // Constructor -> implementation.
-const registry: Map<new() => BaseAPI, BaseAPI> = new Map();
+const registry: Map<new() => (BaseAPI | NotebooksBaseAPI), (BaseAPI | NotebooksBaseAPI)> = new Map();
 
 /**
  * Convenience function to minimize boilerplate below per-service while
@@ -67,7 +73,7 @@ const registry: Map<new() => BaseAPI, BaseAPI> = new Map();
  *
  * Returns a getter for the service implementation (backed by the registry).
  */
-function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
+function bindCtor<T extends (BaseAPI | NotebooksBaseAPI)>(ctor: new() => T): () => T {
   apiCtors.push(ctor);
   return () => {
     if (!registry.has(ctor)) {
@@ -86,6 +92,7 @@ export const auditApi = bindCtor(AuditApi);
 export const authDomainApi = bindCtor(AuthDomainApi);
 export const cdrVersionsApi = bindCtor(CdrVersionsApi);
 export const clusterApi = bindCtor(ClusterApi);
+export const notebooksClusterApi = bindCtor(NotebooksClusterApi);
 export const cohortAnnotationDefinitionApi = bindCtor(CohortAnnotationDefinitionApi);
 export const cohortBuilderApi = bindCtor(CohortBuilderApi);
 export const cohortReviewApi = bindCtor(CohortReviewApi);
@@ -106,7 +113,7 @@ export const workspacesApi = bindCtor(WorkspacesApi);
  * Binds standard API clients. To be called at most once for production use,
  * e.g. during app initialization.
  */
-export function bindApiClients(conf: FetchConfiguration, f: FetchAPI) {
+export function bindApiClients(conf: FetchConfiguration | NotebooksFetchConfiguration, f: FetchAPI | NotebooksFetchAPI) {
   for (const ctor of apiCtors) {
     // We use an anonymous subclass here because Swagger's typescript-fetch
     // codegen creates API client subclasses which lack a public interface for
@@ -128,7 +135,7 @@ export function bindApiClients(conf: FetchConfiguration, f: FetchAPI) {
  * Registers an API client implementation. Can be used to bind a non-standard
  * API implementation, e.g. for testing.
  */
-export function registerApiClient<T extends BaseAPI>(ctor: new() => T, impl: T) {
+export function registerApiClient<T extends (BaseAPI | NotebooksBaseAPI)>(ctor: new() => T, impl: T) {
   checkFrozen();
   registry.set(ctor, impl);
 }
