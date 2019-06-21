@@ -19,6 +19,13 @@ import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 
+/**
+ * This lookup utility extracts all criteria groups in the given search request and produces a
+ * lookup map from group parameter to set of matching child concept ids. This class was implemented
+ * to consolidate logic between the CB query builders and elastic search filters. The ElasticFilters
+ * class will need to be refactored to use this lookup util going forward:
+ * TODO:https://precisionmedicineinitiative.atlassian.net/browse/RW-2875
+ */
 public final class CriteriaLookupUtil {
 
   private final CBCriteriaDao cbCriteriaDao;
@@ -114,6 +121,8 @@ public final class CriteriaLookupUtil {
 
       List<CBCriteria> parents = Lists.newArrayList();
       List<CBCriteria> leaves = Lists.newArrayList();
+      // This dao call returns the parents in addition to the criteria ancestors for each leave in
+      // order to allow the client to determine the relationship between the returned Criteria.
       cbCriteriaDao
           .findCriteriaAncestors(
               treeType.domain.toString(), treeType.type.toString(), parentConceptIds)
@@ -136,7 +145,7 @@ public final class CriteriaLookupUtil {
 
       List<CBCriteria> parents = Lists.newArrayList();
       List<CBCriteria> leaves = Lists.newArrayList();
-
+      // This dao call returns all parents matching the parentConceptIds.
       String ids =
           cbCriteriaDao
               .findCriteriaParentsByDomainAndTypeAndParentConceptIds(
@@ -147,6 +156,8 @@ public final class CriteriaLookupUtil {
               .stream()
               .map(c -> String.valueOf(c.getId()))
               .collect(Collectors.joining(","));
+      // Find the entire hierarchy from parent to leaves. Each parent node is now encoded with
+      // concept ids. The following lookups are in 2 separate calls for query efficiency
       cbCriteriaDao
           .findCriteriaLeavesAndParentsByDomainAndPath(treeType.domain.toString(), ids)
           .forEach(

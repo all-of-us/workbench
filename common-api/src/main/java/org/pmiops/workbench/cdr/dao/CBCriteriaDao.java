@@ -12,9 +12,8 @@ import org.springframework.data.repository.query.Param;
 public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   /**
-   * This query returns the parents in addition to the leaves in order to allow the client to
-   * determine the relationship between the returned Criteria. Parent concept IDs are not otherwise
-   * encoded in Criteria children.
+   * This query returns the parents in addition to the criteria ancestors for each leave in order to
+   * allow the client to determine the relationship between the returned Criteria.
    */
   @Query(
       value =
@@ -56,11 +55,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
       @Param("type") String type,
       @Param("parentConceptIds") Set<String> parentConceptIds);
 
-  /**
-   * This query returns the parents in addition to the leaves in order to allow the client to
-   * determine the relationship between the returned Criteria. Parent concept IDs are not otherwise
-   * encoded in Criteria children.
-   */
+  /** This query returns all parents matching the parentConceptIds. */
   @Query(
       value =
           "select c from CBCriteria c where conceptId in (:parentConceptIds) and domainId = :domain and type = :type and standard = :standard and "
