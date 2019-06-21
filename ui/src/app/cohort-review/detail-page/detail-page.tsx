@@ -105,6 +105,7 @@ export const DetailPage = withCurrentWorkspace()(
     componentDidMount() {
       const {cdrVersionId} = this.props.workspace;
       urlParamsStore.distinctUntilChanged(fp.isEqual)
+        .filter(params => !!params.pid)
         .switchMap(({ns, wsid, cid, pid}) => {
           return Observable.forkJoin(
             from(cohortReviewApi()
