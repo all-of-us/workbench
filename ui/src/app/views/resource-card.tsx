@@ -446,15 +446,17 @@ export class ResourceCard extends React.Component<Props, State> {
         return `${workspacePrefix}/concepts/sets/${conceptSet.id}`;
       }
       case ResourceType.NOTEBOOK: {
-        const queryParams = {
-          playgroundMode: false,
-          jupyterLabMode: jupyterLab,
-        };
+        const queryParams = new URLSearchParams([
+          ['playgroundMode', 'false'],
+          ['jupyterLabMode', (jupyterLab || false).toString()]
+        ]);
+
         if (this.notebookReadOnly) {
-          queryParams.playgroundMode = true;
+          queryParams.set('jupyterLabMode', 'true');
         }
+
         return `${workspacePrefix}/notebooks/${encodeURIComponent(notebook.name)}?` +
-          fp.toPairs(queryParams).map(kvp => `${kvp[0]}=${kvp[1]}`).join('&');
+          queryParams.toString();
       }
       case ResourceType.DATA_SET: {
         return `${workspacePrefix}/data/data-sets/${dataSet.id}`;
