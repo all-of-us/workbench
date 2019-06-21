@@ -759,6 +759,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getPublishedWorkspaces() {
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
+
     return ResponseEntity.ok(response);
   }
 
@@ -769,7 +770,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    workspaceService.doWorkspacePublish(dbWorkspace, getRegisteredUserDomainEmail(), true);
+    dbWorkspace = workspaceService.doWorkspacePublish(dbWorkspace, getRegisteredUserDomainEmail(), true);
+    dbWorkspace.setPublished(true);
+    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -780,7 +783,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    workspaceService.doWorkspacePublish(dbWorkspace, getRegisteredUserDomainEmail(), false);
+    dbWorkspace = workspaceService.doWorkspacePublish(dbWorkspace, getRegisteredUserDomainEmail(), false);
+    dbWorkspace.setPublished(false);
+    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 }

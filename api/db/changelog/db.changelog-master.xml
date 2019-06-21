@@ -93,4 +93,5 @@
   <include file="changelog/db.changelog-83-other-population.xml"/>
   <include file="changelog/db.changelog-84-add-last_status_changed_time.xml"/>
   <include file="changelog/db.changelog-85-drop-user_workspace.xml"/>
+  <include file="changelog/db.changelog-86-published-workspaces.xml"/>
 </databaseChangeLog>
