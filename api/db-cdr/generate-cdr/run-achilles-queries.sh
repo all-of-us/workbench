@@ -312,7 +312,7 @@ select 0, 3000 as analysis_id,
 	COUNT(distinct co1.PERSON_ID) as count_value, (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2
 	where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
-where co1.measurement_concept_id > 0
+where co1.measurement_concept_id > 0 and co1.measurement_concept_id != 21
 group by co1.measurement_concept_id
 union all
  select 0 as id,3000 as analysis_id,CAST(co1.measurement_source_concept_id AS STRING) as stratum_1,
@@ -320,6 +320,7 @@ union all
  COUNT(distinct co1.PERSON_ID) as count_value,COUNT(distinct co1.PERSON_ID) as source_count_value
  from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
  where co1.measurement_source_concept_id not in (select distinct measurement_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\`)
+ and co1.measurement_source_concept_id != 21
  group by co1.measurement_source_concept_id"
 
 if [[ "$tables" == *"_mapping_"* ]]; then
