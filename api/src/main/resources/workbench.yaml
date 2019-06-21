@@ -664,6 +664,18 @@ paths:
           schema:
             $ref: "#/definitions/Workspace"
 
+  /v1/workspaces/published:
+    get:
+      tags:
+        - workspaces
+      description: Returns a list of published workspaces
+      operationId: getPublishedWorkspaces
+      responses:
+        200:
+          description: A list of workspace definitions.
+          schema:
+            $ref: "#/definitions/WorkspaceResponseListResponse"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -723,6 +735,40 @@ paths:
           description: A list of workspace collaborators
           schema:
             $ref: '#/definitions/WorkspaceUserRolesResponse'
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/publish:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      description: >
+        Makes a workspace public to all AoU registered users.
+        Requires WORKSPACE_ADMIN authority.
+      operationId: publishWorkspace
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/unpublish:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      description: >
+        Makes a workspace public to all AoU registered users.
+        Requires WORKSPACE_ADMIN authority.
+      operationId: unpublishWorkspace
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/EmptyResponse"
 
   /v1/admin/workspaces/review:
     get:
@@ -1818,6 +1864,7 @@ definitions:
   #      management. Intended to be granted for devops needs, e.g. for oncall.
   #   3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
   #      to perform actions on a user's enabled status and manual verification.
+  #   4) WORKSPACE_ADMIN: Allows a user to publish workspaces
   Authority:
     type: string
     description: actions a user can have authority/permission to perform
@@ -1827,7 +1874,8 @@ definitions:
         # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
         REVIEW_RESEARCH_PURPOSE,
         DEVELOPER,
-        ACCESS_CONTROL_ADMIN
+        ACCESS_CONTROL_ADMIN,
+        WORKSPACE_ADMIN
     ]
 
   PageVisit:

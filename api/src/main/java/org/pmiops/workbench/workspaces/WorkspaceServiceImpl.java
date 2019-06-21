@@ -376,4 +376,24 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
         .collect(Collectors.toList());
   }
+
+  public Workspace doWorkspacePublish(
+      Workspace workspace, String publishedWorkspaceGroup, boolean publish) {
+    Map<String, WorkspaceAccessEntry> firecloudAcls =
+        getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+
+    Map<String, WorkspaceAccessLevel> updatedAcls = new HashMap<>();
+    for (Map.Entry<String, WorkspaceAccessEntry> entry : firecloudAcls.entrySet()) {
+      updatedAcls.put(
+          entry.getKey(), WorkspaceAccessLevel.fromValue(entry.getValue().getAccessLevel()));
+    }
+
+    if (publish) {
+      updatedAcls.put(publishedWorkspaceGroup, WorkspaceAccessLevel.READER);
+    } else {
+      updatedAcls.put(publishedWorkspaceGroup, WorkspaceAccessLevel.NO_ACCESS);
+    }
+
+    return updateWorkspaceAcls(workspace, updatedAcls);
+  }
 }

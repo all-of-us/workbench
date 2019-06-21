@@ -143,6 +143,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.userProvider = userProvider;
   }
 
+  public String getRegisteredUserDomainEmail() {
+    return workbenchConfigProvider.get().firecloud.registeredDomainName + "@firecloud.org";
+  }
+
   private static String generateRandomChars(String candidateChars, int length) {
     StringBuilder sb = new StringBuilder();
     Random random = new Random();
@@ -750,5 +754,33 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setItems(userRoles);
     return ResponseEntity.ok(resp);
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceResponseListResponse> getPublishedWorkspaces() {
+    WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
+    return ResponseEntity.ok(response);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.WORKSPACE_ADMIN})
+  public ResponseEntity<EmptyResponse> publishWorkspace(
+      String workspaceNamespace, String workspaceId) {
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.getRequired(workspaceNamespace, workspaceId);
+
+    workspaceService.doWorkspacePublish(dbWorkspace, getRegisteredUserDomainEmail(), true);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  @AuthorityRequired({Authority.WORKSPACE_ADMIN})
+  public ResponseEntity<EmptyResponse> unpublishWorkspace(
+      String workspaceNamespace, String workspaceId) {
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.getRequired(workspaceNamespace, workspaceId);
+
+    workspaceService.doWorkspacePublish(dbWorkspace, getRegisteredUserDomainEmail(), false);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 }

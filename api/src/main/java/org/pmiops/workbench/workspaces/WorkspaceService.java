@@ -56,4 +56,7 @@ public interface WorkspaceService {
 
   WorkspaceACLUpdate updateFirecloudAclsOnUser(
       WorkspaceAccessLevel updatedAccess, WorkspaceACLUpdate currentUpdate);
+
+  Workspace doWorkspacePublish(
+      Workspace workspace, String publishedWorkspaceGroup, boolean publish);
 }
