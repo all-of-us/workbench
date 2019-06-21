@@ -1,22 +1,49 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
-import {CriteriaType, DomainType, SearchRequest} from 'generated';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
 
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, getCodeOptions, listAttributeDisplay, listNameDisplay, listTypeDisplay} from 'app/cohort-search/utils';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 
 @Component({
   selector: 'app-list-search-group-item',
   templateUrl: './list-search-group-item.component.html',
   styleUrls: ['./list-search-group-item.component.css'],
 })
-export class ListSearchGroupItemComponent {
+export class ListSearchGroupItemComponent implements OnInit {
   @Input() role: keyof SearchRequest;
   @Input() groupId: string;
   @Input() item: any;
   @Input() delete: Function;
 
-  error: boolean;
+  count: number;
+  error = false;
+  loading = true;
+
+  ngOnInit(): void {
+    try {
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const request = <SearchRequest>{
+        includes: [],
+        excludes: [],
+        [this.role]: [{items: [this.item]}]
+      };
+      cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
+        this.count = count;
+        this.loading = false;
+      }, (err) => {
+        console.error(err);
+        this.error = true;
+        this.loading = false;
+      });
+    } catch (error) {
+      console.error(error);
+      this.error = true;
+      this.loading = false;
+    }
+  }
 
   get codeType() {
     return domainToTitle(this.item.type);
@@ -35,7 +62,7 @@ export class ListSearchGroupItemComponent {
   }
 
   get status() {
-    return this.item.status;
+    return 'active';
   }
 
   get parameters() {

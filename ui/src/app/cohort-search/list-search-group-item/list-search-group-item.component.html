@@ -44,8 +44,10 @@
       <clr-icon
         [popper]="errorPopper"
         [popperTrigger]="'hover'"
-        shape="error-standard"
-        size="16"></clr-icon>
+        class="is-solid"
+        style="color: #f7981c"
+        shape="exclamation-triangle"
+        size="22"></clr-icon>
     </span>
   </div>
   <div *ngIf="status === 'pending'" class="undo-container">
@@ -68,5 +70,5 @@
   <p  [style.margin]="'0'">{{ codes }}</p>
 </popper-content>
 <popper-content #errorPopper>
-  <p  [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p  [style.margin]="'0'">Sorry, the request cannot be completed.</p>
 </popper-content>

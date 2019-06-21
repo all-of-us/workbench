@@ -12,21 +12,21 @@ import {Subscription} from 'rxjs/Subscription';
 })
 export class ListSearchGroupListComponent implements OnInit {
   @Input() role: keyof SearchRequest;
+  @Input() groups: Array<any>;
   @Output() tempLength = new EventEmitter<boolean>();
 
-  groups: any;
   index = 0;
   subscription: Subscription;
 
   ngOnInit(): void {
-    this.subscription = searchRequestStore
-      .filter(sr => !!sr)
-      .subscribe(searchRequest => {
-        this.groups = searchRequest[this.role];
-        if (this.role === 'excludes') {
-          this.index = searchRequest.includes.length + 1;
-        }
-      });
+    // this.subscription = searchRequestStore
+    //   .filter(sr => !!sr)
+    //   .subscribe(searchRequest => {
+    //     this.groups = searchRequest[this.role];
+    //     if (this.role === 'excludes') {
+    //       this.index = searchRequest.includes.length + 1;
+    //     }
+    //   });
   }
 
   get title() {
