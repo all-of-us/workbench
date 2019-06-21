@@ -613,11 +613,8 @@ definitions:
     required:
       - parameterId
       - name
-      - domain
       - type
       - group
-      - ancestorData
-      - standard
       - attributes
     properties:
       parameterId:
@@ -714,7 +711,6 @@ definitions:
   Attribute:
     type: object
     required:
-      - name
       - operands
     properties:
       name:
