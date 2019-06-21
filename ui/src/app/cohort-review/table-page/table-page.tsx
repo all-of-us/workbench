@@ -10,6 +10,7 @@ import {
 } from 'app/cohort-review/review-state.service';
 import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {Button} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -20,8 +21,8 @@ import {
   navigateByUrl,
   urlParamsStore
 } from 'app/utils/navigation';
-import {WorkspaceData} from 'app/utils/workspace-data';
 
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortStatus,
   Filter,
@@ -36,7 +37,6 @@ import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
-import {ClrIcon} from '../../components/icons';
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},
