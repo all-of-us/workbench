@@ -41,6 +41,7 @@ import org.springframework.stereotype.Service;
  * SNOMED.
  */
 @Service
+// TODO:Remove when new search is finished - freemabd
 public class CodesQueryBuilder extends AbstractQueryBuilder {
 
   private static Set<String> SOURCE_TREES =
