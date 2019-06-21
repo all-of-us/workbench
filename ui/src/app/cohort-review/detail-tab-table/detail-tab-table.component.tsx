@@ -645,8 +645,9 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {filteredData, loading, start, sortField, sortOrder} = this.state;
+      const {loading, start, sortField, sortOrder} = this.state;
       const {columns, filterState: {vocab}, tabName} = this.props;
+      const filteredData = loading ? null : this.state.filteredData;
       let pageReportTemplate;
       if (filteredData !== null) {
         const lastRowOfPage = (start + rows) > filteredData.length
@@ -708,7 +709,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
       return <div style={styles.container}>
         <style>{datatableStyles + css}</style>
-        {!loading && <DataTable
+        <DataTable
           expandedRows={this.state.expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
           rowExpansionTemplate={this.rowExpansionTemplate}
@@ -731,7 +732,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           autoLayout
           footer={this.errorMessage()}>
           {cols}
-        </DataTable>}
+        </DataTable>
         {loading && <SpinnerOverlay />}
       </div>;
     }
