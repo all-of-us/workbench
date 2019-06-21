@@ -18,7 +18,8 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
    */
   @Query(
       value =
-          "select distinct id,parent_id,domain_id,is_standard,type,subtype,ca.descendant_id as concept_id,code,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy,"
+          "select * from ("
+              + "select distinct id,parent_id,domain_id,is_standard,type,subtype,ca.descendant_id as concept_id,code,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy,"
               + "has_ancestor_data,path,synonyms "
               + "from cb_criteria_ancestor ca "
               + "   join (select a.* "
@@ -31,14 +32,24 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
               + "                    and is_group = 1) b "
               + "             on (a.path like b.path or a.id = b.id) "
               + "          where domain_id = :domain "
-              + "            and ((concept_id IN (:parentConceptIds) and type = :type)  or (is_group = 0  and is_selectable = 1 and type = 'RXNORM'))) c "
+              + "            and is_group = 0  "
+              + "            and is_selectable = 1 "
+              + "            and type = 'RXNORM') c "
               + "    on (ca.ancestor_id = c.concept_id) "
               + "union "
-              + "select id,parent_id,domain_id,is_standard,type,subtype,concept_id,code,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy,has_ancestor_data,path,synonyms "
-              + "  from cb_criteria "
-              + " where concept_id in (:parentConceptIds) "
-              + "   and domain_id = :domain "
-              + "   and type = :type",
+              + "select a.id,parent_id,domain_id,is_standard,type,subtype,concept_id,code,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy,"
+              + " has_ancestor_data,a.path,synonyms "
+              + "  from cb_criteria a "
+              + "  join (select concat('%.', id, '%') as path, id "
+              + "          from cb_criteria "
+              + "         where concept_id in (:parentConceptIds) "
+              + "           and domain_id = :domain "
+              + "           and type = :type "
+              + "           and is_group = 1) b "
+              + "    on (a.path like b.path) "
+              + " where domain_id = :domain "
+              + "   and type = :type) d "
+              + "order by id",
       nativeQuery = true)
   List<CBCriteria> findCriteriaAncestors(
       @Param("domain") String domain,
@@ -60,8 +71,11 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
       @Param("standard") Boolean isStandard,
       @Param("parentConceptIds") Set<String> parentConceptIds);
 
-  @Query(value = "select c from CBCriteria c where match(path, :path) > 0")
-  List<CBCriteria> findCriteriaLeavesAndParentsByPath(@Param("path") String path);
+  @Query(
+      value =
+          "select c from CBCriteria c where match(path, :path) > 0 and match(synonyms, concat('+[', :domain, '_rank1]')) > 0) order by id asc")
+  List<CBCriteria> findCriteriaLeavesAndParentsByDomainAndPath(
+      @Param("domain") String domain, @Param("path") String path);
 
   @Query(
       value =

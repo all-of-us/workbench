@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 
 /** MeasurementQueryBuilder builds SQL for BigQuery for measurement criteria types. */
 @Service
+// TODO:Remove when new search is finished - freemabd
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
   private static final String MEASUREMENT_SQL_TEMPLATE =
