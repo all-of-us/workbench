@@ -514,7 +514,6 @@ from
     							select concept_id, path
     					    	from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     					    	where type = 'ICD10CM'
-    								and is_group = 0
     								and is_selectable = 1
     						) b on a.concept_id = b.concept_id
                         where is_standard = 0
@@ -605,6 +604,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "delete
 from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 where type in ('ICD10CM', 'ICD10PCS')
+    and is_group = 1
     and is_selectable = 1
     and (est_count is null or est_count = 0)"
 
@@ -725,7 +725,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set x.est_count = y.cnt
 from
     (
-        select concept_id, value_as_concept_id as value, count(distinct person_id) cnt
+        select concept_id, CAST(value_source_concept_id as STRING) as value, count(distinct person_id) cnt
         from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
         where is_standard = 0
             and concept_id in
@@ -734,8 +734,9 @@ from
                     from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                     where domain_id = 'SURVEY'
                         and type = 'PPI'
-                        and is_group = 0
+                        and is_group = 1
                         and is_selectable = 1
+                        and parent_id != 0
                         and concept_id != 1585747
                 )
         group by 1,2
@@ -751,7 +752,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set x.est_count = y.cnt
 from
     (
-        select concept_id, cast(value_as_number as INT64) as value, count(distinct person_id) cnt
+        select concept_id, CAST(value_as_number as STRING) as value, count(distinct person_id) cnt
         from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
         where is_standard = 0
             and concept_id = 1585747
@@ -780,6 +781,7 @@ from
                         and type = 'PPI'
                         and is_group = 1
                         and is_selectable = 1
+                        and parent_id != 0
                 )
         group by 1
     ) y
@@ -797,36 +799,32 @@ from
         select e.id, count(distinct person_id) cnt
         from
             (
-                select *
-                from
+                SELECT *
+                FROM
                     (
-                        select id
-                        from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                        where domain_id = 'SURVEY'
+                        SELECT id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                        WHERE domain_id = 'SURVEY'
                             and type = 'PPI'
                             and parent_id = 0
                     ) a
-                left join \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\` b on a.id = b.ancestor_id
+                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\` b on a.id = b.ancestor_id
             ) e
         left join
             (
-                select c.id, d.*
-                from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
-                join
+                SELECT a.person_id, a.concept_id, b.id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` a
+                JOIN
                     (
-                        SELECT a.person_id, a.concept_id
-                        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` a
-                        join
-                            (
-                                select concept_id
-                                from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                                where domain_id = 'SURVEY'
-                                    and type = 'PPI'
-                                    and is_group = 1
-                                    and is_selectable = 1
-                            ) b on a.concept_id = b.concept_id
-                        where is_standard = 0
-                    ) d on c.concept_id = d.concept_id
+                        SELECT id, concept_id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                        WHERE domain_id = 'SURVEY'
+                            and type = 'PPI'
+                            and is_group = 1
+                            and is_selectable = 1
+                            and parent_id != 0
+                    ) b on a.concept_id = b.concept_id
+                WHERE a.is_standard = 0
             ) f on e.descendant_id = f.id
         group by 1
     ) y
@@ -846,7 +844,7 @@ select id,parent_id,domain_id,is_standard,type,subtype,concept_id,name,value,
     case when is_selectable = 1 then 0 else null end as est_count,
     is_group,is_selectable,has_attribute,has_hierarchy
 from \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\`
-where domain_id = 'PHYSICALMEASUREMENT'
+where domain_id = 'PHYSICAL_MEASUREMENT'
 order by 1"
 
 echo "PM - counts"
@@ -860,7 +858,7 @@ from
         where measurement_source_concept_id in (903126,903133,903121,903124,903135,903136)
         group by 1
     ) y
-where x.domain_id = 'PHYSICALMEASUREMENT'
+where x.domain_id = 'PHYSICAL_MEASUREMENT'
     and x.concept_id = y.concept_id"
 
 echo "PM - counts for heart rhythm, pregnancy, and wheelchair use"
@@ -869,39 +867,28 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set x.est_count = y.cnt
 from
     (
-        select measurement_source_concept_id as concept_id, value_as_concept_id as value, count(distinct person_id) as cnt
+        select measurement_source_concept_id as concept_id, CAST(value_as_concept_id as STRING) as value, count(distinct person_id) as cnt
         from \`$BQ_PROJECT.$BQ_DATASET.measurement\`
         where measurement_source_concept_id IN (1586218, 903120, 903111)
         group by 1,2
     ) y
-where x.domain_id = 'PHYSICALMEASUREMENT'
+where x.domain_id = 'PHYSICAL_MEASUREMENT'
     and x.concept_id = y.concept_id
     and x.value = y.value"
 
 #----- BLOOD PRESSURE -----
-# !!!!!!! WILL WANT TO REWRITE TO USE RELATIONSHIP INFO WHEN WE HAVE IT!!!!!!---
 echo "PM - blood pressure  - hypotensive"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 set est_count =
     (
         select count(distinct person_id)
-        from
-            (
-                select person_id, measurement_date
-                from \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-                where measurement_source_concept_id = 903118
-                    and value_as_number <= 90
-
-                intersect distinct
-
-                select person_id, measurement_date
-                from \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-                where measurement_source_concept_id = 903115
-                    and value_as_number <= 60
-            )
+        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        where concept_id in (903115, 903118)
+            and systolic <= 90
+            and diastolic <= 60
     )
-where domain_id = 'PHYSICALMEASUREMENT'
+where domain_id = 'PHYSICAL_MEASUREMENT'
     and subtype = 'BP'
     and name LIKE 'Hypotensive%'"
 
@@ -911,22 +898,12 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set est_count =
     (
         select count(distinct person_id)
-        from
-            (
-                select person_id, measurement_date
-                from \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-                where measurement_source_concept_id = 903118
-                    and value_as_number <= 120
-
-                intersect distinct
-
-                select person_id, measurement_date
-                from \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-                where measurement_source_concept_id = 903115
-                    and value_as_number <= 80
-            )
+        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        where concept_id in (903115, 903118)
+            and systolic <= 120
+            and diastolic <= 80
     )
-where domain_id = 'PHYSICALMEASUREMENT'
+where domain_id = 'PHYSICAL_MEASUREMENT'
     and subtype = 'BP'
     and name LIKE 'Normal%'"
 
@@ -936,22 +913,12 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set est_count =
     (
         select count(distinct person_id)
-        from
-            (
-                select person_id, measurement_date
-                from \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-                where measurement_source_concept_id = 903118
-                    and value_as_number BETWEEN 120 AND 139
-
-                intersect distinct
-
-                select person_id, measurement_date
-                from \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-                where measurement_source_concept_id = 903115
-                    and value_as_number BETWEEN 81 AND 89
-            )
+        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        where concept_id in (903115, 903118)
+            and systolic BETWEEN 120 AND 139
+            and diastolic BETWEEN 81 AND 89
     )
-where domain_id = 'PHYSICALMEASUREMENT'
+where domain_id = 'PHYSICAL_MEASUREMENT'
     and subtype = 'BP'
     and name LIKE 'Pre-Hypertensive%'"
 
@@ -961,22 +928,12 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set est_count =
     (
         select count(distinct person_id)
-        from
-            (
-                select person_id, measurement_date
-                from \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-                where measurement_source_concept_id = 903118
-                    and value_as_number >= 140
-
-                intersect distinct
-
-                select person_id, measurement_date
-                from \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-                where measurement_source_concept_id = 903115
-                    and value_as_number >= 90
-            )
+        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        where concept_id in (903115, 903118)
+            and systolic >= 140
+            and diastolic >= 90
     )
-where domain_id = 'PHYSICALMEASUREMENT'
+where domain_id = 'PHYSICAL_MEASUREMENT'
     and subtype = 'BP'
     and name LIKE 'Hypertensive%'"
 
@@ -986,20 +943,10 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set est_count =
     (
         select count(distinct person_id)
-        from
-            (
-                select person_id, measurement_date
-                from \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-                where measurement_source_concept_id = 903118
-
-                intersect distinct
-
-                select person_id, measurement_date
-                from \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-                where measurement_source_concept_id = 903115
-            )
+        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        where concept_id in (903115, 903118)
     )
-where domain_id = 'PHYSICALMEASUREMENT'
+where domain_id = 'PHYSICAL_MEASUREMENT'
     and subtype = 'BP'
     and name = 'Blood Pressure Detail'"
 
@@ -1020,7 +967,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     (id,parent_id,domain_id,is_standard,type,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy)
 select row_num + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS ID,
     (SELECT ID FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'AGE' and parent_id = 0) as parent_id,
-    'PERSON',1,'AGE', CAST(row_num AS STRING) as name, row_num as value,
+    'PERSON',1,'AGE', CAST(row_num AS STRING) as name, CAST(row_num as STRING) as value,
     case when b.cnt is null then 0 else b.cnt end as est_count,
     0,1,0,0
 from
@@ -1140,16 +1087,16 @@ echo "VISITS - add items with counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,name,est_count,is_group,is_selectable,has_attribute,has_hierarchy)
-select ROW_NUMBER() OVER(order by concept_name) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as ID,
-    0,'VISIT',1,'VISIT',concept_id,concept_name,b.cnt,0,1,0,0
-from \`$BQ_PROJECT.$BQ_DATASET.concept\` a
-left join
+SELECT ROW_NUMBER() OVER(order by concept_name) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id,
+    0,'VISIT',1,'VISIT',concept_id,concept_name,a.cnt,0,1,0,0
+FROM
     (
         select visit_concept_id, count(distinct person_id) cnt
         from \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\`
         group by 1
-    ) b on a.concept_id = b.visit_concept_id
-where a.vocabulary_id = 'Visit'"
+    ) a
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b ON a.visit_concept_id = b.concept_id
+where b.vocabulary_id = 'Visit'"
 
 
 ################################################
@@ -1501,6 +1448,25 @@ where x.concept_id = y.concept_id
     and x.type = 'SNOMED'
     and x.is_standard = 1
     and x.is_group = 1"
+
+#----- OTHER STANDARD VOCABULARIES -----
+echo "CONDITIONS - add other Standard Concepts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (id,parent_id,domain_id,is_standard,type,concept_id,code,name,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
+select ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as ID,
+    0, 'PROCEDURE',1, vocabulary_id,concept_id,concept_code,concept_name,est_count,0,1,0,0,
+    CAST(ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING) as path
+from
+    (
+        select concept_name, vocabulary_id, concept_id, concept_code, count(distinct person_id) est_count
+        from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` a
+        left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.condition_concept_id = b.concept_id
+        where standard_concept = 'S'
+            and domain_id = 'Condition'
+            and vocabulary_id not in ('SNOMED')
+        group by 1,2,3,4
+    ) x"
 
 
 ################################################
@@ -1855,8 +1821,9 @@ from
                 select *, rank() over (partition by descendant_concept_id order by MAX_LEVELS_OF_SEPARATION desc) rnk
                 from \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\` a
                 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.ANCESTOR_CONCEPT_ID = b.concept_id
-                where domain_id = 'Measurement'
-                    and descendant_concept_id in
+                where b.domain_id = 'Measurement'
+                    and b.vocabulary_id = 'SNOMED'
+                    and a.descendant_concept_id in
                         (
                             select distinct concept_id
                             from \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
