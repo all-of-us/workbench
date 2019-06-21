@@ -55,28 +55,34 @@ export class ListNodeComponent implements OnInit, OnDestroy {
     const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
     const {domainId, id, isStandard, name} = this.node;
     const type = domainId === DomainType.DRUG ? CriteriaType[CriteriaType.ATC] : this.node.type;
-    cohortBuilderApi().getCriteriaBy(cdrId, domainId, type, isStandard, id)
-      .then(resp => {
-        if (resp.items.length === 0 && domainId === DomainType.DRUG) {
-          cohortBuilderApi()
-            .getCriteriaBy(cdrId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
-            .then(rxResp => {
-              this.empty = rxResp.items.length === 0;
-              this.children = rxResp.items;
-              this.loading = false;
-            }, () => this.error = true);
-        } else {
-          this.empty = resp.items.length === 0;
-          this.children = resp.items;
-          this.loading = false;
-          if (!this.empty && domainId === DomainType.SURVEY && !resp.items[0].group) {
-            // save questions in the store so we can display them along with answers if selected
-            const questions = ppiQuestions.getValue();
-            questions[id] = name;
-            ppiQuestions.next(questions);
+    try {
+      cohortBuilderApi().getCriteriaBy(cdrId, null, type, isStandard, id)
+        .then(resp => {
+          if (resp.items.length === 0 && domainId === DomainType.DRUG) {
+            cohortBuilderApi()
+              .getCriteriaBy(cdrId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
+              .then(rxResp => {
+                this.empty = rxResp.items.length === 0;
+                this.children = rxResp.items;
+                this.loading = false;
+              }, () => this.error = true);
+          } else {
+            this.empty = resp.items.length === 0;
+            this.children = resp.items;
+            this.loading = false;
+            if (!this.empty && domainId === DomainType.SURVEY && !resp.items[0].group) {
+              // save questions in the store so we can display them along with answers if selected
+              const questions = ppiQuestions.getValue();
+              questions[id] = name;
+              ppiQuestions.next(questions);
+            }
           }
-        }
-      }, () => this.error = true);
+        });
+    } catch (error) {
+      console.log(error);
+      this.error = true;
+      this.loading = false;
+    }
   }
 
   toggleExpanded() {
