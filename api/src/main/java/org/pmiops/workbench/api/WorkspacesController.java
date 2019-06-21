@@ -7,7 +7,6 @@ import com.google.common.base.Strings;
 import com.google.common.io.CharStreams;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -776,8 +775,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspace, String workspaceName, String notebookName) {
     try {
       ReadOnlyNotebookResponse response = new ReadOnlyNotebookResponse();
-      response.setHtml(CharStreams.toString(new InputStreamReader(getClass()
-          .getClassLoader().getResourceAsStream("read-only-example.html"), StandardCharsets.UTF_8)));
+      response.setHtml(
+          CharStreams.toString(
+              new InputStreamReader(
+                  getClass().getClassLoader().getResourceAsStream("read-only-example.html"),
+                  StandardCharsets.UTF_8)));
       return ResponseEntity.ok(response);
     } catch (IOException e) {
       e.printStackTrace();
