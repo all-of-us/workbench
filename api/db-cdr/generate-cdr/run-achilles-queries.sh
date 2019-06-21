@@ -256,13 +256,14 @@ CAST(po1.procedure_CONCEPT_ID AS STRING) as stratum_1,'Procedure' as stratum_3,
 COUNT(distinct po1.PERSON_ID) as count_value,
 (select COUNT(distinct po2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` po2 where po2.procedure_source_CONCEPT_ID=po1.procedure_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` po1
-where po1.procedure_concept_id > 0
+where po1.procedure_concept_id > 0 and po1.procedure_concept_id != 10
 group by po1.procedure_CONCEPT_ID
 union all
 select 0, 3000 as analysis_id,CAST(po1.procedure_source_CONCEPT_ID AS STRING) as stratum_1,'Procedure' as stratum_3,
 COUNT(distinct po1.PERSON_ID) as count_value,
 COUNT(distinct po1.PERSON_ID) as source_count_value from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` po1 where
-po1.procedure_source_CONCEPT_ID not in (select distinct procedure_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\`)
+po1.procedure_source_concept_id not in (select distinct procedure_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\`)
+and po1.procedure_source_concept_id != 10
 group by po1.procedure_source_CONCEPT_ID"
 
 # Drugs
