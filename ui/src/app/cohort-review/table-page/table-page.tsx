@@ -250,7 +250,10 @@ export const ParticipantsTable = withCurrentWorkspace()(
         cohortDescription: false,
         error: false,
       };
-      this.filterInput = fp.debounce(300, () => this.getTableData());
+      this.filterInput = fp.debounce(300, () => {
+        this.setState({loading: true, error: false});
+        this.getTableData();
+      });
     }
 
     async componentDidMount() {
@@ -547,7 +550,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     onInputChange = (value: any) => {
       const {filters} = this.state;
       filters.PARTICIPANTID = value;
-      this.setState({loading: true, error: false, filters});
+      this.setState({filters});
       this.filterInput(value);
     }
 
@@ -571,7 +574,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {cohortDescription, data, loading, page, sortField, sortOrder, total} = this.state;
+      const {cohortDescription, loading, page, sortField, sortOrder, total} = this.state;
+      const data = loading ? null : this.state.data;
       const cohort = currentCohortStore.getValue();
       const start = page * rows;
       let pageReportTemplate;
@@ -626,7 +630,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           <div style={styles.description}>
             {cohort.description}
           </div>
-          {!loading && <DataTable
+          <DataTable
             style={styles.table}
             value={data}
             first={start}
@@ -645,7 +649,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             scrollHeight='calc(100vh - 350px)'
             footer={this.errorMessage()}>
             {columns}
-          </DataTable>}
+          </DataTable>
         </React.Fragment>}
         {cohortDescription && <React.Fragment>
           <button
