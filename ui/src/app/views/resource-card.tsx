@@ -30,7 +30,7 @@ const styles = reactStyles({
     fontSize: '18px', fontWeight: 500, lineHeight: '22px', color: colors.blue[0],
     cursor: 'pointer', wordBreak: 'break-all', textOverflow: 'ellipsis',
     overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3,
-    WebkitBoxOrient: 'vertical'
+    WebkitBoxOrient: 'vertical', textDecoration: 'none'
   },
   cardDescription: {
     textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',
