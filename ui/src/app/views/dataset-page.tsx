@@ -543,7 +543,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               <div style={{display: 'flex', flexDirection: 'column'}}>
               <div style={{display: 'flex', alignItems: 'flex-end'}}>
                 <div style={styles.previewDataHeader}>
-                  <div>Preview Data Set</div>
+                  Preview Data Set
                 </div>
                 <Clickable data-test-id='refresh-preview-clickable-text'
                            disabled={this.isRefreshPreviewDisabled}
