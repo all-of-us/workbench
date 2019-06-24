@@ -162,7 +162,7 @@ public final class CriteriaLookupUtil {
           .findCriteriaLeavesAndParentsByDomainAndPath(treeType.domain.toString(), ids)
           .forEach(
               c -> {
-                if (c.getGroup() && parents.isEmpty()) {
+                if (c.getGroup() && parentConceptIds.contains(c.getConceptId())) {
                   parents.add(c);
                 } else {
                   leaves.add(c);
