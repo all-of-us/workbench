@@ -2738,6 +2738,12 @@ definitions:
       conceptId:
         type: integer
         format: int64
+      participationCount:
+        type: integer
+        format: int64
+      percentAnswered:
+        type: number
+        format: double
 
   CreateAccountRequest:
     type: object

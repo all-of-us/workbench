@@ -17,7 +17,6 @@ interface SurveyDetails {
 const style = reactStyles({
   questionHeader: {
     height: 24,
-    width: 351,
     color: colors.purple[0],
     fontFamily: 'Montserrat',
     fontSize: '20px',
@@ -37,7 +36,7 @@ const style = reactStyles({
     fontWeight: 600,
     lineHeight: '18px'
   },
-  question: {
+  columnLabel: {
     color: colors.blue[8],
     fontFamily: 'Montserrat',
     fontSize: '16px',
@@ -55,6 +54,7 @@ interface Props {
 
 interface State {
   surveyList: Array<SurveyDetails>;
+  answerLoading: Array<boolean>;
   loading: boolean;
   expandedRows: Array<any>;
   selectedQuestions: Array<SurveyQuestionsResponse>;
@@ -67,6 +67,7 @@ export const SurveyDetails = withCurrentWorkspace()(
       super(props);
       this.state = {
         surveyList: [],
+        answerLoading: [],
         loading: true,
         expandedRows: [],
         selectedQuestions: [],
@@ -114,7 +115,7 @@ export const SurveyDetails = withCurrentWorkspace()(
                   onChange={(value) => this.setSelectedSurveyQuestion(row, value)}/>
        <div style={{paddingLeft: '0.5rem'}}>
          <label style={style.questionLabel}>Question {col.rowIndex + 1}</label>
-         <div style={style.question}>{row.question}</div>
+         <div style={style.columnLabel}>{row.question}</div>
        </div>
       </div>
         <a href='#' onClick={(e) => {e.preventDefault(); this.updateSeeMyAnswer(col.rowIndex); }}>
@@ -125,19 +126,31 @@ export const SurveyDetails = withCurrentWorkspace()(
     }
 
     renderAnswerTable(index) {
-      return <DataTable paginator={true} loading={this.state.surveyList[index].answer.length === 0}
-                        rows={10} value={this.state.surveyList[index].answer}>
-        <Column field='answer'/>
-        <Column field='conceptId'/>
-        </DataTable>;
+      const {answerLoading, surveyList} = this.state;
+      return <DataTable emptyMessage={answerLoading[index] ? '' : 'No records found'}
+                        loading={answerLoading[index]} paginator={true} rows={10}
+                        value={surveyList[index].answer}>
+        <Column headerStyle={style.questionHeader} style={{...style.columnLabel, fontSize: '13px'}}
+                field='answer'/>
+        <Column headerStyle={{...style.questionHeader, fontSize: '14px'}}
+                style={{...style.columnLabel, fontSize: '13px'}}
+                field='conceptId' header='Concept Code'/>
+        <Column field='participationCount' header='Participation Count'
+                headerStyle={{...style.questionHeader, fontSize: '14px'}}/>
+        <Column field='percentAnswered' header='% answered'
+                headerStyle={{...style.questionHeader, fontSize: '14px'}}/>
+          </DataTable>;
     }
 
     async updateSeeMyAnswer(index) {
+      const answerLoadinglist = this.state.answerLoading;
+      answerLoadinglist[index] = true;
+      this.setState({answerLoading: answerLoadinglist});
       const {workspace} = this.props;
       const seeMyAnsList = this.state.seeMyAnswers;
       seeMyAnsList[index] = !this.state.seeMyAnswers[index];
       this.setState({seeMyAnswers: seeMyAnsList});
-      // Cal api to retrieve answer if it has never been called for the question before
+      // Call api to retrieve answer if it has never been called for the question before
       if (this.state.surveyList[index].answer && this.state.surveyList[index].answer.length === 0) {
         const answers =
             await conceptsApi().getSurveyAnswers(workspace.namespace, workspace.id,
@@ -146,6 +159,9 @@ export const SurveyDetails = withCurrentWorkspace()(
         answersList[index].answer =  answers;
         this.setState({surveyList: answersList});
       }
+      answerLoadinglist[index] = false;
+      this.setState({answerLoading: answerLoadinglist});
+
     }
 
     getTableHeader() {
