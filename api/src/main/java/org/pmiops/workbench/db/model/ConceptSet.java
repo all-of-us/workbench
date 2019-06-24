@@ -88,15 +88,6 @@ public class ConceptSet {
     this.domain = domain;
   }
 
-  @Column(name = "survey")
-  public Short getSurvey() {
-    return survey;
-  }
-
-  public void setSurvey(Short survey) {
-    this.survey = survey;
-  }
-
   @Transient
   public Domain getDomainEnum() {
     return CommonStorageEnums.domainFromStorage(domain);
@@ -104,6 +95,15 @@ public class ConceptSet {
 
   public void setDomainEnum(Domain domain) {
     this.domain = CommonStorageEnums.domainToStorage(domain);
+  }
+
+  @Column(name = "survey")
+  public Short getSurvey() {
+    return survey;
+  }
+
+  public void setSurvey(Short survey) {
+    this.survey = survey;
   }
 
   @Transient

@@ -127,57 +127,64 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
       </WorkspaceCardBase>;
     };
 
+interface Props {
+  workspace: WorkspaceData;
+}
+
+interface State { // Browse survey
+  browsingSurvey: boolean;
+  // Array of domains that have finished being searched for concepts with search string
+  completedDomainSearches: Array<Domain>;
+  // Array of concepts found in the search
+  concepts: Array<Concept>;
+  // If modal to add concepts to set is open
+  conceptAddModalOpen: boolean;
+  // Cache for storing selected concepts, their domain, and vocabulary
+  conceptsCache: Array<ConceptCacheItem>;
+  // Array of domains and the number of concepts found in the search for each
+  conceptDomainCounts: Array<DomainCount>;
+  // Array of domains and their metadata
+  conceptDomainList: Array<DomainInfo>;
+  conceptsSavedText: string;
+  // Array of surveys
+  conceptSurveysList: Array<SurveyModule>;
+  // Array of concepts that have been selected
+  conceptsToAdd: Concept[];
+  // Current string in search box
+  currentSearchString: string;
+  // If concept metadata is still being gathered for any domain
+  loadingDomains: boolean;
+  // If we are still searching concepts and should show a spinner on the table
+  searchLoading: boolean;
+  // If we are in 'search mode' and should show the table
+  searching: boolean;
+  // Map of domain to number of selected concepts in domain
+  selectedConceptDomainMap: Map<String, number>;
+  // Domain being viewed. Will be the domain that the add button uses.
+  selectedDomain: DomainCount;
+  // Name of the survey selected
+  selectedSurvey: string;
+  // Array of survey questions selected to be added to concept set
+  selectedSurveyQuestions: Array<SurveyDetailsResponse>;
+  // Show if a search error occurred
+  showSearchError: boolean;
+  // Only search on standard concepts
+  standardConceptsOnly: boolean;
+  // Open modal to add survey questions to concept set
+  surveyAddModalOpen: boolean;
+  // Array of vocabulary id and number of concepts in vocabulary
+  vocabularies: Array<VocabularyCount>;
+  workspacePermissions: WorkspacePermissions;
+}
 
 export const ConceptHomepage = withCurrentWorkspace()(
-  class extends React.Component<{workspace: WorkspaceData},
-    { // Browse survey
-      browseSurvey: boolean,
-      // Array of domains that have finished being searched for concepts with search string
-      completedDomainSearches: Array<Domain>,
-      // If modal to add concepts to set is open
-      conceptAddModalOpen: boolean,
-      // Array of domains and the number of concepts found in the search for each
-      conceptDomainCounts: Array<DomainCount>,
-      // Array of domains and their metadata
-      conceptDomainList: Array<DomainInfo>,
-      // Array of concepts found in the search
-      concepts: Array<Concept>,
-      // Cache for storing selected concepts, their domain, and vocabulary
-      conceptsCache: Array<ConceptCacheItem>,
-      conceptsSavedText: string,
-      // Array of surveys
-      conceptSurveysList: Array<SurveyModule>,
-      // Array of concepts that have been selected
-      conceptsToAdd: Concept[],
-      // Current string in search box
-      currentSearchString: string,
-      // If concept metadata is still being gathered for any domain
-      loadingDomains: boolean,
-      // If we are still searching concepts and should show a spinner on the table
-      searchLoading: boolean,
-      // If we are in 'search mode' and should show the table
-      searching: boolean,
-      // Map of domain to number of selected concepts in domain
-      selectedConceptDomainMap: Map<String, number>,
-      // Domain being viewed. Will be the domain that the add button uses.
-      selectedDomain: DomainCount,
-      // Show if a search error occurred
-      showSearchError: boolean,
-      // Only search on standard concepts
-      standardConceptsOnly: boolean,
-      // Array of vocabulary id and number of concepts in vocabulary
-      vocabularies: Array<VocabularyCount>,
-      workspacePermissions: WorkspacePermissions,
-      selectedSurvey: string,
-      selectedSurveyQuestions: Array<SurveyDetailsResponse>,
-      surveyAddModalOpen: boolean
-    }> {
+  class extends React.Component<Props, State> {
 
     private MAX_CONCEPT_FETCH = 100;
     constructor(props) {
       super(props);
       this.state = {
-        browseSurvey: false,
+        browsingSurvey: false,
         completedDomainSearches: [],
         conceptAddModalOpen: false,
         surveyAddModalOpen: false,
@@ -346,7 +353,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     browseDomain(domain: DomainInfo) {
       const {conceptDomainCounts} = this.state;
-      this.setState({browseSurvey: false, currentSearchString: '',
+      this.setState({browsingSurvey: false, currentSearchString: '',
         selectedDomain: conceptDomainCounts
           .find(domainCount => domainCount.domain === domain.domain)},
         this.searchConcepts);
@@ -354,7 +361,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     browseSurveyInfo(surveys) {
       this.setState({
-        browseSurvey: true,
+        browsingSurvey: true,
         selectedSurvey: surveys.name
       });
     }
@@ -401,7 +408,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         'concepts', 'sets', conceptSet.id, 'actions']);
     }
 
-    renderConceptSets() {
+    renderConcepts() {
       const {concepts, searchLoading, conceptDomainCounts, selectedDomain,
         conceptsToAdd, selectedConceptDomainMap} = this.state;
 
@@ -454,7 +461,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     render() {
-      const {loadingDomains, browseSurvey, conceptDomainList, conceptSurveysList,
+      const {loadingDomains, browsingSurvey, conceptDomainList, conceptSurveysList,
         standardConceptsOnly, showSearchError, searching, selectedDomain, conceptAddModalOpen,
         conceptsToAdd, currentSearchString, conceptsSavedText, selectedSurvey, surveyAddModalOpen,
         selectedSurveyQuestions} =
@@ -491,7 +498,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
           </AlertDanger>}
           <div style={{marginTop: '0.5rem'}}>{conceptsSavedText}</div>
         </div>
-        {browseSurvey && <div><SurveyDetails surveyName={selectedSurvey}
+        {browsingSurvey && <div><SurveyDetails surveyName={selectedSurvey}
                                              surveySelected={(selectedQuestion) =>
                                                    this.selectedQuestion(selectedQuestion)}/>
           <SlidingFabReact submitFunction={() => this.setState({surveyAddModalOpen: true})}
@@ -501,9 +508,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
                            expanded={this.addSurveyToSetText}
                            disable={selectedSurveyQuestions.length === 0}/>
         </div>}
-        {!browseSurvey && loadingDomains ? <SpinnerOverlay/> :
+        {!browsingSurvey && loadingDomains ? <SpinnerOverlay/> :
           searching ?
-            this.renderConceptSets() : !browseSurvey &&
+            this.renderConcepts() : !browsingSurvey &&
                 <div>
                   <div style={styles.sectionHeader}>
                     EHR Domain
@@ -522,7 +529,10 @@ export const ConceptHomepage = withCurrentWorkspace()(
                   <div style={styles.cardList}>
                     {conceptSurveysList.map((surveys) => {
                       return <SurveyCard survey={surveys} key={surveys.orderNumber}
-                                         browseSurvey={() => this.browseSurveyInfo(surveys)}/>;
+                                         browseSurvey={() => {this.setState({
+                                           browsingSurvey: true,
+                                           selectedSurvey: surveys.name
+                                         }); }}/>;
                     })}
                    </div>
                 </div>
