@@ -722,8 +722,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     CBCriteria drugCriteria2 =
         new CBCriteria()
             .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(true)
+            .type(CriteriaType.RXNORM.toString())
+            .group(false)
+            .selectable(true)
             .ancestorData(true)
             .standard(true)
             .conceptId("1520218");

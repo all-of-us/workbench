@@ -49,8 +49,8 @@ public final class SearchGroupItemQueryBuilder {
   private static final String BASE_SQL =
       "select distinct person_id, entry_date, concept_id\n"
           + "from `${projectId}.${dataSetId}.search_all_domains`\n"
-          + "where is_standard = %s\n"
-          + "and ";
+          + "where ";
+  private static final String STANDARD_SQL = "is_standard = %s\n" + "and ";
   private static final String CONCEPT_ID_IN = "(concept_id in unnest(%s))\n";
   private static final String VALUE_AS_NUMBER = "(concept_id = %s and value_as_number %s %s)\n";
   private static final String VALUE_AS_CONCEPT_ID =
@@ -197,8 +197,13 @@ public final class SearchGroupItemQueryBuilder {
       // all search parameters in the search group item have the same source/standard flag
       isStandard = param.getStandard();
     }
+    // create the source/standard flag named parameter
+    String standardParam =
+        addQueryParameterValue(queryParams, QueryParameterValue.int64(isStandard ? 1 : 0));
+    // need to add standard flat to the sql statement
+    String queryPartsSql = String.format(STANDARD_SQL, standardParam);
     // need to OR all query parts together since they exist in the same search group item
-    String queryPartsSql = "(" + String.join(OR, queryParts) + ")\n";
+    queryPartsSql = queryPartsSql + "(" + String.join(OR, queryParts) + ")\n";
     if (!childConceptIds.isEmpty()) {
       // if we have concept ids that are non bp then add named parameters
       QueryParameterValue cids =
@@ -206,20 +211,14 @@ public final class SearchGroupItemQueryBuilder {
       String conceptIdsParam = addQueryParameterValue(queryParams, cids);
       queryPartsSql = String.format(queryPartsSql, conceptIdsParam);
     }
-    // create the source/standard flag named parameter
-    String standardParam =
-        addQueryParameterValue(queryParams, QueryParameterValue.int64(isStandard ? 1 : 0));
     // format the base sql with all query parts
-    String baseSql = String.format(BASE_SQL, standardParam) + queryPartsSql;
+    String baseSql = BASE_SQL + queryPartsSql;
     // build modifier sql if modifiers exists
     String modifiedSql = buildModifierSql(baseSql, queryParams, searchGroupItem.getModifiers());
-    // split off the sql conditions in case were building a temporal sql statement
-    // otherwise this is just ignored
-    String conditionsSql = baseSql.split("where")[1] + "%s";
     // build the inner temporal sql if this search group item is temporal
     // otherwise return modifiedSql
     return buildInnerTemporalQuery(
-        modifiedSql, conditionsSql, queryParams, searchGroupItem.getModifiers(), mention);
+        modifiedSql, queryPartsSql + "%s", queryParams, searchGroupItem.getModifiers(), mention);
   }
 
   /** Build sql statement for demographics */
