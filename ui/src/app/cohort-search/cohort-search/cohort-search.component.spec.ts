@@ -17,6 +17,7 @@ import {ListModifierPageComponent} from 'app/cohort-search/list-modifier-page/li
 import {ListNodeInfoComponent} from 'app/cohort-search/list-node-info/list-node-info.component';
 import {ListNodeComponent} from 'app/cohort-search/list-node/list-node.component';
 import {ListOptionInfoComponent} from 'app/cohort-search/list-option-info/list-option-info.component';
+import {ListOverviewComponent} from 'app/cohort-search/list-overview/list-overview.component';
 import {ListSearchBarComponent} from 'app/cohort-search/list-search-bar/list-search-bar.component';
 import {ListSearchGroupItemComponent} from 'app/cohort-search/list-search-group-item/list-search-group-item.component';
 import {ListSearchGroupListComponent} from 'app/cohort-search/list-search-group-list/list-search-group-list.component';
@@ -95,6 +96,7 @@ describe('CohortSearchComponent', () => {
         ListNodeInfoComponent,
         ListNodeComponent,
         ListOptionInfoComponent,
+        ListOverviewComponent,
         ListSearchBarComponent,
         ListSearchGroupItemComponent,
         ListSearchGroupListComponent,

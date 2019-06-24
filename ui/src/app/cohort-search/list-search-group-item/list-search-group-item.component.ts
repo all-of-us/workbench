@@ -27,7 +27,6 @@ export class ListSearchGroupItemComponent implements OnChanges, OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes);
     if (changes.item && !changes.item.firstChange) {
       this.getItemCount();
     }

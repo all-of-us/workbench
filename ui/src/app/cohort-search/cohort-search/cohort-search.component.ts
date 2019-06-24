@@ -48,6 +48,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   loading = false;
   count: number;
   error = false;
+  overview = false;
   criteria = {includes: [], excludes: []};
   chartData: any;
 
@@ -87,6 +88,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
         this.includeSize = sr.includes.length;
         this.criteria = sr;
         if (sr.includes.length || sr.excludes.length) {
+          this.overview = true;
           this.getTotalCount();
         }
       });

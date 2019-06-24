@@ -191,7 +191,7 @@
       </clr-dropdown>
     </div>
   </ng-container>
-  <div class="container card-footer" *ngIf=" this.group.count !== -1 || !groupDisableFlag">
+  <div class="container card-footer" *ngIf=" this.count !== -1 || !groupDisableFlag">
     <div class="row" [ngClass]="{'toggle-no-cursor' : !typeFlag}">
       <div class="col-sm-6 temporal-container">
         <div class="toggle-switch" [ngClass]="{'toggle-switch-disable' : !typeFlag}">
@@ -207,16 +207,16 @@
         <div [class.error]="error">
           Group Count:
           <span *ngIf="loading"
-            class="spinner spinner-inline"
+            class="spinner spinner-inline group"
             [style.vertical-align]="'middle'">
           Loading...
           </span>
           <ng-container [ngSwitch]="true">
             <span *ngIf="!loading">
-              <ng-container *ngSwitchCase="(group.count !== null || temporalFlag) &&  group.count !== -1">
-                {{ group.count | number }}
+              <ng-container *ngSwitchCase="(count !== null || temporalFlag) &&  count !== -1">
+                {{ count | number }}
               </ng-container>
-              <ng-container *ngSwitchCase="(group.count === null || group.count === -1) && !temporalFlag">
+              <ng-container *ngSwitchCase="(count === null || count === -1) && !temporalFlag">
                  --
                 <clr-tooltip>
                   <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
