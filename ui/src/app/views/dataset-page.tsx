@@ -37,6 +37,7 @@ import {
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
+import {ClrIcon} from 'app/components/icons';
 
 export const styles = reactStyles({
   selectBoxHeader: {
@@ -432,6 +433,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
 
     render() {
       const {namespace, id} = this.props.workspace;
+      const wsPathPrefix = 'workspaces/' + namespace + '/' + id;
       const {
         dataSet,
         dataSetTouched,
@@ -460,6 +462,15 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
                 <div style={styles.selectBoxHeader}>
                   Cohorts
+                    {/*<a data-test-id='asdf' href={this.getResourceUrl()}*/}
+                    {/*  onClick={e => {*/}
+                    {/*    navigateAndPreventDefaultIfNoKeysPressed(e, this.getResourceUrl());*/}
+                    {/*  }}>*/}
+                      <ClrIcon shape='plus-circle' class='is-solid' size={16}
+                           style={{fill: '#216FB4'}}/>
+                           {/*todo: move ^ to a style?*/}
+                    {/*</a>*/}
+                  {/*onClick={() => {navigate([wsPathPrefix, 'cohorts']); }}*/}
                 </div>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
@@ -489,6 +500,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
                   <div style={styles.selectBoxHeader}>
                     Concept Sets
+                    <ClrIcon shape='plus-circle' class='is-solid' size={16}
+                             style={{fill: '#216FB4'}}/>
                   </div>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
