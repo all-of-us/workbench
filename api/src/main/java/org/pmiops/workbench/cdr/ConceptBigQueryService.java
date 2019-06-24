@@ -37,14 +37,14 @@ public class ConceptBigQueryService {
           + SURVEY_PARAM;
 
   private static final String SURVEY_ANSWER_SQL_TEMPLATE =
-      "select a.answer, answer_concept_id, ans_part_count, " +
-          "round((ans_part_count/ques_part_cnt)*100,2) from " +
-          "(SELECT answer, answer_concept_id, question_concept_id, count(distinct person_id) ans_part_count " +
-          "FROM `${projectId}.${dataSetId}.ds_survey` GROUP BY 1,2,3) a join " +
-          "(SELECT question, question_concept_id, count(distinct person_id) ques_part_cnt " +
-          "FROM `${projectId}.${dataSetId}.ds_survey` GROUP BY 1,2) b on " +
-          "a.question_concept_id = b.question_concept_id WHERE a.question_concept_id = @" +
-          QUESTION_PARAM;
+      "select a.answer, answer_concept_id, ans_part_count, "
+          + "round((ans_part_count/ques_part_cnt)*100,2) from "
+          + "(SELECT answer, answer_concept_id, question_concept_id, count(distinct person_id) ans_part_count "
+          + "FROM `${projectId}.${dataSetId}.ds_survey` GROUP BY 1,2,3) a join "
+          + "(SELECT question, question_concept_id, count(distinct person_id) ques_part_cnt "
+          + "FROM `${projectId}.${dataSetId}.ds_survey` GROUP BY 1,2) b on "
+          + "a.question_concept_id = b.question_concept_id WHERE a.question_concept_id = @"
+          + QUESTION_PARAM;
 
   @Autowired
   public ConceptBigQueryService(
@@ -146,10 +146,12 @@ public class ConceptBigQueryService {
         .forEach(
             surveyValue -> {
               SurveyAnswerResponse answer = new SurveyAnswerResponse();
-              answer.setParticipationCount(Long.parseLong(surveyValue.get(2).getValue().toString()));
+              answer.setParticipationCount(
+                  Long.parseLong(surveyValue.get(2).getValue().toString()));
               answer.setAnswer(surveyValue.get(0).getValue().toString());
               answer.setConceptId(Long.parseLong(surveyValue.get(1).getValue().toString()));
-              answer.setPercentAnswered(Double.parseDouble(surveyValue.get(3).getValue().toString()));
+              answer.setPercentAnswered(
+                  Double.parseDouble(surveyValue.get(3).getValue().toString()));
               answerList.add(answer);
             });
     return answerList;
