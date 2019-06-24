@@ -107,7 +107,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String DEMO_BASE =
       "select person_id\n" + "from `${projectId}.${dataSetId}.person` p\nwhere\n";
   private static final String AGE_SQL =
-      "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) %s %s and %s\n"
+      "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) %s %s\n"
           + "and not exists (\n"
           + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
           + "where d.person_id = p.person_id)\n";
@@ -234,20 +234,20 @@ public final class SearchGroupItemQueryBuilder {
     SearchParameter param = parameters.get(0);
     switch (CriteriaType.valueOf(param.getType())) {
       case AGE:
-        // age attribute should always have 2 operands since the UI uses a slider
         Attribute attribute = param.getAttributes().get(0);
         String ageNamedParameter1 =
             addQueryParameterValue(
                 queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
-        String ageNamedParameter2 =
-            addQueryParameterValue(
-                queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
+        String finaParam = ageNamedParameter1;
+        if (attribute.getOperands().size() > 1) {
+          String ageNamedParameter2 =
+              addQueryParameterValue(
+                  queryParams, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
+          finaParam = finaParam + AND + ageNamedParameter2;
+        }
         return DEMO_BASE
             + String.format(
-                AGE_SQL,
-                OperatorUtils.getSqlOperator(attribute.getOperator()),
-                ageNamedParameter1,
-                ageNamedParameter2);
+                AGE_SQL, OperatorUtils.getSqlOperator(attribute.getOperator()), finaParam);
       case GENDER:
       case ETHNICITY:
       case RACE:
