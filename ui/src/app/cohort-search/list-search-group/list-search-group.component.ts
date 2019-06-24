@@ -64,7 +64,6 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes);
     if (changes.group && !changes.group.firstChange) {
       this.getGroupCount();
     }

@@ -1,7 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
-import {CohortSearchActions} from 'app/cohort-search/redux';
+import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 
@@ -39,8 +39,6 @@ export class ListOverviewComponent implements OnInit {
   showConflictError = false;
   cohort: Cohort;
 
-  constructor(private actions: CohortSearchActions) {}
-
   ngOnInit(): void {
     if (currentCohortStore.getValue()) {
       this.cohort = currentCohortStore.getValue();
@@ -52,7 +50,7 @@ export class ListOverviewComponent implements OnInit {
   }
 
   get criteria() {
-    return JSON.stringify(this.actions.mapAll());
+    return JSON.stringify(searchRequestStore.getValue());
   }
 
   get unchanged() {
@@ -69,7 +67,7 @@ export class ListOverviewComponent implements OnInit {
   saveCohort() {
     this.saving = true;
     const {ns, wsid} = urlParamsStore.getValue();
-    this.cohort.criteria = JSON.stringify(this.actions.mapAll());
+    this.cohort.criteria = this.criteria;
     const cid = this.cohort.id;
     cohortsApi().updateCohort(ns, wsid, cid, this.cohort).then(() => {
       this.saving = false;
