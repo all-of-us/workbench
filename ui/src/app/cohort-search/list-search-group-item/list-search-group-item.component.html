@@ -34,10 +34,10 @@
       <span class="code-text">{{ codeTypeDisplay }}</span>
     </small>
     <small *ngIf="status !== 'hidden'" class="code-text padding-right">|</small>
-    <span *ngIf="isRequesting" class="spinner spinner-inline">
+    <span *ngIf="loading" class="spinner spinner-inline">
       Loading...
     </span>
-    <small *ngIf="!isRequesting && status !== 'hidden'" class="code-text">
+    <small *ngIf="!loading && status !== 'hidden'" class="code-text">
       {{ item.count | number }}
     </small>
     <span *ngIf="error">
