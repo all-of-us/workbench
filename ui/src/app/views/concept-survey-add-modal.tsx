@@ -99,7 +99,8 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
     switch (this.props.surveyName) {
       case 'Lifestyle': survey = Surveys.LIFESTYLE; break;
       case 'Overall Health': survey = Surveys.OVERALLHEALTH; break;
-      default: survey = Surveys.THEBASICS;
+      case 'The Basics': survey = Surveys.THEBASICS; break;
+      default: {console.error('Survey name not found'); return; }
     }
     if (addingToExistingSet) {
       const updateConceptSetReq: UpdateConceptSetRequest = {
