@@ -1,0 +1,185 @@
+<div>
+  <div class="overview-header">
+    <div class="actions-container">
+      <clr-dropdown *ngIf="cohort" style="float: right">
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="isRequesting || saving || total === null || total === -1"
+          [clrLoading]="saving"
+          clrDropdownTrigger>
+          <span style="margin-right: 5px">Save Cohort</span>
+          <clr-icon shape="caret down"></clr-icon>
+        </button>
+        <clr-dropdown-menu>
+          <button
+            type="button"
+            class="dropdown-item"
+            [disabled]="unchanged"
+            (click)="saveCohort()"
+            clrDropdownItem>Save</button>
+          <button
+            type="button"
+            class="dropdown-item"
+            (click)="saveModal.open()"
+            clrDropdownItem>Save as</button>
+        </clr-dropdown-menu>
+      </clr-dropdown>
+      <button
+        *ngIf="!cohort"
+        type="button"
+        class="btn btn-primary"
+        style="float: right; margin: 0;"
+        [disabled]="isRequesting || total === null || total === -1"
+        (click)="saveModal.open()">Create Cohort</button>
+      <button
+        class="btn btn-link"
+        (click)="navigateTo('notebook')"
+        disabled
+        [popper]="'Export to notebook'"
+        [popperTrigger]="'hover'">
+        <clr-icon shape="export" class="is-solid" size="30"></clr-icon>
+      </button>
+      <button
+        class="btn btn-link"
+        (click)="deleting = true"
+        [disabled]="isRequesting || !cohort"
+        [popper]="'Delete cohort'"
+        [popperTrigger]="'hover'">
+        <clr-icon shape="trash" class="is-solid" size="30"></clr-icon>
+      </button>
+      <button
+        class="btn btn-link"
+        (click)="navigateTo('review')"
+        [disabled]="isRequesting || !cohort"
+        [popper]="'Review participant level data'"
+        [popperTrigger]="'hover'">
+        <clr-icon shape="copy" class="is-solid disabled" size="30"></clr-icon>
+      </button>
+    </div>
+    <h2 class="count-header" id="total-count">
+      Total Count:
+      <span *ngIf="isRequesting" class="spinner spinner-sm">
+        Loading...
+      </span>
+      <span class="count-header" *ngIf="!isRequesting && total !== -1">
+        {{ total | number }}
+      </span>
+      <span *ngIf="!isRequesting && ((temporal?.flag && temporal.tempLength && total === null) || total === -1)">
+        --
+        <clr-icon
+          [popper]="errorPopper"
+          [popperTrigger]="'hover'"
+          shape="warning-standard"
+          size="18"></clr-icon>
+      </span>
+    </h2>
+  </div>
+  <div *ngIf="error && !temporal.flag" class="total-error">
+    <clr-icon class="is-solid" shape="exclamation-triangle" size="22"></clr-icon>
+    Sorry, the request cannot be completed.
+  </div>
+  <div *ngIf="total > 0 && !isRequesting && chartData">
+    <div class="card bg-faded">
+      <div class="card-header header-text">
+        Results by Gender
+      </div>
+      <div *ngIf="showGenderChart" class="card-block">
+        <app-gender-chart *ngIf="chartData.length"
+          [data]="chartData">
+        </app-gender-chart>
+      </div>
+    </div>
+    <div class="card bg-faded">
+      <div class="card-header header-text">
+        Results By Gender, Age Range, and Race
+        <clr-icon shape="sort-by"
+          [class.is-info]="stackChart"
+          (click)="toggleChartMode()">
+        </clr-icon>
+      </div>
+      <div *ngIf="showComboChart" class="card-block">
+        <app-combo-chart *ngIf="chartData.length"
+          [data]="chartData"
+          [mode]="stackChart ? 'stacked' : 'normalized'">
+        </app-combo-chart>
+      </div>
+    </div>
+  </div>
+</div>
+<popper-content #errorPopper>
+  <p   *ngIf="error && !temporal?.flag" [style.margin]="'0'">
+    A problem occurred and we were not able to retrieve the requested data
+  </p>
+  <p *ngIf="temporal?.flag && temporal.tempLength" [style.margin]="'0'">
+    Please complete criteria selections before saving temporal relationship.
+  </p>
+  <p *ngIf="total === -1" [style.margin]="'0'">
+    All criteria are suppressed. Un-surpress criteria to update the total count based on the visible criteria.
+  </p>
+</popper-content>
+<clr-modal #saveModal
+  [clrModalSize]="'md'"
+  (clrModalOpenChange)="modalChange($event)">
+  <div class="modal-title">
+    <h2>Save New Cohort</h2>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="cohortForm" (ngSubmit)="submit()">
+      <label
+        for="name-control"
+        [class.show]="(name.dirty || name.touched) && cohortForm.invalid">
+        <em>*A Cohort Name is Required</em>
+      </label>
+      <div class="name-area">
+        <input
+          name="name"
+          id="name-control"
+          class="control"
+          placeholder="Cohort Name"
+          maxlength="80"
+          formControlName="name"
+          type="text"
+          [class.invalid]="(name.dirty || name.touched) && cohortForm.invalid"
+          (input)="showConflictError = false"
+          [class.alreadyTaken]="showConflictError"
+          autofocus>
+        <clr-icon shape="warning-standard" class="warning-standard is-solid" *ngIf="showConflictError"></clr-icon>
+        <div *ngIf="showConflictError" class="error">
+          {{name.value}} already exists. Please choose another name.
+        </div>
+      </div>
+      <textarea
+        name="description"
+        id="description-control"
+        class="control"
+        placeholder="Description"
+        rows="60"
+        formControlName="description">
+      </textarea>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-link"
+      (click)="saveModal.close()">
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="submit()"
+      [clrLoading]="saving"
+      [disabled]="!cohortForm.valid">
+      Save Cohort
+    </button>
+  </div>
+</clr-modal>
+<app-confirm-delete-modal
+  *ngIf="deleting"
+  [resourceName]="cohort.name"
+  [resourceType]="'cohort'"
+  [receiveDelete]="delete"
+  [closeFunction]="cancel">
+</app-confirm-delete-modal>
