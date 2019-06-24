@@ -139,7 +139,7 @@ describe('DataSet', () => {
 
   });
 
-  it('should refresh preview data once refresh link is clicked', async() => {
+  it('should refresh preview data once refresh preview link is clicked', async() => {
     const spy = jest.spyOn(dataSetApi(), 'previewQuery');
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
@@ -170,13 +170,14 @@ describe('DataSet', () => {
     expect(spy).toHaveBeenCalledTimes(2);
   });
 
-
-  it('should enable and disable the refresh link when it can and cannot be used', async() => {
+  // This test verifies that the refresh preview link is enabled only if cohort, concept, and value
+  // are all selected AND the preview button has been clicked. Otherwise the link is disabled.
+  it('should enable and disable the refresh preview link when criteria is met', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
-    // Check refresh link is disabled
+    // Check refresh preview link is disabled
     expect(wrapper.find('[data-test-id="refresh-preview-clickable-text"]').first().prop('disabled'))
       .toBeTruthy();
 
@@ -194,7 +195,7 @@ describe('DataSet', () => {
       .simulate('change');
     await waitOneTickAndUpdate(wrapper);
 
-    // Check refresh link is still disabled
+    // Check refresh preview link is still disabled
     expect(wrapper.find('[data-test-id="refresh-preview-clickable-text"]').first().prop('disabled'))
       .toBeTruthy();
 
@@ -202,7 +203,7 @@ describe('DataSet', () => {
     wrapper.find({'data-test-id': 'preview-button'}).first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
-    // Check refresh link is now enabled
+    // Check refresh preview link is now enabled
     expect(wrapper.find('[data-test-id="refresh-preview-clickable-text"]').first().prop('disabled'))
       .toBeFalsy();
 
