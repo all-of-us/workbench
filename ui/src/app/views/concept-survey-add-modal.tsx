@@ -18,7 +18,6 @@ import {
 } from 'generated/fetch';
 import {validate} from 'validate.js';
 
-
 const styles = reactStyles({
   label: {
     color: '#000',

@@ -28,6 +28,7 @@ import {
   DomainInfo,
   StandardConceptFilter,
   SurveyModule,
+  SurveyQuestionsResponse,
   VocabularyCount,
 } from 'generated/fetch';
 import {SurveyDetails} from './survey-details';
@@ -164,7 +165,7 @@ interface State { // Browse survey
   // Name of the survey selected
   selectedSurvey: string;
   // Array of survey questions selected to be added to concept set
-  selectedSurveyQuestions: Array<SurveyDetailsResponse>;
+  selectedSurveyQuestions: Array<SurveyQuestionsResponse>;
   // Show if a search error occurred
   showSearchError: boolean;
   // Only search on standard concepts
