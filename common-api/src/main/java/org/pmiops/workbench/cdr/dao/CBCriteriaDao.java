@@ -9,6 +9,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+/**
+ * Some of our trees are polyhierarchical(Snomed and drug). Since a node may exist multiple times in
+ * this scenario with the same concept_id we only want to return it once from a user search. The
+ * query to rank/min this to a single row was expensive. Instead, when build the the cb_criteria
+ * table we add domain_rank1 to the synonyms column for the first node that matches in the tree for
+ * a specific concept_id. This allows us to use the full text index and makes the query much faster.
+ */
 public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   /**
