@@ -546,11 +546,14 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 <div style={styles.previewDataHeader}>
                   <div>Preview Data Set</div>
                 </div>
-                <Clickable data-test-id='preview-icon' disabled={this.isRefreshPreviewDisabled}
-                     onClick={() => this.getPreviewList()} style={{fontSize: '12px',
-                       cursor: this.isRefreshPreviewDisabled ? 'not-allowed' : 'pointer',
-                       fontWeight: 600, lineHeight: '15px',
-                       color: this.isRefreshPreviewDisabled ? colors.gray[4] : colors.blue[0]}}>
+                <Clickable data-test-id='refresh-preview-clickable-text'
+                           disabled={this.isRefreshPreviewDisabled}
+                           onClick={() => this.getPreviewList()}
+                           style={{fontSize: '12px',
+                             cursor: this.isRefreshPreviewDisabled ? 'not-allowed' : 'pointer',
+                             fontWeight: 600, lineHeight: '15px',
+                             color: this.isRefreshPreviewDisabled ? colors.gray[4] : colors.blue[0]
+                           }}>
                     Refresh Preview
                   </Clickable>
               </div>
@@ -602,9 +605,9 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 <div style={{color: colors.gray[4], fontSize: '20px', fontWeight: 400}}>
                   Select cohorts, concept sets, and values above to generate a preview table
                 </div>
-                <Button disabled={this.disableSave()} style={{marginTop: '0.5rem',
-                  height: '1.8rem', width: '6.5rem'}}
-                    onClick={() => this.getPreviewList()}>
+                <Button data-test-id='preview-button' disabled={this.disableSave()}
+                        style={{marginTop: '0.5rem', height: '1.8rem', width: '6.5rem'}}
+                        onClick={() => this.getPreviewList()}>
                   Preview Table
                 </Button>
               </div>
