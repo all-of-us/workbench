@@ -709,6 +709,21 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/userRoles:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    get:
+      tags:
+        - workspaces
+      description: Returns the user roles for all collaborators on a workspace
+      operationId: getFirecloudWorkspaceUserRoles
+      responses:
+        200:
+          description: A list of workspace collaborators
+          schema:
+            $ref: '#/definitions/WorkspaceUserRolesResponse'
+
   /v1/admin/workspaces/review:
     get:
       tags:
@@ -1014,7 +1029,7 @@ paths:
         200:
           description: Successful share response
           schema:
-            $ref: "#/definitions/ShareWorkspaceResponse"
+            $ref: "#/definitions/WorkspaceUserRolesResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicate:
     parameters:
@@ -1882,10 +1897,6 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
-      userRoles:
-        type: "array"
-        items:
-           $ref: "#/definitions/UserRole"
 
   UserRole:
     type: object
@@ -1918,7 +1929,7 @@ definitions:
         items:
            $ref: "#/definitions/UserRole"
 
-  ShareWorkspaceResponse:
+  WorkspaceUserRolesResponse:
     type: object
     properties:
       workspaceEtag:

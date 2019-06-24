@@ -7,7 +7,7 @@ import {ResourceCardMenu} from 'app/components/resources';
 import {TextModal} from 'app/components/text-modal';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {navigate, navigateByUrl} from 'app/utils/navigation';
+import {navigate, navigateAndPreventDefaultIfNoKeysPressed, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
@@ -30,7 +30,7 @@ const styles = reactStyles({
     fontSize: '18px', fontWeight: 500, lineHeight: '22px', color: colors.blue[0],
     cursor: 'pointer', wordBreak: 'break-all', textOverflow: 'ellipsis',
     overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3,
-    WebkitBoxOrient: 'vertical'
+    WebkitBoxOrient: 'vertical', textDecoration: 'none'
   },
   cardDescription: {
     textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',
@@ -234,12 +234,6 @@ export class ResourceCard extends React.Component<Props, State> {
     }
   }
 
-  reviewCohort(): void {
-    const {resourceCard: {workspaceNamespace, workspaceFirecloudName, cohort: {id}}} = this.props;
-    navigateByUrl(
-      `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/cohorts/${id}/review`);
-  }
-
   renameCohort(): void {
     this.setState({renaming: true});
   }
@@ -439,42 +433,39 @@ export class ResourceCard extends React.Component<Props, State> {
     }
   }
 
-  openResource(jupyterLab?: boolean): void {
+  getResourceUrl(jupyterLab?: boolean): string {
+    const {workspaceNamespace, workspaceFirecloudName, conceptSet, notebook, dataSet, cohort} =
+      this.props.resourceCard;
+    const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
+
     switch (this.resourceType) {
       case ResourceType.COHORT: {
-        this.reviewCohort();
-        break;
+        return `${workspacePrefix}/cohorts/${cohort.id}/review`;
       }
       case ResourceType.CONCEPT_SET: {
-        navigate(['workspaces', this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName, 'concepts', 'sets',
-          this.props.resourceCard.conceptSet.id], {relativeTo: null});
-        break;
+        return `${workspacePrefix}/concepts/sets/${conceptSet.id}`;
       }
       case ResourceType.NOTEBOOK: {
-        const queryParams = {
-          playgroundMode: false,
-          jupyterLabMode: jupyterLab
-        };
+        const queryParams = new URLSearchParams([
+          ['playgroundMode', 'false'],
+          ['jupyterLabMode', String(jupyterLab)]
+        ]);
+
         if (this.notebookReadOnly) {
-          queryParams.playgroundMode = true;
+          queryParams.set('jupyterLabMode', 'true');
         }
-        navigate(
-          ['workspaces', this.props.resourceCard.workspaceNamespace,
-            this.props.resourceCard.workspaceFirecloudName, 'notebooks',
-            encodeURIComponent(this.props.resourceCard.notebook.name)], {
-              queryParams,
-              relativeTo: null,
-            });
-        break;
+
+        return `${workspacePrefix}/notebooks/${encodeURIComponent(notebook.name)}?` +
+          queryParams.toString();
       }
       case ResourceType.DATA_SET: {
-        navigate(['/workspaces', this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName, 'data', 'data-sets',
-          this.props.resourceCard.dataSet.id]);
-        break;
+        return `${workspacePrefix}/data/data-sets/${dataSet.id}`;
       }
     }
+  }
+
+  openResource(jupyterLab?: boolean): void {
+    navigateByUrl(this.getResourceUrl(jupyterLab));
   }
 
   exportDataSet(): void {
@@ -484,6 +475,7 @@ export class ResourceCard extends React.Component<Props, State> {
   renameDataSet(): void {
     this.setState({renaming: true});
   }
+
   render() {
     const marginTop = this.props.marginTop;
     return <React.Fragment>
@@ -521,13 +513,16 @@ export class ResourceCard extends React.Component<Props, State> {
                               onRenameDataSet={() => this.renameDataSet()}
                               onEdit={() => this.edit()}
                               onExportDataSet={() => this.exportDataSet()}
-                              onReviewCohort={() => this.reviewCohort()}
+                              onReviewCohort={() => this.openResource()}
                               onOpenJupyterLabNotebook={() => this.openResource(true)}/>
             <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>
-              <div style={styles.cardName}
+              <a style={styles.cardName}
                    data-test-id='card-name'
-                   onClick={() => this.openResource()}>{this.displayName}
-              </div>
+                 href={this.getResourceUrl()}
+                 onClick={e => {
+                   navigateAndPreventDefaultIfNoKeysPressed(e, this.getResourceUrl());
+                 }}>{this.displayName}
+              </a>
             </Clickable>
           </div>
           <div style={styles.cardDescription}>{this.description}</div>
