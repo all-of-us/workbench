@@ -48,12 +48,6 @@ export const styles = reactStyles({
     borderBottom: '1px solid #E5E5E5'
   },
 
-  addIcon: {
-    marginLeft: 19,
-    fill: colors.blue[0],
-    verticalAlign: '-6%'
-  },
-
   listItem: {
     border: '0.5px solid #C3C3C3',
     margin: '.4rem',
@@ -85,16 +79,24 @@ export const styles = reactStyles({
     marginTop: '0.5rem',
     color: colors.purple[0]
   },
-  refreshIcon: {
-    marginRight: '1rem',
-    marginTop: '0.5rem',
-    height: '25px',
-    width: '25px',
-    borderRadius: '5px',
-    backgroundColor: colors.purple[0],
+  refreshPreviewHeader: {
     display: 'flex',
+    flexDirection: 'row',
+    position: 'relative',
+    lineHeight: 'auto',
+    paddingTop: '0.5rem',
+    paddingBottom: '0.5rem',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'space-between',
+    height: 'auto'
+  },
+  previewButtonBox: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginTop: '2.675rem',
+    marginBottom: '2rem'
   },
   previewDataHeader: {
     height: '19px',
@@ -537,10 +539,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         </FadeBox>
         <FadeBox style={{marginTop: '1rem'}}>
           <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-            <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row',
-              position: 'relative', lineHeight: 'auto', paddingTop: '0.5rem',
-              paddingBottom: '0.5rem', alignItems: 'center', justifyContent: 'space-between',
-              height: 'auto'}}>
+            <div style={{...styles.selectBoxHeader, ...styles.refreshPreviewHeader}}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
               <div style={{display: 'flex', alignItems: 'flex-end'}}>
                 <div style={styles.previewDataHeader}>
@@ -600,8 +599,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               </div>
             }
             {previewList.length === 0 && !previewDataLoading &&
-              <div style={{width: '100%', display: 'flex', flexDirection: 'column',
-                alignItems: 'center', marginTop: '2.675rem', marginBottom: '2rem'}}>
+              <div style={styles.previewButtonBox}>
                 <div style={{color: colors.gray[4], fontSize: '20px', fontWeight: 400}}>
                   Select cohorts, concept sets, and values above to generate a preview table
                 </div>
