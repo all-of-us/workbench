@@ -3,10 +3,9 @@ package org.pmiops.workbench.workspaces;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
-import org.pmiops.workbench.db.model.WorkspaceUserRole;
+import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
@@ -45,11 +44,6 @@ public class WorkspaceMapper {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
 
-    result.setUserRoles(
-        workspace.getWorkspaceUserRoles().stream()
-            .map(this::toApiUserRole)
-            .collect(Collectors.toList()));
-
     return result;
   }
 
@@ -79,11 +73,6 @@ public class WorkspaceMapper {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
 
-    result.setUserRoles(
-        workspace.getWorkspaceUserRoles().stream()
-            .map(this::toApiUserRole)
-            .collect(Collectors.toList()));
-
     return result;
   }
 
@@ -108,12 +97,13 @@ public class WorkspaceMapper {
     return result;
   }
 
-  public UserRole toApiUserRole(WorkspaceUserRole workspaceUserRole) {
+  public UserRole toApiUserRole(
+      org.pmiops.workbench.db.model.User user, WorkspaceAccessEntry aclEntry) {
     UserRole result = new UserRole();
-    result.setEmail(workspaceUserRole.getUser().getEmail());
-    result.setGivenName(workspaceUserRole.getUser().getGivenName());
-    result.setFamilyName(workspaceUserRole.getUser().getFamilyName());
-    result.setRole(workspaceUserRole.getRoleEnum());
+    result.setEmail(user.getEmail());
+    result.setGivenName(user.getGivenName());
+    result.setFamilyName(user.getFamilyName());
+    result.setRole(WorkspaceAccessLevel.fromValue(aclEntry.getAccessLevel()));
     return result;
   }
 

@@ -11,14 +11,28 @@ import {CheckBox, DatePicker, NumberInput, Select, TextArea} from 'app/component
 import {Spinner} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {withCurrentWorkspace, withUrlParams} from 'app/utils/index';
+import {withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {AnnotationType, CohortAnnotationDefinition, CohortStatus, ParticipantCohortAnnotation, WorkspaceAccessLevel} from 'generated/fetch';
+import Timeout = NodeJS.Timeout;
 
 const styles = {
   header: {
     fontSize: 18,
     color: colors.purple[0],
+  },
+  error: {
+    color: '#F7981C',
+    marginTop: '-3px',
+  },
+  success: {
+    color: '#7CC79B',
+    marginTop: '-3px',
+  },
+  message: {
+    color: '#000000',
+    fontSize: '13px',
+    fontWeight: 400
   }
 };
 
@@ -55,13 +69,33 @@ const AnnotationItem = fp.flow(
 }, {
   editValue: number | string | boolean | Date,
   savingValue: number | string | boolean | Date,
+  saving: boolean,
+  error: boolean,
+  success: boolean,
+  timeout: Timeout
 }> {
   constructor(props) {
     super(props);
     this.state = {
       editValue: undefined,
       savingValue: undefined,
+      saving: false,
+      error: false,
+      success: false,
+      timeout: undefined
     };
+  }
+
+  componentDidUpdate(prevProps: any): void {
+    const {annotation} = this.props;
+    const {timeout} = this.state;
+    if (
+      !annotation || (annotation && annotation.annotationId !== prevProps.annotation.annotationId)
+    ) {
+      // get rid of spinners and save messages when switching participants
+      clearTimeout(timeout);
+      this.setState({saving: false, error: false, success: false});
+    }
   }
 
   async save(newValue) {
@@ -72,6 +106,7 @@ const AnnotationItem = fp.flow(
         urlParams: {ns, wsid, cid, pid},
         workspace: {cdrVersionId},
       } = this.props;
+      const {timeout} = this.state;
       const aid = annotation ? annotation.annotationId : undefined;
       const value = readValue(annotationType, annotation);
       this.setState({savingValue: newValue});
@@ -79,23 +114,35 @@ const AnnotationItem = fp.flow(
         setAnnotation(await cohortReviewApi()
           .deleteParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, aid));
       } else if (aid && newValue !== value) {
-        setAnnotation(await cohortReviewApi()
+        clearTimeout(timeout);
+        this.setState({error: false, success: false, saving: true});
+        await cohortReviewApi()
           .updateParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, aid, {
             ...writeValue(annotationType, newValue),
-          }));
+          }).then(res => {
+            setAnnotation(res);
+            this.setState({saving: false, success: true});
+          });
       } else if (!aid && newValue) {
-        setAnnotation(await cohortReviewApi()
+        clearTimeout(timeout);
+        this.setState({error: false, success: false, saving: true});
+        await cohortReviewApi()
           .createParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, {
             cohortAnnotationDefinitionId,
             cohortReviewId: cohortReviewStore.getValue().cohortReviewId,
             participantId: pid,
             ...writeValue(annotationType, newValue),
-          }));
+          }).then(res => {
+            setAnnotation(res);
+            this.setState({saving: false, success: true});
+          });
       }
     } catch (error) {
       console.error(error);
+      this.setState({saving: false, error: true});
     } finally {
-      this.setState({savingValue: undefined});
+      const timeout = setTimeout(() => this.setState({error: false, success: false}), 5000);
+      this.setState({savingValue: undefined, timeout});
     }
   }
 
@@ -170,13 +217,20 @@ const AnnotationItem = fp.flow(
 
   render() {
     const {definition: {columnName}} = this.props;
-    const {savingValue} = this.state;
+    const {error, saving, success} = this.state;
     return <React.Fragment>
-      <div style={{display: 'flex', alignItems: 'center', ...headerStyles.formLabel}}>
+      <div style={{alignItems: 'center', ...headerStyles.formLabel}}>
         <div>{columnName}</div>
-        {savingValue !== undefined &&
-          <Spinner style={{marginLeft: 'auto'}} width={16} height={16}/>
-        }
+        {error && <div>
+          <ClrIcon style={styles.error} shape='exclamation-triangle'
+            size='20' className='is-solid' />
+          <span style={styles.message}> Save Failed</span>
+        </div>}
+        {success && <div>
+          <ClrIcon style={styles.success} shape='check-circle' size='20' className='is-solid' />
+          <span style={styles.message}> Annotation Saved</span>
+        </div>}
+        {saving && <Spinner size={16}/>}
       </div>
       {this.renderInput()}
     </React.Fragment>;

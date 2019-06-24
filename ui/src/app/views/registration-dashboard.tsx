@@ -102,8 +102,8 @@ export const RegistrationTasks = [
   }, {
     key: 'eraCommons',
     title: 'Login to ERA Commons',
-    description: 'Researchers must maintain up-to-date completion of compliance' +
-      ' training courses hosted at the NNLM’s Moodle installation',
+    description: 'Please login to your ERA Commons account and complete the online training ' +
+      'courses in order to gain full access to the Researcher Workbench data and tools',
     buttonText: 'Login',
     completedText: 'Linked',
     isComplete: (profile: Profile) => {

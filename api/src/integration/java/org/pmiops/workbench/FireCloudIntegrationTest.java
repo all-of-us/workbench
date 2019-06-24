@@ -46,6 +46,7 @@ public class FireCloudIntegrationTest {
   @Mock private WorkspacesApi workspacesApi;
   @Mock private GroupsApi allOfUsGroupsApi;
   @Mock private GroupsApi endUserGroupsApi;
+  @Mock private WorkspacesApi workspaceAclsApi;
   @Mock private ProfileApi profileApi;
   @Mock private NihApi nihApi;
 
@@ -92,6 +93,7 @@ public class FireCloudIntegrationTest {
         Providers.of(allOfUsGroupsApi),
         Providers.of(nihApi),
         Providers.of(workspacesApi),
+        Providers.of(workspaceAclsApi),
         Providers.of(new StatusApi(apiClient)),
         new FirecloudRetryHandler(new NoBackOffPolicy()),
         serviceAccounts,

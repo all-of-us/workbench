@@ -10,7 +10,7 @@ import {
   withRouteConfigData,
   withUrlParams
 } from 'app/utils';
-import {BreadcrumbType, navigateByUrl} from 'app/utils/navigation';
+import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 
 const styles = {
   firstLink: {
@@ -93,8 +93,7 @@ const BreadcrumbLink = ({href, ...props}) => {
   return <a
     href={href}
     onClick={e => {
-      e.preventDefault();
-      navigateByUrl(href);
+      navigateAndPreventDefaultIfNoKeysPressed(e, href);
     }}
     {...props}
   />;

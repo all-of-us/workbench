@@ -92,7 +92,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(
       value =
-          "select * from cb_criteria where domain_id=:domain and type=:type and is_standard=:standard and parent_id=:parentId and has_hierarchy = 1 order by id asc",
+          "select * from cb_criteria where domain_id=:domain and type=:type and is_standard=:standard and parent_id=:parentId order by id asc",
       nativeQuery = true)
   List<CBCriteria> findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
       @Param("domain") String domain,

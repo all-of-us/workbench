@@ -7,6 +7,7 @@ import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/valid
 import {CodeDropdownComponent} from 'app/cohort-search/code-dropdown/code-dropdown.component';
 import {DemographicsComponent} from 'app/cohort-search/demographics/demographics.component';
 import {ListAttributesPageComponent} from 'app/cohort-search/list-attributes-page/list-attributes-page.component';
+import {ListDemographicsComponent} from 'app/cohort-search/list-demographics/list-demographics.component';
 import {ListModifierPageComponent} from 'app/cohort-search/list-modifier-page/list-modifier-page.component';
 import {ListNodeInfoComponent} from 'app/cohort-search/list-node-info/list-node-info.component';
 import {ListNodeComponent} from 'app/cohort-search/list-node/list-node.component';
@@ -66,6 +67,7 @@ describe('ListModalComponent', () => {
         CodeDropdownComponent,
         DemographicsComponent,
         ListAttributesPageComponent,
+        ListDemographicsComponent,
         ListModalComponent,
         ListModifierPageComponent,
         ListNodeInfoComponent,
