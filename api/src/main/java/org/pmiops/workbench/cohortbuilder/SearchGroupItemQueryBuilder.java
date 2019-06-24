@@ -38,7 +38,7 @@ import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.utils.OperatorUtils;
 
-/** BaseQueryBuilder builds BigQuery queries for criteria groups. */
+/** SearchGroupItemQueryBuilder builds BigQuery queries for search group items. */
 public final class SearchGroupItemQueryBuilder {
 
   // sql parts to help construct BigQuery sql statements
