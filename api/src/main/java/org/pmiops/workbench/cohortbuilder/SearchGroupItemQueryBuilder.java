@@ -489,39 +489,40 @@ public final class SearchGroupItemQueryBuilder {
     ageDateAndEncounterModifiers.add(getModifier(modifiers, ModifierType.ENCOUNTERS));
     StringBuilder modifierSql = new StringBuilder();
     for (Modifier modifier : ageDateAndEncounterModifiers) {
-      if (modifier != null) {
-        List<String> modifierParamList = new ArrayList<>();
-        for (String operand : modifier.getOperands()) {
-          String modifierParameter =
-              addQueryParameterValue(
-                  queryParams,
-                  (isAgeAtEvent(modifier) || isEncounters(modifier))
-                      ? QueryParameterValue.int64(new Long(operand))
-                      : QueryParameterValue.date(operand));
-          modifierParamList.add(modifierParameter);
-        }
-        if (isAgeAtEvent(modifier)) {
-          modifierSql.append(AGE_AT_EVENT_SQL_TEMPLATE);
-          modifierSql.append(
-              OperatorUtils.getSqlOperator(modifier.getOperator())
-                  + " "
-                  + String.join(AND, modifierParamList)
-                  + "\n");
-        } else if (isEncounters(modifier)) {
-          modifierSql.append(ENCOUNTERS_SQL_TEMPLATE);
-          modifierSql.append(
-              OperatorUtils.getSqlOperator(modifier.getOperator())
-                  + " ("
-                  + modifierParamList.get(0)
-                  + ")\n");
-        } else {
-          modifierSql.append(EVENT_DATE_SQL_TEMPLATE);
-          modifierSql.append(
-              OperatorUtils.getSqlOperator(modifier.getOperator())
-                  + " "
-                  + String.join(AND, modifierParamList)
-                  + "\n");
-        }
+      if (modifier == null) {
+        continue;
+      }
+      List<String> modifierParamList = new ArrayList<>();
+      for (String operand : modifier.getOperands()) {
+        String modifierParameter =
+            addQueryParameterValue(
+                queryParams,
+                (isAgeAtEvent(modifier) || isEncounters(modifier))
+                    ? QueryParameterValue.int64(new Long(operand))
+                    : QueryParameterValue.date(operand));
+        modifierParamList.add(modifierParameter);
+      }
+      if (isAgeAtEvent(modifier)) {
+        modifierSql.append(AGE_AT_EVENT_SQL_TEMPLATE);
+        modifierSql.append(
+            OperatorUtils.getSqlOperator(modifier.getOperator())
+                + " "
+                + String.join(AND, modifierParamList)
+                + "\n");
+      } else if (isEncounters(modifier)) {
+        modifierSql.append(ENCOUNTERS_SQL_TEMPLATE);
+        modifierSql.append(
+            OperatorUtils.getSqlOperator(modifier.getOperator())
+                + " ("
+                + modifierParamList.get(0)
+                + ")\n");
+      } else {
+        modifierSql.append(EVENT_DATE_SQL_TEMPLATE);
+        modifierSql.append(
+            OperatorUtils.getSqlOperator(modifier.getOperator())
+                + " "
+                + String.join(AND, modifierParamList)
+                + "\n");
       }
     }
     return modifierSql.toString();
