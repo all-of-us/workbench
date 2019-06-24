@@ -51,13 +51,13 @@
     </div>
 
     <div class="col-xl-4 col-lg-12" id="list-charts">
-      <app-overview
-        *ngIf="(initShowChart$ | async)"
-        [total$]="total$"
-        [chartData$]="chartData$"
-        [temporal] = "tempLength"
-        [isRequesting$]="isRequesting$">
-      </app-overview>
+      <app-list-overview
+        [total]="count"
+        [chartData]="chartData"
+        [temporal]="tempLength"
+        [isRequesting]="loading"
+        [error]="error">
+      </app-list-overview>
     </div>
   </div>
 </div>

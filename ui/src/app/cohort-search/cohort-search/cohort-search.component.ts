@@ -6,7 +6,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {cohortsApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {environment} from 'environments/environment';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
@@ -21,7 +21,7 @@ import {
 } from 'app/cohort-search/redux';
 import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
-import {SearchRequest} from '../../../generated/fetch';
+import {SearchRequest} from 'generated/fetch';
 
 const pixel = (n: number) => `${n}px`;
 const ONE_REM = 24;  // value in pixels
@@ -46,7 +46,10 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   private subscription;
   listSearch = environment.enableCBListSearch;
   loading = false;
+  count: number;
+  error = false;
   criteria = {includes: [], excludes: []};
+  chartData: any;
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -83,6 +86,9 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
       searchRequestStore.subscribe(sr => {
         this.includeSize = sr.includes.length;
         this.criteria = sr;
+        if (sr.includes.length || sr.excludes.length) {
+          this.getTotalCount();
+        }
       });
     } else {
       this.subscription.add(
@@ -98,6 +104,24 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     idsInUse.next(new Set());
     currentCohortStore.next(undefined);
     searchRequestStore.next({includes: [], excludes: []} as SearchRequest);
+  }
+
+  getTotalCount() {
+    try {
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      cohortBuilderApi().getDemoChartInfo(+cdrVersionId, this.criteria).then(response => {
+        this.count = response.items.reduce((sum, data) => sum + data.count, 0);
+        this.loading = false;
+      }, (err) => {
+        console.error(err);
+        this.error = true;
+        this.loading = false;
+      });
+    } catch (error) {
+      console.error(error);
+      this.error = true;
+      this.loading = false;
+    }
   }
 
   getTempObj(e) {
