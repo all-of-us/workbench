@@ -128,7 +128,7 @@ public final class CriteriaLookupUtil {
               treeType.domain.toString(), treeType.type.toString(), parentConceptIds)
           .forEach(
               c -> {
-                if (c.getGroup() && parents.isEmpty()) {
+                if (c.getGroup()) {
                   parents.add(c);
                 } else {
                   leaves.add(c);
