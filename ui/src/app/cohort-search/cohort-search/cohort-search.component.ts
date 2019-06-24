@@ -89,7 +89,11 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
         this.criteria = sr;
         if (sr.includes.length || sr.excludes.length) {
           this.overview = true;
+          this.loading = true;
+          this.error = false;
           this.getTotalCount();
+        } else {
+          this.overview = false;
         }
       });
     } else {

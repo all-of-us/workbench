@@ -52,10 +52,10 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
   position = 'bottom-left';
   count: number;
   error = false;
-  loading = true;
+  loading = false;
 
   ngOnInit() {
-    this.getGroupCount();
+    // this.getGroupCount();
     // TODO move this to the store and remove all Outputs/Event emitters
     this.temporalLength.emit( {
       tempLength: false,
@@ -65,7 +65,7 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.group && !changes.group.firstChange) {
-      this.getGroupCount();
+      // this.getGroupCount();
     }
   }
 
@@ -114,6 +114,15 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
       this.error = true;
       this.loading = false;
     }
+  }
+
+  update = () => {
+    // timeout prevents Angular 'value changed after checked' error
+    setTimeout(() => {
+      this.loading = true;
+      this.error = false;
+      this.getGroupCount();
+    });
   }
 
   get items() {

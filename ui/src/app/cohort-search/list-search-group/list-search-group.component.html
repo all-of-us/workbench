@@ -45,7 +45,8 @@
       [role]="role"
       [groupId]="groupId"
       [item]="item"
-      [delete]="deleteItem">
+      [delete]="deleteItem"
+      [updateGroup]="update">
     </app-list-search-group-item>
     <div *ngIf="status === 'active'" class="item-or">OR</div>
   </div>
@@ -168,7 +169,8 @@
         [role]="role"
         [groupId]="groupId"
         [item]="item"
-        [delete]="deleteItem">
+        [delete]="deleteItem"
+        [updateGroup]="update">
       </app-list-search-group-item>
       <div *ngIf="status === 'active'" class="item-or">OR</div>
     </div>

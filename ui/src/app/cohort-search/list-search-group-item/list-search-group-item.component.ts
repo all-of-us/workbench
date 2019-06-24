@@ -17,6 +17,7 @@ export class ListSearchGroupItemComponent implements OnChanges, OnInit {
   @Input() groupId: string;
   @Input() item: any;
   @Input() delete: Function;
+  @Input() updateGroup: Function;
 
   count: number;
   error = false;
@@ -33,6 +34,7 @@ export class ListSearchGroupItemComponent implements OnChanges, OnInit {
   }
 
   getItemCount() {
+    this.updateGroup();
     try {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const request = <SearchRequest>{
@@ -118,6 +120,8 @@ export class ListSearchGroupItemComponent implements OnChanges, OnInit {
           ? CriteriaType.AGE : this.parameters[0].type;
         return {type, standard: false};
       case DomainType.PHYSICALMEASUREMENT:
+        return {type: this.parameters[0].type, standard: false};
+      case DomainType.SURVEY:
         return {type: this.parameters[0].type, standard: false};
       case DomainType.VISIT:
         return {type: this.parameters[0].type, standard: true};
