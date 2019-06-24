@@ -21,6 +21,7 @@ import {
 } from 'app/cohort-search/redux';
 import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
+import {SearchRequest} from '../../../generated/fetch';
 
 const pixel = (n: number) => `${n}px`;
 const ONE_REM = 24;  // value in pixels
@@ -71,8 +72,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
                 this.actions.loadFromJSON(cohort.criteria);
                 this.actions.runAllRequests();
               } else {
-                console.log(JSON.parse(cohort.criteria));
-                this.criteria = JSON.parse(cohort.criteria);
+                searchRequestStore.next(JSON.parse(cohort.criteria));
               }
             }
           });
@@ -80,9 +80,10 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     });
 
     if (this.listSearch) {
-      this.subscription.add(searchRequestStore.subscribe(
-        sr => this.includeSize = sr.includes.length
-      ));
+      searchRequestStore.subscribe(sr => {
+        this.includeSize = sr.includes.length;
+        this.criteria = sr;
+      });
     } else {
       this.subscription.add(
         this.includeGroups$.subscribe(groups => this.includeSize = groups.size + 1)
@@ -96,6 +97,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
     idsInUse.next(new Set());
     currentCohortStore.next(undefined);
+    searchRequestStore.next({includes: [], excludes: []} as SearchRequest);
   }
 
   getTempObj(e) {

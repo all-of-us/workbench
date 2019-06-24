@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
@@ -12,7 +12,7 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
   templateUrl: './list-search-group-item.component.html',
   styleUrls: ['./list-search-group-item.component.css'],
 })
-export class ListSearchGroupItemComponent implements OnInit {
+export class ListSearchGroupItemComponent implements OnChanges, OnInit {
   @Input() role: keyof SearchRequest;
   @Input() groupId: string;
   @Input() item: any;
@@ -23,6 +23,17 @@ export class ListSearchGroupItemComponent implements OnInit {
   loading = true;
 
   ngOnInit(): void {
+    this.getItemCount();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log(changes);
+    if (changes.item && !changes.item.firstChange) {
+      this.getItemCount();
+    }
+  }
+
+  getItemCount() {
     try {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const request = <SearchRequest>{
@@ -57,11 +68,8 @@ export class ListSearchGroupItemComponent implements OnInit {
     return this.parameters.length > 1 ? 'Codes' : 'Code';
   }
 
-  get isRequesting() {
-    return this.item.isRequesting;
-  }
-
   get status() {
+    // TODO get actual status from item
     return 'active';
   }
 

@@ -56,7 +56,7 @@ export class ListNodeComponent implements OnInit, OnDestroy {
     const {domainId, id, isStandard, name} = this.node;
     const type = domainId === DomainType.DRUG ? CriteriaType[CriteriaType.ATC] : this.node.type;
     try {
-      cohortBuilderApi().getCriteriaBy(cdrId, null, type, isStandard, id)
+      cohortBuilderApi().getCriteriaBy(cdrId, domainId, type, isStandard, id)
         .then(resp => {
           if (resp.items.length === 0 && domainId === DomainType.DRUG) {
             cohortBuilderApi()

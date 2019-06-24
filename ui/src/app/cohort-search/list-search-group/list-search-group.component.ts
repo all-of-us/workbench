@@ -3,15 +3,18 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnChanges,
   OnInit,
-  Output,
+  Output, SimpleChanges,
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {generateId} from 'app/cohort-search/utils';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
-import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated/fetch';
 
 @Component({
   selector: 'app-list-search-group',
@@ -21,7 +24,7 @@ import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated'
     '../../styles/buttons.css',
   ]
 })
-export class ListSearchGroupComponent implements AfterViewInit, OnInit {
+export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnInit {
   @Input() group;
   @Input() index;
   @Input() role: keyof SearchRequest;
@@ -47,13 +50,24 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
   demoOpen = false;
   demoMenuHover = false;
   position = 'bottom-left';
+  count: number;
+  error = false;
+  loading = true;
 
   ngOnInit() {
+    this.getGroupCount();
     // TODO move this to the store and remove all Outputs/Event emitters
     this.temporalLength.emit( {
       tempLength: false,
       flag: false}
     );
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log(changes);
+    if (changes.group && !changes.group.firstChange) {
+      this.getGroupCount();
+    }
   }
 
   ngAfterViewInit() {
@@ -80,6 +94,29 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
     }
   }
 
+  getGroupCount() {
+    try {
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const request = <SearchRequest>{
+        includes: [],
+        excludes: [],
+        [this.role]: [this.group]
+      };
+      cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
+        this.count = count;
+        this.loading = false;
+      }, (err) => {
+        console.error(err);
+        this.error = true;
+        this.loading = false;
+      });
+    } catch (error) {
+      console.error(error);
+      this.error = true;
+      this.loading = false;
+    }
+  }
+
   get items() {
     return !this.group.temporal ? this.group.items
       : this.group.items.filter(it => it.temporalGroup === 0);
@@ -98,10 +135,6 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
       }
     });
     return flag;
-  }
-
-  get isRequesting() {
-    return this.group.isRequesting || false;
   }
 
   get temporalFlag() {
@@ -212,7 +245,6 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
       modifiers: [],
       count: null,
       temporalGroup: 0,
-      isRequesting: false,
       status: 'active'
     };
   }
