@@ -1175,44 +1175,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDemoGenderAndAge() throws Exception {
-    SearchParameter demoGenderSearchParam =
-        new SearchParameter()
-            .domain(DomainType.PERSON.toString())
-            .type(CriteriaType.GENDER.toString())
-            .standard(true)
-            .ancestorData(false)
-            .group(false)
-            .conceptId(8507L);
-
-    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
-    DateTime now = new DateTime();
-    Period period = new Period(birthDate, now);
-    Integer lo = period.getYears() - 1;
-    Integer hi = period.getYears() + 1;
-    SearchParameter demoAgeSearchParam =
-        new SearchParameter()
-            .domain(DomainType.PERSON.toString())
-            .type(CriteriaType.AGE.toString())
-            .standard(true)
-            .ancestorData(false)
-            .group(false);
-    demoAgeSearchParam.attributes(
-        Arrays.asList(
-            new Attribute()
-                .operator(Operator.BETWEEN)
-                .operands(Arrays.asList(lo.toString(), hi.toString()))));
-
-    SearchRequest searchRequests =
-        createSearchRequests(
-            DomainType.PERSON.toString(),
-            Arrays.asList(demoGenderSearchParam, demoAgeSearchParam),
-            new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
-  }
-
-  @Test
   public void countSubjectsICD9AndDemo() throws Exception {
     SearchParameter icd9 =
         new SearchParameter()
