@@ -372,7 +372,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       try {
         User user = userDao.findUserByEmail(entry.getKey());
         userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
-      } catch(NullPointerException e) {
+      } catch (NullPointerException e) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       }
     }

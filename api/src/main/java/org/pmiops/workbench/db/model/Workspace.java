@@ -229,9 +229,13 @@ public class Workspace {
   }
 
   @Column(name = "published")
-  public boolean getPublished() { return published; }
+  public boolean getPublished() {
+    return published;
+  }
 
-  public void setPublished(boolean published) { this.published = published; }
+  public void setPublished(boolean published) {
+    this.published = published;
+  }
 
   @Column(name = "rp_disease_focused_research")
   public boolean getDiseaseFocusedResearch() {

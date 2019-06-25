@@ -145,8 +145,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private String getRegisteredUserDomainEmail() {
-    ManagedGroupWithMembers registeredDomainGroup = fireCloudService
-            .getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
+    ManagedGroupWithMembers registeredDomainGroup =
+        fireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
     return registeredDomainGroup.getGroupEmail();
   }
 
@@ -773,7 +773,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    dbWorkspace = workspaceService.doWorkspacePublish(dbWorkspace, getRegisteredUserDomainEmail(), true);
+    dbWorkspace =
+        workspaceService.doWorkspacePublish(dbWorkspace, getRegisteredUserDomainEmail(), true);
     dbWorkspace.setPublished(true);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
@@ -786,7 +787,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    dbWorkspace = workspaceService.doWorkspacePublish(dbWorkspace, getRegisteredUserDomainEmail(), false);
+    dbWorkspace =
+        workspaceService.doWorkspacePublish(dbWorkspace, getRegisteredUserDomainEmail(), false);
     dbWorkspace.setPublished(false);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
