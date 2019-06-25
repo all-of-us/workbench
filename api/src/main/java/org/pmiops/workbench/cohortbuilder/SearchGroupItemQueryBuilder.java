@@ -219,7 +219,7 @@ public final class SearchGroupItemQueryBuilder {
     // build the inner temporal sql if this search group item is temporal
     // otherwise return modifiedSql
     return buildInnerTemporalQuery(
-        modifiedSql, queryPartsSql + "%s", queryParams, searchGroupItem.getModifiers(), mention);
+        modifiedSql, queryPartsSql, queryParams, searchGroupItem.getModifiers(), mention);
   }
 
   /** Build sql statement for demographics */
@@ -286,7 +286,7 @@ public final class SearchGroupItemQueryBuilder {
       return modifiedSql;
     }
     // if modifiers exists we need to add them again to the inner temporal sql
-    conditionsSql = String.format(conditionsSql, getAgeDateAndEncounterSql(queryParams, modifiers));
+    conditionsSql = conditionsSql + getAgeDateAndEncounterSql(queryParams, modifiers);
     if (TemporalMention.ANY_MENTION.equals(mention)) {
       return String.format(TEMPORAL_SQL, "", conditionsSql, modifiedSql);
     } else if (TemporalMention.FIRST_MENTION.equals(mention)) {
