@@ -127,7 +127,7 @@ const routes: Routes = [
                       minimizeChrome: true
                     }
                   }, {
-                    path: ':nbName/new',
+                    path: 'v2/:nbName',
                     component: InteractiveNotebookComponent,
                     data: {
                       pathElementForTitle: 'nbName',  // use the (urldecoded) captured value nbName

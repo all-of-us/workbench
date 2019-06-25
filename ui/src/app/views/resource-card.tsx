@@ -461,7 +461,7 @@ export class ResourceCard extends React.Component<Props, State> {
         }
         navigate(
           ['workspaces', this.props.resourceCard.workspaceNamespace,
-            this.props.resourceCard.workspaceFirecloudName, 'notebooks',
+            this.props.resourceCard.workspaceFirecloudName, 'notebooks', 'v2',
             encodeURIComponent(this.props.resourceCard.notebook.name)], {
               queryParams,
               relativeTo: null,
