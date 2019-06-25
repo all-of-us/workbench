@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
@@ -54,6 +56,50 @@ public class CriteriaLookupUtilTest {
     String pathEnd = String.valueOf(criteria.getId());
     criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);
     cbCriteriaDao.save(criteria);
+  }
+
+  @Test
+  public void buildCriteriaLookupMapNoSearchParametersException() throws Exception {
+    SearchRequest searchRequest =
+        new SearchRequest().addIncludesItem(new SearchGroup().addItemsItem(new SearchGroupItem()));
+    try {
+      lookupUtil.buildCriteriaLookupMap(searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: search parameters are empty.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void buildCriteriaLookupMapNoDomainException() throws Exception {
+    SearchParameter searchParameter = new SearchParameter();
+    SearchRequest searchRequest =
+        new SearchRequest()
+            .addIncludesItem(
+                new SearchGroup()
+                    .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
+    try {
+      lookupUtil.buildCriteriaLookupMap(searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: search parameter domain null is not valid.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void buildCriteriaLookupMapNoTypeException() throws Exception {
+    SearchParameter searchParameter = new SearchParameter().domain(DomainType.CONDITION.toString());
+    SearchRequest searchRequest =
+        new SearchRequest()
+            .addIncludesItem(
+                new SearchGroup()
+                    .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
+    try {
+      lookupUtil.buildCriteriaLookupMap(searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: search parameter type null is not valid.", bre.getMessage());
+    }
   }
 
   @Test
