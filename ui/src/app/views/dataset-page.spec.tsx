@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {DataSetPage} from 'app/views/dataset-page';
 import {CohortsApi, ConceptsApi, ConceptSetsApi, DataSetApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -212,6 +212,27 @@ describe('DataSet', () => {
 
     expect(wrapper.find('[data-test-id="refresh-preview-clickable-text"]').first().prop('disabled'))
       .toBeTruthy();
+  });
+
+  it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
+    const wrapper = mount(<DataSetPage />);
+    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+    // todo: can we put these ^ into a single const like in workspace-nav-bar.spec.tsx
+
+    // Mock out navigateByUrl
+    const navSpy = jest.fn();
+    NavStore.navigateByUrl = navSpy;
+
+    // Check Cohorts "+" link
+    wrapper.find({'data-test-id': 'cohorts-link'}).first().simulate('click');
+    expect(navSpy).toHaveBeenCalledWith(
+      'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id + '/cohorts');
+
+    // Check Concept Sets "+" link
+    wrapper.find({'data-test-id': 'concept-sets-link'}).first().simulate('click');
+    expect(navSpy).toHaveBeenCalledWith(
+      'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id + '/concepts/sets');
   });
 
 
