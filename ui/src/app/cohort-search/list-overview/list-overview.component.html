@@ -158,22 +158,28 @@
         formControlName="description">
       </textarea>
     </form>
+    <div *ngIf="saveError" class="total-error">
+      <clr-icon class="is-solid" shape="exclamation-triangle" size="22"></clr-icon>
+      Data cannot be saved. Please try again.
+    </div>
   </div>
   <div class="modal-footer">
-    <button
-      type="button"
-      class="btn btn-link"
-      (click)="saveModal.close()">
-      Cancel
-    </button>
-    <button
-      type="button"
-      class="btn btn-primary"
-      (click)="submit()"
-      [clrLoading]="saving"
-      [disabled]="!cohortForm.valid">
-      Save Cohort
-    </button>
+    <div>
+      <button
+        type="button"
+        class="btn btn-link"
+        (click)="saveModal.close()">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="submit()"
+        [clrLoading]="saving"
+        [disabled]="!cohortForm.valid || saveError">
+        Save Cohort
+      </button>
+    </div>
   </div>
 </clr-modal>
 <app-confirm-delete-modal
