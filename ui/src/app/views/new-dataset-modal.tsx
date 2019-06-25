@@ -130,7 +130,7 @@ class NewDataSetModal extends React.Component<Props, State> {
     }
     this.setState({conflictDataSetName: false, missingDataSetInfo: false, loading: true});
     const {name} = this.state;
-    let request = {
+    const request = {
       name: name,
       description: '',
       includesAllParticipants: this.props.includesAllParticipants,
@@ -146,7 +146,7 @@ class NewDataSetModal extends React.Component<Props, State> {
           description: dataSet.description,
           etag: dataSet.etag
         };
-        await dataSetApi().updateDataSet(workspaceNamespace, workspaceId, dataSet.id, request);
+        await dataSetApi().updateDataSet(workspaceNamespace, workspaceId, dataSet.id, updateReq);
       } else {
         await dataSetApi().createDataSet(workspaceNamespace, workspaceId, request);
       }
