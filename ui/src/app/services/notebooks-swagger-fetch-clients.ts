@@ -21,35 +21,17 @@
  */
 
 import {
-  AuditApi,
-  AuthDomainApi,
   BaseAPI,
-  CdrVersionsApi,
-  ClusterApi,
-  CohortAnnotationDefinitionApi,
-  CohortBuilderApi,
-  CohortReviewApi,
-  CohortsApi,
-  ConceptsApi,
-  ConceptSetsApi,
-  ConfigApi,
   Configuration as FetchConfiguration,
-  CronApi,
-  DataSetApi,
   FetchAPI,
-  OfflineClusterApi,
-  ProfileApi,
-  StatusApi,
-  UserApi,
-  UserMetricsApi,
-  WorkspacesApi,
-} from 'generated/fetch';
+  ClusterApi
+} from "notebooks-generated/fetch";
 
 let frozen = false;
 function checkFrozen() {
   if (frozen) {
     throw Error('API clients registry is already frozen; cannot be ' +
-        'configured after invocation of bindApiClients()');
+      'configured after invocation of bindApiClients()');
   }
 }
 
@@ -71,9 +53,9 @@ function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
   return () => {
     if (!registry.has(ctor)) {
       throw Error('API client is not registered: ensure you are not ' +
-          'retrieving an API client before app initialization. In ' +
-          'unit tests, be sure to call registerApiClient() for all ' +
-          'API clients in use, else call bindApiClients(): ' + ctor);
+        'retrieving an API client before app initialization. In ' +
+        'unit tests, be sure to call registerApiClient() for all ' +
+        'API clients in use, else call bindApiClients(): ' + ctor);
     }
     return registry.get(ctor) as T;
   };
@@ -81,25 +63,7 @@ function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
 
 // To add a new service, add a new entry below. Note that these properties are
 // getters for the API clients, e.g.: clusterApi().listClusters();
-export const auditApi = bindCtor(AuditApi);
-export const authDomainApi = bindCtor(AuthDomainApi);
-export const cdrVersionsApi = bindCtor(CdrVersionsApi);
-export const clusterApi = bindCtor(ClusterApi);
-export const cohortAnnotationDefinitionApi = bindCtor(CohortAnnotationDefinitionApi);
-export const cohortBuilderApi = bindCtor(CohortBuilderApi);
-export const cohortReviewApi = bindCtor(CohortReviewApi);
-export const cohortsApi = bindCtor(CohortsApi);
-export const conceptsApi = bindCtor(ConceptsApi);
-export const conceptSetsApi = bindCtor(ConceptSetsApi);
-export const configApi = bindCtor(ConfigApi);
-export const cronApi = bindCtor(CronApi);
-export const dataSetApi = bindCtor(DataSetApi);
-export const offlineClusterApi = bindCtor(OfflineClusterApi);
-export const profileApi = bindCtor(ProfileApi);
-export const statusApi = bindCtor(StatusApi);
-export const userApi = bindCtor(UserApi);
-export const userMetricsApi = bindCtor(UserMetricsApi);
-export const workspacesApi = bindCtor(WorkspacesApi);
+export const notebooksClusterApi = bindCtor(ClusterApi);
 
 /**
  * Binds standard API clients. To be called at most once for production use,

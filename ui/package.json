@@ -11,7 +11,7 @@
     "test-react": "jest",
     "lint": "ng lint --type-check",
     "e2e": "ng e2e",
-    "codegen": "yarn run merge-swagger && yarn run codegen-clean && yarn run codegen-swagger && yarn run codegen-swagger-fetch && yarn run post-codegen && yarn run notebooks-codegen-swagger && yarn run notebooks-post-codegen",
+    "codegen": "yarn run merge-swagger && yarn run codegen-clean && yarn run codegen-swagger && yarn run codegen-swagger-fetch && yarn run post-codegen && yarn run notebooks-codegen-swagger && yarn run notebooks-codegen-swagger-fetch && yarn run notebooks-post-codegen",
     "merge-swagger": "../api/build.rb merge-yaml --no-docker",
     "codegen-clean": "rm -rf src/generated src/notebooks-generated",
     "codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-angular --input-spec ../api/src/main/resources/merged.yaml --output src/generated --additional-properties ngVersion=2",

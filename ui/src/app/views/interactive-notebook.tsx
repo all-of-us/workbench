@@ -3,12 +3,13 @@ import * as React from 'react';
 
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {clusterApi, notebooksClusterApi, workspacesApi} from "../services/swagger-fetch-clients";
+import {clusterApi, workspacesApi} from "../services/swagger-fetch-clients";
 import {NotebookActionsPopup} from "./notebook-actions-popup";
 import {PlaygroundModeIcon} from "../icons/playground-mode-icon";
 import {EditComponentReact} from "../icons/edit";
 import {Cluster, ClusterStatus} from "../../generated/fetch";
 import {urlParamsStore} from "../utils/navigation";
+import {notebooksClusterApi} from "../services/notebooks-swagger-fetch-clients";
 
 interface Props {
   workspace: WorkspaceData
@@ -46,18 +47,19 @@ export const InteractiveNotebook = withCurrentWorkspace()(class extends React.Co
       .then((body) => {
         const cluster = body.defaultCluster;
         console.log("Polled cluster status: " + cluster.status);
+
         if (cluster.status === ClusterStatus.Stopped) {
-          notebooksClusterApi().start
-          // this.leoClusterService
-          //   .startCluster(c.clusterNamespace, c.clusterName)
-          //   .flatMap(_ => {
-          //     throw Error('resuming');
-          //   });
+          notebooksClusterApi()
+            .startCluster(cluster.clusterNamespace, cluster.clusterName)
+            .then(resp => console.log('start cluster success'))
+            .catch(resp => console.log('start cluster failed'));
         }
+
         if (cluster.status !== ClusterStatus.Running) {
           repoll();
           return;
         }
+
         this.setState({cluster: cluster});
       })
       .catch(() => {
