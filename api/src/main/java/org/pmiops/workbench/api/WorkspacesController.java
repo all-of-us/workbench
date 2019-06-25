@@ -147,8 +147,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private String getRegisteredUserDomainEmail() {
     ManagedGroupWithMembers registeredDomainGroup = fireCloudService
             .getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
-
-    return registeredDomainGroup.getAdminsGroup().getGroupEmail();
+    return registeredDomainGroup.getGroupEmail();
   }
 
   private static String generateRandomChars(String candidateChars, int length) {

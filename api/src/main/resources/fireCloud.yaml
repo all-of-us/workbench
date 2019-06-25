@@ -1179,10 +1179,8 @@ definitions:
       - membersEmails
       - adminsEmails
     properties:
-      membersGroup:
-        $ref: '#/definitions/RawlsGroupShort'
-      adminsGroup:
-        $ref: '#/definitions/RawlsGroupShort'
+      groupEmail:
+        type: string
       membersEmails:
         type: array
         items:
