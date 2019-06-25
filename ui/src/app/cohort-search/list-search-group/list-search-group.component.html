@@ -206,7 +206,11 @@
         <div style="padding-left: 2rem">Temporal</div>
       </div>
       <div class="col-sm-6 text-right">
-        <div [class.error]="error">
+        <div
+          [class.error]="error"
+          [popper]="errorPopper"
+          [popperTrigger]="'hover'"
+          [popperDisabled]="!error">
           Group Count:
           <span *ngIf="loading"
             class="spinner spinner-inline group"
@@ -232,8 +236,6 @@
             </span>
             <span *ngSwitchCase="error && !temporalFlag">
               <clr-icon
-                [popper]="errorPopper"
-                [popperTrigger]="'hover'"
                 class="is-solid"
                 shape="exclamation-triangle"
                 style="color: #ffffff"

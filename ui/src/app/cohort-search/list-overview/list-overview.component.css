@@ -99,7 +99,7 @@ label[for="name"].show {
 
 #description-control {
   border: 1px solid #9a9a9a;
-  height: 12rem;
+  height: 10rem;
 }
 
 #description-control:focus {
@@ -176,4 +176,5 @@ input.alreadyTaken {
   color: #ffffff;
   padding: 0.25rem 0.5rem;
   border-radius: 5px;
+  margin-bottom: 0.5rem;
 }

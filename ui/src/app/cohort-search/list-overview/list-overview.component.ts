@@ -37,6 +37,7 @@ export class ListOverviewComponent implements OnInit {
   showGenderChart = true;
   showComboChart = true;
   showConflictError = false;
+  saveError = false;
   cohort: Cohort;
 
   ngOnInit(): void {
@@ -61,6 +62,7 @@ export class ListOverviewComponent implements OnInit {
     if (!value) {
       this.cohortForm.reset();
       this.showConflictError = false;
+      this.saveError = false;
     }
   }
 
@@ -86,12 +88,15 @@ export class ListOverviewComponent implements OnInit {
     const name = this.cohortForm.get('name').value;
     const description = this.cohortForm.get('description').value;
     const cohort = <Cohort>{name, description, criteria: this.criteria, type: COHORT_TYPE};
-    cohortsApi().createCohort(ns, wsid, cohort).then((c) => {
+    cohortsApi().createCohort(ns, wsid, null).then((c) => {
       navigate(['workspaces', ns, wsid, 'cohorts', c.id, 'actions']);
     }, (error) => {
       this.saving = false;
       if (error.status === 400) {
         this.showConflictError = true;
+      }
+      if (error.status === 500) {
+        this.saveError = true;
       }
     });
   }
