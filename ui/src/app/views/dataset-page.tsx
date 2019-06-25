@@ -54,6 +54,10 @@ export const styles = reactStyles({
     flexDirection: 'row'
   },
 
+  selectBoxHeaderIconLinks: {
+    fill: '#216FB4'
+  },
+
   listItem: {
     border: '0.5px solid #C3C3C3',
     margin: '.4rem',
@@ -481,8 +485,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                         navigateAndPreventDefaultIfNoKeysPressed(e, cohortsPath);
                       }}>
                       <ClrIcon shape='plus-circle' class='is-solid' size={16}
-                           style={{fill: '#216FB4'}}/>
-                           {/*todo: move ^ to a style?*/}
+                           style={styles.selectBoxHeaderIconLinks}/>
                     </a>
                 </div>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
@@ -518,7 +521,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                          navigateAndPreventDefaultIfNoKeysPressed(e, conceptSetsPath);
                        }}>
                     <ClrIcon shape='plus-circle' class='is-solid' size={16}
-                             style={{fill: '#216FB4'}}/>
+                             style={styles.selectBoxHeaderIconLinks}/>
                     </a>
                   </div>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
