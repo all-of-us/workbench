@@ -1662,6 +1662,10 @@ paths:
           description: The updated data set.
           schema:
             $ref: "#/definitions/DataSet"
+        409:
+          description: Data set with same name exist
+          schema:
+            $ref: "#/definitions/ErrorResponse"
     delete:
       tags:
         - dataSet

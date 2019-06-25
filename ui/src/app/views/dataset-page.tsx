@@ -410,22 +410,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       </DataTable>;
     }
 
-    updateDataSet() {
-      const {namespace, id} = this.props.workspace;
-      const {dataSet} = this.state;
-      const request = {
-        name: dataSet.name,
-        description: dataSet.description,
-        includesAllParticipants: this.state.includesAllParticipants,
-        conceptSetIds: this.state.selectedConceptSetIds,
-        cohortIds: this.state.selectedCohortIds,
-        values: this.state.selectedValues,
-        etag: dataSet.etag
-      };
-      dataSetApi().updateDataSet(namespace, id, dataSet.id, request)
-        .then(() => window.history.back());
-    }
-
     get isRefreshPreviewDisabled() {
       return this.disableSave() || this.state.previewList.length === 0;
     }
@@ -560,11 +544,11 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 based on the variable and value you selected above
               </div>
               </div>
-              <Button data-test-id='save-button' style={{marginRight: '1rem'}}
-                      onClick={this.editing ? () => this.updateDataSet() :
-                () => this.setState({openSaveModal: true})}
-                disabled={this.disableSave() || (this.editing && !dataSetTouched)}>
-                {this.editing ? 'UPDATE DATA SET' : 'SAVE DATA SET'}
+              <Button data-test-id='save-button' style={{position: 'absolute', right: '1rem',
+                top: '.25rem'}} onClick ={() => this.setState({openSaveModal: true})}
+                disabled={this.disableSave()}>
+                {this.editing ? !dataSetTouched ? 'Analyze' :
+                    'Update And Analyze' : 'Save And Analyze'}
               </Button>
             </div>
             {previewDataLoading && <div style={styles.warningMessage}>
@@ -618,6 +602,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                            selectedValues={selectedValues}
                                            workspaceNamespace={namespace}
                                            workspaceId={id}
+                                           dataSet={dataSet ? dataSet : undefined}
                                            closeFunction={() => {
                                              this.setState({openSaveModal: false});
                                            }}

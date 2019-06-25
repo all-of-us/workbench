@@ -10,6 +10,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 const workspaceNamespace = 'workspaceNamespace';
 const workspaceId = 'workspaceId';
+let dataSet = undefined;
 
 const createNewDataSetModal = () => {
   return <NewDataSetModal
@@ -20,6 +21,7 @@ const createNewDataSetModal = () => {
     selectedValues={[]}
     workspaceNamespace={workspaceNamespace}
     workspaceId={workspaceId}
+    dataSet={dataSet}
   />;
 }
 
@@ -38,7 +40,6 @@ describe('NewDataSetModal', () => {
   it('should only display code when button pressed', async() => {
     const wrapper = mount(createNewDataSetModal());
     expect(wrapper.find('[data-test-id="code-text-box"]').exists()).toBeFalsy();
-    wrapper.find('[data-test-id="export-to-notebook"]').first().simulate('change');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="code-preview-button"]')
       .first().text()).toEqual('See Code Preview');
@@ -59,7 +60,7 @@ describe('NewDataSetModal', () => {
     expect(exportSpy).not.toHaveBeenCalled();
   });
 
-  it('should not export if export not clicked', async() => {
+  it('should not export if export  clicked', async() => {
     const wrapper = mount(createNewDataSetModal());
     const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
@@ -67,6 +68,8 @@ describe('NewDataSetModal', () => {
 
     wrapper.find('[data-test-id="data-set-name-input"]')
       .first().simulate('change', {target: {value: nameStub}});
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="export-to-notebook"]').first().simulate('change');
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="save-data-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
@@ -90,15 +93,13 @@ describe('NewDataSetModal', () => {
     wrapper.find('[data-test-id="data-set-name-input"]')
       .first().simulate('change', {target: {value: nameStub}});
     await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="export-to-notebook"]').first().simulate('change');
-    await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="save-data-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(createSpy).not.toHaveBeenCalled();
     expect(exportSpy).not.toHaveBeenCalled();
   });
 
-  it('should submit if export checked and name specified', async() => {
+  it('should submit if export is unchecked and name specified', async() => {
     const wrapper = mount(createNewDataSetModal());
     const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
@@ -116,8 +117,6 @@ describe('NewDataSetModal', () => {
     wrapper.find('[data-test-id="data-set-name-input"]')
       .first().simulate('change', {target: {value: nameStub}});
     await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="export-to-notebook"]').first().simulate('change');
-    await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="notebook-name-input"]')
       .first().simulate('change', {target: {value: notebookNameStub}});
     await waitOneTickAndUpdate(wrapper);
@@ -130,5 +129,15 @@ describe('NewDataSetModal', () => {
       notebookName: notebookNameStub,
       kernelType: KernelTypeEnum.Python
     });
+  });
+  it ('should have default dataSet name if data set is passed as props', () => {
+    const name = 'Update Data Set';
+    dataSet = {...dataSet, name: name, description: 'dataset'};
+    const wrapper = mount(createNewDataSetModal());
+    const dataSetName  =
+        wrapper.find('[data-test-id="data-set-name-input"]').first().prop('value');
+    expect(dataSetName).toBe(name);
+
+
   });
 });

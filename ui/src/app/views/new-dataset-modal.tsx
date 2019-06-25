@@ -21,6 +21,7 @@ import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {
+  DataSet,
   DataSetRequest,
   DomainValuePair,
   FileDetail,
@@ -29,6 +30,7 @@ import {
 
 interface Props {
   closeFunction: Function;
+  dataSet: DataSet;
   includesAllParticipants: boolean;
   selectedConceptSetIds: number[];
   selectedCohortIds: number[];
@@ -70,7 +72,7 @@ class NewDataSetModal extends React.Component<Props, State> {
     this.state = {
       conflictDataSetName: false,
       existingNotebooks: [],
-      exportToNotebook: false,
+      exportToNotebook: true,
       kernelType: KernelTypeEnum.Python,
       loading: false,
       missingDataSetInfo: false,
@@ -92,6 +94,9 @@ class NewDataSetModal extends React.Component<Props, State> {
   private async loadNotebooks() {
     try {
       const {workspaceNamespace, workspaceId} = this.props;
+      if (this.props.dataSet) {
+        this.setState({name: this.props.dataSet.name});
+      }
       this.setState({notebooksLoading: true});
       const existingNotebooks =
         await workspacesApi().getNoteBookList(workspaceNamespace, workspaceId);
@@ -103,23 +108,48 @@ class NewDataSetModal extends React.Component<Props, State> {
     }
   }
 
+  async updateDataSet() {
+    const {dataSet, workspaceNamespace, workspaceId} = this.props;
+    const {name} = this.state;
+    const request = {
+      name: name,
+      includesAllParticipants: dataSet.includesAllParticipants,
+      conceptSetIds: this.props.selectedConceptSetIds,
+      cohortIds: this.props.selectedCohortIds,
+      values: this.props.selectedValues,
+      etag: dataSet.etag
+    };
+    await dataSetApi().updateDataSet(workspaceNamespace, workspaceId, dataSet.id, request);
+  }
+
   async saveDataSet() {
-    const {workspaceNamespace, workspaceId} = this.props;
+
+    const {dataSet, workspaceNamespace, workspaceId} = this.props;
     if (!this.state.name) {
       return;
     }
     this.setState({conflictDataSetName: false, missingDataSetInfo: false, loading: true});
-    const request = {
-      name: this.state.name,
-      includesAllParticipants: this.props.includesAllParticipants,
+    const {name} = this.state;
+    let request = {
+      name: name,
       description: '',
+      includesAllParticipants: this.props.includesAllParticipants,
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
       values: this.props.selectedValues
     };
     try {
-      await dataSetApi().createDataSet(
-        workspaceNamespace, workspaceId, request);
+      // If data set exist it is an update
+      if (this.props.dataSet) {
+        const updateReq = {
+          ...request,
+          description: dataSet.description,
+          etag: dataSet.etag
+        };
+        await dataSetApi().updateDataSet(workspaceNamespace, workspaceId, dataSet.id, request);
+      } else {
+        await dataSetApi().createDataSet(workspaceNamespace, workspaceId, request);
+      }
       if (!this.state.exportToNotebook) {
         window.history.back();
       } else {
@@ -209,7 +239,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       }
     });
     return <Modal loading={loading}>
-      <ModalTitle>Save Dataset</ModalTitle>
+      <ModalTitle>{this.props.dataSet ? 'Update' : 'Save'} Dataset</ModalTitle>
       <ModalBody>
         <div>
           {conflictDataSetName &&
@@ -227,7 +257,8 @@ class NewDataSetModal extends React.Component<Props, State> {
         <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem'}}>
           <CheckBox style={{height: 17, width: 17}}
                     data-test-id='export-to-notebook'
-                    onChange={() => this.changeExportToNotebook()} />
+                    onChange={() => this.changeExportToNotebook()}
+                    checked={this.state.exportToNotebook} />
           <div style={{marginLeft: '.5rem',
             color: colors.black[0]}}>Export to notebook</div>
         </div>
@@ -290,7 +321,7 @@ class NewDataSetModal extends React.Component<Props, State> {
         <TooltipTrigger content={summarizeErrors(errors)}>
           <Button type='primary' data-test-id='save-data-set'
                   disabled={errors} onClick={() => this.saveDataSet()}>
-            Save{exportToNotebook && ' and Open'}
+            {!this.props.dataSet ? 'Save' : 'Update' }{exportToNotebook && ' and Analyze'}
           </Button>
         </TooltipTrigger>
       </ModalFooter>
