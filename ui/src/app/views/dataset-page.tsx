@@ -38,15 +38,20 @@ import {
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {ClrIcon} from 'app/components/icons';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 
 export const styles = reactStyles({
   selectBoxHeader: {
     fontSize: '16px',
     height: '2rem',
     lineHeight: '2rem',
-    paddingLeft: '13px',
+    paddingLeft: '0.55rem',
+    paddingRight: '0.55rem',
     color: colors.blue[7],
-    borderBottom: '1px solid #E5E5E5'
+    borderBottom: '1px solid #E5E5E5',
+    display: 'flex',
+    justifyContent: 'space-between',
+    flexDirection: 'row'
   },
 
   listItem: {
@@ -80,17 +85,7 @@ export const styles = reactStyles({
     marginTop: '0.5rem',
     color: colors.purple[0]
   },
-  refreshPreviewHeader: {
-    display: 'flex',
-    flexDirection: 'row',
-    position: 'relative',
-    lineHeight: 'auto',
-    paddingTop: '0.5rem',
-    paddingBottom: '0.5rem',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 'auto'
-  },
+
   previewButtonBox: {
     width: '100%',
     display: 'flex',
@@ -99,6 +94,22 @@ export const styles = reactStyles({
     marginTop: '2.675rem',
     marginBottom: '2rem'
   },
+
+  previewDataHeaderBox: {
+    display: 'flex',
+    flexDirection: 'row',
+    position: 'relative',
+    lineHeight: 'auto',
+    paddingTop: '0.5rem',
+    paddingBottom: '0.5rem',
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem',
+    borderBottom: '1px solid #E5E5E5',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 'auto'
+  },
+
   previewDataHeader: {
     height: '19px',
     width: '160px',
@@ -107,6 +118,7 @@ export const styles = reactStyles({
     fontSize: '16px',
     fontWeight: 600
   },
+
   warningMessage: {
     display: 'flex',
     flexDirection: 'column',
@@ -434,6 +446,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     render() {
       const {namespace, id} = this.props.workspace;
       const wsPathPrefix = 'workspaces/' + namespace + '/' + id;
+      const cohortsPath = wsPathPrefix + '/cohorts';
+      const conceptSetsPath = wsPathPrefix + '/concepts/sets';
       const {
         dataSet,
         dataSetTouched,
@@ -462,15 +476,14 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
                 <div style={styles.selectBoxHeader}>
                   Cohorts
-                    {/*<a data-test-id='asdf' href={this.getResourceUrl()}*/}
-                    {/*  onClick={e => {*/}
-                    {/*    navigateAndPreventDefaultIfNoKeysPressed(e, this.getResourceUrl());*/}
-                    {/*  }}>*/}
+                    <a data-test-id='cohorts-link' href={cohortsPath}
+                      onClick={e => {
+                        navigateAndPreventDefaultIfNoKeysPressed(e, cohortsPath);
+                      }}>
                       <ClrIcon shape='plus-circle' class='is-solid' size={16}
                            style={{fill: '#216FB4'}}/>
                            {/*todo: move ^ to a style?*/}
-                    {/*</a>*/}
-                  {/*onClick={() => {navigate([wsPathPrefix, 'cohorts']); }}*/}
+                    </a>
                 </div>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
@@ -500,8 +513,13 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
                   <div style={styles.selectBoxHeader}>
                     Concept Sets
+                    <a data-test-id='concept-sets-link' href={conceptSetsPath}
+                       onClick={e => {
+                         navigateAndPreventDefaultIfNoKeysPressed(e, conceptSetsPath);
+                       }}>
                     <ClrIcon shape='plus-circle' class='is-solid' size={16}
                              style={{fill: '#216FB4'}}/>
+                    </a>
                   </div>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
@@ -517,12 +535,12 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   </div>
                 </div>
                 <div style={{width: '40%'}}>
-                  <div style={{...styles.selectBoxHeader, display: 'flex'}}>
+                  <div style={styles.selectBoxHeader}>
                     <div>
                       Values
                     </div>
                     <Clickable data-test-id='select-all'
-                               style={{marginLeft: 'auto', marginRight: '0.5rem'}}
+                               style={{marginLeft: 'auto'}}
                                onClick={() => this.selectAllValues()}>
                       Select All
                     </Clickable>
@@ -552,7 +570,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         </FadeBox>
         <FadeBox style={{marginTop: '1rem'}}>
           <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-            <div style={{...styles.selectBoxHeader, ...styles.refreshPreviewHeader}}>
+            <div style={styles.previewDataHeaderBox}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
               <div style={{display: 'flex', alignItems: 'flex-end'}}>
                 <div style={styles.previewDataHeader}>
@@ -573,7 +591,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 based on the variable and value you selected above
               </div>
               </div>
-              <Button data-test-id='save-button' style={{marginRight: '1rem'}}
+              <Button data-test-id='save-button' style={{marginRight: '0.5rem'}}
                       onClick={this.editing ? () => this.updateDataSet() :
                 () => this.setState({openSaveModal: true})}
                 disabled={this.disableSave() || (this.editing && !dataSetTouched)}>
