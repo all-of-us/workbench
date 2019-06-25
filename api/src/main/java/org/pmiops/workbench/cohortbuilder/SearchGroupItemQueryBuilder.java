@@ -177,6 +177,7 @@ public final class SearchGroupItemQueryBuilder {
         List<Long> bpConceptIds = new ArrayList<>();
         for (Attribute attribute : param.getAttributes()) {
           if (attribute.getConceptId() != null) {
+            // attribute.conceptId is unique to blood pressure attributes
             // this indicates we need to build a blood pressure sql statement
             bpConceptIds.add(attribute.getConceptId());
             processBloodPressureSql(queryParams, bpSql, attribute);
