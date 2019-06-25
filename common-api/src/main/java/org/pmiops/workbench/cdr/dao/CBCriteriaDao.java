@@ -9,12 +9,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+/**
+ * Some of our trees are polyhierarchical(Snomed and drug). Since a node may exist multiple times in
+ * this scenario with the same concept_id we only want to return it once from a user search. The
+ * query to rank/min this to a single row was expensive. Instead, when build the the cb_criteria
+ * table we add domain_rank1 to the synonyms column for the first node that matches in the tree for
+ * a specific concept_id. This allows us to use the full text index and makes the query much faster.
+ */
 public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   /**
-   * This query returns the parents in addition to the leaves in order to allow the client to
-   * determine the relationship between the returned Criteria. Parent concept IDs are not otherwise
-   * encoded in Criteria children.
+   * This query returns the parents in addition to the criteria ancestors for each leave in order to
+   * allow the client to determine the relationship between the returned Criteria.
    */
   @Query(
       value =
@@ -31,25 +37,24 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
               + "                    and is_group = 1) b "
               + "             on (a.path like b.path or a.id = b.id) "
               + "          where domain_id = :domain "
-              + "            and ((concept_id IN (:parentConceptIds) and type = :type)  or (is_group = 0  and is_selectable = 1 and type = 'RXNORM'))) c "
+              + "            and is_group = 0  "
+              + "            and is_selectable = 1 "
+              + "            and type = 'RXNORM') c "
               + "    on (ca.ancestor_id = c.concept_id) "
               + "union "
-              + "select id,parent_id,domain_id,is_standard,type,subtype,concept_id,code,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy,has_ancestor_data,path,synonyms "
-              + "  from cb_criteria "
-              + " where concept_id in (:parentConceptIds) "
-              + "   and domain_id = :domain "
-              + "   and type = :type",
+              + "select a.id,parent_id,domain_id,is_standard,type,subtype,concept_id,code,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy,"
+              + " has_ancestor_data,a.path,synonyms "
+              + "  from cb_criteria a "
+              + "  where domain_id = :domain "
+              + "   and type = :type"
+              + "   and concept_id in (:parentConceptIds)",
       nativeQuery = true)
   List<CBCriteria> findCriteriaAncestors(
       @Param("domain") String domain,
       @Param("type") String type,
       @Param("parentConceptIds") Set<String> parentConceptIds);
 
-  /**
-   * This query returns the parents in addition to the leaves in order to allow the client to
-   * determine the relationship between the returned Criteria. Parent concept IDs are not otherwise
-   * encoded in Criteria children.
-   */
+  /** This query returns all parents matching the parentConceptIds. */
   @Query(
       value =
           "select c from CBCriteria c where conceptId in (:parentConceptIds) and domainId = :domain and type = :type and standard = :standard and "
@@ -60,8 +65,11 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
       @Param("standard") Boolean isStandard,
       @Param("parentConceptIds") Set<String> parentConceptIds);
 
-  @Query(value = "select c from CBCriteria c where match(path, :path) > 0")
-  List<CBCriteria> findCriteriaLeavesAndParentsByPath(@Param("path") String path);
+  @Query(
+      value =
+          "select c from CBCriteria c where match(path, :path) > 0 and match(synonyms, concat('+[', :domain, '_rank1]')) > 0) order by id asc")
+  List<CBCriteria> findCriteriaLeavesAndParentsByDomainAndPath(
+      @Param("domain") String domain, @Param("path") String path);
 
   @Query(
       value =

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 /** VisitsQueryBuilder builds SQL for BigQuery for visit criteria types. */
 @Service
+// TODO:Remove when new search is finished - freemabd
 public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
   private static final String VISIT_SELECT_CLAUSE_TEMPLATE =

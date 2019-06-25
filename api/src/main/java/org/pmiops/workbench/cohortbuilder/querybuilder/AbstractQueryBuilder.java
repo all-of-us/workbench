@@ -44,6 +44,7 @@ import org.pmiops.workbench.utils.OperatorUtils;
  * needs to call the modifier/temporal methods with proper args to get generated query for
  * specified.
  */
+// TODO:Remove when new search is finished - freemabd
 public abstract class AbstractQueryBuilder {
 
   public static final String TABLE_ID = "search_all_domains";

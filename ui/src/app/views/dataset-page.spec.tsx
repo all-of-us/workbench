@@ -106,8 +106,7 @@ describe('DataSet', () => {
         .toBeFalsy();
     });
 
-  it('should display preview data table only once cohort, concept and value are selected ' +
-    'and preview button is clicked', async() => {
+  it('should display preview data table once preview button is clicked', async() => {
     const spy = jest.spyOn(dataSetApi(), 'previewQuery');
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
@@ -158,7 +157,6 @@ describe('DataSet', () => {
     wrapper.find('[data-test-id="value-list-items"]').find('input').first()
       .simulate('change');
     await waitOneTickAndUpdate(wrapper);
-    expect(spy).toHaveBeenCalledTimes(0);
 
     // Click preview button to load preview
     wrapper.find({'data-test-id': 'preview-button'}).first().simulate('click');
