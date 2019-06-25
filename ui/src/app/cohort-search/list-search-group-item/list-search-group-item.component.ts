@@ -1,9 +1,13 @@
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
 
-import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {
+  searchRequestStore,
+  selectionsStore,
+  wizardStore
+} from 'app/cohort-search/search-state.service';
 import {domainToTitle, getCodeOptions, listAttributeDisplay, listNameDisplay, listTypeDisplay} from 'app/cohort-search/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 
@@ -12,7 +16,7 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
   templateUrl: './list-search-group-item.component.html',
   styleUrls: ['./list-search-group-item.component.css'],
 })
-export class ListSearchGroupItemComponent implements OnChanges, OnInit {
+export class ListSearchGroupItemComponent implements OnInit {
   @Input() role: keyof SearchRequest;
   @Input() groupId: string;
   @Input() item: any;
@@ -24,13 +28,8 @@ export class ListSearchGroupItemComponent implements OnChanges, OnInit {
   loading = true;
 
   ngOnInit(): void {
+    console.log(this.item);
     this.getItemCount();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.item && !changes.item.firstChange) {
-      this.getItemCount();
-    }
   }
 
   getItemCount() {
@@ -70,8 +69,7 @@ export class ListSearchGroupItemComponent implements OnChanges, OnInit {
   }
 
   get status() {
-    // TODO get actual status from item
-    return 'active';
+    return this.item.status;
   }
 
   get parameters() {
@@ -97,6 +95,16 @@ export class ListSearchGroupItemComponent implements OnChanges, OnInit {
     return this.parameters.map(formatter).join(sep);
   }
 
+  enable() {
+    this.setStatus('active');
+    this.updateSearchRequest();
+  }
+
+  suppress() {
+    this.setStatus('hidden');
+    this.updateSearchRequest();
+  }
+
   remove() {
     this.setStatus('pending');
     this.item.timeout = setTimeout(() => {
@@ -111,6 +119,20 @@ export class ListSearchGroupItemComponent implements OnChanges, OnInit {
   undo() {
     clearTimeout(this.item.timeout);
     this.setStatus('active');
+  }
+
+  updateSearchRequest() {
+    const sr = searchRequestStore.getValue();
+    const {item, groupId, role} = this;
+    const groupIndex = sr[role].findIndex(grp => grp.id === groupId);
+    if (groupIndex > -1) {
+      const itemIndex = sr[role][groupIndex].items.findIndex(it => it.id === item.id);
+      if (itemIndex > -1) {
+        sr[role][groupIndex].items[itemIndex] = item;
+        searchRequestStore.next(sr);
+        this.updateGroup();
+      }
+    }
   }
 
   get typeAndStandard() {
