@@ -103,6 +103,46 @@ public class CriteriaLookupUtilTest {
   }
 
   @Test
+  public void buildCriteriaLookupMapNullGroupException() throws Exception {
+    SearchParameter searchParameter =
+        new SearchParameter()
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString());
+    SearchRequest searchRequest =
+        new SearchRequest()
+            .addIncludesItem(
+                new SearchGroup()
+                    .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
+    try {
+      lookupUtil.buildCriteriaLookupMap(searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: search parameter group null is not valid.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void buildCriteriaLookupMapNullAncestorDataException() throws Exception {
+    SearchParameter searchParameter =
+        new SearchParameter()
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .group(true);
+    SearchRequest searchRequest =
+        new SearchRequest()
+            .addIncludesItem(
+                new SearchGroup()
+                    .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
+    try {
+      lookupUtil.buildCriteriaLookupMap(searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: search parameter ancestor data null is not valid.", bre.getMessage());
+    }
+  }
+
+  @Test
   public void buildCriteriaLookupMapDrugCriteria() throws Exception {
     CBCriteria drugNode1 =
         new CBCriteria()
