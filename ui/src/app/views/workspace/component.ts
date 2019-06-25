@@ -217,6 +217,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   closeShare(): void {
     this.sharing = false;
+    this.loadUserRoles();
   }
 
   submitNotebooksLoadBugReport(): void {
