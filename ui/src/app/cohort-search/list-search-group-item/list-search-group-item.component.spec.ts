@@ -64,7 +64,7 @@ describe('ListSearchGroupItemComponent', () => {
     // Default Inputs for tests
     comp.role = 'includes';
     comp.groupId = 'include0';
-
+    comp.updateGroup = () => {};
     comp.item = baseItem;
 
     fixture.detectChanges();

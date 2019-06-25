@@ -28,7 +28,6 @@ export class ListSearchGroupItemComponent implements OnInit {
   loading = true;
 
   ngOnInit(): void {
-    console.log(this.item);
     this.getItemCount();
   }
 

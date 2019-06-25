@@ -136,7 +136,6 @@ export class ListModalComponent implements OnInit, OnDestroy {
       const group = this.initGroup(role, item);
       searchRequest[role].push(group);
     }
-    console.log(searchRequest);
     searchRequestStore.next(searchRequest);
     this.close();
   }
