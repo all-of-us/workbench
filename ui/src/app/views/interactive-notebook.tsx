@@ -4,12 +4,11 @@ import * as React from 'react';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {clusterApi, workspacesApi} from "../services/swagger-fetch-clients";
-import {Cluster, ClusterStatus} from "../../generated/fetch";
+import {ClusterStatus} from "../../generated/fetch";
 import {navigate, urlParamsStore} from "../utils/navigation";
 import {notebooksClusterApi} from "../services/notebooks-swagger-fetch-clients";
 import {ClrIcon} from "../components/icons";
 import {EditComponentReact} from "../icons/edit";
-import {PlaygroundModeIcon} from "../icons/playground-mode-icon";
 
 interface Props {
   workspace: WorkspaceData
@@ -113,14 +112,6 @@ export const InteractiveNotebook = withCurrentWorkspace()(class extends React.Co
               <div onClick={() => {this.onEditClick();}} style={{cursor: 'pointer', float: 'left', height: '100%', width: 135, color: '#262262', borderLeft: '1px solid rgb(205, 205, 205)', borderRight: '1px solid rgb(205, 205, 205)', backgroundColor: 'rgba(38,34,98,0.05)', textAlign: 'center', lineHeight: '35px'}}>
                 <EditComponentReact enableHoverEffect={false} disabled={false} style={{height: '14px', width: '14px', verticalAlign: 'middle', marginLeft: 0, marginRight: '5px', marginBottom: '3px'}} />
                 Edit (In Use)
-              </div>
-              <div style={{float: 'left', height: '100%', width: 210, color: '#262262', backgroundColor: 'rgba(38,34,98,0.05)', textAlign: 'center', lineHeight: '35px'}}>
-                <div style={{fill: '#216FB4', width: 20, height: '100%', lineHeight: '52px', marginLeft: '12px', float: 'left'}}>
-                  <PlaygroundModeIcon />
-                </div>
-                <div style={{float: 'left'}}>
-                  Run (Playground Mode)
-                </div>
               </div>
             </div>)
           }
