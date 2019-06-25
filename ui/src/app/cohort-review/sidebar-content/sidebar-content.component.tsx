@@ -87,11 +87,9 @@ const AnnotationItem = fp.flow(
   }
 
   componentDidUpdate(prevProps: any): void {
-    const {annotation} = this.props;
+    const {urlParams: {pid}} = this.props;
     const {timeout} = this.state;
-    if (
-      !annotation || (annotation && annotation.annotationId !== prevProps.annotation.annotationId)
-    ) {
+    if ((pid !== prevProps.urlParams.pid)) {
       // get rid of spinners and save messages when switching participants
       clearTimeout(timeout);
       this.setState({saving: false, error: false, success: false});
