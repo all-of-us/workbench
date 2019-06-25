@@ -9,7 +9,7 @@ import {
   subtreeSelectedStore,
   wizardStore
 } from 'app/cohort-search/search-state.service';
-import {domainToTitle, stripHtml} from 'app/cohort-search/utils';
+import {domainToTitle, generateId, stripHtml} from 'app/cohort-search/utils';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -99,14 +99,6 @@ export class ListModalComponent implements OnInit, OnDestroy {
   }
 
   close() {
-    const {groupId, role} = this.wizard;
-    const sr = searchRequestStore.getValue();
-    const group = sr[role].find(grp => grp.id === groupId);
-    // TODO change condition to check for total count instead of items when api call is ready
-    if (group.items.length === 0) {
-      sr[role] = sr[role].filter(grp => grp.id !== groupId);
-      searchRequestStore.next(sr);
-    }
     wizardStore.next(undefined);
     selectionsStore.next([]);
     subtreePathStore.next([]);
@@ -130,15 +122,37 @@ export class ListModalComponent implements OnInit, OnDestroy {
   finish() {
     const {groupId, item, role} = this.wizard;
     const searchRequest = searchRequestStore.getValue();
-    const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
-    const itemIndex = searchRequest[role][groupIndex].items.findIndex(it => it.id === item.id);
-    if (itemIndex > -1) {
-      searchRequest[role][groupIndex].items[itemIndex] = item;
+    if (groupId) {
+      const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
+      if (groupIndex > -1) {
+        const itemIndex = searchRequest[role][groupIndex].items.findIndex(it => it.id === item.id);
+        if (itemIndex > -1) {
+          searchRequest[role][groupIndex].items[itemIndex] = item;
+        } else {
+          searchRequest[role][groupIndex].items.push(item);
+        }
+      }
     } else {
-      searchRequest[role][groupIndex].items.push(item);
+      const group = this.initGroup(role, item);
+      searchRequest[role].push(group);
     }
     searchRequestStore.next(searchRequest);
     this.close();
+  }
+
+  initGroup(role: string, item: any) {
+    return {
+      id: generateId(role),
+      items: [item],
+      count: null,
+      temporal: false,
+      mention: null,
+      time: null,
+      timeValue: 0,
+      timeFrame: '',
+      isRequesting: false,
+      status: 'active'
+    };
   }
 
   get attributeTitle() {

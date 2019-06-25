@@ -5,7 +5,12 @@ import {NgxPopperModule} from 'ngx-popper';
 
 import {ListSearchGroupItemComponent} from './list-search-group-item.component';
 
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {TreeType} from 'generated';
+import {CohortBuilderApi} from 'generated/fetch';
+import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 const zeroCrit = {
   id: 0,
@@ -45,17 +50,21 @@ describe('ListSearchGroupItemComponent', () => {
         providers: [],
       })
       .compileComponents();
+    currentWorkspaceStore.next({
+      ...workspaceDataStub,
+      cdrVersionId: '1',
+    });
   }));
 
   beforeEach(() => {
-
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     fixture = TestBed.createComponent(ListSearchGroupItemComponent);
     comp = fixture.componentInstance;
 
     // Default Inputs for tests
     comp.role = 'includes';
     comp.groupId = 'include0';
-
+    comp.updateGroup = () => {};
     comp.item = baseItem;
 
     fixture.detectChanges();

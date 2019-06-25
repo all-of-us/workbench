@@ -323,7 +323,6 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
   }
 
   selectOption = (opt: any) => {
-    console.log(opt);
     const wizard = this.wizard;
     wizard.item.searchParameters.push(opt);
     const selections = [...this.selections, opt.parameterId];

@@ -45,7 +45,8 @@
       [role]="role"
       [groupId]="groupId"
       [item]="item"
-      [delete]="deleteItem">
+      [delete]="deleteItem"
+      [updateGroup]="update">
     </app-list-search-group-item>
     <div *ngIf="status === 'active'" class="item-or">OR</div>
   </div>
@@ -168,7 +169,8 @@
         [role]="role"
         [groupId]="groupId"
         [item]="item"
-        [delete]="deleteItem">
+        [delete]="deleteItem"
+        [updateGroup]="update">
       </app-list-search-group-item>
       <div *ngIf="status === 'active'" class="item-or">OR</div>
     </div>
@@ -191,7 +193,7 @@
       </clr-dropdown>
     </div>
   </ng-container>
-  <div class="container card-footer" *ngIf=" this.group.count !== -1 || !groupDisableFlag">
+  <div class="container card-footer" *ngIf=" this.count !== -1 || !groupDisableFlag">
     <div class="row" [ngClass]="{'toggle-no-cursor' : !typeFlag}">
       <div class="col-sm-6 temporal-container">
         <div class="toggle-switch" [ngClass]="{'toggle-switch-disable' : !typeFlag}">
@@ -204,45 +206,51 @@
         <div style="padding-left: 2rem">Temporal</div>
       </div>
       <div class="col-sm-6 text-right">
-        Group Count:
-        <span *ngIf="isRequesting"
-              class="spinner spinner-inline"
-              [style.vertical-align]="'middle'">
-      Loading...
-      </span>
-        <ng-container [ngSwitch]="true">
-          <span *ngIf="!isRequesting">
-            <ng-container *ngSwitchCase="(group.count !== null || temporalFlag) &&  group.count !== -1">
-              {{ group.count | number }}
-            </ng-container>
-            <ng-container *ngSwitchCase="(group.count === null || group.count === -1) && !temporalFlag">
-               --
-              <clr-tooltip>
-                <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
-                <clr-tooltip-content clrSize="lg" *clrIfOpen>
-                  <span>
-                    All criteria in this group are suppressed. Un-surpress criteria to update the group count based on the visible criteria.
-                  </span>
-                </clr-tooltip-content>
-              </clr-tooltip>
-            </ng-container>
+        <div
+          [class.error]="error"
+          [popper]="errorPopper"
+          [popperTrigger]="'hover'"
+          [popperDisabled]="!error">
+          Group Count:
+          <span *ngIf="loading"
+            class="spinner spinner-inline group"
+            [style.vertical-align]="'middle'">
+          Loading...
           </span>
-          <span *ngSwitchCase="group.error && !temporalFlag">
-            <clr-icon
-              [popper]="errorPopper"
-              [popperTrigger]="'hover'"
-              shape="error-standard"
-              size="18"></clr-icon>
-          </span>
-          <span *ngSwitchCase="(!isRequesting && temporalFlag && warningFlag)">
-            --
-            <clr-icon
-              [popper]="errorPopper"
-              [popperTrigger]="'hover'"
-              shape="warning-standard"
-              size="18"></clr-icon>
-          </span>
-        </ng-container>
+          <ng-container [ngSwitch]="true">
+            <span *ngIf="!loading">
+              <ng-container *ngSwitchCase="(count !== null || temporalFlag) &&  count !== -1">
+                {{ count | number }}
+              </ng-container>
+              <ng-container *ngSwitchCase="(count === null || count === -1) && !temporalFlag">
+                 --
+                <clr-tooltip>
+                  <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
+                  <clr-tooltip-content clrSize="lg" *clrIfOpen>
+                    <span>
+                      All criteria in this group are suppressed. Un-surpress criteria to update the group count based on the visible criteria.
+                    </span>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+              </ng-container>
+            </span>
+            <span *ngSwitchCase="error && !temporalFlag">
+              <clr-icon
+                class="is-solid"
+                shape="exclamation-triangle"
+                style="color: #ffffff"
+                size="22"></clr-icon>
+            </span>
+            <span *ngSwitchCase="(!loading && temporalFlag && warningFlag)">
+              --
+              <clr-icon
+                [popper]="errorPopper"
+                [popperTrigger]="'hover'"
+                shape="warning-standard"
+                size="18"></clr-icon>
+            </span>
+          </ng-container>
+        </div>
       </div>
     </div>
   </div>
@@ -271,7 +279,7 @@
 </div>
 
 <popper-content #errorPopper>
-  <p  *ngIf="group.error && !temporalFlag" [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p  *ngIf="error && !temporalFlag" [style.margin]="'0'">Sorry, the request cannot be completed.</p>
   <p  *ngIf="temporalFlag && warningFlag"  [style.margin]="'0'">
     Please complete criteria selections before saving temporal relationship.
   </p>
