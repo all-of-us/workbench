@@ -7,6 +7,7 @@ import {FadeBox} from 'app/components/containers';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 
+import {ClrIcon} from 'app/components/icons';
 import {
   cohortsApi,
   conceptsApi,
@@ -21,6 +22,7 @@ import {
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {NewDataSetModal} from 'app/views/new-dataset-modal';
@@ -37,8 +39,6 @@ import {
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
-import {ClrIcon} from 'app/components/icons';
-import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 
 export const styles = reactStyles({
   selectBoxHeader: {
