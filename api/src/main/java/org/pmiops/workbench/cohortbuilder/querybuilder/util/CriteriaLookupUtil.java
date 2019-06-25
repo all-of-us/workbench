@@ -1,6 +1,8 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.ancestorDataNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.domainBlank;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.groupNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.typeBlank;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
@@ -223,6 +225,14 @@ public final class CriteriaLookupUtil {
     from(typeBlank())
         .test(param)
         .throwException("Bad Request: search parameter type {0} is not valid.", param.getType());
+    from(groupNull())
+        .test(param)
+        .throwException("Bad Request: search parameter group {0} is not valid.", param.getGroup());
+    from(ancestorDataNull())
+        .test(param)
+        .throwException(
+            "Bad Request: search parameter ancestor data {0} is not valid.",
+            param.getAncestorData());
   }
 
   private void putLeavesOnParent(

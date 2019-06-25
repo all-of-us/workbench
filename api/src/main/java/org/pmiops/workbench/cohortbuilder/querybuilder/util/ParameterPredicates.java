@@ -104,6 +104,14 @@ public class ParameterPredicates {
     return sp -> StringUtils.isBlank(sp.getDomain());
   }
 
+  public static Predicate<SearchParameter> groupNull() {
+    return sp -> sp.getGroup() == null;
+  }
+
+  public static Predicate<SearchParameter> ancestorDataNull() {
+    return sp -> sp.getAncestorData() == null;
+  }
+
   public static Predicate<SearchParameter> codeTypeInvalid() {
     return sp -> !CODE_TYPES.stream().anyMatch(sp.getType()::equalsIgnoreCase);
   }
