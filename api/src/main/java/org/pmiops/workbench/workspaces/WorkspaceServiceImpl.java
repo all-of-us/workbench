@@ -368,8 +368,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       Map<String, WorkspaceAccessEntry> rolesMap) {
     List<UserRole> userRoles = new ArrayList<>();
     for (Map.Entry<String, WorkspaceAccessEntry> entry : rolesMap.entrySet()) {
-      User user = userDao.findUserByEmail(entry.getKey());
-      userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
+      // Filter out groups
+      try {
+        User user = userDao.findUserByEmail(entry.getKey());
+        userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
+      } catch(NullPointerException e) {
+        log.log(Level.WARNING, "No user found for " + entry.getKey());
+      }
     }
     return userRoles.stream()
         .sorted(
