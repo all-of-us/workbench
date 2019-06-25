@@ -5,7 +5,7 @@ import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {clusterApi, workspacesApi} from "../services/swagger-fetch-clients";
 import {Cluster, ClusterStatus} from "../../generated/fetch";
-import {urlParamsStore} from "../utils/navigation";
+import {navigate, urlParamsStore} from "../utils/navigation";
 import {notebooksClusterApi} from "../services/notebooks-swagger-fetch-clients";
 import {ClrIcon} from "../components/icons";
 import {EditComponentReact} from "../icons/edit";
@@ -24,6 +24,8 @@ export const InteractiveNotebook = withCurrentWorkspace()(class extends React.Co
 
   private pollClusterTimer: NodeJS.Timer;
   private billingProjectId = urlParamsStore.getValue().ns;
+  private workspaceId = urlParamsStore.getValue().wsid;
+  private nbName = urlParamsStore.getValue().nbName;
 
   constructor(props) {
     super(props);
@@ -80,6 +82,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(class extends React.Co
 
   private onClusterRunning() {
     console.log('Switching to edit mode');
+    navigate(['workspaces', this.billingProjectId, this.workspaceId, 'notebooks', this.nbName]);
   }
 
   render() {
