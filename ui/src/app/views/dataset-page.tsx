@@ -55,7 +55,7 @@ export const styles = reactStyles({
   },
 
   selectBoxHeaderIconLinks: {
-    fill: '#216FB4'
+    fill: colors.blue[9]
   },
 
   listItem: {
