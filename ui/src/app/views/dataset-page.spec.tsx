@@ -216,6 +216,7 @@ describe('DataSet', () => {
 
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
     const wrapper = mount(<DataSetPage />);
+    const wsPathPrefix = 'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id;
 
     // Mock out navigateByUrl
     const navSpy = jest.fn();
@@ -223,13 +224,11 @@ describe('DataSet', () => {
 
     // Check Cohorts "+" link
     wrapper.find({'data-test-id': 'cohorts-link'}).first().simulate('click');
-    expect(navSpy).toHaveBeenCalledWith(
-      'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id + '/cohorts');
+    expect(navSpy).toHaveBeenCalledWith(wsPathPrefix + '/cohorts');
 
     // Check Concept Sets "+" link
     wrapper.find({'data-test-id': 'concept-sets-link'}).first().simulate('click');
-    expect(navSpy).toHaveBeenCalledWith(
-      'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id + '/concepts/sets');
+    expect(navSpy).toHaveBeenCalledWith(wsPathPrefix + '/concepts/sets');
   });
 
 
