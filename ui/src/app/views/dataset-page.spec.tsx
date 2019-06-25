@@ -216,9 +216,6 @@ describe('DataSet', () => {
 
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
     const wrapper = mount(<DataSetPage />);
-    await waitOneTickAndUpdate(wrapper);
-    await waitOneTickAndUpdate(wrapper);
-    // todo: can we put these ^ into a single const like in workspace-nav-bar.spec.tsx
 
     // Mock out navigateByUrl
     const navSpy = jest.fn();
