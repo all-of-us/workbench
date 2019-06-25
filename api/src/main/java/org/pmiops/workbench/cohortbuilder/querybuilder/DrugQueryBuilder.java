@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 /** DrugQueryBuilder builds SQL for BigQuery for drug criteria type. */
 @Service
+// TODO:Remove when new search is finished - freemabd
 public class DrugQueryBuilder extends AbstractQueryBuilder {
 
   private static final String DRUG_SQL_TEMPLATE =

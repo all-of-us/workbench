@@ -6,7 +6,9 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.Gson;
-import java.time.*;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,9 +21,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cohortbuilder.BaseQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortFactory;
@@ -151,7 +153,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ReviewQueryBuilder.class,
     CohortCloningService.class,
     CohortQueryBuilder.class,
-    BaseQueryBuilder.class,
+    SearchGroupItemQueryBuilder.class,
     QueryBuilderFactory.class
   })
   @MockBean({

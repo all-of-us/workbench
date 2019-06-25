@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
  * to get an instance of {@link AbstractQueryBuilder}.
  */
 @Component
+// TODO:Remove when new search is finished - freemabd
 public class QueryBuilderFactory {
 
   @Autowired private List<AbstractQueryBuilder> queryBuilders;
