@@ -42,6 +42,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
@@ -143,8 +144,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.userProvider = userProvider;
   }
 
-  public String getRegisteredUserDomainEmail() {
-    return workbenchConfigProvider.get().firecloud.registeredDomainName + "@firecloud.org";
+  private String getRegisteredUserDomainEmail() {
+    ManagedGroupWithMembers registeredDomainGroup = fireCloudService
+            .getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
+
+    return registeredDomainGroup.getAdminsGroup().getGroupEmail();
   }
 
   private static String generateRandomChars(String candidateChars, int length) {
