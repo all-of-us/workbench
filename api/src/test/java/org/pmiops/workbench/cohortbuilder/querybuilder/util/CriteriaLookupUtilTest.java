@@ -25,6 +25,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CriteriaLookupUtilTest {
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
@@ -108,10 +111,6 @@ public class CriteriaLookupUtilTest {
     assertEquals(
         ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)),
         lookupUtil.buildCriteriaLookupMap(searchRequest));
-    cbCriteriaDao.delete(drugNode1.getId());
-    cbCriteriaDao.delete(drugNode2.getId());
-    cbCriteriaDao.delete(drugNode3.getId());
-    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
@@ -204,9 +203,6 @@ public class CriteriaLookupUtilTest {
                 new SearchGroup()
                     .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
     assertTrue(lookupUtil.buildCriteriaLookupMap(searchRequest).isEmpty());
-    cbCriteriaDao.delete(surveyNode.getId());
-    cbCriteriaDao.delete(questionNode.getId());
-    cbCriteriaDao.delete(answerNode.getId());
   }
 
   @Test
@@ -262,9 +258,6 @@ public class CriteriaLookupUtilTest {
     assertEquals(
         ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)),
         lookupUtil.buildCriteriaLookupMap(searchRequest));
-    cbCriteriaDao.delete(snomedParent1.getId());
-    cbCriteriaDao.delete(snomedParent2.getId());
-    cbCriteriaDao.delete(snomedChild.getId());
   }
 
   @Test
@@ -320,8 +313,5 @@ public class CriteriaLookupUtilTest {
     assertEquals(
         ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)),
         lookupUtil.buildCriteriaLookupMap(searchRequest));
-    cbCriteriaDao.delete(icd9Parent.getId());
-    cbCriteriaDao.delete(icd9Child1.getId());
-    cbCriteriaDao.delete(icd9Child2.getId());
   }
 }
