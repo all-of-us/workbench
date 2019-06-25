@@ -90,9 +90,6 @@ export const InteractiveNotebook = withCurrentWorkspace()(class extends React.Co
               Run (Playground Mode)
             </div>
           </div>
-          <div style={{float: 'left', height: '100%', width: 40, color: '#262262', borderLeft: '1px solid rgb(205, 205, 205)', backgroundColor: 'rgba(38,34,98,0.05)', textAlign: 'center', lineHeight: '35px'}}>
-            <NotebookActionsPopup />
-          </div>
         </div>
         <iframe style={{width: '100%', height: 800, border: 0}} srcDoc={this.state.html}>
         </iframe>
