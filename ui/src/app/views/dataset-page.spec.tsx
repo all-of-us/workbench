@@ -40,8 +40,8 @@ describe('DataSet', () => {
     expect(wrapper.find('[data-test-id="concept-set-list-item"]').length)
       .toBe(ConceptSetsApiStub.stubConceptSets().length);
   });
-//  it should load all cohorts related to workspace
 
+//  it should load all cohorts related to workspace
   it('should display all cohorts in workspace', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
