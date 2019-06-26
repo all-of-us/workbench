@@ -18,31 +18,31 @@ const styles = reactStyles({
     border: 'solid thin #cdcdcd'
   },
   navBarPreview: {
+    width: 227,
     float: 'left',
     height: '100%',
-    width: 227,
-    color: '#262262',
+    color: colors.blue[9],
     backgroundColor: 'rgba(38,34,98,0.2)',
+    borderRight: '1px solid rgb(205, 205, 205)',
     textAlign: 'center',
     lineHeight: '35px'
   },
   navBarPreparing: {
+    width: 550,
     float: 'left',
     height: '100%',
-    width: 550,
-    color: '#262262',
-    borderLeft: '1px solid rgb(205, 205, 205)',
+    color: colors.blue[9],
     backgroundColor: 'rgba(38,34,98,0.05)',
+    borderRight: '1px solid rgb(205, 205, 205)',
     textAlign: 'center',
     lineHeight: '35px'
   },
   navBarEdit: {
     cursor: 'pointer',
+    width: 135,
     float: 'left',
     height: '100%',
-    width: 135,
-    color: '#262262',
-    borderLeft: '1px solid rgb(205, 205, 205)',
+    color: colors.blue[9],
     borderRight: '1px solid rgb(205, 205, 205)',
     backgroundColor: 'rgba(38,34,98,0.05)',
     textAlign: 'center',
@@ -99,7 +99,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(class extends React.Co
       .catch(resp => console.error(resp));
   }
 
-  // Refactor from reset cluster button
+  // TODO eric: Refactor from reset cluster button
   private pollCluster(billingProjectId): void {
     const repoll = () => {
       this.pollClusterTimer = setTimeout(() => this.pollCluster(billingProjectId), 5000);
