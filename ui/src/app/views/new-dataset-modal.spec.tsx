@@ -60,7 +60,7 @@ describe('NewDataSetModal', () => {
     expect(exportSpy).not.toHaveBeenCalled();
   });
 
-  it('should not export if export  clicked', async() => {
+  it('should not export if export is not checked', async() => {
     const wrapper = mount(createNewDataSetModal());
     const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
