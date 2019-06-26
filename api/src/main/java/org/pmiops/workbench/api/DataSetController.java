@@ -467,7 +467,7 @@ public class DataSetController implements DataSetApiDelegate {
     try {
       dataSetDao.save(dbDataSet);
     } catch (OptimisticLockException e) {
-      throw new ConflictException("Failed due to concurrent concept set modification");
+      throw new ConflictException("Failed due to concurrent data set modification");
     }
 
     return ResponseEntity.ok(true);
