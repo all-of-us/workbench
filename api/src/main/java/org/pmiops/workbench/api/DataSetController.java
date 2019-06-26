@@ -533,9 +533,8 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<Boolean> dataSetByIdExist(
       String workspaceNamespace, String workspaceId, String resourceType, Long id) {
-    Workspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+      workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     int countDataSet = 0;
     if (resourceType.equals(COHORT)) {

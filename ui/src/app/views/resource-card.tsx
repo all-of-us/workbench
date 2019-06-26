@@ -639,12 +639,14 @@ export class ResourceCard extends React.Component<Props, State> {
           <div style={{paddingBottom: '1rem'}}>
             This {this.resourceType} is being used in a Data Set. Do you still want to delete?
           </div>
-          <Button type='secondary' onClick={() => {this.setState({showDirtyDataSetModal: false});
-            this.closeConfirmDelete(); }
-          } style={{marginRight: '2rem'}}>
-            Cancel
-          </Button>
-          <Button type='primary' onClick={() => this.markDataSetDirty()}>OK</Button>
+          <div style={{float: 'right'}}>
+            <Button type='secondary' style={{ marginRight: '2rem'}} onClick={() => {
+              this.setState({showDirtyDataSetModal: false});  this.closeConfirmDelete(); }}>
+              Cancel
+            </Button>
+            <Button type='primary'
+                  onClick={() => this.markDataSetDirty()}>YES, DELETE</Button>
+          </div>
         </ModalBody>
       </Modal>}
     </React.Fragment>;
