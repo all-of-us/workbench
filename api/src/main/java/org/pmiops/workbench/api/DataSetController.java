@@ -450,14 +450,14 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, MarkDataSetRequest markDataSetRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    List<org.pmiops.workbench.db.model.DataSet> dbDataSet = new ArrayList<>();
+    List<org.pmiops.workbench.db.model.DataSet> dbDataSetList = new ArrayList<>();
     if (markDataSetRequest.getResourceType().equalsIgnoreCase(COHORT)) {
-      dbDataSet = dataSetDao.findDataSetsByCohortSetId(markDataSetRequest.getId());
+      dbDataSetList = dataSetDao.findDataSetsByCohortSetId(markDataSetRequest.getId());
     } else if (markDataSetRequest.getResourceType().equalsIgnoreCase(CONCEPT_SET)) {
-      dbDataSet = dataSetDao.findDataSetsByConceptSetId(markDataSetRequest.getId());
+      dbDataSetList = dataSetDao.findDataSetsByConceptSetId(markDataSetRequest.getId());
     }
-    dbDataSet =
-        dbDataSet.stream()
+    dbDataSetList =
+        dbDataSetList.stream()
             .map(
                 dataSet -> {
                   dataSet.setInvalid(true);
@@ -465,7 +465,7 @@ public class DataSetController implements DataSetApiDelegate {
                 })
             .collect(Collectors.toList());
     try {
-      dataSetDao.save(dbDataSet);
+      dataSetDao.save(dbDataSetList);
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent data set modification");
     }
