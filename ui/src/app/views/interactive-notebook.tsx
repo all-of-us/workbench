@@ -14,54 +14,36 @@ import colors from "../styles/colors";
 const styles = reactStyles({
   navBar: {
     height: 35,
-    backgroundColor: 'white',
-    border: 'solid thin #cdcdcd'
+    backgroundColor: colors.white,
+    border: 'solid thin ' + colors.gray[5]
   },
-  navBarPreview: {
-    width: 227,
+  navBarItem: {
     float: 'left',
     height: '100%',
     color: colors.blue[9],
-    backgroundColor: 'rgba(38,34,98,0.2)',
-    borderRight: '1px solid rgb(205, 205, 205)',
-    textAlign: 'center',
-    lineHeight: '35px'
-  },
-  navBarPreparing: {
-    width: 550,
-    float: 'left',
-    height: '100%',
-    color: colors.blue[9],
-    backgroundColor: 'rgba(38,34,98,0.05)',
-    borderRight: '1px solid rgb(205, 205, 205)',
-    textAlign: 'center',
-    lineHeight: '35px'
-  },
-  navBarEdit: {
-    cursor: 'pointer',
-    width: 135,
-    float: 'left',
-    height: '100%',
-    color: colors.blue[9],
-    borderRight: '1px solid rgb(205, 205, 205)',
+    borderRight: '1px solid ' + colors.gray[5],
     backgroundColor: 'rgba(38,34,98,0.05)',
     textAlign: 'center',
     lineHeight: '35px'
   },
-  navBarEditIcon: {
+  active: {
+    backgroundColor: 'rgba(38,34,98,0.2)'
+  },
+  clickable: {
+    cursor: 'pointer'
+  },
+  navBarIcon: {
     height: '14px',
     width: '14px',
     verticalAlign: 'middle',
-    marginLeft: 0
+    marginLeft: 0,
+    marginRight: '5px',
+    marginBottom: '3px'
   },
   previewFrame: {
     width: '100%',
     height: 800,
     border: 0
-  },
-  navBarIcon: {
-    marginRight: '5px',
-    marginBottom: '3px'
   },
   rotate: {
     animation: 'rotation 2s infinite linear'
@@ -94,18 +76,16 @@ export const InteractiveNotebook = withCurrentWorkspace()(class extends React.Co
   }
 
   componentDidMount(): void {
-    workspacesApi().readOnlyNotebook("aou-rw-local1-93b1df18", "newbuffer", "test.ipynb")
+    workspacesApi().readOnlyNotebook(this.billingProjectId, this.workspaceId, this.nbName)
       .then(html => {this.setState({html: html.html})})
-      .catch(resp => console.error(resp));
   }
 
-  // TODO eric: Refactor from reset cluster button
-  private pollCluster(billingProjectId): void {
-    const repoll = () => {
-      this.pollClusterTimer = setTimeout(() => this.pollCluster(billingProjectId), 5000);
+  private runCluster(): void {
+    const retry = () => {
+      this.pollClusterTimer = setTimeout(() => this.runCluster(), 5000);
     };
 
-    clusterApi().listClusters(billingProjectId)
+    clusterApi().listClusters(this.billingProjectId)
       .then((body) => {
         const cluster = body.defaultCluster;
         this.setState({ clusterStatus: cluster.status });
@@ -118,21 +98,17 @@ export const InteractiveNotebook = withCurrentWorkspace()(class extends React.Co
         if (cluster.status === ClusterStatus.Running) {
           this.onClusterRunning();
         } else {
-          repoll();
-          return;
+          retry();
         }
-
       })
       .catch(() => {
-        console.log("Poll cluster failed");
-        // Also retry on errors
-        repoll();
+        retry();
       });
   }
 
   private onEditClick() {
     this.setState({ userRequestedEditMode : true });
-    this.pollCluster(this.billingProjectId);
+    this.runCluster();
   }
 
   private onClusterRunning() {
@@ -143,16 +119,16 @@ export const InteractiveNotebook = withCurrentWorkspace()(class extends React.Co
     return (
       <div>
         <div style={styles.navBar}>
-          <div style={styles.navBarPreview}>
+          <div style={{...styles.navBarItem, ...styles.active, width: 227}}>
             Preview (Read-Only)
           </div>
           {this.state.userRequestedEditMode ? (
-            <div style={styles.navBarPreparing}>
+            <div style={{...styles.navBarItem, width: 550}}>
               <ClrIcon shape="sync" style={{...styles.navBarIcon, ...styles.rotate}}></ClrIcon>
               Preparing your Jupyter environment. This may take up to 2 minutes.
             </div>) : (<div>
-              <div onClick={() => {this.onEditClick();}} style={styles.navBarEdit}>
-                <EditComponentReact enableHoverEffect={false} disabled={false} style={{...styles.navBarIcon, ...styles.navBarEditIcon}} />
+              <div onClick={() => {this.onEditClick();}} style={{...styles.navBarItem, ...styles.clickable, width: 135}}>
+                <EditComponentReact enableHoverEffect={false} disabled={false} style={{...styles.navBarIcon}} />
                 Edit
               </div>
             </div>)
