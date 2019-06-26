@@ -33,7 +33,6 @@ describe('DataSet', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-//  it should load all concept sets related to workspace
   it ('should display all concepts sets in workspace', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
@@ -41,7 +40,6 @@ describe('DataSet', () => {
       .toBe(ConceptSetsApiStub.stubConceptSets().length);
   });
 
-//  it should load all cohorts related to workspace
   it('should display all cohorts in workspace', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);

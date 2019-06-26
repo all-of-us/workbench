@@ -154,6 +154,14 @@ export const ValueListItem: React.FunctionComponent <
     </div>;
   };
 
+const plusLink = (dataTestId: string, path: string) => {
+  return <a data-test-id={dataTestId} href={path}
+            onClick={e => {navigateAndPreventDefaultIfNoKeysPressed(e, path); }}>
+    <ClrIcon shape='plus-circle' class='is-solid' size={16}
+             style={styles.selectBoxHeaderIconLinks}/>
+  </a>;
+};
+
 interface Props {
   workspace: WorkspaceData;
   urlParams: any;
@@ -480,13 +488,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
                 <div style={styles.selectBoxHeader}>
                   Cohorts
-                    <a data-test-id='cohorts-link' href={cohortsPath}
-                      onClick={e => {
-                        navigateAndPreventDefaultIfNoKeysPressed(e, cohortsPath);
-                      }}>
-                      <ClrIcon shape='plus-circle' class='is-solid' size={16}
-                           style={styles.selectBoxHeaderIconLinks}/>
-                    </a>
+                  {plusLink('cohorts-link', cohortsPath)}
                 </div>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
@@ -516,13 +518,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
                   <div style={styles.selectBoxHeader}>
                     Concept Sets
-                    <a data-test-id='concept-sets-link' href={conceptSetsPath}
-                       onClick={e => {
-                         navigateAndPreventDefaultIfNoKeysPressed(e, conceptSetsPath);
-                       }}>
-                    <ClrIcon shape='plus-circle' class='is-solid' size={16}
-                             style={styles.selectBoxHeaderIconLinks}/>
-                    </a>
+                    {plusLink('concept-sets-link', conceptSetsPath)}
                   </div>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
