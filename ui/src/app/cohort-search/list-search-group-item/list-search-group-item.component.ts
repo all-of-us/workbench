@@ -95,29 +95,25 @@ export class ListSearchGroupItemComponent implements OnInit {
   }
 
   enable() {
-    this.setStatus('active');
+    this.item.status = 'active';
     this.updateSearchRequest();
   }
 
   suppress() {
-    this.setStatus('hidden');
+    this.item.status = 'hidden';
     this.updateSearchRequest();
   }
 
   remove() {
-    this.setStatus('pending');
+    this.item.status = 'pending';
     this.item.timeout = setTimeout(() => {
       this.delete(this.item.id);
     }, 10000);
   }
 
-  setStatus(status: string) {
-    this.item.status = status;
-  }
-
   undo() {
     clearTimeout(this.item.timeout);
-    this.setStatus('active');
+    this.item.status = 'active';
   }
 
   updateSearchRequest() {
