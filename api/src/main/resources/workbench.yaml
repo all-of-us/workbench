@@ -1627,7 +1627,7 @@ paths:
             schema:
               $ref: "#/definitions/ErrorResponse"
           409:
-            description: Data set with same name exist
+            description: Data Set with the same name already exists
             schema:
               $ref: "#/definitions/ErrorResponse"
 
@@ -1663,7 +1663,7 @@ paths:
           schema:
             $ref: "#/definitions/DataSet"
         409:
-          description: Data set with same name exist
+          description: Data Set with the same name already exists
           schema:
             $ref: "#/definitions/ErrorResponse"
     delete:
