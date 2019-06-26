@@ -109,6 +109,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
   render() {
     const {profileState: {profile}} = this.props;
     const {profileEdits, updating} = this.state;
+    console.log('profile.eraCommonsLinkedNihUsername');
+    console.log(profile.eraCommonsLinkedNihUsername);
     const {
       givenName, familyName, currentPosition, organization, areaOfResearch,
       institutionalAffiliations = []
@@ -295,7 +297,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             isComplete={RegistrationTasksMap['complianceTraining'].isComplete(profile)}
             completeStep={RegistrationTasksMap['complianceTraining'].onClick} />
 
-          <ProfileRegistrationStepStatus
+          {serverConfigStore.getValue().enableEraCommons && <ProfileRegistrationStepStatus
             title='ERA Commons Account'
             wasBypassed={!!profile.eraCommonsBypassTime}
             incompleteButtonText='Link'
@@ -303,16 +305,22 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             isComplete={RegistrationTasksMap['eraCommons'].isComplete(profile)}
             completeStep={RegistrationTasksMap['eraCommons'].onClick} >
             <div>
-              <div> Username: </div>
-              <div> { profile.eraCommonsLinkedNihUsername } </div>
-              <div> Link Expiration: </div>
-              <div>
-                { moment.unix(profile.eraCommonsLinkExpireTime)
-                  .format('MMMM Do, YYYY, h:mm:ss A') }
-              </div>
+              {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
+                <div> Username: </div>
+                <div> { profile.eraCommonsLinkedNihUsername } </div>
+              </React.Fragment>}
+              {profile.eraCommonsLinkExpireTime != null &&
+              //  Firecloud returns eraCommons link expiration as 0 if there is no linked account.
+              profile.eraCommonsLinkExpireTime !== 0
+              && <React.Fragment>
+                <div> Link Expiration: </div>
+                <div>
+                  { moment.unix(profile.eraCommonsLinkExpireTime)
+                    .format('MMMM Do, YYYY, h:mm:ss A') }
+                </div>
+              </React.Fragment>}
             </div>
-          </ProfileRegistrationStepStatus>
-
+          </ProfileRegistrationStepStatus>}
           {serverConfigStore.getValue().enableDataUseAgreement && <ProfileRegistrationStepStatus
             title='Data Use Agreement'
             wasBypassed={!!profile.dataUseAgreementBypassTime}
