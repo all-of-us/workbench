@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import * as React from 'react';
 
-import {Clickable, Button} from 'app/components/buttons';
+import {Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {TwoColPaddedTable} from 'app/components/tables';
 import {EditComponentReact} from 'app/icons/edit';
@@ -13,7 +13,6 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {SpecificPopulationEnum} from 'generated/fetch';
 import {ResearchPurposeDescription, ResearchPurposeItems, specificPopulations} from './workspace-edit';
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
 
 const styles = reactStyles({
   mainHeader: {
@@ -74,14 +73,6 @@ export const WorkspaceAbout = withCurrentWorkspace()(
       }
     }
 
-    async publishWorkspace() {
-      try {
-        workspacesApi().publishWorkspace(this.props.workspace.namespace, this.props.workspace.id);
-      } catch(error) {
-        console.log(error);
-      }
-    }
-
     render() {
       const workspace = this.props.workspace;
       const {workspacePermissions} = this.state;
@@ -116,7 +107,6 @@ export const WorkspaceAbout = withCurrentWorkspace()(
                              contentRight={this.getSelectedPopulationsSlice(false)}/>
         </div>
         }
-        <Button onClick={() => this.publishWorkspace()}>Publish</Button>
       </FadeBox>;
     }
   }
