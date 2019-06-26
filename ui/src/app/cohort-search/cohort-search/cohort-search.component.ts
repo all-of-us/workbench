@@ -87,14 +87,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
       searchRequestStore.subscribe(sr => {
         this.includeSize = sr.includes.length;
         this.criteria = sr;
-        if (sr.includes.length || sr.excludes.length) {
-          this.overview = true;
-          this.loading = true;
-          this.error = false;
-          this.getTotalCount();
-        } else {
-          this.overview = false;
-        }
+        this.overview = sr.includes.length || sr.excludes.length;
       });
     } else {
       this.subscription.add(
@@ -110,24 +103,6 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     idsInUse.next(new Set());
     currentCohortStore.next(undefined);
     searchRequestStore.next({includes: [], excludes: []} as SearchRequest);
-  }
-
-  getTotalCount() {
-    try {
-      const {cdrVersionId} = currentWorkspaceStore.getValue();
-      cohortBuilderApi().getDemoChartInfo(+cdrVersionId, this.criteria).then(response => {
-        this.count = response.items.reduce((sum, data) => sum + data.count, 0);
-        this.loading = false;
-      }, (err) => {
-        console.error(err);
-        this.error = true;
-        this.loading = false;
-      });
-    } catch (error) {
-      console.error(error);
-      this.error = true;
-      this.loading = false;
-    }
   }
 
   getTempObj(e) {
