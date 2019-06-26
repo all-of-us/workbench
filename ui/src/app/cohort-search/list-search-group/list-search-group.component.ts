@@ -1,11 +1,7 @@
 import {
   AfterViewInit,
   Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output, SimpleChanges,
+  Input
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
@@ -24,11 +20,10 @@ import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated/
     '../../styles/buttons.css',
   ]
 })
-export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnInit {
+export class ListSearchGroupComponent implements AfterViewInit {
   @Input() group;
   @Input() index;
   @Input() role: keyof SearchRequest;
-  @Output() temporalLength = new EventEmitter<any>();
 
   whichMention = [TemporalMention.ANYMENTION,
     TemporalMention.FIRSTMENTION,
@@ -53,21 +48,6 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
   count: number;
   error = false;
   loading = false;
-
-  ngOnInit() {
-    // this.getGroupCount();
-    // TODO move this to the store and remove all Outputs/Event emitters
-    this.temporalLength.emit( {
-      tempLength: false,
-      flag: false}
-    );
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.group && !changes.group.firstChange) {
-      // this.getGroupCount();
-    }
-  }
 
   ngAfterViewInit() {
     if (typeof ResizeObserver === 'function') {

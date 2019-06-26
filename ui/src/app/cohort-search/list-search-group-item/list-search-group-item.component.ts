@@ -106,8 +106,10 @@ export class ListSearchGroupItemComponent implements OnInit {
 
   remove() {
     this.item.status = 'pending';
+    this.updateSearchRequest();
     this.item.timeout = setTimeout(() => {
-      this.delete(this.item.id);
+      // this.delete(this.item.id);
+      this.updateSearchRequest(true);
     }, 10000);
   }
 
@@ -116,16 +118,22 @@ export class ListSearchGroupItemComponent implements OnInit {
     this.item.status = 'active';
   }
 
-  updateSearchRequest() {
+  updateSearchRequest(remove?: boolean) {
     const sr = searchRequestStore.getValue();
     const {item, groupId, role} = this;
     const groupIndex = sr[role].findIndex(grp => grp.id === groupId);
     if (groupIndex > -1) {
       const itemIndex = sr[role][groupIndex].items.findIndex(it => it.id === item.id);
       if (itemIndex > -1) {
-        sr[role][groupIndex].items[itemIndex] = item;
+        if (remove) {
+          sr[role][groupIndex].items = sr[role][groupIndex].items.filter(it => it.id !== item.id);
+        } else {
+          sr[role][groupIndex].items[itemIndex] = item;
+        }
         searchRequestStore.next(sr);
-        this.updateGroup();
+        if (sr[role][groupIndex].items.length) {
+          this.updateGroup();
+        }
       }
     }
   }

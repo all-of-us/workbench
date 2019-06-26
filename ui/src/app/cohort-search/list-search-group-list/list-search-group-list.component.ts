@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {SearchRequest} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -12,7 +12,6 @@ import {Subscription} from 'rxjs/Subscription';
 export class ListSearchGroupListComponent {
   @Input() role: keyof SearchRequest;
   @Input() groups: Array<any>;
-  @Output() tempLength = new EventEmitter<boolean>();
 
   index = 0;
   subscription: Subscription;
@@ -24,8 +23,5 @@ export class ListSearchGroupListComponent {
 
   get emptyIndex() {
     return this.groups.length + this.index + 1;
-  }
-  getTemporalLength(e) {
-    this.tempLength.emit(e);
   }
 }
