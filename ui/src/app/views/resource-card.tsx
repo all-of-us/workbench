@@ -352,7 +352,7 @@ export class ResourceCard extends React.Component<Props, State> {
         break;
       }
       case ResourceType.CONCEPT_SET: {
-        this.checkForDataSet(this.props.conceptSet.id);
+        this.checkForDataSet(this.props.resourceCard.conceptSet.id);
         conceptSetsApi().deleteConceptSet(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
