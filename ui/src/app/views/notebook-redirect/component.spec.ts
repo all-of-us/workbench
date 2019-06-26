@@ -158,6 +158,20 @@ describe('NotebookRedirectComponent', () => {
     expect(fixture.debugElement.queryAll(By.css('.i-frame')).length).toBe(1);
   }));
 
+  it('should display "Connecting" after initially finding a RUNNING cluster', fakeAsync(() => {
+    blockingClusterStub.cluster.status = ClusterStatus.Running;
+
+    updateAndTick(fixture);
+    fixture.detectChanges();
+
+    const initBox = fixture.debugElement.queryAll(By.css('#initializing'))[0];
+    expect(initBox.children[1].nativeElement.innerText)
+      .toContain('Connecting');
+
+    tick(10000);
+    fixture.detectChanges();
+  }));
+
   it('should display resuming message until resumed', fakeAsync(() => {
     blockingClusterStub.cluster.status = ClusterStatus.Stopped;
     updateAndTick(fixture);
