@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Clickable} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {ResourceCardMenu} from 'app/components/resources';
 import {TextModal} from 'app/components/text-modal';
@@ -14,6 +14,7 @@ import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
 import {ExportDataSetModal} from 'app/views/export-data-set-modal';
 import {Domain, RecentResource} from 'generated/fetch';
 
+import {Modal, ModalBody, ModalTitle} from 'app/components/modals';
 import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {CopyNotebookModal} from 'app/views/copy-notebook-modal';
 import {RenameModal} from 'app/views/rename-modal';
@@ -95,6 +96,7 @@ export interface State {
   renaming: boolean;
   showCopyNotebookModal: boolean;
   showErrorModal: boolean;
+  showDirtyDataSetModal: boolean;
 }
 
 export class ResourceCard extends React.Component<Props, State> {
@@ -115,7 +117,8 @@ export class ResourceCard extends React.Component<Props, State> {
         props.resourceCard.dataSet),
       renaming: false,
       showCopyNotebookModal: false,
-      showErrorModal: false
+      showErrorModal: false,
+      showDirtyDataSetModal: false
     };
   }
 
@@ -304,7 +307,23 @@ export class ResourceCard extends React.Component<Props, State> {
     }
   }
 
-  receiveDelete(): void {
+  async checkForDataSet(id) {
+    if (!this.state.showDirtyDataSetModal) {
+      try {
+        return await dataSetApi().dataSetByIdExist(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.resourceType, id);
+      } catch (ex) {
+        console.log(ex);
+      }
+    } else {
+      this.setState({showDirtyDataSetModal: false});
+    }
+    return false;
+  }
+
+  async receiveDelete() {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         workspacesApi().deleteNotebook(
@@ -318,6 +337,11 @@ export class ResourceCard extends React.Component<Props, State> {
         break;
       }
       case ResourceType.COHORT: {
+        const dataSetExist = await this.checkForDataSet(this.props.resourceCard.cohort.id);
+        if (dataSetExist) {
+          this.setState({showDirtyDataSetModal: dataSetExist});
+          return;
+        }
         cohortsApi().deleteCohort(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
@@ -329,6 +353,11 @@ export class ResourceCard extends React.Component<Props, State> {
         break;
       }
       case ResourceType.CONCEPT_SET: {
+        const dataSetExist = await this.checkForDataSet(this.props.resourceCard.conceptSet.id);
+        if (dataSetExist) {
+          this.setState({showDirtyDataSetModal: dataSetExist});
+          return;
+        }
         conceptSetsApi().deleteConceptSet(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
@@ -476,6 +505,31 @@ export class ResourceCard extends React.Component<Props, State> {
     this.setState({renaming: true});
   }
 
+  async markDataSetDirty() {
+    let id = 0;
+    switch (this.resourceType) {
+      case ResourceType.CONCEPT_SET: {
+        id = this.props.resourceCard.conceptSet.id;
+        break;
+      }
+      case ResourceType.COHORT: {
+        id = this.props.resourceCard.cohort.id;
+        break;
+      }
+    }
+    try {
+      await dataSetApi().markDirty(this.props.resourceCard.workspaceNamespace,
+        this.props.resourceCard.workspaceFirecloudName, {
+          id: id,
+          resourceType: this.resourceType
+        });
+      this.receiveDelete();
+    } catch (ex) {
+      console.log(ex);
+    }
+
+  }
+
   render() {
     const marginTop = this.props.marginTop;
     return <React.Fragment>
@@ -579,6 +633,22 @@ export class ResourceCard extends React.Component<Props, State> {
           oldName={this.props.resourceCard.dataSet.name}
           existingNames={this.props.existingNameList}/>
       }
+      {this.state.showDirtyDataSetModal && <Modal>
+        <ModalTitle>WARNING</ModalTitle>
+        <ModalBody>
+          <div style={{paddingBottom: '1rem'}}>
+            This {this.resourceType} is being used in a Data Set. Do you still want to delete?
+          </div>
+          <div style={{float: 'right'}}>
+            <Button type='secondary' style={{ marginRight: '2rem'}} onClick={() => {
+              this.setState({showDirtyDataSetModal: false});  this.closeConfirmDelete(); }}>
+              Cancel
+            </Button>
+            <Button type='primary'
+                  onClick={() => this.markDataSetDirty()}>YES, DELETE</Button>
+          </div>
+        </ModalBody>
+      </Modal>}
     </React.Fragment>;
   }
 }

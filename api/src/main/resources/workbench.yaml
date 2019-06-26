@@ -1673,6 +1673,49 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
+  /v1/{workspaceNamespace}/{workspaceId}/data-sets/dataSetByIdExist:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    get:
+      parameters:
+        - in: query
+          name: resourceType
+          type: string
+          required: true
+        - in: query
+          name: id
+          type: integer
+          format: int64
+          required: true
+      tags:
+        - dataSet
+      operationId: "dataSetByIdExist"
+      responses:
+        200:
+          description: Returns true if Data set with cohort or concept Id exist
+          schema:
+            type: boolean
+
+  /v1/{workspaceNamespace}/{workspaceId}/data-set/markDirty:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      parameters:
+        - in: body
+          name: markDataSetRequest
+          schema:
+            $ref: "#/definitions/MarkDataSetRequest"
+      tags:
+        - dataSet
+      operationId: "markDirty"
+      responses:
+        200:
+          description: Mark all dataset with cohort/concept id as dirty
+          schema:
+            type: boolean
+
   /v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook:
     post:
       tags:
@@ -2450,6 +2493,15 @@ definitions:
         type: boolean
       kernelType:
         $ref: "#/definitions/KernelTypeEnum"
+
+  MarkDataSetRequest:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      resourceType:
+        type: string
 
   KernelTypeEnum:
     type: string
