@@ -310,20 +310,17 @@ export class ResourceCard extends React.Component<Props, State> {
   async checkForDataSet(id) {
     if (!this.state.showDirtyDataSetModal) {
       try {
-        const dataSetExist = await dataSetApi().dataSetByIdExist(
+        return await dataSetApi().dataSetByIdExist(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
           this.resourceType, id);
-        if (dataSetExist) {
-          this.setState({showDirtyDataSetModal: dataSetExist});
-          return;
-        }
       } catch (ex) {
         console.log(ex);
       }
     } else {
       this.setState({showDirtyDataSetModal: false});
     }
+    return false;
   }
 
   async receiveDelete() {
@@ -340,7 +337,11 @@ export class ResourceCard extends React.Component<Props, State> {
         break;
       }
       case ResourceType.COHORT: {
-        this.checkForDataSet(this.props.resourceCard.cohort.id);
+        const dataSetExist = await this.checkForDataSet(this.props.resourceCard.cohort.id);
+        if (dataSetExist) {
+          this.setState({showDirtyDataSetModal: dataSetExist});
+          return;
+        }
         cohortsApi().deleteCohort(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
@@ -352,7 +353,11 @@ export class ResourceCard extends React.Component<Props, State> {
         break;
       }
       case ResourceType.CONCEPT_SET: {
-        this.checkForDataSet(this.props.resourceCard.conceptSet.id);
+        const dataSetExist = await this.checkForDataSet(this.props.resourceCard.conceptSet.id);
+        if (dataSetExist) {
+          this.setState({showDirtyDataSetModal: dataSetExist});
+          return;
+        }
         conceptSetsApi().deleteConceptSet(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
