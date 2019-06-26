@@ -12,6 +12,7 @@ import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -77,6 +78,14 @@ public class FireCloudConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public WorkspacesApi workspacesApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
     WorkspacesApi api = new WorkspacesApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public StaticNotebooksApi staticNotebooksApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
+    StaticNotebooksApi api = new StaticNotebooksApi();
     api.setApiClient(apiClient);
     return api;
   }

@@ -18,6 +18,7 @@ import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
@@ -50,6 +51,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<NihApi> nihApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
   private final Provider<StatusApi> statusApiProvider;
+  private final Provider<StaticNotebooksApi> staticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
   private final Provider<GoogleCredential> fcAdminCredsProvider;
   private final ServiceAccounts serviceAccounts;
@@ -81,6 +83,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<NihApi> nihApiProvider,
       Provider<WorkspacesApi> workspacesApiProvider,
       Provider<StatusApi> statusApiProvider,
+      Provider<StaticNotebooksApi> staticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
       ServiceAccounts serviceAccounts,
       @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS) Provider<GoogleCredential> fcAdminCredsProvider) {
@@ -94,6 +97,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.retryHandler = retryHandler;
     this.serviceAccounts = serviceAccounts;
     this.fcAdminCredsProvider = fcAdminCredsProvider;
+    this.staticNotebooksApiProvider = staticNotebooksApiProvider;
   }
 
   /**
@@ -330,6 +334,15 @@ public class FireCloudServiceImpl implements FireCloudService {
           ManagedGroupWithMembers group = groupsApiProvider.get().getGroup(groupName);
           return group.getMembersEmails().contains(email)
               || group.getAdminsEmails().contains(email);
+        });
+  }
+
+  @Override
+  public String staticNotebooksConvert(String notebook) {
+    return retryHandler.run(
+        (context) -> {
+          String html = staticNotebooksApiProvider.get().convertNotebook(notebook);
+          return html;
         });
   }
 

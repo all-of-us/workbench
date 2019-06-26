@@ -674,7 +674,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(resp);
   }
 
-  /** Record approval or rejection of research purpose. */
+  /**
+   * Record approval or rejection of research purpose.
+   */
   @Override
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<EmptyResponse> reviewWorkspace(
@@ -771,19 +773,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
-      String workspace, String workspaceName, String notebookName) {
-    try {
-      ReadOnlyNotebookResponse response = new ReadOnlyNotebookResponse();
-      response.setHtml(
-          CharStreams.toString(
-              new InputStreamReader(
-                  getClass().getClassLoader().getResourceAsStream("read-only-example.html"),
-                  StandardCharsets.UTF_8)));
-      return ResponseEntity.ok(response);
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new WorkbenchException("Could not read HTML file");
-    }
+  public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(String workspace,
+      String workspaceName, String notebookName) {
+    ReadOnlyNotebookResponse response = new ReadOnlyNotebookResponse();
+    response.setHtml(notebooksService.getReadOnlyHtml(workspace, workspaceName, notebookName));
+    return ResponseEntity.ok(response);
   }
 }

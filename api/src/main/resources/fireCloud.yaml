@@ -483,6 +483,30 @@ paths:
         500:
           description: Internal Server Error
 
+  /api/staticNotebooks/convert:
+    post:
+      tags:
+        - Static Notebooks
+      operationId: convertNotebook
+      produces:
+        - text/html
+      summary: Convert a Notebook ipynb file to a static HTML representation
+      description: Convert a Notebook ipynb file to a static HTML representation
+      parameters:
+        - name: notebook
+          description: Notebook ipynb file
+          required: true
+          in: body
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          schema:
+            type: string
+        500:
+          description: Internal Error
+
   /me:
     get:
       tags:
@@ -699,7 +723,6 @@ paths:
           - openid
           - email
           - profile
-
 
 ##########################################################################################
 ## PARAMETERS
