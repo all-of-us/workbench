@@ -462,7 +462,7 @@ export class ResourceCard extends React.Component<Props, State> {
     }
   }
 
-  getResourceUrl(jupyterLab?: boolean): string {
+  getResourceUrl(jupyterLab = false): string {
     const {workspaceNamespace, workspaceFirecloudName, conceptSet, notebook, dataSet, cohort} =
       this.props.resourceCard;
     const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
