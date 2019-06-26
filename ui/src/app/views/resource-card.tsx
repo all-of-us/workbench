@@ -199,7 +199,7 @@ export class ResourceCard extends React.Component<Props, State> {
   }
 
   get displayDate(): string {
-    const date = new Date(Number(this.props.resourceCard.modifiedTime));
+    const date = new Date(this.props.resourceCard.modifiedTime);
     // datetime formatting to slice off weekday from readable date string
     return date.toDateString().split(' ').slice(1).join(' ');
   }
@@ -582,7 +582,7 @@ export class ResourceCard extends React.Component<Props, State> {
           <div style={styles.cardDescription}>{this.description}</div>
         </div>
         <div style={styles.cardFooter}>
-          <div style={styles.lastModified}>
+          <div style={styles.lastModified} data-test-id='last-modified'>
             Last Modified: {this.displayDate}</div>
           <div style={{...styles.resourceType, ...resourceTypeStyles[this.resourceType]}}
                data-test-id='card-type'>
