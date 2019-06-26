@@ -232,17 +232,6 @@ public class ProfileControllerTest {
     Profile profile = profileController.submitDemographicsSurvey().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getComplianceTrainingCompletionTime()).isNull();
-  }
-
-  @Test
-  public void testSubmitTermsOfService_success() throws Exception {
-    createUser();
-    Profile profile = profileController.submitTermsOfService().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
-    assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getComplianceTrainingCompletionTime()).isNull();
   }
 
