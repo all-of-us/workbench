@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -327,7 +326,8 @@ public class DataSetController implements DataSetApiDelegate {
                   && ex.getCause().getMessage().contains("Read timed out")) {
                 rowsRequested = (rowsRequested / 2);
                 if (rowsRequested == 0) {
-                  throw new GatewayTimeoutException("Timeout while querying the CDR to pull preview information.");
+                  throw new GatewayTimeoutException(
+                      "Timeout while querying the CDR to pull preview information.");
                 }
                 retry++;
               } else {
@@ -337,7 +337,8 @@ public class DataSetController implements DataSetApiDelegate {
           } while (retry < retryLimit);
 
           if (retry == retryLimit) {
-            throw new GatewayTimeoutException("Timeout while querying the CDR to pull preview information.");
+            throw new GatewayTimeoutException(
+                "Timeout while querying the CDR to pull preview information.");
           }
 
           Collections.sort(

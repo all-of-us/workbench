@@ -8,6 +8,7 @@ public class GatewayTimeoutException extends WorkbenchException {
   public GatewayTimeoutException() {
     super();
   }
+
   public GatewayTimeoutException(String message) {
     super(message);
   }
