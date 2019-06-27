@@ -3,6 +3,7 @@ package org.pmiops.workbench.google;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -44,7 +45,7 @@ public interface CloudStorageService {
 
   GoogleCredential getDefaultServiceAccountCredentials() throws IOException;
 
-  JSONObject getFileAsJson(String bucketName, String fileName) throws IOException;
+  JsonObject getFileAsJson(String bucketName, String fileName) throws IOException;
 
   void deleteBlob(BlobId blobId);
 

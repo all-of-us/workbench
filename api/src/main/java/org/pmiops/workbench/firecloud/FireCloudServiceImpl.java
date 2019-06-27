@@ -349,7 +349,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public String staticNotebooksConvert(String notebook) {
+  public String staticNotebooksConvert(Object notebook) {
     return retryHandler.run(
         (context) -> {
           String html = staticNotebooksApiProvider.get().convertNotebook(notebook);
