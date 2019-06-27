@@ -334,19 +334,6 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
-  # TODO: add signature / other state?
-  /v1/account/accept-terms-of-service:
-    post:
-      tags:
-        - profile
-      description: Submits consent to the terms of service for researchers.
-      operationId: submitTermsOfService
-      responses:
-        200:
-          description: The user's profile.
-          schema:
-            $ref: "#/definitions/Profile"
-
   /v1/account/submit-data-use-agreement:
     post:
       tags:
@@ -2929,14 +2916,6 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when a user was bypassed for completing the data use agreement.
-      termsOfServiceCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp for when a user completed the terms of service.
-      termsOfServiceBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp for when a user was bypassed for completing the terms of service.
 
   InstitutionalAffiliation:
     type: object
