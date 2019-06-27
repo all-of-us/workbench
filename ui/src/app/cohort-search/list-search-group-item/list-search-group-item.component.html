@@ -31,14 +31,14 @@
       [popperPlacement]="'bottom'"
       class="trigger padding-right">
       <span class="code-text">Contains </span>
-      <span class="code-text">{{ codeTypeDisplay }}</span>
+      <span class="code-text">{{codeTypeDisplay}}</span>
     </small>
     <small *ngIf="status !== 'hidden'" class="code-text padding-right">|</small>
     <span *ngIf="loading" class="spinner spinner-inline">
       Loading...
     </span>
     <small *ngIf="!loading && status !== 'hidden'" class="code-text">
-      {{ item.count | number }}
+      {{count | number}}
     </small>
     <span *ngIf="error">
       <clr-icon
@@ -66,8 +66,8 @@
   </div>
 </div>
 <popper-content #codesPopper>
-  <h3 [style.margin]="'0'">{{ codeTypeDisplay }}</h3>
-  <p  [style.margin]="'0'">{{ codes }}</p>
+  <h3 [style.margin]="'0'">{{codeTypeDisplay}}</h3>
+  <p  [style.margin]="'0'">{{codes}}</p>
 </popper-content>
 <popper-content #errorPopper>
   <p  [style.margin]="'0'">Sorry, the request cannot be completed.</p>

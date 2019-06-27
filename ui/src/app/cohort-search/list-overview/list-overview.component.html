@@ -84,8 +84,8 @@
       <div class="card-header header-text">
         Results by Gender
       </div>
-      <div *ngIf="showGenderChart" class="card-block">
-        <app-gender-chart *ngIf="chartData.length"
+      <div class="card-block">
+        <app-gender-chart *ngIf="chartData.size"
           [data]="chartData">
         </app-gender-chart>
       </div>
@@ -98,8 +98,8 @@
           (click)="toggleChartMode()">
         </clr-icon>
       </div>
-      <div *ngIf="showComboChart" class="card-block">
-        <app-combo-chart *ngIf="chartData.length"
+      <div class="card-block">
+        <app-combo-chart *ngIf="chartData.size"
           [data]="chartData"
           [mode]="stackChart ? 'stacked' : 'normalized'">
         </app-combo-chart>

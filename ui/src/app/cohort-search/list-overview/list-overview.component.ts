@@ -13,6 +13,7 @@ import {
 } from 'app/utils/navigation';
 
 import {Cohort} from 'generated/fetch';
+import {fromJS} from 'immutable';
 
 const COHORT_TYPE = 'AoU_Discover';
 
@@ -37,7 +38,7 @@ export class ListOverviewComponent implements OnChanges, OnInit {
   error: boolean;
   loading: boolean;
   total: number;
-  chartData: Array<any>;
+  chartData: any;
   saving = false;
   deleting = false;
   stackChart = false;
@@ -52,6 +53,13 @@ export class ListOverviewComponent implements OnChanges, OnInit {
     if (currentCohortStore.getValue()) {
       this.cohort = currentCohortStore.getValue();
     }
+    searchRequestStore.subscribe(sr => {
+      if (this.hasActiveItems && !this.hasTemporalError) {
+        this.loading = true;
+        this.error = false;
+        this.getTotalCount();
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -67,6 +75,8 @@ export class ListOverviewComponent implements OnChanges, OnInit {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const request = mapRequest(this.searchRequest);
       cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
+        // TODO remove immutable conversion and modify charts to use vanilla javascript
+        this.chartData = fromJS(response.items);
         this.total = response.items.reduce((sum, data) => sum + data.count, 0);
         this.loading = false;
       }, (err) => {
@@ -105,7 +115,8 @@ export class ListOverviewComponent implements OnChanges, OnInit {
   }
 
   get criteria() {
-    return JSON.stringify(searchRequestStore.getValue());
+    const mappedRequest = mapRequest(searchRequestStore.getValue());
+    return JSON.stringify(mappedRequest);
   }
 
   get unchanged() {

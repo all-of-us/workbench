@@ -254,6 +254,46 @@ function genSuffix(): string {
   return Math.random().toString(36).substr(2, 9);
 }
 
+export function parseCohortDefinition(json: string) {
+  const data = JSON.parse(json);
+  const sr = {};
+  for (const role of ['includes', 'excludes']) {
+    sr[role] = data[role].map(grp => {
+      grp.items = grp.items.map(item => {
+        item.searchParameters = item.searchParameters.map(sp => {
+          const {parameterId, name, domain, type, subtype, group, attributes, conceptId,
+            ancestorData, standard} = sp;
+          return {
+            parameterId,
+            name,
+            domainId: domain,
+            type,
+            subtype,
+            group,
+            conceptId,
+            attributes,
+            hasAttributes: sp.attributes.length > 0,
+            hasAncestorData: ancestorData,
+            isStandard: standard
+          };
+        });
+        if (!grp.temporal) {
+          item.temporalGroup = 0;
+        }
+        item.status = 'active';
+        return item;
+      });
+      grp.mention = grp.mention ? grp.mention : '';
+      grp.time = grp.time ? grp.time : '';
+      grp.timeValue = grp.timeValue ? grp.timeValue : 0;
+      grp.timeFrame = grp.timeFrame ? grp.timeFrame : '';
+      grp.status = 'active';
+      return grp;
+    });
+  }
+  return sr;
+}
+
 export function mapRequest(sr: any) {
   return <SearchRequest>{
     includes: sr.includes.map(mapGroup),
@@ -273,7 +313,8 @@ export function mapGroupItem(item: any) {
 }
 
 export function mapParameter(sp: any) {
-  const {parameterId, name, domainId, type, subtype, group, attributes, conceptId, code} = sp;
+  const {parameterId, name, domainId, type, subtype, group, attributes, conceptId,
+    hasAncestorData, isStandard} = sp;
   const param = <SearchParameter>{
     parameterId,
     name: stripHtml(name),
@@ -281,20 +322,12 @@ export function mapParameter(sp: any) {
     type,
     subtype,
     group,
-    attributes
+    attributes,
+    ancestorData: hasAncestorData,
+    standard: isStandard
   };
   if (conceptId) {
     param.conceptId = conceptId;
-  }
-  if (type === CriteriaType.DECEASED) {
-    param.value = name;
-  } else if (code && ([
-    CriteriaType.ICD9CM,
-    CriteriaType.ICD9Proc,
-    CriteriaType.ICD10CM,
-    CriteriaType.ICD10PCS
-  ].includes(type))) {
-    param.value = code;
   }
   return param;
 }
