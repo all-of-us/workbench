@@ -1,11 +1,12 @@
 package org.pmiops.workbench.workspaces;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -137,16 +138,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName) {
-    WorkspaceACL firecloudWorkspaceAcls =
-        fireCloudService.getWorkspaceAcl(workspaceNamespace, firecloudName);
-    Map<String, Object> aclsMap = (Map) firecloudWorkspaceAcls.getAcl();
-    Map<String, WorkspaceAccessEntry> userToAcl = new HashMap<>();
-    for (Map.Entry<String, Object> entry : aclsMap.entrySet()) {
-      WorkspaceAccessEntry acl =
-          new Gson().fromJson(entry.getValue().toString(), WorkspaceAccessEntry.class);
-      userToAcl.put(entry.getKey(), acl);
-    }
-    return userToAcl;
+    WorkspaceACL aclResp = fireCloudService.getWorkspaceAcl(workspaceNamespace, firecloudName);
+
+    // Swagger Java codegen does not handle the WorkspaceACL model correctly; it returns a GSON map
+    // instead. Run this through a typed Gson conversion process to parse into the desired type.
+    Type accessEntryType = new TypeToken<Map<String, WorkspaceAccessEntry>>() {}.getType();
+    Gson gson = new Gson();
+    return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
   }
 
   /**
