@@ -2,6 +2,8 @@ package org.pmiops.workbench.notebooks;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -185,7 +187,13 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getBucketName();
     JsonObject notebook = getNotebookContents(bucketName, notebookName); // this might be wrong
 
-    return fireCloudService.staticNotebooksConvert(notebook);
+    // Notebooks may have "execution_count": null
+    // which is discarded by default by gson
+    // but required to be a valid notebook
+
+    Gson gson = new GsonBuilder().serializeNulls().create();
+
+    return fireCloudService.staticNotebooksConvert(gson.toJson(notebook).getBytes());
   }
 
   private String appendSuffixIfNeeded(String filename) {
