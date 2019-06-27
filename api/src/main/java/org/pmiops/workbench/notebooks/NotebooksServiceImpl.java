@@ -182,6 +182,8 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
+
+
     String notebook =
         getNotebookContents(bucketName, notebookName).toString(); // this might be wrong
 

@@ -1,23 +1,9 @@
 /**
- * This package configures/provides swagger "typescript-fetch" client
- * implementations. This layer allows for abstraction of client implementations
- * for use in React without requiring a full-blown dependency injection
- * solution. This layer can be configured for ease of testing. For discussion on
- * this, see https://github.com/all-of-us/workbench/pull/1663.
+ * Duplicated from swagger-fetch-clients.ts
  *
- * Example usage:
- *
- * import {clusterApi} from 'app/services/swagger-fetch-clients';
- *
- * ...
- * clusterApi().listClusters();
- *
- * Example test usage:
- *
- * beforeEach(() => {
- *   registerApiClient(ProfileApi, new ProfileApiStub());
- *   ...
- * });
+ * It was a lot easier to recreate this file for the Notebooks fetch client instead of modifying the
+ * existing one to service both fetch clients. There's probably some work to be done to still share some code
+ * between this file and swagger-fetch-client.ts.
  */
 
 import {
@@ -41,13 +27,6 @@ const apiCtors: (new() => BaseAPI)[] = [];
 // Constructor -> implementation.
 const registry: Map<new() => BaseAPI, BaseAPI> = new Map();
 
-/**
- * Convenience function to minimize boilerplate below per-service while
- * maintaining the API client type. Also registers the constructor for standard
- * client initialization later.
- *
- * Returns a getter for the service implementation (backed by the registry).
- */
 function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
   apiCtors.push(ctor);
   return () => {
@@ -65,10 +44,6 @@ function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
 // getters for the API clients, e.g.: clusterApi().listClusters();
 export const notebooksClusterApi = bindCtor(ClusterApi);
 
-/**
- * Binds standard API clients. To be called at most once for production use,
- * e.g. during app initialization.
- */
 export function bindApiClients(conf: FetchConfiguration, f: FetchAPI) {
   for (const ctor of apiCtors) {
     // We use an anonymous subclass here because Swagger's typescript-fetch
@@ -87,18 +62,11 @@ export function bindApiClients(conf: FetchConfiguration, f: FetchAPI) {
   frozen = true;
 }
 
-/**
- * Registers an API client implementation. Can be used to bind a non-standard
- * API implementation, e.g. for testing.
- */
 export function registerApiClient<T extends BaseAPI>(ctor: new() => T, impl: T) {
   checkFrozen();
   registry.set(ctor, impl);
 }
 
-/**
- * Clears the API client registry, e.g. for test teardown.
- */
 export function clearApiClients() {
   checkFrozen();
   registry.clear();
