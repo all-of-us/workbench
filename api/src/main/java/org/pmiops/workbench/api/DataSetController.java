@@ -343,86 +343,86 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> exportToNotebook(
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    // This suppresses 'may not be initialized errors. We will always init to something else before
-    // used.
-    JSONObject notebookFile = new JSONObject();
-    WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
-    JSONObject metaData = new JSONObject();
-
-    if (!dataSetExportRequest.getNewNotebook()) {
-      notebookFile =
-          notebooksService.getNotebookContents(
-              workspace.getWorkspace().getBucketName(), dataSetExportRequest.getNotebookName());
-      try {
-        String language =
-            Optional.of(notebookFile.getJSONObject("metadata"))
-                .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
-                .map(kernelSpec -> kernelSpec.getString("language"))
-                .orElse("Python");
-        if ("R".equals(language)) {
-          dataSetExportRequest.setKernelType(KernelTypeEnum.R);
-        } else {
-          dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
-        }
-      } catch (JSONException e) {
-        // If we can't find metadata to parse, default to python.
-        dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
-      }
-    } else {
-      switch (dataSetExportRequest.getKernelType()) {
-        case PYTHON:
-          break;
-        case R:
-          metaData
-              .put(
-                  "kernelspec",
-                  new JSONObject().put("display_name", "R").put("language", "R").put("name", "ir"))
-              .put(
-                  "language_info",
-                  new JSONObject()
-                      .put("codemirror_mode", "r")
-                      .put("file_extension", ".r")
-                      .put("mimetype", "text/x-r-source")
-                      .put("name", "r")
-                      .put("pygments_lexer", "r")
-                      .put("version", "3.4.4"));
-          break;
-        default:
-          throw new BadRequestException(
-              "Kernel Type " + dataSetExportRequest.getKernelType() + " is not supported");
-      }
-    }
-
-    Map<String, QueryJobConfiguration> queryList =
-        dataSetService.generateQuery(dataSetExportRequest.getDataSetRequest());
-    String queriesAsStrings =
-        dataSetService.generateCodeFromQueryAndKernelType(
-            dataSetExportRequest.getKernelType(),
-            dataSetExportRequest.getDataSetRequest().getName(),
-            queryList);
-
-    if (dataSetExportRequest.getNewNotebook()) {
-      notebookFile =
-          new JSONObject()
-              .put("cells", new JSONArray().put(createNotebookCodeCellWithString(queriesAsStrings)))
-              .put("metadata", metaData)
-              // nbformat and nbformat_minor are the notebook major and minor version we are
-              // creating.
-              // Specifically, here we create notebook version 4.2 (I believe)
-              // See https://nbformat.readthedocs.io/en/latest/api.html
-              .put("nbformat", 4)
-              .put("nbformat_minor", 2);
-    } else {
-      notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(queriesAsStrings));
-    }
-
-    notebooksService.saveNotebook(
-        workspace.getWorkspace().getBucketName(),
-        dataSetExportRequest.getNotebookName(),
-        notebookFile);
-
+//    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+//        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+//    // This suppresses 'may not be initialized errors. We will always init to something else before
+//    // used.
+//    JSONObject notebookFile = new JSONObject();
+//    WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+//    JSONObject metaData = new JSONObject();
+//
+//    if (!dataSetExportRequest.getNewNotebook()) {
+//      notebookFile =
+//          notebooksService.getNotebookContents(
+//              workspace.getWorkspace().getBucketName(), dataSetExportRequest.getNotebookName());
+//      try {
+//        String language =
+//            Optional.of(notebookFile.getJSONObject("metadata"))
+//                .flatMap(metaDataObj -> Optional.of(metaDataObj.getJSONObject("kernelspec")))
+//                .map(kernelSpec -> kernelSpec.getString("language"))
+//                .orElse("Python");
+//        if ("R".equals(language)) {
+//          dataSetExportRequest.setKernelType(KernelTypeEnum.R);
+//        } else {
+//          dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
+//        }
+//      } catch (JSONException e) {
+//        // If we can't find metadata to parse, default to python.
+//        dataSetExportRequest.setKernelType(KernelTypeEnum.PYTHON);
+//      }
+//    } else {
+//      switch (dataSetExportRequest.getKernelType()) {
+//        case PYTHON:
+//          break;
+//        case R:
+//          metaData
+//              .put(
+//                  "kernelspec",
+//                  new JSONObject().put("display_name", "R").put("language", "R").put("name", "ir"))
+//              .put(
+//                  "language_info",
+//                  new JSONObject()
+//                      .put("codemirror_mode", "r")
+//                      .put("file_extension", ".r")
+//                      .put("mimetype", "text/x-r-source")
+//                      .put("name", "r")
+//                      .put("pygments_lexer", "r")
+//                      .put("version", "3.4.4"));
+//          break;
+//        default:
+//          throw new BadRequestException(
+//              "Kernel Type " + dataSetExportRequest.getKernelType() + " is not supported");
+//      }
+//    }
+//
+//    Map<String, QueryJobConfiguration> queryList =
+//        dataSetService.generateQuery(dataSetExportRequest.getDataSetRequest());
+//    String queriesAsStrings =
+//        dataSetService.generateCodeFromQueryAndKernelType(
+//            dataSetExportRequest.getKernelType(),
+//            dataSetExportRequest.getDataSetRequest().getName(),
+//            queryList);
+//
+//    if (dataSetExportRequest.getNewNotebook()) {
+//      notebookFile =
+//          new JSONObject()
+//              .put("cells", new JSONArray().put(createNotebookCodeCellWithString(queriesAsStrings)))
+//              .put("metadata", metaData)
+//              // nbformat and nbformat_minor are the notebook major and minor version we are
+//              // creating.
+//              // Specifically, here we create notebook version 4.2 (I believe)
+//              // See https://nbformat.readthedocs.io/en/latest/api.html
+//              .put("nbformat", 4)
+//              .put("nbformat_minor", 2);
+//    } else {
+//      notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(queriesAsStrings));
+//    }
+//
+//    notebooksService.saveNotebook(
+//        workspace.getWorkspace().getBucketName(),
+//        dataSetExportRequest.getNotebookName(),
+//        notebookFile);
+//
     return ResponseEntity.ok(new EmptyResponse());
   }
 
