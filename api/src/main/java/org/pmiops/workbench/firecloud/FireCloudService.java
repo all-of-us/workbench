@@ -8,6 +8,7 @@ import org.pmiops.workbench.firecloud.model.JWTWrapper;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -57,6 +58,8 @@ public interface FireCloudService {
 
   /** Retrieves all billing project memberships for the user from FireCloud. */
   List<BillingProjectMembership> getBillingProjectMemberships();
+
+  WorkspaceACL getWorkspaceAcl(String projectName, String workspaceName);
 
   WorkspaceACLUpdateResponseList updateWorkspaceACL(
       String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates);

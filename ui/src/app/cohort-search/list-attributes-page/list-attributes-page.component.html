@@ -57,7 +57,7 @@
                 formControlName="valueA"
                 [(ngModel)]="attr.operands[0]"
                 (ngModelChange)="inputChange($event, i, 'valueA')">
-              <span *ngIf="hasUnits">{{units[node.get('subtype')]}}</span>
+              <span *ngIf="hasUnits">{{units[criterion.subtype]}}</span>
             </div>
             <div *ngIf="isBetween(i)" class="form-group and-text">
               <div>and</div>
@@ -71,7 +71,7 @@
                 formControlName="valueB"
                 [(ngModel)]="attr.operands[1]"
                 (ngModelChange)="inputChange($event, i, 'valueB')">
-              <span *ngIf="hasUnits">{{units[node.get('subtype')]}}</span>
+              <span *ngIf="hasUnits">{{units[criterion.subtype]}}</span>
             </div>
               <span class="range-padding" *ngIf="isMeasurement && showInput(i)">
               Range: {{attr.MIN}} - {{attr.MAX}}

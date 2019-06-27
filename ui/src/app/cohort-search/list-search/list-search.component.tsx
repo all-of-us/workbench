@@ -313,7 +313,7 @@ export const ListSearch = withCurrentWorkspace()(
         {error && <div style={styles.error}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
             shape='exclamation-triangle' size='22'/>
-          A problem occurred and we were not able to retrieve the requested data.
+          Sorry, the request cannot be completed.
           {results === 'standard' && <Button type='link'
             style={{display: 'inline-block'}}
             onClick={() => this.getResults(sourceMatch.code)}>

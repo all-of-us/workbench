@@ -1,5 +1,5 @@
 <div *ngIf="status !== 'deleted'" class="flex-container">
-  <div *ngIf="status === 'active'" class="line-item">
+  <div *ngIf="status === 'active' || !status" class="line-item">
     <clr-dropdown>
       <button type="button" clrDropdownTrigger>
         <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
@@ -13,7 +13,7 @@
         </button>
         <button
           type="button"
-          (click)="setStatus('hidden')"
+          (click)="suppress()"
           clrDropdownItem>
           Suppress criteria from total count
         </button>
@@ -34,18 +34,20 @@
       <span class="code-text">{{ codeTypeDisplay }}</span>
     </small>
     <small *ngIf="status !== 'hidden'" class="code-text padding-right">|</small>
-    <span *ngIf="isRequesting" class="spinner spinner-inline">
+    <span *ngIf="loading" class="spinner spinner-inline">
       Loading...
     </span>
-    <small *ngIf="!isRequesting && status !== 'hidden'" class="code-text">
+    <small *ngIf="!loading && status !== 'hidden'" class="code-text">
       {{ item.count | number }}
     </small>
     <span *ngIf="error">
       <clr-icon
         [popper]="errorPopper"
         [popperTrigger]="'hover'"
-        shape="error-standard"
-        size="16"></clr-icon>
+        class="is-solid"
+        style="color: #f7981c"
+        shape="exclamation-triangle"
+        size="22"></clr-icon>
     </span>
   </div>
   <div *ngIf="status === 'pending'" class="undo-container">
@@ -59,7 +61,7 @@
     <clr-icon shape="eye-hide" class="is-solid" size="23"></clr-icon>
     <span class="undo-text">
       This criteria has been suppressed
-      <button class="btn btn-link" (click)="setStatus('active')">ENABLE</button>
+      <button class="btn btn-link" (click)="enable()">ENABLE</button>
     </span>
   </div>
 </div>
@@ -68,5 +70,5 @@
   <p  [style.margin]="'0'">{{ codes }}</p>
 </popper-content>
 <popper-content #errorPopper>
-  <p  [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p  [style.margin]="'0'">Sorry, the request cannot be completed.</p>
 </popper-content>

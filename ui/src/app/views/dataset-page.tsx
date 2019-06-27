@@ -4,10 +4,10 @@ import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 
+import {ClrIcon} from 'app/components/icons';
 import {
   cohortsApi,
   conceptsApi,
@@ -22,6 +22,7 @@ import {
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {NewDataSetModal} from 'app/views/new-dataset-modal';
@@ -44,15 +45,17 @@ export const styles = reactStyles({
     fontSize: '16px',
     height: '2rem',
     lineHeight: '2rem',
-    paddingLeft: '13px',
+    paddingLeft: '0.55rem',
+    paddingRight: '0.55rem',
     color: colors.blue[7],
-    borderBottom: '1px solid #E5E5E5'
+    borderBottom: '1px solid #E5E5E5',
+    display: 'flex',
+    justifyContent: 'space-between',
+    flexDirection: 'row'
   },
 
-  addIcon: {
-    marginLeft: 19,
-    fill: colors.blue[0],
-    verticalAlign: '-6%'
+  selectBoxHeaderIconLinks: {
+    fill: colors.blue[10]
   },
 
   listItem: {
@@ -86,17 +89,31 @@ export const styles = reactStyles({
     marginTop: '0.5rem',
     color: colors.purple[0]
   },
-  refreshIcon: {
-    marginRight: '1rem',
-    marginTop: '0.5rem',
-    height: '25px',
-    width: '25px',
-    borderRadius: '5px',
-    backgroundColor: colors.purple[0],
+
+  previewButtonBox: {
+    width: '100%',
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center'
+    marginTop: '2.675rem',
+    marginBottom: '2rem'
   },
+
+  previewDataHeaderBox: {
+    display: 'flex',
+    flexDirection: 'row',
+    position: 'relative',
+    lineHeight: 'auto',
+    paddingTop: '0.5rem',
+    paddingBottom: '0.5rem',
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem',
+    borderBottom: '1px solid #E5E5E5',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 'auto'
+  },
+
   previewDataHeader: {
     height: '19px',
     width: '160px',
@@ -105,6 +122,7 @@ export const styles = reactStyles({
     fontSize: '16px',
     fontWeight: 600
   },
+
   warningMessage: {
     display: 'flex',
     flexDirection: 'column',
@@ -136,6 +154,14 @@ export const ValueListItem: React.FunctionComponent <
     </div>;
   };
 
+const plusLink = (dataTestId: string, path: string) => {
+  return <a data-test-id={dataTestId} href={path}
+            onClick={e => {navigateAndPreventDefaultIfNoKeysPressed(e, path); }}>
+    <ClrIcon shape='plus-circle' class='is-solid' size={16}
+             style={styles.selectBoxHeaderIconLinks}/>
+  </a>;
+};
+
 interface Props {
   workspace: WorkspaceData;
   urlParams: any;
@@ -147,7 +173,6 @@ interface State {
   creatingConceptSet: boolean;
   dataSet: DataSet;
   dataSetTouched: boolean;
-  defaultPreviewView: boolean;
   includesAllParticipants: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
@@ -173,7 +198,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         creatingConceptSet: false,
         dataSet: undefined,
         dataSetTouched: false,
-        defaultPreviewView: true,
         includesAllParticipants: false,
         loadingResources: true,
         openSaveModal: false,
@@ -283,8 +307,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         }
       } else {
         this.setState({selectedCohortIds: toggleIncludes(resource.id,
-          this.state.selectedCohortIds) as unknown as number[]},
-          () => this.defaultPreviewDataRequest());
+          this.state.selectedCohortIds) as unknown as number[]});
       }
     }
 
@@ -306,16 +329,14 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       valuesSelected = valuesSelected.sort((a, b) =>
           valueSets.findIndex(({value}) => a.value === value) -
           valueSets.findIndex(({value}) => b.value === value));
-      this.setState({selectedValues: valuesSelected, dataSetTouched: true},
-        () => this.defaultPreviewDataRequest());
+      this.setState({selectedValues: valuesSelected, dataSetTouched: true});
     }
 
     selectAllValues() {
       if (this.state.selectAll) {
         this.setState({
           selectedValues: [],
-          selectAll: !this.state.selectAll,
-          defaultPreviewView: true});
+          selectAll: !this.state.selectAll});
         return;
       }
 
@@ -325,8 +346,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           allValuesSelected.push({domain: valueSet.domain, value: value.value});
         });
       });
-      this.setState({selectedValues: allValuesSelected, selectAll: !this.state.selectAll},
-        () => this.defaultPreviewDataRequest());
+      this.setState({selectedValues: allValuesSelected, selectAll: !this.state.selectAll});
     }
 
     disableSave() {
@@ -334,13 +354,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           ((!this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0)
                 && !this.state.includesAllParticipants) ||
             !this.state.selectedValues || this.state.selectedValues.length === 0;
-    }
-
-    defaultPreviewDataRequest() {
-      if (this.state.defaultPreviewView && !this.disableSave()) {
-        this.getPreviewList();
-        this.setState({defaultPreviewView: false});
-      }
     }
 
     getDataTableValue(data) {
@@ -422,28 +435,18 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       </DataTable>;
     }
 
-    updateDataSet() {
-      const {namespace, id} = this.props.workspace;
-      const {dataSet} = this.state;
-      const request = {
-        name: dataSet.name,
-        description: dataSet.description,
-        includesAllParticipants: this.state.includesAllParticipants,
-        conceptSetIds: this.state.selectedConceptSetIds,
-        cohortIds: this.state.selectedCohortIds,
-        values: this.state.selectedValues,
-        etag: dataSet.etag
-      };
-      dataSetApi().updateDataSet(namespace, id, dataSet.id, request)
-        .then(() => window.history.back());
+    get isRefreshPreviewDisabled() {
+      return this.disableSave() || this.state.previewList.length === 0;
     }
 
     render() {
       const {namespace, id} = this.props.workspace;
+      const wsPathPrefix = 'workspaces/' + namespace + '/' + id;
+      const cohortsPath = wsPathPrefix + '/cohorts';
+      const conceptSetsPath = wsPathPrefix + '/concepts/sets';
       const {
         dataSet,
         dataSetTouched,
-        defaultPreviewView,
         includesAllParticipants,
         loadingResources,
         openSaveModal,
@@ -469,6 +472,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
                 <div style={styles.selectBoxHeader}>
                   Cohorts
+                  {plusLink('cohorts-link', cohortsPath)}
                 </div>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
@@ -498,6 +502,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
                   <div style={styles.selectBoxHeader}>
                     Concept Sets
+                    {plusLink('concept-sets-link', conceptSetsPath)}
                   </div>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
@@ -513,12 +518,12 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   </div>
                 </div>
                 <div style={{width: '40%'}}>
-                  <div style={{...styles.selectBoxHeader, display: 'flex'}}>
+                  <div style={styles.selectBoxHeader}>
                     <div>
                       Values
                     </div>
                     <Clickable data-test-id='select-all'
-                               style={{marginLeft: 'auto', marginRight: '0.5rem'}}
+                               style={{marginLeft: 'auto'}}
                                onClick={() => this.selectAllValues()}>
                       Select All
                     </Clickable>
@@ -548,25 +553,32 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         </FadeBox>
         <FadeBox style={{marginTop: '1rem'}}>
           <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-            <div style={{...styles.selectBoxHeader, display: 'flex', flexDirection: 'row',
-              position: 'relative'}}>
-              <div style={styles.previewDataHeader}>
-                Preview Data Set
+            <div style={styles.previewDataHeaderBox}>
+              <div style={{display: 'flex', flexDirection: 'column'}}>
+              <div style={{display: 'flex', alignItems: 'flex-end'}}>
+                <div style={styles.previewDataHeader}>
+                  Preview Data Set
+                </div>
+                <Clickable data-test-id='refresh-preview-clickable-text'
+                           disabled={this.isRefreshPreviewDisabled}
+                           onClick={() => this.getPreviewList()}
+                           style={{fontSize: '12px',
+                             cursor: this.isRefreshPreviewDisabled ? 'not-allowed' : 'pointer',
+                             fontWeight: 600, lineHeight: '15px',
+                             color: this.isRefreshPreviewDisabled ? colors.gray[4] : colors.blue[0]
+                           }}>
+                    Refresh Preview
+                  </Clickable>
               </div>
-              {!defaultPreviewView && <Clickable data-test-id='preview-icon'
-                                                 onClick={() => this.getPreviewList()}
-                                                 style={styles.refreshIcon}>
-                  <ClrIcon style={{fill: colors.gray[7]}} shape='refresh'/>
-                </Clickable>
-              }
               <div style={{color: '#000000', fontSize: '14px'}}>A visualization of your data table
                 based on the variable and value you selected above
               </div>
+              </div>
               <Button data-test-id='save-button' style={{position: 'absolute', right: '1rem',
-                top: '.25rem'}} onClick ={this.editing ? () => this.updateDataSet() :
-                () => this.setState({openSaveModal: true})}
-                disabled={this.disableSave() || (this.editing && !dataSetTouched)}>
-                {this.editing ? 'UPDATE DATA SET' : 'SAVE DATA SET'}
+                top: '.25rem'}} onClick ={() => this.setState({openSaveModal: true})}
+                disabled={this.disableSave()}>
+                {this.editing ? !dataSetTouched ? 'Analyze' :
+                    'Update And Analyze' : 'Save And Analyze'}
               </Button>
             </div>
             {previewDataLoading && <div style={styles.warningMessage}>
@@ -600,6 +612,18 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 {this.renderPreviewDataTable()}
               </div>
             }
+            {previewList.length === 0 && !previewDataLoading &&
+              <div style={styles.previewButtonBox}>
+                <div style={{color: colors.gray[4], fontSize: '20px', fontWeight: 400}}>
+                  Select cohorts, concept sets, and values above to generate a preview table
+                </div>
+                <Button data-test-id='preview-button' disabled={this.disableSave()}
+                        style={{marginTop: '0.5rem', height: '1.8rem', width: '6.5rem'}}
+                        onClick={() => this.getPreviewList()}>
+                  Preview Table
+                </Button>
+              </div>
+            }
           </div>
         </FadeBox>
         {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
@@ -608,6 +632,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                            selectedValues={selectedValues}
                                            workspaceNamespace={namespace}
                                            workspaceId={id}
+                                           dataSet={dataSet ? dataSet : undefined}
                                            closeFunction={() => {
                                              this.setState({openSaveModal: false});
                                            }}

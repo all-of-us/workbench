@@ -50,7 +50,7 @@ public class TestJpaConfig {
 
     hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
     hibernateProperties.setProperty(
-        "hibernate.dialect", "org.hibernate.dialect.MySQL57InnoDBDialect");
+        "hibernate.dialect", "org.pmiops.workbench.cdr.CommonTestDialect");
     hibernateProperties.setProperty("hibernate.show_sql", "true");
 
     return hibernateProperties;

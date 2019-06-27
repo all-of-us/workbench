@@ -308,8 +308,16 @@ public class CBCriteriaDaoTest {
 
   @Test
   public void findCriteriaLeavesAndParentsByPath() throws Exception {
-    CBCriteria criteria = new CBCriteria().path("1.5.99");
+    CBCriteria criteria =
+        new CBCriteria()
+            .domainId(DomainType.CONDITION.toString())
+            .path("1.5.99")
+            .synonyms("+[CONDITION_rank1]");
     cbCriteriaDao.save(criteria);
-    assertEquals(criteria, cbCriteriaDao.findCriteriaLeavesAndParentsByPath("1.5").get(0));
+    assertEquals(
+        criteria,
+        cbCriteriaDao
+            .findCriteriaLeavesAndParentsByDomainAndPath(DomainType.CONDITION.toString(), "5")
+            .get(0));
   }
 }

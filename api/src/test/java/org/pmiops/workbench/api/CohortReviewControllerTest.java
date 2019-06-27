@@ -34,9 +34,9 @@ import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cohortbuilder.BaseQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -168,10 +168,10 @@ public class CohortReviewControllerTest {
     CohortReviewController.class,
     CohortReviewServiceImpl.class,
     CohortQueryBuilder.class,
-    BaseQueryBuilder.class,
+    SearchGroupItemQueryBuilder.class,
     ReviewQueryBuilder.class,
     QueryBuilderFactory.class,
-    BaseQueryBuilder.class
+    SearchGroupItemQueryBuilder.class
   })
   @MockBean({
     BigQueryService.class,

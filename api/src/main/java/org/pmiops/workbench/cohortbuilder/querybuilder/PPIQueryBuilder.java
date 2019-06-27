@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service;
 
 /** PPIQueryBuilder builds SQL for BigQuery for the survey criteria type. */
 @Service
+// TODO:Remove when new search is finished - freemabd
 public class PPIQueryBuilder extends AbstractQueryBuilder {
 
   private static final String UNION_ALL = " union all\n";

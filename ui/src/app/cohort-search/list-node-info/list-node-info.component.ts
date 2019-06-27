@@ -1,4 +1,3 @@
-import {NgRedux} from '@angular-redux/store';
 import {
   AfterViewInit,
   Component,
@@ -10,11 +9,7 @@ import {
   ViewChild
 } from '@angular/core';
 import {PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
-import {
-  CohortSearchState,
-  ppiAnswers,
-} from 'app/cohort-search/redux';
-import {attributesStore, groupSelectionsStore, selectionsStore, subtreeSelectedStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {attributesStore, groupSelectionsStore, ppiQuestions, selectionsStore, subtreeSelectedStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {stripHtml} from 'app/cohort-search/utils';
 import {AttrName, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
@@ -32,10 +27,6 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('name') name: ElementRef;
   isTruncated = false;
   matched = false;
-
-  constructor(
-    private ngRedux: NgRedux<CohortSearchState>
-  ) {}
 
   ngOnInit() {
     this.subscription = selectionsStore.subscribe(selections => {
@@ -81,7 +72,7 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get paramId() {
-    return `param${this.node.conceptId ?
+    return `param${this.node.conceptId && !this.isPPI ?
         (this.node.conceptId + this.node.code) : this.node.id}`;
   }
 
@@ -128,9 +119,11 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
         }
         let modifiedName = this.node.name;
         if (this.isPPI) {
-          // TODO need an alternative to pulling from redux store here
-          const parent = ppiAnswers(this.node.path)(this.ngRedux.getState()).toJS();
-          modifiedName = parent.name + ' - ' + modifiedName;
+          // get PPI question from store
+          const question = ppiQuestions.getValue()[this.node.parentId];
+          if (question) {
+            modifiedName = question + ' - ' + modifiedName;
+          }
         }
         let attributes = [];
         if (this.node.subtype === CriteriaSubType[CriteriaSubType.BP]) {
@@ -147,17 +140,17 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
             operands: [this.node.code]
           });
         } else if (this.isPPI && !this.node.group) {
-          if (this.node.code === '') {
+          if (this.node.conceptId === 1585747) {
             attributes.push({
               name: AttrName.NUM,
               operator: Operator.EQUAL,
-              operands: [this.node.name]
+              operands: [this.node.value]
             });
           } else {
             attributes.push({
               name: AttrName.CAT,
               operator: Operator.IN,
-              operands: [this.node.code]
+              operands: [this.node.value]
             });
           }
         }
@@ -179,26 +172,26 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   get showCount() {
     return this.node.count > -1
       && (this.node.selectable
-      || (this.node.subtype === CriteriaSubType[CriteriaSubType.LAB]
+      || (this.node.subtype === CriteriaSubType.LAB
       && this.node.group
       && this.node.code !== null )
-      || this.node.type === CriteriaType[CriteriaType.CPT4]);
+      || this.node.type === CriteriaType.CPT4);
   }
 
   get isPM() {
-    return this.node.domainId === DomainType[DomainType.PHYSICALMEASUREMENT];
+    return this.node.domainId === DomainType.PHYSICALMEASUREMENT;
   }
 
   get isDrug() {
-    return this.node.domainId === DomainType[DomainType.DRUG];
+    return this.node.domainId === DomainType.DRUG;
   }
 
   get isPPI() {
-    return this.node.type === CriteriaType[CriteriaType.PPI];
+    return this.node.domainId === DomainType.SURVEY;
   }
 
   get isSNOMED() {
-    return this.node.type === CriteriaType[CriteriaType.SNOMED];
+    return this.node.type === CriteriaType.SNOMED;
   }
 
   get hasAttributes() {
@@ -210,9 +203,9 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get isPMCat() {
-    return this.node.subtype === CriteriaSubType[CriteriaSubType.WHEEL] ||
-      this.node.subtype === CriteriaSubType[CriteriaSubType.PREG] ||
-      this.node.subtype === CriteriaSubType[CriteriaSubType.HRIRR] ||
-      this.node.subtype === CriteriaSubType[CriteriaSubType.HRNOIRR];
+    return this.node.subtype === CriteriaSubType.WHEEL ||
+      this.node.subtype === CriteriaSubType.PREG ||
+      this.node.subtype === CriteriaSubType.HRIRR ||
+      this.node.subtype === CriteriaSubType.HRNOIRR;
   }
 }

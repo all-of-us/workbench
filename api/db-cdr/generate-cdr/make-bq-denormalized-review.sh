@@ -62,33 +62,48 @@ echo "Inserting survey data into person_survey"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_survey\`
    (person_id, data_id, start_datetime, survey, question, answer)
-SELECT PERSON_ID,
-    DATA_ID,
-    START_DATETIME,
+SELECT person_id,
+    data_id,
+    start_datetime,
     survey,
     question,
     answer
 FROM
-(SELECT person_id,
-    observation_id as DATA_ID,
-    observation_datetime as START_DATETIME,
-    observation_source_concept_id as concept_id,
-    case when observation_source_concept_id = 1585747 then CAST(value_as_number as STRING) else concept_name end as answer
-FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
-left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b1 on a.value_as_concept_id = b1.concept_id
-where a.observation_source_concept_id in
-(select concept_id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and is_group = 0 and is_selectable = 1)) x
-join
-(select b2.name as survey,
-    c1.name as question,
-    c1.concept_id,
-    b2.id as s_id,
-    c1.id as q_id
-FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor_count\` a1
-left join \`$BQ_PROJECT.$BQ_DATASET.criteria\` b2 on a1.ancestor_id = b2.id
-left join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c1 on a1.descendant_id = c1.id
-where ancestor_id in
-(select id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and parent_id = 0)) y on x.concept_id = y.concept_id"
+    (
+        SELECT person_id,
+            observation_id as data_id,
+            observation_datetime as start_datetime,
+            observation_source_concept_id as concept_id,
+            case when observation_source_concept_id = 1585747 then CAST(value_as_number as STRING) else concept_name END as answer
+        FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b1 on a.value_source_concept_id = b1.concept_id
+        WHERE a.observation_source_concept_id in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE domain_id = 'SURVEY'
+                    and is_group = 1
+                    and is_selectable = 1
+                    and parent_id != 0
+            )
+    ) x
+JOIN
+    (
+        SELECT b2.name as survey,
+            c1.name as question,
+            c1.concept_id,
+            b2.id as s_id,
+            c1.id as q_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\` a1
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` b2 on a1.ancestor_id = b2.id
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c1 on a1.descendant_id = c1.id
+        WHERE ancestor_id in
+            (
+                SELECT id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE domain_id = 'SURVEY'
+                    and parent_id = 0)
+    ) y on x.concept_id = y.concept_id"
 
 # Create bq tables we have json schema for
 bq --project=$BQ_PROJECT rm -f $BQ_DATASET.person_all_events

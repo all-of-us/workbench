@@ -24,11 +24,11 @@ export function listTypeDisplay(parameter): string {
   const {domainId, type} = parameter;
   if (domainId === DomainType.PERSON) {
     return {
-      'GEN': 'Gender',
+      'GENDER': 'Gender',
       'RACE': 'Race',
-      'ETH': 'Ethnicity',
+      'ETHNICITY': 'Ethnicity',
       'AGE': 'Age',
-      'DEC': 'Deceased'
+      'DECEASED': 'Deceased'
     }[type] || '';
   } else if (type === CriteriaType.SNOMED) {
     return parameter.code;
@@ -98,30 +98,30 @@ export function listAttributeDisplay(parameter): string {
   }
 }
 
-export function domainToTitle(domain: string): string {
+export function domainToTitle(domain: any): string {
   switch (domain) {
-    case DomainType[DomainType.PERSON]:
+    case DomainType.PERSON:
       domain = 'Demographics';
       break;
-    case DomainType[DomainType.MEASUREMENT]:
+    case DomainType.MEASUREMENT:
       domain = 'Measurements';
       break;
-    case DomainType[DomainType.PHYSICALMEASUREMENT]:
+    case DomainType.PHYSICALMEASUREMENT:
       domain = 'Physical Measurements';
       break;
-    case DomainType[DomainType.VISIT]:
+    case DomainType.VISIT:
       domain = 'Visit';
       break;
-    case DomainType[DomainType.DRUG]:
+    case DomainType.DRUG:
       domain = 'Drugs';
       break;
-    case DomainType[DomainType.CONDITION]:
+    case DomainType.CONDITION:
       domain = 'Conditions';
       break;
-    case DomainType[DomainType.PROCEDURE]:
+    case DomainType.PROCEDURE:
       domain = 'Procedures';
       break;
-    case DomainType[DomainType.LAB]:
+    case DomainType.LAB:
       domain = 'Labs';
       break;
   }

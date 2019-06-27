@@ -1,6 +1,8 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import java.sql.Timestamp;
@@ -10,12 +12,9 @@ import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import javax.inject.Provider;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
@@ -24,18 +23,23 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.test.Providers;
+import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -48,66 +52,69 @@ import org.springframework.test.context.junit4.SpringRunner;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserControllerTest {
 
-  @Autowired private UserDao userDao;
-  @Mock private AdminActionHistoryDao adminActionHistoryDao;
-  @Mock private Provider<WorkbenchConfig> configProvider;
-  @Mock private Provider<User> userProvider;
-  @Mock private FireCloudService fireCloudService;
-  @Mock private ComplianceService complianceService;
-  @Mock private DirectoryService directoryService;
-  private UserService userService;
-
-  private UserController userController;
-  private Long incrementedUserId = 1L;
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
+  private static WorkbenchConfig config = new WorkbenchConfig();
+  private static User user = new User();
+  private static long incrementedUserId = 1;
 
-  public Clock clock() {
-    return CLOCK;
+  @TestConfiguration
+  @Import({UserController.class, UserService.class})
+  @MockBean({
+    FireCloudService.class,
+    ComplianceService.class,
+    DirectoryService.class,
+    AdminActionHistoryDao.class
+  })
+  static class Configuration {
+
+    @Bean
+    @Scope("prototype")
+    public WorkbenchConfig workbenchConfig() {
+      return config;
+    }
+
+    @Bean
+    Clock clock() {
+      return CLOCK;
+    }
+
+    @Bean
+    @Scope("prototype")
+    User user() {
+      return user;
+    }
+
+    @Bean
+    Random random() {
+      return new FakeLongRandom(123);
+    }
   }
+
+  @Autowired UserController userController;
+  @Autowired UserDao userDao;
+  @Autowired FireCloudService fireCloudService;
 
   @Before
   public void setUp() {
-    WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.enforceRegistered = false;
     config.featureFlags = new FeatureFlagsConfig();
     config.featureFlags.useBillingProjectBuffer = false;
-    configProvider = Providers.of(config);
-    this.userService =
-        new UserService(
-            userProvider,
-            userDao,
-            adminActionHistoryDao,
-            clock(),
-            new Random(),
-            fireCloudService,
-            configProvider,
-            complianceService,
-            directoryService);
-    this.userController = new UserController(userService);
+
     saveFamily();
   }
 
-  @After
-  public void tearDown() {
-    userDao.deleteAll();
+  @Test(expected = ForbiddenException.class)
+  public void testEnforceRegisteredUnregistered() {
+    config.firecloud.enforceRegistered = true;
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(false);
+    userController.user("Robinson", null, null, null).getBody();
   }
 
   @Test
   public void testEnforceRegistered() {
-    configProvider.get().firecloud.enforceRegistered = true;
-    this.userService =
-        new UserService(
-            userProvider,
-            userDao,
-            adminActionHistoryDao,
-            clock(),
-            new Random(),
-            fireCloudService,
-            configProvider,
-            complianceService,
-            directoryService);
-    this.userController = new UserController(userService);
+    config.firecloud.enforceRegistered = true;
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     User john = userDao.findUserByEmail("john@lis.org");
 
     UserResponse response = userController.user("Robinson", null, null, null).getBody();
@@ -258,7 +265,7 @@ public class UserControllerTest {
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
-    user.setFirstSignInTime(new Timestamp(clock().instant().toEpochMilli()));
+    user.setFirstSignInTime(new Timestamp(CLOCK.instant().toEpochMilli()));
     if (registered) {
       user.setDataAccessLevel(
           CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));

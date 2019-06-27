@@ -1,16 +1,3 @@
-<div *ngIf="isEmpty" class="alert alert-warning">
-  <div class="alert-items">
-    <div class="alert-item static">
-      <div class="alert-icon-wrapper">
-        <clr-icon class="alert-icon" shape="exclamation-triangle"></clr-icon>
-      </div>
-      <span class="alert-text">
-        A problem occurred and we were not able to retrieve the requested data
-      </span>
-    </div>
-  </div>
-</div>
-
 <div class="dropdown-search-container">
   <div [ngClass]="{'condition-dropdown' : showDropDown}">
     <ng-container *ngIf="showDropDown">
@@ -22,9 +9,19 @@
   </div>
 </div>
 
-<div class="tree-container">
-  <div class="tree-header">
+<div class="tree-container" [class.border]="showHeader">
+  <div *ngIf="showHeader" class="tree-header">
     <button class="btn btn-link" (click)="back()">Return to list</button>
+  </div>
+  <div *ngIf="isEmpty" class="alert alert-warning">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <div class="alert-icon-wrapper">
+          <clr-icon class="alert-icon is-solid" shape="exclamation-triangle"></clr-icon>
+        </div>
+        <span class="alert-text">Sorry, the request cannot be completed.</span>
+      </div>
+    </div>
   </div>
   <crit-list-node *ngFor="let item of children" [node]="item"></crit-list-node>
 </div>
