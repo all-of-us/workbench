@@ -124,6 +124,9 @@ export function domainToTitle(domain: any): string {
     case DomainType.LAB:
       domain = 'Labs';
       break;
+    case DomainType.SURVEY:
+      domain = 'Surveys';
+      break;
   }
   return domain;
 }
