@@ -1,15 +1,16 @@
 package org.pmiops.workbench.cohortbuilder;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.notOneModifier;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ONE_MODIFIER_MESSAGE;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.SEARCH_GROUP_ITEM;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TEMPORAL_GROUP;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TEMPORAL_GROUP_MESSAGE;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.modifierText;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.notZeroAndNotOne;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.temporalGroupNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.betweenOperator;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.notBetweenAndNotInOperator;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.notZeroAndNotOne;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.operandsEmpty;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.operandsNotDates;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.operandsNotNumbers;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.operandsNotOne;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.operandsNotTwo;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.operatorNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.temporalGroupNull;
 
 import com.google.api.client.util.Sets;
 import com.google.cloud.bigquery.QueryParameterValue;
@@ -176,6 +177,7 @@ public final class SearchGroupItemQueryBuilder {
         StringBuilder bpSql = new StringBuilder(BP_SQL);
         List<Long> bpConceptIds = new ArrayList<>();
         for (Attribute attribute : param.getAttributes()) {
+          validateAttribute(attribute);
           if (attribute.getConceptId() != null) {
             // attribute.conceptId is unique to blood pressure attributes
             // this indicates we need to build a blood pressure sql statement
@@ -370,13 +372,14 @@ public final class SearchGroupItemQueryBuilder {
               from(temporalGroupNull())
                   .test(item)
                   .throwException(
-                      NOT_VALID_MESSAGE,
-                      SEARCH_GROUP_ITEM,
-                      TEMPORAL_GROUP,
+                      "Bad Request: search group item temporal group {0} is not valid.",
                       item.getTemporalGroup());
               itemMap.put(item.getTemporalGroup(), item);
             });
-    from(notZeroAndNotOne()).test(itemMap).throwException(TEMPORAL_GROUP_MESSAGE);
+    from(notZeroAndNotOne())
+        .test(itemMap)
+        .throwException(
+            "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).");
     return itemMap;
   }
 
@@ -471,6 +474,7 @@ public final class SearchGroupItemQueryBuilder {
   /** Helper method to build modifier sql if needed. */
   private static String buildModifierSql(
       String baseSql, Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
+    validateModifiers(modifiers);
     String ageDateAndEncounterSql = getAgeDateAndEncounterSql(queryParams, modifiers);
     // Number of Occurrences has to be last because of the group by
     String occurrenceSql =
@@ -559,9 +563,6 @@ public final class SearchGroupItemQueryBuilder {
     if (modifierList.isEmpty()) {
       return null;
     }
-    from(notOneModifier())
-        .test(modifierList)
-        .throwException(ONE_MODIFIER_MESSAGE, modifierText.get(modifierType));
     return modifierList.get(0);
   }
 
@@ -580,5 +581,65 @@ public final class SearchGroupItemQueryBuilder {
     String parameterName = "p" + queryParameterValueMap.size();
     queryParameterValueMap.put(parameterName, queryParameterValue);
     return "@" + parameterName;
+  }
+
+  /** Validate attributes */
+  private static void validateAttribute(Attribute attr) {
+    if (!AttrName.ANY.equals(attr.getName())) {
+      from(operatorNull())
+          .test(attr)
+          .throwException("Bad Request: attribute operator {0} is not valid.", attr.getOperator());
+      from(operandsEmpty()).test(attr).throwException("Bad Request: attribute operands are empty.");
+      from(notBetweenAndNotInOperator().and(operandsNotOne()))
+          .test(attr)
+          .throwException(
+              "Bad Request: attribute {0} must have one operand when using the {1} operator.",
+              attr.getName().toString(), attr.getOperator().toString());
+      from(betweenOperator().and(operandsNotTwo()))
+          .test(attr)
+          .throwException(
+              "Bad Request: attribute {0} can only have 2 operands when using the {1} operator",
+              attr.getName().toString(), attr.getOperator().toString());
+      from(operandsNotNumbers())
+          .test(attr)
+          .throwException(
+              "Bad Request: attribute {0} operands must be numeric.", attr.getName().toString());
+    }
+  }
+
+  private static void validateModifiers(List<Modifier> modifiers) {
+    modifiers.forEach(
+        modifier -> {
+          from(operatorNull())
+              .test(modifier)
+              .throwException(
+                  "Bad Request: modifier operator {0} is not valid.", modifier.getOperator());
+          from(operandsEmpty())
+              .test(modifier)
+              .throwException("Bad Request: modifier operands are empty.");
+          from(notBetweenAndNotInOperator().and(operandsNotOne()))
+              .test(modifier)
+              .throwException(
+                  "Bad Request: modifier {0} must have one operand when using the {1} operator.",
+                  modifier.getName().toString(), modifier.getOperator().toString());
+          from(betweenOperator().and(operandsNotTwo()))
+              .test(modifier)
+              .throwException(
+                  "Bad Request: modifier {0} can only have 2 operands when using the {1} operator",
+                  modifier.getName().toString(), modifier.getOperator().toString());
+          if (ModifierType.EVENT_DATE.equals(modifier.getName())) {
+            from(operandsNotDates())
+                .test(modifier)
+                .throwException(
+                    "Bad Request: modifier {0} must be a valid date.",
+                    modifier.getName().toString());
+          } else {
+            from(operandsNotNumbers())
+                .test(modifier)
+                .throwException(
+                    "Bad Request: modifier {0} operands must be numeric.",
+                    modifier.getName().toString());
+          }
+        });
   }
 }

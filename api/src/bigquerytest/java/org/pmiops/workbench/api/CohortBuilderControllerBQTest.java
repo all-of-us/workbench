@@ -53,8 +53,6 @@ import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
-import org.pmiops.workbench.model.TreeSubType;
-import org.pmiops.workbench.model.TreeType;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,6 +154,135 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void validateAttribute() throws Exception {
+    SearchParameter demo =
+        new SearchParameter()
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.AGE.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true);
+    Attribute attribute = new Attribute().name(AttrName.NUM);
+    demo.attributes(Arrays.asList(attribute));
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(demo), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: attribute operator null is not valid.", bre.getMessage());
+    }
+
+    attribute.operator(Operator.BETWEEN);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: attribute operands are empty.", bre.getMessage());
+    }
+
+    attribute.operands(Arrays.asList("20"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator",
+          bre.getMessage());
+    }
+
+    attribute.operands(Arrays.asList("s", "20"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: attribute NUM operands must be numeric.", bre.getMessage());
+    }
+
+    attribute.operands(Arrays.asList("10", "20"));
+    attribute.operator(Operator.EQUAL);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: attribute NUM must have one operand when using the EQUAL operator.",
+          bre.getMessage());
+    }
+  }
+
+  @Test
+  public void validateModifiers() throws Exception {
+    SearchParameter searchParameter =
+        new SearchParameter()
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true);
+    Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(),
+            Arrays.asList(searchParameter),
+            Arrays.asList(modifier));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: modifier operator null is not valid.", bre.getMessage());
+    }
+
+    modifier.operator(Operator.BETWEEN);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: modifier operands are empty.", bre.getMessage());
+    }
+
+    modifier.operands(Arrays.asList("20"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: modifier AGE_AT_EVENT can only have 2 operands when using the BETWEEN operator",
+          bre.getMessage());
+    }
+
+    modifier.operands(Arrays.asList("s", "20"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: modifier AGE_AT_EVENT operands must be numeric.", bre.getMessage());
+    }
+
+    modifier.operands(Arrays.asList("10", "20"));
+    modifier.operator(Operator.EQUAL);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: modifier AGE_AT_EVENT must have one operand when using the EQUAL operator.",
+          bre.getMessage());
+    }
+
+    modifier.name(ModifierType.EVENT_DATE);
+    modifier.operands(Arrays.asList("10"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: modifier EVENT_DATE must be a valid date.", bre.getMessage());
+    }
+  }
+
+  @Test
   public void countSubjectsICD9ConditionOccurrenceChild() throws Exception {
     SearchParameter icd9 =
         new SearchParameter()
@@ -171,6 +298,42 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.CONDITION.toString(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void temporalGroupExceptions() throws Exception {
+    SearchParameter icd9 =
+        new SearchParameter()
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false)
+            .ancestorData(false)
+            .group(false)
+            .conceptId(1L);
+
+    SearchGroupItem icd9SGI =
+        new SearchGroupItem().type(DomainType.CONDITION.toString()).addSearchParametersItem(icd9);
+
+    SearchGroup temporalGroup = new SearchGroup().items(Arrays.asList(icd9SGI)).temporal(true);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: search group item temporal group null is not valid.", bre.getMessage());
+    }
+
+    icd9SGI.temporalGroup(0);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).",
+          bre.getMessage());
+    }
   }
 
   @Test
@@ -764,17 +927,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchGroupItem measurementSGI =
         new SearchGroupItem()
-            .type(TreeType.MEAS.name())
+            .type(DomainType.MEASUREMENT.toString())
             .addSearchParametersItem(measurement)
             .temporalGroup(0);
     SearchGroupItem visitSGI =
         new SearchGroupItem()
-            .type(TreeType.VISIT.name())
+            .type(DomainType.VISIT.toString())
             .addSearchParametersItem(visit)
             .temporalGroup(0);
     SearchGroupItem drugSGI =
         new SearchGroupItem()
-            .type(TreeType.DRUG.name())
+            .type(DomainType.DRUG.toString())
             .addSearchParametersItem(drug)
             .temporalGroup(1);
 
@@ -1324,7 +1487,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .conceptId(6L);
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.CONDITION.name(), Arrays.asList(icd9Parent, icd10), new ArrayList<>());
+            DomainType.CONDITION.toString(), Arrays.asList(icd9Parent, icd10), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
     cbCriteriaDao.delete(criteriaParent.getId());
@@ -1342,7 +1505,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .ancestorData(false)
             .conceptId(4L);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PROCEDURE.toString(), Arrays.asList(cpt), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1358,7 +1522,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .ancestorData(false)
             .conceptId(6L);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(snomed), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -2290,7 +2455,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new SearchParameter()
             .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(TreeSubType.WHEEL.toString())
+            .subtype(CriteriaSubType.WHEEL.toString())
             .ancestorData(false)
             .standard(false)
             .group(false)

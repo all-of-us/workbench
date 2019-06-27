@@ -1,5 +1,8 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.isEmpty;
+
 import com.google.api.client.util.Sets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -91,11 +94,14 @@ public final class CriteriaLookupUtil {
     // which will eventually hold the results (for now, we mark them with an empty set).
     for (SearchGroup sg : Iterables.concat(req.getIncludes(), req.getExcludes())) {
       for (SearchGroupItem sgi : sg.getItems()) {
+        // Validate that search params exist
+        from(isEmpty())
+            .test(sgi.getSearchParameters())
+            .throwException("Bad Request: search parameters are empty.");
         for (SearchParameter param : sgi.getSearchParameters()) {
           if (!param.getGroup() && !param.getAncestorData()) {
             continue;
           }
-
           CriteriaLookupUtil.FullTreeType treeKey =
               CriteriaLookupUtil.FullTreeType.fromParam(param);
           if (param.getAncestorData()) {
