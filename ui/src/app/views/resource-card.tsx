@@ -199,6 +199,9 @@ export class ResourceCard extends React.Component<Props, State> {
   }
 
   get displayDate(): string {
+    if (!this.props.resourceCard.modifiedTime) {
+      return '';
+    }
     const date = new Date(this.props.resourceCard.modifiedTime);
     // datetime formatting to slice off weekday from readable date string
     return date.toDateString().split(' ').slice(1).join(' ');
