@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
@@ -100,18 +99,6 @@ public class ParameterPredicates {
     return sp -> StringUtils.isBlank(sp.getType());
   }
 
-  public static Predicate<SearchParameter> domainBlank() {
-    return sp -> StringUtils.isBlank(sp.getDomain());
-  }
-
-  public static Predicate<SearchParameter> groupNull() {
-    return sp -> sp.getGroup() == null;
-  }
-
-  public static Predicate<SearchParameter> ancestorDataNull() {
-    return sp -> sp.getAncestorData() == null;
-  }
-
   public static Predicate<SearchParameter> codeTypeInvalid() {
     return sp -> !CODE_TYPES.stream().anyMatch(sp.getType()::equalsIgnoreCase);
   }
@@ -166,15 +153,6 @@ public class ParameterPredicates {
 
   public static Predicate<SearchParameter> notTwoAttributes() {
     return sp -> sp.getAttributes().size() != 2;
-  }
-
-  public static Predicate<SearchParameter> notNumAttr() {
-    return sp ->
-        sp.getAttributes().stream()
-                .filter(a -> AttrName.NUM.equals(a.getName()))
-                .collect(Collectors.toList())
-                .size()
-            == 0;
   }
 
   public static Predicate<SearchParameter> notSystolicAndDiastolic() {
