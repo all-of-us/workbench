@@ -157,7 +157,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
 
   get attributeTitle() {
     const domain = this.attributesNode.domainId;
-    return domain === DomainType[DomainType.PHYSICALMEASUREMENT]
+    return domain === DomainType.PHYSICALMEASUREMENT
       ? stripHtml(this.attributesNode.name)
       : domain + ' Detail';
   }
