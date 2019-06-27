@@ -158,7 +158,7 @@ public class DataSetController implements DataSetApiDelegate {
               now);
       return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(savedDataSet));
     } catch (DataIntegrityViolationException ex) {
-      throw new ConflictException("Data set with the same name already exist");
+      throw new ConflictException("Data set with the same name already exists");
     }
   }
 
@@ -517,6 +517,8 @@ public class DataSetController implements DataSetApiDelegate {
       // TODO: add recent resource entry for data sets
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
+    } catch (DataIntegrityViolationException ex) {
+      throw new ConflictException("Data set with the same name already exists");
     }
 
     return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dbDataSet));
