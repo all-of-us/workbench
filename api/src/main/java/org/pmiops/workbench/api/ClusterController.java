@@ -254,6 +254,8 @@ public class ClusterController implements ClusterApiDelegate {
                   Collectors.<String, String, String>toMap(
                       name -> localDir + "/" + name, name -> gcsNotebooksDir + "/" + name)));
     }
+
+    // TODO: Alternate Welder logic.
     leonardoNotebooksClient.localize(projectName, clusterName, localizeMap);
 
     ClusterLocalizeResponse resp = new ClusterLocalizeResponse();

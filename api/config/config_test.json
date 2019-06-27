@@ -66,6 +66,7 @@
     "enableListSearch": true
   },
   "featureFlags": {
+    "enableLeoWelder": false,
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": true
   }

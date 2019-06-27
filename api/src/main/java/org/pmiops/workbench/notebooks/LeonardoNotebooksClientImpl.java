@@ -1,6 +1,7 @@
 package org.pmiops.workbench.notebooks;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,6 +58,13 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     WorkbenchConfig config = workbenchConfigProvider.get();
     String gcsPrefix = "gs://" + config.googleCloudStorageService.clusterResourcesBucketName;
+
+    Map<String, String> nbExtensions = new HashMap<>();
+    nbExtensions.put("aou-snippets-menu", gcsPrefix + "/aou-snippets-menu.js");
+    if (!config.featureFlags.enableLeoWelder) {
+      nbExtensions.put("aou-playground-extension", gcsPrefix + "/playground-extension.js");
+    }
+
     return new ClusterRequest()
         .labels(ImmutableMap.of(CLUSTER_LABEL_AOU, "true", CLUSTER_LABEL_CREATED_BY, userEmail))
         .defaultClientId(config.server.oauthClientId)
@@ -64,13 +72,11 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .jupyterUserScriptUri(gcsPrefix + "/setup_notebook_cluster.sh")
         .userJupyterExtensionConfig(
             new UserJupyterExtensionConfig()
-                .nbExtensions(
-                    ImmutableMap.of(
-                        "aou-playground-extension", gcsPrefix + "/playground-extension.js",
-                        "aou-snippets-menu", gcsPrefix + "/aou-snippets-menu.js"))
+                .nbExtensions(nbExtensions)
                 .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
                 .combinedExtensions(ImmutableMap.<String, String>of())
                 .labExtensions(ImmutableMap.<String, String>of()))
+        .enableWelder(config.featureFlags.enableLeoWelder)
         .machineConfig(
             new MachineConfig()
                 .masterDiskSize(
