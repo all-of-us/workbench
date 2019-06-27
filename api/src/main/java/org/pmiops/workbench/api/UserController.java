@@ -7,9 +7,13 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +36,21 @@ public class UserController implements UserApiDelegate {
         return modelUser;
       };
 
+  private Provider<User> userProvider;
+  private final Provider<WorkbenchConfig> configProvider;
   private final UserService userService;
+  private final FireCloudService fireCloudService;
 
   @Autowired
-  public UserController(UserService userService) {
+  public UserController(
+      Provider<User> userProvider,
+      Provider<WorkbenchConfig> configProvider,
+      FireCloudService fireCloudService,
+      UserService userService) {
+    this.userProvider = userProvider;
+    this.configProvider = configProvider;
     this.userService = userService;
+    this.fireCloudService = fireCloudService;
   }
 
   @Override
@@ -55,6 +69,16 @@ public class UserController implements UserApiDelegate {
       paginationToken = getPaginationTokenFromPageToken(pageToken);
     } catch (IllegalArgumentException | BadRequestException e) {
       return ResponseEntity.badRequest().body(response);
+    }
+
+    // See discussion on RW-2894. This may not be strictly necessary, especially if researchers
+    // details will be published publicly, but it prevents arbitrary unregistered users from seeing
+    // limited researcher profile details.
+    WorkbenchConfig config = configProvider.get();
+    if (config.firecloud.enforceRegistered
+        && !fireCloudService.isUserMemberOfGroup(
+            userProvider.get().getEmail(), config.firecloud.registeredDomainName)) {
+      throw new ForbiddenException("user search requires registered data access");
     }
 
     Sort.Direction direction =
