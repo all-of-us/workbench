@@ -180,6 +180,9 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public String getReadOnlyHtml(
       String workspaceNamespace, String workspaceName, String notebookName) {
+    workspaceService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER);
+
     String bucketName =
         fireCloudService
             .getWorkspace(workspaceNamespace, workspaceName)

@@ -127,7 +127,7 @@ const routes: Routes = [
                       minimizeChrome: true
                     }
                   }, {
-                    path: 'v2/:nbName',
+                    path: 'preview/:nbName',
                     component: InteractiveNotebookComponent,
                     data: {
                       pathElementForTitle: 'nbName',
