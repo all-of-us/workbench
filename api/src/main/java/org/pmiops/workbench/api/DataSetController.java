@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -35,6 +36,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -242,16 +244,17 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    int retryLimit = 2;
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
     bigQueryJobConfig.forEach(
         (domain, queryJobConfiguration) -> {
           int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS;
           List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
-
+          String originalQuery = queryJobConfiguration.getQuery();
           do {
             try {
-              String query = queryJobConfiguration.getQuery().concat(" LIMIT " + rowsRequested);
+              String query = originalQuery.concat(" LIMIT " + rowsRequested);
 
               queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
@@ -323,12 +326,19 @@ public class DataSetController implements DataSetApiDelegate {
                   && ex.getCause().getMessage() != null
                   && ex.getCause().getMessage().contains("Read timed out")) {
                 rowsRequested = (rowsRequested / 2);
+                if (rowsRequested == 0) {
+                  throw new GatewayTimeoutException("Timeout while querying the CDR to pull preview information.");
+                }
                 retry++;
               } else {
                 throw ex;
               }
             }
-          } while (retry < 2);
+          } while (retry < retryLimit);
+
+          if (retry == retryLimit) {
+            throw new GatewayTimeoutException("Timeout while querying the CDR to pull preview information.");
+          }
 
           Collections.sort(
               valuePreviewList,
