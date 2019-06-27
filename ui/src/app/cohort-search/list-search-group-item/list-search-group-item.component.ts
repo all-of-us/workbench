@@ -1,14 +1,14 @@
 import {Component, Input, OnInit} from '@angular/core';
 
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
+import {CriteriaType, DomainType, SearchGroup, SearchGroupItem, SearchRequest} from 'generated/fetch';
 
 import {
   searchRequestStore,
   selectionsStore,
   wizardStore
 } from 'app/cohort-search/search-state.service';
-import {domainToTitle, getCodeOptions, listAttributeDisplay, listNameDisplay, listTypeDisplay} from 'app/cohort-search/utils';
+import {domainToTitle, getCodeOptions, listAttributeDisplay, listNameDisplay, listTypeDisplay, mapGroupItem} from 'app/cohort-search/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 
 @Component({
@@ -35,10 +35,11 @@ export class ListSearchGroupItemComponent implements OnInit {
     this.updateGroup();
     try {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const item = mapGroupItem(this.item);
       const request = <SearchRequest>{
         includes: [],
         excludes: [],
-        [this.role]: [{items: [this.item]}]
+        [this.role]: [{items: [item], temporal: false}]
       };
       cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
         this.count = count;
