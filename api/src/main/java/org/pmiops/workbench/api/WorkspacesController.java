@@ -741,8 +741,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
       String workspace, String workspaceName, String notebookName) {
-    ReadOnlyNotebookResponse response = new ReadOnlyNotebookResponse()
-        .html(notebooksService.getReadOnlyHtml(workspace, workspaceName, notebookName));
+    ReadOnlyNotebookResponse response =
+        new ReadOnlyNotebookResponse()
+            .html(notebooksService.getReadOnlyHtml(workspace, workspaceName, notebookName));
     return ResponseEntity.ok(response);
   }
 
