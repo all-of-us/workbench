@@ -126,7 +126,7 @@ public class WorkbenchConfig {
   }
 
   public static class FeatureFlagsConfig {
-    // When changing this flag in a an environment, all clusters should also be deleted
+    // When changing this flag in an environment, all clusters should also be deleted
     // simultaneously. Failure to do this may result in cluster creation failures.
     public boolean enableLeoWelder = false;
     public boolean useBillingProjectBuffer = false;
