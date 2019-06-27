@@ -37,7 +37,8 @@
     <div class="col-xl-4 col-lg-6" id="list-include-groups" style="margin-top: 1.5rem">
       <app-list-search-group-list
         [role]="'includes'"
-        [groups]="criteria.includes">
+        [groups]="criteria.includes"
+        [updateRequest]="updateRequest">
       </app-list-search-group-list>
     </div>
 
@@ -45,12 +46,13 @@
       <app-list-search-group-list
         *ngIf="includeSize > 0"
         [role]="'excludes'"
-        [groups]="criteria.excludes">
+        [groups]="criteria.excludes"
+        [updateRequest]="updateRequest">
       </app-list-search-group-list>
     </div>
 
     <div class="col-xl-4 col-lg-12" id="list-charts">
-      <app-list-overview *ngIf="overview" [searchRequest]="criteria"></app-list-overview>
+      <app-list-overview *ngIf="overview" [searchRequest]="criteria" [update]="triggerUpdate"></app-list-overview>
     </div>
   </div>
 </div>
