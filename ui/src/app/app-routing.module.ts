@@ -130,7 +130,7 @@ const routes: Routes = [
                     path: 'v2/:nbName',
                     component: InteractiveNotebookComponent,
                     data: {
-                      pathElementForTitle: 'nbName',  // use the (urldecoded) captured value nbName
+                      pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
                       minimizeChrome: true
                     }

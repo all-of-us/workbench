@@ -175,14 +175,15 @@ public class NotebooksServiceImpl implements NotebooksService {
   }
 
   @Override
-  public String getReadOnlyHtml(String workspaceNamespace, String workspaceName,
-      String notebookName) {
+  public String getReadOnlyHtml(
+      String workspaceNamespace, String workspaceName, String notebookName) {
     String bucketName =
         fireCloudService
             .getWorkspace(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
-    String notebook = getNotebookContents(bucketName, notebookName).toString(); // this might be wrong
+    String notebook =
+        getNotebookContents(bucketName, notebookName).toString(); // this might be wrong
 
     return fireCloudService.staticNotebooksConvert(notebook);
   }

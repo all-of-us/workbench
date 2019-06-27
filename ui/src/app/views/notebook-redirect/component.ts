@@ -160,7 +160,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
           return Observable.from([c]);
         }
         if (c.status === ClusterStatus.Stopped) {
-          debugger;
           // Resume the cluster and continue polling.
           return <Observable<Cluster>> this.leoClusterService
             .startCluster(c.clusterNamespace, c.clusterName)

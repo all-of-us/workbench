@@ -4,10 +4,6 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.common.io.CharStreams;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
@@ -46,7 +42,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
@@ -674,9 +669,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(resp);
   }
 
-  /**
-   * Record approval or rejection of research purpose.
-   */
+  /** Record approval or rejection of research purpose. */
   @Override
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<EmptyResponse> reviewWorkspace(
@@ -773,8 +766,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(String workspace,
-      String workspaceName, String notebookName) {
+  public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
+      String workspace, String workspaceName, String notebookName) {
     ReadOnlyNotebookResponse response = new ReadOnlyNotebookResponse();
     response.setHtml(notebooksService.getReadOnlyHtml(workspace, workspaceName, notebookName));
     return ResponseEntity.ok(response);

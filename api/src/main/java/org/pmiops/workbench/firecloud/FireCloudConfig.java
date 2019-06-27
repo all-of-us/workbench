@@ -84,7 +84,8 @@ public class FireCloudConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public StaticNotebooksApi staticNotebooksApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
+  public StaticNotebooksApi staticNotebooksApi(
+      @Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
     StaticNotebooksApi api = new StaticNotebooksApi();
     api.setApiClient(apiClient);
     return api;
