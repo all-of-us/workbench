@@ -8,7 +8,7 @@ import {
   selectionsStore,
   wizardStore
 } from 'app/cohort-search/search-state.service';
-import {domainToTitle, getCodeOptions, listAttributeDisplay, listNameDisplay, listTypeDisplay} from 'app/cohort-search/utils';
+import {domainToTitle, getCodeOptions, listAttributeDisplay, listNameDisplay, listTypeDisplay, mapGroupItem} from 'app/cohort-search/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 
 @Component({
@@ -20,7 +20,6 @@ export class ListSearchGroupItemComponent implements OnInit {
   @Input() role: keyof SearchRequest;
   @Input() groupId: string;
   @Input() item: any;
-  @Input() delete: Function;
   @Input() updateGroup: Function;
 
   count: number;
@@ -35,10 +34,11 @@ export class ListSearchGroupItemComponent implements OnInit {
     this.updateGroup();
     try {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const item = mapGroupItem(this.item);
       const request = <SearchRequest>{
         includes: [],
         excludes: [],
-        [this.role]: [{items: [this.item]}]
+        [this.role]: [{items: [item], temporal: false}]
       };
       cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
         this.count = count;
@@ -95,41 +95,44 @@ export class ListSearchGroupItemComponent implements OnInit {
   }
 
   enable() {
-    this.setStatus('active');
+    this.item.status = 'active';
     this.updateSearchRequest();
   }
 
   suppress() {
-    this.setStatus('hidden');
+    this.item.status = 'hidden';
     this.updateSearchRequest();
   }
 
   remove() {
-    this.setStatus('pending');
+    this.item.status = 'pending';
+    this.updateSearchRequest();
     this.item.timeout = setTimeout(() => {
-      this.delete(this.item.id);
+      this.updateSearchRequest(true);
     }, 10000);
-  }
-
-  setStatus(status: string) {
-    this.item.status = status;
   }
 
   undo() {
     clearTimeout(this.item.timeout);
-    this.setStatus('active');
+    this.item.status = 'active';
+    this.updateSearchRequest();
   }
 
-  updateSearchRequest() {
+  updateSearchRequest(remove?: boolean) {
     const sr = searchRequestStore.getValue();
     const {item, groupId, role} = this;
     const groupIndex = sr[role].findIndex(grp => grp.id === groupId);
     if (groupIndex > -1) {
       const itemIndex = sr[role][groupIndex].items.findIndex(it => it.id === item.id);
       if (itemIndex > -1) {
-        sr[role][groupIndex].items[itemIndex] = item;
-        searchRequestStore.next(sr);
-        this.updateGroup();
+        if (remove) {
+          sr[role][groupIndex].items = sr[role][groupIndex].items.filter(it => it.id !== item.id);
+          searchRequestStore.next(sr);
+        } else {
+          sr[role][groupIndex].items[itemIndex] = item;
+          searchRequestStore.next(sr);
+          this.updateGroup();
+        }
       }
     }
   }

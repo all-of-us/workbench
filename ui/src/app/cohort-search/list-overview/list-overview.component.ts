@@ -1,11 +1,19 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
-import {cohortsApi} from 'app/services/swagger-fetch-clients';
-import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {mapRequest} from 'app/cohort-search/utils';
+import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
+import {
+  currentCohortStore,
+  currentWorkspaceStore,
+  navigate,
+  navigateByUrl,
+  urlParamsStore
+} from 'app/utils/navigation';
 
 import {Cohort} from 'generated/fetch';
+import {fromJS} from 'immutable';
 
 const COHORT_TYPE = 'AoU_Discover';
 
@@ -19,18 +27,19 @@ const COHORT_TYPE = 'AoU_Discover';
     './list-overview.component.css'
   ]
 })
-export class ListOverviewComponent implements OnInit {
-  @Input() chartData: Array<any>;
-  @Input() total: number;
-  @Input() isRequesting: boolean;
-  @Input() temporal: {flag, tempLength};
-  @Input() error: boolean;
+export class ListOverviewComponent implements OnChanges, OnInit {
+  @Input() searchRequest: any;
+  @Input() update: number;
 
   cohortForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl()
   });
 
+  error: boolean;
+  loading: boolean;
+  total: number;
+  chartData: any;
   saving = false;
   deleting = false;
   stackChart = false;
@@ -38,6 +47,7 @@ export class ListOverviewComponent implements OnInit {
   showComboChart = true;
   showConflictError = false;
   saveError = false;
+  temporalError = false;
   cohort: Cohort;
 
   ngOnInit(): void {
@@ -46,12 +56,61 @@ export class ListOverviewComponent implements OnInit {
     }
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.update && this.hasActiveItems && !this.hasTemporalError) {
+      this.loading = true;
+      this.error = false;
+      this.getTotalCount();
+    }
+  }
+
+  getTotalCount() {
+    try {
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const request = mapRequest(this.searchRequest);
+      cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
+        // TODO remove immutable conversion and modify charts to use vanilla javascript
+        this.chartData = fromJS(response.items);
+        this.total = response.items.reduce((sum, data) => sum + data.count, 0);
+        this.loading = false;
+      }, (err) => {
+        console.error(err);
+        this.error = true;
+        this.loading = false;
+      });
+    } catch (error) {
+      console.error(error);
+      this.error = true;
+      this.loading = false;
+    }
+  }
+
+  get hasActiveItems() {
+    return ['includes', 'excludes'].some(role => {
+      const activeGroups = this.searchRequest[role].filter(grp => grp.status === 'active');
+      return activeGroups.some(grp => {
+        const activeItems = grp.items.filter(it => it.status === 'active');
+        return activeItems.length > 0;
+      });
+    });
+  }
+
+  get hasTemporalError() {
+    const activeGroups = this.searchRequest.includes
+      .filter(grp => grp.temporal && grp.status === 'active');
+    return activeGroups.some(grp => {
+      const activeItems = grp.items.reduce((acc, it) => acc[it.temporalGroup]++, [0, 0]);
+      return activeItems.length > 0;
+    });
+  }
+
   get name() {
     return this.cohortForm.get('name');
   }
 
   get criteria() {
-    return JSON.stringify(searchRequestStore.getValue());
+    const mappedRequest = mapRequest(searchRequestStore.getValue());
+    return JSON.stringify(mappedRequest);
   }
 
   get unchanged() {

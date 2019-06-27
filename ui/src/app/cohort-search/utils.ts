@@ -1,5 +1,5 @@
 import {TreeSubType, TreeType} from 'generated';
-import {CriteriaType, DomainType} from 'generated/fetch';
+import {CriteriaType, DomainType, SearchGroup, SearchGroupItem, SearchParameter, SearchRequest} from 'generated/fetch';
 import {List} from 'immutable';
 import {DOMAIN_TYPES} from './constant';
 import {idsInUse} from './search-state.service';
@@ -123,6 +123,9 @@ export function domainToTitle(domain: any): string {
       break;
     case DomainType.LAB:
       domain = 'Labs';
+      break;
+    case DomainType.SURVEY:
+      domain = 'Surveys';
       break;
   }
   return domain;
@@ -252,4 +255,93 @@ export function generateId(prefix?: string): string {
 
 function genSuffix(): string {
   return Math.random().toString(36).substr(2, 9);
+}
+
+export function parseCohortDefinition(json: string) {
+  const data = JSON.parse(json);
+  const sr = {};
+  for (const role of ['includes', 'excludes']) {
+    sr[role] = data[role].map(grp => {
+      grp.items = grp.items.map(item => {
+        item.searchParameters = item.searchParameters.map(sp => {
+          const {parameterId, name, domain, type, subtype, group, attributes, conceptId,
+            ancestorData, standard} = sp;
+          return {
+            parameterId,
+            name,
+            domainId: domain,
+            type,
+            subtype,
+            group,
+            conceptId,
+            attributes,
+            hasAttributes: sp.attributes.length > 0,
+            hasAncestorData: ancestorData,
+            isStandard: standard
+          };
+        });
+        if (!grp.temporal) {
+          item.temporalGroup = 0;
+        }
+        item.status = 'active';
+        return item;
+      });
+      grp.mention = grp.mention ? grp.mention : '';
+      grp.time = grp.time ? grp.time : '';
+      grp.timeValue = grp.timeValue ? grp.timeValue : 0;
+      grp.timeFrame = grp.timeFrame ? grp.timeFrame : '';
+      grp.status = 'active';
+      return grp;
+    });
+  }
+  return sr;
+}
+
+export function mapRequest(sr: any) {
+  const grpFilter = (role: string) => sr[role].reduce((acc, grp) => {
+    if (grp.status === 'active') {
+      acc.push(mapGroup(grp));
+    }
+    return acc;
+  }, []);
+  return <SearchRequest>{
+    includes: grpFilter('includes'),
+    excludes: grpFilter('excludes'),
+  };
+}
+
+export function mapGroup(group: any) {
+  const items = group.items.reduce((acc, it) => {
+    if (it.status === 'active') {
+      acc.push(mapGroupItem(it));
+    }
+    return acc;
+  }, []);
+  return <SearchGroup>{id: group.id, items, temporal: false};
+}
+
+export function mapGroupItem(item: any) {
+  const {id, type, modifiers} = item;
+  const searchParameters = item.searchParameters.map(mapParameter);
+  return <SearchGroupItem>{id, type, searchParameters, modifiers};
+}
+
+export function mapParameter(sp: any) {
+  const {parameterId, name, domainId, type, subtype, group, attributes, conceptId,
+    hasAncestorData, isStandard} = sp;
+  const param = <SearchParameter>{
+    parameterId,
+    name: stripHtml(name),
+    domain: domainId,
+    type,
+    subtype,
+    group,
+    attributes,
+    ancestorData: hasAncestorData,
+    standard: isStandard
+  };
+  if (conceptId) {
+    param.conceptId = conceptId;
+  }
+  return param;
 }

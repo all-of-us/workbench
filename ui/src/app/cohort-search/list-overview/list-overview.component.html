@@ -5,7 +5,7 @@
         <button
           type="button"
           class="btn btn-primary"
-          [disabled]="isRequesting || saving || total === null || total === -1"
+          [disabled]="loading || saving || total === null || total === -1"
           [clrLoading]="saving"
           clrDropdownTrigger>
           <span style="margin-right: 5px">Save Cohort</span>
@@ -30,7 +30,7 @@
         type="button"
         class="btn btn-primary"
         style="float: right; margin: 0;"
-        [disabled]="isRequesting || total === null || total === -1"
+        [disabled]="loading || total === null || total === -1"
         (click)="saveModal.open()">Create Cohort</button>
       <button
         class="btn btn-link"
@@ -43,7 +43,7 @@
       <button
         class="btn btn-link"
         (click)="deleting = true"
-        [disabled]="isRequesting || !cohort"
+        [disabled]="loading || !cohort"
         [popper]="'Delete cohort'"
         [popperTrigger]="'hover'">
         <clr-icon shape="trash" class="is-solid" size="30"></clr-icon>
@@ -51,7 +51,7 @@
       <button
         class="btn btn-link"
         (click)="navigateTo('review')"
-        [disabled]="isRequesting || !cohort"
+        [disabled]="loading || !cohort"
         [popper]="'Review participant level data'"
         [popperTrigger]="'hover'">
         <clr-icon shape="copy" class="is-solid disabled" size="30"></clr-icon>
@@ -59,13 +59,13 @@
     </div>
     <h2 class="count-header" id="total-count">
       Total Count:
-      <span *ngIf="isRequesting" class="spinner spinner-sm">
+      <span *ngIf="loading" class="spinner spinner-sm">
         Loading...
       </span>
-      <span class="count-header" *ngIf="!isRequesting && total !== -1">
+      <span class="count-header" *ngIf="!loading && hasActiveItems">
         {{ total | number }}
       </span>
-      <span *ngIf="!isRequesting && ((temporal?.flag && temporal.tempLength && total === null) || total === -1)">
+      <span *ngIf="!loading && ((temporalError && total === null) || !hasActiveItems)">
         --
         <clr-icon
           [popper]="errorPopper"
@@ -75,17 +75,17 @@
       </span>
     </h2>
   </div>
-  <div *ngIf="error && !temporal.flag" class="total-error">
+  <div *ngIf="error && hasActiveItems && !hasTemporalError" class="total-error">
     <clr-icon class="is-solid" shape="exclamation-triangle" size="22"></clr-icon>
     Sorry, the request cannot be completed.
   </div>
-  <div *ngIf="total > 0 && !isRequesting && chartData">
+  <div *ngIf="hasActiveItems && !loading && chartData">
     <div class="card bg-faded">
       <div class="card-header header-text">
         Results by Gender
       </div>
-      <div *ngIf="showGenderChart" class="card-block">
-        <app-gender-chart *ngIf="chartData.length"
+      <div class="card-block">
+        <app-gender-chart *ngIf="chartData.size"
           [data]="chartData">
         </app-gender-chart>
       </div>
@@ -98,8 +98,8 @@
           (click)="toggleChartMode()">
         </clr-icon>
       </div>
-      <div *ngIf="showComboChart" class="card-block">
-        <app-combo-chart *ngIf="chartData.length"
+      <div class="card-block">
+        <app-combo-chart *ngIf="chartData.size"
           [data]="chartData"
           [mode]="stackChart ? 'stacked' : 'normalized'">
         </app-combo-chart>
@@ -108,14 +108,14 @@
   </div>
 </div>
 <popper-content #errorPopper>
-  <p   *ngIf="error && !temporal?.flag" [style.margin]="'0'">
+  <p   *ngIf="error && !temporalError" [style.margin]="'0'">
     A problem occurred and we were not able to retrieve the requested data
   </p>
-  <p *ngIf="temporal?.flag && temporal.tempLength" [style.margin]="'0'">
+  <p *ngIf="temporalError && hasActiveItems" [style.margin]="'0'">
     Please complete criteria selections before saving temporal relationship.
   </p>
-  <p *ngIf="total === -1" [style.margin]="'0'">
-    All criteria are suppressed. Un-surpress criteria to update the total count based on the visible criteria.
+  <p *ngIf="!hasActiveItems" [style.margin]="'0'">
+    All criteria are suppressed. Un-suppress criteria to update the total count based on the visible criteria.
   </p>
 </popper-content>
 <clr-modal #saveModal

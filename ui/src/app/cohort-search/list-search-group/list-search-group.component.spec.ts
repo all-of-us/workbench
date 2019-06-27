@@ -77,6 +77,7 @@ describe('ListSearchGroupComponent', () => {
     // Default Inputs for tests
     comp.group = group;
     comp.role = 'includes';
+    comp.updateRequest = () => {};
     fixture.detectChanges();
   });
 

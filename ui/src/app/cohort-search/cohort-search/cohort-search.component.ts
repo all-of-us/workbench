@@ -6,7 +6,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
+import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import {environment} from 'environments/environment';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
@@ -20,6 +20,7 @@ import {
   totalCount,
 } from 'app/cohort-search/redux';
 import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.service';
+import {parseCohortDefinition} from 'app/cohort-search/utils';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {SearchRequest} from 'generated/fetch';
 
@@ -51,6 +52,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   overview = false;
   criteria = {includes: [], excludes: []};
   chartData: any;
+  triggerUpdate = 0;
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -76,7 +78,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
                 this.actions.loadFromJSON(cohort.criteria);
                 this.actions.runAllRequests();
               } else {
-                searchRequestStore.next(JSON.parse(cohort.criteria));
+                searchRequestStore.next(parseCohortDefinition(cohort.criteria));
               }
             }
           });
@@ -87,14 +89,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
       searchRequestStore.subscribe(sr => {
         this.includeSize = sr.includes.length;
         this.criteria = sr;
-        if (sr.includes.length || sr.excludes.length) {
-          this.overview = true;
-          this.loading = true;
-          this.error = false;
-          this.getTotalCount();
-        } else {
-          this.overview = false;
-        }
+        this.overview = sr.includes.length || sr.excludes.length;
       });
     } else {
       this.subscription.add(
@@ -110,24 +105,6 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     idsInUse.next(new Set());
     currentCohortStore.next(undefined);
     searchRequestStore.next({includes: [], excludes: []} as SearchRequest);
-  }
-
-  getTotalCount() {
-    try {
-      const {cdrVersionId} = currentWorkspaceStore.getValue();
-      cohortBuilderApi().getDemoChartInfo(+cdrVersionId, this.criteria).then(response => {
-        this.count = response.items.reduce((sum, data) => sum + data.count, 0);
-        this.loading = false;
-      }, (err) => {
-        console.error(err);
-        this.error = true;
-        this.loading = false;
-      });
-    } catch (error) {
-      console.error(error);
-      this.error = true;
-      this.loading = false;
-    }
   }
 
   getTempObj(e) {
@@ -146,5 +123,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
   }
 
-
+  updateRequest = () => {
+    this.triggerUpdate++;
+  }
 }
