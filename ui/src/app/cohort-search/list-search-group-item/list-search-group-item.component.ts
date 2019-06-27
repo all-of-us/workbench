@@ -1,7 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import {CriteriaType, DomainType, SearchGroup, SearchGroupItem, SearchRequest} from 'generated/fetch';
+import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
 
 import {
   searchRequestStore,
