@@ -6,7 +6,7 @@ import {
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {generateId} from 'app/cohort-search/utils';
+import {generateId, mapGroup} from 'app/cohort-search/utils';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -76,10 +76,11 @@ export class ListSearchGroupComponent implements AfterViewInit {
   getGroupCount() {
     try {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const group = mapGroup(this.group);
       const request = <SearchRequest>{
         includes: [],
         excludes: [],
-        [this.role]: [this.group]
+        [this.role]: [group]
       };
       cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
         this.count = count;

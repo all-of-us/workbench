@@ -2,6 +2,7 @@ import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core'
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
+import {mapRequest} from 'app/cohort-search/utils';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {
   currentCohortStore,
@@ -64,7 +65,8 @@ export class ListOverviewComponent implements OnChanges, OnInit {
   getTotalCount() {
     try {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
-      cohortBuilderApi().getDemoChartInfo(+cdrVersionId, this.searchRequest).then(response => {
+      const request = mapRequest(this.searchRequest);
+      cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
         this.total = response.items.reduce((sum, data) => sum + data.count, 0);
         this.loading = false;
       }, (err) => {

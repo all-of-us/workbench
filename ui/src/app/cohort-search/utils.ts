@@ -1,5 +1,5 @@
 import {TreeSubType, TreeType} from 'generated';
-import {CriteriaType, DomainType} from 'generated/fetch';
+import {CriteriaType, DomainType, SearchGroup, SearchGroupItem, SearchParameter, SearchRequest} from 'generated/fetch';
 import {List} from 'immutable';
 import {DOMAIN_TYPES} from './constant';
 import {idsInUse} from './search-state.service';
@@ -252,4 +252,49 @@ export function generateId(prefix?: string): string {
 
 function genSuffix(): string {
   return Math.random().toString(36).substr(2, 9);
+}
+
+export function mapRequest(sr: any) {
+  return <SearchRequest>{
+    includes: sr.includes.map(mapGroup),
+    excludes: sr.excludes.map(mapGroup),
+  };
+}
+
+export function mapGroup(group: any) {
+  const items = group.items.map(mapGroupItem);
+  return <SearchGroup>{id: group.id, items, temporal: false};
+}
+
+export function mapGroupItem(item: any) {
+  const {id, type, modifiers} = item;
+  const searchParameters = item.searchParameters.map(mapParameter);
+  return <SearchGroupItem>{id, type, searchParameters, modifiers};
+}
+
+export function mapParameter(sp: any) {
+  const {parameterId, name, domainId, type, subtype, group, attributes, conceptId, code} = sp;
+  const param = <SearchParameter>{
+    parameterId,
+    name: stripHtml(name),
+    domain: domainId,
+    type,
+    subtype,
+    group,
+    attributes
+  };
+  if (conceptId) {
+    param.conceptId = conceptId;
+  }
+  if (type === CriteriaType.DECEASED) {
+    param.value = name;
+  } else if (code && ([
+    CriteriaType.ICD9CM,
+    CriteriaType.ICD9Proc,
+    CriteriaType.ICD10CM,
+    CriteriaType.ICD10PCS
+  ].includes(type))) {
+    param.value = code;
+  }
+  return param;
 }
