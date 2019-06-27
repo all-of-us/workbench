@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -17,7 +18,10 @@ import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.api.StatusApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterRequest;
+import org.pmiops.workbench.notebooks.model.Entry;
+import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.notebooks.model.MachineConfig;
+import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.notebooks.model.UserJupyterExtensionConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -62,6 +66,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     Map<String, String> nbExtensions = new HashMap<>();
     nbExtensions.put("aou-snippets-menu", gcsPrefix + "/aou-snippets-menu.js");
     if (!config.featureFlags.enableLeoWelder) {
+      // Enabling Welder automatically installs a Leo-maintained playground extension.
       nbExtensions.put("aou-playground-extension", gcsPrefix + "/playground-extension.js");
     }
 
@@ -121,12 +126,31 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   @Override
   public void localize(String googleProject, String clusterName, Map<String, String> fileList) {
+    boolean enableLeoWelder = workbenchConfigProvider.get().featureFlags.enableLeoWelder;
+    Localize welderReq =
+        new Localize()
+            .entries(
+                fileList.entrySet().stream()
+                    .map(e -> new Entry().sourceUri(e.getValue()).localDestinationPath(e.getKey()))
+                    .collect(Collectors.toList()));
     NotebooksApi notebooksApi = notebooksApiProvider.get();
     retryHandler.run(
         (context) -> {
-          notebooksApi.proxyLocalize(googleProject, clusterName, fileList, /* async */ false);
+          if (enableLeoWelder) {
+            notebooksApi.welderLocalize(googleProject, clusterName, welderReq);
+          } else {
+            notebooksApi.proxyLocalize(googleProject, clusterName, fileList, /* async */ false);
+          }
           return null;
         });
+  }
+
+  @Override
+  public StorageLink createStorageLink(
+      String googleProject, String clusterName, StorageLink storageLink) {
+    NotebooksApi notebooksApi = notebooksApiProvider.get();
+    return retryHandler.run(
+        (context) -> notebooksApi.welderCreateStorageLink(googleProject, clusterName, storageLink));
   }
 
   @Override

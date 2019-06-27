@@ -1,4 +1,7 @@
-# Copied from https://github.com/broadinstitute/leonardo/blob/develop/src/main/resources/swagger/api-docs.yaml
+# This file is a hand-crafted combination of Leo and its proxy APIs.
+#  - All of Leo: https://github.com/broadinstitute/leonardo/blob/develop/src/main/resources/swagger/api-docs.yaml
+#  - A subset of Welder (modified for cluster/path prefix): https://github.com/DataBiosphere/welder/blob/master/server/src/main/resources/api-docs.yaml
+#  - A subset of Jupyter (modified for cluster/path prefix): https://github.com/jupyter/notebook/blob/master/notebook/services/api/api.yaml
 swagger: '2.0'
 info:
   title: Leonardo
@@ -827,6 +830,275 @@ paths:
             $ref: '#/definitions/ErrorReport'
 
 ##########################################################################################
+## Subset of the Welder API
+## https://github.com/DataBiosphere/welder/blob/master/server/src/main/resources/api-docs.yaml
+##########################################################################################
+
+  '/proxy/{googleProject}/{clusterName}/welder/objects':
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+    post:
+      summary: ''
+      operationId: welderLocalize
+      tags:
+        - notebooks
+      parameters:
+        - in: body
+          description: ''
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/Localize'
+      responses:
+        '204':
+          description: ''
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/WelderErrorReport'
+  '/proxy/{googleProject}/{clusterName}/welder/storageLinks':
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+    post:
+      summary: 'creates the specified storage link configuration for the cluster'
+      operationId: welderCreateStorageLink
+      tags:
+        - notebooks
+      parameters:
+        - in: body
+          description: ''
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/StorageLink'
+      responses:
+        '200':
+          description: 'storage link successfully created'
+          schema:
+            $ref: '#/definitions/StorageLink'
+
+##########################################################################################
+## Subset of the Jupyter API
+## https://github.com/jupyter/notebook/blob/master/notebook/services/api/api.yaml
+##########################################################################################
+
+  # In Swagger 2, path params are escaped so we need to hardcode any known "/"
+  # delimiters. With Swagger 3, allowReserved would allow us to collapse the
+  # "workspaces/..." fragment into a single "path" var, as is used in Jupyter's
+  # own Swagger definition. Note: this does not initialize any parent
+  # directories. The Leo proxy localize API can be used for this purpose.
+  /notebooks/{googleProject}/{clusterName}/api/contents/{fileName}:
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+      - in: path
+        name: fileName
+        description: fileName
+        required: true
+        type: string
+    get:
+      summary: Get contents of file or directory
+      description: "A client can optionally specify a type and/or format argument via URL parameter. When given, the Contents service shall return a model in the requested type and/or format. If the request cannot be satisfied, e.g. type=text is requested, but the file is binary, then the request shall fail with 400 and have a JSON response containing a 'reason' field, with the value 'bad format' or 'bad type', depending on what was requested."
+      tags:
+        - jupyter
+      operationId: getRootContents
+      parameters:
+        - name: type
+          in: query
+          description: File type ('file', 'directory')
+          type: string
+          enum:
+            - file
+            - directory
+        - name: format
+          in: query
+          description: "How file content should be returned ('text', 'base64')"
+          type: string
+          enum:
+            - text
+            - base64
+        - name: content
+          in: query
+          description: "Return content (0 for no content, 1 for return content)"
+          type: integer
+      responses:
+        404:
+          description: No item found
+        400:
+          description: Bad request
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
+        200:
+          description: Contents of file or directory
+          headers:
+            Last-Modified:
+              description: Last modified date for file
+              type: string
+              format: dateTime
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        500:
+          description: Model key error
+  /notebooks/{googleProject}/{clusterName}/api/contents/workspaces/{workspaceDir}:
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+      - in: path
+        name: workspaceDir
+        description: workspaceDir
+        required: true
+        type: string
+    post:
+      summary: Create a new file in the specified path
+      description: "A POST to /api/contents/path creates a New untitled, empty file or directory. A POST to /api/contents/path with body {'copy_from': '/path/to/OtherNotebook.ipynb'} creates a new copy of OtherNotebook in path."
+      tags:
+        - jupyter
+      consumes:
+        - application/json
+      operationId: postContents
+      parameters:
+        - name: model
+          in: body
+          description: Path of file to copy
+          schema:
+            type: object
+            properties:
+              ext:
+                type: string
+              type:
+                type: string
+      responses:
+        201:
+          description: File created
+          headers:
+            Location:
+              description: URL for the new file
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        404:
+          description: No item found
+        400:
+          description: Bad request
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
+  /notebooks/{googleProject}/{clusterName}/api/contents/workspaces/{workspaceDir}/{fileName}:
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+      - in: path
+        name: workspaceDir
+        description: workspaceDir
+        required: true
+        type: string
+      - in: path
+        name: fileName
+        description: fileName
+        required: true
+        type: string
+    put:
+      summary: Save or upload file.
+      description: "Saves the file in the location specified by name and path.  PUT is very similar to POST, but the requester specifies the name, whereas with POST, the server picks the name."
+      tags:
+        - jupyter
+      consumes:
+        - application/json
+      operationId: putContents
+      parameters:
+        - name: model
+          in: body
+          description: New path for file or directory
+          schema:
+            $ref: '#/definitions/JupyterModel'
+      responses:
+        200:
+          description: File saved
+          headers:
+            Location:
+              description: Updated URL for the file or directory
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        201:
+          description: Path created
+          headers:
+            Location:
+              description: URL for the file or directory
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        400:
+          description: No data provided
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
+
+##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
 definitions:
@@ -1236,3 +1508,114 @@ definitions:
         description: |
           Optional, the size in gigabytes of the disk on the master node. Minimum size is 10GB. Note: disk size cannot be
           decreased in an update request, only increased.
+
+##########################################################################################
+## Subset of Welder API models
+## https://github.com/DataBiosphere/welder/blob/master/server/src/main/resources/api-docs.yaml
+##########################################################################################
+
+  Localize:
+    description: ''
+    properties:
+      action:
+        type: string
+        default: "localize"
+      entries:
+        type: array
+        items:
+          $ref: '#/definitions/Entry'
+  Entry:
+    properties:
+      sourceUri:
+        type: string
+      localDestinationPath:
+        type: string
+  StorageLink:
+    description: ''
+    properties:
+      localBaseDirectory:
+        type: string
+      localSafeModeBaseDirectory:
+        type: string
+      cloudStorageDirectory:
+        type: string
+      pattern:
+        type: string
+  WelderErrorReport:
+    properties:
+      errorMessage:
+        type: string
+      errorCode:
+        type: integer
+
+##########################################################################################
+## Subset of Jupyter API models
+## https://github.com/jupyter/notebook/blob/master/notebook/services/api/api.yaml
+##########################################################################################
+
+  JupyterModel:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The new filename if changed
+      path:
+        type: string
+        description: New path for file or directory
+      type:
+        type: string
+        description: Path dtype ('notebook', 'file', 'directory')
+      format:
+        type: string
+        description: File format ('json', 'text', 'base64')
+      content:
+        type: string
+        description: The actual body of the document excluding directory type
+
+  JupyterContents:
+    description: "A contents object.  The content and format keys may be null if content is not contained.  If type is 'file', then the mimetype will be null."
+    type: object
+    required:
+      - type
+      - name
+      - path
+      - writable
+      - created
+      - last_modified
+      - mimetype
+      - format
+      - content
+    properties:
+      name:
+        type: string
+        description: "Name of file or directory, equivalent to the last part of the path"
+      path:
+        type: string
+        description: Full path for file or directory
+      type:
+        type: string
+        description: Type of content
+        enum:
+          - directory
+          - file
+          - notebook
+      writable:
+        type: boolean
+        description: indicates whether the requester has permission to edit the file
+      created:
+        type: string
+        description: Creation timestamp
+        format: dateTime
+      last_modified:
+        type: string
+        description: Last modified timestamp
+        format: dateTime
+      mimetype:
+        type: string
+        description: "The mimetype of a file.  If content is not null, and type is 'file', this will contain the mimetype of the file, otherwise this will be null."
+      content:
+        type: string
+        description: "The content, if requested (otherwise null).  Will be an array if type is 'directory'"
+      format:
+        type: string
+        description: Format of content (one of null, 'text', 'base64', 'json')

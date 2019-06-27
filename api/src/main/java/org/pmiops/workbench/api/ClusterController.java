@@ -38,6 +38,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.ClusterError;
+import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +63,7 @@ public class ClusterController implements ClusterApiDelegate {
   // The billing project to use for the analysis.
   private static final String BILLING_CLOUD_PROJECT = "BILLING_CLOUD_PROJECT";
   private static final String DATA_URI_PREFIX = "data:application/json;base64,";
+  private static final String DELOC_PATTERN = "\\.ipynb$";
 
   private static final Logger log = Logger.getLogger(ClusterController.class.getName());
 
@@ -226,43 +228,55 @@ public class ClusterController implements ClusterApiDelegate {
               + FireCloudService.WORKSPACE_DELIMITER
               + body.getWorkspaceId();
     }
-    String apiDir = "workspaces/" + workspacePath;
-    if (body.getPlaygroundMode()) {
-      // This prefix must be kept in sync with the Playground mode extension,
-      // see
-      // https://github.com/all-of-us/workbench/blob/master/api/cluster-resources/playground-extension.js
-      apiDir = "workspaces_playground/" + workspacePath;
+    String editDir = "workspaces/" + workspacePath;
+    // This prefix must be kept in sync with the Playground mode extension, see
+    // https://github.com/all-of-us/workbench/blob/master/api/cluster-resources/playground-extension.js
+    String playgroundDir = "workspaces_playground/" + workspacePath;
+    String targetDir = body.getPlaygroundMode() ? playgroundDir : editDir;
+    boolean enableLeoWelder = workbenchConfigProvider.get().featureFlags.enableLeoWelder;
+
+    if (enableLeoWelder) {
+      leonardoNotebooksClient.createStorageLink(
+          projectName,
+          clusterName,
+          new StorageLink()
+              .cloudStorageDirectory(gcsNotebooksDir)
+              .localBaseDirectory(editDir)
+              .localSafeModeBaseDirectory(playgroundDir)
+              .pattern(DELOC_PATTERN));
     }
-    String localDir = "~/" + apiDir;
 
     // Always localize config files; usually a no-op after the first call.
     Map<String, String> localizeMap = new HashMap<>();
-    if (!body.getPlaygroundMode()) {
-      localizeMap.put(
-          localDir + "/" + DELOCALIZE_CONFIG_FILENAME,
-          jsonToDataUri(
-              new JSONObject().put("destination", gcsNotebooksDir).put("pattern", "\\.ipynb$")));
+    String legacyDelocConfigUri =
+        jsonToDataUri(
+            new JSONObject().put("destination", gcsNotebooksDir).put("pattern", DELOC_PATTERN));
+    String aouConfigUri = aouConfigDataUri(fcWorkspace, cdrVersion, projectName);
+    if (enableLeoWelder) {
+      // The Welder extension offers direct links to/from playground mode; write the AoU config file
+      // to both locations so notebooks will work in either directory.
+      localizeMap.put(editDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
+      localizeMap.put(playgroundDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
+    } else {
+      localizeMap.put(targetDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
+      if (!body.getPlaygroundMode()) {
+        localizeMap.put(editDir + "/" + DELOCALIZE_CONFIG_FILENAME, legacyDelocConfigUri);
+      }
     }
-    localizeMap.put(
-        localDir + "/" + AOU_CONFIG_FILENAME,
-        aouConfigDataUri(fcWorkspace, cdrVersion, projectName));
+
     // Localize the requested notebooks, if any.
     if (body.getNotebookNames() != null) {
       localizeMap.putAll(
           body.getNotebookNames().stream()
               .collect(
-                  Collectors.<String, String, String>toMap(
-                      name -> localDir + "/" + name, name -> gcsNotebooksDir + "/" + name)));
+                  Collectors.toMap(
+                      name -> targetDir + "/" + name, name -> gcsNotebooksDir + "/" + name)));
     }
 
-    // TODO: Alternate Welder logic.
     leonardoNotebooksClient.localize(projectName, clusterName, localizeMap);
 
-    ClusterLocalizeResponse resp = new ClusterLocalizeResponse();
-    // This is the Jupyer-server-root-relative path, the style used by the
-    // Jupyter REST API.
-    resp.setClusterLocalDirectory(apiDir);
-    return ResponseEntity.ok(resp);
+    // This is the Jupyer-server-root-relative path, the style used by the Jupyter REST API.
+    return ResponseEntity.ok(new ClusterLocalizeResponse().clusterLocalDirectory(targetDir));
   }
 
   @Override
