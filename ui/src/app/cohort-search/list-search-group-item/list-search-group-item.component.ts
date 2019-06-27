@@ -20,7 +20,6 @@ export class ListSearchGroupItemComponent implements OnInit {
   @Input() role: keyof SearchRequest;
   @Input() groupId: string;
   @Input() item: any;
-  @Input() delete: Function;
   @Input() updateGroup: Function;
 
   count: number;
@@ -109,7 +108,6 @@ export class ListSearchGroupItemComponent implements OnInit {
     this.item.status = 'pending';
     this.updateSearchRequest();
     this.item.timeout = setTimeout(() => {
-      // this.delete(this.item.id);
       this.updateSearchRequest(true);
     }, 10000);
   }
@@ -132,9 +130,7 @@ export class ListSearchGroupItemComponent implements OnInit {
           sr[role][groupIndex].items[itemIndex] = item;
         }
         searchRequestStore.next(sr);
-        if (sr[role][groupIndex].items.length) {
-          this.updateGroup();
-        }
+        this.updateGroup();
       }
     }
   }

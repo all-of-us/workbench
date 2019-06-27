@@ -295,14 +295,25 @@ export function parseCohortDefinition(json: string) {
 }
 
 export function mapRequest(sr: any) {
+  const grpFilter = (role: string) => sr[role].reduce((acc, grp) => {
+    if (grp.status === 'active') {
+      acc.push(mapGroup(grp));
+    }
+    return acc;
+  }, []);
   return <SearchRequest>{
-    includes: sr.includes.map(mapGroup),
-    excludes: sr.excludes.map(mapGroup),
+    includes: grpFilter('includes'),
+    excludes: grpFilter('excludes'),
   };
 }
 
 export function mapGroup(group: any) {
-  const items = group.items.map(mapGroupItem);
+  const items = group.items.reduce((acc, it) => {
+    if (it.status === 'active') {
+      acc.push(mapGroupItem(it));
+    }
+    return acc;
+  }, []);
   return <SearchGroup>{id: group.id, items, temporal: false};
 }
 

@@ -45,7 +45,6 @@
       [role]="role"
       [groupId]="groupId"
       [item]="item"
-      [delete]="deleteItem"
       [updateGroup]="update">
     </app-list-search-group-item>
     <div *ngIf="status === 'active'" class="item-or">OR</div>
@@ -169,7 +168,6 @@
         [role]="role"
         [groupId]="groupId"
         [item]="item"
-        [delete]="deleteItem"
         [updateGroup]="update">
       </app-list-search-group-item>
       <div *ngIf="status === 'active'" class="item-or">OR</div>
@@ -193,7 +191,7 @@
       </clr-dropdown>
     </div>
   </ng-container>
-  <div class="container card-footer" *ngIf=" this.count !== -1 || !groupDisableFlag">
+  <div class="container card-footer" *ngIf="activeItems || !groupDisableFlag">
     <div class="row" [ngClass]="{'toggle-no-cursor' : !typeFlag}">
       <div class="col-sm-6 temporal-container">
         <div class="toggle-switch" [ngClass]="{'toggle-switch-disable' : !typeFlag}">
@@ -219,10 +217,10 @@
           </span>
           <ng-container [ngSwitch]="true">
             <span *ngIf="!loading">
-              <ng-container *ngSwitchCase="(count !== null || temporalFlag) &&  count !== -1">
+              <ng-container *ngSwitchCase="(count !== null || temporalFlag) &&  activeItems">
                 {{ count | number }}
               </ng-container>
-              <ng-container *ngSwitchCase="(count === null || count === -1) && !temporalFlag">
+              <ng-container *ngSwitchCase="(count === null || !activeItems) && !temporalFlag">
                  --
                 <clr-tooltip>
                   <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>

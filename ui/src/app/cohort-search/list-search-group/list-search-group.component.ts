@@ -100,10 +100,16 @@ export class ListSearchGroupComponent implements AfterViewInit {
   update = () => {
     // timeout prevents Angular 'value changed after checked' error
     setTimeout(() => {
-      this.loading = true;
-      this.error = false;
-      this.getGroupCount();
+      if (this.activeItems) {
+        this.loading = true;
+        this.error = false;
+        this.getGroupCount();
+      }
     });
+  }
+
+  get activeItems() {
+    return this.group.items.some(it => it.status === 'active');
   }
 
   get items() {
@@ -161,35 +167,13 @@ export class ListSearchGroupComponent implements AfterViewInit {
   }
 
   removeGroup(status?: string): void {
-    this.cancelIfRequesting();
     const searchRequest = searchRequestStore.getValue();
     if (!status) {
       searchRequest[this.role] = searchRequest[this.role].filter(grp => grp.id !== this.group.id);
       searchRequestStore.next(searchRequest);
     } else {
-      this.setGroupProperty('status', 'pending');
-      if (this.hasActiveItems) {
-        if (this.otherGroupsWithActiveItems) {
-          // this.requestTotalCount();
-        } else {
-          // this.cancelTotalIfRequesting();
-          // this.clearTotalCount();
-        }
-      }
+      this.setGroupProperty('status', status);
     }
-  }
-
-  cancelIfRequesting() {
-    // TODO cancel pending api call
-  }
-
-  get hasActiveItems() {
-    return this.group.items.filter(it => it.status === 'active').length > 0;
-  }
-
-  get otherGroupsWithActiveItems() {
-    // TODO check all groups for active items
-    return false;
   }
 
   setOverlayPosition() {
@@ -236,11 +220,6 @@ export class ListSearchGroupComponent implements AfterViewInit {
       temporalGroup: 0,
       status: 'active'
     };
-  }
-
-  deleteItem = (itemId: string) => {
-    const items = this.group.items.filter(it => it.id !== itemId);
-    this.setGroupProperty('items', items);
   }
 
   setGroupProperty(property: string, value: any) {
