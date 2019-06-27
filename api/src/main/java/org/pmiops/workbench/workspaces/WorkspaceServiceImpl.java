@@ -265,10 +265,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       } else {
         // This is how to remove a user from the FireCloud ACL:
         // Pass along an update request with NO ACCESS as the given access level.
-        WorkspaceACLUpdate removedUser = new WorkspaceACLUpdate();
-        removedUser.setEmail(currentUserEmail);
-        removedUser = updateFirecloudAclsOnUser(WorkspaceAccessLevel.NO_ACCESS, removedUser);
-        updateACLRequestList.add(removedUser);
+        // Note: do not do for all users group.  Unpublish will pass the specific NO_ACCESS acl
+        // TODO [jacmrob] : have all users pass NO_ACCESS explicitly? Handle filtering on frontend?
+        User foundUser = userDao.findUserByEmail(currentUserEmail);
+        if (foundUser != null) {
+          WorkspaceACLUpdate removedUser = new WorkspaceACLUpdate();
+          removedUser.setEmail(currentUserEmail);
+          removedUser = updateFirecloudAclsOnUser(WorkspaceAccessLevel.NO_ACCESS, removedUser);
+          updateACLRequestList.add(removedUser);
+        }
       }
     }
 
@@ -369,11 +374,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     List<UserRole> userRoles = new ArrayList<>();
     for (Map.Entry<String, WorkspaceAccessEntry> entry : rolesMap.entrySet()) {
       // Filter out groups
-      try {
-        User user = userDao.findUserByEmail(entry.getKey());
-        userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
-      } catch (NullPointerException e) {
+      User user = userDao.findUserByEmail(entry.getKey());
+      if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
+      } else {
+        userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
       }
     }
     return userRoles.stream()
@@ -382,7 +387,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .collect(Collectors.toList());
   }
 
-  public Workspace doWorkspacePublish(
+  public Workspace setPublished(
       Workspace workspace, String publishedWorkspaceGroup, boolean publish) {
     Map<String, WorkspaceAccessEntry> firecloudAcls =
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());

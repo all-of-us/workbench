@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -767,28 +768,28 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.WORKSPACE_ADMIN})
+  @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> publishWorkspace(
       String workspaceNamespace, String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     dbWorkspace =
-        workspaceService.doWorkspacePublish(dbWorkspace, getRegisteredUserDomainEmail(), true);
+        workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
     dbWorkspace.setPublished(true);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
-  @AuthorityRequired({Authority.WORKSPACE_ADMIN})
+  @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> unpublishWorkspace(
       String workspaceNamespace, String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     dbWorkspace =
-        workspaceService.doWorkspacePublish(dbWorkspace, getRegisteredUserDomainEmail(), false);
+        workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
     dbWorkspace.setPublished(false);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());

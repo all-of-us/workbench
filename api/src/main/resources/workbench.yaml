@@ -745,7 +745,7 @@ paths:
         - workspaces
       description: >
         Makes a workspace public to all AoU registered users.
-        Requires WORKSPACE_ADMIN authority.
+        Requires FEATURED_WORKSPACE_ADMIN authority.
       operationId: publishWorkspace
       responses:
         200:
@@ -762,7 +762,7 @@ paths:
         - workspaces
       description: >
         Makes a workspace public to all AoU registered users.
-        Requires WORKSPACE_ADMIN authority.
+        Requires FEATURED_WORKSPACE_ADMIN authority.
       operationId: unpublishWorkspace
       responses:
         200:
@@ -1864,7 +1864,7 @@ definitions:
   #      management. Intended to be granted for devops needs, e.g. for oncall.
   #   3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
   #      to perform actions on a user's enabled status and manual verification.
-  #   4) WORKSPACE_ADMIN: Allows a user to publish workspaces
+  #   4) FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
   Authority:
     type: string
     description: actions a user can have authority/permission to perform
@@ -1875,7 +1875,7 @@ definitions:
         REVIEW_RESEARCH_PURPOSE,
         DEVELOPER,
         ACCESS_CONTROL_ADMIN,
-        WORKSPACE_ADMIN
+        FEATURED_WORKSPACE_ADMIN
     ]
 
   PageVisit:
