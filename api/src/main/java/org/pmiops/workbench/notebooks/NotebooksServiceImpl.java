@@ -183,8 +183,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace(workspaceNamespace, workspaceName)
             .getWorkspace()
             .getBucketName();
-    JsonObject notebook =
-        getNotebookContents(bucketName, notebookName); // this might be wrong
+    JsonObject notebook = getNotebookContents(bucketName, notebookName); // this might be wrong
 
     return fireCloudService.staticNotebooksConvert(notebook);
   }

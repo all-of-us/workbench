@@ -185,7 +185,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   @Override
   public JsonObject getFileAsJson(String bucketName, String fileName) throws IOException {
     return new JsonParser().parse(readToString(bucketName, fileName)).getAsJsonObject();
-//    return new JSONObject(readToString(bucketName, fileName));
+    //    return new JSONObject(readToString(bucketName, fileName));
   }
 
   @Override
