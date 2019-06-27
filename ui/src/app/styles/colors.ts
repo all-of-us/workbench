@@ -21,7 +21,8 @@ export default {
     '#d7eaf6',
     '#eaf4fb',
     '#2F2E7E',
-    '#302C71'
+    '#302C71',
+    '#216FB4' // link blue
   ],
   gray: [
     '#4a4a4a',

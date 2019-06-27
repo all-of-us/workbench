@@ -6,7 +6,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {cohortsApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {environment} from 'environments/environment';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
@@ -21,6 +21,7 @@ import {
 } from 'app/cohort-search/redux';
 import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
+import {SearchRequest} from 'generated/fetch';
 
 const pixel = (n: number) => `${n}px`;
 const ONE_REM = 24;  // value in pixels
@@ -45,6 +46,11 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   private subscription;
   listSearch = environment.enableCBListSearch;
   loading = false;
+  count: number;
+  error = false;
+  overview = false;
+  criteria = {includes: [], excludes: []};
+  chartData: any;
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -66,17 +72,30 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
             this.loading = false;
             currentCohortStore.next(cohort);
             if (cohort.criteria) {
-              this.actions.loadFromJSON(cohort.criteria);
-              this.actions.runAllRequests();
+              if (!this.listSearch) {
+                this.actions.loadFromJSON(cohort.criteria);
+                this.actions.runAllRequests();
+              } else {
+                searchRequestStore.next(JSON.parse(cohort.criteria));
+              }
             }
           });
       }
     });
 
     if (this.listSearch) {
-      this.subscription.add(searchRequestStore.subscribe(
-        sr => this.includeSize = sr.includes.length
-      ));
+      searchRequestStore.subscribe(sr => {
+        this.includeSize = sr.includes.length;
+        this.criteria = sr;
+        if (sr.includes.length || sr.excludes.length) {
+          this.overview = true;
+          this.loading = true;
+          this.error = false;
+          this.getTotalCount();
+        } else {
+          this.overview = false;
+        }
+      });
     } else {
       this.subscription.add(
         this.includeGroups$.subscribe(groups => this.includeSize = groups.size + 1)
@@ -90,6 +109,25 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
     idsInUse.next(new Set());
     currentCohortStore.next(undefined);
+    searchRequestStore.next({includes: [], excludes: []} as SearchRequest);
+  }
+
+  getTotalCount() {
+    try {
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      cohortBuilderApi().getDemoChartInfo(+cdrVersionId, this.criteria).then(response => {
+        this.count = response.items.reduce((sum, data) => sum + data.count, 0);
+        this.loading = false;
+      }, (err) => {
+        console.error(err);
+        this.error = true;
+        this.loading = false;
+      });
+    } catch (error) {
+      console.error(error);
+      this.error = true;
+      this.loading = false;
+    }
   }
 
   getTempObj(e) {

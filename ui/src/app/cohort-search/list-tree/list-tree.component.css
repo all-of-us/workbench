@@ -65,10 +65,12 @@
 }
 
 .alert.alert-warning {
-  color: #E28327;
-  border: 0;
+  background: #f7981c;
+  color: #ffffff;
+  border: 1px solid #ebafa6;
+  margin: 0.5rem 0.25rem;
 }
 
 .alert.alert-warning .alert-icon {
-  color: #E28327;
+  color: #ffffff;
 }

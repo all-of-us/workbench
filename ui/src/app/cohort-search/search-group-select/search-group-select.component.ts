@@ -2,7 +2,7 @@ import {AfterViewInit, Component, Input} from '@angular/core';
 
 import {DOMAIN_TYPES, LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {CohortSearchActions} from 'app/cohort-search/redux';
-import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {wizardStore} from 'app/cohort-search/search-state.service';
 import {generateId} from 'app/cohort-search/utils';
 import {environment} from 'environments/environment';
 
@@ -49,13 +49,9 @@ export class SearchGroupSelectComponent implements AfterViewInit {
     let context: any;
     if (environment.enableCBListSearch) {
       const itemId = generateId('items');
-      const groupId = generateId(this.role);
+      const groupId = null;
       const {domain, type, standard} = criteria;
-      const searchRequest = searchRequestStore.getValue();
-      const group = this.initGroup(groupId);
       const item = this.initItem(itemId, domain);
-      searchRequest[this.role].push(group);
-      searchRequestStore.next(searchRequest);
       context = {item, domain, type, standard, role, groupId, itemId, codes};
       wizardStore.next(context);
     } else {
@@ -67,21 +63,6 @@ export class SearchGroupSelectComponent implements AfterViewInit {
       context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
       this.actions.openWizard(itemId, criteria.type, context);
     }
-  }
-
-  initGroup(id: string) {
-    return {
-      id,
-      items: [],
-      count: null,
-      temporal: false,
-      mention: null,
-      time: null,
-      timeValue: 0,
-      timeFrame: '',
-      isRequesting: false,
-      status: 'active'
-    };
   }
 
   initItem(id: string, type: string) {

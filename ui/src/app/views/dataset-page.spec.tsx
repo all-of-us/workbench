@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {DataSetPage} from 'app/views/dataset-page';
 import {CohortsApi, ConceptsApi, ConceptSetsApi, DataSetApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -33,14 +33,12 @@ describe('DataSet', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-//  it should load all concept sets related to workspace
   it ('should display all concepts sets in workspace', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="concept-set-list-item"]').length)
       .toBe(ConceptSetsApiStub.stubConceptSets().length);
   });
-//  it should load all cohorts related to workspace
 
   it('should display all cohorts in workspace', async() => {
     const wrapper = mount(<DataSetPage />);
@@ -212,6 +210,23 @@ describe('DataSet', () => {
 
     expect(wrapper.find('[data-test-id="refresh-preview-clickable-text"]').first().prop('disabled'))
       .toBeTruthy();
+  });
+
+  it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
+    const wrapper = mount(<DataSetPage />);
+    const wsPathPrefix = 'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id;
+
+    // Mock out navigateByUrl
+    const navSpy = jest.fn();
+    NavStore.navigateByUrl = navSpy;
+
+    // Check Cohorts "+" link
+    wrapper.find({'data-test-id': 'cohorts-link'}).first().simulate('click');
+    expect(navSpy).toHaveBeenCalledWith(wsPathPrefix + '/cohorts');
+
+    // Check Concept Sets "+" link
+    wrapper.find({'data-test-id': 'concept-sets-link'}).first().simulate('click');
+    expect(navSpy).toHaveBeenCalledWith(wsPathPrefix + '/concepts/sets');
   });
 
 

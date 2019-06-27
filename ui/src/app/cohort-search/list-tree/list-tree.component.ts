@@ -33,7 +33,7 @@ export class ListTreeComponent extends ListNodeComponent implements OnInit, OnCh
   }
 
   get showSearch() {
-    return !this.isEmpty && this.node.domainId !== DomainType[DomainType.PERSON];
+    return this.node.domainId !== DomainType[DomainType.PERSON];
   }
 
   get showHeader() {
