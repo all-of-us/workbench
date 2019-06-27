@@ -95,7 +95,10 @@ const expectedSR = {
         subtype: '',
         group: false,
         attributes: [],
-        conceptId: 12345
+        conceptId: 12345,
+        domain: 'Any',
+        ancestorData: false,
+        standard: true
       }, {
         parameterId: 'param1',
         name: 'CodeB',
@@ -104,7 +107,10 @@ const expectedSR = {
         subtype: '',
         group: true,
         attributes: [],
-        conceptId: 12345
+        conceptId: 12345,
+        domain: 'Any',
+        ancestorData: false,
+        standard: true
       }],
       modifiers: [],
     }]
@@ -216,7 +222,10 @@ describe('CohortSearchActions', () => {
             subtype: '',
             group: false,
             conceptId: 12345,
-            attributes: []
+            attributes: [],
+            domain: 'Any',
+            ancestorData: false,
+            standard: true
           }, {
             parameterId: 'param1',
             name: 'CodeB',
@@ -225,7 +234,10 @@ describe('CohortSearchActions', () => {
             subtype: '',
             group: true,
             conceptId: 12345,
-            attributes: []
+            attributes: [],
+            domain: 'Any',
+            ancestorData: false,
+            standard: true
           }],
           modifiers: [],
         }]
@@ -243,7 +255,10 @@ describe('CohortSearchActions', () => {
             subtype: '',
             group: false,
             conceptId: 12345,
-            attributes: []
+            attributes: [],
+            domain: 'Any',
+            ancestorData: false,
+            standard: true
           }, {
             parameterId: 'param1',
             name: 'CodeB',
@@ -252,7 +267,10 @@ describe('CohortSearchActions', () => {
             subtype: '',
             group: true,
             conceptId: 12345,
-            attributes: []
+            attributes: [],
+            domain: 'Any',
+            ancestorData: false,
+            standard: true
           }],
           modifiers: [],
         }]
@@ -310,7 +328,10 @@ describe('CohortSearchActions', () => {
       subtype: '',
       group: false,
       conceptId: 12345,
-      attributes: []
+      attributes: [],
+      domain: 'Any',
+      ancestorData: false,
+      standard: true
     });
     // Demographics
     const demoParam = actions.mapParameter(DEMO_crit);
@@ -322,6 +343,9 @@ describe('CohortSearchActions', () => {
       group: false,
       conceptId: 12345,
       attributes: DEMO_crit.get('attributes'),
+      domain: 'Any',
+      ancestorData: false,
+      standard: true
     });
   });
 });

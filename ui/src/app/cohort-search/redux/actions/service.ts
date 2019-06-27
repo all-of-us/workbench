@@ -699,6 +699,9 @@ export class CohortSearchActions {
       subtype: immParam.get('subtype', ''),
       group: immParam.get('group'),
       attributes: immParam.get('attributes'),
+      domain: 'Any',
+      ancestorData: false,
+      standard: true
     };
 
     if (immParam.get('conceptId')) {
