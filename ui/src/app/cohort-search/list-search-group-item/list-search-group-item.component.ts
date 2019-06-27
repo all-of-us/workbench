@@ -115,6 +115,7 @@ export class ListSearchGroupItemComponent implements OnInit {
   undo() {
     clearTimeout(this.item.timeout);
     this.item.status = 'active';
+    this.updateSearchRequest();
   }
 
   updateSearchRequest(remove?: boolean) {
@@ -126,11 +127,12 @@ export class ListSearchGroupItemComponent implements OnInit {
       if (itemIndex > -1) {
         if (remove) {
           sr[role][groupIndex].items = sr[role][groupIndex].items.filter(it => it.id !== item.id);
+          searchRequestStore.next(sr);
         } else {
           sr[role][groupIndex].items[itemIndex] = item;
+          searchRequestStore.next(sr);
+          this.updateGroup();
         }
-        searchRequestStore.next(sr);
-        this.updateGroup();
       }
     }
   }

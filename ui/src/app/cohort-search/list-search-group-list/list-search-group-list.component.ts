@@ -12,6 +12,7 @@ import {Subscription} from 'rxjs/Subscription';
 export class ListSearchGroupListComponent {
   @Input() role: keyof SearchRequest;
   @Input() groups: Array<any>;
+  @Input() updateRequest: Function;
 
   index = 0;
   subscription: Subscription;

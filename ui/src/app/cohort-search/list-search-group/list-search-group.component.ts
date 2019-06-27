@@ -1,8 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  Input
-} from '@angular/core';
+import {AfterViewInit, Component, Input} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
@@ -24,6 +20,7 @@ export class ListSearchGroupComponent implements AfterViewInit {
   @Input() group;
   @Input() index;
   @Input() role: keyof SearchRequest;
+  @Input() updateRequest: Function;
 
   whichMention = [TemporalMention.ANYMENTION,
     TemporalMention.FIRSTMENTION,
@@ -101,6 +98,7 @@ export class ListSearchGroupComponent implements AfterViewInit {
     // timeout prevents Angular 'value changed after checked' error
     setTimeout(() => {
       if (this.activeItems) {
+        this.updateRequest();
         this.loading = true;
         this.error = false;
         this.getGroupCount();

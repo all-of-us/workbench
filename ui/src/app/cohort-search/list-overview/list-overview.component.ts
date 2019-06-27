@@ -29,6 +29,7 @@ const COHORT_TYPE = 'AoU_Discover';
 })
 export class ListOverviewComponent implements OnChanges, OnInit {
   @Input() searchRequest: any;
+  @Input() update: number;
 
   cohortForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
@@ -53,17 +54,10 @@ export class ListOverviewComponent implements OnChanges, OnInit {
     if (currentCohortStore.getValue()) {
       this.cohort = currentCohortStore.getValue();
     }
-    searchRequestStore.subscribe(sr => {
-      if (this.hasActiveItems && !this.hasTemporalError) {
-        this.loading = true;
-        this.error = false;
-        this.getTotalCount();
-      }
-    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.searchRequest && this.hasActiveItems && !this.hasTemporalError) {
+    if (changes.update && this.hasActiveItems && !this.hasTemporalError) {
       this.loading = true;
       this.error = false;
       this.getTotalCount();

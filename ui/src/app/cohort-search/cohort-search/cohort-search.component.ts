@@ -52,6 +52,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   overview = false;
   criteria = {includes: [], excludes: []};
   chartData: any;
+  triggerUpdate = 0;
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -122,5 +123,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
   }
 
-
+  updateRequest = () => {
+    this.triggerUpdate++;
+  }
 }
