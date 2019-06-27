@@ -7,9 +7,9 @@ import {
   visitsFilterOptions,
   vocabOptions
 } from 'app/cohort-review/review-state.service';
-import {cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {CohortBuilderService, TreeType} from 'generated';
+import {CriteriaType, DomainType} from 'generated/fetch';
 import {PageFilterType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 
 @Component({
@@ -20,7 +20,6 @@ export class PageLayout implements OnInit, OnDestroy {
   reviewPresent: boolean;
   cohortLoaded = false;
   readonly = false;
-  constructor(private builderApi: CohortBuilderService) {}
 
   ngOnInit() {
     const {ns, wsid, cid} = urlParamsStore.getValue();
@@ -31,6 +30,7 @@ export class PageLayout implements OnInit, OnDestroy {
       pageSize: 25,
       sortOrder: SortOrder.Asc,
       pageFilterType: PageFilterType.ParticipantCohortStatuses,
+      filters: {items: []}
     }).then(review => {
       cohortReviewStore.next(review);
       this.reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
@@ -45,16 +45,16 @@ export class PageLayout implements OnInit, OnDestroy {
       this.cohortLoaded = true;
     });
     if (!visitsFilterOptions.getValue()) {
-      this.builderApi.getCriteriaBy(+cdrVersionId, TreeType[TreeType.VISIT], null, true, 0)
-        .toPromise()
-        .then(response => {
-          visitsFilterOptions.next([
-            {value: null, label: 'Any'},
-            ...response.items.map(option => {
-              return {value: option.name, label: option.name};
-            })
-          ]);
-        });
+      cohortBuilderApi().getCriteriaBy(
+        +cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]
+      ).then(response => {
+        visitsFilterOptions.next([
+          {value: null, label: 'Any'},
+          ...response.items.map(option => {
+            return {value: option.name, label: option.name};
+          })
+        ]);
+      });
     }
   }
 
