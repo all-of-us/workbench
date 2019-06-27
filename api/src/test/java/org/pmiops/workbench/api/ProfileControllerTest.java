@@ -229,10 +229,8 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitDemographicSurvey_success() throws Exception {
     createUser();
-    Profile profile = profileController.submitDemographicsSurvey().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getComplianceTrainingCompletionTime()).isNull();
+    assertThat(profileController.submitDemographicsSurvey().getStatusCode())
+        .isEqualTo(HttpStatus.NOT_IMPLEMENTED);
   }
 
   @Test
