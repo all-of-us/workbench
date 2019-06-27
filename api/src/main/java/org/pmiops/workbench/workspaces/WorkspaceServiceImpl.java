@@ -135,20 +135,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 fcWorkspace -> fcWorkspace));
   }
 
-  /**
-   * Swagger Java codegen does not handle the WorkspaceACL model correctly; it returns a GSON map
-   * instead. Run this through a typed Gson conversion process to parse into the desired type.
-   */
-  private static Map<String, WorkspaceAccessEntry> extractAclResponse(WorkspaceACL aclResp) {
-    Type accessEntryType = new TypeToken<Map<String, WorkspaceAccessEntry>>() {}.getType();
-    Gson gson = new Gson();
-    return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
-  }
-
   @Override
   public Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName) {
-    return extractAclResponse(fireCloudService.getWorkspaceAcl(workspaceNamespace, firecloudName));
+    WorkspaceACL aclResp = fireCloudService.getWorkspaceAcl(workspaceNamespace, firecloudName);
+
+    // Swagger Java codegen does not handle the WorkspaceACL model correctly; it returns a GSON map
+    // instead. Run this through a typed Gson conversion process to parse into the desired type.
+    Type accessEntryType = new TypeToken<Map<String, WorkspaceAccessEntry>>() {}.getType();
+    Gson gson = new Gson();
+    return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
   }
 
   /**
