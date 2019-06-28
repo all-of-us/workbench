@@ -485,7 +485,7 @@ public class DataSetControllerTest {
             .generateCode(
                 WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
-    assertThat(response.getCode()).isEqualTo("import pandas\n\n");
+    assertThat(response.getCode()).isEmpty();
   }
 
   @Test
