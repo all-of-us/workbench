@@ -1568,18 +1568,18 @@ paths:
           schema:
             $ref: "#/definitions/SurveysResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/{survey}/surveyDetails:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/{surveyName}/surveyQuestions:
       get:
         tags:
           - concepts
         description: >
           Returns survey questions and answers in the workspace's CDR version
-        operationId: "getSurveyDetails"
+        operationId: "getSurveyQuestions"
         parameters:
           - $ref: '#/parameters/workspaceNamespace'
           - $ref: '#/parameters/workspaceId'
           - in: path
-            name: survey
+            name: surveyName
             required: true
             type: string
         responses:
@@ -1588,7 +1588,7 @@ paths:
             schema:
              type: "array"
              items:
-               $ref: "#/definitions/SurveyDetailsResponse"
+               $ref: "#/definitions/SurveyQuestionsResponse"
 
 ### Data set ############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
@@ -2752,7 +2752,7 @@ definitions:
         items:
           $ref: "#/definitions/SurveyModule"
 
-  SurveyDetailsResponse:
+  SurveyQuestionsResponse:
     type: object
     properties:
       question:

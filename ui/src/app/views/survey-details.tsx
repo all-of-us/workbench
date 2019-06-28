@@ -4,7 +4,7 @@ import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {SurveyDetailsResponse} from 'generated/fetch';
+import {SurveyQuestionsResponse} from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
@@ -50,10 +50,10 @@ interface Props {
 }
 
 interface State {
-  surveyList: Array<SurveyDetailsResponse>;
-  loading: boolean;
   expandedRows: Array<any>;
-  selectedQuestions: Array<SurveyDetailsResponse>;
+  loading: boolean;
+  selectedQuestions: Array<SurveyQuestionsResponse>;
+  surveyList: Array<SurveyQuestionsResponse>;
 }
 
 export const SurveyDetails = withCurrentWorkspace()(
@@ -75,7 +75,7 @@ export const SurveyDetails = withCurrentWorkspace()(
     async loadSurveyDetails() {
       try {
         const {workspace, surveyName} = this.props;
-        const surveys = await conceptsApi().getSurveyDetails(
+        const surveys = await conceptsApi().getSurveyQuestions(
           workspace.namespace, workspace.id, surveyName);
         this.setState({surveyList: surveys, loading: false});
       } catch (ex) {

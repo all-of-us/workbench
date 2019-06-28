@@ -29,8 +29,8 @@ import {
   DomainCount,
   DomainInfo,
   StandardConceptFilter,
-  SurveyDetailsResponse,
   SurveyModule,
+  SurveyQuestionsResponse,
   VocabularyCount,
 } from 'generated/fetch';
 import {SurveyDetails} from './survey-details';
@@ -167,7 +167,7 @@ interface State { // Browse survey
   // Name of the survey selected
   selectedSurvey: string;
   // Array of survey questions selected to be added to concept set
-  selectedSurveyQuestions: Array<SurveyDetailsResponse>;
+  selectedSurveyQuestions: Array<SurveyQuestionsResponse>;
   // Show if a search error occurred
   showSearchError: boolean;
   // Only search on standard concepts
@@ -361,13 +361,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
         this.searchConcepts);
     }
 
-    browseSurveyInfo(surveys) {
-      this.setState({
-        browsingSurvey: true,
-        selectedSurvey: surveys.name
-      });
-    }
-
     domainLoading(domain) {
       return this.state.searchLoading || !this.state.completedDomainSearches
         .includes(domain.domain);
@@ -504,7 +497,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
         </div>
         {browsingSurvey && <div><SurveyDetails surveyName={selectedSurvey}
                                              surveySelected={(selectedQuestion) =>
-                                                   this.selectedQuestion(selectedQuestion)}/>
+                                                 this.setState(
+                                                     {selectedSurveyQuestions: selectedQuestion})}/>
           <SlidingFabReact submitFunction={() => this.setState({surveyAddModalOpen: true})}
                            iconShape='plus'
                            tooltip={!this.state.workspacePermissions.canWrite}

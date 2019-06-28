@@ -14,7 +14,7 @@ import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
-import org.pmiops.workbench.model.SurveyDetailsResponse;
+import org.pmiops.workbench.model.SurveyQuestionsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -85,7 +85,7 @@ public class ConceptBigQueryService {
           + "where survey = @"
           + SURVEY_PARAM;
 
-  private QueryJobConfiguration buildSurveyQuery(String survey) {
+  private QueryJobConfiguration buildSurveyQuestionQuery(String survey) {
     String finalSql = SURVEY_SQL_TEMPLATE;
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(SURVEY_PARAM, QueryParameterValue.string(survey));
@@ -95,12 +95,12 @@ public class ConceptBigQueryService {
         .build();
   }
 
-  public List<SurveyDetailsResponse> getSurveys(String survey) {
-    List<SurveyDetailsResponse> responseList = new ArrayList<>();
+  public List<SurveyQuestionsResponse> getSurveyQuestions(String survey) {
+    List<SurveyQuestionsResponse> responseList = new ArrayList<>();
 
     TableResult result =
         bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(buildSurveyQuery(survey)), 360000L);
+            bigQueryService.filterBigQueryConfig(buildSurveyQuestionQuery(survey)), 360000L);
     result
         .getValues()
         .forEach(
@@ -108,7 +108,7 @@ public class ConceptBigQueryService {
               String question = surveyValue.get(0).getValue().toString();
               Long concept_id = Long.parseLong(surveyValue.get(1).getValue().toString());
               responseList.add(
-                  new SurveyDetailsResponse().question(question).conceptId(concept_id));
+                  new SurveyQuestionsResponse().question(question).conceptId(concept_id));
             });
     return responseList;
   }

@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   private static final int MAX_CONCEPTS_PER_SET = 1000;
+  private static final String CONCEPT_CLASS_ID_QUESTION = "Question";
 
   private final WorkspaceService workspaceService;
   private final ConceptSetDao conceptSetDao;
@@ -278,7 +279,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(addedIds);
     List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
         ImmutableList.copyOf(concepts).stream()
-            .filter(concept -> !concept.getConceptClassId().equals("Question"))
+            .filter(concept -> !concept.getConceptClassId().equals(CONCEPT_CLASS_ID_QUESTION))
             .filter(
                 concept -> {
                   Domain domain = CommonStorageEnums.domainIdToDomain(concept.getDomainId());
