@@ -187,7 +187,7 @@ export const ConceptSetDetails =
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         {loading ? <SpinnerOverlay/> :
         <div style={{display: 'flex', flexDirection: 'column'}}>
-          <div style={styles.conceptSetHeader}>{conceptSet.survey.length}
+          <div style={styles.conceptSetHeader}>
             <div style={{display: 'flex', flexDirection: 'row'}}>
               <ConceptSetMenu canDelete={workspacePermissions.isOwner}
                               canEdit={workspacePermissions.canWrite}
