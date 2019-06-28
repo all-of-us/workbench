@@ -3,8 +3,7 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {Domain, SurveyQuestionsResponse, Surveys} from 'generated/fetch';
-import {ConceptSetsApi, SurveyQuestionsResponse} from 'generated/fetch/api';
+import {ConceptSetsApi, Domain, SurveyQuestionsResponse, Surveys} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-api-stub';
