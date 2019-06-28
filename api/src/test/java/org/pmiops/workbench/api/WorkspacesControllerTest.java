@@ -9,7 +9,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -289,15 +288,6 @@ public class WorkspacesControllerTest {
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);
     conceptDao.save(CONCEPT_3);
-
-    Cohort cohort = new Cohort();
-    cohort.setName("demo");
-    cohort.setDescription("demo");
-    cohort.setType("demo");
-    cohort.setCriteria(createDemoCriteria().toString());
-    when(cloudStorageService.readAllDemoCohorts()).thenReturn(Collections.singletonList(cohort));
-
-    doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
 
     CLOCK.setInstant(NOW);
 
@@ -1067,7 +1057,7 @@ public class WorkspacesControllerTest {
             .getItems();
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
     assertThat(cohortsByName.keySet()).containsAllOf("c1", "c2");
-    assertThat(cohortsByName.keySet().size()).isEqualTo(3);
+    assertThat(cohortsByName.keySet().size()).isEqualTo(2);
     assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
         .containsNoneOf(c1.getId(), c2.getId());
 
