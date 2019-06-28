@@ -289,14 +289,16 @@ public class DataSetServiceImpl implements DataSetService {
             "Kernel Type " + kernelTypeEnum.toString() + " not supported");
     }
     return queryJobConfigurationMap.entrySet().stream()
-            .map(
-                entry ->
-                    prerequisites + "\n\n" + convertQueryToString(
+        .map(
+            entry ->
+                prerequisites
+                    + "\n\n"
+                    + convertQueryToString(
                         entry.getValue(),
                         Domain.fromValue(entry.getKey()),
                         dataSetName,
                         kernelTypeEnum))
-            .collect(Collectors.toList());
+        .collect(Collectors.toList());
   }
 
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {

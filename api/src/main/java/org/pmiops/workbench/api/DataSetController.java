@@ -232,8 +232,11 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(
         new DataSetCodeResponse()
             .code(
-                dataSetService.generateCodeCellPerDomainFromQueryAndKernelType(
-                    kernelType, dataSet.getName(), bigQueryJobConfig).stream().collect(Collectors.joining("\n\n")))
+                dataSetService
+                    .generateCodeCellPerDomainFromQueryAndKernelType(
+                        kernelType, dataSet.getName(), bigQueryJobConfig)
+                    .stream()
+                    .collect(Collectors.joining("\n\n")))
             .kernelType(kernelType));
   }
 
