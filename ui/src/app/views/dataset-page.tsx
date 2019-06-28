@@ -6,8 +6,8 @@ import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-
 import {ClrIcon} from 'app/components/icons';
+import {CheckBox} from 'app/components/inputs';
 import {
   cohortsApi,
   conceptsApi,
@@ -39,7 +39,6 @@ import {
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
-import {CheckBox} from "../components/inputs";
 
 export const styles = reactStyles({
   selectBoxHeader: {
