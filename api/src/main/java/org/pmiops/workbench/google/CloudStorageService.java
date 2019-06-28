@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONObject;
-import org.pmiops.workbench.model.Cohort;
 
 /** Encapsulate Google APIs for interfacing with Google Cloud Storage. */
 public interface CloudStorageService {
