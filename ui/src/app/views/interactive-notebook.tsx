@@ -10,12 +10,14 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ClusterStatus} from 'generated/fetch';
+import {Spinner, SpinnerOverlay} from "../components/spinners";
 
 const styles = reactStyles({
   navBar: {
-    height: 35,
+    height: 40,
     backgroundColor: colors.white,
-    border: 'solid thin ' + colors.gray[5]
+    border: 'solid thin ' + colors.gray[5],
+    fontSize: '16px'
   },
   navBarItem: {
     float: 'left',
@@ -24,7 +26,7 @@ const styles = reactStyles({
     borderRight: '1px solid ' + colors.gray[5],
     backgroundColor: 'rgba(38,34,98,0.05)',
     textAlign: 'center',
-    lineHeight: '35px'
+    lineHeight: '40px'
   },
   active: {
     backgroundColor: 'rgba(38,34,98,0.2)'
@@ -33,8 +35,8 @@ const styles = reactStyles({
     cursor: 'pointer'
   },
   navBarIcon: {
-    height: '14px',
-    width: '14px',
+    height: '16px',
+    width: '16px',
     verticalAlign: 'middle',
     marginLeft: 0,
     marginRight: '5px',
@@ -126,7 +128,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(
               Preview (Read-Only)
             </div>
             {this.state.userRequestedEditMode ? (
-              <div style={{...styles.navBarItem, width: 550}}>
+              <div style={{...styles.navBarItem, width: 620}}>
                 <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}></ClrIcon>
                 Preparing your Jupyter environment. This may take up to 10 minutes.
               </div>) : (<div>
@@ -141,8 +143,11 @@ export const InteractiveNotebook = withCurrentWorkspace()(
             </div>)
             }
           </div>
-          <iframe style={styles.previewFrame} srcDoc={this.state.html}>
-          </iframe>
+          <div style={styles.previewFrame}>
+            {this.state.html ?
+              (<iframe style={styles.previewFrame} srcDoc={this.state.html}></iframe>) :
+              (<SpinnerOverlay/>)}
+          </div>
         </div>
       );
     }
