@@ -1421,12 +1421,12 @@ paths:
           schema:
             $ref: "#/definitions/ConceptSet"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/survey-concept-sets/{survey}:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/survey-concept-sets/{surveyName}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
       - in: path
-        name: survey
+        name: surveyName
         type: string
         required: true
     get:
