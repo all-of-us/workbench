@@ -99,8 +99,13 @@ export class ListOverviewComponent implements OnChanges, OnInit {
     const activeGroups = this.searchRequest.includes
       .filter(grp => grp.temporal && grp.status === 'active');
     return activeGroups.some(grp => {
-      const activeItems = grp.items.reduce((acc, it) => acc[it.temporalGroup]++, [0, 0]);
-      return activeItems.length > 0;
+      const activeItems = grp.items.reduce((acc, it) => {
+        if (it.status === 'active') {
+          acc[it.temporalGroup]++;
+        }
+        return acc;
+      }, [0, 0]);
+      return activeItems.includes(0);
     });
   }
 
