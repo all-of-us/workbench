@@ -4,9 +4,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-    <changeSet author="jroberti" id="db.changelog-86-published-workspaces">
-        <addColumn tableName="workspace">
-            <column name="published" type="boolean" defaultValueBoolean="false"/>
-        </addColumn>
+    <changeSet author="calbach" id="db.changelog-86-drop-tos">
+      <dropColumn columnName="terms_of_service_completion_time" tableName="user"/>
     </changeSet>
 </databaseChangeLog>

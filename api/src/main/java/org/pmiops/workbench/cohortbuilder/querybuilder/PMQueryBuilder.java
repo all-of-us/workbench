@@ -54,6 +54,7 @@ import org.springframework.stereotype.Service;
 
 /** PMQueryBuilder builds SQL for BigQuery for the physical measurement criteria types. */
 @Service
+// TODO:Remove when new search is finished - freemabd
 public class PMQueryBuilder extends AbstractQueryBuilder {
 
   private static final String UNION_ALL = " union all\n";

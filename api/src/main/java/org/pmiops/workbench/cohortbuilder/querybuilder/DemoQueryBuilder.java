@@ -53,6 +53,7 @@ import org.springframework.stereotype.Service;
  * DEMO_RACE and DEMO_DEC.
  */
 @Service
+// TODO:Remove when new search is finished - freemabd
 public class DemoQueryBuilder extends AbstractQueryBuilder {
 
   private static final String SELECT =

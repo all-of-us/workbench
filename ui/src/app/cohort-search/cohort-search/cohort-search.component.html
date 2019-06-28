@@ -37,25 +37,22 @@
     <div class="col-xl-4 col-lg-6" id="list-include-groups" style="margin-top: 1.5rem">
       <app-list-search-group-list
         [role]="'includes'"
-        (tempLength)="getTempObj($event)">
+        [groups]="criteria.includes"
+        [updateRequest]="updateRequest">
       </app-list-search-group-list>
     </div>
 
     <div class="col-xl-4 col-lg-6" id="list-exclude-groups" style="margin-top: 1.5rem">
       <app-list-search-group-list
         *ngIf="includeSize > 0"
-        [role]="'excludes'">
+        [role]="'excludes'"
+        [groups]="criteria.excludes"
+        [updateRequest]="updateRequest">
       </app-list-search-group-list>
     </div>
 
     <div class="col-xl-4 col-lg-12" id="list-charts">
-      <app-overview
-        *ngIf="(initShowChart$ | async)"
-        [total$]="total$"
-        [chartData$]="chartData$"
-        [temporal] = "tempLength"
-        [isRequesting$]="isRequesting$">
-      </app-overview>
+      <app-list-overview *ngIf="overview" [searchRequest]="criteria" [update]="triggerUpdate"></app-list-overview>
     </div>
   </div>
 </div>

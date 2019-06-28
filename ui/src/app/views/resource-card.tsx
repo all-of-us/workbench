@@ -1,19 +1,20 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Clickable} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {ResourceCardMenu} from 'app/components/resources';
 import {TextModal} from 'app/components/text-modal';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {navigate, navigateByUrl} from 'app/utils/navigation';
+import {navigate, navigateAndPreventDefaultIfNoKeysPressed, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
 import {ExportDataSetModal} from 'app/views/export-data-set-modal';
 import {Domain, RecentResource} from 'generated/fetch';
 
+import {Modal, ModalBody, ModalTitle} from 'app/components/modals';
 import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {CopyNotebookModal} from 'app/views/copy-notebook-modal';
 import {RenameModal} from 'app/views/rename-modal';
@@ -30,7 +31,7 @@ const styles = reactStyles({
     fontSize: '18px', fontWeight: 500, lineHeight: '22px', color: colors.blue[0],
     cursor: 'pointer', wordBreak: 'break-all', textOverflow: 'ellipsis',
     overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3,
-    WebkitBoxOrient: 'vertical'
+    WebkitBoxOrient: 'vertical', textDecoration: 'none'
   },
   cardDescription: {
     textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',
@@ -95,6 +96,7 @@ export interface State {
   renaming: boolean;
   showCopyNotebookModal: boolean;
   showErrorModal: boolean;
+  showDirtyDataSetModal: boolean;
 }
 
 export class ResourceCard extends React.Component<Props, State> {
@@ -115,7 +117,8 @@ export class ResourceCard extends React.Component<Props, State> {
         props.resourceCard.dataSet),
       renaming: false,
       showCopyNotebookModal: false,
-      showErrorModal: false
+      showErrorModal: false,
+      showDirtyDataSetModal: false
     };
   }
 
@@ -196,7 +199,10 @@ export class ResourceCard extends React.Component<Props, State> {
   }
 
   get displayDate(): string {
-    const date = new Date(Number(this.props.resourceCard.modifiedTime));
+    if (!this.props.resourceCard.modifiedTime) {
+      return '';
+    }
+    const date = new Date(this.props.resourceCard.modifiedTime);
     // datetime formatting to slice off weekday from readable date string
     return date.toDateString().split(' ').slice(1).join(' ');
   }
@@ -232,12 +238,6 @@ export class ResourceCard extends React.Component<Props, State> {
         this.setState({renaming: true});
       }
     }
-  }
-
-  reviewCohort(): void {
-    const {resourceCard: {workspaceNamespace, workspaceFirecloudName, cohort: {id}}} = this.props;
-    navigateByUrl(
-      `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/cohorts/${id}/review`);
   }
 
   renameCohort(): void {
@@ -310,7 +310,23 @@ export class ResourceCard extends React.Component<Props, State> {
     }
   }
 
-  receiveDelete(): void {
+  async checkForDataSet(id) {
+    if (!this.state.showDirtyDataSetModal) {
+      try {
+        return await dataSetApi().dataSetByIdExist(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.resourceType, id);
+      } catch (ex) {
+        console.log(ex);
+      }
+    } else {
+      this.setState({showDirtyDataSetModal: false});
+    }
+    return false;
+  }
+
+  async receiveDelete() {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         workspacesApi().deleteNotebook(
@@ -324,6 +340,11 @@ export class ResourceCard extends React.Component<Props, State> {
         break;
       }
       case ResourceType.COHORT: {
+        const dataSetExist = await this.checkForDataSet(this.props.resourceCard.cohort.id);
+        if (dataSetExist) {
+          this.setState({showDirtyDataSetModal: dataSetExist});
+          return;
+        }
         cohortsApi().deleteCohort(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
@@ -335,6 +356,11 @@ export class ResourceCard extends React.Component<Props, State> {
         break;
       }
       case ResourceType.CONCEPT_SET: {
+        const dataSetExist = await this.checkForDataSet(this.props.resourceCard.conceptSet.id);
+        if (dataSetExist) {
+          this.setState({showDirtyDataSetModal: dataSetExist});
+          return;
+        }
         conceptSetsApi().deleteConceptSet(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
@@ -439,42 +465,39 @@ export class ResourceCard extends React.Component<Props, State> {
     }
   }
 
-  openResource(jupyterLab?: boolean): void {
+  getResourceUrl(jupyterLab = false): string {
+    const {workspaceNamespace, workspaceFirecloudName, conceptSet, notebook, dataSet, cohort} =
+      this.props.resourceCard;
+    const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
+
     switch (this.resourceType) {
       case ResourceType.COHORT: {
-        this.reviewCohort();
-        break;
+        return `${workspacePrefix}/cohorts/${cohort.id}/review`;
       }
       case ResourceType.CONCEPT_SET: {
-        navigate(['workspaces', this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName, 'concepts', 'sets',
-          this.props.resourceCard.conceptSet.id], {relativeTo: null});
-        break;
+        return `${workspacePrefix}/concepts/sets/${conceptSet.id}`;
       }
       case ResourceType.NOTEBOOK: {
-        const queryParams = {
-          playgroundMode: false,
-          jupyterLabMode: jupyterLab
-        };
+        const queryParams = new URLSearchParams([
+          ['playgroundMode', 'false'],
+          ['jupyterLabMode', String(jupyterLab)]
+        ]);
+
         if (this.notebookReadOnly) {
-          queryParams.playgroundMode = true;
+          queryParams.set('jupyterLabMode', 'true');
         }
-        navigate(
-          ['workspaces', this.props.resourceCard.workspaceNamespace,
-            this.props.resourceCard.workspaceFirecloudName, 'notebooks',
-            encodeURIComponent(this.props.resourceCard.notebook.name)], {
-              queryParams,
-              relativeTo: null,
-            });
-        break;
+
+        return `${workspacePrefix}/notebooks/${encodeURIComponent(notebook.name)}?` +
+          queryParams.toString();
       }
       case ResourceType.DATA_SET: {
-        navigate(['/workspaces', this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName, 'data', 'data-sets',
-          this.props.resourceCard.dataSet.id]);
-        break;
+        return `${workspacePrefix}/data/data-sets/${dataSet.id}`;
       }
     }
+  }
+
+  openResource(jupyterLab?: boolean): void {
+    navigateByUrl(this.getResourceUrl(jupyterLab));
   }
 
   exportDataSet(): void {
@@ -484,6 +507,32 @@ export class ResourceCard extends React.Component<Props, State> {
   renameDataSet(): void {
     this.setState({renaming: true});
   }
+
+  async markDataSetDirty() {
+    let id = 0;
+    switch (this.resourceType) {
+      case ResourceType.CONCEPT_SET: {
+        id = this.props.resourceCard.conceptSet.id;
+        break;
+      }
+      case ResourceType.COHORT: {
+        id = this.props.resourceCard.cohort.id;
+        break;
+      }
+    }
+    try {
+      await dataSetApi().markDirty(this.props.resourceCard.workspaceNamespace,
+        this.props.resourceCard.workspaceFirecloudName, {
+          id: id,
+          resourceType: this.resourceType
+        });
+      this.receiveDelete();
+    } catch (ex) {
+      console.log(ex);
+    }
+
+  }
+
   render() {
     const marginTop = this.props.marginTop;
     return <React.Fragment>
@@ -521,19 +570,22 @@ export class ResourceCard extends React.Component<Props, State> {
                               onRenameDataSet={() => this.renameDataSet()}
                               onEdit={() => this.edit()}
                               onExportDataSet={() => this.exportDataSet()}
-                              onReviewCohort={() => this.reviewCohort()}
+                              onReviewCohort={() => this.openResource()}
                               onOpenJupyterLabNotebook={() => this.openResource(true)}/>
             <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>
-              <div style={styles.cardName}
+              <a style={styles.cardName}
                    data-test-id='card-name'
-                   onClick={() => this.openResource()}>{this.displayName}
-              </div>
+                 href={this.getResourceUrl()}
+                 onClick={e => {
+                   navigateAndPreventDefaultIfNoKeysPressed(e, this.getResourceUrl());
+                 }}>{this.displayName}
+              </a>
             </Clickable>
           </div>
           <div style={styles.cardDescription}>{this.description}</div>
         </div>
         <div style={styles.cardFooter}>
-          <div style={styles.lastModified}>
+          <div style={styles.lastModified} data-test-id='last-modified'>
             Last Modified: {this.displayDate}</div>
           <div style={{...styles.resourceType, ...resourceTypeStyles[this.resourceType]}}
                data-test-id='card-type'>
@@ -584,6 +636,22 @@ export class ResourceCard extends React.Component<Props, State> {
           oldName={this.props.resourceCard.dataSet.name}
           existingNames={this.props.existingNameList}/>
       }
+      {this.state.showDirtyDataSetModal && <Modal>
+        <ModalTitle>WARNING</ModalTitle>
+        <ModalBody>
+          <div style={{paddingBottom: '1rem'}}>
+            This {this.resourceType} is being used in a Data Set. Do you still want to delete?
+          </div>
+          <div style={{float: 'right'}}>
+            <Button type='secondary' style={{ marginRight: '2rem'}} onClick={() => {
+              this.setState({showDirtyDataSetModal: false});  this.closeConfirmDelete(); }}>
+              Cancel
+            </Button>
+            <Button type='primary'
+                  onClick={() => this.markDataSetDirty()}>YES, DELETE</Button>
+          </div>
+        </ModalBody>
+      </Modal>}
     </React.Fragment>;
   }
 }

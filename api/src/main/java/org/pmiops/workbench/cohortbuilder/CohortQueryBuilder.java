@@ -8,12 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cohortbuilder.querybuilder.util.CriteriaLookupUtil;
 import org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -88,6 +91,13 @@ public class CohortQueryBuilder {
 
   private static final String EXCLUDE_SQL_TEMPLATE =
       "${mainTable}.person_id not in\n" + "(${excludeSql})\n";
+
+  private CBCriteriaDao cbCriteriaDao;
+
+  @Autowired
+  public CohortQueryBuilder(CBCriteriaDao cbCriteriaDao) {
+    this.cbCriteriaDao = cbCriteriaDao;
+  }
 
   /** Provides counts of unique subjects defined by the provided {@link ParticipantCriteria}. */
   public QueryJobConfiguration buildParticipantCounterQuery(
@@ -202,8 +212,12 @@ public class CohortQueryBuilder {
       }
 
       // produces a map of matching child concept ids.
-      Map<SearchParameter, Set<Long>> criteriaLookup = new HashMap<>();
       boolean isEnableListSearch = participantCriteria.isEnableListSearch();
+      Map<SearchParameter, Set<Long>> criteriaLookup = new HashMap<>();
+      if (isEnableListSearch) {
+        criteriaLookup = new CriteriaLookupUtil(cbCriteriaDao).buildCriteriaLookupMap(request);
+      }
+
       // build query for included search groups
       StringJoiner joiner =
           buildQuery(
@@ -250,7 +264,7 @@ public class CohortQueryBuilder {
     StringJoiner joiner = new StringJoiner("and ");
     List<String> queryParts = new ArrayList<>();
     for (SearchGroup includeGroup : groups) {
-      BaseQueryBuilder.buildQuery(
+      SearchGroupItemQueryBuilder.buildQuery(
           criteriaLookup, params, queryParts, includeGroup, isEnableListSearch);
 
       if (excludeSQL) {

@@ -65,7 +65,6 @@ public class User {
   private Timestamp firstSignInTime;
   private Set<Short> authorities = new HashSet<>();
   private Boolean idVerificationIsValid;
-  private Timestamp termsOfServiceCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
   private Short emailVerificationStatus;
@@ -320,15 +319,6 @@ public class User {
       rawValue = new Gson().toJson(value);
     }
     setClusterConfigDefaultRaw(rawValue);
-  }
-
-  @Column(name = "terms_of_service_completion_time")
-  public Timestamp getTermsOfServiceCompletionTime() {
-    return termsOfServiceCompletionTime;
-  }
-
-  public void setTermsOfServiceCompletionTime(Timestamp termsOfServiceCompletionTime) {
-    this.termsOfServiceCompletionTime = termsOfServiceCompletionTime;
   }
 
   @Column(name = "demographic_survey_completion_time")

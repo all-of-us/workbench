@@ -1,22 +1,59 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
-import {CriteriaType, DomainType, SearchRequest} from 'generated';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
 
-import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {domainToTitle, getCodeOptions, listAttributeDisplay, listNameDisplay, listTypeDisplay} from 'app/cohort-search/utils';
+import {
+  searchRequestStore,
+  selectionsStore,
+  wizardStore
+} from 'app/cohort-search/search-state.service';
+import {domainToTitle, getCodeOptions, listAttributeDisplay, listNameDisplay, listTypeDisplay, mapGroupItem} from 'app/cohort-search/utils';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 
 @Component({
   selector: 'app-list-search-group-item',
   templateUrl: './list-search-group-item.component.html',
   styleUrls: ['./list-search-group-item.component.css'],
 })
-export class ListSearchGroupItemComponent {
+export class ListSearchGroupItemComponent implements OnInit {
   @Input() role: keyof SearchRequest;
   @Input() groupId: string;
   @Input() item: any;
-  @Input() delete: Function;
+  @Input() updateGroup: Function;
 
-  error: boolean;
+  count: number;
+  error = false;
+  loading = true;
+
+  ngOnInit(): void {
+    this.getItemCount();
+  }
+
+  getItemCount() {
+    this.updateGroup();
+    try {
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const item = mapGroupItem(this.item);
+      const request = <SearchRequest>{
+        includes: [],
+        excludes: [],
+        [this.role]: [{items: [item], temporal: false}]
+      };
+      cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
+        this.count = count;
+        this.loading = false;
+      }, (err) => {
+        console.error(err);
+        this.error = true;
+        this.loading = false;
+      });
+    } catch (error) {
+      console.error(error);
+      this.error = true;
+      this.loading = false;
+    }
+  }
 
   get codeType() {
     return domainToTitle(this.item.type);
@@ -28,10 +65,6 @@ export class ListSearchGroupItemComponent {
 
   get pluralizedCode() {
     return this.parameters.length > 1 ? 'Codes' : 'Code';
-  }
-
-  get isRequesting() {
-    return this.item.isRequesting;
   }
 
   get status() {
@@ -61,20 +94,47 @@ export class ListSearchGroupItemComponent {
     return this.parameters.map(formatter).join(sep);
   }
 
-  remove() {
-    this.setStatus('pending');
-    this.item.timeout = setTimeout(() => {
-      this.delete(this.item.id);
-    }, 10000);
+  enable() {
+    this.item.status = 'active';
+    this.updateSearchRequest();
   }
 
-  setStatus(status: string) {
-    this.item.status = status;
+  suppress() {
+    this.item.status = 'hidden';
+    this.updateSearchRequest();
+  }
+
+  remove() {
+    this.item.status = 'pending';
+    this.updateSearchRequest();
+    this.item.timeout = setTimeout(() => {
+      this.updateSearchRequest(true);
+    }, 10000);
   }
 
   undo() {
     clearTimeout(this.item.timeout);
-    this.setStatus('active');
+    this.item.status = 'active';
+    this.updateSearchRequest();
+  }
+
+  updateSearchRequest(remove?: boolean) {
+    const sr = searchRequestStore.getValue();
+    const {item, groupId, role} = this;
+    const groupIndex = sr[role].findIndex(grp => grp.id === groupId);
+    if (groupIndex > -1) {
+      const itemIndex = sr[role][groupIndex].items.findIndex(it => it.id === item.id);
+      if (itemIndex > -1) {
+        if (remove) {
+          sr[role][groupIndex].items = sr[role][groupIndex].items.filter(it => it.id !== item.id);
+          searchRequestStore.next(sr);
+        } else {
+          sr[role][groupIndex].items[itemIndex] = item;
+          searchRequestStore.next(sr);
+          this.updateGroup();
+        }
+      }
+    }
   }
 
   get typeAndStandard() {
@@ -84,6 +144,8 @@ export class ListSearchGroupItemComponent {
           ? CriteriaType.AGE : this.parameters[0].type;
         return {type, standard: false};
       case DomainType.PHYSICALMEASUREMENT:
+        return {type: this.parameters[0].type, standard: false};
+      case DomainType.SURVEY:
         return {type: this.parameters[0].type, standard: false};
       case DomainType.VISIT:
         return {type: this.parameters[0].type, standard: true};

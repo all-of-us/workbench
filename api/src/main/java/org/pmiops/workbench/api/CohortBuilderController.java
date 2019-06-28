@@ -41,6 +41,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
@@ -229,6 +230,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       criteriaResponse.setItems(
           criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
     } else {
+      // TODO:Remove when new search is finished - freemabd
       List<Criteria> criteriaList;
       String matchExp = modifyKeywordMatch(term, domain);
       if (type == null) {
@@ -558,16 +560,26 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             .flatMap(sg -> sg.getItems().stream())
             .flatMap(sgi -> sgi.getSearchParameters().stream())
             .collect(Collectors.toList());
-    // currently elasticsearch doesn't implement Temporal/BP/DEC
-    return allGroups.stream().anyMatch(sg -> sg.getTemporal())
-        || allParams.stream()
-            .anyMatch(
-                sp ->
-                    TreeSubType.BP.toString().equals(sp.getSubtype())
-                        || TreeSubType.DEC.toString().equals(sp.getSubtype()))
-        || allParams.stream()
-            // TODO(RW-2404): Support these queries.
-            .anyMatch(sp -> TreeType.DRUG.toString().equals(sp.getType()));
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      return allGroups.stream().anyMatch(sg -> sg.getTemporal())
+          || allParams.stream()
+              .anyMatch(
+                  sp ->
+                      CriteriaSubType.BP.toString().equals(sp.getSubtype())
+                          || CriteriaType.DECEASED.toString().equals(sp.getType()));
+    } else {
+      // TODO:Remove when new search is finished - freemabd
+      // currently elasticsearch doesn't implement Temporal/BP/DEC
+      return allGroups.stream().anyMatch(sg -> sg.getTemporal())
+          || allParams.stream()
+              .anyMatch(
+                  sp ->
+                      TreeSubType.BP.toString().equals(sp.getSubtype())
+                          || TreeSubType.DEC.toString().equals(sp.getSubtype()))
+          || allParams.stream()
+              // TODO(RW-2404): Support these queries.
+              .anyMatch(sp -> TreeType.DRUG.toString().equals(sp.getType()));
+    }
   }
 
   // TODO:Remove freemabd

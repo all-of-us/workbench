@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
@@ -154,15 +153,6 @@ public class ParameterPredicates {
 
   public static Predicate<SearchParameter> notTwoAttributes() {
     return sp -> sp.getAttributes().size() != 2;
-  }
-
-  public static Predicate<SearchParameter> notNumAttr() {
-    return sp ->
-        sp.getAttributes().stream()
-                .filter(a -> AttrName.NUM.equals(a.getName()))
-                .collect(Collectors.toList())
-                .size()
-            == 0;
   }
 
   public static Predicate<SearchParameter> notSystolicAndDiastolic() {

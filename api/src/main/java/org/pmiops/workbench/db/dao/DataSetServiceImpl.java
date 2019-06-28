@@ -187,7 +187,7 @@ public class DataSetServiceImpl implements DataSetService {
                           });
                   return participantQuery.get();
                 })
-            .collect(Collectors.joining(" OR PERSON_ID IN "));
+            .collect(Collectors.joining(" UNION DISTINCT "));
     List<Domain> domainList =
         dataSet.getValues().stream().map(value -> value.getDomain()).collect(Collectors.toList());
 

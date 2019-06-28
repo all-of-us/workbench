@@ -8,15 +8,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.Clock;
-import javax.mail.MessagingException;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.mail.MailServiceImpl;
 import org.pmiops.workbench.test.Providers;
+import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.backoff.NoBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 
 public class DirectoryServiceImplIntegrationTest {
   private DirectoryServiceImpl service;
@@ -25,8 +25,7 @@ public class DirectoryServiceImplIntegrationTest {
   private final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
 
   @Before
-  public void setUp() throws MessagingException {
-    MailService mailService = Mockito.mock(MailServiceImpl.class);
+  public void setUp() {
     service =
         new DirectoryServiceImpl(
             Providers.of(googleCredential),
@@ -50,17 +49,36 @@ public class DirectoryServiceImplIntegrationTest {
     String userName = String.format("integration.test.%d", Clock.systemUTC().millis());
     service.createUser("Integration", "Test", userName, "notasecret@gmail.com");
     assertThat(service.isUsernameTaken(userName)).isTrue();
+
+    // As of ~6/25/19, customSchemas are sometimes unavailable on the initial call to Gsuite. This
+    // data is likely not written with strong consistency. Retry until it is available.
+    Map<String, Object> aouMeta =
+        retryTemplate()
+            .execute(
+                c -> {
+                  Map<String, Map<String, Object>> schemas =
+                      service.getUserByUsername(userName).getCustomSchemas();
+                  if (schemas == null) {
+                    throw new RuntimeException("custom schemas is still null");
+                  }
+                  return schemas.get("All_of_Us_Workbench");
+                });
     // Ensure our two custom schema fields are correctly set & re-fetched from GSuite.
+    assertThat(aouMeta).containsEntry("Institution", "All of Us Research Workbench");
     assertThat(service.getContactEmailAddress(userName).equals("notasecret@gmail.com"));
-    assertThat(
-        service
-            .getUserByUsername(userName)
-            .getCustomSchemas()
-            .get("All_of_Us_Workbench")
-            .get("Institution")
-            .equals("All of Us Research Workbench"));
     service.deleteUser(userName);
     assertThat(service.isUsernameTaken(userName)).isFalse();
+  }
+
+  private static RetryTemplate retryTemplate() {
+    RetryTemplate tmpl = new RetryTemplate();
+    ExponentialRandomBackOffPolicy backoff = new ExponentialRandomBackOffPolicy();
+    tmpl.setBackOffPolicy(backoff);
+    SimpleRetryPolicy retry = new SimpleRetryPolicy();
+    retry.setMaxAttempts(10);
+    tmpl.setRetryPolicy(retry);
+    tmpl.setThrowLastExceptionOnExhausted(true);
+    return tmpl;
   }
 
   private static GoogleCredential getGoogleCredential() {

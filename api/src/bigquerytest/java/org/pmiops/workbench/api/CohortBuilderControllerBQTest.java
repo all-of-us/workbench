@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import java.text.MessageFormat;
@@ -26,9 +25,10 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
-import org.pmiops.workbench.cohortbuilder.BaseQueryBuilder;
+import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -37,7 +37,22 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.CloudStorageServiceImpl;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.AttrName;
+import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.CriteriaSubType;
+import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.DemoChartInfoListResponse;
+import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Modifier;
+import org.pmiops.workbench.model.ModifierType;
+import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchGroupItem;
+import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.TemporalMention;
+import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +61,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({
@@ -53,7 +69,7 @@ import org.springframework.http.ResponseEntity;
   BigQueryService.class,
   CloudStorageServiceImpl.class,
   CohortQueryBuilder.class,
-  BaseQueryBuilder.class,
+  SearchGroupItemQueryBuilder.class,
   TestJpaConfig.class,
   CdrVersionService.class
 })
@@ -89,6 +105,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Mock private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
+  @Autowired private JdbcTemplate jdbcTemplate;
+
   @Override
   public List<String> getTableNames() {
     return Arrays.asList(
@@ -106,7 +124,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     testConfig.elasticsearch = new WorkbenchConfig.ElasticsearchConfig();
     testConfig.elasticsearch.enableElasticsearchBackend = false;
     testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
-    testConfig.cohortbuilder.enableListSearch = false;
+    testConfig.cohortbuilder.enableListSearch = true;
     when(configProvider.get()).thenReturn(testConfig);
 
     ElasticSearchService elasticSearchService =
@@ -136,783 +154,186 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsEmptyMessageException() throws Exception {
-    // icd9 no search parameters
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
-
-    // procedure no search parameters
-    searchRequest =
-        createSearchRequests(TreeType.PROCEDURE.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
-
-    // demo no search parameters
-    searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
-
-    // demo no attributes
+  public void validateAttribute() throws Exception {
     SearchParameter demo =
         new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.AGE.name())
-            .group(false);
-    searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, ATTRIBUTES);
-
-    // demo no attribute operands
-    Attribute attr = new Attribute().operator(Operator.BETWEEN);
-    demo.attributes(Arrays.asList(attr));
-    searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, OPERANDS);
-
-    // drug no search parameters
-    searchRequest =
-        createSearchRequests(TreeType.DRUG.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
-
-    // measurement no search parameters
-    searchRequest =
-        createSearchRequests(TreeType.MEAS.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
-
-    // measurement no attribute operands
-    SearchParameter measParam =
-        new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.AGE.toString())
             .group(false)
-            .conceptId(1L);
-    measParam.attributes(Arrays.asList(new Attribute().operator(Operator.IN).name(AttrName.NUM)));
-    searchRequest =
-        createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, OPERANDS);
-
-    // pm no search parameters
-    searchRequest = createSearchRequests(TreeType.PM.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
-
-    // pm no attribute operands
-    SearchParameter pmParam =
-        new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.HEIGHT.name())
-            .group(false)
-            .conceptId(1L);
-    pmParam.attributes(Arrays.asList(new Attribute().operator(Operator.IN).name(AttrName.NUM)));
-    searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, OPERANDS);
-
-    // visit no search parameters
-    searchRequest =
-        createSearchRequests(TreeType.VISIT.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
-
-    // ppi no search parameters
-    searchRequest = createSearchRequests(TreeType.PPI.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
-  }
-
-  @Test
-  public void countSubjectsNotValidMessageException() throws Exception {
-    // icd9 no type
-    SearchParameter icd9 = new SearchParameter().value("001.1");
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, icd9.getType());
-
-    // icd9 bad type
-    icd9.type(TreeType.VISIT.name());
-    searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, icd9.getType());
-
-    // icd9 no subtype
-    icd9.type(TreeType.ICD9.name());
-    searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, icd9.getSubtype());
-
-    // icd9 bad subtype
-    icd9.subtype("badsubtype");
-    searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, icd9.getSubtype());
-
-    // icd9 child no concept id
-    icd9.subtype(TreeSubType.CM.name()).group(false);
-    searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, icd9.getConceptId());
-
-    // icd9 parent no code
-    icd9.group(true).value(null);
-    searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, CODE, icd9.getValue());
-
-    // icd9 parent empty code
-    icd9.group(true).value("");
-    searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, CODE, icd9.getValue());
-
-    // snomed no type
-    SearchParameter snomed = new SearchParameter();
-    searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, snomed.getType());
-
-    // snomed bad type
-    snomed.type(TreeType.VISIT.name());
-    searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, snomed.getType());
-
-    // snomed child no concept id
-    snomed.type(TreeType.SNOMED.name()).subtype(TreeSubType.CM.name()).group(false);
-    searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, snomed.getConceptId());
-
-    // demo no type
-    SearchParameter demoParam = new SearchParameter();
-    searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, demoParam.getType());
-
-    // demo bad type
-    demoParam.type(TreeType.VISIT.name());
-    searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, demoParam.getType());
-
-    // demo no subtype
-    demoParam.type(TreeType.DEMO.name());
-    searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, demoParam.getSubtype());
-
-    // demo bad subtype
-    demoParam.subtype(TreeSubType.HEIGHT.name());
-    searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, demoParam.getSubtype());
-
-    // demo no concept id for gender
-    demoParam.subtype(TreeSubType.GEN.name());
-    searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, demoParam.getConceptId());
-
-    // demo no concept id for gender
-    Attribute age = new Attribute().name(AttrName.AGE);
-    demoParam.subtype(TreeSubType.AGE.name()).attributes(Arrays.asList(age));
-    searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, age.getOperator());
-
-    // drug no type
-    SearchParameter drugParam = new SearchParameter();
-    searchRequest =
-        createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, drugParam.getType());
-
-    // drug bad type
-    drugParam.type("blah");
-    searchRequest =
-        createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, drugParam.getType());
-
-    // drug no concept id
-    drugParam.type(TreeType.DRUG.name());
-    searchRequest =
-        createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, drugParam.getConceptId());
-
-    // meas no type
-    Attribute measAttr = new Attribute();
-    SearchParameter measParam = new SearchParameter().attributes(Arrays.asList(measAttr));
-    searchRequest =
-        createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, measParam.getType());
-
-    // meas bad type
-    measParam.type("blah");
-    searchRequest =
-        createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, measParam.getType());
-
-    // meas no concept id
-    measParam.type(TreeType.MEAS.name());
-    searchRequest =
-        createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, measParam.getConceptId());
-
-    // meas no attr name
-    measParam.conceptId(1L);
-    searchRequest =
-        createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, NAME, measAttr.getName());
-
-    // meas no operator
-    measParam.attributes(Arrays.asList(measAttr.name(AttrName.NUM)));
-    searchRequest =
-        createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, measAttr.getOperator());
-
-    // pm no type
-    SearchParameter pmParam = new SearchParameter();
-    searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, pmParam.getType());
-
-    // pm bad type
-    pmParam.type("blah");
-    searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, pmParam.getType());
-
-    // pm no subtype
-    pmParam.type(TreeType.PM.name());
-    searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, pmParam.getSubtype());
-
-    // pm bad subtype
-    pmParam.subtype("blah");
-    searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, pmParam.getSubtype());
-
-    // pm no attribute name
-    Attribute pmAttr = new Attribute();
-    pmParam.subtype(TreeSubType.HEIGHT.name()).attributes(Arrays.asList(pmAttr));
-    searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, pmParam.getConceptId());
-
-    // pm no operator
-    pmParam.conceptId(1L);
-    pmAttr.name(AttrName.NUM);
-    pmParam.attributes(Arrays.asList(pmAttr));
-    searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, pmAttr.getOperator());
-
-    // visit no type
-    SearchParameter visitParam = new SearchParameter();
-    searchRequest =
-        createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, visitParam.getType());
-
-    // visit bad type
-    visitParam.type("blah");
-    searchRequest =
-        createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, visitParam.getType());
-
-    // visit no concept id
-    visitParam.type(TreeType.VISIT.name());
-    searchRequest =
-        createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, visitParam.getConceptId());
-
-    // ppi no type
-    SearchParameter ppiParam = new SearchParameter();
-    searchRequest =
-        createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, ppiParam.getType());
-
-    // ppi bad type
-    ppiParam.type("blah");
-    searchRequest =
-        createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, ppiParam.getType());
-
-    // ppi no concept id
-    Attribute attr =
-        new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("1"));
-    ppiParam.attributes(Arrays.asList(attr));
-    ppiParam.type(TreeType.PPI.name()).group(false);
-    searchRequest =
-        createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, ppiParam.getConceptId());
-
-    // ppi no attribute name
-    attr = new Attribute().name(null).operator(Operator.EQUAL).operands(Arrays.asList("1"));
-    ppiParam.attributes(Arrays.asList(attr));
-    ppiParam.setConceptId(1L);
-    searchRequest =
-        createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, NAME, attr.getName());
-
-    // ppi no operator
-    attr = new Attribute().name(AttrName.NUM).operands(Arrays.asList("1"));
-    ppiParam.attributes(Arrays.asList(attr));
-    searchRequest =
-        createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, null);
-  }
-
-  @Test
-  public void temporalMessageExceptions() throws Exception {
-    SearchParameter param1 =
-        new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
-            .group(false)
-            .conceptId(1L);
-    SearchParameter param2 =
-        new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
-            .group(false)
-            .conceptId(9L);
-
-    SearchGroupItem searchGroupItem1 =
-        new SearchGroupItem().type(TreeType.CONDITION.name()).addSearchParametersItem(param1);
-    SearchGroupItem searchGroupItem2 =
-        new SearchGroupItem().type(TreeType.CONDITION.name()).addSearchParametersItem(param2);
-
-    SearchGroup temporalGroup =
-        new SearchGroup().items(Arrays.asList(searchGroupItem1, searchGroupItem2)).temporal(true);
-    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
-    // temporal mention null
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, SEARCH_GROUP, MENTION, param1.getValue());
-
-    // temporal mention invalid
-    temporalGroup.setMention(null);
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, SEARCH_GROUP, MENTION, temporalGroup.getMention());
-
-    // temporal time null
-    temporalGroup.setMention(TemporalMention.ANY_MENTION);
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, SEARCH_GROUP, TIME, temporalGroup.getTime());
-
-    // temporal time invalid
-    temporalGroup.setTime(null);
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, SEARCH_GROUP, TIME, temporalGroup.getTime());
-
-    // temporal timeValue null
-    temporalGroup.setTime(TemporalTime.X_DAYS_AFTER);
-    assertMessageException(
-        searchRequest, NOT_VALID_MESSAGE, SEARCH_GROUP, TIME_VALUE, temporalGroup.getTimeValue());
-
-    // temporal group is null
-    temporalGroup.setTime(TemporalTime.DURING_SAME_ENCOUNTER_AS);
-    assertMessageException(
-        searchRequest,
-        NOT_VALID_MESSAGE,
-        SEARCH_GROUP_ITEM,
-        TEMPORAL_GROUP,
-        searchGroupItem1.getTemporalGroup());
-
-    // temporal group not valid
-    searchGroupItem1.setTemporalGroup(2);
-    searchGroupItem2.setTemporalGroup(3);
-    assertMessageException(searchRequest, TEMPORAL_GROUP_MESSAGE);
-  }
-
-  @Test
-  public void countSubjectsOneOperandMessageException() throws Exception {
-    // demo operands not one
-    Attribute demoAttr =
-        new Attribute()
-            .name(AttrName.AGE)
-            .operator(Operator.EQUAL)
-            .operands(Arrays.asList("1", "2"));
-    SearchParameter demoParam =
-        new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.AGE.name())
-            .attributes(Arrays.asList(demoAttr));
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest,
-        ONE_OPERAND_MESSAGE,
-        ATTRIBUTE,
-        demoAttr.getName(),
-        operatorText.get(demoAttr.getOperator()));
-
-    // pm operands not one
-    Attribute pmAttr =
-        new Attribute()
-            .name(AttrName.NUM)
-            .operator(Operator.EQUAL)
-            .operands(Arrays.asList("1", "2"));
-    SearchParameter pmParam =
-        new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.HEIGHT.name())
-            .conceptId(1L)
-            .attributes(Arrays.asList(pmAttr));
-    searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest,
-        ONE_OPERAND_MESSAGE,
-        ATTRIBUTE,
-        pmAttr.getName(),
-        operatorText.get(pmAttr.getOperator()));
-
-    // modifier operands not one
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.EQUAL)
-            .operands(Arrays.asList("1", "2"));
-    SearchParameter drugParam =
-        new SearchParameter()
-            .type(TreeType.DRUG.name())
-            .subtype(TreeSubType.ATC.name())
-            .group(false)
-            .conceptId(1L);
-    searchRequest =
-        createSearchRequests(
-            TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(
-        searchRequest,
-        ONE_OPERAND_MESSAGE,
-        MODIFIER,
-        modifierText.get(modifier.getName()),
-        operatorText.get(pmAttr.getOperator()));
-  }
-
-  @Test
-  public void countSubjectsTwoOperandMessageException() throws Exception {
-    // demo operands not two
-    Attribute demoAttr =
-        new Attribute().name(AttrName.AGE).operator(Operator.BETWEEN).operands(Arrays.asList("1"));
-    SearchParameter demoParam =
-        new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.AGE.name())
-            .attributes(Arrays.asList(demoAttr));
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest,
-        TWO_OPERAND_MESSAGE,
-        ATTRIBUTE,
-        demoAttr.getName(),
-        operatorText.get(demoAttr.getOperator()));
-
-    // pm operands not two
-    Attribute pmAttr =
-        new Attribute()
-            .name(AttrName.NUM)
-            .operator(Operator.BETWEEN)
-            .operands(Arrays.asList("1"))
-            .conceptId(1L);
-    SearchParameter pmParam =
-        new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.HEIGHT.name())
-            .conceptId(1L)
-            .attributes(Arrays.asList(pmAttr));
-    searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest,
-        TWO_OPERAND_MESSAGE,
-        ATTRIBUTE,
-        pmAttr.getName(),
-        operatorText.get(pmAttr.getOperator()));
-
-    // meas operands not two
-    Attribute measAttr =
-        new Attribute().name(AttrName.NUM).operator(Operator.BETWEEN).operands(Arrays.asList("1"));
-    SearchParameter measParam =
-        new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
-            .conceptId(1L)
-            .attributes(Arrays.asList(measAttr));
-    searchRequest =
-        createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(
-        searchRequest,
-        TWO_OPERAND_MESSAGE,
-        ATTRIBUTE,
-        measAttr.getName(),
-        operatorText.get(measAttr.getOperator()));
-
-    // modifier operands not two
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.BETWEEN)
-            .operands(Arrays.asList("1"));
-    SearchParameter drugParam =
-        new SearchParameter()
-            .type(TreeType.DRUG.name())
-            .group(false)
-            .subtype(TreeSubType.ATC.name())
-            .conceptId(1L);
-    searchRequest =
-        createSearchRequests(
-            TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(
-        searchRequest,
-        TWO_OPERAND_MESSAGE,
-        MODIFIER,
-        modifierText.get(modifier.getName()),
-        operatorText.get(modifier.getOperator()));
-  }
-
-  @Test
-  public void countSubjectsOperandsNumericMessageException() throws Exception {
-    // demo operands not a number
-    Attribute demoAttr =
-        new Attribute().name(AttrName.AGE).operator(Operator.EQUAL).operands(Arrays.asList("z"));
-    SearchParameter demoParam =
-        new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.AGE.name())
-            .group(false)
-            .attributes(Arrays.asList(demoAttr));
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, demoAttr.getName());
-
-    // pm operands not a number
-    Attribute pmAttr =
-        new Attribute()
-            .name(AttrName.NUM)
-            .operator(Operator.EQUAL)
-            .operands(Arrays.asList("z"))
-            .conceptId(1L);
-    SearchParameter pmParam =
-        new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.HEIGHT.name())
-            .group(false)
-            .conceptId(1L)
-            .attributes(Arrays.asList(pmAttr));
-    searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, pmAttr.getName());
-
-    // meas operands not a number
-    Attribute measAttr =
-        new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("z"));
-    SearchParameter measParam =
-        new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
-            .group(false)
-            .conceptId(1L)
-            .attributes(Arrays.asList(measAttr));
-    searchRequest =
-        createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, measAttr.getName());
-
-    // encounters operands not a number
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.ENCOUNTERS)
-            .operator(Operator.IN)
-            .operands(Arrays.asList("z"));
-    SearchParameter drugParam =
-        new SearchParameter()
-            .type(TreeType.DRUG.name())
-            .subtype(TreeSubType.ATC.name())
-            .group(false)
-            .conceptId(1L);
-    searchRequest =
-        createSearchRequests(
-            TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(
-        searchRequest, OPERANDS_NUMERIC_MESSAGE, MODIFIER, modifierText.get(modifier.getName()));
-
-    // age at event operands not a number
-    modifier =
-        new Modifier()
-            .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.EQUAL)
-            .operands(Arrays.asList("z"));
-    searchRequest =
-        createSearchRequests(
-            TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(
-        searchRequest, OPERANDS_NUMERIC_MESSAGE, MODIFIER, modifierText.get(modifier.getName()));
-  }
-
-  @Test
-  public void countSubjectsOneModifierMessageException() throws Exception {
-    Modifier modifier1 =
-        new Modifier()
-            .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.EQUAL)
-            .operands(Arrays.asList("1"));
-    Modifier modifier2 =
-        new Modifier()
-            .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.EQUAL)
-            .operands(Arrays.asList("1"));
-    SearchParameter drugParam =
-        new SearchParameter()
-            .type(TreeType.DRUG.name())
-            .subtype(TreeSubType.ATC.name())
-            .group(false)
-            .conceptId(1L);
+            .ancestorData(false)
+            .standard(true);
+    Attribute attribute = new Attribute().name(AttrName.NUM);
+    demo.attributes(Arrays.asList(attribute));
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier1, modifier2));
-    assertMessageException(
-        searchRequest, ONE_MODIFIER_MESSAGE, modifierText.get(modifier1.getName()));
+            DomainType.CONDITION.toString(), Arrays.asList(demo), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: attribute operator null is not valid.", bre.getMessage());
+    }
+
+    attribute.operator(Operator.BETWEEN);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: attribute operands are empty.", bre.getMessage());
+    }
+
+    attribute.operands(Arrays.asList("20"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator",
+          bre.getMessage());
+    }
+
+    attribute.operands(Arrays.asList("s", "20"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: attribute NUM operands must be numeric.", bre.getMessage());
+    }
+
+    attribute.operands(Arrays.asList("10", "20"));
+    attribute.operator(Operator.EQUAL);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: attribute NUM must have one operand when using the EQUAL operator.",
+          bre.getMessage());
+    }
   }
 
   @Test
-  public void countSubjectsDateModifierMessageException() throws Exception {
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.EVENT_DATE)
-            .operator(Operator.EQUAL)
-            .operands(Arrays.asList("1"));
-    SearchParameter drugParam =
+  public void validateModifiers() throws Exception {
+    SearchParameter searchParameter =
         new SearchParameter()
-            .type(TreeType.DRUG.name())
-            .subtype(TreeSubType.ATC.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(false)
-            .conceptId(1L);
+            .ancestorData(false)
+            .standard(true);
+    Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT);
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(
-        searchRequest, DATE_MODIFIER_MESSAGE, MODIFIER, modifierText.get(modifier.getName()));
-  }
+            DomainType.CONDITION.toString(),
+            Arrays.asList(searchParameter),
+            Arrays.asList(modifier));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: modifier operator null is not valid.", bre.getMessage());
+    }
 
-  @Test
-  public void countSubjectsNotInModifierMessageException() throws Exception {
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.ENCOUNTERS)
-            .operator(Operator.EQUAL)
-            .operands(Arrays.asList("1"));
-    SearchParameter drugParam =
-        new SearchParameter()
-            .type(TreeType.DRUG.name())
-            .subtype(TreeSubType.ATC.name())
-            .group(false)
-            .conceptId(1L);
-    SearchRequest searchRequest =
-        createSearchRequests(
-            TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(
-        searchRequest,
-        NOT_IN_MODIFIER_MESSAGE,
-        modifierText.get(modifier.getName()),
-        operatorText.get(Operator.IN));
-  }
+    modifier.operator(Operator.BETWEEN);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: modifier operands are empty.", bre.getMessage());
+    }
 
-  @Test
-  public void countSubjectsAgeAndDecMessageException() throws Exception {
-    Attribute demoAttr =
-        new Attribute().name(AttrName.AGE).operator(Operator.EQUAL).operands(Arrays.asList("1"));
-    SearchParameter demoParam =
-        new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.AGE.name())
-            .group(false)
-            .attributes(Arrays.asList(demoAttr));
-    SearchParameter decParam =
-        new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.DEC.name())
-            .group(false);
-    SearchRequest searchRequest =
-        createSearchRequests(
-            TreeType.DEMO.name(), Arrays.asList(demoParam, decParam), new ArrayList<>());
-    assertMessageException(searchRequest, AGE_DEC_MESSAGE);
-  }
+    modifier.operands(Arrays.asList("20"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: modifier AGE_AT_EVENT can only have 2 operands when using the BETWEEN operator",
+          bre.getMessage());
+    }
 
-  @Test
-  public void countSubjectsCategoricalMessageException() throws Exception {
-    Attribute measAttr =
-        new Attribute().name(AttrName.CAT).operator(Operator.EQUAL).operands(Arrays.asList("1"));
-    SearchParameter measParam =
-        new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
-            .group(false)
-            .conceptId(1L)
-            .attributes(Arrays.asList(measAttr));
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, CATEGORICAL_MESSAGE);
-  }
+    modifier.operands(Arrays.asList("s", "20"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: modifier AGE_AT_EVENT operands must be numeric.", bre.getMessage());
+    }
 
-  @Test
-  public void countSubjectsBPMessageException() throws Exception {
-    Attribute sysAttr =
-        new Attribute()
-            .name(AttrName.NUM)
-            .operator(Operator.EQUAL)
-            .operands(Arrays.asList("90"))
-            .conceptId(903118L);
-    Attribute nonDiaAttr =
-        new Attribute()
-            .name(AttrName.NUM)
-            .operator(Operator.EQUAL)
-            .operands(Arrays.asList("90"))
-            .conceptId(1L);
+    modifier.operands(Arrays.asList("10", "20"));
+    modifier.operator(Operator.EQUAL);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: modifier AGE_AT_EVENT must have one operand when using the EQUAL operator.",
+          bre.getMessage());
+    }
 
-    // only 1 attribute
-    SearchParameter pmParam =
-        new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.BP.name())
-            .group(false)
-            .attributes(Arrays.asList(sysAttr));
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, BP_TWO_ATTRIBUTE_MESSAGE);
-
-    // 2 but not systolic and diastolic
-    pmParam.attributes(Arrays.asList(sysAttr, nonDiaAttr));
-    searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, BP_TWO_ATTRIBUTE_MESSAGE);
+    modifier.name(ModifierType.EVENT_DATE);
+    modifier.operands(Arrays.asList("10"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: modifier EVENT_DATE must be a valid date.", bre.getMessage());
+    }
   }
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChild() throws Exception {
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(false)
             .value("001.1")
+            .standard(false)
+            .ancestorData(false)
             .conceptId(1L);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void temporalGroupExceptions() throws Exception {
+    SearchParameter icd9 =
+        new SearchParameter()
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false)
+            .ancestorData(false)
+            .group(false)
+            .conceptId(1L);
+
+    SearchGroupItem icd9SGI =
+        new SearchGroupItem().type(DomainType.CONDITION.toString()).addSearchParametersItem(icd9);
+
+    SearchGroup temporalGroup = new SearchGroup().items(Arrays.asList(icd9SGI)).temporal(true);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: search group item temporal group null is not valid.", bre.getMessage());
+    }
+
+    icd9SGI.temporalGroup(0);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).",
+          bre.getMessage());
+    }
   }
 
   @Test
@@ -931,38 +352,44 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(false)
             .conceptId(1L);
     SearchParameter icd10 =
         new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD10CM.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(false)
             .conceptId(9L);
     SearchParameter snomed =
         new SearchParameter()
-            .type(TreeType.SNOMED.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(false)
             .conceptId(4L);
 
     SearchGroupItem icd9SGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(icd9)
             .temporalGroup(0)
             .addModifiersItem(ageModifier);
     SearchGroupItem icd10SGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(icd10)
             .temporalGroup(1)
             .addModifiersItem(visitsModifier);
     SearchGroupItem snomedSGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(snomed)
             .temporalGroup(0);
 
@@ -991,37 +418,43 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(false)
             .conceptId(1L);
     SearchParameter icd10 =
         new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD10CM.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(false)
             .conceptId(9L);
     SearchParameter snomed =
         new SearchParameter()
-            .type(TreeType.SNOMED.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(false)
             .conceptId(4L);
 
     SearchGroupItem icd9SGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(icd9)
             .temporalGroup(0)
             .addModifiersItem(occurrencesModifier);
     SearchGroupItem icd10SGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(icd10)
             .temporalGroup(1);
     SearchGroupItem snomedSGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(snomed)
             .temporalGroup(0);
 
@@ -1042,6 +475,31 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() throws Exception {
+    CBCriteria drugNode1 =
+        new CBCriteria()
+            .parentId(99999)
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .conceptId("21600932")
+            .group(true)
+            .selectable(true);
+    saveCriteriaWithPath("0", drugNode1);
+    CBCriteria drugNode2 =
+        new CBCriteria()
+            .parentId(drugNode1.getId())
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.RXNORM.toString())
+            .conceptId("1520218")
+            .group(false)
+            .selectable(true);
+    saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
+    // Use jdbcTemplate to create/insert data into the ancestor table
+    // The codebase currently doesn't have a need to implement a DAO for this table
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (1520218, 1520218)");
+
     Modifier visitsModifier =
         new Modifier()
             .name(ModifierType.ENCOUNTERS)
@@ -1050,25 +508,29 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchParameter drug =
         new SearchParameter()
-            .type(TreeType.DRUG.name())
-            .subtype(TreeSubType.ATC.name())
+            .domain(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .standard(false)
+            .ancestorData(true)
             .group(true)
             .conceptId(21600932L);
     SearchParameter icd10 =
         new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(false)
             .conceptId(9L);
 
     SearchGroupItem drugSGI =
         new SearchGroupItem()
-            .type(TreeType.DRUG.name())
+            .type(DomainType.DRUG.toString())
             .addSearchParametersItem(drug)
             .temporalGroup(0);
     SearchGroupItem icd10SGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(icd10)
             .temporalGroup(1)
             .addModifiersItem(visitsModifier);
@@ -1085,38 +547,68 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(drugNode1.getId());
+    cbCriteriaDao.delete(drugNode2.getId());
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
   public void anyMentionOfICD9Parent5DaysAfterICD10Child() throws Exception {
+    CBCriteria icd9Parent =
+        new CBCriteria()
+            .ancestorData(false)
+            .code("001")
+            .conceptId("0")
+            .domainId(DomainType.CONDITION.toString())
+            .group(true)
+            .selectable(true)
+            .standard(false)
+            .synonyms("+[CONDITION_rank1]");
+    saveCriteriaWithPath("0", icd9Parent);
+    CBCriteria icd9Child =
+        new CBCriteria()
+            .ancestorData(false)
+            .code("001.1")
+            .conceptId("1")
+            .domainId(DomainType.CONDITION.toString())
+            .group(false)
+            .selectable(true)
+            .standard(false)
+            .synonyms("+[CONDITION_rank1]");
+    saveCriteriaWithPath(icd9Parent.getPath(), icd9Child);
+
     Modifier visitsModifier =
         new Modifier()
             .name(ModifierType.ENCOUNTERS)
             .operator(Operator.IN)
             .operands(Arrays.asList("1"));
-
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(true)
-            .value("001");
+            .value("001")
+            .conceptId(0L);
     SearchParameter icd10 =
         new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD10CM.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(false)
             .conceptId(9L);
 
     SearchGroupItem icd9SGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(icd9)
             .temporalGroup(0)
             .addModifiersItem(visitsModifier);
     SearchGroupItem icd10SGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(icd10)
             .temporalGroup(1);
 
@@ -1132,27 +624,37 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(icd9Parent.getId());
+    cbCriteriaDao.delete(icd9Child.getId());
   }
 
   @Test
   public void anyMentionOfCPTWithIn5DaysOfVisit() throws Exception {
     SearchParameter cpt =
         new SearchParameter()
-            .type(TreeType.CPT.name())
-            .subtype(TreeSubType.CPT4.name())
+            .domain(DomainType.PROCEDURE.toString())
+            .type(CriteriaType.CPT4.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(false)
             .conceptId(10L);
     SearchParameter visit =
-        new SearchParameter().type(TreeType.VISIT.name()).group(false).conceptId(1L);
+        new SearchParameter()
+            .domain(DomainType.VISIT.toString())
+            .type(CriteriaType.VISIT.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true)
+            .conceptId(1L);
 
     SearchGroupItem cptSGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.PROCEDURE.toString())
             .addSearchParametersItem(cpt)
             .temporalGroup(0);
     SearchGroupItem visitSGI =
         new SearchGroupItem()
-            .type(TreeType.VISIT.name())
+            .type(DomainType.VISIT.toString())
             .addSearchParametersItem(visit)
             .temporalGroup(1);
 
@@ -1172,27 +674,48 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void firstMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
+    CBCriteria drugCriteria =
+        new CBCriteria()
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .group(false)
+            .ancestorData(true)
+            .standard(true)
+            .conceptId("11");
+    saveCriteriaWithPath("0", drugCriteria);
+    // Use jdbcTemplate to create/insert data into the ancestor table
+    // The codebase currently doesn't have a need to implement a DAO for this table
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (11, 11)");
+
     SearchParameter drug =
         new SearchParameter()
-            .type(TreeType.DRUG.name())
-            .subtype(TreeSubType.ATC.name())
+            .domain(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
             .group(false)
+            .ancestorData(true)
+            .standard(true)
             .conceptId(11L);
     SearchParameter measurement =
         new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
+            .subtype(CriteriaSubType.LAB.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(3L);
 
     SearchGroupItem drugSGI =
         new SearchGroupItem()
-            .type(TreeType.DRUG.name())
+            .type(DomainType.DRUG.toString())
             .addSearchParametersItem(drug)
             .temporalGroup(0);
     SearchGroupItem measurementSGI =
         new SearchGroupItem()
-            .type(TreeType.MEAS.name())
+            .type(DomainType.MEASUREMENT.toString())
             .addSearchParametersItem(measurement)
             .temporalGroup(1);
 
@@ -1207,31 +730,54 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(drugCriteria.getId());
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
   public void lastMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
+    CBCriteria drugCriteria =
+        new CBCriteria()
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .group(false)
+            .ancestorData(true)
+            .standard(true)
+            .conceptId("11");
+    saveCriteriaWithPath("0", drugCriteria);
+    // Use jdbcTemplate to create/insert data into the ancestor table
+    // The codebase currently doesn't have a need to implement a DAO for this table
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (11, 11)");
+
     SearchParameter drug =
         new SearchParameter()
-            .type(TreeType.DRUG.name())
-            .subtype(TreeSubType.ATC.name())
+            .domain(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
             .group(false)
+            .ancestorData(true)
+            .standard(true)
             .conceptId(11L);
     SearchParameter measurement =
         new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
+            .subtype(CriteriaSubType.LAB.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(3L);
 
     SearchGroupItem drugSGI =
         new SearchGroupItem()
-            .type(TreeType.DRUG.name())
+            .type(DomainType.DRUG.toString())
             .addSearchParametersItem(drug)
             .temporalGroup(0);
     SearchGroupItem measurementSGI =
         new SearchGroupItem()
-            .type(TreeType.MEAS.name())
+            .type(DomainType.MEASUREMENT.toString())
             .addSearchParametersItem(measurement)
             .temporalGroup(1);
 
@@ -1246,38 +792,67 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(drugCriteria.getId());
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
   public void lastMentionOfDrugDuringSameEncounterAsMeasurementOrVisit() throws Exception {
+    CBCriteria drugCriteria =
+        new CBCriteria()
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .group(false)
+            .ancestorData(true)
+            .standard(true)
+            .conceptId("11");
+    saveCriteriaWithPath("0", drugCriteria);
+    // Use jdbcTemplate to create/insert data into the ancestor table
+    // The codebase currently doesn't have a need to implement a DAO for this table
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (11, 11)");
+
     SearchParameter drug =
         new SearchParameter()
-            .type(TreeType.DRUG.name())
-            .subtype(TreeSubType.ATC.name())
+            .domain(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
             .group(false)
+            .ancestorData(true)
+            .standard(true)
             .conceptId(11L);
     SearchParameter measurement =
         new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
+            .subtype(CriteriaSubType.LAB.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(3L);
     SearchParameter visit =
-        new SearchParameter().type(TreeType.VISIT.name()).group(false).conceptId(1L);
+        new SearchParameter()
+            .domain(DomainType.VISIT.toString())
+            .type(CriteriaType.VISIT.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true)
+            .conceptId(1L);
 
     SearchGroupItem drugSGI =
         new SearchGroupItem()
-            .type(TreeType.DRUG.name())
+            .type(DomainType.DRUG.toString())
             .addSearchParametersItem(drug)
             .temporalGroup(0);
     SearchGroupItem measurementSGI =
         new SearchGroupItem()
-            .type(TreeType.MEAS.name())
+            .type(DomainType.MEASUREMENT.toString())
             .addSearchParametersItem(measurement)
             .temporalGroup(1);
     SearchGroupItem visitSGI =
         new SearchGroupItem()
-            .type(TreeType.VISIT.name())
+            .type(DomainType.VISIT.toString())
             .addSearchParametersItem(visit)
             .temporalGroup(1);
 
@@ -1292,38 +867,77 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(drugCriteria.getId());
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
   public void lastMentionOfMeasurementOrVisit5DaysAfterDrug() throws Exception {
+    CBCriteria drugCriteria1 =
+        new CBCriteria()
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .group(true)
+            .ancestorData(true)
+            .standard(true)
+            .conceptId("21600932");
+    saveCriteriaWithPath("0", drugCriteria1);
+    CBCriteria drugCriteria2 =
+        new CBCriteria()
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.RXNORM.toString())
+            .group(false)
+            .selectable(true)
+            .ancestorData(true)
+            .standard(true)
+            .conceptId("1520218");
+    saveCriteriaWithPath(drugCriteria1.getPath(), drugCriteria2);
+    // Use jdbcTemplate to create/insert data into the ancestor table
+    // The codebase currently doesn't have a need to implement a DAO for this table
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (1520218, 1520218)");
+
     SearchParameter measurement =
         new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
+            .subtype(CriteriaSubType.LAB.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(3L);
     SearchParameter visit =
-        new SearchParameter().type(TreeType.VISIT.name()).group(false).conceptId(1L);
+        new SearchParameter()
+            .domain(DomainType.VISIT.toString())
+            .type(CriteriaType.VISIT.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true)
+            .conceptId(1L);
     SearchParameter drug =
         new SearchParameter()
-            .type(TreeType.DRUG.name())
-            .subtype(TreeSubType.ATC.name())
+            .domain(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
             .group(true)
+            .ancestorData(true)
+            .standard(true)
             .conceptId(21600932L);
 
     SearchGroupItem measurementSGI =
         new SearchGroupItem()
-            .type(TreeType.MEAS.name())
+            .type(DomainType.MEASUREMENT.toString())
             .addSearchParametersItem(measurement)
             .temporalGroup(0);
     SearchGroupItem visitSGI =
         new SearchGroupItem()
-            .type(TreeType.VISIT.name())
+            .type(DomainType.VISIT.toString())
             .addSearchParametersItem(visit)
             .temporalGroup(0);
     SearchGroupItem drugSGI =
         new SearchGroupItem()
-            .type(TreeType.DRUG.name())
+            .type(DomainType.DRUG.toString())
             .addSearchParametersItem(drug)
             .temporalGroup(1);
 
@@ -1339,24 +953,22 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(drugCriteria1.getId());
+    cbCriteriaDao.delete(drugCriteria2.getId());
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildrenAgeAtEvent() throws Exception {
+  public void countSubjectsICD9ConditionChildAgeAtEvent() throws Exception {
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(false)
             .value("001.1")
+            .standard(false)
+            .ancestorData(false)
             .conceptId(1L);
-    SearchParameter icd9Proc =
-        new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.PROC.name())
-            .group(false)
-            .value("001.1")
-            .conceptId(2L);
 
     Modifier modifier =
         new Modifier()
@@ -1366,27 +978,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.CONDITION.name(), Arrays.asList(icd9, icd9Proc), Arrays.asList(modifier));
+            DomainType.CONDITION.toString(), Arrays.asList(icd9), Arrays.asList(modifier));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildrenEncounter() throws Exception {
+  public void countSubjectsICD9ConditionChildEncounter() throws Exception {
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.name())
             .group(false)
             .value("001.1")
+            .standard(false)
+            .ancestorData(false)
+            .ancestorData(false)
             .conceptId(1L);
-    SearchParameter icd9Proc =
-        new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.PROC.name())
-            .group(false)
-            .value("001.1")
-            .conceptId(2L);
 
     Modifier modifier =
         new Modifier()
@@ -1396,19 +1004,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.CONDITION.name(), Arrays.asList(icd9, icd9Proc), Arrays.asList(modifier));
+            DomainType.CONDITION.toString(), Arrays.asList(icd9), Arrays.asList(modifier));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventBetween() throws Exception {
+  public void countSubjectsICD9ConditionChildAgeAtEventBetween() throws Exception {
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(false)
+            .standard(false)
             .value("001.1")
+            .ancestorData(false)
             .conceptId(1L);
 
     Modifier modifier =
@@ -1419,7 +1029,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.CONDITION.name(), Arrays.asList(icd9), Arrays.asList(modifier));
+            DomainType.CONDITION.toString(), Arrays.asList(icd9), Arrays.asList(modifier));
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1429,10 +1039,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrences() throws Exception {
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(false)
+            .standard(false)
             .value("001.1")
+            .ancestorData(false)
             .conceptId(1L);
 
     Modifier modifier1 =
@@ -1448,27 +1060,33 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.CONDITION.name(), Arrays.asList(icd9), Arrays.asList(modifier1, modifier2));
+            DomainType.CONDITION.toString(),
+            Arrays.asList(icd9),
+            Arrays.asList(modifier1, modifier2));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrencesAndEventDate()
+  public void countSubjectsICD9ConditioChildAgeAtEventAndOccurrencesAndEventDate()
       throws Exception {
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(false)
+            .standard(false)
             .value("001.1")
+            .ancestorData(false)
             .conceptId(1L);
-    SearchParameter icd9Proc =
+    SearchParameter icd92 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.PROC.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(false)
+            .standard(false)
             .value("001.1")
+            .ancestorData(false)
             .conceptId(2L);
 
     Modifier modifier1 =
@@ -1489,21 +1107,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.CONDITION.name(),
-            Arrays.asList(icd9, icd9Proc),
+            DomainType.CONDITION.toString(),
+            Arrays.asList(icd9, icd92),
             Arrays.asList(modifier1, modifier2, modifier3));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildEventDate() throws Exception {
+  public void countSubjectsICD9ConditionChildEventDate() throws Exception {
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(false)
+            .standard(false)
             .value("001.1")
+            .ancestorData(false)
             .conceptId(1L);
 
     Modifier modifier =
@@ -1514,19 +1134,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.CONDITION.name(), Arrays.asList(icd9), Arrays.asList(modifier));
+            DomainType.CONDITION.toString(), Arrays.asList(icd9), Arrays.asList(modifier));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildOccurrences() throws Exception {
+  public void countSubjectsICD9ConditionNumOfOccurrences() throws Exception {
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(false)
+            .standard(false)
             .value("001.1")
+            .ancestorData(false)
             .conceptId(1L);
 
     Modifier modifier2 =
@@ -1537,7 +1159,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.CONDITION.name(), Arrays.asList(icd9), Arrays.asList(modifier2));
+            DomainType.CONDITION.toString(), Arrays.asList(icd9), Arrays.asList(modifier2));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1546,114 +1168,111 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsICD9ParentAndChild() throws Exception {
     SearchParameter icd9Child =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(false)
+            .standard(false)
             .value("001.1")
-            .conceptId(1L);
+            .conceptId(1L)
+            .ancestorData(false);
     SearchParameter icd9Parent =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(true)
-            .value("001");
+            .standard(false)
+            .value("001")
+            .ancestorData(false);
 
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.CONDITION.name(), Arrays.asList(icd9Child, icd9Parent), new ArrayList<>());
+            DomainType.CONDITION.toString(),
+            Arrays.asList(icd9Child, icd9Parent),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceParent() throws Exception {
+  public void countSubjectsICD9ConditionParent() throws Exception {
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
-            .group(false)
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .group(true)
+            .standard(false)
             .value("001")
-            .conceptId(1L);
-
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ProcedureOccurrenceChild() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.PROC.name())
-            .group(false)
-            .value("002.1")
+            .ancestorData(false)
             .conceptId(2L);
 
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ProcedureOccurrenceParent() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.PROC.name())
+    CBCriteria criteriaParent =
+        new CBCriteria()
+            .parentId(99999)
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false)
+            .code("001")
+            .name("Cholera")
+            .count("19")
             .group(true)
-            .value("002");
-
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9MeasurementChild() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .selectable(true)
+            .ancestorData(false)
+            .conceptId("2");
+    saveCriteriaWithPath("0", criteriaParent);
+    CBCriteria criteriaChild =
+        new CBCriteria()
+            .parentId(criteriaParent.getId())
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false)
+            .code("001.1")
+            .name("Cholera")
+            .count("19")
             .group(false)
-            .value("003.1")
-            .conceptId(3L);
+            .selectable(true)
+            .ancestorData(false)
+            .conceptId("1");
+    saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
 
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9MeasurementParent() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
-            .group(true)
-            .value("003");
-
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(criteriaParent.getId());
+    cbCriteriaDao.delete(criteriaChild.getId());
   }
 
   @Test
   public void countSubjectsDemoGender() throws Exception {
     SearchParameter demo =
         new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.GEN.name())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.GENDER.toString())
             .group(false)
+            .standard(true)
+            .ancestorData(false)
             .conceptId(8507L);
 
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
+        createSearchRequests(DomainType.PERSON.toString(), Arrays.asList(demo), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsDemoRace() throws Exception {
+    SearchParameter demo =
+        new SearchParameter()
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.RACE.toString())
+            .group(false)
+            .standard(true)
+            .ancestorData(false)
+            .conceptId(1L);
+
+    SearchRequest searchRequest =
+        createSearchRequests(DomainType.PERSON.toString(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1662,13 +1281,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsDemoEthnicity() throws Exception {
     SearchParameter demo =
         new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.ETH.name())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.ETHNICITY.toString())
             .group(false)
+            .standard(true)
+            .ancestorData(false)
             .conceptId(9898L);
 
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
+        createSearchRequests(DomainType.PERSON.toString(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1677,13 +1298,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsDemoDec() throws Exception {
     SearchParameter demo =
         new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.DEC.name())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.DECEASED.toString())
             .group(false)
+            .standard(true)
+            .ancestorData(false)
             .value("Deceased");
 
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
+        createSearchRequests(DomainType.PERSON.toString(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1693,67 +1316,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
-    Integer age = period.getYears();
+    Integer lo = period.getYears() - 1;
+    Integer hi = period.getYears() + 1;
     SearchParameter demo =
         new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.AGE.name())
-            .group(false);
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.AGE.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true);
     demo.attributes(
         Arrays.asList(
             new Attribute()
                 .name(AttrName.AGE)
-                .operator(Operator.EQUAL)
-                .operands(Arrays.asList(age.toString()))));
+                .operator(Operator.BETWEEN)
+                .operands(Arrays.asList(lo.toString(), hi.toString()))));
     SearchRequest searchRequests =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
-  }
-
-  @Test
-  public void countSubjectsDemoAgeBetween() throws Exception {
-    SearchParameter demo =
-        new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.AGE.name())
-            .group(false);
-    demo.attributes(
-        Arrays.asList(
-            new Attribute().operator(Operator.BETWEEN).operands(Arrays.asList("15", "99"))));
-    SearchRequest searchRequests =
-        createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
-  }
-
-  @Test
-  public void countSubjectsDemoGenderAndAge() throws Exception {
-    SearchParameter demoGenderSearchParam =
-        new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.GEN.name())
-            .group(false)
-            .conceptId(8507L);
-
-    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
-    DateTime now = new DateTime();
-    Period period = new Period(birthDate, now);
-    Integer age = period.getYears();
-    SearchParameter demoAgeSearchParam =
-        new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.AGE.name())
-            .group(false);
-    demoAgeSearchParam.attributes(
-        Arrays.asList(
-            new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
-
-    SearchRequest searchRequests =
-        createSearchRequests(
-            TreeType.DEMO.name(),
-            Arrays.asList(demoGenderSearchParam, demoAgeSearchParam),
-            new ArrayList<>());
+        createSearchRequests(DomainType.PERSON.toString(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
   }
@@ -1762,47 +1341,61 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsICD9AndDemo() throws Exception {
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(false)
+            .standard(false)
+            .ancestorData(false)
             .conceptId(3L)
             .value("003.1");
 
     SearchParameter demoGenderSearchParam =
         new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.GEN.name())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.GENDER.toString())
             .group(false)
+            .standard(true)
+            .ancestorData(false)
             .conceptId(8507L);
 
     SearchParameter demoAgeSearchParam =
         new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.AGE.name())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.AGE.toString())
+            .standard(true)
+            .ancestorData(false)
             .group(false);
 
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
-    Integer age = period.getYears();
+    Integer lo = period.getYears() - 1;
+    Integer hi = period.getYears() + 1;
 
     demoAgeSearchParam.attributes(
         Arrays.asList(
-            new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
+            new Attribute()
+                .operator(Operator.BETWEEN)
+                .operands(Arrays.asList(lo.toString(), hi.toString()))));
 
     SearchRequest searchRequests =
         createSearchRequests(
-            TreeType.DEMO.name(),
-            Arrays.asList(demoGenderSearchParam, demoAgeSearchParam),
-            new ArrayList<>());
+            DomainType.PERSON.toString(), Arrays.asList(demoGenderSearchParam), new ArrayList<>());
 
     SearchGroupItem anotherSearchGroupItem =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .searchParameters(Arrays.asList(icd9))
             .modifiers(new ArrayList<>());
 
+    SearchGroupItem anotherNewSearchGroupItem =
+        new SearchGroupItem()
+            .type(DomainType.PERSON.toString())
+            .searchParameters(Arrays.asList(demoAgeSearchParam))
+            .modifiers(new ArrayList<>());
+
     searchRequests.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
+    searchRequests.getIncludes().get(0).addItemsItem(anotherNewSearchGroupItem);
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
@@ -1812,27 +1405,31 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsDemoExcluded() throws Exception {
     SearchParameter demoGenderSearchParam =
         new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.GEN.name())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.GENDER.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(8507L);
 
     SearchParameter demoGenderSearchParamExclude =
         new SearchParameter()
-            .type(TreeType.DEMO.name())
-            .subtype(TreeSubType.GEN.name())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.GENDER.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(8507L);
 
     SearchGroupItem excludeSearchGroupItem =
         new SearchGroupItem()
-            .type(TreeType.DEMO.name())
+            .type(DomainType.PERSON.toString())
             .searchParameters(Arrays.asList(demoGenderSearchParamExclude));
     SearchGroup excludeSearchGroup = new SearchGroup().addItemsItem(excludeSearchGroupItem);
 
     SearchRequest searchRequests =
         createSearchRequests(
-            TreeType.DEMO.name(), Arrays.asList(demoGenderSearchParam), new ArrayList<>());
+            DomainType.PERSON.toString(), Arrays.asList(demoGenderSearchParam), new ArrayList<>());
     searchRequests.getExcludes().add(excludeSearchGroup);
 
     assertParticipants(
@@ -1840,239 +1437,158 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD10ConditionOccurrenceChildEncounter() throws Exception {
-    SearchParameter icd10 =
+  public void countSubjectsICD9ParentAndICD10ChildCondition() throws Exception {
+    SearchParameter icd9Parent =
         new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
-            .group(false)
-            .conceptId(6L);
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.ENCOUNTERS)
-            .operator(Operator.IN)
-            .operands(Arrays.asList("1"));
-    SearchRequest searchRequest =
-        createSearchRequests(
-            TreeType.CONDITION.name(), Arrays.asList(icd10), Arrays.asList(modifier));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD10ConditionOccurrenceChild() throws Exception {
-    SearchParameter icd10 =
-        new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
-            .group(false)
-            .conceptId(6L);
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildICD10ConditionOccurrenceChild()
-      throws Exception {
-    SearchParameter icd9P =
-        new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(true)
+            .standard(false)
+            .ancestorData(false)
+            .ancestorData(false)
             .value("001");
+
+    CBCriteria criteriaParent =
+        new CBCriteria()
+            .parentId(99999)
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false)
+            .code("001")
+            .name("Cholera")
+            .count("19")
+            .group(true)
+            .selectable(true)
+            .ancestorData(false)
+            .conceptId("2");
+    saveCriteriaWithPath("0", criteriaParent);
+    CBCriteria criteriaChild =
+        new CBCriteria()
+            .parentId(criteriaParent.getId())
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false)
+            .code("001.1")
+            .name("Cholera")
+            .count("19")
+            .group(false)
+            .selectable(true)
+            .ancestorData(false)
+            .conceptId("1");
+    saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
+
     SearchParameter icd10 =
         new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD10CM.toString())
             .group(false)
+            .standard(false)
+            .ancestorData(false)
             .conceptId(6L);
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.CONDITION.name(), Arrays.asList(icd9P, icd10), new ArrayList<>());
+            DomainType.CONDITION.toString(), Arrays.asList(icd9Parent, icd10), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+    cbCriteriaDao.delete(criteriaParent.getId());
+    cbCriteriaDao.delete(criteriaChild.getId());
   }
 
   @Test
-  public void countSubjectsICD10ConditionOccurrenceParent() throws Exception {
-    SearchParameter icd10 =
-        new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
-            .group(true)
-            .value("A");
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD10ProcedureOccurrenceChild() throws Exception {
-    SearchParameter icd10 =
-        new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
-            .group(false)
-            .conceptId(8L);
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD10ProcedureOccurrenceParent() throws Exception {
-    SearchParameter icd10 =
-        new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.PCS.name())
-            .group(true)
-            .value("16");
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD10MeasurementChild() throws Exception {
-    SearchParameter icd10 =
-        new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
-            .group(false)
-            .conceptId(9L);
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
-  }
-
-  @Test
-  public void countSubjectsICD10MeasurementParent() throws Exception {
-    SearchParameter icd10 =
-        new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
-            .group(true)
-            .value("R92");
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
-  }
-
-  @Test
-  public void countSubjectsCPTProcedureOccurrence() throws Exception {
+  public void countSubjectsCPTProcedure() throws Exception {
     SearchParameter cpt =
         new SearchParameter()
-            .type(TreeType.CPT.name())
-            .subtype(TreeSubType.CPT4.name())
+            .domain(DomainType.PROCEDURE.toString())
+            .type(CriteriaType.CPT4.toString())
             .group(false)
+            .standard(false)
+            .ancestorData(false)
             .conceptId(4L);
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsCPTProcedureOccurrenceEncounter() throws Exception {
-    SearchParameter cpt =
-        new SearchParameter()
-            .type(TreeType.CPT.name())
-            .subtype(TreeSubType.CPT4.name())
-            .group(false)
-            .conceptId(4L);
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.ENCOUNTERS)
-            .operator(Operator.IN)
-            .operands(Arrays.asList("1"));
     SearchRequest searchRequest =
         createSearchRequests(
-            TreeType.PROCEDURE.name(), Arrays.asList(cpt), Arrays.asList(modifier));
+            DomainType.PROCEDURE.toString(), Arrays.asList(cpt), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsCPTObservation() throws Exception {
-    SearchParameter cpt =
-        new SearchParameter()
-            .type(TreeType.CPT.name())
-            .subtype(TreeSubType.CPT4.name())
-            .group(false)
-            .conceptId(5L);
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsCPTMeasurement() throws Exception {
-    SearchParameter cpt =
-        new SearchParameter()
-            .type(TreeType.CPT.name())
-            .subtype(TreeSubType.CPT4.name())
-            .group(false)
-            .conceptId(10L);
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-  }
-
-  @Test
-  public void countSubjectsConditionsSnomed() throws Exception {
+  public void countSubjectsSnomedChildCondition() throws Exception {
     SearchParameter snomed =
         new SearchParameter()
-            .type(TreeType.SNOMED.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.SNOMED.toString())
             .group(false)
+            .standard(true)
+            .ancestorData(false)
             .conceptId(6L);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(snomed), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsProceduresSnomed() throws Exception {
+  public void countSubjectsSnomedParentProcedure() throws Exception {
     SearchParameter snomed =
         new SearchParameter()
-            .type(TreeType.SNOMED.name())
-            .subtype(TreeSubType.PCS.name())
+            .domain(DomainType.PROCEDURE.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .group(true)
+            .standard(true)
+            .ancestorData(false)
+            .conceptId(4302541L);
+
+    CBCriteria criteriaParent =
+        new CBCriteria()
+            .parentId(99999)
+            .domainId(DomainType.PROCEDURE.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .standard(true)
+            .code("386637004")
+            .name("Obstetric procedure")
+            .count("36673")
+            .group(true)
+            .selectable(true)
+            .ancestorData(false)
+            .conceptId("4302541")
+            .synonyms("+[PROCEDURE_rank1]");
+    saveCriteriaWithPath("0", criteriaParent);
+    CBCriteria criteriaChild =
+        new CBCriteria()
+            .parentId(criteriaParent.getId())
+            .domainId(DomainType.PROCEDURE.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .standard(true)
+            .code("386639001")
+            .name("Termination of pregnancy")
+            .count("50")
             .group(false)
-            .conceptId(4L);
+            .selectable(true)
+            .ancestorData(false)
+            .conceptId("4")
+            .synonyms("+[PROCEDURE_rank1]");
+    saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
+
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(snomed), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(criteriaParent.getId());
+    cbCriteriaDao.delete(criteriaChild.getId());
   }
 
   @Test
-  public void countSubjectsCPTDrugExposure() throws Exception {
-    SearchParameter cpt =
-        new SearchParameter()
-            .type(TreeType.CPT.name())
-            .subtype(TreeSubType.CPT4.name())
-            .group(false)
-            .conceptId(11L);
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsVisitChild() throws Exception {
+  public void countSubjectsVisit() throws Exception {
     SearchParameter visit =
-        new SearchParameter().type(TreeType.VISIT.name()).group(false).conceptId(10L);
+        new SearchParameter()
+            .domain(DomainType.VISIT.toString())
+            .type(CriteriaType.VISIT.toString())
+            .group(false)
+            .standard(true)
+            .ancestorData(false)
+            .conceptId(10L);
     SearchRequest searchRequest =
         createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
     assertParticipants(
@@ -2080,9 +1596,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsVisitChildModifiers() throws Exception {
+  public void countSubjectsVisitModifiers() throws Exception {
     SearchParameter visit =
-        new SearchParameter().type(TreeType.VISIT.name()).group(false).conceptId(10L);
+        new SearchParameter()
+            .domain(DomainType.VISIT.toString())
+            .type(CriteriaType.VISIT.toString())
+            .group(false)
+            .standard(true)
+            .ancestorData(false)
+            .conceptId(10L);
     Modifier modifier =
         new Modifier()
             .name(ModifierType.NUM_OF_OCCURRENCES)
@@ -2096,41 +1618,141 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugChild() throws Exception {
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (11, 11)");
     SearchParameter drug =
-        new SearchParameter().type(TreeType.DRUG.name()).group(false).conceptId(11L);
+        new SearchParameter()
+            .domain(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .group(false)
+            .ancestorData(true)
+            .standard(true)
+            .conceptId(11L);
     SearchRequest searchRequest =
         createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
   public void countSubjectsDrugParent() throws Exception {
+    CBCriteria drugNode1 =
+        new CBCriteria()
+            .parentId(99999)
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .conceptId("21600932")
+            .group(true)
+            .standard(true)
+            .selectable(true);
+    saveCriteriaWithPath("0", drugNode1);
+    CBCriteria drugNode2 =
+        new CBCriteria()
+            .parentId(drugNode1.getId())
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.RXNORM.toString())
+            .conceptId("1520218")
+            .group(false)
+            .standard(true)
+            .selectable(true);
+    saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
+
+    // Use jdbcTemplate to create/insert data into the ancestor table
+    // The codebase currently doesn't have a need to implement a DAO for this table
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (1520218, 1520218)");
     SearchParameter drug =
-        new SearchParameter().type(TreeType.DRUG.name()).group(true).conceptId(21600932L);
+        new SearchParameter()
+            .domain(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .group(true)
+            .conceptId(21600932L)
+            .ancestorData(true)
+            .standard(true);
     SearchRequest searchRequest =
-        createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
+        createSearchRequests(drug.getDomain(), Arrays.asList(drug), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    cbCriteriaDao.delete(drugNode1.getId());
+    cbCriteriaDao.delete(drugNode2.getId());
   }
 
   @Test
   public void countSubjectsDrugParentAndChild() throws Exception {
+    CBCriteria drugNode1 =
+        new CBCriteria()
+            .parentId(99999)
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .conceptId("21600932")
+            .group(true)
+            .standard(true)
+            .selectable(true);
+    saveCriteriaWithPath("0", drugNode1);
+    CBCriteria drugNode2 =
+        new CBCriteria()
+            .parentId(drugNode1.getId())
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.RXNORM.toString())
+            .conceptId("1520218")
+            .group(false)
+            .standard(true)
+            .selectable(true);
+    saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
+
+    // Use jdbcTemplate to create/insert data into the ancestor table
+    // The codebase currently doesn't have a need to implement a DAO for this table
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (1520218, 1520218)");
+
     SearchParameter drugChild =
-        new SearchParameter().type(TreeType.DRUG.name()).group(false).conceptId(11L);
+        new SearchParameter()
+            .domain(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .group(false)
+            .ancestorData(true)
+            .standard(true)
+            .conceptId(11L);
     SearchParameter drugParent =
-        new SearchParameter().type(TreeType.DRUG.name()).group(true).conceptId(21600932L);
+        new SearchParameter()
+            .domain(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .group(true)
+            .conceptId(21600932L)
+            .ancestorData(true)
+            .standard(true);
     SearchRequest searchRequest =
         createSearchRequests(
             drugParent.getType(), Arrays.asList(drugParent, drugChild), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    cbCriteriaDao.delete(drugNode1.getId());
+    cbCriteriaDao.delete(drugNode2.getId());
   }
 
   @Test
   public void countSubjectsDrugChildEncounter() throws Exception {
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (11, 11)");
     SearchParameter drug =
-        new SearchParameter().type(TreeType.DRUG.name()).group(false).conceptId(11L);
+        new SearchParameter()
+            .domain(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .group(false)
+            .ancestorData(true)
+            .standard(true)
+            .conceptId(11L);
     Modifier modifier =
         new Modifier()
             .name(ModifierType.ENCOUNTERS)
@@ -2140,12 +1762,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(drug.getType(), Arrays.asList(drug), Arrays.asList(modifier));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
-  public void countSubjectsDrugChildModifiers() throws Exception {
+  public void countSubjectsDrugChildAgeAtEvent() throws Exception {
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (11, 11)");
     SearchParameter drug =
-        new SearchParameter().type(TreeType.DRUG.name()).group(false).conceptId(11L);
+        new SearchParameter()
+            .domain(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .group(false)
+            .ancestorData(true)
+            .standard(true)
+            .conceptId(11L);
     Modifier modifier =
         new Modifier()
             .name(ModifierType.AGE_AT_EVENT)
@@ -2155,15 +1788,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(drug.getType(), Arrays.asList(drug), Arrays.asList(modifier));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
-  public void countSubjectsLabTextAnyEncounter() throws Exception {
+  public void countSubjectsLabEncounter() throws Exception {
     SearchParameter lab =
         new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
+            .subtype(CriteriaSubType.LAB.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(3L);
     Modifier modifier =
         new Modifier()
@@ -2177,40 +1814,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabTextAny() throws Exception {
-    SearchParameter lab =
-        new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
-            .group(false)
-            .conceptId(3L);
-    SearchRequest searchRequest =
-        createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabNumericalAny() throws Exception {
-    SearchParameter lab =
-        new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
-            .group(false)
-            .conceptId(3L);
-    SearchRequest searchRequest =
-        createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
   public void countSubjectsLabNumericalBetween() throws Exception {
     SearchParameter lab =
         new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
+            .subtype(CriteriaSubType.LAB.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(3L);
     lab.attributes(
         Arrays.asList(
@@ -2225,26 +1837,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabCategoricalAny() throws Exception {
-    SearchParameter lab =
-        new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
-            .group(false)
-            .conceptId(3L);
-    SearchRequest searchRequest =
-        createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
   public void countSubjectsLabCategoricalIn() throws Exception {
     SearchParameter lab =
         new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
+            .subtype(CriteriaSubType.LAB.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(3L);
     lab.attributes(
         Arrays.asList(
@@ -2256,26 +1857,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabBothAny() throws Exception {
-    SearchParameter lab =
-        new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
-            .group(false)
-            .conceptId(3L);
-    SearchRequest searchRequest =
-        createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
   public void countSubjectsLabBothNumericalAndCategorical() throws Exception {
     SearchParameter lab =
         new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
+            .subtype(CriteriaSubType.LAB.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(3L);
     Attribute numerical =
         new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
@@ -2289,31 +1879,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabBothNumericalAndCategoricalSpecificName() throws Exception {
+  public void countSubjectsLabCategoricalAgeAtEvent() throws Exception {
     SearchParameter lab =
         new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
+            .subtype(CriteriaSubType.LAB.toString())
             .group(false)
-            .conceptId(3L);
-    Attribute numerical =
-        new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
-    Attribute categorical =
-        new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("1"));
-    lab.attributes(Arrays.asList(numerical, categorical));
-    SearchRequest searchRequest =
-        createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabNumericalAnyAgeAtEvent() throws Exception {
-    SearchParameter lab =
-        new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
-            .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(3L);
     Modifier modifier =
         new Modifier()
@@ -2321,7 +1895,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
             .operands(Arrays.asList("25"));
     SearchRequest searchRequest =
-        createSearchRequests(lab.getType(), Arrays.asList(lab), Arrays.asList(modifier));
+        createSearchRequests(lab.getDomain(), Arrays.asList(lab), Arrays.asList(modifier));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -2330,29 +1904,38 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabMoreThanOneSearchParameter() throws Exception {
     SearchParameter lab1 =
         new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
+            .subtype(CriteriaSubType.LAB.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(3L);
     SearchParameter lab2 =
         new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
+            .subtype(CriteriaSubType.LAB.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(9L);
     SearchParameter lab3 =
         new SearchParameter()
-            .type(TreeType.MEAS.name())
-            .subtype(TreeSubType.LAB.name())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
+            .subtype(CriteriaSubType.LAB.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(9L);
     Attribute labCategorical =
         new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("77"));
     lab3.attributes(Arrays.asList(labCategorical));
     SearchRequest searchRequest =
-        createSearchRequests(lab1.getType(), Arrays.asList(lab1, lab2, lab3), new ArrayList<>());
+        createSearchRequests(lab1.getDomain(), Arrays.asList(lab1, lab2, lab3), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -2371,8 +1954,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .conceptId(903115L));
     SearchParameter pm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.BP.name())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BP.toString())
+            .ancestorData(false)
+            .standard(false)
             .group(false)
             .attributes(attributes);
     SearchRequest searchRequest =
@@ -2389,14 +1975,69 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             new Attribute().name(AttrName.ANY).operands(new ArrayList<>()).conceptId(903115L));
     SearchParameter pm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.BP.name())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BP.toString())
+            .ancestorData(false)
+            .standard(false)
             .group(false)
             .attributes(attributes);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pm), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsBloodPressureOrHeartRateDetail() throws Exception {
+    List<Attribute> bpAttributes =
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.LESS_THAN_OR_EQUAL_TO)
+                .operands(Arrays.asList("90"))
+                .conceptId(903118L),
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.BETWEEN)
+                .operands(Arrays.asList("60", "80"))
+                .conceptId(903115L));
+    SearchParameter bpPm =
+        new SearchParameter()
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BP.toString())
+            .ancestorData(false)
+            .standard(false)
+            .group(false)
+            .attributes(bpAttributes);
+
+    List<Attribute> hrAttributes =
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.EQUAL)
+                .operands(Arrays.asList("71")));
+    SearchParameter hrPm =
+        new SearchParameter()
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.HR_DETAIL.toString())
+            .ancestorData(false)
+            .standard(false)
+            .group(false)
+            .conceptId(903126L)
+            .attributes(hrAttributes);
+
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(),
+            Arrays.asList(bpPm, hrPm),
+            new ArrayList<>());
+
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -2415,12 +2056,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .conceptId(903115L));
     SearchParameter bpPm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.BP.name())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BP.toString())
+            .ancestorData(false)
+            .standard(false)
             .group(false)
             .attributes(bpAttributes);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(bpPm), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(bpPm), new ArrayList<>());
 
     List<Attribute> hrAttributes =
         Arrays.asList(
@@ -2430,14 +2075,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(Arrays.asList("71")));
     SearchParameter hrPm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.HR_DETAIL.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.HR_DETAIL.toString())
+            .ancestorData(false)
+            .standard(false)
             .group(false)
             .conceptId(903126L)
             .attributes(hrAttributes);
     SearchGroupItem anotherSearchGroupItem =
         new SearchGroupItem()
-            .type(TreeType.PM.name())
+            .type(DomainType.PHYSICAL_MEASUREMENT.toString())
             .searchParameters(Arrays.asList(hrPm))
             .modifiers(new ArrayList<>());
 
@@ -2451,14 +2099,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(Arrays.asList("4262985")));
     SearchParameter hrIrrPm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.HR.name())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.HR.toString())
+            .ancestorData(false)
+            .standard(false)
             .group(false)
             .conceptId(1586218L)
             .attributes(irrAttributes);
     SearchGroupItem heartRateIrrSearchGroupItem =
         new SearchGroupItem()
-            .type(TreeType.PM.name())
+            .type(DomainType.PHYSICAL_MEASUREMENT.toString())
             .searchParameters(Arrays.asList(hrIrrPm))
             .modifiers(new ArrayList<>());
 
@@ -2472,12 +2123,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsHeartRateAny() throws Exception {
     SearchParameter pm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.HR_DETAIL.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.HR_DETAIL.toString())
             .group(false)
-            .conceptId(1586218L);
+            .conceptId(1586218L)
+            .ancestorData(false)
+            .standard(false);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pm), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
@@ -2492,13 +2147,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(Arrays.asList("45")));
     SearchParameter pm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.HR_DETAIL.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.HR_DETAIL.toString())
             .group(false)
             .conceptId(1586218L)
+            .ancestorData(false)
+            .standard(false)
             .attributes(attributes);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pm), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
@@ -2513,13 +2172,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(Arrays.asList("168")));
     SearchParameter pm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.HEIGHT.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.HEIGHT.toString())
             .group(false)
             .conceptId(903133L)
+            .ancestorData(false)
+            .standard(false)
             .attributes(attributes);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pm), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -2535,13 +2198,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(Arrays.asList("201")));
     SearchParameter pm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.WEIGHT.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.WEIGHT.toString())
             .group(false)
             .conceptId(903121L)
+            .ancestorData(false)
+            .standard(false)
             .attributes(attributes);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pm), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -2557,20 +2224,24 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(Arrays.asList("263")));
     SearchParameter pm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.BMI.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BMI.toString())
             .group(false)
             .conceptId(903124L)
+            .ancestorData(false)
+            .standard(false)
             .attributes(attributes);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pm), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectWaistCircumference() throws Exception {
+  public void countSubjectWaistCircumferenceAndHipCircumference() throws Exception {
     List<Attribute> attributes =
         Arrays.asList(
             new Attribute()
@@ -2579,35 +2250,27 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(Arrays.asList("31")));
     SearchParameter pm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.WC.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.WC.toString())
             .group(false)
             .conceptId(903135L)
+            .ancestorData(false)
+            .standard(false)
             .attributes(attributes);
-    SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pm), new ArrayList<>());
-
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectHipCircumference() throws Exception {
-    List<Attribute> attributes =
-        Arrays.asList(
-            new Attribute()
-                .name(AttrName.NUM)
-                .operator(Operator.EQUAL)
-                .operands(Arrays.asList("33")));
-    SearchParameter pm =
+    SearchParameter pm1 =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.HC.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.HC.toString())
             .group(false)
             .conceptId(903136L)
+            .ancestorData(false)
+            .standard(false)
             .attributes(attributes);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pm), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm, pm1), new ArrayList<>());
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -2623,13 +2286,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(Arrays.asList("45877994")));
     SearchParameter pm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.PREG.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.PREG.toString())
             .group(false)
             .conceptId(903120L)
+            .ancestorData(false)
+            .standard(false)
             .attributes(attributes);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pm), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -2645,13 +2312,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(Arrays.asList("4023190")));
     SearchParameter pm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.WHEEL.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.WHEEL.toString())
             .group(false)
             .conceptId(903111L)
+            .ancestorData(false)
+            .standard(false)
             .attributes(attributes);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pm), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
@@ -2659,11 +2330,50 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsPPI() throws Exception {
+    CBCriteria surveyNode =
+        new CBCriteria()
+            .parentId(0)
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BASICS.toString())
+            .group(true)
+            .selectable(true)
+            .standard(false);
+    saveCriteriaWithPath("0", surveyNode);
+    CBCriteria questionNode =
+        new CBCriteria()
+            .parentId(surveyNode.getId())
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BASICS.toString())
+            .group(true)
+            .selectable(true)
+            .standard(false)
+            .name("In what country were you born?")
+            .conceptId("1585899")
+            .synonyms("[SURVEY_rank1]");
+    saveCriteriaWithPath(surveyNode.getPath(), questionNode);
+    CBCriteria answerNode =
+        new CBCriteria()
+            .parentId(questionNode.getId())
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BASICS.toString())
+            .group(false)
+            .selectable(true)
+            .standard(false)
+            .name("USA")
+            .conceptId("5");
+    saveCriteriaWithPath(questionNode.getPath(), answerNode);
+
     // Survey
     SearchParameter ppiSurvey =
         new SearchParameter()
-            .type(TreeType.PPI.name())
-            .subtype(TreeSubType.BASICS.toString())
+            .domain(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BASICS.toString())
+            .ancestorData(false)
+            .standard(false)
             .group(true);
     SearchRequest searchRequest =
         createSearchRequests(ppiSurvey.getType(), Arrays.asList(ppiSurvey), new ArrayList<>());
@@ -2673,8 +2383,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // Question
     SearchParameter ppiQuestion =
         new SearchParameter()
-            .type(TreeType.PPI.name())
-            .subtype(TreeSubType.BASICS.toString())
+            .domain(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BASICS.toString())
+            .ancestorData(false)
+            .standard(false)
             .group(true)
             .conceptId(1585899L);
     searchRequest =
@@ -2682,14 +2395,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
-    // value as concept id
+    // value source concept id
     List<Attribute> attributes =
         Arrays.asList(
             new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("7")));
     SearchParameter ppiValueAsConceptId =
         new SearchParameter()
-            .type(TreeType.PPI.name())
-            .subtype(TreeSubType.BASICS.toString())
+            .domain(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BASICS.toString())
+            .ancestorData(false)
+            .standard(false)
             .group(false)
             .conceptId(5L)
             .attributes(attributes);
@@ -2708,8 +2424,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(Arrays.asList("7")));
     SearchParameter ppiValueAsNumer =
         new SearchParameter()
-            .type(TreeType.PPI.name())
-            .subtype(TreeSubType.BASICS.toString())
+            .domain(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BASICS.toString())
+            .ancestorData(false)
+            .standard(false)
             .group(false)
             .conceptId(5L)
             .attributes(attributes);
@@ -2718,6 +2437,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ppiValueAsNumer.getType(), Arrays.asList(ppiValueAsNumer), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    cbCriteriaDao.delete(surveyNode.getId());
+    cbCriteriaDao.delete(questionNode.getId());
+    cbCriteriaDao.delete(answerNode.getId());
   }
 
   @Test
@@ -2730,13 +2453,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(Arrays.asList("4023190")));
     SearchParameter pm =
         new SearchParameter()
-            .type(TreeType.PM.name())
-            .subtype(TreeSubType.WHEEL.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.WHEEL.toString())
+            .ancestorData(false)
+            .standard(false)
             .group(false)
             .conceptId(903111L)
             .attributes(attributes);
     SearchRequest searchRequest =
-        createSearchRequests(TreeType.PM.name(), Arrays.asList(pm), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
     DemoChartInfoListResponse response =
         controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
@@ -2793,5 +2520,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     Long participantCount = (Long) response.getBody();
     assertThat(participantCount).isEqualTo(expectedCount);
+  }
+
+  private void saveCriteriaWithPath(String path, CBCriteria criteria) {
+    cbCriteriaDao.save(criteria);
+    String pathEnd = String.valueOf(criteria.getId());
+    criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);
+    cbCriteriaDao.save(criteria);
   }
 }

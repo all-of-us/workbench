@@ -1,9 +1,11 @@
 import {Component, Input} from '@angular/core';
 import {wizardStore} from 'app/cohort-search/search-state.service';
+import {mapParameter} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {DatePicker} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
+import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -100,7 +102,18 @@ const styles = reactStyles({
   previewCount: {
     color: '#4a4a4a',
     fontWeight: 'bold'
-  }
+  },
+  error: {
+    background: '#F7981C',
+    color: '#ffffff',
+    fontSize: '12px',
+    fontWeight: 500,
+    textAlign: 'left',
+    border: '1px solid #ebafa6',
+    borderRadius: '5px',
+    marginTop: '0.25rem',
+    padding: '8px',
+  },
 });
 
 const button = {
@@ -174,8 +187,10 @@ interface Props {
 
 interface State {
   formState: any;
-  preview: any;
+  count: number;
   visitCounts: any;
+  error: boolean;
+  loading: boolean;
 }
 
 export const ListModifierPage = withCurrentWorkspace()(
@@ -236,11 +251,10 @@ export const ListModifierPage = withCurrentWorkspace()(
             value: Operator.BETWEEN,
           }]
         }],
-        preview: {
-          loading: false,
-          count: null,
-        },
-        visitCounts: undefined
+        loading: false,
+        count: null,
+        visitCounts: undefined,
+        error: false,
       };
       this.updateInput = fp.debounce(300, () => this.updateMods());
     }
@@ -365,8 +379,33 @@ export const ListModifierPage = withCurrentWorkspace()(
       return ![DomainType.PHYSICALMEASUREMENT, DomainType.VISIT].includes(domain);
     }
 
-    calculate() {
-      // TODO calculate count when new api call is ready
+    calculate = () => {
+      // TODO update when new api call is ready, currently this will always fail
+      try {
+        this.setState({loading: true, error: false});
+        const {
+          wizard: {domain, item: {modifiers, searchParameters}, role},
+          workspace: {cdrVersionId}
+        } = this.props;
+        const request = {
+          includes: [],
+          excludes: [],
+          [role]: [{
+            items: [{
+              type: domain,
+              searchParameters: searchParameters.map(mapParameter),
+              modifiers: modifiers
+            }]
+          }]
+        };
+        cohortBuilderApi().countParticipants(+cdrVersionId, request).then(response => {
+          this.setState({count: response, loading: false});
+        }, () => this.setState({loading: false, error: true}));
+      } catch (error) {
+        console.error(error);
+        // TODO this is not catching errors. Need to try again with the new api call
+        this.setState({loading: false, error: true});
+      }
     }
 
     validateValues() {
@@ -425,20 +464,25 @@ export const ListModifierPage = withCurrentWorkspace()(
     }
 
     render() {
-      const {formState, preview} = this.state;
+      const {count, error, formState, loading} = this.state;
       const tooltip = `Dates are consistently shifted within a participant’s record by a time period
         of up to 364 days backwards. The date shift differs across participants.`;
       const {errors, initialState, untouched} = this.validateValues();
-      const disableFinish = !!errors.size || untouched || preview.loading;
+      const disableFinish = !!errors.size || untouched || loading;
       this.props.disabled(disableFinish);
       const disabled = disableFinish || initialState;
       return <div style={{marginTop: '1rem'}}>
         <div style={styles.header}>
           The following modifiers are optional and apply to all selected criteria
         </div>
+        {error && <div style={styles.error}>
+          <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+            shape='exclamation-triangle' size='22'/>
+          Sorry, the request cannot be completed.
+        </div>}
         {!!errors.size && <div style={styles.errors}>
-          {Array.from(errors).map((error, e) => <div key={e} style={styles.errorItem}>
-            {error}
+          {Array.from(errors).map((err, e) => <div key={e} style={styles.errorItem}>
+            {err}
           </div>)}
         </div>}
         {formState.map((mod, i) => {
@@ -470,12 +514,17 @@ export const ListModifierPage = withCurrentWorkspace()(
           <div style={styles.row}>
             <div style={columns.col3}>
               <Button type='primary' style={disabled ? button.disabled : button.active}
-                disabled={disabled} onClick={this.calculate()}>Calculate</Button>
+                disabled={disabled} onClick={() => this.calculate()}>
+                {loading &&
+                  <Spinner size={16} style={{marginRight: '0.25rem', marginLeft: '-0.25rem'}}/>
+                }
+                Calculate
+              </Button>
             </div>
-            {!preview.loading && preview.count && <div style={columns.col8}>
+            {!loading && count && <div style={columns.col8}>
               <div style={{color: '#262262'}}>Results</div>
-              {!preview.loading && <div>
-                Number Participants: <span style={styles.previewCount}>{preview.count}</span>
+              {!loading && <div>
+                Number Participants: <span style={styles.previewCount}>{count}</span>
               </div>}
             </div>}
           </div>

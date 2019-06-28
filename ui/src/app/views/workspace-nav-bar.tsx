@@ -53,9 +53,10 @@ const styles = reactStyles({
 const tabs = [
   {name: 'About', link: ''},
   ...(environment.enableDatasetBuilder ? [{name: 'Data', link: 'data'}] : []),
-  {name: 'Cohorts', link: 'cohorts'},
-  {name: 'Concepts', link: 'concepts'},
-  {name: 'Notebooks', link: 'notebooks'},
+  ...(environment.enableDatasetBuilder ? [] : [
+    {name: 'Cohorts', link: 'cohorts'},
+    {name: 'Concepts', link: 'concepts'}]),
+  {name: environment.enableDatasetBuilder ? 'Analysis' : 'Notebooks', link: 'notebooks'},
 ];
 
 const navSeparator = <div style={styles.separator}/>;
