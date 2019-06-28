@@ -10,7 +10,7 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ClusterStatus} from 'generated/fetch';
-import {Spinner, SpinnerOverlay} from "../components/spinners";
+import {SpinnerOverlay} from '../components/spinners';
 
 const styles = reactStyles({
   navBar: {
