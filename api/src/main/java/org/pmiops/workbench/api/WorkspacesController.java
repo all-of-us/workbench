@@ -103,7 +103,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final NotebooksService notebooksService;
   private final UserService userService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   WorkspacesController(
@@ -142,6 +142,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @VisibleForTesting
   public void setUserProvider(Provider<User> userProvider) {
     this.userProvider = userProvider;
+  }
+
+  @VisibleForTesting
+  void setWorkbenchConfigProvider(Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   private String getRegisteredUserDomainEmail() {

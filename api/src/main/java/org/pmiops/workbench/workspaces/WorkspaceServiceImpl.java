@@ -138,10 +138,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<WorkspaceResponse> getPublishedWorkspaces() {
     return getWorkspacesAndPublicWorkspaces().stream()
-        .filter(
-            workspaceResponse ->
-                (workspaceResponse.getAccessLevel() != WorkspaceAccessLevel.OWNER
-                    && workspaceResponse.getWorkspace().getPublished()))
+        .filter(workspaceResponse -> (workspaceResponse.getWorkspace().getPublished()))
         .collect(Collectors.toList());
   }
 
