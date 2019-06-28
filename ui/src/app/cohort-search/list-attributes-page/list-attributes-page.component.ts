@@ -1,8 +1,7 @@
 import {ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
-import {AttrName, Operator, TreeSubType, TreeType} from 'generated';
-import {CriteriaSubType, DomainType, SearchGroup} from 'generated/fetch';
+import {AttrName, CriteriaSubType, DomainType, Operator, SearchGroup} from 'generated/fetch';
 
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
@@ -75,7 +74,7 @@ export class ListAttributesPageComponent implements OnInit {
         .then(resp => {
           resp.items.forEach(attr => {
             switch (attr.type) {
-              case AttrName.NUM:
+              case AttrName[AttrName.NUM]:
                 const NUM = <FormGroup>this.form.controls.NUM;
                 if (!this.attrs.NUM.length) {
                   NUM.addControl('num0', new FormGroup({
@@ -95,7 +94,7 @@ export class ListAttributesPageComponent implements OnInit {
                   this.attrs.NUM[0][attr.conceptName] = attr.estCount;
                 }
                 break;
-              case AttrName.CAT:
+              case AttrName[AttrName.CAT]:
                 if (parseInt(attr.estCount, 10) > 0) {
                   attr['checked'] = false;
                   this.attrs.CAT.push(attr);
@@ -104,7 +103,9 @@ export class ListAttributesPageComponent implements OnInit {
           });
         });
     } else {
-      this.options.unshift({value: AttrName.ANY, name: 'Any', display: 'Any', code: 'Any'});
+      this.options.unshift(
+  {value: AttrName[AttrName.ANY], name: 'Any', display: 'Any', code: 'Any'}
+      );
       this.attrs.NUM = this.criterion.subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{
@@ -119,8 +120,8 @@ export class ListAttributesPageComponent implements OnInit {
         this.selectedCode = 'Any';
         this.attrs.NUM.forEach((attr, i) => {
           attr.operator = AttrName.ANY;
-          this.dropdowns.selected[i] = AttrName.ANY;
-          this.dropdowns.oldVals[i] = AttrName.ANY;
+          this.dropdowns.selected[i] = AttrName[AttrName.ANY];
+          this.dropdowns.oldVals[i] = AttrName[AttrName.ANY];
           NUM.addControl('num' + i, new FormGroup({
             operator: new FormControl(),
             valueA: new FormControl(),
@@ -158,9 +159,9 @@ export class ListAttributesPageComponent implements OnInit {
           this.selectedCode = (this.dropdowns.codes.join(''));
         }
         if (option.value === AttrName.ANY) {
-          this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = AttrName.ANY;
+          this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = AttrName[AttrName.ANY];
           this.dropdowns.selected[other] = 'Any';
-        } else if (this.dropdowns.oldVals[index] === AttrName.ANY) {
+        } else if (this.dropdowns.oldVals[index] === AttrName[AttrName.ANY]) {
           this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = option.value;
           this.dropdowns.selected[other] = option.name;
         }
@@ -266,14 +267,16 @@ export class ListAttributesPageComponent implements OnInit {
       name = this.criterion.name + ' (Any)';
     } else {
       name = this.paramName;
-      this.attrs.NUM.forEach((attr, i) => {
+      this.attrs.NUM.forEach((attr) => {
         const paramAttr = {
           name: AttrName.NUM,
           operator: attr.operator,
           operands: attr.operator === 'BETWEEN' ? attr.operands : [attr.operands[0]],
-          conceptId: attr.conceptId
         };
-        if (attr.operator === AttrName.ANY && this.criterion.subtype === TreeSubType.BP) {
+        if (this.criterion.subtype === CriteriaSubType.BP) {
+          paramAttr['conceptId'] = attr.conceptId;
+        }
+        if (attr.operator === AttrName.ANY && this.criterion.subtype === CriteriaSubType.BP) {
           paramAttr.name = AttrName.ANY;
           paramAttr.operands = [];
           delete(paramAttr.operator);
@@ -315,7 +318,7 @@ export class ListAttributesPageComponent implements OnInit {
         if (i > 0) {
           name += ' / ';
         }
-        if (this.criterion.subtype === TreeSubType[TreeSubType.BP]) {
+        if (this.criterion.subtype === CriteriaSubType.BP) {
           name += attr.name + ' ';
         }
         name += this.options.find(option => option.value === attr.operator).display
@@ -384,7 +387,7 @@ export class ListAttributesPageComponent implements OnInit {
   }
 
   get isPM() {
-    return this.criterion.type === TreeType[TreeType.PM];
+    return this.criterion.domainId === DomainType[DomainType.PHYSICALMEASUREMENT];
   }
 
   get showCalc() {
