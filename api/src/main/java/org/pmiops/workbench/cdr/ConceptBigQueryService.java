@@ -85,22 +85,22 @@ public class ConceptBigQueryService {
           + "where survey = @"
           + SURVEY_PARAM;
 
-  private QueryJobConfiguration buildSurveyQuestionQuery(String survey) {
+  private QueryJobConfiguration buildSurveyQuestionQuery(String surveyName) {
     String finalSql = SURVEY_SQL_TEMPLATE;
     Map<String, QueryParameterValue> params = new HashMap<>();
-    params.put(SURVEY_PARAM, QueryParameterValue.string(survey));
+    params.put(SURVEY_PARAM, QueryParameterValue.string(surveyName));
     return QueryJobConfiguration.newBuilder(finalSql)
         .setNamedParameters(params)
         .setUseLegacySql(false)
         .build();
   }
 
-  public List<SurveyQuestionsResponse> getSurveyQuestions(String survey) {
+  public List<SurveyQuestionsResponse> getSurveyQuestions(String surveyName) {
     List<SurveyQuestionsResponse> responseList = new ArrayList<>();
 
     TableResult result =
         bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(buildSurveyQuestionQuery(survey)), 360000L);
+            bigQueryService.filterBigQueryConfig(buildSurveyQuestionQuery(surveyName)), 360000L);
     result
         .getValues()
         .forEach(
