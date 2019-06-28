@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -763,7 +762,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getPublishedWorkspaces() {
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
-
+    response.setItems(workspaceService.getPublishedWorkspaces());
     return ResponseEntity.ok(response);
   }
 
@@ -774,8 +773,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    dbWorkspace =
-        workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
+    dbWorkspace = workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
     dbWorkspace.setPublished(true);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
@@ -788,8 +786,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    dbWorkspace =
-        workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
+    dbWorkspace = workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
     dbWorkspace.setPublished(false);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());

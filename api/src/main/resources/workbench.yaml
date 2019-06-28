@@ -1945,6 +1945,8 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      published:
+        type: boolean
 
   UserRole:
     type: object

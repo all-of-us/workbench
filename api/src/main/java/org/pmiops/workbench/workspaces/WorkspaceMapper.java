@@ -36,6 +36,7 @@ public class WorkspaceMapper {
             .name(workspace.getName())
             .id(workspaceId.getWorkspaceName())
             .namespace(workspaceId.getWorkspaceNamespace())
+            .published(workspace.getPublished())
             .researchPurpose(researchPurpose);
     if (workspace.getCreator() != null) {
       result.setCreator(workspace.getCreator().getEmail());
@@ -65,6 +66,7 @@ public class WorkspaceMapper {
             .id(fcWorkspace.getName())
             .namespace(fcWorkspace.getNamespace())
             .researchPurpose(researchPurpose)
+            .published(workspace.getPublished())
             .googleBucketName(fcWorkspace.getBucketName());
     if (fcWorkspace.getCreatedBy() != null) {
       result.setCreator(fcWorkspace.getCreatedBy());

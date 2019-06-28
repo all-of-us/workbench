@@ -103,7 +103,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public List<WorkspaceResponse> getWorkspaces() {
+  public List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces() {
     Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
         getFirecloudWorkspaces();
     List<Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
@@ -122,6 +122,26 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                   workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;
             })
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<WorkspaceResponse> getWorkspaces() {
+    return getWorkspacesAndPublicWorkspaces().stream()
+        .filter(
+            workspaceResponse ->
+                !(workspaceResponse.getAccessLevel() != WorkspaceAccessLevel.OWNER
+                    && workspaceResponse.getWorkspace().getPublished()))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<WorkspaceResponse> getPublishedWorkspaces() {
+    return getWorkspacesAndPublicWorkspaces().stream()
+        .filter(
+            workspaceResponse ->
+                (workspaceResponse.getAccessLevel() != WorkspaceAccessLevel.OWNER
+                    && workspaceResponse.getWorkspace().getPublished()))
         .collect(Collectors.toList());
   }
 
@@ -387,6 +407,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .collect(Collectors.toList());
   }
 
+  @Override
   public Workspace setPublished(
       Workspace workspace, String publishedWorkspaceGroup, boolean publish) {
     Map<String, WorkspaceAccessEntry> firecloudAcls =

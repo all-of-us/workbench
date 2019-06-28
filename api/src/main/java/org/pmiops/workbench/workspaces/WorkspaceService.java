@@ -23,7 +23,11 @@ public interface WorkspaceService {
 
   Workspace get(String ns, String firecloudName);
 
+  List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces();
+
   List<WorkspaceResponse> getWorkspaces();
+
+  List<WorkspaceResponse> getPublishedWorkspaces();
 
   Workspace getByName(String ns, String name);
 
@@ -57,6 +61,5 @@ public interface WorkspaceService {
   WorkspaceACLUpdate updateFirecloudAclsOnUser(
       WorkspaceAccessLevel updatedAccess, WorkspaceACLUpdate currentUpdate);
 
-  Workspace setPublished(
-      Workspace workspace, String publishedWorkspaceGroup, boolean publish);
+  Workspace setPublished(Workspace workspace, String publishedWorkspaceGroup, boolean publish);
 }
