@@ -12,8 +12,8 @@ import {
   ConceptSet,
   CreateConceptSetRequest,
   Domain,
-  Surveys,
   SurveyQuestionsResponse,
+  Surveys,
   UpdateConceptSetRequest
 } from 'generated/fetch';
 import {validate} from 'validate.js';
