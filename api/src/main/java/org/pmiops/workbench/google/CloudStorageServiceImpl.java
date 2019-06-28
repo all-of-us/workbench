@@ -11,8 +11,6 @@ import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
@@ -183,9 +181,8 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public JsonObject getFileAsJson(String bucketName, String fileName) throws IOException {
-    return new JsonParser().parse(readToString(bucketName, fileName)).getAsJsonObject();
-    //    return new JSONObject(readToString(bucketName, fileName));
+  public JSONObject getFileAsJson(String bucketName, String fileName) throws IOException {
+    return new JSONObject(readToString(bucketName, fileName));
   }
 
   @Override
