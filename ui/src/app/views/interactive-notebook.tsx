@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import * as React from 'react';
 
 import {ClrIcon} from 'app/components/icons';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -10,7 +11,7 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ClusterStatus} from 'generated/fetch';
-import {SpinnerOverlay} from 'app/components/spinners';
+
 
 const styles = reactStyles({
   navBar: {
