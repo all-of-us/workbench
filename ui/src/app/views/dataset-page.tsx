@@ -443,7 +443,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       const {namespace, id} = this.props.workspace;
       const wsPathPrefix = 'workspaces/' + namespace + '/' + id;
       const cohortsPath = wsPathPrefix + '/cohorts';
-      const conceptSetsPath = wsPathPrefix + '/concepts/sets';
+      const conceptSetsPath = wsPathPrefix + '/concepts';
       const {
         dataSet,
         dataSetTouched,

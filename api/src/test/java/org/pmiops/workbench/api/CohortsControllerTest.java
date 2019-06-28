@@ -254,9 +254,6 @@ public class CohortsControllerTest {
     cohort.setDescription("demo");
     cohort.setType("demo");
     cohort.setCriteria(createDemoCriteria().toString());
-    when(cloudStorageService.readAllDemoCohorts()).thenReturn(Collections.singletonList(cohort));
-
-    doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspacesController.createWorkspace(workspace2);
@@ -305,8 +302,7 @@ public class CohortsControllerTest {
             .getBody()
             .getItems();
     assertThat(cohorts).containsAllOf(c1, c2);
-    // This is because we have a demo cohort in the workspace.
-    assertThat(cohorts.size()).isEqualTo(3);
+    assertThat(cohorts.size()).isEqualTo(2);
   }
 
   @Test

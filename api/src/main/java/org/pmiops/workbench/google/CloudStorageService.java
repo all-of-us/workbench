@@ -18,12 +18,6 @@ public interface CloudStorageService {
 
   String getImageUrl(String image_name);
 
-  void copyAllDemoNotebooks(String workspaceBucket);
-
-  List<Cohort> readAllDemoCohorts();
-
-  List<JSONObject> readAllDemoConceptSets();
-
   List<Blob> getBlobList(String bucketName, String directory);
 
   Set<BlobId> blobsExist(List<BlobId> id);

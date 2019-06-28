@@ -257,8 +257,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
 
-    cloudStorageService.copyAllDemoNotebooks(fcWorkspace.getBucketName());
-
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         new org.pmiops.workbench.db.model.Workspace();
@@ -293,63 +291,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
 
-    org.pmiops.workbench.db.model.Workspace finalDbWorkspace = dbWorkspace;
-    cloudStorageService.readAllDemoCohorts().stream()
-        .map(
-            apiCohort ->
-                cohortFactory.createCohort(
-                    apiCohort, userProvider.get(), finalDbWorkspace.getWorkspaceId()))
-        .forEach(
-            dbCohort -> {
-              try {
-                dbCohort = cohortDao.save(dbCohort);
-              } catch (DataIntegrityViolationException e) {
-                throw new BadRequestException(
-                    String.format(
-                        "Cohort \"/%s/%s/%d\" already exists.",
-                        finalDbWorkspace.getWorkspaceNamespace(),
-                        finalDbWorkspace.getWorkspaceId(),
-                        dbCohort.getCohortId()));
-              }
-            });
-
-    List<JSONObject> demoConceptSets = cloudStorageService.readAllDemoConceptSets();
-    for (JSONObject conceptSet : demoConceptSets) {
-      ConceptSet dbConceptSet = new ConceptSet();
-
-      dbConceptSet.setName(conceptSet.getString("name"));
-      dbConceptSet.setCreator(userProvider.get());
-      dbConceptSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
-      dbConceptSet.setCreationTime(now);
-      dbConceptSet.setLastModifiedTime(now);
-      dbConceptSet.setVersion(1);
-      dbConceptSet.setParticipantCount(conceptSet.getInt("participant_count"));
-      dbConceptSet.setDomain(
-          CommonStorageEnums.domainToStorage(Domain.fromValue(conceptSet.getString("domain"))));
-      try {
-        List<Object> conceptIdsJSON = conceptSet.getJSONArray("concept_ids").toList();
-        Set<Long> conceptIds =
-            conceptIdsJSON.stream()
-                .map(Object::toString)
-                .map(Long::valueOf)
-                .collect(Collectors.toSet());
-        dbConceptSet.getConceptIds().addAll(conceptIds);
-      } catch (JSONException e) {
-        throw new ServerErrorException(
-            String.format("concept_ids cannot be read from %s", conceptSet.getString("name")));
-      }
-
-      try {
-        dbConceptSet = conceptSetDao.save(dbConceptSet);
-      } catch (DataIntegrityViolationException e) {
-        throw new ServerErrorException(
-            String.format(
-                "Concept Set \"/%s/%s/%d\" already exists.",
-                dbWorkspace.getWorkspaceNamespace(),
-                dbWorkspace.getWorkspaceId(),
-                dbConceptSet.getConceptSetId()));
-      }
-    }
     return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
