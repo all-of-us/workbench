@@ -24,7 +24,7 @@ const defaultStyle = {
 
 const hoverStyle = {...defaultStyle, fill: '#83C3EC'};
 
-const disabledStyle = {...defaultStyle, fill: '#C3C3C3'};
+const disabledStyle = {...defaultStyle, cursor: 'not-allowed', fill: '#C3C3C3'};
 
 export class EditComponentReact extends React.Component<EditComponentProps, EditComponentState> {
 

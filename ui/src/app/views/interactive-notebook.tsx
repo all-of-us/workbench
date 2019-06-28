@@ -10,8 +10,8 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ClusterStatus} from 'generated/fetch';
-
 
 const styles = reactStyles({
   navBar: {
@@ -34,6 +34,10 @@ const styles = reactStyles({
   },
   clickable: {
     cursor: 'pointer'
+  },
+  disabled: {
+    cursor: 'not-allowed',
+    opacity: 0.7
   },
   navBarIcon: {
     height: '16px',
@@ -113,12 +117,18 @@ export const InteractiveNotebook = withCurrentWorkspace()(
     }
 
     private onEditClick() {
-      this.setState({userRequestedEditMode: true});
-      this.runCluster();
+      if (this.canWrite()) {
+        this.setState({userRequestedEditMode: true});
+        this.runCluster();
+      }
     }
 
     private onClusterRunning() {
       navigate(['workspaces', this.billingProjectId, this.workspaceId, 'notebooks', this.nbName]);
+    }
+
+    private canWrite() {
+      return WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel);
     }
 
     render() {
@@ -133,11 +143,12 @@ export const InteractiveNotebook = withCurrentWorkspace()(
                 <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}></ClrIcon>
                 Preparing your Jupyter environment. This may take up to 10 minutes.
               </div>) : (<div>
-              <div onClick={() => {
-                this.onEditClick();
-              }} style={{...styles.navBarItem, ...styles.clickable, width: 135}}>
+              <div style={
+                Object.assign({}, styles.navBarItem,
+                  this.canWrite() ? styles.clickable : styles.disabled, {width: 135})}
+                   onClick={() => { this.onEditClick(); }}>
                 <EditComponentReact enableHoverEffect={false}
-                                    disabled={false}
+                                    disabled={!this.canWrite()}
                                     style={{...styles.navBarIcon}}/>
                 Edit
               </div>

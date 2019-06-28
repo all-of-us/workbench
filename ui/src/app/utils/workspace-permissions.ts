@@ -1,5 +1,12 @@
 import {Workspace, WorkspaceAccessLevel, WorkspaceResponse} from 'generated/fetch';
 
+export namespace WorkspacePermissionsUtil {
+  export function canWrite(accessLevel: WorkspaceAccessLevel) {
+    return accessLevel === WorkspaceAccessLevel.OWNER ||
+      accessLevel === WorkspaceAccessLevel.WRITER;
+  }
+}
+
 export class WorkspacePermissions {
   workspace: Workspace;
   accessLevel: WorkspaceAccessLevel;
@@ -9,13 +16,12 @@ export class WorkspacePermissions {
     this.accessLevel = workspaceResponse.accessLevel;
   }
 
-  get isOwner(): boolean {
+  get isOwner() {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
-  get canWrite(): boolean {
-    return this.accessLevel === WorkspaceAccessLevel.OWNER ||
-      this.accessLevel === WorkspaceAccessLevel.WRITER;
+  get canWrite() {
+    return WorkspacePermissionsUtil.canWrite(this.accessLevel);
   }
 
   get canRead() {
