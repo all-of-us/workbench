@@ -532,7 +532,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                 checked={!this.selectAll} />
                       <div style={{marginLeft: '0.25rem', fontSize: '13px', lineHeight: '17px'}}>
                         {this.selectAll ? 'Select All' : 'Deselect All'}
-                        </div>
+                      </div>
                     </div>
                   </div>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
