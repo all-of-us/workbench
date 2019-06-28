@@ -49,6 +49,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   firstVisit = true;
   username = '';
   creatingNotebook = false;
+  workspaceUserRoles = [];
 
   bugReportOpen: boolean;
   bugReportDescription = '';
@@ -107,6 +108,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             this.cohortsError = true;
           });
     this.loadNotebookList();
+    this.loadUserRoles();
     this.cdrVersionStorageService.cdrVersions$.subscribe(resp => {
       this.cdrVersion = resp.items.find(v => v.cdrVersionId === this.workspace.cdrVersionId);
     });
@@ -114,7 +116,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   private reloadWorkspace(workspace: WorkspaceData) {
     this.workspace = workspace;
-    this.workspace.userRoles = fp.sortBy('familyName', workspace.userRoles);
     this.accessLevel = workspace.accessLevel;
     this.researchPurposeArray = [];
     ResearchPurposeItems.forEach((item) => {
@@ -138,6 +139,19 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const {ns, wsid} = urlParamsStore.getValue();
     this.wsNamespace = ns;
     this.wsId = wsid;
+  }
+
+  private loadUserRoles() {
+    workspacesApi().getFirecloudWorkspaceUserRoles(this.wsNamespace, this.wsId)
+      .then(
+        resp => {
+          this.workspaceUserRoles = fp.sortBy('familyName', resp.items);
+        }
+      ).catch(
+        error => {
+          console.log(error);
+        }
+    );
   }
 
   private loadNotebookList() {
@@ -203,6 +217,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   closeShare(): void {
     this.sharing = false;
+    this.loadUserRoles();
   }
 
   submitNotebooksLoadBugReport(): void {

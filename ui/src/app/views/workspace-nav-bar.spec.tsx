@@ -35,9 +35,9 @@ describe('WorkspaceNavBarComponent', () => {
     NavStore.navigate = navSpy;
     const wrapper = component();
 
-    wrapper.find({'data-test-id': 'Cohorts'}).first().simulate('click');
+    wrapper.find({'data-test-id': 'Data'}).first().simulate('click');
     expect(navSpy).toHaveBeenCalledWith(
-      ['/workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'cohorts']);
+      ['/workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'data']);
   });
 
   it('should call delete method when clicked', () => {

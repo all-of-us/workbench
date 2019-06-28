@@ -64,9 +64,7 @@ public class User {
   private Short freeTierBillingProjectStatus;
   private Timestamp firstSignInTime;
   private Set<Short> authorities = new HashSet<>();
-  private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<>();
   private Boolean idVerificationIsValid;
-  private Timestamp termsOfServiceCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
   private Short emailVerificationStatus;
@@ -289,23 +287,6 @@ public class User {
     this.pageVisits = newPageVisits;
   }
 
-  @OneToMany(
-      fetch = FetchType.LAZY,
-      mappedBy = "user",
-      orphanRemoval = true,
-      cascade = CascadeType.ALL)
-  public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
-    return workspaceUserRoles;
-  }
-
-  /**
-   * Necessary for Spring initialization of the object. Not actually supported because it won't
-   * delete old entries.
-   */
-  public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
-    this.workspaceUserRoles = userRoles;
-  }
-
   @Column(name = "id_verification_is_valid")
   public Boolean getIdVerificationIsValid() {
     return idVerificationIsValid;
@@ -338,15 +319,6 @@ public class User {
       rawValue = new Gson().toJson(value);
     }
     setClusterConfigDefaultRaw(rawValue);
-  }
-
-  @Column(name = "terms_of_service_completion_time")
-  public Timestamp getTermsOfServiceCompletionTime() {
-    return termsOfServiceCompletionTime;
-  }
-
-  public void setTermsOfServiceCompletionTime(Timestamp termsOfServiceCompletionTime) {
-    this.termsOfServiceCompletionTime = termsOfServiceCompletionTime;
   }
 
   @Column(name = "demographic_survey_completion_time")

@@ -2,11 +2,11 @@ import {ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
 import {AttrName, Operator, TreeSubType, TreeType} from 'generated';
-import {DomainType} from 'generated/fetch';
+import {CriteriaSubType, DomainType, SearchGroup} from 'generated/fetch';
 
-import {PM_UNITS} from 'app/cohort-search/constant';
+import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {stripHtml} from 'app/cohort-search/utils';
+import {mapParameter, stripHtml} from 'app/cohort-search/utils';
 import {numberAndNegativeValidator, rangeValidator} from 'app/cohort-search/validators';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -29,7 +29,7 @@ export class ListAttributesPageComponent implements OnInit {
     labels: ['', ''],
     codes: ['', '']
   };
-  preview: any = {count: -1};
+  count = -1;
   loading: boolean;
   error: boolean;
   selectedCode: any;
@@ -71,7 +71,6 @@ export class ListAttributesPageComponent implements OnInit {
   ngOnInit() {
     if (this.isMeasurement) {
       const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-      // TODO this call will need to be switched when new version is added
       cohortBuilderApi().getCriteriaAttributeByConceptId(cdrid, this.criterion.conceptId)
         .then(resp => {
           resp.items.forEach(attr => {
@@ -106,7 +105,15 @@ export class ListAttributesPageComponent implements OnInit {
         });
     } else {
       this.options.unshift({value: AttrName.ANY, name: 'Any', display: 'Any', code: 'Any'});
-      this.attrs.NUM = this.criterion.attributes;
+      this.attrs.NUM = this.criterion.subtype === CriteriaSubType[CriteriaSubType.BP]
+          ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
+          : [{
+            name: this.criterion.subtype,
+            operator: null,
+            operands: [null],
+            MIN: 0,
+            MAX: 10000
+          }];
       if (this.attrs.NUM) {
         const NUM = <FormGroup>this.form.controls.NUM;
         this.selectedCode = 'Any';
@@ -121,7 +128,7 @@ export class ListAttributesPageComponent implements OnInit {
           }));
           this.dropdowns.labels[i] = attr.name;
         });
-        this.preview = {count : this.criterion.count};
+        this.count = this.criterion.count;
       }
     }
   }
@@ -130,7 +137,7 @@ export class ListAttributesPageComponent implements OnInit {
     if (this.attrs.EXISTS) {
       this.form.controls.NUM.reset();
       this.selectedCode = 'Any';
-      this.preview = {count : this.criterion.count};
+      this.count = this.criterion.count;
     } else {
       this.refresh();
     }
@@ -165,8 +172,8 @@ export class ListAttributesPageComponent implements OnInit {
         this.selectedCode = option.code;
       }
       this.setValidation(option.name);
-      this.preview = option.value === AttrName.ANY
-        ? {count : this.criterion.count} : {count: -1};
+      this.count = option.value === AttrName.ANY
+        ? this.criterion.count : -1;
     }
   }
 
@@ -209,7 +216,7 @@ export class ListAttributesPageComponent implements OnInit {
         this.form.controls.NUM.get(['num' + index, name]).setValue(value, {emitEvent: false});
       }
     }
-    this.preview = {count: -1};
+    this.count = -1;
   }
 
   get isValid() {
@@ -231,7 +238,7 @@ export class ListAttributesPageComponent implements OnInit {
   }
 
   refresh() {
-    this.preview = {count: -1};
+    this.count = -1;
     this.form.reset();
     this.attrs.NUM.forEach(num => {
       num.operator = null;
@@ -266,13 +273,12 @@ export class ListAttributesPageComponent implements OnInit {
           operands: attr.operator === 'BETWEEN' ? attr.operands : [attr.operands[0]],
           conceptId: attr.conceptId
         };
-        if (this.form.value.NUM['num' + i].operator === AttrName.ANY
-          && this.criterion.subtype === TreeSubType.BP) {
+        if (attr.operator === AttrName.ANY && this.criterion.subtype === TreeSubType.BP) {
           paramAttr.name = AttrName.ANY;
           paramAttr.operands = [];
           delete(paramAttr.operator);
           attrs.push(paramAttr);
-        } else if (this.form.value.NUM['num' + i].operator !== AttrName.ANY) {
+        } else if (attr.operator !== AttrName.ANY) {
           attrs.push(paramAttr);
         }
       });
@@ -320,8 +326,28 @@ export class ListAttributesPageComponent implements OnInit {
   }
 
   requestPreview() {
-    // const param = this.paramWithAttributes;
+    this.loading = true;
+    this.error = false;
+    const param = this.paramWithAttributes;
     // TODO make api call for count (call doesn't exist yet)
+    const cdrVersionId = +(currentWorkspaceStore.getValue().cdrVersionId);
+    const request = {
+      excludes: [],
+      includes: [<SearchGroup>{
+        items: [{
+          type: param.domainId,
+          searchParameters: [mapParameter(param)],
+          modifiers: []
+        }],
+      }]
+    };
+    cohortBuilderApi().countParticipants(cdrVersionId, request).then(response => {
+      this.count = response;
+      this.loading = false;
+    }, () => {
+      this.error = true;
+      this.loading = false;
+    });
   }
 
   addAttrs() {
@@ -367,6 +393,12 @@ export class ListAttributesPageComponent implements OnInit {
       notAny = this.attrs.NUM && this.attrs.NUM[0].operator !== AttrName.ANY;
     }
     return !this.attrs.EXISTS && notAny;
+  }
+
+  get disabled() {
+    return this.form.invalid ||
+      this.loading ||
+      this.attrs.NUM.every(attr => attr.operator === 'ANY');
   }
 
   get showAdd() {

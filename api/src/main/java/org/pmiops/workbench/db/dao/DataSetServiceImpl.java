@@ -187,7 +187,7 @@ public class DataSetServiceImpl implements DataSetService {
                           });
                   return participantQuery.get();
                 })
-            .collect(Collectors.joining(" OR PERSON_ID IN "));
+            .collect(Collectors.joining(" UNION DISTINCT "));
     List<Domain> domainList =
         dataSet.getValues().stream().map(value -> value.getDomain()).collect(Collectors.toList());
 
@@ -216,7 +216,10 @@ public class DataSetServiceImpl implements DataSetService {
                       .collect(Collectors.joining(" ")));
 
       // CONCEPT SETS HERE:
-      if (conceptSetsSelected.stream().map(conceptSet -> conceptSet.getConceptIds()).count() == 0) {
+      if (conceptSetsSelected.stream()
+              .mapToLong(conceptSet -> conceptSet.getConceptIds().size())
+              .sum()
+          == 0) {
         throw new BadRequestException("Concept Sets must contain at least one concept");
       }
       String conceptSetQueries =

@@ -11,11 +11,13 @@ import {CodeDropdownComponent} from 'app/cohort-search/code-dropdown/code-dropdo
 import {DemographicsComponent} from 'app/cohort-search/demographics/demographics.component';
 import {GenderChartComponent} from 'app/cohort-search/gender-chart/gender-chart.component';
 import {ListAttributesPageComponent} from 'app/cohort-search/list-attributes-page/list-attributes-page.component';
+import {ListDemographicsComponent} from 'app/cohort-search/list-demographics/list-demographics.component';
 import {ListModalComponent} from 'app/cohort-search/list-modal/list-modal.component';
 import {ListModifierPageComponent} from 'app/cohort-search/list-modifier-page/list-modifier-page.component';
 import {ListNodeInfoComponent} from 'app/cohort-search/list-node-info/list-node-info.component';
 import {ListNodeComponent} from 'app/cohort-search/list-node/list-node.component';
 import {ListOptionInfoComponent} from 'app/cohort-search/list-option-info/list-option-info.component';
+import {ListOverviewComponent} from 'app/cohort-search/list-overview/list-overview.component';
 import {ListSearchBarComponent} from 'app/cohort-search/list-search-bar/list-search-bar.component';
 import {ListSearchGroupItemComponent} from 'app/cohort-search/list-search-group-item/list-search-group-item.component';
 import {ListSearchGroupListComponent} from 'app/cohort-search/list-search-group-list/list-search-group-list.component';
@@ -88,11 +90,13 @@ describe('CohortSearchComponent', () => {
         DemographicsComponent,
         GenderChartComponent,
         ListAttributesPageComponent,
+        ListDemographicsComponent,
         ListModalComponent,
         ListModifierPageComponent,
         ListNodeInfoComponent,
         ListNodeComponent,
         ListOptionInfoComponent,
+        ListOverviewComponent,
         ListSearchBarComponent,
         ListSearchGroupItemComponent,
         ListSearchGroupListComponent,

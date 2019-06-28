@@ -47,7 +47,7 @@
           </div>
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="wizard.domain">
-              <crit-demographics *ngSwitchCase="domainType[domainType.PERSON]"></crit-demographics>
+              <crit-list-demographics *ngSwitchCase="domainType[domainType.PERSON]"></crit-list-demographics>
               <ng-container *ngSwitchDefault>
                 <div *ngIf="disableCursor" class="spinner spinner-lg spin-in-overlay">
                   Loading...

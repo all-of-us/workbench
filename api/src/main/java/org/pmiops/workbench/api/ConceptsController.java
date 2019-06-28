@@ -136,13 +136,12 @@ public class ConceptsController implements ConceptsApiDelegate {
     return ResponseEntity.ok(answer);
   }
 
-  @Override
-  public ResponseEntity<List<SurveyQuestionsResponse>> getSurveyDetails(
-      String workspaceNamespace, String workspaceId, String survey) {
+  public ResponseEntity<List<SurveyQuestionsResponse>> getSurveyQuestions(
+      String workspaceNamespace, String workspaceId, String surveyName) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     List<SurveyQuestionsResponse> surveyQuestionAnswerList =
-        conceptBigQueryService.getSurveys(survey);
+        conceptBigQueryService.getSurveyQuestions(surveyName);
     return ResponseEntity.ok(surveyQuestionAnswerList);
   }
 

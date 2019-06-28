@@ -37,30 +37,29 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
   onClose: Function,
   surveyName: string
 }, {
+  addingToExistingSet: boolean;
   conceptSets: ConceptSet[];
   errorSaving: boolean;
-  addingToExistingSet: boolean;
   loading: boolean;
-  nameTouched: boolean;
-  selectedSet: ConceptSet;
-  newSetDescription: string;
   name: string;
+  nameTouched: boolean;
+  newSetDescription: string;
   saving: boolean;
-
+  selectedSet: ConceptSet;
 }> {
 
   constructor(props) {
     super(props);
     this.state = {
+      addingToExistingSet: true,
       conceptSets: [],
       errorSaving: false,
-      addingToExistingSet: true,
       loading: true,
-      nameTouched: false,
-      selectedSet: null,
-      newSetDescription: '',
       name: '',
-      saving: false
+      nameTouched: false,
+      newSetDescription: '',
+      saving: false,
+      selectedSet: null
     };
   }
 

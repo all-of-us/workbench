@@ -14,11 +14,13 @@ import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {DemographicsComponent} from './demographics/demographics.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
 import {ListAttributesPageComponent} from './list-attributes-page/list-attributes-page.component';
+import {ListDemographicsComponent} from './list-demographics/list-demographics.component';
 import {ListModalComponent} from './list-modal/list-modal.component';
 import {ListModifierPageComponent} from './list-modifier-page/list-modifier-page.component';
 import {ListNodeInfoComponent} from './list-node-info/list-node-info.component';
 import {ListNodeComponent} from './list-node/list-node.component';
 import {ListOptionInfoComponent} from './list-option-info/list-option-info.component';
+import {ListOverviewComponent} from './list-overview/list-overview.component';
 import {ListSearchBarComponent} from './list-search-bar/list-search-bar.component';
 import {ListSearchGroupItemComponent} from './list-search-group-item/list-search-group-item.component';
 import {ListSearchGroupListComponent} from './list-search-group-list/list-search-group-list.component';
@@ -78,11 +80,13 @@ const routes: Routes = [{
     DemographicsComponent,
     GenderChartComponent,
     ListAttributesPageComponent,
+    ListDemographicsComponent,
     ListModalComponent,
     ListModifierPageComponent,
     ListNodeComponent,
     ListNodeInfoComponent,
     ListOptionInfoComponent,
+    ListOverviewComponent,
     ListSearchBarComponent,
     ListSearchGroupItemComponent,
     ListSearchGroupListComponent,

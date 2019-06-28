@@ -53,12 +53,12 @@ interface Props {
 }
 
 interface State {
-  surveyList: Array<SurveyDetails>;
   answerLoading: Array<boolean>;
-  loading: boolean;
   expandedRows: Array<any>;
-  selectedQuestions: Array<SurveyQuestionsResponse>;
+  loading: boolean;
   seeMyAnswers: Array<boolean>;
+  selectedQuestions: Array<SurveyQuestionsResponse>;
+  surveyList: Array<SurveyDetails>;
 }
 
 export const SurveyDetails = withCurrentWorkspace()(
@@ -66,12 +66,12 @@ export const SurveyDetails = withCurrentWorkspace()(
     constructor(props) {
       super(props);
       this.state = {
-        surveyList: [],
         answerLoading: [],
-        loading: true,
         expandedRows: [],
-        selectedQuestions: [],
+        loading: true,
         seeMyAnswers: [],
+        selectedQuestions: [],
+        surveyList: []
       };
     }
 
@@ -82,7 +82,7 @@ export const SurveyDetails = withCurrentWorkspace()(
     async loadSurveyDetails() {
       try {
         const {workspace, surveyName} = this.props;
-        const surveys = await conceptsApi().getSurveyDetails(
+        const surveys = await conceptsApi().getSurveyQuestions(
           workspace.namespace, workspace.id, surveyName);
         const seeMyAnsList = [];
         surveys.forEach(survey => seeMyAnsList.push(false));

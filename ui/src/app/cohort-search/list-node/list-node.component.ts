@@ -1,5 +1,5 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {scrollStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
+import {ppiQuestions, scrollStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';
@@ -53,24 +53,36 @@ export class ListNodeComponent implements OnInit, OnDestroy {
     if (!event || !!this.children) { return ; }
     this.loading = true;
     const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
-    const {domainId, id, isStandard} = this.node;
+    const {domainId, id, isStandard, name} = this.node;
     const type = domainId === DomainType.DRUG ? CriteriaType[CriteriaType.ATC] : this.node.type;
-    cohortBuilderApi().getCriteriaBy(cdrId, domainId, type, isStandard, id)
-      .then(resp => {
-        if (resp.items.length === 0 && domainId === DomainType.DRUG) {
-          cohortBuilderApi()
-            .getCriteriaBy(cdrId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
-            .then(rxResp => {
-              this.empty = rxResp.items.length === 0;
-              this.children = rxResp.items;
-              this.loading = false;
-            }, () => this.error = true);
-        } else {
-          this.empty = resp.items.length === 0;
-          this.children = resp.items;
-          this.loading = false;
-        }
-      }, () => this.error = true);
+    try {
+      cohortBuilderApi().getCriteriaBy(cdrId, domainId, type, isStandard, id)
+        .then(resp => {
+          if (resp.items.length === 0 && domainId === DomainType.DRUG) {
+            cohortBuilderApi()
+              .getCriteriaBy(cdrId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
+              .then(rxResp => {
+                this.empty = rxResp.items.length === 0;
+                this.children = rxResp.items;
+                this.loading = false;
+              }, () => this.error = true);
+          } else {
+            this.empty = resp.items.length === 0;
+            this.children = resp.items;
+            this.loading = false;
+            if (!this.empty && domainId === DomainType.SURVEY && !resp.items[0].group) {
+              // save questions in the store so we can display them along with answers if selected
+              const questions = ppiQuestions.getValue();
+              questions[id] = name;
+              ppiQuestions.next(questions);
+            }
+          }
+        });
+    } catch (error) {
+      console.log(error);
+      this.error = true;
+      this.loading = false;
+    }
   }
 
   toggleExpanded() {

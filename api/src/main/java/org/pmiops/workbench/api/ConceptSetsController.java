@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   private static final int MAX_CONCEPTS_PER_SET = 1000;
+  private static final String CONCEPT_CLASS_ID_QUESTION = "Question";
 
   private final WorkspaceService workspaceService;
   private final ConceptSetDao conceptSetDao;
@@ -224,11 +225,12 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   @Override
   public ResponseEntity<ConceptSetListResponse> getSurveyConceptSetsInWorkspace(
-      String workspaceNamespace, String workspaceId, String survey) {
+      String workspaceNamespace, String workspaceId, String surveyName) {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    short surveyId = CommonStorageEnums.surveysToStorage(Surveys.fromValue(survey.toUpperCase()));
+    short surveyId =
+        CommonStorageEnums.surveysToStorage(Surveys.fromValue(surveyName.toUpperCase()));
     List<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
         conceptSetDao.findByWorkspaceIdAndSurvey(workspace.getWorkspaceId(), surveyId);
     ConceptSetListResponse response = new ConceptSetListResponse();
@@ -278,7 +280,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(addedIds);
     List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
         ImmutableList.copyOf(concepts).stream()
-            .filter(concept -> !concept.getConceptClassId().equals("Question"))
+            .filter(concept -> !concept.getConceptClassId().equals(CONCEPT_CLASS_ID_QUESTION))
             .filter(
                 concept -> {
                   Domain domain = CommonStorageEnums.domainIdToDomain(concept.getDomainId());

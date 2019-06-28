@@ -29,7 +29,7 @@ public class ConceptBigQueryService {
   private static final String SURVEY_PARAM = "survey";
   private static final String QUESTION_PARAM = "question_concept_id";
 
-  private static final String SURVEY_SQL_TEMPLATE =
+  private static final String SURVEY_QUESTION_SQL_TEMPLATE =
       "select DISTINCT(question) as question,\n"
           + "question_concept_id as concept_id \n"
           + "from `${projectId}.${dataSetId}.ds_survey`\n"
@@ -97,10 +97,10 @@ public class ConceptBigQueryService {
     return (int) result.iterateAll().iterator().next().get(0).getLongValue();
   }
 
-  private QueryJobConfiguration buildSurveyQuery(String survey) {
-    String finalSql = SURVEY_SQL_TEMPLATE;
+  private QueryJobConfiguration buildSurveyQuestionQuery(String surveyName) {
+    String finalSql = SURVEY_QUESTION_SQL_TEMPLATE;
     Map<String, QueryParameterValue> params = new HashMap<>();
-    params.put(SURVEY_PARAM, QueryParameterValue.string(survey));
+    params.put(SURVEY_PARAM, QueryParameterValue.string(surveyName));
     return QueryJobConfiguration.newBuilder(finalSql)
         .setNamedParameters(params)
         .setUseLegacySql(false)
@@ -117,12 +117,12 @@ public class ConceptBigQueryService {
         .build();
   }
 
-  public List<SurveyQuestionsResponse> getSurveys(String survey) {
+  public List<SurveyQuestionsResponse> getSurveyQuestions(String surveyName) {
     List<SurveyQuestionsResponse> responseList = new ArrayList<>();
 
     TableResult result =
         bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(buildSurveyQuery(survey)), 360000L);
+            bigQueryService.filterBigQueryConfig(buildSurveyQuestionQuery(surveyName)), 360000L);
     result
         .getValues()
         .forEach(
@@ -146,12 +146,20 @@ public class ConceptBigQueryService {
         .forEach(
             surveyValue -> {
               SurveyAnswerResponse answer = new SurveyAnswerResponse();
-              answer.setParticipationCount(
-                  Long.parseLong(surveyValue.get(2).getValue().toString()));
+              if (surveyValue.get(2).getValue() != null) {
+                answer.setParticipationCount(
+                    Long.parseLong(surveyValue.get(2).getValue().toString()));
+              } else {
+                answer.setParticipationCount(0l);
+              }
               answer.setAnswer(surveyValue.get(0).getValue().toString());
               answer.setConceptId(Long.parseLong(surveyValue.get(1).getValue().toString()));
-              answer.setPercentAnswered(
-                  Double.parseDouble(surveyValue.get(3).getValue().toString()));
+              if (surveyValue.get(3).getValue() != null) {
+                answer.setPercentAnswered(
+                    Double.parseDouble(surveyValue.get(3).getValue().toString()));
+              } else {
+                answer.setPercentAnswered(0.0);
+              }
               answerList.add(answer);
             });
     return answerList;

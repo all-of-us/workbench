@@ -7,7 +7,6 @@ import {
   FileDetail,
   NotebookRename,
   ShareWorkspaceRequest,
-  ShareWorkspaceResponse,
   UpdateWorkspaceRequest,
   UserRole,
   Workspace,
@@ -15,6 +14,7 @@ import {
   WorkspaceListResponse,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
+  WorkspaceUserRolesResponse
 } from 'generated';
 import {UserServiceStub} from './user-service-stub';
 
@@ -63,6 +63,7 @@ export class WorkspacesServiceStub {
     }
   ];
   notebookList: FileDetail[];
+  workspaceUserRoles: Map< string, UserRole[]>;
 
   constructor() {
     this.userService = new UserServiceStub();
@@ -70,6 +71,9 @@ export class WorkspacesServiceStub {
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.workspacesForReview = WorkspacesServiceStub.stubWorkspacesForReview();
     this.notebookList = WorkspacesServiceStub.stubNotebookList();
+    this.workspaceUserRoles = new Map<string, UserRole[]>();
+    this.workspaceUserRoles
+      .set(this.workspaces[0].id, WorkspacesServiceStub.stubWorkspaceUserRoles());
   }
 
   static stubWorkspace(): Workspace {
@@ -99,27 +103,30 @@ export class WorkspacesServiceStub {
         socialBehavioral: false,
         reasonForAllOfUs: '',
       },
-      userRoles: [
-        {
-          email: 'sampleuser1@fake-research-aou.org',
-          givenName: 'Sample',
-          familyName: 'User1',
-          role: WorkspaceAccessLevel.OWNER
-        },
-        {
-          email: 'sampleuser2@fake-research-aou.org',
-          givenName: 'Sample',
-          familyName: 'User2',
-          role: WorkspaceAccessLevel.WRITER
-        },
-        {
-          email: 'sampleuser3@fake-research-aou.org',
-          givenName: 'Sample',
-          familyName: 'User3',
-          role: WorkspaceAccessLevel.READER
-        },
-      ]
     };
+  }
+
+  static stubWorkspaceUserRoles(): UserRole[] {
+    return [
+      {
+        email: 'sampleuser1@fake-research-aou.org',
+        givenName: 'Sample',
+        familyName: 'User1',
+        role: WorkspaceAccessLevel.OWNER
+      },
+      {
+        email: 'sampleuser2@fake-research-aou.org',
+        givenName: 'Sample',
+        familyName: 'User2',
+        role: WorkspaceAccessLevel.WRITER
+      },
+      {
+        email: 'sampleuser3@fake-research-aou.org',
+        givenName: 'Sample',
+        familyName: 'User3',
+        role: WorkspaceAccessLevel.READER
+      },
+    ];
   }
 
   static stubWorkspaceData(): WorkspaceData {
@@ -287,8 +294,8 @@ export class WorkspacesServiceStub {
 
   shareWorkspace(workspaceNamespace: string,
     workspaceId: string,
-    request: ShareWorkspaceRequest): Observable<ShareWorkspaceResponse> {
-    return new Observable<ShareWorkspaceResponse>(observer => {
+    request: ShareWorkspaceRequest): Observable<WorkspaceUserRolesResponse> {
+    return new Observable<WorkspaceUserRolesResponse>(observer => {
       setTimeout(() => {
         const updateIndex = this.workspaces.findIndex((workspace: Workspace) => {
           if (workspace.id === workspaceId) {
@@ -374,5 +381,14 @@ export class WorkspacesServiceStub {
       }, 0);
     });
 
+  }
+
+  getFirecloudWorkspaceUserRoles(workspaceNamespace: string, workspaceId: string): Observable<any> {
+    return new Observable<any>(observer => {
+      setTimeout(() => {
+        observer.next(this.workspaceUserRoles.get(workspaceId));
+        observer.complete();
+      });
+    });
   }
 }

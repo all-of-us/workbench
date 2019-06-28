@@ -29,6 +29,7 @@ import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.firecloud.model.Profile;
+import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceIngest;
@@ -49,6 +50,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<NihApi> nihApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
+  private final Provider<WorkspacesApi> workspaceAclsApiProvider;
   private final Provider<StatusApi> statusApiProvider;
   private final FirecloudRetryHandler retryHandler;
   private final Provider<GoogleCredential> fcAdminCredsProvider;
@@ -79,7 +81,8 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<BillingApi> billingApiProvider,
       Provider<GroupsApi> groupsApiProvider,
       Provider<NihApi> nihApiProvider,
-      Provider<WorkspacesApi> workspacesApiProvider,
+      @Qualifier("workspacesApi") Provider<WorkspacesApi> workspacesApiProvider,
+      @Qualifier("workspaceAclsApi") Provider<WorkspacesApi> workspaceAclsApiProvider,
       Provider<StatusApi> statusApiProvider,
       FirecloudRetryHandler retryHandler,
       ServiceAccounts serviceAccounts,
@@ -90,6 +93,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.groupsApiProvider = groupsApiProvider;
     this.nihApiProvider = nihApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
+    this.workspaceAclsApiProvider = workspaceAclsApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
     this.serviceAccounts = serviceAccounts;
@@ -274,6 +278,13 @@ public class FireCloudServiceImpl implements FireCloudService {
     return retryHandler.run(
         (context) ->
             workspacesApi.updateWorkspaceACL(projectName, workspaceName, false, aclUpdates));
+  }
+
+  @Override
+  public WorkspaceACL getWorkspaceAcl(String projectName, String workspaceName) {
+    WorkspacesApi workspaceAclsApi = workspaceAclsApiProvider.get();
+    return retryHandler.run(
+        (context) -> workspaceAclsApi.getWorkspaceAcl(projectName, workspaceName));
   }
 
   @Override
