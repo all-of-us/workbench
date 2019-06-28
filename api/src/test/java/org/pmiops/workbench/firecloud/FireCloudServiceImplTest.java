@@ -26,6 +26,7 @@ import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.auth.OAuth;
@@ -48,6 +49,7 @@ public class FireCloudServiceImplTest {
   @Mock private GroupsApi groupsApi;
   @Mock private NihApi nihApi;
   @Mock private StatusApi statusApi;
+  @Mock private StaticNotebooksApi staticNotebooksApi;
   @Mock private GoogleCredential fireCloudCredential;
   @Mock private ServiceAccounts serviceAccounts;
   @Mock private GoogleCredential impersonatedCredential;
@@ -71,6 +73,7 @@ public class FireCloudServiceImplTest {
             Providers.of(workspacesApi),
             Providers.of(workspaceAclsApi),
             Providers.of(statusApi),
+            Providers.of(staticNotebooksApi),
             new FirecloudRetryHandler(new NoBackOffPolicy()),
             serviceAccounts,
             Providers.of(fireCloudCredential));

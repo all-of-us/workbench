@@ -183,6 +183,10 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace()
             .getBucketName();
 
+    // We need to send a byte array so the ApiClient attaches the body as is instead
+    // of serializing it through Gson which it will do for Strings.
+    // The default Gson serializer does not work since it strips out some null fields
+    // which are needed for nbconvert
     return fireCloudService.staticNotebooksConvert(
         getNotebookContents(bucketName, notebookName).toString().getBytes());
   }
