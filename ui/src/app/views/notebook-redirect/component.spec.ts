@@ -168,8 +168,8 @@ describe('NotebookRedirectComponent', () => {
     expect(initBox.children[1].nativeElement.innerText)
       .toContain('Connecting');
 
+    // Clear lingering timers.
     tick(10000);
-    fixture.detectChanges();
   }));
 
   it('should display resuming message until resumed', fakeAsync(() => {
