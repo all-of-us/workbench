@@ -148,7 +148,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
       temporal: false,
       mention: TemporalMention.ANYMENTION,
       time: TemporalTime.DURINGSAMEENCOUNTERAS,
-      timeValue: null,
+      timeValue: 0,
       timeFrame: '',
       isRequesting: false,
       status: 'active'
