@@ -226,7 +226,7 @@ describe('DataSet', () => {
 
     // Check Concept Sets "+" link
     wrapper.find({'data-test-id': 'concept-sets-link'}).first().simulate('click');
-    expect(navSpy).toHaveBeenCalledWith(wsPathPrefix + '/concepts/sets');
+    expect(navSpy).toHaveBeenCalledWith(wsPathPrefix + '/concepts');
   });
 
 
