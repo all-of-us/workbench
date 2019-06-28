@@ -229,7 +229,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    short surveyId = CommonStorageEnums.surveysToStorage(Surveys.fromValue(surveyName.toUpperCase()));
+    short surveyId =
+        CommonStorageEnums.surveysToStorage(Surveys.fromValue(surveyName.toUpperCase()));
     List<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
         conceptSetDao.findByWorkspaceIdAndSurvey(workspace.getWorkspaceId(), surveyId);
     ConceptSetListResponse response = new ConceptSetListResponse();
