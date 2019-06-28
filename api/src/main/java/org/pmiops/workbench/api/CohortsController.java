@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -457,12 +458,12 @@ public class CohortsController implements CohortsApiDelegate {
       String workspaceNamespace, String workspaceId, Long cohortId) {
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    org.pmiops.workbench.db.model.Cohort cohort = cohortDao.findOne(cohortId);
-    if (cohort == null || cohort.getWorkspaceId() != workspace.getWorkspaceId()) {
+    Optional<org.pmiops.workbench.db.model.Cohort> cohort = cohortDao.findById(cohortId);
+    if (!cohort.isPresent() || cohort.get().getWorkspaceId() != workspace.getWorkspaceId()) {
       throw new NotFoundException(
           String.format(
               "No cohort with name %s in workspace %s.", cohortId, workspace.getFirecloudName()));
     }
-    return cohort;
+    return cohort.get();
   }
 }

@@ -9,6 +9,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.Authority;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -97,6 +98,6 @@ public class SetAuthority {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(SetAuthority.class).web(false).run(args);
+    new SpringApplicationBuilder(SetAuthority.class).web(WebApplicationType.NONE).run(args);
   }
 }

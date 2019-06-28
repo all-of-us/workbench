@@ -80,9 +80,8 @@ public class UserController implements UserApiDelegate {
             userProvider.get().getEmail(), config.firecloud.registeredDomainName)) {
       throw new ForbiddenException("user search requires registered data access");
     }
-
     Sort.Direction direction =
-        Optional.ofNullable(Sort.Direction.fromStringOrNull(sortOrder)).orElse(Sort.Direction.ASC);
+        Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC);
     Sort sort = new Sort(new Sort.Order(direction, DEFAULT_SORT_FIELD));
 
     // What we are really looking for here are users who have a FC account.

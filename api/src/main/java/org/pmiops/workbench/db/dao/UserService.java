@@ -112,7 +112,7 @@ public class UserService {
         return user;
       } catch (ObjectOptimisticLockingFailureException e) {
         if (objectLockingFailureCount < MAX_RETRIES) {
-          user = userDao.findOne(user.getUserId());
+          user = userDao.findById(user.getUserId()).get();
           objectLockingFailureCount++;
         } else {
           throw new ConflictException(
@@ -127,7 +127,7 @@ public class UserService {
             .getMessage()
             .equals("Statement closed.")) {
           if (statementClosedCount < MAX_RETRIES) {
-            user = userDao.findOne(user.getUserId());
+            user = userDao.findById(user.getUserId()).get();
             statementClosedCount++;
           } else {
             throw new ConflictException(

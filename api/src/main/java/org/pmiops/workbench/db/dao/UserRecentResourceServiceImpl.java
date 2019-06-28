@@ -3,9 +3,11 @@ package org.pmiops.workbench.db.dao;
 import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.UserRecentResource;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -75,13 +77,16 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public void updateCohortEntry(
       long workspaceId, long userId, long cohortId, Timestamp lastAccessDateTime) {
-    Cohort cohort = cohortDao.findOne(cohortId);
+    Optional<Cohort> cohort = cohortDao.findById(cohortId);
+    if (!cohort.isPresent()) {
+      throw new NotFoundException(String.format("cohort '%d' not found", cohortId));
+    }
     UserRecentResource resource =
-        getDao().findByUserIdAndWorkspaceIdAndCohort(userId, workspaceId, cohort);
+        getDao().findByUserIdAndWorkspaceIdAndCohort(userId, workspaceId, cohort.get());
     if (resource == null) {
       handleUserLimit(userId);
       resource = new UserRecentResource(workspaceId, userId, lastAccessDateTime);
-      resource.setCohort(cohort);
+      resource.setCohort(cohort.get());
       resource.setConceptSet(null);
     }
     resource.setLastAccessDate(lastAccessDateTime);
@@ -91,13 +96,16 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public void updateConceptSetEntry(
       long workspaceId, long userId, long conceptSetId, Timestamp lastAccessDateTime) {
-    ConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
+    Optional<ConceptSet> conceptSet = conceptSetDao.findById(conceptSetId);
+    if (!conceptSet.isPresent()) {
+      throw new NotFoundException(String.format("concept set '%d' not found", conceptSetId));
+    }
     UserRecentResource resource =
-        getDao().findByUserIdAndWorkspaceIdAndConceptSet(userId, workspaceId, conceptSet);
+        getDao().findByUserIdAndWorkspaceIdAndConceptSet(userId, workspaceId, conceptSet.get());
     if (resource == null) {
       handleUserLimit(userId);
       resource = new UserRecentResource(workspaceId, userId, lastAccessDateTime);
-      resource.setConceptSet(conceptSet);
+      resource.setConceptSet(conceptSet.get());
       resource.setCohort(null);
     }
     resource.setLastAccessDate(lastAccessDateTime);

@@ -8,12 +8,14 @@ import com.google.gson.Gson;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -76,14 +78,15 @@ public class ConfigLoader {
         log.info(marshalledDiff.toString());
         System.exit(1);
       }
-      Config existingConfig = configDao.findOne(configKey);
-      if (existingConfig == null) {
+      Optional<Config> existingConfigOpt = configDao.findById(configKey);
+      if (!existingConfigOpt.isPresent()) {
         log.info("No configuration exists, creating one.");
         Config config = new Config();
         config.setConfigId(configKey);
         config.setConfiguration(newJson.toString());
         configDao.save(config);
       } else {
+        Config existingConfig = existingConfigOpt.get();
         JsonNode existingJson = jackson.readTree(existingConfig.getConfiguration());
         JsonNode diff = JsonDiff.asJson(existingJson, newJson);
         if (diff.size() == 0) {
@@ -100,6 +103,6 @@ public class ConfigLoader {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(ConfigLoader.class).web(false).run(args);
+    new SpringApplicationBuilder(ConfigLoader.class).web(WebApplicationType.NONE).run(args);
   }
 }

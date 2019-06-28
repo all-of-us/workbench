@@ -374,7 +374,7 @@ public class BillingProjectBufferServiceTest {
     assertThat(invokedEmail).isEqualTo("fake-email@aou.org");
     assertThat(invokedProjectName).isEqualTo("test-project-name");
 
-    assertThat(billingProjectBufferEntryDao.findOne(assignedEntry.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(assignedEntry.getId()).getStatusEnum())
         .isEqualTo(ASSIGNED);
   }
 
@@ -432,7 +432,7 @@ public class BillingProjectBufferServiceTest {
     CLOCK.setInstant(NOW.plus(61, ChronoUnit.MINUTES));
     billingProjectBufferService.cleanBillingBuffer();
 
-    assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(entry.getId()).getStatusEnum())
         .isEqualTo(ERROR);
   }
 
@@ -446,7 +446,7 @@ public class BillingProjectBufferServiceTest {
     CLOCK.setInstant(NOW.plus(11, ChronoUnit.MINUTES));
     billingProjectBufferService.cleanBillingBuffer();
 
-    assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(entry.getId()).getStatusEnum())
         .isEqualTo(ERROR);
   }
 
@@ -460,7 +460,7 @@ public class BillingProjectBufferServiceTest {
     CLOCK.setInstant(NOW.plus(59, ChronoUnit.MINUTES));
     billingProjectBufferService.cleanBillingBuffer();
 
-    assertThat(billingProjectBufferEntryDao.findOne(creating.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(creating.getId()).getStatusEnum())
         .isEqualTo(CREATING);
 
     BillingProjectBufferEntry assigning = new BillingProjectBufferEntry();
@@ -471,7 +471,7 @@ public class BillingProjectBufferServiceTest {
     CLOCK.setInstant(NOW.plus(9, ChronoUnit.MINUTES));
     billingProjectBufferService.cleanBillingBuffer();
 
-    assertThat(billingProjectBufferEntryDao.findOne(assigning.getId()).getStatusEnum())
+    assertThat(billingProjectBufferEntryDao.findById(assigning.getId()).getStatusEnum())
         .isEqualTo(ASSIGNING);
   }
 

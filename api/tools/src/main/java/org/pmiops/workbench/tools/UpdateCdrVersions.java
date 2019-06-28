@@ -18,6 +18,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -124,13 +125,13 @@ public class UpdateCdrVersions {
         if (!dryRun) {
           // Note: this will fail if the database still has references to the CDR version being
           // deleted.
-          cdrVersionDao.delete(cdrVersion.getCdrVersionId());
+          cdrVersionDao.deleteById(cdrVersion.getCdrVersionId());
         }
       }
     };
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(UpdateCdrVersions.class).web(false).run(args);
+    new SpringApplicationBuilder(UpdateCdrVersions.class).web(WebApplicationType.NONE).run(args);
   }
 }

@@ -324,7 +324,7 @@ dependencies {
   compile 'org.hibernate:hibernate-core:5.2.10.Final'
   compile 'org.apache.tomcat:tomcat-jdbc:9.0.21'
   compile 'org.apache.logging.log4j:log4j-core:2.11.2'
-  
+
   compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-core:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'

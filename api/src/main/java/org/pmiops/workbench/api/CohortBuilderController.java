@@ -38,6 +38,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
@@ -213,7 +214,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaListResponse> getCriteriaAutoComplete(
       Long cdrVersionId, String domain, String term, String type, Boolean standard, Long limit) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    cdrVersionService.setCdrVersion(mustFindCdrVersion(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     if (configProvider.get().cohortbuilder.enableListSearch) {
@@ -256,7 +257,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByValue(
       Long cdrVersionId, String value, Long limit) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    cdrVersionService.setCdrVersion(mustFindCdrVersion(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     final List<Criteria> criteriaList =
@@ -270,7 +271,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaListResponse> getDrugIngredientByConceptId(
       Long cdrVersionId, Long conceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    cdrVersionService.setCdrVersion(mustFindCdrVersion(cdrVersionId));
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     final List<Criteria> criteriaList = criteriaDao.findDrugIngredientByConceptId(conceptId);
     criteriaResponse.setItems(
@@ -284,7 +285,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
    */
   @Override
   public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
-    CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
+    CdrVersion cdrVersion = mustFindCdrVersion(cdrVersionId);
     cdrVersionService.setCdrVersion(cdrVersion);
     if (configProvider.get().elasticsearch.enableElasticsearchBackend
         && !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName())
@@ -310,7 +311,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaListResponse> findCriteriaByDomainAndSearchTerm(
       Long cdrVersionId, String domain, String term, Long limit) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    cdrVersionService.setCdrVersion(mustFindCdrVersion(cdrVersionId));
     List<CBCriteria> criteriaList = new ArrayList<>();
     int resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT).intValue();
     List<StandardProjection> projections = cbCriteriaDao.findStandardProjectionByCode(domain, term);
@@ -368,7 +369,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaListResponse> getStandardCriteriaByDomainAndConceptId(
       Long cdrVersionId, String domain, Long conceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    cdrVersionService.setCdrVersion(mustFindCdrVersion(cdrVersionId));
     // These look ups can be done as one dao call but to make this code testable with the mysql
     // fulltext search match function and H2 in memory database, it's split into 2 separate calls
     // Each call is sub second, so having 2 calls and being testable is better than having one call
@@ -392,7 +393,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<DemoChartInfoListResponse> getDemoChartInfo(
       Long cdrVersionId, SearchRequest request) {
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
-    CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
+    CdrVersion cdrVersion = mustFindCdrVersion(cdrVersionId);
     cdrVersionService.setCdrVersion(cdrVersion);
     if (configProvider.get().elasticsearch.enableElasticsearchBackend
         && !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName())
@@ -425,7 +426,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaAttributeListResponse> getCriteriaAttributeByConceptId(
       Long cdrVersionId, Long conceptId) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    cdrVersionService.setCdrVersion(mustFindCdrVersion(cdrVersionId));
     CriteriaAttributeListResponse criteriaAttributeResponse = new CriteriaAttributeListResponse();
     if (configProvider.get().cohortbuilder.enableListSearch) {
       final List<CBCriteriaAttribute> criteriaAttributeList =
@@ -450,7 +451,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> getCriteriaBy(
       Long cdrVersionId, String domain, String type, Boolean standard, Long parentId) {
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    cdrVersionService.setCdrVersion(mustFindCdrVersion(cdrVersionId));
 
     if (configProvider.get().cohortbuilder.enableListSearch) {
       validateDomainAndType(domain, type);
@@ -520,7 +521,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<ParticipantDemographics> getParticipantDemographics(Long cdrVersionId) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    cdrVersionService.setCdrVersion(mustFindCdrVersion(cdrVersionId));
 
     Map<String, Map<Long, String>> concepts =
         genderRaceEthnicityConceptProvider.get().getConcepts();
@@ -580,6 +581,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
               // TODO(RW-2404): Support these queries.
               .anyMatch(sp -> TreeType.DRUG.toString().equals(sp.getType()));
     }
+  }
+
+  private CdrVersion mustFindCdrVersion(long id) {
+    Optional<CdrVersion> v = cdrVersionDao.findById(id);
+    if (!v.isPresent()) {
+      throw new NotFoundException(String.format("CDR version '%d' not found", id));
+    }
+    return v.get();
   }
 
   // TODO:Remove freemabd

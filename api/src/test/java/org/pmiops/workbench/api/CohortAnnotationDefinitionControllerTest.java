@@ -44,7 +44,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(null);
+    when(cohortDao.findById(cohortId)).thenReturn(null);
 
     try {
       cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
@@ -54,7 +54,7 @@ public class CohortAnnotationDefinitionControllerTest {
       assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService)
         .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
     verifyNoMoreMockInteractions();
@@ -75,7 +75,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
 
     try {
@@ -91,7 +91,7 @@ public class CohortAnnotationDefinitionControllerTest {
           e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(workspaceService)
         .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
@@ -124,7 +124,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
     when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName))
         .thenReturn(existingDefinition);
@@ -141,7 +141,7 @@ public class CohortAnnotationDefinitionControllerTest {
           "Conflict: Cohort Annotation Definition name exists for: " + columnName, e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(cohortAnnotationDefinitionDao, times(1))
         .findByCohortIdAndColumnName(cohortId, columnName);
@@ -176,7 +176,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
     when(cohortAnnotationDefinitionDao.save(dbCohortAnnotationDefinition))
         .thenReturn(dbCohortAnnotationDefinition);
@@ -193,7 +193,7 @@ public class CohortAnnotationDefinitionControllerTest {
             .getBody();
     assertEquals(expectedResponse, response);
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(cohortAnnotationDefinitionDao, times(1)).save(dbCohortAnnotationDefinition);
     verify(cohortAnnotationDefinitionDao, times(1))
@@ -217,7 +217,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(null);
+    when(cohortDao.findById(cohortId)).thenReturn(null);
 
     try {
       cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
@@ -227,7 +227,7 @@ public class CohortAnnotationDefinitionControllerTest {
       assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService)
         .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
@@ -254,7 +254,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
 
     try {
@@ -270,7 +270,7 @@ public class CohortAnnotationDefinitionControllerTest {
           e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(workspaceService)
         .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
@@ -296,7 +296,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
     when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
             cohortId, annotationDefinitionId))
@@ -313,7 +313,7 @@ public class CohortAnnotationDefinitionControllerTest {
           e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(cohortAnnotationDefinitionDao, times(1))
         .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
@@ -346,7 +346,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
     when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
             cohortId, annotationDefinitionId))
@@ -363,7 +363,7 @@ public class CohortAnnotationDefinitionControllerTest {
           "Conflict: Cohort Annotation Definition name exists for: " + columnName, e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(cohortAnnotationDefinitionDao, times(1))
         .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
@@ -403,7 +403,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
     when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
             cohortId, annotationDefinitionId))
@@ -420,7 +420,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     assertEquals(expectedResponse, responseDefinition);
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(cohortAnnotationDefinitionDao, times(1))
         .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
@@ -443,7 +443,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(null);
+    when(cohortDao.findById(cohortId)).thenReturn(null);
 
     try {
       cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
@@ -453,7 +453,7 @@ public class CohortAnnotationDefinitionControllerTest {
       assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService)
         .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
@@ -477,7 +477,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
 
     try {
@@ -493,7 +493,7 @@ public class CohortAnnotationDefinitionControllerTest {
           e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(workspaceService)
         .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
@@ -517,7 +517,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
     when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
             cohortId, annotationDefinitionId))
@@ -534,7 +534,7 @@ public class CohortAnnotationDefinitionControllerTest {
           e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(cohortAnnotationDefinitionDao, times(1))
         .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
@@ -565,7 +565,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
     when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
             cohortId, annotationDefinitionId))
@@ -579,7 +579,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     assertEquals(new EmptyResponse(), response);
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(cohortAnnotationDefinitionDao, times(1))
         .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
@@ -601,7 +601,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(null);
+    when(cohortDao.findById(cohortId)).thenReturn(null);
 
     try {
       cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
@@ -611,7 +611,7 @@ public class CohortAnnotationDefinitionControllerTest {
       assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService)
         .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
@@ -635,7 +635,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
 
     try {
@@ -651,7 +651,7 @@ public class CohortAnnotationDefinitionControllerTest {
           e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(workspaceService)
         .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
@@ -675,7 +675,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
     when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
             cohortId, annotationDefinitionId))
@@ -692,7 +692,7 @@ public class CohortAnnotationDefinitionControllerTest {
           e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(cohortAnnotationDefinitionDao, times(1))
         .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
@@ -723,7 +723,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
     when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
             cohortId, annotationDefinitionId))
@@ -739,7 +739,7 @@ public class CohortAnnotationDefinitionControllerTest {
             annotationDefinitionId, cohortId, columnName, AnnotationType.STRING);
     assertEquals(expectedResponse, responseDefinition);
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(cohortAnnotationDefinitionDao, times(1))
         .findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
@@ -759,7 +759,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
         .thenReturn(owner);
-    when(cohortDao.findOne(cohortId)).thenReturn(null);
+    when(cohortDao.findById(cohortId)).thenReturn(null);
 
     try {
       cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
@@ -769,7 +769,7 @@ public class CohortAnnotationDefinitionControllerTest {
       assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService)
         .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
@@ -790,7 +790,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
         .thenReturn(owner);
@@ -808,7 +808,7 @@ public class CohortAnnotationDefinitionControllerTest {
           e.getMessage());
     }
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(workspaceService)
         .enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
@@ -829,7 +829,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-    when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+    when(cohortDao.findById(cohortId)).thenReturn(cohort);
     when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
     when(cohortAnnotationDefinitionDao.findByCohortId(cohortId)).thenReturn(new ArrayList<>());
     when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER))
@@ -837,7 +837,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(namespace, name, cohortId);
 
-    verify(cohortDao, times(1)).findOne(cohortId);
+    verify(cohortDao, times(1)).findById(cohortId);
     verify(workspaceService, times(1)).getRequired(namespace, name);
     verify(cohortAnnotationDefinitionDao, times(1)).findByCohortId(cohortId);
     verify(workspaceService)

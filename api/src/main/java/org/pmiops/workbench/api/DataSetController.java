@@ -178,11 +178,12 @@ public class DataSetController implements DataSetApiDelegate {
           }
           result.setConceptSets(
               StreamSupport.stream(
-                      conceptSetDao.findAll(dataSet.getConceptSetId()).spliterator(), false)
+                      conceptSetDao.findAllById(dataSet.getConceptSetId()).spliterator(), false)
                   .map(conceptSet -> toClientConceptSet(conceptSet))
                   .collect(Collectors.toList()));
           result.setCohorts(
-              StreamSupport.stream(cohortDao.findAll(dataSet.getCohortSetId()).spliterator(), false)
+              StreamSupport.stream(
+                      cohortDao.findAllById(dataSet.getCohortSetId()).spliterator(), false)
                   .map(CohortsController.TO_CLIENT_COHORT)
                   .collect(Collectors.toList()));
           result.setValues(
@@ -197,7 +198,7 @@ public class DataSetController implements DataSetApiDelegate {
     ConceptSet result = ConceptSetsController.TO_CLIENT_CONCEPT_SET.apply(conceptSet);
     if (!conceptSet.getConceptIds().isEmpty()) {
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts =
-          conceptDao.findAll(conceptSet.getConceptIds());
+          conceptDao.findAllById(conceptSet.getConceptIds());
       result.setConcepts(
           StreamSupport.stream(concepts.spliterator(), false)
               .map(ConceptsController.TO_CLIENT_CONCEPT)
@@ -465,7 +466,7 @@ public class DataSetController implements DataSetApiDelegate {
                 })
             .collect(Collectors.toList());
     try {
-      dataSetDao.save(dbDataSetList);
+      dataSetDao.saveAll(dbDataSetList);
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent data set modification");
     }
@@ -478,7 +479,7 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, Long dataSetId) {
     org.pmiops.workbench.db.model.DataSet dataSet =
         getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
-    dataSetDao.delete(dataSet.getDataSetId());
+    dataSetDao.deleteById(dataSet.getDataSetId());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -565,12 +566,12 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, workspaceAccessLevel);
 
-    org.pmiops.workbench.db.model.DataSet dataSet = dataSetDao.findOne(dataSetId);
-    if (dataSet == null || workspace.getWorkspaceId() != dataSet.getWorkspaceId()) {
+    Optional<org.pmiops.workbench.db.model.DataSet> dataSet = dataSetDao.findById(dataSetId);
+    if (!dataSet.isPresent() || workspace.getWorkspaceId() != dataSet.get().getWorkspaceId()) {
       throw new NotFoundException(
           String.format(
               "No data set with ID %s in workspace %s.", dataSet, workspace.getFirecloudName()));
     }
-    return dataSet;
+    return dataSet.get();
   }
 }

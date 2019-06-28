@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -167,7 +168,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
 
     findCohortAnnotationDefinition(cohortId, annotationDefinitionId);
 
-    cohortAnnotationDefinitionDao.delete(annotationDefinitionId);
+    cohortAnnotationDefinitionDao.deleteById(annotationDefinitionId);
 
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -267,12 +268,12 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
   }
 
   private Cohort findCohort(long cohortId) {
-    Cohort cohort = cohortDao.findOne(cohortId);
-    if (cohort == null) {
+    Optional<Cohort> cohort = cohortDao.findById(cohortId);
+    if (!cohort.isPresent()) {
       throw new NotFoundException(
           String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));
     }
-    return cohort;
+    return cohort.get();
   }
 
   private void validateMatchingWorkspace(

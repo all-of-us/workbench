@@ -23,6 +23,7 @@ import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterStatus;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -184,6 +185,6 @@ public class ManageClusters {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(ManageClusters.class).web(false).run(args);
+    new SpringApplicationBuilder(ManageClusters.class).web(WebApplicationType.NONE).run(args);
   }
 }

@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -353,12 +354,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Workspace findByWorkspaceId(long workspaceId) {
-    Workspace workspace = getDao().findOne(workspaceId);
-    if (workspace == null
-        || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
+    Optional<Workspace> workspace = getDao().findById(workspaceId);
+    if (!workspace.isPresent()
+        || (workspace.get().getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
       throw new NotFoundException(String.format("Workspace %s not found.", workspaceId));
     }
-    return workspace;
+    return workspace.get();
   }
 
   @Override

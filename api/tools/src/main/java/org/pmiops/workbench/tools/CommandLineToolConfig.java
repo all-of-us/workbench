@@ -105,7 +105,7 @@ public class CommandLineToolConfig {
   @Bean
   @Lazy
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
-    Config config = configDao.findOne(Config.MAIN_CONFIG_ID);
+    Config config = configDao.findById(Config.MAIN_CONFIG_ID).get();
     Gson gson = new Gson();
     return gson.fromJson(config.getConfiguration(), WorkbenchConfig.class);
   }
