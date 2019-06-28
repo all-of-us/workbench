@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -39,6 +40,7 @@ public class WorkspaceServiceTest {
   @Mock private CohortCloningService cohortCloningService;
   @Mock private ConceptSetService conceptSetService;
   @Mock private WorkspaceDao workspaceDao;
+  @Mock private UserDao userDao;
   @Autowired private WorkspaceMapper workspaceMapper;
   @Mock private FireCloudService fireCloudService;
   @Mock private Clock clock;
@@ -54,6 +56,7 @@ public class WorkspaceServiceTest {
             cohortCloningService,
             conceptSetService,
             fireCloudService,
+            userDao,
             workspaceDao,
             workspaceMapper);
 

@@ -210,3 +210,10 @@ ul {
   display: flex;
 }
 
+.col-sm-6 > .error {
+  display: inline-block;
+  background: #f7981c;
+  color: #ffffff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+}

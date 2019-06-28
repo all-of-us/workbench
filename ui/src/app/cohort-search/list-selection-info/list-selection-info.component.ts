@@ -31,12 +31,12 @@ export class ListSelectionInfoComponent {
   get name()      { return listNameDisplay(this.parameter); }
   get attribute() { return listAttributeDisplay(this.parameter); }
   get showType() {
-    return this.parameter.domain !== DomainType.PHYSICALMEASUREMENT
-      && this.parameter.domain !== DomainType.DRUG
-      && this.parameter.domain !== DomainType.SURVEY;
+    return this.parameter.domainId !== DomainType.PHYSICALMEASUREMENT
+      && this.parameter.domainId !== DomainType.DRUG
+      && this.parameter.domainId !== DomainType.SURVEY;
   }
   get showOr() {
-    return (this.indexes && (this.indexes[0] > 0)) && this.parameter.domain !== DomainType.PERSON;
+    return (this.indexes && (this.indexes[0] > 0)) && this.parameter.domainId !== DomainType.PERSON;
   }
 }
 

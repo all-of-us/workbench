@@ -10,7 +10,7 @@ import {
 } from 'app/cohort-review/review-state.service';
 import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {Button} from 'app/components/buttons';
-import {TextInput} from 'app/components/inputs';
+import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -21,8 +21,8 @@ import {
   navigateByUrl,
   urlParamsStore
 } from 'app/utils/navigation';
-import {WorkspaceData} from 'app/utils/workspace-data';
 
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortStatus,
   Filter,
@@ -154,7 +154,8 @@ const styles = reactStyles({
     marginLeft: '5px'
   },
   textInput: {
-    width: 'auto',
+    width: '85%',
+    height: '1.5rem',
     padding: '0 0 0 5px',
     border: 0,
     backgroundColor: 'transparent',
@@ -164,7 +165,19 @@ const styles = reactStyles({
     left: '359.531px!important',
     maxHeight: 'calc(100vh - 360px)',
     overflow: 'auto'
-  }
+  },
+  error: {
+    width: '50%',
+    background: '#F7981C',
+    color: '#ffffff',
+    fontSize: '12px',
+    fontWeight: 500,
+    textAlign: 'left',
+    border: '1px solid #ebafa6',
+    borderRadius: '5px',
+    marginTop: '0.25rem',
+    padding: '8px',
+  },
 });
 const filterIcons = {
   active: {
@@ -181,7 +194,20 @@ const idColumn = {
   ...styles.columnBody,
   color: '#2691D0'
 };
-let multiFilters: any;
+let multiFilters: any = {
+  DECEASED: [
+    {name: 'Yes', value: '1'},
+    {name: 'No', value: '0'},
+    {name: 'Select All', value: 'Select All'}
+  ],
+  STATUS: [
+    {name: 'Included', value: CohortStatus.INCLUDED},
+    {name: 'Excluded', value: CohortStatus.EXCLUDED},
+    {name: 'Needs Further Review', value: CohortStatus.NEEDSFURTHERREVIEW},
+    {name: 'Unreviewed', value: CohortStatus.NOTREVIEWED},
+    {name: 'Select All', value: 'Select All'}
+  ]
+};
 const reverseColumnEnum = {
   participantId: Columns.PARTICIPANTID,
   gender: Columns.GENDER,
@@ -192,7 +218,11 @@ const reverseColumnEnum = {
   status: Columns.STATUS
 };
 
-export interface ParticipantsTableState {
+interface Props {
+  workspace: WorkspaceData;
+}
+
+interface State {
   data: Array<any>;
   loading: boolean;
   page: number;
@@ -201,10 +231,11 @@ export interface ParticipantsTableState {
   total: number;
   filters: any;
   cohortDescription: boolean;
+  error: boolean;
 }
 
 export const ParticipantsTable = withCurrentWorkspace()(
-  class extends React.Component<{workspace: WorkspaceData}, ParticipantsTableState> {
+  class extends React.Component<Props, State> {
     filterInput: Function;
     constructor(props: any) {
       super(props);
@@ -217,48 +248,52 @@ export const ParticipantsTable = withCurrentWorkspace()(
         total: null,
         filters: filterStateStore.getValue().participants,
         cohortDescription: false,
+        error: false,
       };
-      this.filterInput = fp.debounce(300, () => this.getTableData());
+      this.filterInput = fp.debounce(300, () => {
+        this.setState({loading: true, error: false});
+        this.getTableData();
+      });
     }
 
-    componentDidMount() {
+    async componentDidMount() {
       const {filters} = this.state;
       const {cdrVersionId, id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
       if (!multiOptions.getValue()) {
-        cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
-          const extract = (arr, _type?) => fp.uniq([
-            ...arr.map(i => {
-              filters[_type].push(i.conceptName);
-              return {
-                name: _type === Columns.GENDER
-                  ? this.formatGenderForText(i.conceptName) : i.conceptName,
-                value: i.conceptName
-              };
-            }),
-            {name: 'Select All', value: 'Select All'}
-          ]) as string[];
+        try {
+          await cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
+            const extract = (arr, _type?) => fp.uniq([
+              ...arr.map(i => {
+                filters[_type].push(i.conceptName);
+                return {
+                  name: _type === Columns.GENDER
+                      ? this.formatGenderForText(i.conceptName) : i.conceptName,
+                  value: i.conceptName
+                };
+              }),
+              {name: 'Select All', value: 'Select All'}
+            ]) as string[];
+            multiFilters = {
+              ...multiFilters,
+              RACE: extract(data.raceList, Columns.RACE),
+              GENDER: extract(data.genderList, Columns.GENDER),
+              ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY)
+            };
+            multiOptions.next(multiFilters);
+            this.setState({filters});
+          });
+        } catch (error) {
+          console.error(error);
           multiFilters = {
-            RACE: extract(data.raceList, Columns.RACE),
-            GENDER: extract(data.genderList, Columns.GENDER),
-            ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY),
-            DECEASED: [
-              {name: 'Yes', value: '1'},
-              {name: 'No', value: '0'},
-              {name: 'Select All', value: 'Select All'}
-            ],
-            STATUS: [
-              {name: 'Included', value: CohortStatus.INCLUDED},
-              {name: 'Excluded', value: CohortStatus.EXCLUDED},
-              {name: 'Needs Further Review', value: CohortStatus.NEEDSFURTHERREVIEW},
-              {name: 'Unreviewed', value: CohortStatus.NOTREVIEWED},
-              {name: 'Select All', value: 'Select All'}
-            ]
+            ...multiFilters,
+            RACE: [{name: 'Select All', value: 'Select All'}],
+            GENDER: [{name: 'Select All', value: 'Select All'}],
+            ETHNICITY: [{name: 'Select All', value: 'Select All'}]
           };
-          multiOptions.next(multiFilters);
-          this.setState({filters});
-          setTimeout(() => this.getTableData());
-        });
+        } finally {
+          this.getTableData();
+        }
       } else {
         multiFilters = multiOptions.getValue();
         const review = cohortReviewStore.getValue();
@@ -268,18 +303,23 @@ export const ParticipantsTable = withCurrentWorkspace()(
         setTimeout(() => this.getTableData());
       }
       if (!vocabOptions.getValue()) {
-        cohortReviewApi().getVocabularies(namespace, id, cid, +cdrVersionId)
-          .then(response => {
-            const vocabFilters = {source: {}, standard: {}};
-            response.items.forEach(item => {
-              const type = item.type.toLowerCase();
-              vocabFilters[type][item.domain] = [
-                ...(vocabFilters[type][item.domain] || []),
-                item.vocabulary
-              ];
+        const vocabFilters = {source: {}, standard: {}};
+        try {
+          await cohortReviewApi().getVocabularies(namespace, id, cid, +cdrVersionId)
+            .then(response => {
+              response.items.forEach(item => {
+                const type = item.type.toLowerCase();
+                vocabFilters[type][item.domain] = [
+                  ...(vocabFilters[type][item.domain] || []),
+                  item.vocabulary
+                ];
+              });
             });
-            vocabOptions.next(vocabFilters);
-          });
+        } catch (error) {
+          console.error(error);
+        } finally {
+          vocabOptions.next(vocabFilters);
+        }
       }
     }
 
@@ -323,7 +363,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
       } catch (error) {
         console.log(error);
         this.setState({
-          loading: false
+          loading: false,
+          error: true
         });
       }
     }
@@ -417,7 +458,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     onPage = (event: any) => {
       const {page} = this.state;
       if (event.page !== page) {
-        this.setState({loading: true, page: event.page});
+        this.setState({loading: true, error: false, page: event.page});
         setTimeout(() => this.getTableData());
       }
     }
@@ -425,9 +466,9 @@ export const ParticipantsTable = withCurrentWorkspace()(
     columnSort = (sortField: string) => {
       if (this.state.sortField === sortField) {
         const sortOrder = this.state.sortOrder === 1 ? -1 : 1;
-        this.setState({loading: true, sortOrder});
+        this.setState({loading: true, error: false, sortOrder});
       } else {
-        this.setState({loading: true, sortField, sortOrder: 1});
+        this.setState({loading: true, error: false, sortField, sortOrder: 1});
       }
       setTimeout(() => this.getTableData());
     }
@@ -435,7 +476,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     filterTemplate(column: string) {
       const {data, filters, loading} = this.state;
       if (!data) {
-        return {};
+        return '';
       }
       const colType = reverseColumnEnum[column];
       const options = multiFilters[colType];
@@ -456,16 +497,19 @@ export const ParticipantsTable = withCurrentWorkspace()(
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           {column === 'participantId' && <div style={styles.textSearch}>
             <i className='pi pi-search' style={{margin: '0 5px'}} />
-            <TextInput
+            <input
+              type='number'
               ref={(i) => ip = i}
               style={styles.textInput}
               value={filters.PARTICIPANTID}
-              onChange={this.onInputChange}
+              onChange={(e) => this.onInputChange(e.target.value)}
               placeholder={'Search'} />
           </div>}
           {column !== 'participantId' && options.map((opt, i) => (
-            <div key={i} style={{borderTop: opt.name === 'Select All' ? '1px solid #ccc' : 'none',
-              padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
+            <div key={i} style={{
+              borderTop: opt.name === 'Select All' && options.length > 1 ? '1px solid #ccc' : 0,
+              padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'
+            }}>
               <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
                      checked={filters[colType].includes(opt.value)} value={opt.value}
                      onChange={(e) => this.onCheckboxChange(e, colType)} disabled={loading}/>
@@ -499,19 +543,39 @@ export const ParticipantsTable = withCurrentWorkspace()(
           }
         }
       }
-      this.setState({loading: true, filters});
+      this.setState({loading: true, error: false, filters});
       setTimeout(() => this.getTableData());
     }
 
     onInputChange = (value: any) => {
       const {filters} = this.state;
       filters.PARTICIPANTID = value;
-      this.setState({loading: true, filters});
+      this.setState({filters});
       this.filterInput(value);
     }
 
+    errorMessage = () => {
+      const {data, error} = this.state;
+      if ((data && data.length) || (!data && !error)) {
+        return false;
+      }
+      let message: string;
+      if (data && data.length === 0) {
+        // TODO verify correct text here: changed 'the selected criteria' to 'your filters'
+        message = 'Data cannot be found. Please review your filters and try again.';
+      } else if (!data && error) {
+        message = 'Sorry, the request cannot be completed.';
+      }
+      return <div style={styles.error}>
+        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+          shape='exclamation-triangle' size='22'/>
+          {message}
+      </div>;
+    }
+
     render() {
-      const {cohortDescription, data, loading, page, sortField, sortOrder, total} = this.state;
+      const {cohortDescription, loading, page, sortField, sortOrder, total} = this.state;
+      const data = loading ? null : this.state.data;
       const cohort = currentCohortStore.getValue();
       const start = page * rows;
       let pageReportTemplate;
@@ -566,7 +630,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           <div style={styles.description}>
             {cohort.description}
           </div>
-          {data && <DataTable
+          <DataTable
             style={styles.table}
             value={data}
             first={start}
@@ -575,15 +639,17 @@ export const ParticipantsTable = withCurrentWorkspace()(
             lazy
             paginator
             onPage={this.onPage}
-            paginatorTemplate={data.length ? paginatorTemplate : ''}
-            currentPageReportTemplate={data.length ? pageReportTemplate : ''}
+            alwaysShowPaginator={false}
+            paginatorTemplate={data && data.length ? paginatorTemplate : ''}
+            currentPageReportTemplate={data && data.length ? pageReportTemplate : ''}
             rows={rows}
             totalRecords={total}
             onRowClick={this.onRowClick}
             scrollable
-            scrollHeight='calc(100vh - 350px)'>
+            scrollHeight='calc(100vh - 350px)'
+            footer={this.errorMessage()}>
             {columns}
-          </DataTable>}
+          </DataTable>
         </React.Fragment>}
         {cohortDescription && <React.Fragment>
           <button

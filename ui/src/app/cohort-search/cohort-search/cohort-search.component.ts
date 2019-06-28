@@ -20,7 +20,9 @@ import {
   totalCount,
 } from 'app/cohort-search/redux';
 import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.service';
+import {parseCohortDefinition} from 'app/cohort-search/utils';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
+import {SearchRequest} from 'generated/fetch';
 
 const pixel = (n: number) => `${n}px`;
 const ONE_REM = 24;  // value in pixels
@@ -45,6 +47,12 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   private subscription;
   listSearch = environment.enableCBListSearch;
   loading = false;
+  count: number;
+  error = false;
+  overview = false;
+  criteria = {includes: [], excludes: []};
+  chartData: any;
+  triggerUpdate = 0;
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -66,17 +74,23 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
             this.loading = false;
             currentCohortStore.next(cohort);
             if (cohort.criteria) {
-              this.actions.loadFromJSON(cohort.criteria);
-              this.actions.runAllRequests();
+              if (!this.listSearch) {
+                this.actions.loadFromJSON(cohort.criteria);
+                this.actions.runAllRequests();
+              } else {
+                searchRequestStore.next(parseCohortDefinition(cohort.criteria));
+              }
             }
           });
       }
     });
 
     if (this.listSearch) {
-      this.subscription.add(searchRequestStore.subscribe(
-        sr => this.includeSize = sr.includes.length
-      ));
+      searchRequestStore.subscribe(sr => {
+        this.includeSize = sr.includes.length;
+        this.criteria = sr;
+        this.overview = sr.includes.length || sr.excludes.length;
+      });
     } else {
       this.subscription.add(
         this.includeGroups$.subscribe(groups => this.includeSize = groups.size + 1)
@@ -90,6 +104,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
     idsInUse.next(new Set());
     currentCohortStore.next(undefined);
+    searchRequestStore.next({includes: [], excludes: []} as SearchRequest);
   }
 
   getTempObj(e) {
@@ -108,5 +123,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
   }
 
-
+  updateRequest = () => {
+    this.triggerUpdate++;
+  }
 }

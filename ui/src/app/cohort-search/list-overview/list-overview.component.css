@@ -1,0 +1,180 @@
+/* Right third column */
+.overview-header {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#total-count {
+  flex: 1;
+  margin: 0;
+}
+
+.card {
+  background-color: white;
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+  border-top: none;
+  border-bottom: none;
+}
+
+clr-icon[shape^=error-standard] {
+  color: #d9534f;
+}
+
+clr-icon[shape^=warning-standard] {
+  color: #F57600;
+}
+
+/* Save Cohort Modal */
+/*
+ * ng-deep is technically "deprecated" but there's no upgrade path and no other
+ * way to do this short of removing all css encapsulation and liberally
+ * sprinkling on some `!important`s.  When Angular figures out how this should
+ * be done, we can change.  Until then, there's not even any plans to
+ * _actually_ remove the ::ng-deep feature, much less replace it:
+ * https://github.com/angular/angular/issues/17867
+ */
+::ng-deep .modal-header .close clr-icon {
+  fill: rgb(38, 34, 98);
+  color: rgb(38, 34, 98);
+  border: 1px solid rgb(38, 34, 98);
+  border-radius: 50%;
+  margin: 0.5rem 0;
+}
+
+::ng-deep .modal-header {
+  padding-bottom: 0;
+}
+
+.modal-title h2 {
+  margin: 0;
+}
+
+.modal-footer {
+  padding-top: 0;
+}
+
+form {
+  padding-top: 0;
+}
+
+.control {
+  width: 100%;
+  padding: 0.75rem 0.25rem;
+  margin: 0.25rem 0.25rem 0.75rem 0;
+  border-radius: 6px;
+}
+
+.name-area .control {
+  margin-bottom: 0;
+}
+
+.name-area {
+  margin-bottom: 0.75rem;
+  position: relative;
+}
+
+label[for="name"] {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+label[for="name"].show {
+  opacity: 1;
+}
+
+#name-control:focus {
+  border: 1px solid #0094d2;
+  box-shadow: 0 0 2px 2px rgb(92, 183, 225);
+  /* Undoes the clarity animated background */
+  background-size: 0;
+}
+
+#name-control.invalid {
+  border-color: rgb(158, 158, 158);
+  box-shadow: 0 0 2px 2px red;
+}
+
+#description-control {
+  border: 1px solid #9a9a9a;
+  height: 10rem;
+}
+
+#description-control:focus {
+  border: 1px solid #0094d2;
+  box-shadow: 0 0 2px 2px rgb(92, 183, 225);
+}
+
+::placeholder {
+  color: rgb(158, 158, 158);
+  text-transform: uppercase;
+  font-size: 0.5rem;
+  font-weight: bold;
+}
+
+div.error {
+  padding: 0;
+  font-weight: 500;
+  color: #2F2E7E;
+  margin-top: 0.2rem;
+  height: auto;
+  background-color: white;
+}
+
+input.alreadyTaken {
+  background-color: #FCEFEC;
+  border-color: #F68D76;
+  display: inline-block;
+}
+
+.warning-standard {
+  display: inline-block;
+  position: absolute;
+  color: #F68D76;
+  right: 16px;
+  top: 16px;
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.count-header {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.header-text {
+  color: #302C71;
+  font-size: 13px;
+  font-weight: 500;
+}
+.overview-header .btn.btn-primary {
+  line-height: 0.2rem !important;
+  border-radius: 3px;
+}
+.card-header {
+    border-bottom: none;
+}
+.actions-container {
+  width: 100%;
+}
+.actions-container > .btn-link {
+  float: right;
+  margin: 0 1rem 0 0;
+  min-width: 0;
+  padding: 0;
+  color: #262262;
+  cursor: pointer;
+}
+.actions-container > .btn-link:disabled {
+  cursor: not-allowed;
+}
+
+.total-error {
+  background: #f7981c;
+  color: #ffffff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  margin-bottom: 0.5rem;
+}

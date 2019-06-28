@@ -493,13 +493,13 @@ definitions:
         {
           include: [
             # SearchGroups
-            [
-              # SearchGroupItems
-              {type: "ICD9", searchParameters: [{value: "Foo", domainId: "Bar"}, {value: "C"}]},
-              {type: "ICD9", searchParameters: [{value: "Baz"}]}
-            ], [
-              {type: "ICD10", searchParameters: [{value: "Baz", domainId: "Bar"}], modifiers: []},
-            ]
+          [
+            # SearchGroupItems
+          {type: "ICD9", searchParameters: [{value: "Foo", domainId: "Bar"}, {value: "C"}]},
+          {type: "ICD9", searchParameters: [{value: "Baz"}]}
+          ], [
+          {type: "ICD10", searchParameters: [{value: "Baz", domainId: "Bar"}], modifiers: []},
+          ]
           ],
           exclude: []
         }
@@ -600,11 +600,11 @@ definitions:
       {
         type: "ICD9",
         searchParameters: [
-          { value: "E9293", domainId: "Condition", conceptId: null },
-          { value: "E979-E979.9", domainId: null, conceptId: null }
+        { value: "E9293", domainId: "Condition", conceptId: null },
+        { value: "E979-E979.9", domainId: null, conceptId: null }
         ],
         modifiers: [
-          { name: "age_at_event", operator: "GTE >=", operands: [ "Arg1", "Arg2" ] }
+        { name: "age_at_event", operator: "GTE >=", operands: [ "Arg1", "Arg2" ] }
         ]
       }
 
@@ -613,8 +613,11 @@ definitions:
     required:
       - parameterId
       - name
+      - domain
       - type
       - group
+      - ancestorData
+      - standard
       - attributes
     properties:
       parameterId:
@@ -650,51 +653,51 @@ definitions:
         format: int64
       attributes:
         description: >
-            Attributes are extra inputs provided by users through the UX. Currently used by Demographics(Age),
-            Measurements(Body Height, Weight.. etc) and Physical Measurements(Blood Pressure, Body Weight.. etc).
-            Measurements and Physical Measurements have overlap in many areas such as body weight, but the
-            difference is standard(measurements) and source(physical measurements).
-            
-             Example demo age search parameter:
-             {
-               "type": "DEMO",
-               "searchParameters": [
-                 {
-                   "type": "DEMO", 
-                   "subtype": "AGE",
-                   "group": false,
-                   "attributes": [{"name": "Age", "operator": "BETWEEN", "operands": [23, 31]}]
-                 }
-               ],
-               "modifiers": []
-             } 
-             
-             Example physical measurement blood pressure(Hypotensive (Systolic <= 90 / Diastolic <= 60))
-             {
-               "type": "PM",
-               "searchParameters": [
-                 {
-                   "type": "PM",
-                   "subtype": "BP",
-                   "group": false,
-                   "attributes": [
-                     {
-                       "conceptId": 903118,
-                       "name": "Systolic",
-                       "operands": ["90"],
-                       "operator":"LESS_THAN_OR_EQUAL_TO"
-                     },
-                     {
-                       "conceptId": 903115,
-                       "name": "Diastolic",
-                       "operands": ["60"],
-                        "operator": "LESS_THAN_OR_EQUAL_TO"
-                      }
-                    ]
-                  }
-                ],
-                "modifiers": []
-              }
+          Attributes are extra inputs provided by users through the UX. Currently used by Demographics(Age),
+          Measurements(Body Height, Weight.. etc) and Physical Measurements(Blood Pressure, Body Weight.. etc).
+          Measurements and Physical Measurements have overlap in many areas such as body weight, but the
+          difference is standard(measurements) and source(physical measurements).
+
+           Example demo age search parameter:
+           {
+             "type": "DEMO",
+             "searchParameters": [
+               {
+                 "type": "DEMO",
+                 "subtype": "AGE",
+                 "group": false,
+                 "attributes": [{"name": "Age", "operator": "BETWEEN", "operands": [23, 31]}]
+               }
+             ],
+             "modifiers": []
+           }
+
+           Example physical measurement blood pressure(Hypotensive (Systolic <= 90 / Diastolic <= 60))
+           {
+             "type": "PM",
+             "searchParameters": [
+               {
+                 "type": "PM",
+                 "subtype": "BP",
+                 "group": false,
+                 "attributes": [
+                   {
+                     "conceptId": 903118,
+                     "name": "Systolic",
+                     "operands": ["90"],
+                     "operator":"LESS_THAN_OR_EQUAL_TO"
+                   },
+                   {
+                     "conceptId": 903115,
+                     "name": "Diastolic",
+                     "operands": ["60"],
+                      "operator": "LESS_THAN_OR_EQUAL_TO"
+                    }
+                  ]
+                }
+              ],
+              "modifiers": []
+            }
         type: "array"
         items:
           $ref: "#/definitions/Attribute"
@@ -711,6 +714,7 @@ definitions:
   Attribute:
     type: object
     required:
+      - name
       - operands
     properties:
       name:
@@ -780,11 +784,11 @@ definitions:
     enum: [ICD9, ICD10, CPT, DEMO, VISIT, PM, DRUG, MEAS, CONDITION, PROCEDURE, PPI, SNOMED]
   # TODO:Remove freemabd
   TreeSubType:
-      type: string
-      description: possible subtypes of trees
-      enum: [CM, PROC, PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR,
-      HR-DETAIL, HR-IRR, HR-NOIRR, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC,
-      BRAND, CLIN, LAB, BASICS, LIFESTYLE, OVERALLHEALTH]
+    type: string
+    description: possible subtypes of trees
+    enum: [CM, PROC, PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR,
+           HR-DETAIL, HR-IRR, HR-NOIRR, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC,
+           BRAND, CLIN, LAB, BASICS, LIFESTYLE, OVERALLHEALTH]
 
   TemporalMention:
     type: string

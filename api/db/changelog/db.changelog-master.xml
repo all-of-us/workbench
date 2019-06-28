@@ -92,5 +92,7 @@
   <include file="changelog/db.changelog-82-add-cascade-delete-admin-actions-after-user-delete.xml"/>
   <include file="changelog/db.changelog-83-other-population.xml"/>
   <include file="changelog/db.changelog-84-add-last_status_changed_time.xml"/>
-  <include file="changelog/db.changelog-85-add-survey-concept-set"/>
+  <include file="changelog/db.changelog-85-drop-user_workspace.xml"/>
+  <include file="changelog/db.changelog-86-drop-tos.xml"/>
+  <include file="changelog/db.changelog-87-add-survey-concept-set"/>
 </databaseChangeLog>
