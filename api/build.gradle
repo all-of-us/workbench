@@ -1,8 +1,22 @@
-import io.swagger.codegen.config.CodegenConfigurator
-import io.swagger.codegen.DefaultGenerator
-import org.gradle.api.tasks.JavaExec
-import org.pmiops.workbench.tooling.GenerateAPIListingTask
-import org.pmiops.workbench.tooling.IncrementalHotSwapTask
+buildscript {    // Configuration for building
+  repositories {
+    jcenter()    // Bintray's repository - a fast Maven Central mirror & more
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
+    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
+    classpath 'io.swagger:swagger-codegen:2.2.3'
+    classpath 'org.owasp:dependency-check-gradle:3.1.0'
+    classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
+  }
+}
+
+plugins {
+	id 'org.springframework.boot' version '2.1.6.RELEASE'
+}
 
 def swaggerTemplateDir = 'src/main/resources'
 def mergedApiSourceFile = 'src/main/resources/merged.yaml'
@@ -10,6 +24,12 @@ def clientApiSourceFile = 'src/main/resources/client_api.yaml'
 def cbReviewApiSourceFile = 'src/main/resources/cb_review_api.yaml'
 def cbSearchApiSourceFile = 'src/main/resources/cb_search_api.yaml'
 def swaggerTargetFolder = 'src/generated/java'
+
+import io.swagger.codegen.config.CodegenConfigurator
+import io.swagger.codegen.DefaultGenerator
+import org.gradle.api.tasks.JavaExec
+import org.pmiops.workbench.tooling.GenerateAPIListingTask
+import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
 task generateMergedSwagger(type: Exec) {
   commandLine "./build.rb", "merge-yaml"
@@ -171,23 +191,6 @@ configurations {
 
 project.ext.GAE_VERSION = '1.9.64'
 
-buildscript {    // Configuration for building
-  repositories {
-    jcenter()    // Bintray's repository - a fast Maven Central mirror & more
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
-    classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
-    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
-    classpath 'io.swagger:swagger-codegen:2.2.3'
-    classpath 'org.owasp:dependency-check-gradle:3.1.0'
-    classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
-  }
-}
-
 ext['hibernate.version'] = '5.2.10.Final'
 
 apply plugin: 'java'
@@ -195,6 +198,7 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'war'
 apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'org.hidetake.swagger.generator'
 apply plugin: 'org.owasp.dependencycheck'
@@ -313,21 +317,14 @@ dependencies {
   compile 'com.google.cloud.sql:mysql-socket-factory:1.0.10'
   compile "com.google.appengine:appengine:${GAE_VERSION}"
   compile "com.google.appengine:appengine-api-1.0-sdk:${GAE_VERSION}"
-  compile('org.springframework.boot:spring-boot-starter-web') {
-    exclude module: 'spring-boot-starter-tomcat'
-    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-  }
-  compile('org.springframework.boot:spring-boot-starter-data-jpa') {
-    exclude module: 'spring-boot-starter-tomcat'
-    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-  }
-  compile('org.springframework.boot:spring-boot-starter-actuator') {
-    exclude module: 'spring-boot-starter-tomcat'
-    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-  }
+  compile('org.springframework.boot:spring-boot-starter-web')
+  compile('org.springframework.boot:spring-boot-starter-data-jpa')
+  compile('org.springframework.boot:spring-boot-starter-actuator')
   compile 'org.springframework.security:spring-security-web:4.2.2.RELEASE'
   compile 'org.hibernate:hibernate-core:5.2.10.Final'
-
+  compile 'org.apache.tomcat:tomcat-jdbc:9.0.21'
+  compile 'org.apache.logging.log4j:log4j-core:2.11.2'
+  
   compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-core:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'

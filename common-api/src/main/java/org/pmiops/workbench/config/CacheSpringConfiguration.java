@@ -6,6 +6,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.db.dao.ConfigDao;
@@ -40,12 +41,12 @@ public class CacheSpringConfiguration {
                 if (configClass == null) {
                   throw new IllegalArgumentException("Invalid config key: " + key);
                 }
-                Config config = configDao.findOne(key);
-                if (config == null) {
+                Optional<Config> config = configDao.findById(key);
+                if (!config.isPresent()) {
                   return null;
                 }
                 Gson gson = new Gson();
-                return gson.fromJson(config.getConfiguration(), configClass);
+                return gson.fromJson(config.get().getConfiguration(), configClass);
               }
             });
   }

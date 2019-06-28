@@ -232,7 +232,7 @@ public class ConceptService {
     ImmutableList.Builder<Long> standardConceptIds = ImmutableList.builder();
     ImmutableList.Builder<Long> sourceConceptIds = ImmutableList.builder();
 
-    Iterable<Concept> concepts = conceptDao.findAll(conceptIds);
+    Iterable<Concept> concepts = conceptDao.findAllById(conceptIds);
     for (Concept concept : concepts) {
       if (ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept())
           || ConceptService.CLASSIFICATION_CONCEPT_CODE.equals(concept.getStandardConcept())) {
