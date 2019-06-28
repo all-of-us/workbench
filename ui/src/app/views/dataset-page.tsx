@@ -4,10 +4,10 @@ import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {TooltipTrigger} from 'app/components/popups';
-import {Spinner} from 'app/components/spinners';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
+import {TooltipTrigger} from 'app/components/popups';
+import {Spinner} from 'app/components/spinners';
 import {
   cohortsApi,
   conceptsApi,
