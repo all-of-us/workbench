@@ -109,8 +109,6 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
   render() {
     const {profileState: {profile}} = this.props;
     const {profileEdits, updating} = this.state;
-    console.log('profile.eraCommonsLinkedNihUsername');
-    console.log(profile.eraCommonsLinkedNihUsername);
     const {
       givenName, familyName, currentPosition, organization, areaOfResearch,
       institutionalAffiliations = []
