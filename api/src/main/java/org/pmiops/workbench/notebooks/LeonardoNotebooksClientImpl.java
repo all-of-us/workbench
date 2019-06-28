@@ -18,7 +18,7 @@ import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.api.StatusApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterRequest;
-import org.pmiops.workbench.notebooks.model.Entry;
+import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.notebooks.model.MachineConfig;
 import org.pmiops.workbench.notebooks.model.StorageLink;
@@ -131,7 +131,11 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         new Localize()
             .entries(
                 fileList.entrySet().stream()
-                    .map(e -> new Entry().sourceUri(e.getValue()).localDestinationPath(e.getKey()))
+                    .map(
+                        e ->
+                            new LocalizationEntry()
+                                .sourceUri(e.getValue())
+                                .localDestinationPath(e.getKey()))
                     .collect(Collectors.toList()));
     NotebooksApi notebooksApi = notebooksApiProvider.get();
     retryHandler.run(

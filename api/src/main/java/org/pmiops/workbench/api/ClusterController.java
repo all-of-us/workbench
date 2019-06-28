@@ -228,13 +228,15 @@ public class ClusterController implements ClusterApiDelegate {
               + FireCloudService.WORKSPACE_DELIMITER
               + body.getWorkspaceId();
     }
+
     String editDir = "workspaces/" + workspacePath;
     // This prefix must be kept in sync with the Playground mode extension, see
     // https://github.com/all-of-us/workbench/blob/master/api/cluster-resources/playground-extension.js
     String playgroundDir = "workspaces_playground/" + workspacePath;
     String targetDir = body.getPlaygroundMode() ? playgroundDir : editDir;
-    boolean enableLeoWelder = workbenchConfigProvider.get().featureFlags.enableLeoWelder;
 
+    // TODO(RW-2955): Teardown playground mode and non-Welder paths.
+    boolean enableLeoWelder = workbenchConfigProvider.get().featureFlags.enableLeoWelder;
     if (enableLeoWelder) {
       leonardoNotebooksClient.createStorageLink(
           projectName,

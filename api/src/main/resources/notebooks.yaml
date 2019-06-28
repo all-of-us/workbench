@@ -1523,8 +1523,8 @@ definitions:
       entries:
         type: array
         items:
-          $ref: '#/definitions/Entry'
-  Entry:
+          $ref: '#/definitions/LocalizationEntry'
+  LocalizationEntry:
     properties:
       sourceUri:
         type: string
