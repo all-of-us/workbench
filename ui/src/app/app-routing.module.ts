@@ -30,7 +30,7 @@ import {WorkspaceComponent} from './views/workspace/component';
 
 import {environment} from 'environments/environment';
 import {BreadcrumbType, NavStore} from './utils/navigation';
-import {InteractiveNotebookComponent} from "./views/interactive-notebook";
+import {InteractiveNotebookComponent} from './views/interactive-notebook';
 
 
 declare let gtag: Function;

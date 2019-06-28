@@ -1,17 +1,17 @@
 /**
  * Duplicated from swagger-fetch-clients.ts
  *
- * It was a lot easier to recreate this file for the Notebooks fetch client instead of modifying the
- * existing one to service both fetch clients. There's probably some work to be done to still share some code
- * between this file and swagger-fetch-client.ts.
+ * It was a lot easier to recreate this file for the Notebooks fetch client instead of modifying
+ * the existing one to service both fetch clients. There's probably some work to be done to
+ * still share some code between this file and swagger-fetch-client.ts.
  */
 
 import {
   BaseAPI,
+  ClusterApi,
   Configuration as FetchConfiguration,
-  FetchAPI,
-  ClusterApi
-} from "notebooks-generated/fetch";
+  FetchAPI
+} from 'notebooks-generated/fetch';
 
 let frozen = false;
 function checkFrozen() {

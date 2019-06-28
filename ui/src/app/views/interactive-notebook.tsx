@@ -1,15 +1,15 @@
 import {Component} from '@angular/core';
 import * as React from 'react';
 
+import {ClrIcon} from 'app/components/icons';
+import {EditComponentReact} from 'app/icons/edit';
+import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
+import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {clusterApi, workspacesApi} from "../services/swagger-fetch-clients";
-import {ClusterStatus} from "../../generated/fetch";
-import {navigate, urlParamsStore} from "../utils/navigation";
-import {notebooksClusterApi} from "../services/notebooks-swagger-fetch-clients";
-import {ClrIcon} from "../components/icons";
-import {EditComponentReact} from "../icons/edit";
-import colors from "../styles/colors";
+import {ClusterStatus} from 'generated/fetch';
 
 const styles = reactStyles({
   navBar: {
@@ -51,95 +51,102 @@ const styles = reactStyles({
 });
 
 interface Props {
-  workspace: WorkspaceData
+  workspace: WorkspaceData;
 }
+
 interface State {
-  clusterStatus: ClusterStatus,
-  userRequestedEditMode: boolean,
-  html: string
+  clusterStatus: ClusterStatus;
+  userRequestedEditMode: boolean;
+  html: string;
 }
 
-export const InteractiveNotebook = withCurrentWorkspace()(class extends React.Component<Props, State> {
+export const InteractiveNotebook = withCurrentWorkspace()(
+  class extends React.Component<Props, State> {
 
-  private pollClusterTimer: NodeJS.Timer;
-  private billingProjectId = urlParamsStore.getValue().ns;
-  private workspaceId = urlParamsStore.getValue().wsid;
-  private nbName = urlParamsStore.getValue().nbName;
+    private billingProjectId = urlParamsStore.getValue().ns;
+    private workspaceId = urlParamsStore.getValue().wsid;
+    private nbName = urlParamsStore.getValue().nbName;
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      userRequestedEditMode: false,
-      clusterStatus: ClusterStatus.Unknown,
-      html: ''
-    };
-  }
+    constructor(props) {
+      super(props);
+      this.state = {
+        userRequestedEditMode: false,
+        clusterStatus: ClusterStatus.Unknown,
+        html: ''
+      };
+    }
 
-  componentDidMount(): void {
-    workspacesApi().readOnlyNotebook(this.billingProjectId, this.workspaceId, this.nbName)
-      .then(html => {this.setState({html: html.html})})
-  }
+    componentDidMount(): void {
+      workspacesApi().readOnlyNotebook(this.billingProjectId, this.workspaceId, this.nbName)
+        .then(html => {
+          this.setState({html: html.html});
+        });
+    }
 
-  private runCluster(): void {
-    const retry = () => {
-      this.pollClusterTimer = setTimeout(() => this.runCluster(), 5000);
-    };
+    private runCluster(): void {
+      const retry = () => {
+        setTimeout(() => this.runCluster(), 5000);
+      };
 
-    clusterApi().listClusters(this.billingProjectId)
-      .then((body) => {
-        const cluster = body.defaultCluster;
-        this.setState({ clusterStatus: cluster.status });
+      clusterApi().listClusters(this.billingProjectId)
+        .then((body) => {
+          const cluster = body.defaultCluster;
+          this.setState({clusterStatus: cluster.status});
 
-        if (cluster.status === ClusterStatus.Stopped) {
-          notebooksClusterApi()
-            .startCluster(cluster.clusterNamespace, cluster.clusterName);
-        }
+          if (cluster.status === ClusterStatus.Stopped) {
+            notebooksClusterApi()
+              .startCluster(cluster.clusterNamespace, cluster.clusterName);
+          }
 
-        if (cluster.status === ClusterStatus.Running) {
-          this.onClusterRunning();
-        } else {
+          if (cluster.status === ClusterStatus.Running) {
+            this.onClusterRunning();
+          } else {
+            retry();
+          }
+        })
+        .catch(() => {
           retry();
-        }
-      })
-      .catch(() => {
-        retry();
-      });
-  }
+        });
+    }
 
-  private onEditClick() {
-    this.setState({ userRequestedEditMode : true });
-    this.runCluster();
-  }
+    private onEditClick() {
+      this.setState({userRequestedEditMode: true});
+      this.runCluster();
+    }
 
-  private onClusterRunning() {
-    navigate(['workspaces', this.billingProjectId, this.workspaceId, 'notebooks', this.nbName]);
-  }
+    private onClusterRunning() {
+      navigate(['workspaces', this.billingProjectId, this.workspaceId, 'notebooks', this.nbName]);
+    }
 
-  render() {
-    return (
-      <div>
-        <div style={styles.navBar}>
-          <div style={{...styles.navBarItem, ...styles.active, width: 227}}>
-            Preview (Read-Only)
-          </div>
-          {this.state.userRequestedEditMode ? (
-            <div style={{...styles.navBarItem, width: 550}}>
-              <ClrIcon shape="sync" style={{...styles.navBarIcon, ...styles.rotate}}></ClrIcon>
-              Preparing your Jupyter environment. This may take up to 2 minutes.
-            </div>) : (<div>
-              <div onClick={() => {this.onEditClick();}} style={{...styles.navBarItem, ...styles.clickable, width: 135}}>
-                <EditComponentReact enableHoverEffect={false} disabled={false} style={{...styles.navBarIcon}} />
+    render() {
+      return (
+        <div>
+          <div style={styles.navBar}>
+            <div style={{...styles.navBarItem, ...styles.active, width: 227}}>
+              Preview (Read-Only)
+            </div>
+            {this.state.userRequestedEditMode ? (
+              <div style={{...styles.navBarItem, width: 550}}>
+                <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}></ClrIcon>
+                Preparing your Jupyter environment. This may take up to 10 minutes.
+              </div>) : (<div>
+              <div onClick={() => {
+                this.onEditClick();
+              }} style={{...styles.navBarItem, ...styles.clickable, width: 135}}>
+                <EditComponentReact enableHoverEffect={false}
+                                    disabled={false}
+                                    style={{...styles.navBarIcon}}/>
                 Edit
               </div>
             </div>)
-          }
+            }
+          </div>
+          <iframe style={styles.previewFrame} srcDoc={this.state.html}>
+          </iframe>
         </div>
-        <iframe style={styles.previewFrame} srcDoc={this.state.html}>
-        </iframe>
-      </div>
-    );
-  }
-});
+      );
+    }
+  });
 
 @Component({
   template: '<div #root></div>'
