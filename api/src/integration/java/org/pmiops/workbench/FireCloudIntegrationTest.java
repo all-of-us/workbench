@@ -23,6 +23,7 @@ import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.Me;
@@ -47,6 +48,7 @@ public class FireCloudIntegrationTest {
   @Mock private GroupsApi allOfUsGroupsApi;
   @Mock private GroupsApi endUserGroupsApi;
   @Mock private WorkspacesApi workspaceAclsApi;
+  @Mock private StaticNotebooksApi staticNotebooksApi;
   @Mock private ProfileApi profileApi;
   @Mock private NihApi nihApi;
 
@@ -95,6 +97,7 @@ public class FireCloudIntegrationTest {
         Providers.of(workspacesApi),
         Providers.of(workspaceAclsApi),
         Providers.of(new StatusApi(apiClient)),
+        Providers.of(staticNotebooksApi),
         new FirecloudRetryHandler(new NoBackOffPolicy()),
         serviceAccounts,
         Providers.of(fireCloudAdminCredential));
