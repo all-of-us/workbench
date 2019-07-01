@@ -373,14 +373,17 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
           <div style={styles.controls}>
             <div style={{width: '50%'}}>
               {selected !== 0 &&
-              <Button type='primaryOnDarkBackground' data-test-id='previous' style={{marginLeft: '10%'}}
+              <Button type='primaryOnDarkBackground' data-test-id='previous'
+                      style={{marginLeft: '10%'}}
                       onClick={() => this.previous()}>Previous</Button>}
             </div>
             <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
               {selected !== (panels.length - 1) &&
-              <Button type='primaryOnDarkBackground' data-test-id='close' onClick={() => this.close()}
+              <Button type='primaryOnDarkBackground' data-test-id='close'
+                      onClick={() => this.close()}
                       style={{marginLeft: '10%', marginRight: '0.25rem'}}>Close</Button>}
-              <Button type='secondaryOnDarkBackground' data-test-id='next' style={{marginRight: '10%'}}
+              <Button type='secondaryOnDarkBackground' data-test-id='next'
+                      style={{marginRight: '10%'}}
                       onClick={() => this.next()}>{this.lastButtonText()}</Button>
             </div>
           </div>

@@ -181,7 +181,8 @@ export class WorkspaceCard extends React.Component<
               Pending Approval
             </div>}
             {wp.isRejected && <div style={{color: colors.danger}}>
-              <ClrIcon shape='exclamation-triangle' className='is-solid' style={{fill: colors.danger}}/>
+              <ClrIcon shape='exclamation-triangle' className='is-solid'
+                       style={{fill: colors.danger}}/>
               Rejected
             </div> }
           </div>

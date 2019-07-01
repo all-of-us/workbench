@@ -6,7 +6,6 @@ import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithLightness} from 'app/styles/colors';
 import {ReactWrapperBase, toggleIncludes} from 'app/utils';
 import {reactStyles} from 'app/utils';
-import * as Color from 'color';
 import {Concept} from 'generated/fetch/api';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
