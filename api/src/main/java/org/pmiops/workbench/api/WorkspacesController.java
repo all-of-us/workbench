@@ -712,9 +712,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    dbWorkspace = workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
-    dbWorkspace.setPublished(true);
-    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -725,9 +723,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    dbWorkspace = workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
-    dbWorkspace.setPublished(false);
-    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
     return ResponseEntity.ok(new EmptyResponse());
   }
 }
