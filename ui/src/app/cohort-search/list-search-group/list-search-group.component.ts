@@ -1,20 +1,12 @@
-import {
-  AfterViewInit,
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output, SimpleChanges,
-} from '@angular/core';
+import {AfterViewInit, Component, Input} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {generateId} from 'app/cohort-search/utils';
+import {generateId, mapGroup} from 'app/cohort-search/utils';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated/fetch';
+import {DomainType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
 
 @Component({
   selector: 'app-list-search-group',
@@ -24,20 +16,24 @@ import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated/
     '../../styles/buttons.css',
   ]
 })
-export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnInit {
+export class ListSearchGroupComponent implements AfterViewInit {
   @Input() group;
   @Input() index;
   @Input() role: keyof SearchRequest;
-  @Output() temporalLength = new EventEmitter<any>();
+  @Input() updateRequest: Function;
 
-  whichMention = [TemporalMention.ANYMENTION,
+  whichMention = [
+    TemporalMention.ANYMENTION,
     TemporalMention.FIRSTMENTION,
-    TemporalMention.LASTMENTION];
+    TemporalMention.LASTMENTION
+  ];
 
-  timeDropDown = [TemporalTime.DURINGSAMEENCOUNTERAS,
+  timeDropDown = [
+    TemporalTime.DURINGSAMEENCOUNTERAS,
     TemporalTime.XDAYSAFTER,
     TemporalTime.XDAYSBEFORE,
-    TemporalTime.WITHINXDAYSOF];
+    TemporalTime.WITHINXDAYSOF
+  ];
   name = this.whichMention[0];
   readonly domainTypes = LIST_DOMAIN_TYPES;
   readonly programTypes = LIST_PROGRAM_TYPES;
@@ -53,21 +49,6 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
   count: number;
   error = false;
   loading = false;
-
-  ngOnInit() {
-    // this.getGroupCount();
-    // TODO move this to the store and remove all Outputs/Event emitters
-    this.temporalLength.emit( {
-      tempLength: false,
-      flag: false}
-    );
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.group && !changes.group.firstChange) {
-      // this.getGroupCount();
-    }
-  }
 
   ngAfterViewInit() {
     if (typeof ResizeObserver === 'function') {
@@ -96,10 +77,11 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
   getGroupCount() {
     try {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const group = mapGroup(this.group);
       const request = <SearchRequest>{
         includes: [],
         excludes: [],
-        [this.role]: [this.group]
+        [this.role]: [group]
       };
       cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
         this.count = count;
@@ -119,10 +101,17 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
   update = () => {
     // timeout prevents Angular 'value changed after checked' error
     setTimeout(() => {
-      this.loading = true;
-      this.error = false;
-      this.getGroupCount();
+      if (this.activeItems) {
+        this.updateRequest();
+        this.loading = true;
+        this.error = false;
+        this.getGroupCount();
+      }
     });
+  }
+
+  get activeItems() {
+    return this.group.items.some(it => it.status === 'active');
   }
 
   get items() {
@@ -134,18 +123,12 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
     return !this.group.temporal ? [] : this.group.items.filter(it => it.temporalGroup === 1);
   }
 
-  get typeFlag() {
-    let flag = true;
-    this.treeType.map(m => {
-      if ( m === TreeType[TreeType.PM] || m === TreeType[TreeType.DEMO] ||
-        m === TreeType[TreeType.PPI]) {
-        flag = false;
-      }
-    });
-    return flag;
+  get disableTemporal() {
+    return this.items.some(it =>
+      [DomainType.PHYSICALMEASUREMENT, DomainType.PERSON, DomainType.SURVEY].includes(it.type));
   }
 
-  get temporalFlag() {
+  get temporal() {
     return this.group.temporal;
   }
 
@@ -180,35 +163,13 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
   }
 
   removeGroup(status?: string): void {
-    this.cancelIfRequesting();
     const searchRequest = searchRequestStore.getValue();
     if (!status) {
       searchRequest[this.role] = searchRequest[this.role].filter(grp => grp.id !== this.group.id);
       searchRequestStore.next(searchRequest);
     } else {
-      this.setGroupProperty('status', 'pending');
-      if (this.hasActiveItems) {
-        if (this.otherGroupsWithActiveItems) {
-          // this.requestTotalCount();
-        } else {
-          // this.cancelTotalIfRequesting();
-          // this.clearTotalCount();
-        }
-      }
+      this.setGroupProperty('status', status);
     }
-  }
-
-  cancelIfRequesting() {
-    // TODO cancel pending api call
-  }
-
-  get hasActiveItems() {
-    return this.group.items.filter(it => it.status === 'active').length > 0;
-  }
-
-  get otherGroupsWithActiveItems() {
-    // TODO check all groups for active items
-    return false;
   }
 
   setOverlayPosition() {
@@ -237,7 +198,8 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
   launchWizard(criteria: any, tempGroup?: number) {
     const {domain, type, standard} = criteria;
     const itemId = generateId('items');
-    const item = this.initItem(itemId, domain);
+    tempGroup = tempGroup || 0;
+    const item = this.initItem(itemId, domain, tempGroup);
     const codes = criteria.codes || false;
     const role = this.role;
     const groupId = this.group.id;
@@ -245,21 +207,16 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
     wizardStore.next(context);
   }
 
-  initItem(id: string, type: string) {
+  initItem(id: string, type: string, tempGroup: number) {
     return {
       id,
       type,
       searchParameters: [],
       modifiers: [],
       count: null,
-      temporalGroup: 0,
+      temporalGroup: tempGroup,
       status: 'active'
     };
-  }
-
-  deleteItem = (itemId: string) => {
-    const items = this.group.items.filter(it => it.id !== itemId);
-    this.setGroupProperty('items', items);
   }
 
   setGroupProperty(property: string, value: any) {
@@ -271,11 +228,16 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
       return grp;
     });
     searchRequestStore.next(searchRequest);
+    this.updateRequest();
   }
 
   getTemporal(e) {
     this.setGroupProperty('temporal', e.target.checked);
-    // TODO when new api call are ready, recalculate counts
+    if ((!e.target.checked && this.activeItems) || (e.target.checked && !this.temporalError)) {
+      this.loading = true;
+      this.error = false;
+      this.getGroupCount();
+    }
   }
 
   getMentionTitle(mentionName) {
@@ -315,15 +277,17 @@ export class ListSearchGroupComponent implements AfterViewInit, OnChanges, OnIni
   }
 
   get groupDisableFlag() {
-    return !this.temporalFlag && !this.group.items.length;
+    return !this.temporal && !this.group.items.length;
   }
 
-  get warningFlag() {
-    const tempWarningFlag =
-      !this.temporalItems.filter(t => t.get('status') === 'active').length;
-    const nonTempWarningFlag =
-      !this.items.filter(t => t.get('status') === 'active').length;
-    return tempWarningFlag || nonTempWarningFlag;
+  get temporalError() {
+    const counts = this.group.items.reduce((acc, it) => {
+      if (it.status === 'active') {
+        acc[it.temporalGroup]++;
+      }
+      return acc;
+    }, [0, 0]);
+    return counts.includes(0);
   }
 
   setMenuPosition() {

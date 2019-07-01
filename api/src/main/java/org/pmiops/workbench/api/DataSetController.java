@@ -232,8 +232,11 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(
         new DataSetCodeResponse()
             .code(
-                dataSetService.generateCodeFromQueryAndKernelType(
-                    kernelType, dataSet.getName(), bigQueryJobConfig))
+                dataSetService
+                    .generateCodeCellPerDomainFromQueryAndKernelType(
+                        kernelType, dataSet.getName(), bigQueryJobConfig)
+                    .stream()
+                    .collect(Collectors.joining("\n\n")))
             .kernelType(kernelType));
   }
 
@@ -397,8 +400,8 @@ public class DataSetController implements DataSetApiDelegate {
 
     Map<String, QueryJobConfiguration> queryList =
         dataSetService.generateQuery(dataSetExportRequest.getDataSetRequest());
-    String queriesAsStrings =
-        dataSetService.generateCodeFromQueryAndKernelType(
+    List<String> queriesAsStrings =
+        dataSetService.generateCodeCellPerDomainFromQueryAndKernelType(
             dataSetExportRequest.getKernelType(),
             dataSetExportRequest.getDataSetRequest().getName(),
             queryList);
@@ -406,7 +409,7 @@ public class DataSetController implements DataSetApiDelegate {
     if (dataSetExportRequest.getNewNotebook()) {
       notebookFile =
           new JSONObject()
-              .put("cells", new JSONArray().put(createNotebookCodeCellWithString(queriesAsStrings)))
+              .put("cells", new JSONArray())
               .put("metadata", metaData)
               // nbformat and nbformat_minor are the notebook major and minor version we are
               // creating.
@@ -414,9 +417,9 @@ public class DataSetController implements DataSetApiDelegate {
               // See https://nbformat.readthedocs.io/en/latest/api.html
               .put("nbformat", 4)
               .put("nbformat_minor", 2);
-    } else {
-
-      notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(queriesAsStrings));
+    }
+    for (String query : queriesAsStrings) {
+      notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(query));
     }
 
     notebooksService.saveNotebook(

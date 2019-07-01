@@ -77,9 +77,6 @@ public class ProfileService {
     profile.setDisabled(user.getDisabled());
     profile.setEraCommonsLinkedNihUsername(user.getEraCommonsLinkedNihUsername());
 
-    if (user.getTermsOfServiceCompletionTime() != null) {
-      profile.setTermsOfServiceCompletionTime(user.getTermsOfServiceCompletionTime().getTime());
-    }
     if (user.getComplianceTrainingCompletionTime() != null) {
       profile.setComplianceTrainingCompletionTime(
           user.getComplianceTrainingCompletionTime().getTime());

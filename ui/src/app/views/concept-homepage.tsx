@@ -5,6 +5,7 @@ import {AlertClose, AlertDanger} from 'app/components/alert';
 import {Clickable} from 'app/components/buttons';
 import {WorkspaceCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
+import {Header} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
@@ -19,6 +20,7 @@ import {ConceptNavigationBar} from 'app/views/concept-navigation-bar';
 import {ConceptTable} from 'app/views/concept-table';
 import {SlidingFabReact} from 'app/views/sliding-fab';
 import * as Color from 'color';
+import {environment} from 'environments/environment';
 import {
   Concept,
   ConceptSet,
@@ -375,7 +377,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
         currentSearchString, conceptsSavedText} = this.state;
       const {workspace} = this.props;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
-        <ConceptNavigationBar showConcepts={true} ns={workspace.namespace} wsId={workspace.id}/>
+        {environment.enableDatasetBuilder ?
+          <Header style={{fontSize: '20px', marginTop: 0, fontWeight: 600}}>Concept Sets</Header> :
+          <ConceptNavigationBar showConcepts={true} ns={workspace.namespace} wsId={workspace.id}/>}
         <div style={{marginBottom: '6%', marginTop: '1.5%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
             <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',

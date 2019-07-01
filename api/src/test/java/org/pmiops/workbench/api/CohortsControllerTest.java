@@ -2,8 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
@@ -14,7 +12,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import javax.inject.Provider;
@@ -254,9 +251,6 @@ public class CohortsControllerTest {
     cohort.setDescription("demo");
     cohort.setType("demo");
     cohort.setCriteria(createDemoCriteria().toString());
-    when(cloudStorageService.readAllDemoCohorts()).thenReturn(Collections.singletonList(cohort));
-
-    doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspacesController.createWorkspace(workspace2);
@@ -305,8 +299,7 @@ public class CohortsControllerTest {
             .getBody()
             .getItems();
     assertThat(cohorts).containsAllOf(c1, c2);
-    // This is because we have a demo cohort in the workspace.
-    assertThat(cohorts.size()).isEqualTo(3);
+    assertThat(cohorts.size()).isEqualTo(2);
   }
 
   @Test

@@ -33,7 +33,8 @@ describe('ListOverviewComponent', () => {
 
     // Default Inputs for tests
     component.total = 0;
-    component.isRequesting = false;
+    component.loading = false;
+    component.searchRequest = {includes: [], excludes: []};
 
     fixture.detectChanges();
   });

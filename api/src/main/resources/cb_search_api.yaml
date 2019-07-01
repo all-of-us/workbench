@@ -39,7 +39,7 @@ security:
 paths:
 
   # Cohort Builder #######################################################################
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/{term}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/term:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
@@ -54,7 +54,7 @@ paths:
           type: string
           required: true
           description: the specific type of domain
-        - in: path
+        - in: query
           name: term
           type: string
           required: true

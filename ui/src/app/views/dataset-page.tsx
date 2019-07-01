@@ -4,10 +4,10 @@ import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {ClrIcon} from 'app/components/icons';
+import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-
-import {ClrIcon} from 'app/components/icons';
 import {
   cohortsApi,
   conceptsApi,
@@ -128,6 +128,13 @@ export const styles = reactStyles({
     flexDirection: 'column',
     alignItems: 'center',
     height: '10rem'
+  },
+
+  selectAllContainer: {
+    marginLeft: 'auto',
+    width: '5rem',
+    display: 'flex',
+    alignItems: 'center'
   }
 });
 
@@ -147,7 +154,7 @@ const Subheader = (props) => {
 export const ValueListItem: React.FunctionComponent <
   {domainValue: DomainValue, onChange: Function, checked: boolean}> =
   ({domainValue, onChange, checked}) => {
-    return <div style={{display: 'flex', color: 'black', height: '1.2rem'}}>
+    return <div style={{display: 'flex', height: '1.2rem'}}>
       <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
              style={styles.valueListItemCheckboxStyling} checked={checked}/>
       <div style={{lineHeight: '1.5rem', wordWrap: 'break-word'}}>{domainValue.value}</div>
@@ -184,7 +191,6 @@ interface State {
   selectedValues: DomainValuePair[];
   valueSets: ValueSet[];
   valuesLoading: boolean;
-  selectAll: boolean;
 }
 
 const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
@@ -209,7 +215,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         selectedValues: [],
         valueSets: [],
         valuesLoading: false,
-        selectAll: false
       };
     }
 
@@ -332,21 +337,23 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       this.setState({selectedValues: valuesSelected, dataSetTouched: true});
     }
 
-    selectAllValues() {
-      if (this.state.selectAll) {
-        this.setState({
-          selectedValues: [],
-          selectAll: !this.state.selectAll});
-        return;
-      }
+    get selectAll() {
+      return fp.isEmpty(this.state.selectedValues);
+    }
 
-      const allValuesSelected = [];
-      this.state.valueSets.map(valueSet => {
-        valueSet.values.items.map(value => {
-          allValuesSelected.push({domain: valueSet.domain, value: value.value});
+    selectAllValues() {
+      if (!this.selectAll) {
+        this.setState({selectedValues: []});
+        return;
+      } else {
+        const allValuesSelected = [];
+        this.state.valueSets.map(valueSet => {
+          valueSet.values.items.map(value => {
+            allValuesSelected.push({domain: valueSet.domain, value: value.value});
+          });
         });
-      });
-      this.setState({selectedValues: allValuesSelected, selectAll: !this.state.selectAll});
+        this.setState({selectedValues: allValuesSelected});
+      }
     }
 
     disableSave() {
@@ -443,7 +450,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       const {namespace, id} = this.props.workspace;
       const wsPathPrefix = 'workspaces/' + namespace + '/' + id;
       const cohortsPath = wsPathPrefix + '/cohorts';
-      const conceptSetsPath = wsPathPrefix + '/concepts/sets';
+      const conceptSetsPath = wsPathPrefix + '/concepts';
       const {
         dataSet,
         dataSetTouched,
@@ -522,11 +529,16 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                     <div>
                       Values
                     </div>
-                    <Clickable data-test-id='select-all'
-                               style={{marginLeft: 'auto'}}
-                               onClick={() => this.selectAllValues()}>
-                      Select All
-                    </Clickable>
+                    <div style={styles.selectAllContainer}>
+                      <CheckBox style={{height: 17, width: 17}}
+                                disabled={fp.isEmpty(valueSets)}
+                                data-test-id='select-all'
+                                onChange={() => this.selectAllValues()}
+                                checked={!this.selectAll} />
+                      <div style={{marginLeft: '0.25rem', fontSize: '13px', lineHeight: '17px'}}>
+                        {this.selectAll ? 'Select All' : 'Deselect All'}
+                      </div>
+                    </div>
                   </div>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {valuesLoading && <Spinner style={{position: 'relative',

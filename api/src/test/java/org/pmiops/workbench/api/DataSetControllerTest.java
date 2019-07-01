@@ -485,7 +485,7 @@ public class DataSetControllerTest {
             .generateCode(
                 WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
-    assertThat(response.getCode()).isEqualTo("import pandas\n\n");
+    assertThat(response.getCode()).isEmpty();
   }
 
   @Test
@@ -646,7 +646,7 @@ public class DataSetControllerTest {
             .generateCode(
                 WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
-    assertThat(response.getCode()).contains("OR PERSON_ID IN");
+    assertThat(response.getCode()).contains("UNION DISTINCT");
   }
 
   @Rule public ExpectedException expectedException = ExpectedException.none();

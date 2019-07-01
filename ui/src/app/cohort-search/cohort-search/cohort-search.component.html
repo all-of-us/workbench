@@ -38,7 +38,7 @@
       <app-list-search-group-list
         [role]="'includes'"
         [groups]="criteria.includes"
-        (tempLength)="getTempObj($event)">
+        [updateRequest]="updateRequest">
       </app-list-search-group-list>
     </div>
 
@@ -46,19 +46,13 @@
       <app-list-search-group-list
         *ngIf="includeSize > 0"
         [role]="'excludes'"
-        [groups]="criteria.excludes">
+        [groups]="criteria.excludes"
+        [updateRequest]="updateRequest">
       </app-list-search-group-list>
     </div>
 
     <div class="col-xl-4 col-lg-12" id="list-charts">
-      <app-list-overview
-        *ngIf="overview"
-        [total]="count"
-        [chartData]="chartData"
-        [temporal]="tempLength"
-        [isRequesting]="loading"
-        [error]="error">
-      </app-list-overview>
+      <app-list-overview *ngIf="overview" [searchRequest]="criteria" [update]="triggerUpdate"></app-list-overview>
     </div>
   </div>
 </div>

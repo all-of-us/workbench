@@ -248,24 +248,6 @@ public class UserService {
     return user;
   }
 
-  public User submitTermsOfService() {
-    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateUserWithRetries(
-        (user) -> {
-          user.setTermsOfServiceCompletionTime(timestamp);
-          return user;
-        });
-  }
-
-  public User submitDemographicSurvey() {
-    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateUserWithRetries(
-        (user) -> {
-          user.setDemographicSurveyCompletionTime(timestamp);
-          return user;
-        });
-  }
-
   public User submitDataUseAgreement() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     return updateUserWithRetries(

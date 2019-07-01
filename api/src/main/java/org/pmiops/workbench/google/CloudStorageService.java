@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONObject;
-import org.pmiops.workbench.model.Cohort;
 
 /** Encapsulate Google APIs for interfacing with Google Cloud Storage. */
 public interface CloudStorageService {
@@ -17,12 +16,6 @@ public interface CloudStorageService {
   String readMandrillApiKey();
 
   String getImageUrl(String image_name);
-
-  void copyAllDemoNotebooks(String workspaceBucket);
-
-  List<Cohort> readAllDemoCohorts();
-
-  List<JSONObject> readAllDemoConceptSets();
 
   List<Blob> getBlobList(String bucketName, String directory);
 

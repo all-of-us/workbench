@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {wizardStore} from 'app/cohort-search/search-state.service';
+import {mapParameter} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {DatePicker} from 'app/components/inputs';
@@ -392,7 +393,7 @@ export const ListModifierPage = withCurrentWorkspace()(
           [role]: [{
             items: [{
               type: domain,
-              searchParameters: searchParameters,
+              searchParameters: searchParameters.map(mapParameter),
               modifiers: modifiers
             }]
           }]

@@ -15,7 +15,9 @@
     "xAppIdValue": "test-AoU-RW"
   },
   "auth": {
-    "serviceAccountApiUsers": [ "all-of-us-workbench-test@appspot.gserviceaccount.com" ]
+    "serviceAccountApiUsers": [
+      "all-of-us-workbench-test@appspot.gserviceaccount.com"
+    ]
   },
   "cdr": {
     "debugQueries": true
@@ -23,8 +25,7 @@
   "googleCloudStorageService": {
     "clusterResourcesBucketName": "all-of-us-workbench-test-cluster-resources",
     "credentialsBucketName": "all-of-us-workbench-test-credentials",
-    "emailImagesBucketName": "all-of-us-workbench-test-email-images",
-    "demosBucketName": "all-of-us-workbench-test-demos"
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "fake-research-aou.org"
@@ -47,7 +48,7 @@
   "elasticsearch": {
     "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
     "enableBasicAuth": true,
-    "enableElasticsearchBackend": true
+    "enableElasticsearchBackend": false
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",
@@ -61,7 +62,7 @@
     "unsafeAllowSelfBypass": true
   },
   "cohortbuilder": {
-    "enableListSearch": false
+    "enableListSearch": true
   },
   "featureFlags": {
     "useBillingProjectBuffer": true,

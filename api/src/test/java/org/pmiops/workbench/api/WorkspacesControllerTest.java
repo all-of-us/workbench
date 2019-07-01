@@ -9,7 +9,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -78,7 +77,10 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.*;
+import org.pmiops.workbench.firecloud.model.WorkspaceACL;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
@@ -287,15 +289,6 @@ public class WorkspacesControllerTest {
     conceptDao.save(CONCEPT_2);
     conceptDao.save(CONCEPT_3);
 
-    Cohort cohort = new Cohort();
-    cohort.setName("demo");
-    cohort.setDescription("demo");
-    cohort.setType("demo");
-    cohort.setCriteria(createDemoCriteria().toString());
-    when(cloudStorageService.readAllDemoCohorts()).thenReturn(Collections.singletonList(cohort));
-
-    doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
-
     CLOCK.setInstant(NOW);
 
     WorkbenchConfig testConfig = new WorkbenchConfig();
@@ -343,13 +336,18 @@ public class WorkspacesControllerTest {
   }
 
   private WorkspaceACL createWorkspaceACL() {
-    WorkspaceACL fcAcl = new WorkspaceACL();
-    Map<String, Object> acl = new HashMap<>();
-    JSONObject accessEntry =
-        new JSONObject().put("accessLevel", "OWNER").put("canCompute", true).put("canShare", true);
-    acl.put(currentUser.getEmail(), accessEntry);
-    fcAcl.setAcl(acl);
-    return fcAcl;
+    return createWorkspaceACL(
+        new JSONObject()
+            .put(
+                currentUser.getEmail(),
+                new JSONObject()
+                    .put("accessLevel", "OWNER")
+                    .put("canCompute", true)
+                    .put("canShare", true)));
+  }
+
+  private WorkspaceACL createWorkspaceACL(JSONObject acl) {
+    return new Gson().fromJson(new JSONObject().put("acl", acl).toString(), WorkspaceACL.class);
   }
 
   private JSONObject createDemoCriteria() {
@@ -1059,7 +1057,7 @@ public class WorkspacesControllerTest {
             .getItems();
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
     assertThat(cohortsByName.keySet()).containsAllOf("c1", "c2");
-    assertThat(cohortsByName.keySet().size()).isEqualTo(3);
+    assertThat(cohortsByName.keySet().size()).isEqualTo(2);
     assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
         .containsNoneOf(c1.getId(), c2.getId());
 
@@ -1434,37 +1432,43 @@ public class WorkspacesControllerTest {
                 new UserRole().email(writer.getEmail()).role(WorkspaceAccessLevel.WRITER)));
 
     stubFcUpdateWorkspaceACL();
-    WorkspaceACL workspaceAclsFromCloned = new WorkspaceACL();
-    Map<String, Object> aclsFromCloned = new HashMap<>();
-    aclsFromCloned.put(
-        "cloner@gmail.com",
-        new JSONObject().put("accessLevel", "OWNER").put("canCompute", true).put("canShare", true));
-    workspaceAclsFromCloned.setAcl(aclsFromCloned);
+    WorkspaceACL workspaceAclsFromCloned =
+        createWorkspaceACL(
+            new JSONObject()
+                .put(
+                    "cloner@gmail.com",
+                    new JSONObject()
+                        .put("accessLevel", "OWNER")
+                        .put("canCompute", true)
+                        .put("canShare", true)));
 
-    WorkspaceACL workspaceAclsFromOriginal = new WorkspaceACL();
-    Map<String, Object> aclsFromOriginal = new HashMap<>();
-    aclsFromOriginal.put(
-        "cloner@gmail.com",
-        new JSONObject()
-            .put("accessLevel", "READER")
-            .put("canCompute", true)
-            .put("canShare", true));
-    aclsFromOriginal.put(
-        "reader@gmail.com",
-        new JSONObject()
-            .put("accessLevel", "READER")
-            .put("canCompute", false)
-            .put("canShare", false));
-    aclsFromOriginal.put(
-        "writer@gmail.com",
-        new JSONObject()
-            .put("accessLevel", "WRITER")
-            .put("canCompute", true)
-            .put("canShare", false));
-    aclsFromOriginal.put(
-        LOGGED_IN_USER_EMAIL,
-        new JSONObject().put("accessLevel", "OWNER").put("canCompute", true).put("canShare", true));
-    workspaceAclsFromOriginal.setAcl(aclsFromOriginal);
+    WorkspaceACL workspaceAclsFromOriginal =
+        createWorkspaceACL(
+            new JSONObject()
+                .put(
+                    "cloner@gmail.com",
+                    new JSONObject()
+                        .put("accessLevel", "READER")
+                        .put("canCompute", true)
+                        .put("canShare", true))
+                .put(
+                    "reader@gmail.com",
+                    new JSONObject()
+                        .put("accessLevel", "READER")
+                        .put("canCompute", false)
+                        .put("canShare", false))
+                .put(
+                    "writer@gmail.com",
+                    new JSONObject()
+                        .put("accessLevel", "WRITER")
+                        .put("canCompute", true)
+                        .put("canShare", false))
+                .put(
+                    LOGGED_IN_USER_EMAIL,
+                    new JSONObject()
+                        .put("accessLevel", "OWNER")
+                        .put("canCompute", true)
+                        .put("canShare", true)));
 
     when(fireCloudService.getWorkspaceAcl("cloned-ns", "cloned"))
         .thenReturn(workspaceAclsFromCloned);
@@ -1691,24 +1695,27 @@ public class WorkspacesControllerTest {
     shareWorkspaceRequest.addItemsItem(reader);
 
     // Mock firecloud ACLs
-    WorkspaceACL workspaceACLs = new WorkspaceACL();
-    Map<String, Object> acls = new HashMap<>();
-    acls.put(
-        LOGGED_IN_USER_EMAIL,
-        new JSONObject().put("accessLevel", "OWNER").put("canCompute", true).put("canShare", true));
-    acls.put(
-        "writerfriend@gmail.com",
-        new JSONObject()
-            .put("accessLevel", "WRITER")
-            .put("canCompute", true)
-            .put("canShare", false));
-    acls.put(
-        "readerfriend@gmail.com",
-        new JSONObject()
-            .put("accessLevel", "READER")
-            .put("canCompute", false)
-            .put("canShare", false));
-    workspaceACLs.setAcl(acls);
+    WorkspaceACL workspaceACLs =
+        createWorkspaceACL(
+            new JSONObject()
+                .put(
+                    LOGGED_IN_USER_EMAIL,
+                    new JSONObject()
+                        .put("accessLevel", "OWNER")
+                        .put("canCompute", true)
+                        .put("canShare", true))
+                .put(
+                    "writerfriend@gmail.com",
+                    new JSONObject()
+                        .put("accessLevel", "WRITER")
+                        .put("canCompute", true)
+                        .put("canShare", false))
+                .put(
+                    "readerfriend@gmail.com",
+                    new JSONObject()
+                        .put("accessLevel", "READER")
+                        .put("canCompute", false)
+                        .put("canShare", false)));
     when(fireCloudService.getWorkspaceAcl(any(), any())).thenReturn(workspaceACLs);
 
     CLOCK.increment(1000);
