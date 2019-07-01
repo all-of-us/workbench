@@ -61,7 +61,7 @@
           <clr-dropdown *ngFor="let criteria of programTypes">
             <button
               *ngIf="!criteria.children"
-              [id]="criteria.type"
+              [id]="criteria.domain"
               class="dropdown-item"
               type="button"
               (click)="launchWizard(criteria)"
@@ -90,14 +90,14 @@
           <clr-dropdown *ngFor="let criteria of domainTypes">
             <button
               *ngIf="!criteria.children"
-              [id]="criteria.type"
+              [id]="criteria.domain"
               class="dropdown-item"
               type="button"
               (click)="launchWizard(criteria)"
               clrDropdownItem>{{criteria.name}}</button>
             <ng-container *ngIf="criteria.children">
               <button
-                [id]="criteria.type + '-' + index"
+                [id]="criteria.domain + '-' + index"
                 class="dropdown-item"
                 type="button"
                 clrDropdownTrigger>{{criteria.name}}</button>
@@ -124,11 +124,11 @@
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
         <ng-container *ngFor="let criteria of domainTypes">
           <button *ngIf="criteria.name !== 'Demographics'"
-                  id="criteria.type domain"
-                  class="dropdown-item"
-                  type="button"
-                  (click)="launchWizard(criteria)"
-                  clrDropdownItem>{{criteria.name}}</button>
+            [id]="criteria.domain"
+            class="dropdown-item"
+            type="button"
+            (click)="launchWizard(criteria)"
+            clrDropdownItem>{{criteria.name}}</button>
         </ng-container>
       </clr-dropdown-menu>
     </clr-dropdown>
@@ -180,7 +180,7 @@
         <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
           <ng-container *ngFor="let criteria of domainTypes">
             <button *ngIf="criteria.name !== 'Demographics'"
-                    [id]="criteria.type"
+                    [id]="criteria.domain"
                     class="dropdown-item"
                     type="button"
                     (click)="launchWizard(criteria, 1)"
