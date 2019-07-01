@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {ClrIcon} from 'app/components/icons';
@@ -59,6 +59,9 @@ const styles = reactStyles({
 
 interface Props {
   workspace: WorkspaceData;
+  billingProjectId: string,
+  workspaceName: string,
+  notebookName: string
 }
 
 interface State {
@@ -70,10 +73,6 @@ interface State {
 export const InteractiveNotebook = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
 
-    private billingProjectId = urlParamsStore.getValue().ns;
-    private workspaceId = urlParamsStore.getValue().wsid;
-    private nbName = urlParamsStore.getValue().nbName;
-
     constructor(props) {
       super(props);
       this.state = {
@@ -84,7 +83,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(
     }
 
     componentDidMount(): void {
-      workspacesApi().readOnlyNotebook(this.billingProjectId, this.workspaceId, this.nbName)
+      workspacesApi().readOnlyNotebook(this.props.billingProjectId, this.props.workspaceName, this.props.notebookName)
         .then(html => {
           this.setState({html: html.html});
         });
@@ -95,7 +94,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(
         setTimeout(() => this.runCluster(), 5000);
       };
 
-      clusterApi().listClusters(this.billingProjectId)
+      clusterApi().listClusters(this.props.billingProjectId)
         .then((body) => {
           const cluster = body.defaultCluster;
           this.setState({clusterStatus: cluster.status});
@@ -124,7 +123,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(
     }
 
     private onClusterRunning() {
-      navigate(['workspaces', this.billingProjectId, this.workspaceId, 'notebooks', this.nbName]);
+      navigate(['workspaces', this.props.billingProjectId, this.props.workspaceName, 'notebooks', this.props.notebookName]);
     }
 
     private canWrite() {
@@ -169,7 +168,11 @@ export const InteractiveNotebook = withCurrentWorkspace()(
   template: '<div #root></div>'
 })
 export class InteractiveNotebookComponent extends ReactWrapperBase {
+  @Input() billingProjectId = urlParamsStore.getValue().ns;
+  @Input() workspaceName = urlParamsStore.getValue().wsid;
+  @Input() notebookName = urlParamsStore.getValue().nbName;
+
   constructor() {
-    super(InteractiveNotebook, []);
+    super(InteractiveNotebook, ['billingProjectId', 'workspaceName', 'notebookName']);
   }
 }
