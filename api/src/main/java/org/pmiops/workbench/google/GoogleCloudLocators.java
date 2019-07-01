@@ -23,7 +23,6 @@ public class GoogleCloudLocators {
       return false;
     }
     GoogleCloudLocators that = (GoogleCloudLocators) obj;
-    return this.blobId.equals(that.blobId)
-        && this.fullPath.equals(that.fullPath);
+    return this.blobId.equals(that.blobId) && this.fullPath.equals(that.fullPath);
   }
 }
