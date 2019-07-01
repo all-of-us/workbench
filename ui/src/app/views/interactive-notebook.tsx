@@ -58,9 +58,9 @@ const styles = reactStyles({
 
 interface Props {
   workspace: WorkspaceData;
-  billingProjectId: string,
-  workspaceName: string,
-  notebookName: string
+  billingProjectId: string;
+  workspaceName: string;
+  notebookName: string;
 }
 
 interface State {
@@ -82,7 +82,8 @@ export const InteractiveNotebook = withCurrentWorkspace()(
     }
 
     componentDidMount(): void {
-      workspacesApi().readOnlyNotebook(this.props.billingProjectId, this.props.workspaceName, this.props.notebookName)
+      workspacesApi().readOnlyNotebook(this.props.billingProjectId,
+        this.props.workspaceName, this.props.notebookName)
         .then(html => {
           this.setState({html: html.html});
         });
@@ -122,7 +123,8 @@ export const InteractiveNotebook = withCurrentWorkspace()(
     }
 
     private navigateOldNotebooksPage() {
-      navigate(['workspaces', this.props.billingProjectId, this.props.workspaceName, 'notebooks', this.props.notebookName]);
+      navigate(['workspaces', this.props.billingProjectId, this.props.workspaceName,
+        'notebooks', this.props.notebookName]);
     }
 
     private canWrite() {
