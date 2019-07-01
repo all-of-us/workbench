@@ -52,7 +52,7 @@ export class SearchGroupSelectComponent implements AfterViewInit {
       const groupId = null;
       const {domain, type, standard} = criteria;
       const item = this.initItem(itemId, domain);
-      context = {item, domain, type, standard, role, groupId, itemId, codes};
+      context = {item, domain, type, standard, role, groupId, itemId, fullTree};
       wizardStore.next(context);
     } else {
       const itemId = this.actions.generateId('items');
