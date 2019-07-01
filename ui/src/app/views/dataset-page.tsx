@@ -128,6 +128,13 @@ export const styles = reactStyles({
     flexDirection: 'column',
     alignItems: 'center',
     height: '10rem'
+  },
+
+  selectAllContainer: {
+    marginLeft: 'auto',
+    width: '5rem',
+    display: 'flex',
+    alignItems: 'center'
   }
 });
 
@@ -522,8 +529,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                     <div>
                       Values
                     </div>
-                    <div style={{marginLeft: 'auto',
-                      width: '5rem', display: 'flex', alignItems: 'center'}}>
+                    <div style={styles.selectAllContainer}>
                       <CheckBox style={{height: 17, width: 17}}
                                 disabled={fp.isEmpty(valueSets)}
                                 data-test-id='select-all'
