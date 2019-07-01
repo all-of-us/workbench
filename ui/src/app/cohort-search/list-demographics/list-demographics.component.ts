@@ -323,11 +323,13 @@ export class ListDemographicsComponent implements OnInit, OnDestroy {
   }
 
   selectOption = (opt: any) => {
-    const wizard = this.wizard;
-    wizard.item.searchParameters.push(opt);
-    const selections = [...this.selections, opt.parameterId];
-    wizardStore.next(wizard);
-    selectionsStore.next(selections);
+    if (!this.selections.includes(opt.parameterId)) {
+      const wizard = this.wizard;
+      wizard.item.searchParameters.push(opt);
+      const selections = [...this.selections, opt.parameterId];
+      wizardStore.next(wizard);
+      selectionsStore.next(selections);
+    }
   }
 
   calculate() {
