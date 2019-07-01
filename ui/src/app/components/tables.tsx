@@ -32,7 +32,7 @@ const styles = {
     border: '1px solid #ccc', backgroundColor: '#fafafa', fontSize: 13
   },
   paddedTable: {
-    color: colors.purple[0], fontSize: 13, lineHeight: '24px',
+    color: colors.primary, fontSize: 13, lineHeight: '24px',
     background: colors.white, padding: '0.2rem 0.5rem', display: 'flex'
   }
 };

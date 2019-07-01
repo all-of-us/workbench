@@ -1,7 +1,7 @@
 import {styles as cardStyles} from 'app/components/card';
 import {TooltipTrigger} from 'app/components/popups';
 import {IconComponent} from 'app/icons/icon';
-import colors from 'app/styles/colors';
+import colors, {colorWithLightness} from 'app/styles/colors';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
@@ -28,28 +28,30 @@ export const styles = {
   }
 };
 
+const hoverAlpha = 0.3;
+
 const buttonVariants = {
   primary: {
     style: {
       ...styles.base,
       borderRadius: '0.3rem',
-      backgroundColor: colors.purple[0], color: colors.white,
+      backgroundColor: colors.primary, color: colors.white,
     },
-    disabledStyle: {backgroundColor: colors.gray[4]},
-    hover: {backgroundColor: colors.purple[1]}
+    disabledStyle: {backgroundColor: colorWithLightness(colors.dark, 0.4)},
+    hover: {backgroundColor: colorWithLightness(colors.primary, hoverAlpha)}
   },
   secondary: {
     style: {
       ...styles.base,
-      border: '1px solid', borderRadius: '0.2rem', borderColor: colors.purple[0],
+      border: '1px solid', borderRadius: '0.2rem', borderColor: colors.primary,
       backgroundColor: 'transparent',
-      color: colors.purple[0],
+      color: colors.primary,
     },
     disabledStyle: {
-      borderColor: colors.gray[4],
-      backgroundColor: colors.backgroundGrey, color: colors.gray[4]
+      borderColor: colorWithLightness(colors.dark, 0.4),
+      color: colorWithLightness(colors.dark, .4)
     },
-    hover: {backgroundColor: colors.purple[0], color: '#ffffff'}
+    hover: {backgroundColor: colors.primary, color: '#ffffff'}
   },
   secondaryLight: {
     style: {
@@ -59,56 +61,57 @@ const buttonVariants = {
       color: '#0077b7'
     },
     disabledStyle: {
-      borderColor: colors.gray[4],
-      backgroundColor: colors.backgroundGrey, color: colors.gray[4]
+      borderColor: colorWithLightness(colors.dark, 0.4),
+      color: colorWithLightness(colors.dark, .4)
     },
-    hover: {backgroundColor: colors.blue[5], color: colors.black[0]}
+    hover: {color: colors.accent}
   },
-  darklingPrimary: {
+  primaryOnDarkBackground: {
     style: {
       ...styles.base,
       borderRadius: '0.2rem',
-      backgroundColor: colors.purple[0], color: colors.white
+      backgroundColor: colors.primary, color: colors.white
     },
-    disabledStyle: {backgroundColor: colors.gray[4]},
+    disabledStyle: {backgroundColor: colorWithLightness(colors.dark, 0.4)},
     hover: {backgroundColor: 'rgba(255,255,255,0.3)'}
   },
-  darklingSecondary: {
+  secondaryOnDarkBackground: {
     style: {
       ...styles.base,
       borderRadius: '0.2rem',
       backgroundColor: '#0079b8', color: '#ffffff'
     },
-    disabledStyle: {backgroundColor: colors.gray[4]},
+    disabledStyle: {backgroundColor: colorWithLightness(colors.dark, 0.4)},
     hover: {backgroundColor: '#50ACE1'}
   },
   purplePrimary: {
     style: {
       ...styles.baseNew,
-      backgroundColor: colors.purple[0], color: colors.white,
+      backgroundColor: colors.primary, color: colors.white,
     },
-    disabledStyle: {backgroundColor: colors.gray[4]},
-    hover: {backgroundColor: colors.purple[1]}
+    disabledStyle: {backgroundColor: colorWithLightness(colors.dark, 0.4)},
+    hover: {backgroundColor: colorWithLightness(colors.primary, hoverAlpha)}
   },
   purpleSecondary: {
     style: {
       ...styles.baseNew,
-      border: '1px solid', borderColor: colors.purple[0],
+      border: '1px solid', borderColor: colors.primary,
       backgroundColor: 'transparent',
-      color: colors.purple[0],
+      color: colors.primary,
     },
     disabledStyle: {
-      borderColor: colors.gray[4],
-      backgroundColor: colors.backgroundGrey, color: colors.gray[4]
+      borderColor: colorWithLightness(colors.dark, 0.4),
+      color: colorWithLightness(colors.dark, 0.4)
     },
-    hover: {backgroundColor: colors.purple[1], color: '#fff', borderColor: colors.purple[1]}
+    hover: {backgroundColor: colorWithLightness(colors.primary, hoverAlpha),
+      color: '#fff', borderColor: colorWithLightness(colors.primary, hoverAlpha)}
   },
   link: {
     style: {
-      color: colors.blue[0]
+      color: colors.accent
     },
     disabledStyle: {
-      color: colors.gray[2]
+      color: colorWithLightness(colors.dark, 0.4)
     }
   }
 };
@@ -144,11 +147,11 @@ export const MenuItem = ({tooltip = '', disabled = false, children, ...props}) =
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'start',
         fontSize: 12, minWidth: 125, height: 32,
-        color: disabled ? colors.gray[2] : 'black',
+        color: disabled ? colorWithLightness(colors.dark, 0.4) : 'black',
         padding: '0 12px',
         cursor: disabled ? 'not-allowed' : 'pointer'
       }}
-      hover={!disabled ? {backgroundColor: colors.blue[4]} : undefined}
+      hover={!disabled ? {backgroundColor: colorWithLightness(colors.accent, 0.08)} : undefined}
       {...props}
     >
       {children}
@@ -171,7 +174,7 @@ export const IconButton = ({icon, style = {}, tooltip = '', disabled = false, ..
 const cardButtonBase = {
   style: {
     alignItems: 'flex-start', alignContent: 'left', fontWeight: 500,
-    justifyContent: 'center', padding: '0 1rem', color: colors.blue[0],
+    justifyContent: 'center', padding: '0 1rem', color: colors.accent,
   },
   disabledStyle: {color: '#c3c3c3', backgroundColor: '#f1f2f2', cursor: 'not-allowed'}
 

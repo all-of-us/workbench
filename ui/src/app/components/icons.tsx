@@ -4,20 +4,20 @@ import colors from 'app/styles/colors';
 
 export const styles = {
   infoIcon: {
-    color: colors.blue[0],
+    color: colors.accent,
     height: '22px',
     width: '22px',
     fill: '#2691D0'
   },
 
   successIcon: {
-    color: colors.green[1],
+    color: colors.success,
     width: '20px',
     height: '20px'
   },
 
   warningIcon: {
-    color: colors.yellow[2],
+    color: colors.warning,
     width: '20px',
     height: '20px'
   }

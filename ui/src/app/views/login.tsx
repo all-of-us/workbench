@@ -32,7 +32,7 @@ export const styles = reactStyles({
   },
   fismaCommon: {
     fontSize: '10px',
-    color: colors.purple[0],
+    color: colors.primary,
     lineHeight: '18px'
   },
   fismaHeader: {

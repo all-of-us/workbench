@@ -40,38 +40,38 @@ const styles = reactStyles({
     lineHeight: '19px', paddingLeft: '2rem'
   },
   domainBoxHeader: {
-    color: colors.blue[0], fontSize: '18px', lineHeight: '22px'
+    color: colors.accent, fontSize: '18px', lineHeight: '22px'
   },
   domainBoxLink: {
-    color: colors.blue[0], lineHeight: '18px', fontWeight: 400, letterSpacing: '0.05rem'
+    color: colors.accent, lineHeight: '18px', fontWeight: 400, letterSpacing: '0.05rem'
   },
   conceptText: {
-    marginTop: '0.3rem', fontSize: '14px', fontWeight: 400, color: colors.gray[0],
+    marginTop: '0.3rem', fontSize: '14px', fontWeight: 400, color: colors.primary,
     display: 'flex', flexDirection: 'column', marginBottom: '0.3rem'
   },
   domainHeaderLink: {
-    justifyContent: 'center', padding: '0.1rem 1rem', color: colors.blue[0],
+    justifyContent: 'center', padding: '0.1rem 1rem', color: colors.accent,
     lineHeight: '18px'
   },
   domainHeaderSelected: {
-    height: '2.5px', width: '100%', backgroundColor: colors.blue[0], border: 'none'
+    height: '4px', width: '100%', backgroundColor: colors.accent, border: 'none'
   },
   conceptCounts: {
     backgroundColor: colors.white, height: '2rem', border: '1px solid #CCCCCC',
     marginTop: '-1px', paddingLeft: '0.5rem', display: 'flex',
     justifyContent: 'flex-start', lineHeight: '15px', fontWeight: 600, fontSize: '14px',
-    color: colors.purple[0], alignItems: 'center'
+    color: colors.primary, alignItems: 'center'
   },
   selectedConceptsCount: {
-    backgroundColor: colors.blue[0], color: colors.white, borderRadius: '20px',
-    textAlign: 'center', height: '1.5em', padding: '0 5px'
+    backgroundColor: colors.accent, color: colors.white, borderRadius: '5px',
+    padding: '0 5px', fontSize: 12
   },
   clearSearchIcon: {
-    fill: colors.blue[0], transform: 'translate(-1.5rem)', height: '1rem', width: '1rem'
+    fill: colors.accent, transform: 'translate(-1.5rem)', height: '1rem', width: '1rem'
   },
   sectionHeader: {
     height: 24,
-    color: colors.blue[8],
+    color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: 20,
     fontWeight: 600,
@@ -99,8 +99,9 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
       const conceptCount = standardConceptsOnly ?
           conceptDomainInfo.standardConceptCount : conceptDomainInfo.allConceptCount;
       return <WorkspaceCardBase style={{minWidth: '11rem'}} data-test-id='domain-box'>
-        <div style={styles.domainBoxHeader}
-             data-test-id='domain-box-name'>{conceptDomainInfo.name}</div>
+        <Clickable style={styles.domainBoxHeader}
+             onClick={browseInDomain}
+             data-test-id='domain-box-name'>{conceptDomainInfo.name}</Clickable>
         <div style={styles.conceptText}>
           <span style={{fontSize: 30}}>{conceptCount}</span> concepts in this domain. <p/>
           <div><b>{conceptDomainInfo.participantCount}</b> participants in domain.</div>

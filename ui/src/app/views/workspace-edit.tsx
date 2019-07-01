@@ -196,20 +196,20 @@ const styles = reactStyles({
   header: {
     fontWeight: 600,
     lineHeight: '24px',
-    color: colors.purple[0]
+    color: colors.primary
   },
 
   requiredText: {
     fontSize: '13px',
     fontStyle: 'italic',
     fontWeight: 400,
-    color: colors.gray[0],
+    color: colors.primary,
     marginLeft: '0.2rem'
   },
 
   text: {
     fontSize: '13px',
-    color: colors.gray[0],
+    color: colors.primary,
     fontWeight: 400,
     lineHeight: '24px'
   },
@@ -235,19 +235,8 @@ const styles = reactStyles({
     width: '11.3rem',
     marginRight: '20px'
   },
-  textArea: {
-    width: '100%',
-    marginTop: '0.5rem',
-    height: '10em',
-    resize: 'none',
-    padding: '0.1rem 0.2rem',
-    background: colors.white,
-    border: '1px solid #ccc',
-    color: colors.black[0],
-    borderRadius: '.125rem'
-  },
   shortDescription: {
-    color: colors.purple[0],
+    color: colors.primary,
     fontSize: '16px',
     fontWeight: 600,
     lineHeight: '24px'
@@ -289,7 +278,7 @@ export const WorkspaceEditSection = (props) => {
       </TooltipTrigger>
       }
     </div>
-    {props.subHeader && <div style={{...styles.header, color: colors.gray[0], fontSize: 14}}>
+    {props.subHeader && <div style={{...styles.header, color: colors.primary, fontSize: 14}}>
       {props.subHeader}
     </div>
     }

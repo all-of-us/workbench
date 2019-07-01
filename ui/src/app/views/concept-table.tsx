@@ -3,7 +3,7 @@ import {Clickable, Link} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
-import colors from 'app/styles/colors';
+import colors, {colorWithLightness} from 'app/styles/colors';
 import {ReactWrapperBase, toggleIncludes} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import * as Color from 'color';
@@ -23,16 +23,17 @@ const styles = reactStyles({
     minWidth: '170px',
     maxWidth: '170px',
     fontStyle: 'italic',
-    color: colors.gray[2]
+    color: colors.primary
   },
   akaIcon: {
     marginLeft: 10,
     verticalAlign: 'middle',
-    color: colors.blue[3]
+    color: colorWithLightness(colors.accent, 0.5)
   },
   highlighted: {
-    color: colors.green[3],
-    backgroundColor: Color(colors.green[3]).alpha(0.2).toString(),
+    color: colorWithLightness(colors.success, 1.6),
+    backgroundColor: colorWithLightness(colors.success, 0.3),
+    padding: '0 0.25rem',
     display: 'inline-block'
   }
 });
