@@ -2,7 +2,7 @@
   <div [id]="nodeId" class="clr-treenode-link container" (click)="toggleExpanded()">
     <crit-list-node-info [node]="node"></crit-list-node-info>
   </div>
-  <ng-template *ngIf="node.group"
+  <ng-template *ngIf="node.group && !wizard.fullTree"
     [(clrIfExpanded)]="expanded"
     (clrIfExpandedChange)="loadChildren($event)">
     <ng-container [clrLoading]="loading">
@@ -19,8 +19,13 @@
             </div>
           </div>
         </div>
-        <crit-list-node *ngFor="let item of children" [node]="item"></crit-list-node>
+        <crit-list-node *ngFor="let item of children" [node]="item" [wizard]="wizard"></crit-list-node>
       </div>
     </ng-container>
+  </ng-template>
+  <ng-template *ngIf="node.group && wizard.fullTree" [(clrIfExpanded)]="expanded">
+    <div class="node-list">
+      <crit-list-node *ngFor="let item of node.children" [node]="item" [wizard]="wizard"></crit-list-node>
+    </div>
   </ng-template>
 </clr-tree-node>
