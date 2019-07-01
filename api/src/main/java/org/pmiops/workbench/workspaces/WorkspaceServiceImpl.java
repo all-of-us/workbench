@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -419,7 +418,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     updateACLRequestList.add(currentUpdate);
     fireCloudService.updateWorkspaceACL(
-            workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
+        workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
 
     return this.saveWithLastModified(workspace);
   }
