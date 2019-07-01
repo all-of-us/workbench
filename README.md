@@ -36,7 +36,7 @@ cd workbench
 git submodule update --init --recursive
 ```
 
-Then set up [git secrets](#git-secrets) and fire up the [development servers](#running-the-dev-servers). Optionally, you can [set up your Intellij](https://docs.google.com/document/d/1DtESBapEzvuti7xODTFPHorwmLM7LybF-6D5lhbIkLU/edit) for UI or API work, including [autoformatting for Java](https://docs.google.com/document/d/18N4oz_GGLUPavMnUhsaOheaRDIti8DuK6QlVpcZlFWE/edit)
+Then set up [git secrets](#git-secrets) and fire up the [development servers](#running-the-dev-servers). Optionally, you can [set up your Intellij](https://docs.google.com/document/d/1DtESBapEzvuti7xODTFPHorwmLM7LybF-6D5lhbIkLU/edit) for UI or API work.
 
 ## Development Process
 
