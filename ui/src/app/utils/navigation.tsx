@@ -63,7 +63,6 @@ export const navigateByUrl = (...args) => {
 export const navigateAndPreventDefaultIfNoKeysPressed = (e: React.MouseEvent, url: string) => {
   if (!(e.shiftKey || e.altKey || e.ctrlKey || e.metaKey)) {
     e.preventDefault();
-    navigateByUrl(url);
   }
 };
 
