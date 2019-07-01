@@ -38,7 +38,6 @@ git submodule update --init --recursive
 
 Then set up [git secrets](#git-secrets) and fire up the [development servers](#running-the-dev-servers). Optionally, you can [set up your Intellij](https://docs.google.com/document/d/1DtESBapEzvuti7xODTFPHorwmLM7LybF-6D5lhbIkLU/edit) for UI or API work, including [autoformatting for Java](https://docs.google.com/document/d/18N4oz_GGLUPavMnUhsaOheaRDIti8DuK6QlVpcZlFWE/edit)
 
-
 ## Development Process
 
 To make changes, do:
@@ -65,7 +64,6 @@ After responding to changes, merge in GitHub.
 * Direct your editor to write swap files outside the source tree, so Webpack
 does not reload when they're updated.
 [Example for vim](https://github.com/angular/angular-cli/issues/4593).
-
 
 ## Running the Dev Servers
 
