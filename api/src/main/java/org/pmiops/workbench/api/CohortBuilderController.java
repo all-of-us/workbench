@@ -9,7 +9,6 @@ import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,7 +17,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
@@ -30,7 +28,6 @@ import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cdr.model.CBCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
-import org.pmiops.workbench.cdr.model.StandardProjection;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -266,7 +263,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     return ResponseEntity.ok(criteriaResponse);
   }
 
-  // TODO:Remove when new search is finished - freemabd
   @Override
   public ResponseEntity<CriteriaListResponse> getDrugIngredientByConceptId(
       Long cdrVersionId, Long conceptId) {
@@ -311,52 +307,41 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> findCriteriaByDomainAndSearchTerm(
       Long cdrVersionId, String domain, String term, Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    List<CBCriteria> criteriaList = new ArrayList<>();
+    List<CBCriteria> criteriaList;
     int resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT).intValue();
-    List<StandardProjection> projections = cbCriteriaDao.findStandardProjectionByCode(domain, term);
-    boolean isStandard = projections.isEmpty() || projections.get(0).getStandard();
-    if (projections.isEmpty()) {
-      String modTerm = modifyTermMatch(term);
+    List<CBCriteria> exactMatchByCode = cbCriteriaDao.findExactMatchByCode(domain, term);
+    boolean isStandard = exactMatchByCode.isEmpty() || exactMatchByCode.get(0).getStandard();
+
+    if (!isStandard) {
       criteriaList =
-          cbCriteriaDao.findCriteriaByDomainAndSynonyms(
-              domain, isStandard, modTerm, new PageRequest(0, resultLimit));
-    }
-    if (criteriaList.isEmpty()) {
+          cbCriteriaDao.findCriteriaByDomainAndTypeAndCode(
+              domain,
+              exactMatchByCode.get(0).getType(),
+              isStandard,
+              term,
+              new PageRequest(0, resultLimit));
+
+      Map<Boolean, List<CBCriteria>> groups =
+          criteriaList.stream().collect(Collectors.partitioningBy(c -> c.getCode().equals(term)));
+      criteriaList = groups.get(true);
+      criteriaList.addAll(groups.get(false));
+
+    } else {
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndCode(
               domain, isStandard, term, new PageRequest(0, resultLimit));
-    }
-    if (criteriaList.isEmpty()) {
-      criteriaList =
-          cbCriteriaDao.findCriteriaByDomainAndCode(
-              domain, !isStandard, term, new PageRequest(0, resultLimit));
-    }
-    if (DomainType.DRUG.equals(DomainType.fromValue(domain))) {
-      Map<Boolean, List<CBCriteria>> groups =
-          criteriaList.stream()
-              .collect(
-                  Collectors.partitioningBy(
-                      c -> c.getType().equals(CriteriaType.BRAND.toString())));
-      List<Long> conceptIds =
-          groups.get(true).stream()
-              .map(c -> Long.valueOf(c.getConceptId()))
-              .collect(Collectors.toList());
-      List<CBCriteria> ingredients = new ArrayList<>();
-      if (!conceptIds.isEmpty()) {
-        List<Integer> relationshipConceptIds =
-            cbCriteriaDao.findDrugConceptId2ByConceptId1(conceptIds);
-        ingredients =
-            cbCriteriaDao.findDrugIngredientByConceptId(
-                relationshipConceptIds.stream()
-                    .map(c -> String.valueOf(c))
-                    .collect(Collectors.toList()),
-                domain,
-                CriteriaType.RXNORM.toString());
+      if (criteriaList.isEmpty() && !term.contains(".")) {
+        String modTerm = modifyTermMatch(term);
+        criteriaList =
+            cbCriteriaDao.findCriteriaByDomainAndSynonyms(
+                domain, isStandard, modTerm, new PageRequest(0, resultLimit));
       }
-      criteriaList =
-          Stream.concat(groups.get(false).stream(), ingredients.stream())
-              .sorted(Comparator.comparing(CBCriteria::getLongCount).reversed())
-              .collect(Collectors.toList());
+      if (criteriaList.isEmpty() && !term.contains(".")) {
+        String modTerm = modifyTermMatch(term);
+        criteriaList =
+            cbCriteriaDao.findCriteriaByDomainAndSynonyms(
+                domain, !isStandard, modTerm, new PageRequest(0, resultLimit));
+      }
     }
     CriteriaListResponse criteriaResponse =
         new CriteriaListResponse()
