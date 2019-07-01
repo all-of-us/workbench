@@ -15,19 +15,20 @@ import {ClusterStatus} from 'generated/fetch';
 
 const styles = reactStyles({
   navBar: {
+    display: 'flex',
     height: 40,
     backgroundColor: colors.white,
     border: 'solid thin ' + colors.gray[5],
     fontSize: '16px'
   },
   navBarItem: {
-    float: 'left',
+    display: 'flex',
     height: '100%',
     color: colors.blue[9],
     borderRight: '1px solid ' + colors.gray[5],
     backgroundColor: 'rgba(38,34,98,0.05)',
-    textAlign: 'center',
-    lineHeight: '40px'
+    alignItems: 'center',
+    padding: '0 20px'
   },
   active: {
     backgroundColor: 'rgba(38,34,98,0.2)'
@@ -42,10 +43,8 @@ const styles = reactStyles({
   navBarIcon: {
     height: '16px',
     width: '16px',
-    verticalAlign: 'middle',
     marginLeft: 0,
-    marginRight: '5px',
-    marginBottom: '3px'
+    marginRight: '5px'
   },
   previewFrame: {
     width: '100%',
@@ -105,7 +104,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(
           }
 
           if (cluster.status === ClusterStatus.Running) {
-            this.onClusterRunning();
+            this.navigateOldNotebooksPage();
           } else {
             retry();
           }
@@ -122,7 +121,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(
       }
     }
 
-    private onClusterRunning() {
+    private navigateOldNotebooksPage() {
       navigate(['workspaces', this.props.billingProjectId, this.props.workspaceName, 'notebooks', this.props.notebookName]);
     }
 
@@ -134,17 +133,17 @@ export const InteractiveNotebook = withCurrentWorkspace()(
       return (
         <div>
           <div style={styles.navBar}>
-            <div style={{...styles.navBarItem, ...styles.active, width: 227}}>
+            <div style={{...styles.navBarItem, ...styles.active}}>
               Preview (Read-Only)
             </div>
             {this.state.userRequestedEditMode ? (
-              <div style={{...styles.navBarItem, width: 620}}>
+              <div style={{...styles.navBarItem}}>
                 <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}></ClrIcon>
                 Preparing your Jupyter environment. This may take up to 10 minutes.
               </div>) : (<div>
               <div style={
                 Object.assign({}, styles.navBarItem,
-                  this.canWrite() ? styles.clickable : styles.disabled, {width: 135})}
+                  this.canWrite() ? styles.clickable : styles.disabled)}
                    onClick={() => { this.onEditClick(); }}>
                 <EditComponentReact enableHoverEffect={false}
                                     disabled={!this.canWrite()}
