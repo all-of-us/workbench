@@ -632,7 +632,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             {previewList.length === 0 && !previewDataLoading &&
               <div style={styles.previewButtonBox}>
                 <div style={{color: colorWithLightness(colors.dark, .4),
-                    fontSize: '20px', fontWeight: 400}}>
+                  fontSize: '20px', fontWeight: 400}}>
                   Select cohorts, concept sets, and values above to generate a preview table
                 </div>
                 <Button data-test-id='preview-button' disabled={this.disableSave()}
