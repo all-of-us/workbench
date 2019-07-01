@@ -17,7 +17,7 @@ export class ListNodeComponent implements OnInit, OnDestroy {
   @Input() wizard: any;
   expanded = false;
   children: any;
-  filtered: any;
+  original: any;
   expandedTree: any;
   originalTree: any;
   modifiedTree = false;
@@ -47,8 +47,10 @@ export class ListNodeComponent implements OnInit, OnDestroy {
           if (searchTerms && searchTerms.length > 1) {
             this.searchTree();
           } else if (this.children) {
-            this.expanded = false;
-            this.clearSearchTree(this.children);
+            // TODO highlighted terms still not clearing, need to look into this more
+            this.children = this.original = this.clearSearchTree(this.original);
+            // this.expanded = false;
+            // this.clearSearchTree(this.children);
           }
         }
       }));
@@ -117,7 +119,7 @@ export class ListNodeComponent implements OnInit, OnDestroy {
                 children = this.addChildToParent(child, children);
               }
             });
-            this.children = this.filtered = children;
+            this.children = this.original = children;
           });
       }
     } catch (error) {
@@ -151,7 +153,7 @@ export class ListNodeComponent implements OnInit, OnDestroy {
   }
 
   listSearchTree() {
-    this.filtered = this.children.map(item => item.group ? this.checkChildren(item) : item);
+    this.children = this.original.map(item => item.group ? this.checkChildren(item) : item);
   }
 
   checkChildren(item: any) {
