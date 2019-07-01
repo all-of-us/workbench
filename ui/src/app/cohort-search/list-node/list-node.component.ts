@@ -1,5 +1,6 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {ppiQuestions, scrollStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
+import {autocompleteStore, ppiQuestions, scrollStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
+import {highlightMatches, stripHtml} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';
@@ -16,6 +17,11 @@ export class ListNodeComponent implements OnInit, OnDestroy {
   @Input() wizard: any;
   expanded = false;
   children: any;
+  filtered: any;
+  expandedTree: any;
+  originalTree: any;
+  modifiedTree = false;
+  searchTerms: string;
   loading = false;
   empty: boolean;
   selected: boolean;
@@ -23,16 +29,30 @@ export class ListNodeComponent implements OnInit, OnDestroy {
   subscription: Subscription;
 
   ngOnInit() {
-    this.subscription = subtreePathStore.subscribe(path => {
-      this.expanded = path.includes(this.node.id.toString());
-    });
+    if (!this.wizard.fullTree || this.node.id === 0) {
+      this.subscription = subtreePathStore.subscribe(path => {
+        this.expanded = path.includes(this.node.id.toString());
+      });
 
-    this.subscription.add(subtreeSelectedStore.subscribe(id => {
-      this.selected = id === this.node.id;
-      if (this.selected) {
-        setTimeout(() => scrollStore.next(this.node.id));
-      }
-    }));
+      this.subscription.add(subtreeSelectedStore.subscribe(id => {
+        this.selected = id === this.node.id;
+        if (this.selected) {
+          setTimeout(() => scrollStore.next(this.node.id));
+        }
+      }));
+
+      this.subscription.add(autocompleteStore.subscribe(searchTerms => {
+        this.searchTerms = searchTerms;
+        if (this.wizard.fullTree) {
+          if (searchTerms && searchTerms.length > 1) {
+            this.searchTree();
+          } else if (this.children) {
+            this.expanded = false;
+            this.clearSearchTree(this.children);
+          }
+        }
+      }));
+    }
     if (this.wizard && this.wizard.fullTree) {
       this.expanded = this.node.expanded || false;
     }
@@ -97,7 +117,7 @@ export class ListNodeComponent implements OnInit, OnDestroy {
                 children = this.addChildToParent(child, children);
               }
             });
-            this.children = children;
+            this.children = this.filtered = children;
           });
       }
     } catch (error) {
@@ -128,5 +148,88 @@ export class ListNodeComponent implements OnInit, OnDestroy {
 
   toggleExpanded() {
     this.expanded = !this.expanded;
+  }
+
+  listSearchTree() {
+    this.filtered = this.children.map(item => item.group ? this.checkChildren(item) : item);
+  }
+
+  checkChildren(item: any) {
+    const match = item.children.some(it => this.isMatch(it.name));
+    if (item.children.some(it => this.isMatch(it.name))) {
+      item.expanded = true;
+      item.children = item.children.map(child => {
+        if (this.isMatch(child.name)) {
+          child.name = highlightMatches([this.searchTerms], child.name, false);
+        }
+        return child.group ? this.checkChildren(child) : child;
+      });
+    }
+    return item;
+  }
+
+  isMatch(name: string) {
+    return name.toLowerCase().includes(this.searchTerms.toLowerCase());
+  }
+
+  searchTree() {
+    if (!this.modifiedTree) {
+      this.modifiedTree = true;
+      this.originalTree = JSON.parse(JSON.stringify(this.children));
+    }
+    this.expandedTree = JSON.parse(JSON.stringify(this.originalTree));
+    const filtered = this.filterTree(this.originalTree, []);
+    this.children = this.mergeExpanded(filtered, this.expandedTree);
+  }
+
+  clearSearchTree(children: any) {
+    return children.map(child => {
+      child.name = stripHtml(child.name);
+      child.expanded = false;
+      if (child.group) {
+        child.children = this.clearSearchTree(child.children);
+      }
+      return child;
+    });
+  }
+
+  filterTree(tree: Array<any>, path: Array<number>) {
+    return tree.map((item, i) => {
+      path.push(i);
+      if (stripHtml(item.name).toLowerCase().includes(this.searchTerms.toLowerCase())) {
+        item.name = highlightMatches([this.searchTerms], item.name, false);
+        if (path.length > 1) {
+          this.setExpanded(path, 0);
+        }
+      }
+      if (item.children.length) {
+        item.children = this.filterTree(item.children, path);
+      }
+      path.pop();
+      return item;
+    });
+  }
+
+  setExpanded(path: Array<number>, end: number) {
+    let obj = this.expandedTree[path[0]];
+    for (let x = 1; x < end; x++) {
+      obj = obj.children[path[x]];
+    }
+    if (obj.children.length) {
+      obj.expanded = true;
+    }
+    if (typeof path[end + 1] !== 'undefined') {
+      this.setExpanded(path, end + 1);
+    }
+  }
+
+  mergeExpanded(filtered: Array<any>, expanded: Array<any>) {
+    expanded.forEach((item, i) => {
+      filtered[i].expanded = item.expanded || false;
+      if (filtered[i].children.length) {
+        filtered[i].children = this.mergeExpanded(filtered[i].children, item.children);
+      }
+    });
+    return filtered;
   }
 }
