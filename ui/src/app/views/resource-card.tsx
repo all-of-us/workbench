@@ -487,8 +487,7 @@ export class ResourceCard extends React.Component<Props, State> {
           queryParams.set('jupyterLabMode', 'true');
         }
 
-        return `${workspacePrefix}/notebooks/preview/${encodeURIComponent(notebook.name)}?` +
-          queryParams.toString();
+        return `${workspacePrefix}/notebooks/preview/${encodeURIComponent(notebook.name)}`;
       }
       case ResourceType.DATA_SET: {
         return `${workspacePrefix}/data/data-sets/${dataSet.id}`;

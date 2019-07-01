@@ -80,7 +80,7 @@ public class NotebooksServiceImpl implements NotebooksService {
       String toWorkspaceNamespace,
       String toWorkspaceName,
       String newNotebookName) {
-    newNotebookName = appendSuffixIfNeeded(newNotebookName);
+    newNotebookName = withNotebookExtension(newNotebookName);
     GoogleCloudLocators fromNotebookLocators =
         getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
     GoogleCloudLocators newNotebookLocators =
@@ -145,7 +145,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             originalName,
             workspaceNamespace,
             workspaceName,
-            appendSuffixIfNeeded(newName));
+            withNotebookExtension(newName));
     deleteNotebook(workspaceNamespace, workspaceName, originalName);
 
     return fileDetail;
@@ -189,14 +189,6 @@ public class NotebooksServiceImpl implements NotebooksService {
     // which are needed for nbconvert
     return fireCloudService.staticNotebooksConvert(
         getNotebookContents(bucketName, notebookName).toString().getBytes());
-  }
-
-  private String appendSuffixIfNeeded(String filename) {
-    if (!filename.matches("^.+\\.ipynb")) {
-      return filename + ".ipynb";
-    }
-
-    return filename;
   }
 
   private GoogleCloudLocators getNotebookLocators(
