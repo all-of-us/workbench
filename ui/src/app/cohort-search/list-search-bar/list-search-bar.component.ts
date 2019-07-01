@@ -44,14 +44,18 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
       .debounceTime(300)
       .distinctUntilChanged()
       .subscribe( value => {
-        if (value.length >= trigger) {
-          this.inputChange();
+        if (this.node.domainId === DomainType.PHYSICALMEASUREMENT) {
+          autocompleteStore.next(this.searchTerm.value);
         } else {
-          if (!this.optionSelected) {
-            autocompleteStore.next('');
+          if (value.length >= trigger) {
+            this.inputChange();
+          } else {
+            if (!this.optionSelected) {
+              autocompleteStore.next('');
+            }
+            this.options = [];
+            this.noResults = false;
           }
-          this.options = [];
-          this.noResults = false;
         }
       })
     );

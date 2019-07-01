@@ -24,7 +24,8 @@
     [popperModifiers]="{preventOverflow: {boundariesElement: 'viewport'}}"
     [popperDisabled]="!isTruncated"
     class="name text-muted">
-    <span [class.search-keyword]="matched">{{node.name}}</span>
+    <span *ngIf="isPM" [innerHTML]="node.name | safeHtml"></span>
+    <span *ngIf="!isPM" [class.search-keyword]="matched">{{node.name}}</span>
   </div>
 
   <!-- COUNT -->
