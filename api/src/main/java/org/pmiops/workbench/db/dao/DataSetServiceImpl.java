@@ -269,7 +269,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public String generateCodeFromQueryAndKernelType(
+  public List<String> generateCodeCellPerDomainFromQueryAndKernelType(
       KernelTypeEnum kernelTypeEnum,
       String dataSetName,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
@@ -288,17 +288,17 @@ public class DataSetServiceImpl implements DataSetService {
         throw new BadRequestException(
             "Kernel Type " + kernelTypeEnum.toString() + " not supported");
     }
-    return prerequisites
-        + "\n\n"
-        + queryJobConfigurationMap.entrySet().stream()
-            .map(
-                entry ->
-                    convertQueryToString(
+    return queryJobConfigurationMap.entrySet().stream()
+        .map(
+            entry ->
+                prerequisites
+                    + "\n\n"
+                    + convertQueryToString(
                         entry.getValue(),
                         Domain.fromValue(entry.getKey()),
                         dataSetName,
                         kernelTypeEnum))
-            .collect(Collectors.joining("\n\n"));
+        .collect(Collectors.toList());
   }
 
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {
