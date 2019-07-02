@@ -1,5 +1,3 @@
-import {dispatch, NgRedux} from '@angular-redux/store';
-import {MockNgRedux} from '@angular-redux/store/testing';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -9,45 +7,20 @@ import {ListNodeInfoComponent} from 'app/cohort-search/list-node-info/list-node-
 import {ListNodeComponent} from 'app/cohort-search/list-node/list-node.component';
 import {ListOptionInfoComponent} from 'app/cohort-search/list-option-info/list-option-info.component';
 import {ListSearchBarComponent} from 'app/cohort-search/list-search-bar/list-search-bar.component';
-import {
-activeCriteriaTreeType,
-CohortSearchActions,
-criteriaChildren,
-criteriaError,
-criteriaSearchTerms,
-isCriteriaLoading,
-} from 'app/cohort-search/redux';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderApi} from 'generated/fetch';
-import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {ListTreeComponent} from './list-tree.component';
 
-class MockActions {
-  @dispatch() activeCriteriaTreeType = activeCriteriaTreeType;
-  @dispatch() criteriaChildren = criteriaChildren;
-  @dispatch() criteriaError = criteriaError;
-  @dispatch() criteriaSearchTerms = criteriaSearchTerms;
-  @dispatch() isCriteriaLoading = isCriteriaLoading;
-
-  fetchCriteria(kind: string, parentId: number): void {}
-}
-
 describe('ListTreeComponent', () => {
   let component: ListTreeComponent;
   let fixture: ComponentFixture<ListTreeComponent>;
-  let mockReduxInst;
 
   beforeEach(async(() => {
-    mockReduxInst = MockNgRedux.getInstance();
-    const _old = mockReduxInst.getState;
-    const _wrapped = () => fromJS(_old());
-    mockReduxInst.getState = _wrapped;
-
     TestBed.configureTestingModule({
       declarations: [
         CodeDropdownComponent,
@@ -65,10 +38,7 @@ describe('ListTreeComponent', () => {
         NgxPopperModule,
         ReactiveFormsModule,
       ],
-      providers: [
-        {provide: NgRedux, useValue: mockReduxInst},
-        {provide: CohortSearchActions, useValue: new MockActions()},
-      ],
+      providers: [],
     })
       .compileComponents();
     currentWorkspaceStore.next({
@@ -96,6 +66,7 @@ describe('ListTreeComponent', () => {
       subtype: 'HEIGHT',
       type: 'PM'
     };
+    component.wizard = {};
     fixture.detectChanges();
   });
 
