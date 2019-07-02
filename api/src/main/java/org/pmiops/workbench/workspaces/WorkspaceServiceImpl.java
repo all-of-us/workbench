@@ -132,6 +132,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .filter(
             workspaceResponse ->
                 !(workspaceResponse.getAccessLevel() != WorkspaceAccessLevel.OWNER
+                    && workspaceResponse.getAccessLevel() != WorkspaceAccessLevel.WRITER
                     && workspaceResponse.getWorkspace().getPublished()))
         .collect(Collectors.toList());
   }
@@ -261,7 +262,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Workspace updateWorkspaceAcls(
-      Workspace workspace, Map<String, WorkspaceAccessLevel> updatedAclsMap) {
+      Workspace workspace,
+      Map<String, WorkspaceAccessLevel> updatedAclsMap,
+      String registeredUsersGroup) {
     // userRoleMap is a map of the new permissions for ALL users on the ws
     Map<String, WorkspaceAccessEntry> aclsMap =
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
@@ -282,7 +285,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         // Pass along an update request with NO ACCESS as the given access level.
         // Note: do not do groups.  Unpublish will pass the specific NO_ACCESS acl
         // TODO [jacmrob] : have all users pass NO_ACCESS explicitly? Handle filtering on frontend?
-        if (!currentUserEmail.split("_", 0)[0].equals("GROUP")) {
+        if (!currentUserEmail.equals(registeredUsersGroup)) {
           WorkspaceACLUpdate removedUser = new WorkspaceACLUpdate();
           removedUser.setEmail(currentUserEmail);
           removedUser = updateFirecloudAclsOnUser(WorkspaceAccessLevel.NO_ACCESS, removedUser);

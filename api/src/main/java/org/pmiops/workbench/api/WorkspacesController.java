@@ -542,7 +542,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      savedWorkspace = workspaceService.updateWorkspaceAcls(savedWorkspace, clonedRoles);
+      savedWorkspace =
+          workspaceService.updateWorkspaceAcls(
+              savedWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
@@ -574,7 +576,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       shareRolesMap.put(role.getEmail(), role.getRole());
     }
     // This automatically enforces the "canShare" permission.
-    dbWorkspace = workspaceService.updateWorkspaceAcls(dbWorkspace, shareRolesMap);
+    dbWorkspace =
+        workspaceService.updateWorkspaceAcls(
+            dbWorkspace, shareRolesMap, getRegisteredUserDomainEmail());
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 

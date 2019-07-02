@@ -41,7 +41,10 @@ public interface WorkspaceService {
 
   void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
 
-  Workspace updateWorkspaceAcls(Workspace workspace, Map<String, WorkspaceAccessLevel> userRoleMap);
+  Workspace updateWorkspaceAcls(
+      Workspace workspace,
+      Map<String, WorkspaceAccessLevel> userRoleMap,
+      String registeredUsersGroup);
 
   Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to);
 

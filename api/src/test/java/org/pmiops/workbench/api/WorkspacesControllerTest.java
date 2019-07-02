@@ -2153,4 +2153,61 @@ public class WorkspacesControllerTest {
     assertThat(workspacesController.getPublishedWorkspaces().getBody().getItems().size())
         .isEqualTo(1);
   }
+
+  @Test
+  public void testGetWorkspacesGetsPublishedIfOwner() {
+    stubFcGetGroup();
+    stubFcUpdateWorkspaceACL();
+    stubFcGetWorkspaceACL();
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
+
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setWorkspace(createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+
+    assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
+  }
+
+  @Test
+  public void testGetWorkspacesGetsPublishedIfWriter() {
+    stubFcGetGroup();
+    stubFcUpdateWorkspaceACL();
+    stubFcGetWorkspaceACL();
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
+
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setWorkspace(createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+
+    assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
+  }
+
+  @Test
+  public void testGetWorkspacesDoesNotGetsPublishedIfReader() {
+    stubFcGetGroup();
+    stubFcUpdateWorkspaceACL();
+    stubFcGetWorkspaceACL();
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
+
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setWorkspace(createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+
+    assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(0);
+  }
 }
