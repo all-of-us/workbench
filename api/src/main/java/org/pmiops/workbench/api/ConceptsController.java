@@ -27,6 +27,7 @@ import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
+import org.pmiops.workbench.model.SurveyAnswerResponse;
 import org.pmiops.workbench.model.SurveyQuestionsResponse;
 import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.VocabularyCount;
@@ -127,6 +128,14 @@ public class ConceptsController implements ConceptsApiDelegate {
   }
 
   @Override
+  public ResponseEntity<List<SurveyAnswerResponse>> getSurveyAnswers(
+      String workspaceNamespace, String workspaceId, Long questionConceptId) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    List<SurveyAnswerResponse> answer = conceptBigQueryService.getSurveyAnswer(questionConceptId);
+    return ResponseEntity.ok(answer);
+  }
+
   public ResponseEntity<List<SurveyQuestionsResponse>> getSurveyQuestions(
       String workspaceNamespace, String workspaceId, String surveyName) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(

@@ -14,6 +14,7 @@ import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
+import org.pmiops.workbench.model.SurveyAnswerResponse;
 import org.pmiops.workbench.model.SurveyQuestionsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -96,19 +97,20 @@ public class ConceptBigQueryService {
     return (int) result.iterateAll().iterator().next().get(0).getLongValue();
   }
 
-  private static final String SURVEY_PARAM = "survey";
-
-  private static final String SURVEY_SQL_TEMPLATE =
-      "select DISTINCT(question) as question,\n"
-          + "question_concept_id as concept_id \n"
-          + "from `${projectId}.${dataSetId}.ds_survey`\n"
-          + "where survey = @"
-          + SURVEY_PARAM;
-
   private QueryJobConfiguration buildSurveyQuestionQuery(String surveyName) {
-    String finalSql = SURVEY_SQL_TEMPLATE;
+    String finalSql = SURVEY_QUESTION_SQL_TEMPLATE;
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(SURVEY_PARAM, QueryParameterValue.string(surveyName.toUpperCase()));
+    return QueryJobConfiguration.newBuilder(finalSql)
+        .setNamedParameters(params)
+        .setUseLegacySql(false)
+        .build();
+  }
+
+  private QueryJobConfiguration buildSurveyAnswerQuery(Long questionConceptId) {
+    String finalSql = SURVEY_ANSWER_SQL_TEMPLATE;
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    params.put(QUESTION_PARAM, QueryParameterValue.int64(questionConceptId));
     return QueryJobConfiguration.newBuilder(finalSql)
         .setNamedParameters(params)
         .setUseLegacySql(false)
@@ -131,5 +133,35 @@ public class ConceptBigQueryService {
                   new SurveyQuestionsResponse().question(question).conceptId(concept_id));
             });
     return responseList;
+  }
+
+  public List<SurveyAnswerResponse> getSurveyAnswer(Long questionConceptId) {
+    List<SurveyAnswerResponse> answerList = new ArrayList<>();
+    TableResult result =
+        bigQueryService.executeQuery(
+            bigQueryService.filterBigQueryConfig(buildSurveyAnswerQuery(questionConceptId)),
+            360000L);
+    result
+        .getValues()
+        .forEach(
+            surveyValue -> {
+              SurveyAnswerResponse answer = new SurveyAnswerResponse();
+              if (surveyValue.get(2).getValue() != null) {
+                answer.setParticipationCount(
+                    Long.parseLong(surveyValue.get(2).getValue().toString()));
+              } else {
+                answer.setParticipationCount(0l);
+              }
+              answer.setAnswer(surveyValue.get(0).getValue().toString());
+              answer.setConceptId(Long.parseLong(surveyValue.get(1).getValue().toString()));
+              if (surveyValue.get(3).getValue() != null) {
+                answer.setPercentAnswered(
+                    Double.parseDouble(surveyValue.get(3).getValue().toString()));
+              } else {
+                answer.setPercentAnswered(0.0);
+              }
+              answerList.add(answer);
+            });
+    return answerList;
   }
 }
