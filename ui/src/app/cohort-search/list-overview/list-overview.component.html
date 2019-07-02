@@ -62,10 +62,10 @@
       <span *ngIf="loading" class="spinner spinner-sm">
         Loading...
       </span>
-      <span class="count-header" *ngIf="!loading && hasActiveItems">
-        {{ total | number }}
+      <span class="count-header" *ngIf="!loading && hasActiveItems && !hasTemporalError">
+        {{total | number}}
       </span>
-      <span *ngIf="!loading && ((temporalError && total === null) || !hasActiveItems)">
+      <span *ngIf="!loading && (hasTemporalError || !hasActiveItems)">
         --
         <clr-icon
           [popper]="errorPopper"
@@ -79,7 +79,7 @@
     <clr-icon class="is-solid" shape="exclamation-triangle" size="22"></clr-icon>
     Sorry, the request cannot be completed.
   </div>
-  <div *ngIf="hasActiveItems && !loading && chartData">
+  <div *ngIf="hasActiveItems && !hasTemporalError && !loading && chartData && total">
     <div class="card bg-faded">
       <div class="card-header header-text">
         Results by Gender
@@ -108,10 +108,10 @@
   </div>
 </div>
 <popper-content #errorPopper>
-  <p   *ngIf="error && !temporalError" [style.margin]="'0'">
+  <p   *ngIf="error && !hasTemporalError" [style.margin]="'0'">
     A problem occurred and we were not able to retrieve the requested data
   </p>
-  <p *ngIf="temporalError && hasActiveItems" [style.margin]="'0'">
+  <p *ngIf="hasTemporalError && hasActiveItems" [style.margin]="'0'">
     Please complete criteria selections before saving temporal relationship.
   </p>
   <p *ngIf="!hasActiveItems" [style.margin]="'0'">

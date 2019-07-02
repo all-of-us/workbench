@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.notebooks.model.Cluster;
+import org.pmiops.workbench.notebooks.model.StorageLink;
 
 /**
  * Encapsulate Leonardo's Notebooks API interaction details and provide a simple/mockable interface
@@ -32,6 +33,9 @@ public interface LeonardoNotebooksClient {
   /** Send files over to notebook Cluster */
   void localize(String googleProject, String clusterName, Map<String, String> fileList)
       throws WorkbenchException;
+
+  /** Create a new data synchronization storage link on a Welder-enabled cluster. */
+  StorageLink createStorageLink(String googleProject, String clusterName, StorageLink storageLink);
 
   /** @return true if notebooks is okay, false if notebooks are down. */
   boolean getNotebooksStatus();

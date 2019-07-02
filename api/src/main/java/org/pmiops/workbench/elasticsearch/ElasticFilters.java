@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -445,7 +446,7 @@ public final class ElasticFilters {
     }
 
     // Finally, we unpack the results and map them back to the original SearchParameters.
-    ImmutableMap.Builder<SearchParameter, Set<Long>> builder = ImmutableMap.builder();
+    Map<SearchParameter, Set<Long>> builder = new HashMap<>();
     for (SearchGroup sg : Iterables.concat(req.getIncludes(), req.getExcludes())) {
       for (SearchGroupItem sgi : sg.getItems()) {
         for (SearchParameter param : sgi.getSearchParameters()) {
@@ -463,6 +464,6 @@ public final class ElasticFilters {
         }
       }
     }
-    return builder.build();
+    return builder;
   }
 }

@@ -1840,6 +1840,9 @@ definitions:
       enableDataUseAgreement:
         type: boolean
         description: Feature flag for enabling data use agreement
+      enableEraCommons:
+        type: boolean
+        description: Feature flag for enabling eRA commons
 
   # Mirrors BillingProjectMembership from fireCloud.yaml
   BillingProjectMembership:

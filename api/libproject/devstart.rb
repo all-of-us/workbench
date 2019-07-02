@@ -1391,34 +1391,6 @@ Common.register_command({
   :fn => ->(*args) { deploy_gcs_artifacts("deploy-gcs-artifacts", args) }
 })
 
-def deploy_gcs_demos(cmd_name, args)
-  ensure_docker cmd_name, args
-
-  common = Common.new
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.dry_run = false
-  op.add_option(
-    "--dry-run",
-    ->(opts, _) { opts.dry_run = true},
-    "Don't actually push, just log the command lines which would be " +
-    "executed on a real invocation."
-  )
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate
-  cmd_prefix = op.opts.dry_run ? DRY_RUN_CMD : []
-  # Run but ignore failure statuses, as these files may not exist.
-  Process.wait spawn(*cmd_prefix, "gsutil", "rm", "gs://#{gcc.project}-demos/**")
-  run_inline_or_log(op.opts.dry_run, %W{gsutil cp demos/* gs://#{gcc.project}-demos/})
-end
-
-Common.register_command({
-  :invocation => "deploy-gcs-demos",
-  :description => "Deploys any GCS demos associated with this environment.",
-  :fn => ->(*args) { deploy_gcs_demos("deploy-gcs-demos", args) }
-})
-
-
 def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
@@ -1623,8 +1595,6 @@ def deploy(cmd_name, args)
     common.status "Pushing GCS artifacts..."
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []
     deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}} + dry_flag)
-
-    deploy_gcs_demos(cmd_name, %W{--project #{ctx.project}} + dry_flag)
 
     # Keep the cloud proxy context open for the service account credentials.
     deploy_args = %W{
