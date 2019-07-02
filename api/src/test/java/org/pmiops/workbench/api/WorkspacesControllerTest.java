@@ -801,6 +801,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspace() throws Exception {
+    stubFcGetGroup();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -1431,6 +1432,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspaceIncludeUserRoles() throws Exception {
+    stubFcGetGroup();
     User cloner = createUser("cloner@gmail.com");
     User reader = createUser("reader@gmail.com");
     User writer = createUser("writer@gmail.com");
@@ -1588,6 +1590,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testShareWorkspace() throws Exception {
+    stubFcGetGroup();
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
@@ -1676,6 +1679,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUnshareWorkspace() throws Exception {
+    stubFcGetGroup();
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
@@ -1764,6 +1768,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testStaleShareWorkspace() throws Exception {
+    stubFcGetGroup();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
