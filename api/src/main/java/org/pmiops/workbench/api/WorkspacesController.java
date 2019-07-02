@@ -37,6 +37,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
@@ -95,7 +96,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final NotebooksService notebooksService;
   private final UserService userService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   WorkspacesController(
@@ -134,6 +135,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @VisibleForTesting
   public void setUserProvider(Provider<User> userProvider) {
     this.userProvider = userProvider;
+  }
+
+  @VisibleForTesting
+  void setWorkbenchConfigProvider(Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.workbenchConfigProvider = workbenchConfigProvider;
+  }
+
+  private String getRegisteredUserDomainEmail() {
+    ManagedGroupWithMembers registeredDomainGroup =
+        fireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
+    return registeredDomainGroup.getGroupEmail();
   }
 
   private static String generateRandomChars(String candidateChars, int length) {
@@ -530,7 +542,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      savedWorkspace = workspaceService.updateWorkspaceAcls(savedWorkspace, clonedRoles);
+      savedWorkspace =
+          workspaceService.updateWorkspaceAcls(
+              savedWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
@@ -562,7 +576,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       shareRolesMap.put(role.getEmail(), role.getRole());
     }
     // This automatically enforces the "canShare" permission.
-    dbWorkspace = workspaceService.updateWorkspaceAcls(dbWorkspace, shareRolesMap);
+    dbWorkspace =
+        workspaceService.updateWorkspaceAcls(
+            dbWorkspace, shareRolesMap, getRegisteredUserDomainEmail());
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
@@ -684,5 +700,34 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setItems(userRoles);
     return ResponseEntity.ok(resp);
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceResponseListResponse> getPublishedWorkspaces() {
+    WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
+    response.setItems(workspaceService.getPublishedWorkspaces());
+    return ResponseEntity.ok(response);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
+  public ResponseEntity<EmptyResponse> publishWorkspace(
+      String workspaceNamespace, String workspaceId) {
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.getRequired(workspaceNamespace, workspaceId);
+
+    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
+  public ResponseEntity<EmptyResponse> unpublishWorkspace(
+      String workspaceNamespace, String workspaceId) {
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.getRequired(workspaceNamespace, workspaceId);
+
+    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 }

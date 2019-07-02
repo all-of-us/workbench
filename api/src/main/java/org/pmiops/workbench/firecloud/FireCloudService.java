@@ -70,6 +70,8 @@ public interface FireCloudService {
 
   void deleteWorkspace(String projectName, String workspaceName);
 
+  ManagedGroupWithMembers getGroup(String groupname);
+
   ManagedGroupWithMembers createGroup(String groupName);
 
   void addUserToGroup(String email, String groupName);

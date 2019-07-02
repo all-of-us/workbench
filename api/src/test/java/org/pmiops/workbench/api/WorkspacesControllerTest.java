@@ -77,6 +77,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
@@ -294,9 +295,14 @@ public class WorkspacesControllerTest {
     WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
     testConfig.cohortbuilder.enableListSearch = false;
+    testConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
+    testConfig.firecloud.registeredDomainName = "allUsers";
+    testConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+    testConfig.featureFlags.useBillingProjectBuffer = false;
     when(configProvider.get()).thenReturn(testConfig);
 
     cohortReviewController.setConfigProvider(configProvider);
+    workspacesController.setWorkbenchConfigProvider(configProvider);
     fcWorkspaceAcl = createWorkspaceACL();
 
     doAnswer(
@@ -392,6 +398,12 @@ public class WorkspacesControllerTest {
 
   private void stubFcGetWorkspaceACL() {
     when(fireCloudService.getWorkspaceAcl(anyString(), anyString())).thenReturn(fcWorkspaceAcl);
+  }
+
+  private void stubFcGetGroup() {
+    ManagedGroupWithMembers testGrp = new ManagedGroupWithMembers();
+    testGrp.setGroupEmail("test@firecloud.org");
+    when(fireCloudService.getGroup(anyString())).thenReturn(testGrp);
   }
 
   private void stubGetWorkspace(
@@ -789,6 +801,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspace() throws Exception {
+    stubFcGetGroup();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -1419,6 +1432,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspaceIncludeUserRoles() throws Exception {
+    stubFcGetGroup();
     User cloner = createUser("cloner@gmail.com");
     User reader = createUser("reader@gmail.com");
     User writer = createUser("writer@gmail.com");
@@ -1576,6 +1590,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testShareWorkspace() throws Exception {
+    stubFcGetGroup();
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
@@ -1664,6 +1679,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUnshareWorkspace() throws Exception {
+    stubFcGetGroup();
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
@@ -1752,6 +1768,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testStaleShareWorkspace() throws Exception {
+    stubFcGetGroup();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
@@ -2095,5 +2112,107 @@ public class WorkspacesControllerTest {
     workspacesController.deleteNotebook(workspace.getNamespace(), workspace.getId(), "nb1.ipynb");
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
     verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
+  }
+
+  @Test
+  public void testPublishUnpublishWorkspace() {
+    stubFcGetGroup();
+    stubFcUpdateWorkspaceACL();
+    stubFcGetWorkspaceACL();
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
+
+    workspace =
+        workspacesController
+            .getWorkspace(workspace.getNamespace(), workspace.getId())
+            .getBody()
+            .getWorkspace();
+    assertThat(workspace.getPublished()).isTrue();
+
+    workspacesController.unpublishWorkspace(workspace.getNamespace(), workspace.getId());
+    workspace =
+        workspacesController
+            .getWorkspace(workspace.getNamespace(), workspace.getId())
+            .getBody()
+            .getWorkspace();
+    assertThat(workspace.getPublished()).isFalse();
+  }
+
+  @Test
+  public void testGetPublishedWorkspaces() {
+    stubFcGetGroup();
+    stubFcUpdateWorkspaceACL();
+    stubFcGetWorkspaceACL();
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
+
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setWorkspace(createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+
+    assertThat(workspacesController.getPublishedWorkspaces().getBody().getItems().size())
+        .isEqualTo(1);
+  }
+
+  @Test
+  public void testGetWorkspacesGetsPublishedIfOwner() {
+    stubFcGetGroup();
+    stubFcUpdateWorkspaceACL();
+    stubFcGetWorkspaceACL();
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
+
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setWorkspace(createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+
+    assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
+  }
+
+  @Test
+  public void testGetWorkspacesGetsPublishedIfWriter() {
+    stubFcGetGroup();
+    stubFcUpdateWorkspaceACL();
+    stubFcGetWorkspaceACL();
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
+
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setWorkspace(createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+
+    assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
+  }
+
+  @Test
+  public void testGetWorkspacesDoesNotGetsPublishedIfReader() {
+    stubFcGetGroup();
+    stubFcUpdateWorkspaceACL();
+    stubFcGetWorkspaceACL();
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
+
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setWorkspace(createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+
+    assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(0);
   }
 }
