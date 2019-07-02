@@ -17,7 +17,7 @@ interface SurveyDetails {
 const style = reactStyles({
   questionHeader: {
     height: 24,
-    color: colors.purple[0],
+    color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: '20px',
     fontWeight: 600,
@@ -30,14 +30,14 @@ const style = reactStyles({
   questionLabel: {
     height: 18,
     width: 76,
-    color: colors.blue[8],
+    color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: '14px',
     fontWeight: 600,
     lineHeight: '18px'
   },
   columnLabel: {
-    color: colors.blue[8],
+    color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: '16px',
     lineHeight: '19px',
