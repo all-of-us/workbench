@@ -1,15 +1,10 @@
 <div class="dropdown-search-container">
-  <div [ngClass]="{'condition-dropdown' : showDropDown}">
-    <ng-container *ngIf="showDropDown">
-      <crit-code-dropdown (onOptionChange)="optionChange($event)" [_type]="_type"></crit-code-dropdown>
-    </ng-container>
-  </div>
-  <div [ngClass]="showDropDown ? 'search-container' : 'search-width'">
+  <div class="search-container">
     <app-list-search-bar *ngIf="showSearch" [node]="node"></app-list-search-bar>
   </div>
 </div>
 
-<div class="tree-container" [class.border]="showHeader">
+<div class="tree-container" [class.border]="showHeader" [class.no-search]="!showSearch">
   <div *ngIf="showHeader" class="tree-header">
     <button class="btn btn-link" (click)="back()">Return to list</button>
   </div>
