@@ -27,6 +27,8 @@ public interface ConceptSetDao extends CrudRepository<ConceptSet, Long> {
 
   List<ConceptSet> findByWorkspaceId(long workspaceId);
 
+  List<ConceptSet> findByWorkspaceIdAndSurvey(long workspaceId, short surveyId);
+
   /** Returns the concept set in the workspace with the specified name, or null if there is none. */
   ConceptSet findConceptSetByNameAndWorkspaceId(String name, long workspaceId);
 
