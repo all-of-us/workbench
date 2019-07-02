@@ -15,7 +15,7 @@ import {
   dataSetApi
 } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {colorWithLightness} from 'app/styles/colors';
+import {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
   ReactWrapperBase,
@@ -579,7 +579,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                              cursor: this.isRefreshPreviewDisabled ? 'not-allowed' : 'pointer',
                              fontWeight: 600, lineHeight: '15px',
                              color: this.isRefreshPreviewDisabled ?
-                               colorWithLightness(colors.dark, .4) : colors.accent
+                               colorWithWhiteness(colors.dark, 0.6) : colors.accent
                            }}>
                     Refresh Preview
                   </Clickable>
@@ -631,7 +631,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             }
             {previewList.length === 0 && !previewDataLoading &&
               <div style={styles.previewButtonBox}>
-                <div style={{color: colorWithLightness(colors.dark, .4),
+                <div style={{color: colorWithWhiteness(colors.dark, 0.6),
                   fontSize: '20px', fontWeight: 400}}>
                   Select cohorts, concept sets, and values above to generate a preview table
                 </div>

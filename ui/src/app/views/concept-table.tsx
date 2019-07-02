@@ -3,7 +3,7 @@ import {Clickable, Link} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
-import colors, {colorWithLightness} from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase, toggleIncludes} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {Concept} from 'generated/fetch/api';
@@ -27,11 +27,11 @@ const styles = reactStyles({
   akaIcon: {
     marginLeft: 10,
     verticalAlign: 'middle',
-    color: colorWithLightness(colors.accent, 0.5)
+    color: colorWithWhiteness(colors.accent, 0.5)
   },
   highlighted: {
-    color: colorWithLightness(colors.success, 1.6),
-    backgroundColor: colorWithLightness(colors.success, 0.3),
+    color: colorWithWhiteness(colors.success, -0.4),
+    backgroundColor: colorWithWhiteness(colors.success, 0.7),
     padding: '0 0.25rem',
     display: 'inline-block'
   }

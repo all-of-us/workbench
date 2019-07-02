@@ -10,7 +10,7 @@ import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
-import colors, {colorWithLightness} from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import { ProfileRegistrationStepStatus } from 'app/views/profile-registration-step-status';
@@ -235,7 +235,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             </div>
           )}
           <div style={{display: 'flex', width: 520, alignItems: 'center'}}>
-            <div style={{border: `1px solid ${colorWithLightness(colors.dark, 0.5)}`, flex: 1}}/>
+            <div style={{border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`, flex: 1}}/>
             <Clickable
               onClick={() => this.setState(fp.update(
                 ['profileEdits', 'institutionalAffiliations'],
@@ -252,7 +252,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 }}
               />
             </Clickable>
-            <div style={{border: `1px solid ${colorWithLightness(colors.dark, 0.5)}`, flex: 1}}/>
+            <div style={{border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`, flex: 1}}/>
           </div>
           <div style={{marginTop: 100}}>
             <Button

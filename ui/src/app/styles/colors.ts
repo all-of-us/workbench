@@ -1,6 +1,9 @@
 import * as Color from 'color';
 
 export default {
+  // Style guide found here:
+  // https://projects.invisionapp.com/d/main#/console/17894189/371138106/preview
+
   // Used for buttons and text
   primary: '#262262',
   // Used for tab navigation
@@ -23,6 +26,7 @@ export default {
   white: '#fff',
 };
 
-export const colorWithLightness = (color: string, intensity: number) => {
-  return Color(color).mix(Color('white'), 1 - intensity).toString();
+// Range for whiteness is {-1, 1} where -1 is fully black, 0 is the color, and 1 is fully white.
+export const colorWithWhiteness = (color: string, whiteness: number) => {
+  return Color(color).mix(Color('white'), whiteness).toString();
 };
