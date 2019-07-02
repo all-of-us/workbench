@@ -11,7 +11,7 @@ describe('getTrail', () => {
     });
     expect(trail.map(item => item.label))
       .toEqual(['Workspaces', 'TestW', 'TestC', 'Participant 77']);
-    expect(trail[4].url)
+    expect(trail[3].url)
       .toEqual('/workspaces/testns/testwsid/cohorts/88/review/participants/77')
   });
 });
