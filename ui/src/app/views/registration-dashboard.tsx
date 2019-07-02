@@ -27,11 +27,11 @@ const styles = reactStyles({
     minWidth: '250px', justifyContent: 'space-between', backgroundColor: colors.white
   },
   cardHeader: {
-    color: colors.purple[0], fontSize: '16px', lineHeight: '19px', fontWeight: 600,
+    color: colors.primary, fontSize: '16px', lineHeight: '19px', fontWeight: 600,
     marginBottom: '0.5rem'
   },
   cardDescription: {
-    color: colors.purple[0], fontSize: '14px', lineHeight: '20px'
+    color: colors.primary, fontSize: '14px', lineHeight: '20px'
   },
   infoBoxButton: {
     color: colors.white, height: '49px', borderRadius: '5px', marginLeft: '1rem',
@@ -42,7 +42,7 @@ const styles = reactStyles({
     height: '20px', width: '20px'
   },
   warningModal: {
-    color: colors.purple[0], fontSize: '18px', lineHeight: '28px', flexDirection: 'row',
+    color: colors.primary, fontSize: '18px', lineHeight: '28px', flexDirection: 'row',
     boxShadow: 'none', fontWeight: 600, display: 'flex', justifyContent: 'center'
   },
   closeableWarning: {
@@ -230,8 +230,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                       style={{backgroundColor: '#8BC990', width: 'max-content', cursor: 'default'}}>
                 <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{card.completedText}
               </Button> :
-            <Button type='darklingSecondary'
-                    onClick={ () => this.onCardClick(card) }
+            <Button onClick={ () => this.onCardClick(card) }
                     style={{width: 'max-content',
                       cursor: this.isEnabled(i) ? 'pointer' : 'default'}}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>

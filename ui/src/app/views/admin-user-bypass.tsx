@@ -13,7 +13,7 @@ import * as React from 'react';
 
 const styles = reactStyles({
   infoIcon: {
-    color: colors.blue[0],
+    color: colors.accent,
     cursor: 'pointer',
     marginBottom: '0.5rem',
     height: '16px',

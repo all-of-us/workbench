@@ -21,7 +21,7 @@ const styles = reactStyles({
     paddingBottom: '2rem',
     maxWidth: '50rem',
     height: '100%',
-    color: colors.purple[0],
+    color: colors.primary,
   },
   h2: {...headerStyles.h2, lineHeight: '24px', fontWeight: 600, fontSize: '16px'}
 });

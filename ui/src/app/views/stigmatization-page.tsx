@@ -12,20 +12,20 @@ const styles = reactStyles({
     height: '100%'
   },
   header: {
-    color: colors.purple[0],
+    color: colors.primary,
     fontSize: 20,
     fontWeight: 600,
     lineHeight: '24px'
   },
   subHeader: {
     fontSize: 16,
-    color: colors.purple[0],
+    color: colors.primary,
     fontWeight: 600,
     lineHeight: '24px',
     marginTop: '0.6rem'
   },
   text: {
-    color: colors.gray[0],
+    color: colors.primary,
     fontSize: 14,
     fontWeight: 400,
     lineHeight: '24px'
@@ -33,7 +33,7 @@ const styles = reactStyles({
   list: {
     paddingLeft: '1rem',
     listStylePosition: 'outside',
-    color: colors.purple[0],
+    color: colors.primary,
     fontWeight: 600
   }
 });

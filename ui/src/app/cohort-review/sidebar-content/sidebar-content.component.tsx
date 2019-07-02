@@ -19,7 +19,7 @@ import Timeout = NodeJS.Timeout;
 const styles = {
   header: {
     fontSize: 18,
-    color: colors.purple[0],
+    color: colors.primary,
   },
   error: {
     color: '#F7981C',

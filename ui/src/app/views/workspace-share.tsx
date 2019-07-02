@@ -118,7 +118,7 @@ const styles = reactStyles( {
 
   collaboratorIcon: {
     margin: '0 0 0 5rem',
-    color: colors.blue[0],
+    color: colors.accent,
     cursor: 'pointer'
   },
 

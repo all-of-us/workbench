@@ -5,17 +5,17 @@ import {withStyle} from 'app/utils/index';
 
 export const styles = {
   h1: {
-    color: colors.purple[0],
+    color: colors.primary,
     fontWeight: 500,
     fontSize: '1.6rem',
   },
   h2: {
-    color: colors.purple[0],
+    color: colors.primary,
     fontWeight: 800,
     fontSize: '1.25rem',
   },
   h3: {
-    color: colors.purple[0],
+    color: colors.primary,
     fontWeight: 800,
     fontSize: '1rem',
   },
@@ -24,13 +24,13 @@ export const styles = {
     color: '#000',
   },
   formLabel: {
-    color: colors.purple[0],
+    color: colors.primary,
     fontWeight: 600,
     marginTop: '0.5rem',
     marginBottom: '0.125rem'
   },
   listPageHeader: {
-    color: '#2F2E7E',
+    color: colors.primary,
     fontSize: '20px',
     lineHeight: '24px',
     fontWeight: 600,
