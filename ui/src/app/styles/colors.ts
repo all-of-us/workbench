@@ -18,10 +18,10 @@ export default {
   // Text links and Icon links
   accent: '#216FB4',
   resourceCardHighlights: {
-    conceptSet: '#A27BD7',
     cohort: '#F8C954',
-    notebook: '#8BC990',
-    dataSet: '#6CACE4'
+    conceptSet: '#A27BD7',
+    dataSet: '#6CACE4',
+    notebook: '#8BC990'
   },
   white: '#fff',
 };
