@@ -3,8 +3,7 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {Domain, SurveyQuestionsResponse, Surveys} from 'generated/fetch';
-import {ConceptSetsApi} from 'generated/fetch/api';
+import {ConceptSetsApi, Domain, SurveyQuestionsResponse, Surveys} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-api-stub';
@@ -13,7 +12,6 @@ import {ConceptSurveyAddModal} from './concept-survey-add-modal';
 
 const surveyList: Array<SurveyQuestionsResponse> = [{
   question: 'Lifestyle',
-  answer: [],
   conceptId: 5
 }];
 
@@ -42,28 +40,27 @@ describe('ConceptSurveyAddModal', () => {
 
   it('displays option to add to existing concept set if survey concept set for survey exists',
     async() => {
-        const wrapper = component();
-        const stubSetsInDomain = conceptSetsApi.surveyConceptSets
+      const wrapper = component();
+      const stubSetsInDomain = conceptSetsApi.surveyConceptSets
         .filter(s => s.domain === Domain.OBSERVATION)
         .filter(s => s.survey === Surveys.LIFESTYLE)
         .map(s => s.name);
-        await waitOneTickAndUpdate(wrapper);
-        expect(wrapper.find('[data-test-id="add-to-existing"]').exists()).toBeTruthy();
-        const foundSets = wrapper.find('[data-test-id="existing-set"]').map((s) => s.text());
-        expect(foundSets).toEqual(stubSetsInDomain);
+      await waitOneTickAndUpdate(wrapper);
+      expect(wrapper.find('[data-test-id="add-to-existing"]').exists()).toBeTruthy();
+      const foundSets = wrapper.find('[data-test-id="existing-set"]').map((s) => s.text());
+      expect(foundSets).toEqual(stubSetsInDomain);
+    });
 
-      });
-
-  it('disables option to add to existing if concept set does not exist & defaults to create', async() => {
-    props.surveyName = Surveys.THEBASICS.toString();
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="add-to-existing"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-id="create-new-set"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-id="toggle-existing-set"]')
-      .first().prop('disabled')).toBe(true);
-
-  });
+  it('disables option to add to existing if concept set does not exist & defaults to create',
+    async() => {
+      props.surveyName = Surveys.THEBASICS.toString();
+      const wrapper = component();
+      await waitOneTickAndUpdate(wrapper);
+      expect(wrapper.find('[data-test-id="add-to-existing"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-id="create-new-set"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-id="toggle-existing-set"]')
+        .first().prop('disabled')).toBe(true);
+    });
 
   it('allows user to toggle to create new set', async() => {
     const wrapper = component();
