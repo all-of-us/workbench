@@ -178,10 +178,10 @@ export const ConceptSetDetails =
     addToConceptSet() {
       const {workspace} = this.props;
       const {conceptSet} = this.state;
-      conceptSet.survey ? navigateByUrl('workspaces/' + workspace.namespace + '/' +
-          workspace.id + '/concepts' + '?survey=' +  conceptSet.survey) :
-          navigateByUrl('workspaces/' + workspace.namespace + '/' +
-              workspace.id + '/concepts' + '?domain=' + conceptSet.domain);
+      const queryParams = conceptSet.survey ? '?survey=' +  conceptSet.survey :
+          '?domain=' + conceptSet.domain;
+      navigateByUrl('workspaces/' + workspace.namespace + '/' +
+          workspace.id + '/concepts' + queryParams);
     }
 
     render() {
