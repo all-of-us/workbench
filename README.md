@@ -114,6 +114,10 @@ All commands should be run from `workbench/api`
       export WORKBENCH_DIR=[YOUR_WORKBENCH_DIRECTORY_PATH]
       source $WORKBENCH_DIR/api/db/load_vars.sh
       ```
+        * If you are using zsh, add the lines above to `~/.zshrc` and replace the last line with:
+        ```Shell
+        emulate sh -c 'source $WORKBENCH_DIR/api/db/load_vars.sh'
+        ```
     * Source your bash profile or open a new terminal
       ```Shell
       source `~/.bash_profile`
