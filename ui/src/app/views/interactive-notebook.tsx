@@ -158,7 +158,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(
             <div style={
               Object.assign({}, styles.navBarItem,
                   this.canWrite() ? styles.clickable : styles.disabled)}>
-              <div style={styles.navBarIcon}>
+              <div style={{...styles.navBarIcon, fill: '#216FB4', marginBottom: '5px'}}>
                 <PlaygroundModeIcon />
               </div>
               Run (Playground Mode)
