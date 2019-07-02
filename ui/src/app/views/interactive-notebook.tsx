@@ -4,6 +4,7 @@ import * as React from 'react';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
+import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -12,6 +13,7 @@ import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ClusterStatus} from 'generated/fetch';
+
 
 const styles = reactStyles({
   navBar: {
@@ -149,11 +151,18 @@ export const InteractiveNotebook = withCurrentWorkspace()(
                    onClick={() => { this.onEditClick(); }}>
                 <EditComponentReact enableHoverEffect={false}
                                     disabled={!this.canWrite()}
-                                    style={{...styles.navBarIcon}}/>
+                                    style={styles.navBarIcon}/>
                 Edit
               </div>
-            </div>)
-            }
+            </div>)}
+            <div style={
+              Object.assign({}, styles.navBarItem,
+                  this.canWrite() ? styles.clickable : styles.disabled)}>
+              <div style={styles.navBarIcon}>
+                <PlaygroundModeIcon />
+              </div>
+              Run (Playground Mode)
+            </div>
           </div>
           <div style={styles.previewFrame}>
             {this.state.html ?
