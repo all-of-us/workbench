@@ -224,7 +224,8 @@ export const ListSearch = withCurrentWorkspace()(
     showIngredients = (row: any) => {
       const {ingredients} = this.state;
       if (ingredients[row.id]) {
-        ingredients[row.id].open = true;
+        ingredients[row.id].open = !ingredients[row.id].open;
+        this.setState({ingredients});
       } else {
         ingredients[row.id] = {open: false, loading: true, items: []};
         this.setState({ingredients});
@@ -232,7 +233,6 @@ export const ListSearch = withCurrentWorkspace()(
         cohortBuilderApi()
           .getDrugIngredientByConceptId(+cdrVersionId, row.conceptId)
           .then(resp => {
-            console.log(resp);
             ingredients[row.id] = {
               open: true,
               loading: false,
@@ -251,6 +251,56 @@ export const ListSearch = withCurrentWorkspace()(
 
     getParamId(row: any) {
       return `param${row.conceptId ? (row.conceptId + row.code) : row.id}`;
+    }
+
+    renderRow(row: any, child: boolean) {
+      const {ingredients} = this.state;
+      const attributes = row.hasAttributes;
+      const brand = row.type === CriteriaType.BRAND;
+      const selected = !attributes && !brand && this.isSelected(row);
+      const unselected = !attributes && !brand && !this.isSelected(row);
+      const open = ingredients[row.id] && ingredients[row.id].open;
+      const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
+      const columnStyle = child ? {...styles.columnBody, paddingLeft: '1rem'} : styles.columnBody;
+      return <tr>
+          <td style={columnStyle}>
+            {row.selectable && <div style={{...styles.selectDiv}}>
+              {attributes &&
+              <ClrIcon style={styles.attrIcon}
+                       shape='slider' dir='right' size='20'
+                       onClick={() => this.launchAttributes(row)}/>
+              }
+              {selected &&
+              <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
+              }
+              {unselected &&
+              <ClrIcon style={styles.selectIcon}
+                       shape='plus-circle' size='16'
+                       onClick={() => this.selectItem(row)}/>
+              }
+              {brand && !loadingIngredients &&
+              <ClrIcon style={styles.brandIcon}
+                       shape={'angle ' + (open ? 'down' : 'right')} size='20'
+                       onClick={() => this.showIngredients(row)}/>
+              }
+              {loadingIngredients && <Spinner size={16}/>}
+            </div>}
+            <div style={{...styles.nameDiv}}>
+              <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
+            </div>
+          </td>
+          <td style={columnStyle}>{row.type}</td>
+          <td style={columnStyle}>
+            {row.count > -1 && row.count.toLocaleString()}
+          </td>
+          <td style={{...columnStyle, padding: '0.2rem'}}>
+            {row.hasHierarchy &&
+            <i className='pi pi-sitemap'
+               style={styles.treeIcon}
+               onClick={() => this.showHierarchy(row)}/>
+            }
+          </td>
+        </tr>;
     }
 
     render() {
@@ -302,59 +352,12 @@ export const ListSearch = withCurrentWorkspace()(
             </thead>
             <tbody className='p-datatable-tbody'>
               {data.map((row, r) => {
-                const attributes = row.hasAttributes;
-                const brand = row.type === CriteriaType.BRAND;
-                const selected = !attributes && !brand && this.isSelected(row);
-                const unselected = !attributes && !brand && !this.isSelected(row);
                 const open = ingredients[row.id] && ingredients[row.id].open;
-                const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
                 return <React.Fragment key={r}>
-                  <tr>
-                    <td style={styles.columnBody}>
-                      {row.selectable && <div style={{...styles.selectDiv}}>
-                        {attributes &&
-                          <ClrIcon style={styles.attrIcon}
-                            shape='slider' dir='right' size='20'
-                            onClick={() => this.launchAttributes(row)}/>
-                        }
-                        {selected &&
-                          <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
-                        }
-                        {unselected &&
-                          <ClrIcon style={styles.selectIcon}
-                            shape='plus-circle' size='16'
-                            onClick={() => this.selectItem(row)}/>
-                        }
-                        {brand && !loadingIngredients &&
-                          <ClrIcon style={styles.brandIcon}
-                            shape={'angle ' + (open ? 'down' : 'right')} size='20'
-                            onClick={() => this.showIngredients(row)}/>
-                        }
-                        {loadingIngredients && <Spinner size={16}/>}
-                      </div>}
-                      <div style={{...styles.nameDiv}}>
-                        <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
-                      </div>
-                    </td>
-                    <td style={styles.columnBody}>{row.type}</td>
-                    <td style={styles.columnBody}>
-                      {row.count > -1 && row.count.toLocaleString()}
-                    </td>
-                    <td style={{...styles.columnBody, padding: '0.2rem'}}>
-                      {row.hasHierarchy &&
-                        <i className='pi pi-sitemap'
-                          style={styles.treeIcon}
-                          onClick={() => this.showHierarchy(row)}/>
-                      }
-                    </td>
-                  </tr>
-                  {open && <tr>
-                    <td colSpan={4}>
-                      {ingredients[row.id].items.map((item, i) => {
-                        return <div key={i}>{item.name}</div>;
-                      })}
-                    </td>
-                  </tr>}
+                  {this.renderRow(row, false)}
+                  {open && ingredients[row.id].items.map((item, i) => {
+                    return <React.Fragment key={i}>{this.renderRow(item, true)}</React.Fragment>;
+                  })}
                 </React.Fragment>;
               })}
             </tbody>
