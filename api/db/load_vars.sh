@@ -13,5 +13,5 @@ for line in $(awk '!/^ *#/ && NF' $WORKBENCH_DIR/api/db/vars.env); do
   fi
 
   eval evaluatedString=$(echo $val) # this will expand the variable inside $val, for zsh compatibility
-  export $var=$(echo "$evaluatedString")
+  export $var=$evaluatedString
 done
