@@ -10,7 +10,7 @@ import {
   wizardStore
 } from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, stripHtml} from 'app/cohort-search/utils';
-import {CriteriaType, DomainType} from 'generated/fetch';
+import {CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
 
@@ -146,8 +146,8 @@ export class ListModalComponent implements OnInit, OnDestroy {
       items: [item],
       count: null,
       temporal: false,
-      mention: null,
-      time: null,
+      mention: TemporalMention.ANYMENTION,
+      time: TemporalTime.DURINGSAMEENCOUNTERAS,
       timeValue: 0,
       timeFrame: '',
       isRequesting: false,

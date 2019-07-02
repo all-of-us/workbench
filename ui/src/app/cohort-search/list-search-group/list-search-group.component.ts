@@ -6,7 +6,7 @@ import {generateId, mapGroup} from 'app/cohort-search/utils';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated/fetch';
+import {DomainType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
 
 @Component({
   selector: 'app-list-search-group',
@@ -22,14 +22,18 @@ export class ListSearchGroupComponent implements AfterViewInit {
   @Input() role: keyof SearchRequest;
   @Input() updateRequest: Function;
 
-  whichMention = [TemporalMention.ANYMENTION,
+  whichMention = [
+    TemporalMention.ANYMENTION,
     TemporalMention.FIRSTMENTION,
-    TemporalMention.LASTMENTION];
+    TemporalMention.LASTMENTION
+  ];
 
-  timeDropDown = [TemporalTime.DURINGSAMEENCOUNTERAS,
+  timeDropDown = [
+    TemporalTime.DURINGSAMEENCOUNTERAS,
     TemporalTime.XDAYSAFTER,
     TemporalTime.XDAYSBEFORE,
-    TemporalTime.WITHINXDAYSOF];
+    TemporalTime.WITHINXDAYSOF
+  ];
   name = this.whichMention[0];
   readonly domainTypes = LIST_DOMAIN_TYPES;
   readonly programTypes = LIST_PROGRAM_TYPES;
@@ -56,7 +60,7 @@ export class ListSearchGroupComponent implements AfterViewInit {
       const groupDiv = document.getElementById(this.group.id);
       ro.observe(groupDiv);
     }
-    const demoItem = document.getElementById('DEMO-' + this.index);
+    const demoItem = document.getElementById('PERSON-' + this.index);
     if (demoItem) {
       demoItem.addEventListener('mouseenter', () => {
         this.demoOpen = true;
@@ -119,18 +123,12 @@ export class ListSearchGroupComponent implements AfterViewInit {
     return !this.group.temporal ? [] : this.group.items.filter(it => it.temporalGroup === 1);
   }
 
-  get typeFlag() {
-    let flag = true;
-    this.treeType.map(m => {
-      if ( m === TreeType[TreeType.PM] || m === TreeType[TreeType.DEMO] ||
-        m === TreeType[TreeType.PPI]) {
-        flag = false;
-      }
-    });
-    return flag;
+  get disableTemporal() {
+    return this.items.some(it =>
+      [DomainType.PHYSICALMEASUREMENT, DomainType.PERSON, DomainType.SURVEY].includes(it.type));
   }
 
-  get temporalFlag() {
+  get temporal() {
     return this.group.temporal;
   }
 
@@ -200,7 +198,8 @@ export class ListSearchGroupComponent implements AfterViewInit {
   launchWizard(criteria: any, tempGroup?: number) {
     const {domain, type, standard} = criteria;
     const itemId = generateId('items');
-    const item = this.initItem(itemId, domain);
+    tempGroup = tempGroup || 0;
+    const item = this.initItem(itemId, domain, tempGroup);
     const codes = criteria.codes || false;
     const role = this.role;
     const groupId = this.group.id;
@@ -208,14 +207,14 @@ export class ListSearchGroupComponent implements AfterViewInit {
     wizardStore.next(context);
   }
 
-  initItem(id: string, type: string) {
+  initItem(id: string, type: string, tempGroup: number) {
     return {
       id,
       type,
       searchParameters: [],
       modifiers: [],
       count: null,
-      temporalGroup: 0,
+      temporalGroup: tempGroup,
       status: 'active'
     };
   }
@@ -229,11 +228,16 @@ export class ListSearchGroupComponent implements AfterViewInit {
       return grp;
     });
     searchRequestStore.next(searchRequest);
+    this.updateRequest();
   }
 
   getTemporal(e) {
     this.setGroupProperty('temporal', e.target.checked);
-    // TODO when new api call are ready, recalculate counts
+    if ((!e.target.checked && this.activeItems) || (e.target.checked && !this.temporalError)) {
+      this.loading = true;
+      this.error = false;
+      this.getGroupCount();
+    }
   }
 
   getMentionTitle(mentionName) {
@@ -273,15 +277,17 @@ export class ListSearchGroupComponent implements AfterViewInit {
   }
 
   get groupDisableFlag() {
-    return !this.temporalFlag && !this.group.items.length;
+    return !this.temporal && !this.group.items.length;
   }
 
-  get warningFlag() {
-    const tempWarningFlag =
-      !this.temporalItems.filter(t => t.get('status') === 'active').length;
-    const nonTempWarningFlag =
-      !this.items.filter(t => t.get('status') === 'active').length;
-    return tempWarningFlag || nonTempWarningFlag;
+  get temporalError() {
+    const counts = this.group.items.reduce((acc, it) => {
+      if (it.status === 'active') {
+        acc[it.temporalGroup]++;
+      }
+      return acc;
+    }, [0, 0]);
+    return counts.includes(0);
   }
 
   setMenuPosition() {

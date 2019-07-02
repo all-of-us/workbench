@@ -1,11 +1,13 @@
 package org.pmiops.workbench.notebooks;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -16,7 +18,10 @@ import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.api.StatusApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterRequest;
+import org.pmiops.workbench.notebooks.model.LocalizationEntry;
+import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.notebooks.model.MachineConfig;
+import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.notebooks.model.UserJupyterExtensionConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -57,6 +62,14 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     WorkbenchConfig config = workbenchConfigProvider.get();
     String gcsPrefix = "gs://" + config.googleCloudStorageService.clusterResourcesBucketName;
+
+    Map<String, String> nbExtensions = new HashMap<>();
+    nbExtensions.put("aou-snippets-menu", gcsPrefix + "/aou-snippets-menu.js");
+    if (!config.featureFlags.enableLeoWelder) {
+      // Enabling Welder automatically installs a Leo-maintained playground extension.
+      nbExtensions.put("aou-playground-extension", gcsPrefix + "/playground-extension.js");
+    }
+
     return new ClusterRequest()
         .labels(ImmutableMap.of(CLUSTER_LABEL_AOU, "true", CLUSTER_LABEL_CREATED_BY, userEmail))
         .defaultClientId(config.server.oauthClientId)
@@ -64,13 +77,11 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .jupyterUserScriptUri(gcsPrefix + "/setup_notebook_cluster.sh")
         .userJupyterExtensionConfig(
             new UserJupyterExtensionConfig()
-                .nbExtensions(
-                    ImmutableMap.of(
-                        "aou-playground-extension", gcsPrefix + "/playground-extension.js",
-                        "aou-snippets-menu", gcsPrefix + "/aou-snippets-menu.js"))
+                .nbExtensions(nbExtensions)
                 .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
                 .combinedExtensions(ImmutableMap.<String, String>of())
                 .labExtensions(ImmutableMap.<String, String>of()))
+        .enableWelder(config.featureFlags.enableLeoWelder)
         .machineConfig(
             new MachineConfig()
                 .masterDiskSize(
@@ -115,12 +126,35 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   @Override
   public void localize(String googleProject, String clusterName, Map<String, String> fileList) {
+    boolean enableLeoWelder = workbenchConfigProvider.get().featureFlags.enableLeoWelder;
+    Localize welderReq =
+        new Localize()
+            .entries(
+                fileList.entrySet().stream()
+                    .map(
+                        e ->
+                            new LocalizationEntry()
+                                .sourceUri(e.getValue())
+                                .localDestinationPath(e.getKey()))
+                    .collect(Collectors.toList()));
     NotebooksApi notebooksApi = notebooksApiProvider.get();
     retryHandler.run(
         (context) -> {
-          notebooksApi.proxyLocalize(googleProject, clusterName, fileList, /* async */ false);
+          if (enableLeoWelder) {
+            notebooksApi.welderLocalize(googleProject, clusterName, welderReq);
+          } else {
+            notebooksApi.proxyLocalize(googleProject, clusterName, fileList, /* async */ false);
+          }
           return null;
         });
+  }
+
+  @Override
+  public StorageLink createStorageLink(
+      String googleProject, String clusterName, StorageLink storageLink) {
+    NotebooksApi notebooksApi = notebooksApiProvider.get();
+    return retryHandler.run(
+        (context) -> notebooksApi.welderCreateStorageLink(googleProject, clusterName, storageLink));
   }
 
   @Override

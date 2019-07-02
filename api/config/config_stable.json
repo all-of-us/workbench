@@ -22,8 +22,7 @@
   "googleCloudStorageService": {
     "clusterResourcesBucketName": "all-of-us-rw-stable-cluster-resources",
     "credentialsBucketName": "all-of-us-rw-stable-credentials",
-    "emailImagesBucketName": "all-of-us-workbench-test-email-images",
-    "demosBucketName": "all-of-us-rw-stable-demos"
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "stable.fake-research-aou.org"
@@ -63,6 +62,7 @@
     "enableListSearch": false
   },
   "featureFlags": {
+    "enableLeoWelder": false,
     "useBillingProjectBuffer": false,
     "unsafeAllowDeleteUser": false
   }

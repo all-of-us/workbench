@@ -9,8 +9,8 @@
       <div id="initializing" class="progress-card" [class.progress-card-current]="[Progress.Initializing, Progress.Resuming, Progress.Unknown].includes(progress)">
         <span *ngIf="[Progress.Initializing, Progress.Resuming, Progress.Unknown].includes(progress)" class="spinner spinner-sm"></span>
         <app-notebook-icon *ngIf="![Progress.Initializing, Progress.Resuming, Progress.Unknown].includes(progress)"></app-notebook-icon>
-        <span *ngIf="progress === Progress.Unknown" class="progress-text">Connecting to notebook server...</span>
-        <span *ngIf="(progress === Progress.Initializing || progressComplete[Progress.Initializing]) && !progressComplete[Progress.Resuming]" class="progress-text">Initializing notebook server, may take up to 10 minutes</span>
+        <span *ngIf="progress === Progress.Unknown || progressComplete[Progress.Unknown]" class="progress-text">Connecting to the notebook server</span>
+        <span *ngIf="progress === Progress.Initializing || progressComplete[Progress.Initializing]" class="progress-text">Initializing notebook server, may take up to 10 minutes</span>
         <span *ngIf="progress === Progress.Resuming || progressComplete[Progress.Resuming]" class="progress-text">Resuming notebook server, may take up to 1 minute</span>
       </div>
       <div id="authenticating" class="progress-card" [class.progress-card-current]="progress === Progress.Authenticating">

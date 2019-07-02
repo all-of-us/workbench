@@ -1590,7 +1590,7 @@ paths:
             items:
               $ref: "#/definitions/SurveyQuestionsResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/getSurveyAnswer:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyAnswer:
     get:
       tags:
         - concepts
@@ -1612,7 +1612,6 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/SurveyAnswerResponse"
-
 
 ### Data set ############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
@@ -1864,6 +1863,9 @@ definitions:
       enableDataUseAgreement:
         type: boolean
         description: Feature flag for enabling data use agreement
+      enableEraCommons:
+        type: boolean
+        description: Feature flag for enabling eRA commons
 
   # Mirrors BillingProjectMembership from fireCloud.yaml
   BillingProjectMembership:

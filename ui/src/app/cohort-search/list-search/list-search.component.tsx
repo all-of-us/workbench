@@ -199,7 +199,7 @@ export const ListSearch = withCurrentWorkspace()(
           const groups = [...groupSelectionsStore.getValue(), row.id];
           groupSelectionsStore.next(groups);
         }
-        wizard.item.searchParameters.push({parameterId, ...row});
+        wizard.item.searchParameters.push({parameterId, ...row, attributes: []});
         selections = [parameterId, ...selections];
         selectionsStore.next(selections);
         wizardStore.next(wizard);

@@ -43,12 +43,14 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 public class CohortBuilderControllerTest {
@@ -109,8 +111,6 @@ public class CohortBuilderControllerTest {
             cdrVersionService,
             elasticSearchService,
             configProvider);
-
-    jdbcTemplate.execute("delete from criteria");
   }
 
   @Test
@@ -356,7 +356,7 @@ public class CohortBuilderControllerTest {
             .selectable(Boolean.TRUE)
             .name("chol blah")
             .parentId(0)
-            .type(CriteriaType.LOINC.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .attribute(Boolean.FALSE)
             .standard(false)
             .synonyms("[CONDITION_rank1]");
@@ -375,7 +375,7 @@ public class CohortBuilderControllerTest {
   public void findCriteriaByDomainAndSearchTermLikeSourceCode() throws Exception {
     CBCriteria criteria =
         new CBCriteria()
-            .code("001")
+            .code("00")
             .count("10")
             .conceptId("123")
             .domainId(DomainType.CONDITION.toString())
@@ -383,23 +383,24 @@ public class CohortBuilderControllerTest {
             .selectable(Boolean.TRUE)
             .name("chol blah")
             .parentId(0)
-            .type(CriteriaType.LOINC.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .attribute(Boolean.FALSE)
             .standard(false)
-            .synonyms("[CONDITION_rank1]");
+            .synonyms("+[CONDITION_rank1]");
     cbCriteriaDao.save(criteria);
 
-    assertEquals(
-        createResponseCriteria(criteria),
+    List<org.pmiops.workbench.model.Criteria> results =
         controller
             .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(), "00", null)
             .getBody()
-            .getItems()
-            .get(0));
+            .getItems();
+
+    assertEquals(1, results.size());
+    assertEquals(createResponseCriteria(criteria), results.get(0));
   }
 
   @Test
-  public void findCriteriaByDomainAndSearchTermDrugMatchesStandardCode() throws Exception {
+  public void findCriteriaByDomainAndSearchTermDrugMatchesStandardCodeBrand() throws Exception {
     CBCriteria criteria1 =
         new CBCriteria()
             .code("672535")
@@ -415,56 +416,14 @@ public class CohortBuilderControllerTest {
             .standard(true)
             .synonyms("[DRUG_rank1]");
     cbCriteriaDao.save(criteria1);
-    CBCriteria criteria2 =
-        new CBCriteria()
-            .code("8163")
-            .count("2")
-            .conceptId("1135766")
-            .domainId(DomainType.DRUG.toString())
-            .group(Boolean.FALSE)
-            .selectable(Boolean.TRUE)
-            .name("Phenylephrine")
-            .parentId(0)
-            .type(CriteriaType.RXNORM.toString())
-            .attribute(Boolean.FALSE)
-            .standard(true)
-            .synonyms("[DRUG_rank1]");
-    cbCriteriaDao.save(criteria2);
-    CBCriteria criteria3 =
-        new CBCriteria()
-            .code("8163")
-            .count("87551")
-            .conceptId("1135767")
-            .domainId(DomainType.DRUG.toString())
-            .group(Boolean.FALSE)
-            .selectable(Boolean.TRUE)
-            .name("Phenylephrine1")
-            .parentId(0)
-            .type(CriteriaType.RXNORM.toString())
-            .attribute(Boolean.FALSE)
-            .standard(true)
-            .synonyms("[DRUG_rank1]");
-    cbCriteriaDao.save(criteria3);
-    jdbcTemplate.execute(
-        "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
-    jdbcTemplate.execute(
-        "insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (19001487, 1135766)");
-    jdbcTemplate.execute(
-        "insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (19001487, 1135767)");
-    Concept concept1 = new Concept().conceptId(1135766).conceptClassId("Ingredient");
-    conceptDao.save(concept1);
-    Concept concept2 = new Concept().conceptId(1135767).conceptClassId("Ingredient");
-    conceptDao.save(concept2);
 
     List<org.pmiops.workbench.model.Criteria> results =
         controller
             .findCriteriaByDomainAndSearchTerm(1L, DomainType.DRUG.name(), "672535", null)
             .getBody()
             .getItems();
-    assertEquals(2, results.size());
-    assertEquals(createResponseCriteria(criteria3), results.get(0));
-    assertEquals(createResponseCriteria(criteria2), results.get(1));
-    jdbcTemplate.execute("drop table cb_criteria_relationship");
+    assertEquals(1, results.size());
+    assertEquals(createResponseCriteria(criteria1), results.get(0));
   }
 
   @Test

@@ -3,7 +3,6 @@ package org.pmiops.workbench.cdr.dao;
 import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.cdr.model.CBCriteria;
-import org.pmiops.workbench.cdr.model.StandardProjection;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -114,9 +113,18 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(
       value =
-          "select c.standard as standard from CBCriteria c where domainId=:domain and code=:term order by standard desc")
-  List<StandardProjection> findStandardProjectionByCode(
-      @Param("domain") String domain, @Param("term") String term);
+          "select c from CBCriteria c where domainId=:domain and code=:term order by standard desc")
+  List<CBCriteria> findExactMatchByCode(@Param("domain") String domain, @Param("term") String term);
+
+  @Query(
+      value =
+          "select c from CBCriteria c where domainId=:domain and type=:type and standard=:standard and code like upper(concat(:term,'%')) and match(synonyms, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
+  List<CBCriteria> findCriteriaByDomainAndTypeAndCode(
+      @Param("domain") String domain,
+      @Param("type") String type,
+      @Param("standard") Boolean isStandard,
+      @Param("term") String term,
+      Pageable page);
 
   @Query(
       value =
@@ -129,7 +137,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(
       value =
-          "select c from CBCriteria c where domainId=:domain and standard=:standard and match(synonyms, concat(:term, '+[', :domain, '_rank1]')) > 0 order by c.count desc")
+          "select c from CBCriteria c where domainId=:domain and standard=:standard and match(synonyms, concat(:term, '+[', :domain, '_rank1]')) > 0 order by c.count desc, c.name asc")
   List<CBCriteria> findCriteriaByDomainAndSynonyms(
       @Param("domain") String domain,
       @Param("standard") Boolean isStandard,

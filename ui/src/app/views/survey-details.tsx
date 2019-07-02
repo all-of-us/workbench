@@ -17,6 +17,7 @@ interface SurveyDetails {
 const style = reactStyles({
   questionHeader: {
     height: 24,
+    width: 351,
     color: colors.purple[0],
     fontFamily: 'Montserrat',
     fontSize: '20px',
@@ -86,13 +87,11 @@ export const SurveyDetails = withCurrentWorkspace()(
           workspace.namespace, workspace.id, surveyName);
         const seeMyAnsList = [];
         surveys.forEach(survey => seeMyAnsList.push(false));
-        const surveyDetails = [];
-        surveys.map((survey) => {
-          const surveyQuestionAnswer = {
+        const surveyDetails = surveys.map((survey) => {
+          return {
             question: survey,
             answer: []
           };
-          surveyDetails.push(surveyQuestionAnswer);
         });
         this.setState({surveyList: surveyDetails, loading: false, seeMyAnswers: seeMyAnsList});
       } catch (ex) {
