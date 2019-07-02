@@ -367,7 +367,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     browseSurvey(surveyName) {
       this.setState({browsingSurvey: true,
-            selectedSurvey: surveyName});
+        selectedSurvey: surveyName});
     }
 
     domainLoading(domain) {
