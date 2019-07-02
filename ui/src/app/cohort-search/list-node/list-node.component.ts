@@ -17,10 +17,6 @@ export class ListNodeComponent implements OnInit, OnDestroy {
   @Input() wizard: any;
   expanded = false;
   children: any;
-  original: any;
-  expandedTree: any;
-  originalTree: any;
-  modifiedTree = false;
   searchTerms: string;
   loading = false;
   empty: boolean;
@@ -43,15 +39,8 @@ export class ListNodeComponent implements OnInit, OnDestroy {
 
       this.subscription.add(autocompleteStore.subscribe(searchTerms => {
         this.searchTerms = searchTerms;
-        if (this.wizard.fullTree) {
-          if (searchTerms && searchTerms.length > 1) {
-            this.searchTree();
-          } else if (this.children) {
-            // TODO highlighted terms still not clearing, need to look into this more
-            this.children = this.original = this.clearSearchTree(this.original);
-            // this.expanded = false;
-            // this.clearSearchTree(this.children);
-          }
+        if (this.wizard.fullTree && this.children) {
+          this.children = this.filterTree(JSON.parse(JSON.stringify(this.children)), () => {});
         }
       }));
     }
@@ -107,7 +96,6 @@ export class ListNodeComponent implements OnInit, OnDestroy {
       } else {
         cohortBuilderApi().getCriteriaBy(cdrId, domainId, type)
           .then(resp => {
-            console.log(resp);
             this.empty = resp.items.length === 0;
             this.loading = false;
             let children = [];
@@ -119,7 +107,7 @@ export class ListNodeComponent implements OnInit, OnDestroy {
                 children = this.addChildToParent(child, children);
               }
             });
-            this.children = this.original = children;
+            this.children = children;
           });
       }
     } catch (error) {
@@ -152,86 +140,30 @@ export class ListNodeComponent implements OnInit, OnDestroy {
     this.expanded = !this.expanded;
   }
 
-  listSearchTree() {
-    this.children = this.original.map(item => item.group ? this.checkChildren(item) : item);
-  }
-
-  checkChildren(item: any) {
-    const match = item.children.some(it => this.isMatch(it.name));
-    if (item.children.some(it => this.isMatch(it.name))) {
-      item.expanded = true;
-      item.children = item.children.map(child => {
-        if (this.isMatch(child.name)) {
-          child.name = highlightMatches([this.searchTerms], child.name, false);
-        }
-        return child.group ? this.checkChildren(child) : child;
-      });
-    }
-    return item;
-  }
-
   isMatch(name: string) {
-    return name.toLowerCase().includes(this.searchTerms.toLowerCase());
+    return stripHtml(name).toLowerCase().includes(this.searchTerms.toLowerCase());
   }
 
-  searchTree() {
-    if (!this.modifiedTree) {
-      this.modifiedTree = true;
-      this.originalTree = JSON.parse(JSON.stringify(this.children));
-    }
-    this.expandedTree = JSON.parse(JSON.stringify(this.originalTree));
-    const filtered = this.filterTree(this.originalTree, []);
-    this.children = this.mergeExpanded(filtered, this.expandedTree);
-  }
-
-  clearSearchTree(children: any) {
-    return children.map(child => {
-      child.name = stripHtml(child.name);
-      child.expanded = false;
-      if (child.group) {
-        child.children = this.clearSearchTree(child.children);
+  filterTree(tree: Array<any>, expand: Function) {
+    return tree.map((item) => {
+      item.name = stripHtml(item.name);
+      if (this.searchTerms.length > 1) {
+        item.expanded = item.children.some(it => this.isMatch(it.name));
+      } else {
+        item.expanded = false;
       }
-      return child;
-    });
-  }
-
-  filterTree(tree: Array<any>, path: Array<number>) {
-    return tree.map((item, i) => {
-      path.push(i);
-      if (stripHtml(item.name).toLowerCase().includes(this.searchTerms.toLowerCase())) {
+      const func = () => {
+        item.expanded = true;
+        expand();
+      }
+      if (this.searchTerms.length > 1 && this.isMatch(item.name)) {
         item.name = highlightMatches([this.searchTerms], item.name, false);
-        if (path.length > 1) {
-          this.setExpanded(path, 0);
-        }
+        expand();
       }
       if (item.children.length) {
-        item.children = this.filterTree(item.children, path);
+        item.children = this.filterTree(item.children, func);
       }
-      path.pop();
       return item;
     });
-  }
-
-  setExpanded(path: Array<number>, end: number) {
-    let obj = this.expandedTree[path[0]];
-    for (let x = 1; x < end; x++) {
-      obj = obj.children[path[x]];
-    }
-    if (obj.children.length) {
-      obj.expanded = true;
-    }
-    if (typeof path[end + 1] !== 'undefined') {
-      this.setExpanded(path, end + 1);
-    }
-  }
-
-  mergeExpanded(filtered: Array<any>, expanded: Array<any>) {
-    expanded.forEach((item, i) => {
-      filtered[i].expanded = item.expanded || false;
-      if (filtered[i].children.length) {
-        filtered[i].children = this.mergeExpanded(filtered[i].children, item.children);
-      }
-    });
-    return filtered;
   }
 }
