@@ -94,7 +94,7 @@ export const WorkspaceAbout = withCurrentWorkspace()(
                            contentLeft={selectedResearchPurposeItems.slice(0, rpItemsHalfLen)}
                            contentRight={selectedResearchPurposeItems.slice(rpItemsHalfLen)}/>
         <div style={styles.sectionHeader}>
-          Reason for choosing All of Us data for your investigation</div>
+          Reason for choosing <i>All of Us</i> data for your investigation</div>
         <div style={styles.sectionText}>{workspace.researchPurpose.reasonForAllOfUs}</div>
         <div style={styles.sectionHeader}>Area of intended study</div>
         <div style={styles.sectionText}>{workspace.researchPurpose.intendedStudy}</div>

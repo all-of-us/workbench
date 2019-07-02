@@ -17,10 +17,10 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 export const ResearchPurposeDescription =
-   'The AoU Research Program requires each user of AoU data to provide a \
-   meaningful description of the intended purpose of data use for each Workspace they \
-   create. The responses provided below will be posted publicly in the AoU Research Hub \
-   website to inform the AoU Research Participants. ';
+  <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
+   of <i>All of Us</i> data to provide a meaningful description of the intended purpose of data use
+   for each workspace they create. The responses provided below will be posted publicly in
+   the <i>All of Us</i> Research Hub website to inform research participants.</div>;
 
 export const ResearchPurposeItems = [
   {
@@ -627,8 +627,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               sufficiently detailed responses at a 5th grade reading level.  Your responses
               will not be used to make decisions about data access. <br/> <br/>
               <i>Note that you are required to create separate Workspaces for each project
-                for which you access AoU data, hence the responses below are expected to be specific
-                to the project for which you are creating this particular Workspace.</i> </div>
+                for which you access All of Us data, hence the responses below are expected
+                to be specific to the project for which you are creating this particular
+                Workspace.</i></div>
             }/>
         <WorkspaceEditSection header={researchPurposeQuestions[0].header}
             description={researchPurposeQuestions[0].description} required>
