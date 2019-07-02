@@ -175,6 +175,15 @@ export const ConceptSetDetails =
         this.state.conceptSet.concepts.length : 0;
     }
 
+    addToConceptSet() {
+      const {workspace} = this.props;
+      const {conceptSet} = this.state;
+      conceptSet.survey ? navigateByUrl('workspaces/' + workspace.namespace + '/' +
+          workspace.id + '/concepts' + '?survey=' +  conceptSet.survey) :
+          navigateByUrl('workspaces/' + workspace.namespace + '/' +
+              workspace.id + '/concepts' + '?domain=' + conceptSet.domain);
+    }
+
     render() {
       const {urlParams: {ns, wsid}} = this.props;
       const {conceptSet, removingConcepts, editing, editDescription, editName,
@@ -244,8 +253,7 @@ export const ConceptSetDetails =
             </div>
             <div style={{display: 'flex', flexDirection: 'column'}}>
               <Button type='secondaryLight' style={styles.buttonBoxes}
-                      onClick={() => navigateByUrl('workspaces/' + ns + '/' +
-                        wsid + '/concepts' + '?domain=' + conceptSet.domain)}>
+                      onClick={() => this.addToConceptSet()}>
                 <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
               </Button>
             </div>
@@ -259,7 +267,8 @@ export const ConceptSetDetails =
           <Button type='secondaryLight' data-test-id='add-concepts'
                   style={{...styles.buttonBoxes, marginLeft: '0.5rem', maxWidth: '22%'}}
                   onClick={() => navigateByUrl('workspaces/' + ns + '/' +
-                    wsid + '/concepts' + '?domain=' + conceptSet.domain)}>
+                    wsid + '/concepts' + conceptSet.survey ? ('?survey=' + conceptSet.survey) :
+                      ('?domain=' + conceptSet.domain))}>
             <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
           </Button>}
           {workspacePermissions.canWrite && this.selectedConceptsCount > 0 &&

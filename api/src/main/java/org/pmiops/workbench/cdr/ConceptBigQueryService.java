@@ -25,6 +25,26 @@ public class ConceptBigQueryService {
   private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private final ConceptService conceptService;
 
+  private static final String SURVEY_PARAM = "survey";
+  private static final String QUESTION_PARAM = "question_concept_id";
+
+  private static final String SURVEY_QUESTION_SQL_TEMPLATE =
+      "select DISTINCT(question) as question,\n"
+          + "question_concept_id as concept_id \n"
+          + "from `${projectId}.${dataSetId}.ds_survey`\n"
+          + "where UPPER(survey) = @"
+          + SURVEY_PARAM;
+
+  private static final String SURVEY_ANSWER_SQL_TEMPLATE =
+      "select a.answer, answer_concept_id, ans_part_count, "
+          + "round((ans_part_count/ques_part_cnt)*100,2) from "
+          + "(SELECT answer, answer_concept_id, question_concept_id, count(distinct person_id) ans_part_count "
+          + "FROM `${projectId}.${dataSetId}.ds_survey` GROUP BY 1,2,3) a join "
+          + "(SELECT question, question_concept_id, count(distinct person_id) ques_part_cnt "
+          + "FROM `${projectId}.${dataSetId}.ds_survey` GROUP BY 1,2) b on "
+          + "a.question_concept_id = b.question_concept_id WHERE a.question_concept_id = @"
+          + QUESTION_PARAM;
+
   @Autowired
   public ConceptBigQueryService(
       BigQueryService bigQueryService,
@@ -88,7 +108,7 @@ public class ConceptBigQueryService {
   private QueryJobConfiguration buildSurveyQuestionQuery(String surveyName) {
     String finalSql = SURVEY_SQL_TEMPLATE;
     Map<String, QueryParameterValue> params = new HashMap<>();
-    params.put(SURVEY_PARAM, QueryParameterValue.string(surveyName));
+    params.put(SURVEY_PARAM, QueryParameterValue.string(surveyName.toUpperCase()));
     return QueryJobConfiguration.newBuilder(finalSql)
         .setNamedParameters(params)
         .setUseLegacySql(false)
