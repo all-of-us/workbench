@@ -24,6 +24,8 @@ export default {
     notebook: '#8BC990'
   },
   white: '#fff',
+  purple: 'purple',
+  blue: 'blue'
 };
 
 // Range for whiteness is {-1, 1} where -1 is fully black, 0 is the color, and 1 is fully white.
