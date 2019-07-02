@@ -17,7 +17,6 @@ interface SurveyDetails {
 const style = reactStyles({
   questionHeader: {
     height: 24,
-    width: 351,
     color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: '20px',
