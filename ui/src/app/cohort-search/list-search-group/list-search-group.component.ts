@@ -38,7 +38,6 @@ export class ListSearchGroupComponent implements AfterViewInit {
   readonly domainTypes = LIST_DOMAIN_TYPES;
   readonly programTypes = LIST_PROGRAM_TYPES;
   itemId: any;
-  treeType = [];
   timeForm = new FormGroup({
     inputTimeValue: new FormControl([Validators.required],
       [integerAndRangeValidator('Form', 0, 9999)]),
@@ -200,10 +199,10 @@ export class ListSearchGroupComponent implements AfterViewInit {
     const itemId = generateId('items');
     tempGroup = tempGroup || 0;
     const item = this.initItem(itemId, domain, tempGroup);
-    const codes = criteria.codes || false;
+    const fullTree = criteria.fullTree || false;
     const role = this.role;
     const groupId = this.group.id;
-    const context = {item, domain, type, standard, role, groupId, itemId, codes, tempGroup};
+    const context = {item, domain, type, standard, role, groupId, itemId, fullTree, tempGroup};
     wizardStore.next(context);
   }
 

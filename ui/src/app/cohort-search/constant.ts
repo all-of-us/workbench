@@ -2,8 +2,8 @@ import {TreeSubType, TreeType} from 'generated';
 import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 export const PROGRAM_TYPES = [
-  { name: 'Surveys', type: TreeType.PPI, subtype: null },
-  { name: 'Physical Measurements', type: TreeType.PM, fullTree: true, subtype: null },
+  {name: 'Surveys', type: TreeType.PPI, subtype: null},
+  {name: 'Physical Measurements', type: TreeType.PM, fullTree: true, subtype: null},
 ];
 
 export const DOMAIN_TYPES = [
@@ -44,7 +44,8 @@ export const LIST_PROGRAM_TYPES = [
     name: 'Physical Measurements',
     domain: DomainType.PHYSICALMEASUREMENT,
     type: CriteriaType.PPI,
-    standard: false
+    standard: false,
+    fullTree: true
   },
 ];
 
@@ -61,7 +62,13 @@ export const LIST_DOMAIN_TYPES = [
   {name: 'Procedures', domain: DomainType.PROCEDURE},
   {name: 'Drugs', domain: DomainType.DRUG},
   {name: 'Measurements', domain: DomainType.MEASUREMENT},
-  {name: 'Visits', domain: DomainType.VISIT, type: CriteriaType.VISIT, standard: true}
+  {
+    name: 'Visits',
+    domain: DomainType.VISIT,
+    type: CriteriaType.VISIT,
+    standard: true,
+    fullTree: true
+  }
 ];
 
 export const PM_UNITS = {

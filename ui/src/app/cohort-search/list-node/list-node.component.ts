@@ -1,5 +1,6 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {ppiQuestions, scrollStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
+import {autocompleteStore, ppiQuestions, scrollStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
+import {highlightMatches, stripHtml} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';
@@ -16,6 +17,7 @@ export class ListNodeComponent implements OnInit, OnDestroy {
   @Input() wizard: any;
   expanded = false;
   children: any;
+  searchTerms: string;
   loading = false;
   empty: boolean;
   selected: boolean;
@@ -23,16 +25,28 @@ export class ListNodeComponent implements OnInit, OnDestroy {
   subscription: Subscription;
 
   ngOnInit() {
-    this.subscription = subtreePathStore.subscribe(path => {
-      this.expanded = path.includes(this.node.id.toString());
-    });
+    if (!this.wizard.fullTree || this.node.id === 0) {
+      this.subscription = subtreePathStore.subscribe(path => {
+        this.expanded = path.includes(this.node.id.toString());
+      });
 
-    this.subscription.add(subtreeSelectedStore.subscribe(id => {
-      this.selected = id === this.node.id;
-      if (this.selected) {
-        setTimeout(() => scrollStore.next(this.node.id));
-      }
-    }));
+      this.subscription.add(subtreeSelectedStore.subscribe(id => {
+        this.selected = id === this.node.id;
+        if (this.selected) {
+          setTimeout(() => scrollStore.next(this.node.id));
+        }
+      }));
+
+      this.subscription.add(autocompleteStore.subscribe(searchTerms => {
+        this.searchTerms = searchTerms;
+        if (this.wizard.fullTree && this.children) {
+          this.children = this.filterTree(JSON.parse(JSON.stringify(this.children)), () => {});
+        }
+      }));
+    }
+    if (this.wizard && this.wizard.fullTree) {
+      this.expanded = this.node.expanded || false;
+    }
   }
 
   ngOnDestroy() {
@@ -56,36 +70,100 @@ export class ListNodeComponent implements OnInit, OnDestroy {
     const {domainId, id, isStandard, name} = this.node;
     const type = domainId === DomainType.DRUG ? CriteriaType[CriteriaType.ATC] : this.node.type;
     try {
-      cohortBuilderApi().getCriteriaBy(cdrId, domainId, type, isStandard, id)
-        .then(resp => {
-          if (resp.items.length === 0 && domainId === DomainType.DRUG) {
-            cohortBuilderApi()
-              .getCriteriaBy(cdrId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
-              .then(rxResp => {
-                this.empty = rxResp.items.length === 0;
-                this.children = rxResp.items;
-                this.loading = false;
-              }, () => this.error = true);
-          } else {
-            this.empty = resp.items.length === 0;
-            this.children = resp.items;
-            this.loading = false;
-            if (!this.empty && domainId === DomainType.SURVEY && !resp.items[0].group) {
-              // save questions in the store so we can display them along with answers if selected
-              const questions = ppiQuestions.getValue();
-              questions[id] = name;
-              ppiQuestions.next(questions);
+      if (!this.wizard.fullTree) {
+        cohortBuilderApi().getCriteriaBy(cdrId, domainId, type, isStandard, id)
+          .then(resp => {
+            if (resp.items.length === 0 && domainId === DomainType.DRUG) {
+              cohortBuilderApi()
+                .getCriteriaBy(cdrId, domainId, CriteriaType[CriteriaType.RXNORM], isStandard, id)
+                .then(rxResp => {
+                  this.empty = rxResp.items.length === 0;
+                  this.children = rxResp.items;
+                  this.loading = false;
+                }, () => this.error = true);
+            } else {
+              this.empty = resp.items.length === 0;
+              this.children = resp.items;
+              this.loading = false;
+              if (!this.empty && domainId === DomainType.SURVEY && !resp.items[0].group) {
+                // save questions in the store so we can display them along with answers if selected
+                const questions = ppiQuestions.getValue();
+                questions[id] = name;
+                ppiQuestions.next(questions);
+              }
             }
-          }
-        });
+          });
+      } else {
+        cohortBuilderApi().getCriteriaBy(cdrId, domainId, type)
+          .then(resp => {
+            this.empty = resp.items.length === 0;
+            this.loading = false;
+            let children = [];
+            resp.items.forEach(child => {
+              child['children'] = [];
+              if (child.parentId === 0) {
+                children.push(child);
+              } else {
+                children = this.addChildToParent(child, children);
+              }
+            });
+            this.children = children;
+          });
+      }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       this.error = true;
       this.loading = false;
     }
   }
 
+  addChildToParent(child, itemList) {
+    for (const item of itemList) {
+      if (!item.group) {
+        continue;
+      }
+      if (item.id === child.parentId) {
+        item.children.push(child);
+        return itemList;
+      }
+      if (item.children.length) {
+        const childList = this.addChildToParent(child, item.children);
+        if (childList) {
+          item.children = childList;
+          return itemList;
+        }
+      }
+    }
+  }
+
   toggleExpanded() {
     this.expanded = !this.expanded;
+  }
+
+  isMatch(name: string) {
+    return stripHtml(name).toLowerCase().includes(this.searchTerms.toLowerCase());
+  }
+
+  filterTree(tree: Array<any>, expand: Function) {
+    return tree.map((item) => {
+      item.name = stripHtml(item.name);
+      if (this.searchTerms.length > 1) {
+        item.expanded = item.children.some(it => this.isMatch(it.name));
+      } else {
+        item.expanded = false;
+      }
+      const func = () => {
+        item.expanded = true;
+        expand();
+      };
+      if (this.searchTerms.length > 1 && this.isMatch(item.name)) {
+        item.name = highlightMatches([this.searchTerms], item.name, false);
+        expand();
+      }
+      if (item.children.length) {
+        item.children = this.filterTree(item.children, func);
+      }
+      return item;
+    });
   }
 }

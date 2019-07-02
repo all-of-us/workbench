@@ -51,8 +51,8 @@ export class SearchGroupSelectComponent implements AfterViewInit {
       const itemId = generateId('items');
       const groupId = null;
       const {domain, type, standard} = criteria;
-      const item = this.initItem(itemId, domain);
-      context = {item, domain, type, standard, role, groupId, itemId, codes};
+      const item = this.initItem(itemId, domain, fullTree);
+      context = {item, domain, type, standard, role, groupId, itemId, fullTree};
       wizardStore.next(context);
     } else {
       const itemId = this.actions.generateId('items');
@@ -65,7 +65,7 @@ export class SearchGroupSelectComponent implements AfterViewInit {
     }
   }
 
-  initItem(id: string, type: string) {
+  initItem(id: string, type: string, fullTree: boolean) {
     return {
       id,
       type,
@@ -74,7 +74,8 @@ export class SearchGroupSelectComponent implements AfterViewInit {
       count: null,
       temporalGroup: 0,
       isRequesting: false,
-      status: 'active'
+      status: 'active',
+      fullTree
     };
   }
 
