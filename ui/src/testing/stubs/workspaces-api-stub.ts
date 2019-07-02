@@ -192,7 +192,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   getPublishedWorkspaces(options?: any): Promise<WorkspaceResponseListResponse> {
     return new Promise<WorkspaceResponseListResponse>(resolve => {
-      const publishedWorkspaces = this.workspaces.filter(w => w.published === true)
+      const publishedWorkspaces = this.workspaces.filter(w => w.published === true);
       resolve({
         items: publishedWorkspaces.map(workspace => {
           let accessLevel = WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
