@@ -20,11 +20,14 @@ const styles = reactStyles({
   },
   menuLink: {
     color: '#216FB4', fontSize: 14, fontWeight: 600, display: 'flex',
-    flexDirection: 'row', alignItems: 'center', padding: '0.3rem 0'
+    flexDirection: 'row', alignItems: 'center', padding: '0.35rem 0', borderRadius: '3px'
   },
   divider: {
     width: '100%', backgroundColor: '#262262', borderWidth: '0px', height: '1px',
     marginBottom: '0.5rem'
+  },
+  menuLinkSelected: {
+    backgroundColor: '#F3F2F7'
   }
 });
 
@@ -44,9 +47,12 @@ const libraryTabs = [
   libraryTabEnums.PUBLISHED_WORKSPACES
 ];
 
-const LibraryTab: React.FunctionComponent<{title: string, icon: string, onClick: Function}> =
-  ({title, icon, onClick}) => {
-    return <Clickable style={styles.menuLink} onClick={onClick}>
+const LibraryTab: React.FunctionComponent<{
+  title: string, icon: string, onClick: Function, selected: boolean}> =
+  ({title, icon, onClick, selected}) => {
+    return <Clickable style={selected ? {...styles.menuLink, ...styles.menuLinkSelected}
+    : styles.menuLink}
+                      onClick={onClick} hover={styles.menuLinkSelected}>
       <ClrIcon shape={icon} style={styles.iconStyling} class='is-solid' size={24}/>
       {title}
     </Clickable>;
@@ -67,10 +73,10 @@ export const WorkspaceLibrary = withUserProfile()
         <div style={{display: 'flex', flexDirection: 'column'}}>
           {libraryTabs.map((tab, i) => {
             return <React.Fragment key={i}>
-              <LibraryTab icon={tab.icon} title={tab.title}
+              <LibraryTab icon={tab.icon} title={tab.title} selected={this.state.currentTab === tab}
                           onClick={() => this.setState({currentTab: tab})}/>
                 {i !== libraryTabs.length - 1 &&
-                <hr style={{width: '100%', marginBottom: '0.5rem'}}/>}
+                <hr style={{width: '100%', margin: '0.5rem 0'}}/>}
             </React.Fragment>;
           })}
         </div>
