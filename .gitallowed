@@ -1,0 +1,13 @@
+# This file contains whitelisted patterns for git-secrets:
+# https://github.com/awslabs/git-secrets#ignoring-false-positives
+
+# Oauth client IDs which trip git-secrets; these must be sent client-side so
+# there is no point in witholding them from source.
+602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com
+657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com
+56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com
+684273740878-d7i68in5d9hqr6n9mfvrdh53snekp79f.apps.googleusercontent.com
+
+# Public API keys for Stackdriver. These also must be sent client-side.
+AIzaSyBSPcQ0FcR99GLXaqX4Ujpoj3JUDSP689g
+AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous

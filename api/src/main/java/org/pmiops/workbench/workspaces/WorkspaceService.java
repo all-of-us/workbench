@@ -23,7 +23,11 @@ public interface WorkspaceService {
 
   Workspace get(String ns, String firecloudName);
 
+  List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces();
+
   List<WorkspaceResponse> getWorkspaces();
+
+  List<WorkspaceResponse> getPublishedWorkspaces();
 
   Workspace getByName(String ns, String name);
 
@@ -37,7 +41,10 @@ public interface WorkspaceService {
 
   void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
 
-  Workspace updateWorkspaceAcls(Workspace workspace, Map<String, WorkspaceAccessLevel> userRoleMap);
+  Workspace updateWorkspaceAcls(
+      Workspace workspace,
+      Map<String, WorkspaceAccessLevel> userRoleMap,
+      String registeredUsersGroup);
 
   Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to);
 
@@ -56,4 +63,6 @@ public interface WorkspaceService {
 
   WorkspaceACLUpdate updateFirecloudAclsOnUser(
       WorkspaceAccessLevel updatedAccess, WorkspaceACLUpdate currentUpdate);
+
+  Workspace setPublished(Workspace workspace, String publishedWorkspaceGroup, boolean publish);
 }

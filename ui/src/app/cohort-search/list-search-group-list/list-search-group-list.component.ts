@@ -1,6 +1,8 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {SearchRequest} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
+
+import {searchRequestStore} from 'app/cohort-search/search-state.service';
 
 @Component({
   selector: 'app-list-search-group-list',
@@ -9,13 +11,19 @@ import {Subscription} from 'rxjs/Subscription';
     './list-search-group-list.component.css',
   ]
 })
-export class ListSearchGroupListComponent {
+export class ListSearchGroupListComponent implements OnInit {
   @Input() role: keyof SearchRequest;
   @Input() groups: Array<any>;
-  @Output() tempLength = new EventEmitter<boolean>();
+  @Input() updateRequest: Function;
 
   index = 0;
   subscription: Subscription;
+
+  ngOnInit(): void {
+    if (this.role === 'excludes') {
+      searchRequestStore.subscribe(sr => this.index = sr.includes.length + 1);
+    }
+  }
 
   get title() {
     const prefix = this.role === 'excludes' ? 'And ' : '';
@@ -24,8 +32,5 @@ export class ListSearchGroupListComponent {
 
   get emptyIndex() {
     return this.groups.length + this.index + 1;
-  }
-  getTemporalLength(e) {
-    this.tempLength.emit(e);
   }
 }

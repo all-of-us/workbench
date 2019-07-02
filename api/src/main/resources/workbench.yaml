@@ -334,19 +334,6 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
-  # TODO: add signature / other state?
-  /v1/account/accept-terms-of-service:
-    post:
-      tags:
-        - profile
-      description: Submits consent to the terms of service for researchers.
-      operationId: submitTermsOfService
-      responses:
-        200:
-          description: The user's profile.
-          schema:
-            $ref: "#/definitions/Profile"
-
   /v1/account/submit-data-use-agreement:
     post:
       tags:
@@ -664,6 +651,18 @@ paths:
           schema:
             $ref: "#/definitions/Workspace"
 
+  /v1/workspaces/published:
+    get:
+      tags:
+        - workspaces
+      description: Returns a list of published workspaces
+      operationId: getPublishedWorkspaces
+      responses:
+        200:
+          description: A list of workspace definitions.
+          schema:
+            $ref: "#/definitions/WorkspaceResponseListResponse"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -723,6 +722,40 @@ paths:
           description: A list of workspace collaborators
           schema:
             $ref: '#/definitions/WorkspaceUserRolesResponse'
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/publish:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      description: >
+        Makes a workspace public to all AoU registered users.
+        Requires FEATURED_WORKSPACE_ADMIN authority.
+      operationId: publishWorkspace
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/unpublish:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      description: >
+        Makes a workspace public to all AoU registered users.
+        Requires FEATURED_WORKSPACE_ADMIN authority.
+      operationId: unpublishWorkspace
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/EmptyResponse"
 
   /v1/admin/workspaces/review:
     get:
@@ -1434,6 +1467,25 @@ paths:
           schema:
             $ref: "#/definitions/ConceptSet"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/survey-concept-sets/{surveyName}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - in: path
+        name: surveyName
+        type: string
+        required: true
+    get:
+      tags:
+        - conceptSets
+      description: Returns all survey concept sets in a workspace
+      operationId: "getSurveyConceptSetsInWorkspace"
+      responses:
+        200:
+          description: A list of concept sets of type surveys.
+          schema:
+            $ref: "#/definitions/ConceptSetListResponse"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -1562,6 +1614,51 @@ paths:
           schema:
             $ref: "#/definitions/SurveysResponse"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/{surveyName}/surveyQuestions:
+    get:
+      tags:
+        - concepts
+      description: >
+        Returns survey questions and answers in the workspace's CDR version
+      operationId: "getSurveyQuestions"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: path
+          name: surveyName
+          required: true
+          type: string
+      responses:
+        200:
+          description: information about the surveys
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/SurveyQuestionsResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyAnswer:
+    get:
+      tags:
+        - concepts
+      description: >
+        Returns with all the answer for survey Question
+      operationId: "getSurveyAnswers"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: query
+          name: questionConceptId
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: List of Survey Details with Answer
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/SurveyAnswerResponse"
+
 ### Data set ############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
     post:
@@ -1627,7 +1724,7 @@ paths:
             schema:
               $ref: "#/definitions/ErrorResponse"
           409:
-            description: Data set with same name exist
+            description: Data Set with the same name already exists
             schema:
               $ref: "#/definitions/ErrorResponse"
 
@@ -1662,6 +1759,10 @@ paths:
           description: The updated data set.
           schema:
             $ref: "#/definitions/DataSet"
+        409:
+          description: Data Set with the same name already exists
+          schema:
+            $ref: "#/definitions/ErrorResponse"
     delete:
       tags:
         - dataSet
@@ -1672,6 +1773,49 @@ paths:
           description: ACCEPTED
           schema:
             $ref: '#/definitions/EmptyResponse'
+
+  /v1/{workspaceNamespace}/{workspaceId}/data-sets/dataSetByIdExist:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    get:
+      parameters:
+        - in: query
+          name: resourceType
+          type: string
+          required: true
+        - in: query
+          name: id
+          type: integer
+          format: int64
+          required: true
+      tags:
+        - dataSet
+      operationId: "dataSetByIdExist"
+      responses:
+        200:
+          description: Returns true if Data set with cohort or concept Id exist
+          schema:
+            type: boolean
+
+  /v1/{workspaceNamespace}/{workspaceId}/data-set/markDirty:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      parameters:
+        - in: body
+          name: markDataSetRequest
+          schema:
+            $ref: "#/definitions/MarkDataSetRequest"
+      tags:
+        - dataSet
+      operationId: "markDirty"
+      responses:
+        200:
+          description: Mark all dataset with cohort/concept id as dirty
+          schema:
+            type: boolean
 
   /v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook:
     post:
@@ -1765,6 +1909,9 @@ definitions:
       enableDataUseAgreement:
         type: boolean
         description: Feature flag for enabling data use agreement
+      enableEraCommons:
+        type: boolean
+        description: Feature flag for enabling eRA commons
 
   # Mirrors BillingProjectMembership from fireCloud.yaml
   BillingProjectMembership:
@@ -1818,6 +1965,7 @@ definitions:
   #      management. Intended to be granted for devops needs, e.g. for oncall.
   #   3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
   #      to perform actions on a user's enabled status and manual verification.
+  #   4) FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
   Authority:
     type: string
     description: actions a user can have authority/permission to perform
@@ -1827,7 +1975,8 @@ definitions:
         # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
         REVIEW_RESEARCH_PURPOSE,
         DEVELOPER,
-        ACCESS_CONTROL_ADMIN
+        ACCESS_CONTROL_ADMIN,
+        FEATURED_WORKSPACE_ADMIN
     ]
 
   PageVisit:
@@ -1897,6 +2046,8 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      published:
+        type: boolean
 
   UserRole:
     type: object
@@ -2326,6 +2477,10 @@ definitions:
           here; it makes sense to specify concepts in these domains in cohort criteria, but
           there isn't much value in having concept sets defined for them.
         $ref: "#/definitions/Domain"
+      survey:
+        description: >
+          Survey
+        $ref: "#/definitions/Surveys"
       description:
         type: string
       creator:
@@ -2450,6 +2605,15 @@ definitions:
         type: boolean
       kernelType:
         $ref: "#/definitions/KernelTypeEnum"
+
+  MarkDataSetRequest:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      resourceType:
+        type: string
 
   KernelTypeEnum:
     type: string
@@ -2664,6 +2828,30 @@ definitions:
         items:
           $ref: "#/definitions/SurveyModule"
 
+  SurveyQuestionsResponse:
+    type: object
+    properties:
+      question:
+        type: string
+      conceptId:
+        type: integer
+        format: int64
+
+  SurveyAnswerResponse:
+    type: object
+    properties:
+      answer:
+        type: string
+      conceptId:
+        type: integer
+        format: int64
+      participationCount:
+        type: integer
+        format: int64
+      percentAnswered:
+        type: number
+        format: double
+
   CreateAccountRequest:
     type: object
     properties:
@@ -2873,14 +3061,6 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when a user was bypassed for completing the data use agreement.
-      termsOfServiceCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp for when a user completed the terms of service.
-      termsOfServiceBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp for when a user was bypassed for completing the terms of service.
 
   InstitutionalAffiliation:
     type: object

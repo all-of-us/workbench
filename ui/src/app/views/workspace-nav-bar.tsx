@@ -16,22 +16,22 @@ import * as React from 'react';
 
 const styles = reactStyles({
   container: {
-    display: 'flex', alignItems: 'center', backgroundColor: colors.blue[1],
+    display: 'flex', alignItems: 'center', backgroundColor: colors.secondary,
     fontWeight: 500, color: 'white', textTransform: 'uppercase',
     height: 60, paddingRight: 16,
     boxShadow: 'inset rgba(0, 0, 0, 0.12) 0px 3px 2px 0px',
     width: 'calc(100% + 1.2rem)',
     marginLeft: '-0.6rem',
-    paddingLeft: 80, borderBottom: `5px solid ${colors.blue[0]}`, flex: 'none'
+    paddingLeft: 80, borderBottom: `5px solid ${colors.accent}`, flex: 'none'
   },
   tab: {
     minWidth: 140, flexGrow: 0, padding: '0 20px',
-    color: colors.gray[5],
+    color: colors.white,
     alignSelf: 'stretch', display: 'flex', justifyContent: 'center', alignItems: 'center'
   },
   active: {
     backgroundColor: 'rgba(255,255,255,0.15)', color: 'unset',
-    borderBottom: `4px solid ${colors.blue[0]}`, fontWeight: 'bold'
+    borderBottom: `4px solid ${colors.accent}`, fontWeight: 'bold'
   },
   separator: {
     background: 'rgba(255,255,255,0.15)', width: 1, height: 48, flexShrink: 0
@@ -53,9 +53,10 @@ const styles = reactStyles({
 const tabs = [
   {name: 'About', link: ''},
   ...(environment.enableDatasetBuilder ? [{name: 'Data', link: 'data'}] : []),
-  {name: 'Cohorts', link: 'cohorts'},
-  {name: 'Concepts', link: 'concepts'},
-  {name: 'Notebooks', link: 'notebooks'},
+  ...(environment.enableDatasetBuilder ? [] : [
+    {name: 'Cohorts', link: 'cohorts'},
+    {name: 'Concepts', link: 'concepts'}]),
+  {name: environment.enableDatasetBuilder ? 'Analysis' : 'Notebooks', link: 'notebooks'},
 ];
 
 const navSeparator = <div style={styles.separator}/>;

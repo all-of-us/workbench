@@ -18,7 +18,7 @@ import {validate} from 'validate.js';
 const styles = reactStyles({
   fieldHeader: {
     fontSize: 14,
-    color: colors.purple[0],
+    color: colors.primary,
     fontWeight: 600,
     display: 'block'
   }

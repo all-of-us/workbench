@@ -135,6 +135,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.jupyterLabMode = jupyterLabMode === 'true';
     this.setNotebookNames();
 
+    let initializedProgress = false;
     this.loadingSub = serverConfigStore.asObservable()
       .flatMap(({useBillingProjectBuffer}) => {
         if (useBillingProjectBuffer) {
@@ -146,20 +147,29 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
               profileStore.profile.freeTierBillingProjectName);
           });
       })
-      .flatMap((resp) => {
+      .do((resp) => {
+        if (initializedProgress) {
+          // Only initialize progress once. This callback will re-execute as we
+          // poll the cluster's status.
+          return;
+        }
         const c = resp.defaultCluster;
-        this.incrementProgress(Progress.Initializing);
-        if (c.status === ClusterStatus.Starting ||
+        if (c.status === ClusterStatus.Running) {
+          this.incrementProgress(Progress.Unknown);
+        } else if (c.status === ClusterStatus.Starting ||
             c.status === ClusterStatus.Stopping ||
             c.status === ClusterStatus.Stopped) {
           this.incrementProgress(Progress.Resuming);
         } else {
           this.incrementProgress(Progress.Initializing);
         }
+        initializedProgress = true;
+      })
+      .flatMap((resp) => {
+        const c = resp.defaultCluster;
         if (c.status === ClusterStatus.Running) {
           return Observable.from([c]);
-        }
-        if (c.status === ClusterStatus.Stopped) {
+        } else if (c.status === ClusterStatus.Stopped) {
           // Resume the cluster and continue polling.
           return <Observable<Cluster>> this.leoClusterService
             .startCluster(c.clusterNamespace, c.clusterName)

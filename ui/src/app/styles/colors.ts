@@ -1,46 +1,32 @@
+import * as Color from 'color';
+
 export default {
-  purple: [
-    '#262262',
-    '#4356a7',
-    '#AB87B3'
-  ],
-  backgroundGrey: '#f1f2f2',
-  red: '#d0021b',
-  green: [
-    '#8bc990',
-    '#7AC79B',
-    '#7CC79B',
-    '#659F3D'
-  ],
-  blue: [
-    '#2691d0',
-    '#5aa6da',
-    '#6CACE4',
-    '#85bde4',
-    '#afd3ed',
-    '#d7eaf6',
-    '#eaf4fb',
-    '#2F2E7E',
-    '#302C71'
-  ],
-  gray: [
-    '#4a4a4a',
-    '#6e6e6e',
-    '#929292',
-    '#b7b7b7',
-    '#c3c3c3',
-    '#dbdbdb',
-    '#ededed',
-    '#F1F1F1'
-  ],
+  // Style guide found here:
+  // https://projects.invisionapp.com/d/main#/console/17894189/371138106/preview
+
+  // Used for buttons and text
+  primary: '#262262',
+  // Used for tab navigation
+  secondary: '#6CACE4',
+  success: '#8BC990',
+  // Used for tables
+  light: '#E9ECEF',
+  highlight: '#F8C954',
+  warning: '#F7981C',
+  danger: '#DB3214',
+  dark: '#4A4A4A',
+  // Text links and Icon links
+  accent: '#216FB4',
+  resourceCardHighlights: {
+    cohort: '#F8C954',
+    conceptSet: '#A27BD7',
+    dataSet: '#6CACE4',
+    notebook: '#8BC990'
+  },
   white: '#fff',
-  black: [
-    '#000',
-    '#333333'
-  ],
-  yellow: [
-    '#F8C954',
-    '#F7981C',
-    '#F68D76'
-  ]
+};
+
+// Range for whiteness is {-1, 1} where -1 is fully black, 0 is the color, and 1 is fully white.
+export const colorWithWhiteness = (color: string, whiteness: number) => {
+  return Color(color).mix(Color('white'), whiteness).toString();
 };

@@ -4,9 +4,10 @@ import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {ClrIcon} from 'app/components/icons';
+import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-
 import {
   cohortsApi,
   conceptsApi,
@@ -14,6 +15,7 @@ import {
   dataSetApi
 } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
   ReactWrapperBase,
@@ -21,6 +23,7 @@ import {
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {NewDataSetModal} from 'app/views/new-dataset-modal';
@@ -43,14 +46,22 @@ export const styles = reactStyles({
     fontSize: '16px',
     height: '2rem',
     lineHeight: '2rem',
-    paddingLeft: '13px',
-    color: colors.blue[7],
-    borderBottom: '1px solid #E5E5E5'
+    paddingLeft: '0.55rem',
+    paddingRight: '0.55rem',
+    color: colors.primary,
+    borderBottom: '1px solid #E5E5E5',
+    display: 'flex',
+    justifyContent: 'space-between',
+    flexDirection: 'row'
+  },
+
+  selectBoxHeaderIconLinks: {
+    fill: colors.accent
   },
 
   listItem: {
     border: '0.5px solid #C3C3C3',
-    margin: '.4rem',
+    margin: '.4rem .4rem .4rem .55rem',
     height: '1.5rem',
     display: 'flex'
   },
@@ -61,35 +72,25 @@ export const styles = reactStyles({
     marginLeft: 10,
     marginTop: 10,
     marginRight: 10,
-    backgroundColor: colors.green[2]
+    backgroundColor: colors.success
   },
 
   valueListItemCheckboxStyling: {
     height: 17,
     width: 17,
-    marginLeft: 10,
     marginTop: 10,
     marginRight: 10,
-    backgroundColor: colors.green[2]
+    backgroundColor: colors.success
   },
 
   subheader: {
     fontWeight: 400,
     fontSize: '0.6rem',
     marginTop: '0.5rem',
-    color: colors.purple[0]
+    paddingLeft: '0.55rem',
+    color: colors.primary
   },
-  refreshPreviewHeader: {
-    display: 'flex',
-    flexDirection: 'row',
-    position: 'relative',
-    lineHeight: 'auto',
-    paddingTop: '0.5rem',
-    paddingBottom: '0.5rem',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 'auto'
-  },
+
   previewButtonBox: {
     width: '100%',
     display: 'flex',
@@ -98,19 +99,43 @@ export const styles = reactStyles({
     marginTop: '2.675rem',
     marginBottom: '2rem'
   },
+
+  previewDataHeaderBox: {
+    display: 'flex',
+    flexDirection: 'row',
+    position: 'relative',
+    lineHeight: 'auto',
+    paddingTop: '0.5rem',
+    paddingBottom: '0.5rem',
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem',
+    borderBottom: '1px solid #E5E5E5',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 'auto'
+  },
+
   previewDataHeader: {
     height: '19px',
     width: '160px',
-    color: colors.blue[7],
+    color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: '16px',
     fontWeight: 600
   },
+
   warningMessage: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     height: '10rem'
+  },
+
+  selectAllContainer: {
+    marginLeft: 'auto',
+    width: '5rem',
+    display: 'flex',
+    alignItems: 'center'
   }
 });
 
@@ -130,12 +155,20 @@ const Subheader = (props) => {
 export const ValueListItem: React.FunctionComponent <
   {domainValue: DomainValue, onChange: Function, checked: boolean}> =
   ({domainValue, onChange, checked}) => {
-    return <div style={{display: 'flex', color: 'black', height: '1.2rem'}}>
+    return <div style={{display: 'flex', height: '1.2rem', marginLeft: '0.55rem'}}>
       <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
              style={styles.valueListItemCheckboxStyling} checked={checked}/>
       <div style={{lineHeight: '1.5rem', wordWrap: 'break-word'}}>{domainValue.value}</div>
     </div>;
   };
+
+const plusLink = (dataTestId: string, path: string) => {
+  return <a data-test-id={dataTestId} href={path}
+            onClick={e => {navigateAndPreventDefaultIfNoKeysPressed(e, path); }}>
+    <ClrIcon shape='plus-circle' class='is-solid' size={16}
+             style={styles.selectBoxHeaderIconLinks}/>
+  </a>;
+};
 
 interface Props {
   workspace: WorkspaceData;
@@ -159,7 +192,6 @@ interface State {
   selectedValues: DomainValuePair[];
   valueSets: ValueSet[];
   valuesLoading: boolean;
-  selectAll: boolean;
 }
 
 const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
@@ -184,7 +216,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         selectedValues: [],
         valueSets: [],
         valuesLoading: false,
-        selectAll: false
       };
     }
 
@@ -307,21 +338,23 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       this.setState({selectedValues: valuesSelected, dataSetTouched: true});
     }
 
-    selectAllValues() {
-      if (this.state.selectAll) {
-        this.setState({
-          selectedValues: [],
-          selectAll: !this.state.selectAll});
-        return;
-      }
+    get selectAll() {
+      return fp.isEmpty(this.state.selectedValues);
+    }
 
-      const allValuesSelected = [];
-      this.state.valueSets.map(valueSet => {
-        valueSet.values.items.map(value => {
-          allValuesSelected.push({domain: valueSet.domain, value: value.value});
+    selectAllValues() {
+      if (!this.selectAll) {
+        this.setState({selectedValues: []});
+        return;
+      } else {
+        const allValuesSelected = [];
+        this.state.valueSets.map(valueSet => {
+          valueSet.values.items.map(value => {
+            allValuesSelected.push({domain: valueSet.domain, value: value.value});
+          });
         });
-      });
-      this.setState({selectedValues: allValuesSelected, selectAll: !this.state.selectAll});
+        this.setState({selectedValues: allValuesSelected});
+      }
     }
 
     disableSave() {
@@ -410,28 +443,15 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       </DataTable>;
     }
 
-    updateDataSet() {
-      const {namespace, id} = this.props.workspace;
-      const {dataSet} = this.state;
-      const request = {
-        name: dataSet.name,
-        description: dataSet.description,
-        includesAllParticipants: this.state.includesAllParticipants,
-        conceptSetIds: this.state.selectedConceptSetIds,
-        cohortIds: this.state.selectedCohortIds,
-        values: this.state.selectedValues,
-        etag: dataSet.etag
-      };
-      dataSetApi().updateDataSet(namespace, id, dataSet.id, request)
-        .then(() => window.history.back());
-    }
-
     get isRefreshPreviewDisabled() {
       return this.disableSave() || this.state.previewList.length === 0;
     }
 
     render() {
       const {namespace, id} = this.props.workspace;
+      const wsPathPrefix = 'workspaces/' + namespace + '/' + id;
+      const cohortsPath = wsPathPrefix + '/cohorts';
+      const conceptSetsPath = wsPathPrefix + '/concepts';
       const {
         dataSet,
         dataSetTouched,
@@ -460,6 +480,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
                 <div style={styles.selectBoxHeader}>
                   Cohorts
+                  {plusLink('cohorts-link', cohortsPath)}
                 </div>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
@@ -489,6 +510,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
                   <div style={styles.selectBoxHeader}>
                     Concept Sets
+                    {plusLink('concept-sets-link', conceptSetsPath)}
                   </div>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
@@ -504,24 +526,29 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   </div>
                 </div>
                 <div style={{width: '40%'}}>
-                  <div style={{...styles.selectBoxHeader, display: 'flex'}}>
+                  <div style={styles.selectBoxHeader}>
                     <div>
                       Values
                     </div>
-                    <Clickable data-test-id='select-all'
-                               style={{marginLeft: 'auto', marginRight: '0.5rem'}}
-                               onClick={() => this.selectAllValues()}>
-                      Select All
-                    </Clickable>
+                    <div style={styles.selectAllContainer}>
+                      <CheckBox style={{height: 17, width: 17}}
+                                disabled={fp.isEmpty(valueSets)}
+                                data-test-id='select-all'
+                                onChange={() => this.selectAllValues()}
+                                checked={!this.selectAll} />
+                      <div style={{marginLeft: '0.25rem', fontSize: '13px', lineHeight: '17px'}}>
+                        {this.selectAll ? 'Select All' : 'Deselect All'}
+                      </div>
+                    </div>
                   </div>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {valuesLoading && <Spinner style={{position: 'relative',
                       top: '2rem', left: 'calc(50% - 36px)'}}/>}
                     {valueSets.map(valueSet =>
-                      <div key={valueSet.domain} style={{marginLeft: '0.5rem'}}>
-                        <div style={{fontSize: '13px', fontWeight: 600, color: 'black'}}>
+                      <div key={valueSet.domain}>
+                        <Subheader>
                           {fp.capitalize(valueSet.domain.toString())}
-                        </div>
+                        </Subheader>
                         {valueSet.values.items.map(domainValue =>
                           <ValueListItem data-test-id='value-list-items'
                             key={domainValue.value} domainValue={domainValue}
@@ -539,7 +566,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         </FadeBox>
         <FadeBox style={{marginTop: '1rem'}}>
           <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-            <div style={{...styles.selectBoxHeader, ...styles.refreshPreviewHeader}}>
+            <div style={styles.previewDataHeaderBox}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
               <div style={{display: 'flex', alignItems: 'flex-end'}}>
                 <div style={styles.previewDataHeader}>
@@ -551,7 +578,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                            style={{fontSize: '12px',
                              cursor: this.isRefreshPreviewDisabled ? 'not-allowed' : 'pointer',
                              fontWeight: 600, lineHeight: '15px',
-                             color: this.isRefreshPreviewDisabled ? colors.gray[4] : colors.blue[0]
+                             color: this.isRefreshPreviewDisabled ?
+                               colorWithWhiteness(colors.dark, 0.6) : colors.accent
                            }}>
                     Refresh Preview
                   </Clickable>
@@ -560,11 +588,11 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 based on the variable and value you selected above
               </div>
               </div>
-              <Button data-test-id='save-button' style={{marginRight: '1rem'}}
-                      onClick={this.editing ? () => this.updateDataSet() :
-                () => this.setState({openSaveModal: true})}
-                disabled={this.disableSave() || (this.editing && !dataSetTouched)}>
-                {this.editing ? 'UPDATE DATA SET' : 'SAVE DATA SET'}
+              <Button data-test-id='save-button'
+                onClick ={() => this.setState({openSaveModal: true})}
+                disabled={this.disableSave()}>
+                {this.editing ? !dataSetTouched ? 'Analyze' :
+                    'Update And Analyze' : 'Save And Analyze'}
               </Button>
             </div>
             {previewDataLoading && <div style={styles.warningMessage}>
@@ -575,23 +603,26 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             </div>}
             {previewList.length > 0 &&
               <div style={{display: 'flex', flexDirection: 'column'}}>
-                <div style={{display: 'flex', flexDirection: 'row'}}>
+                <div style={{display: 'flex', flexDirection: 'row', paddingTop: '0.5rem'}}>
                   {previewList.map(previewRow =>
                      <Clickable key={previewRow.domain}
-                               onClick={() =>
-                                 this.setState({selectedPreviewDomain: previewRow.domain})}
-                               style={{
-                                 lineHeight: '32px', fontSize: '18px',
-                                 fontWeight: (selectedPreviewDomain === previewRow.domain)
-                                     ? 600 : 400,
-                                 textDecoration:
-                                    (selectedPreviewDomain === previewRow.domain) ? 'underline' : ''
-                               }}>
-                       <div key={previewRow.domain}
-                           style={{
-                             marginLeft: '0.2rem', color: colors.blue[0], paddingRight: '3rem'}}>
-                         {previewRow.domain}
-                       </div>
+                          onClick={() =>
+                            this.setState({selectedPreviewDomain: previewRow.domain})}
+                            style={{
+                              marginLeft: '0.2rem', color: colors.accent,
+                              marginRight: '0.25rem', paddingBottom: '0.25rem',
+                              width: '7rem',
+                              borderBottom:
+                               (selectedPreviewDomain === previewRow.domain) ?
+                                 '4px solid ' + colors.accent : '',
+                              fontWeight: (selectedPreviewDomain === previewRow.domain)
+                               ? 600 : 400,
+                              fontSize: '18px',
+                              display: 'flex',
+                              justifyContent: 'center',
+                              lineHeight: '32px',
+                            }}>
+                       {previewRow.domain}
                      </Clickable>
                   )}
                 </div>
@@ -600,7 +631,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             }
             {previewList.length === 0 && !previewDataLoading &&
               <div style={styles.previewButtonBox}>
-                <div style={{color: colors.gray[4], fontSize: '20px', fontWeight: 400}}>
+                <div style={{color: colorWithWhiteness(colors.dark, 0.6),
+                  fontSize: '20px', fontWeight: 400}}>
                   Select cohorts, concept sets, and values above to generate a preview table
                 </div>
                 <Button data-test-id='preview-button' disabled={this.disableSave()}
@@ -618,6 +650,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                            selectedValues={selectedValues}
                                            workspaceNamespace={namespace}
                                            workspaceId={id}
+                                           dataSet={dataSet ? dataSet : undefined}
                                            closeFunction={() => {
                                              this.setState({openSaveModal: false});
                                            }}

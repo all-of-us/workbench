@@ -53,7 +53,7 @@ const styles = reactStyles({
     padding: 0,
     border: 0,
     fontSize: '14px',
-    color: colors.blue[0],
+    color: colors.accent,
     background: 'transparent',
     cursor: 'pointer',
   },
@@ -61,7 +61,7 @@ const styles = reactStyles({
     marginTop: 0,
     fontSize: '20px',
     fontWeight: 600,
-    color: '#262262',
+    color: colors.primary,
     overflow: 'auto',
   },
   description: {

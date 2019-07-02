@@ -4,7 +4,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
@@ -17,12 +16,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import javax.inject.Provider;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.Cohort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,18 +26,6 @@ import org.springframework.stereotype.Service;
 public class CloudStorageServiceImpl implements CloudStorageService {
 
   final Provider<WorkbenchConfig> configProvider;
-
-  private List<JSONObject> readJSONObjects(String filterType, String filterField) {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-    Bucket demoBucket = storage.get(getDemosBucketName());
-
-    return StreamSupport.stream(demoBucket.list().getValues().spliterator(), false)
-        .filter(blob -> blob.getBlobId().getName().endsWith(".json"))
-        .map(blob -> new JSONObject(new String(blob.getContent()).trim()))
-        .filter(jsonObject -> jsonObject.getString("type").equalsIgnoreCase(filterType))
-        .map(jsonObject -> jsonObject.getJSONObject(filterField))
-        .collect(Collectors.toList());
-  }
 
   @Autowired
   public CloudStorageServiceImpl(Provider<WorkbenchConfig> configProvider) {
@@ -71,40 +55,6 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public void copyAllDemoNotebooks(String workspaceBucket) {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-    Bucket demoBucket = storage.get(getDemosBucketName());
-    StreamSupport.stream(demoBucket.list().getValues().spliterator(), false)
-        .filter(blob -> blob.getBlobId().getName().endsWith(".ipynb"))
-        .map(
-            blob ->
-                ImmutablePair.of(
-                    blob.getBlobId(),
-                    BlobId.of(workspaceBucket, "notebooks/" + blob.getBlobId().getName())))
-        .forEach(pair -> copyBlob(pair.getLeft(), pair.getRight()));
-  }
-
-  @Override
-  public List<Cohort> readAllDemoCohorts() {
-    return readJSONObjects("cohort", "cohort").stream()
-        .map(
-            jsonObject -> {
-              Cohort cohort = new Cohort();
-              cohort.setName(jsonObject.getString("name"));
-              cohort.setDescription(jsonObject.getString("description"));
-              cohort.setCriteria(jsonObject.get("criteria").toString());
-              cohort.setType(jsonObject.getString("type"));
-              return cohort;
-            })
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public List<JSONObject> readAllDemoConceptSets() {
-    return readJSONObjects("concept_set", "concept_set");
-  }
-
-  @Override
   public List<Blob> getBlobList(String bucketName, String directory) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Iterable<Blob> blobList =
@@ -118,10 +68,6 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   String getImagesBucketName() {
     return configProvider.get().googleCloudStorageService.emailImagesBucketName;
-  }
-
-  private String getDemosBucketName() {
-    return configProvider.get().googleCloudStorageService.demosBucketName;
   }
 
   private String readToString(String bucketName, String objectPath) {

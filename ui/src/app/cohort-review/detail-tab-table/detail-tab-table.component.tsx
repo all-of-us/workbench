@@ -45,7 +45,7 @@ const styles = reactStyles({
   },
   columnHeader: {
     background: '#f4f4f4',
-    color: colors.purple[0],
+    color: colors.primary,
     fontWeight: 600,
   },
   columnBody: {
@@ -77,7 +77,7 @@ const styles = reactStyles({
   },
   sortIcon: {
     marginTop: '4px',
-    color: colors.blue[0],
+    color: colors.accent,
     fontSize: '0.5rem',
     float: 'right'
   },
@@ -99,7 +99,7 @@ const styles = reactStyles({
     width: '2rem',
   },
   headerStyle: {
-    color: colors.blue[0],
+    color: colors.primary,
     fontSize: '14px',
     fontWeight: 'bold',
     width: '20rem',
@@ -144,7 +144,7 @@ const styles = reactStyles({
     bottom: '14px',
     left: '100%',
     background: '#ffffff',
-    color: colors.blue[0],
+    color: colors.accent,
     boxSizing: 'content-box',
     float: 'right',
     position: 'relative',
@@ -169,12 +169,12 @@ const styles = reactStyles({
 const filterIcons = {
   active: {
     ...styles.filterIcon,
-    background: colors.green[0],
+    background: colors.success,
     color: colors.white,
   },
   default: {
     ...styles.filterIcon,
-    color: colors.purple[0],
+    color: colors.accent,
   }
 };
 

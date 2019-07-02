@@ -35,7 +35,7 @@ export function convertToResource(resource: FileDetail | Cohort | ConceptSet | D
   if (!resource.lastModifiedTime) {
     modifiedTime = new Date().toDateString();
   } else {
-    modifiedTime = resource.lastModifiedTime.toString();
+    modifiedTime = new Date(resource.lastModifiedTime).toString();
   }
   const newResource: RecentResource = {
     workspaceNamespace: workspaceNamespace,

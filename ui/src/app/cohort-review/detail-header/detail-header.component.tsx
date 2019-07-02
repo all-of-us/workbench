@@ -46,7 +46,7 @@ const styles = reactStyles({
     padding: 0,
     border: 0,
     fontSize: '14px',
-    color: colors.blue[0],
+    color: colors.accent,
     background: 'transparent',
     cursor: 'pointer',
   },
@@ -54,11 +54,11 @@ const styles = reactStyles({
     marginTop: 0,
     fontSize: '20px',
     fontWeight: 600,
-    color: colors.purple[0],
+    color: colors.primary,
   },
   description: {
     margin: '0.5rem 0',
-    color: colors.black[0],
+    color: colors.primary,
   },
   headerSection: {
     float: 'left',
@@ -80,7 +80,7 @@ const styles = reactStyles({
   },
   participantText: {
     fontSize: '14px',
-    color: colors.purple[0],
+    color: colors.primary,
   },
   filterHeader: {
     height: '38%',
@@ -92,7 +92,7 @@ const styles = reactStyles({
     margin: '0 4% 0 1%',
     padding: '5px 7px 0',
     fontSize: '12px',
-    color: colors.blue[0],
+    color: colors.accent,
     border: 0,
     borderBottom: 0,
     background: 'transparent',
@@ -112,8 +112,8 @@ const styles = reactStyles({
     padding: '0.5px 3.5px',
     margin: '6px 5px 0 0',
     fontSize: '10px',
-    color: colors.blue[0],
-    border: '1px solid ' + colors.blue[0],
+    color: colors.accent,
+    border: '1px solid ' + colors.accent,
     borderRadius: '3px',
     background: 'transparent',
     cursor: 'pointer',
@@ -143,8 +143,8 @@ const otherStyles = {
   },
   navBtnActive: {
     ...styles.navBtn,
-    color: colors.blue[0],
-    border: '1px solid ' + colors.blue[0],
+    color: colors.accent,
+    border: '1px solid ' + colors.accent,
     cursor: 'pointer',
   },
   navBtnDisabled: {

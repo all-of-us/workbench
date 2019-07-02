@@ -11,13 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
@@ -30,8 +27,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
-import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
@@ -42,13 +37,13 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.CopyNotebookRequest;
-import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.NotebookRename;
@@ -69,7 +64,6 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -102,7 +96,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final NotebooksService notebooksService;
   private final UserService userService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   WorkspacesController(
@@ -141,6 +135,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @VisibleForTesting
   public void setUserProvider(Provider<User> userProvider) {
     this.userProvider = userProvider;
+  }
+
+  @VisibleForTesting
+  void setWorkbenchConfigProvider(Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.workbenchConfigProvider = workbenchConfigProvider;
+  }
+
+  private String getRegisteredUserDomainEmail() {
+    ManagedGroupWithMembers registeredDomainGroup =
+        fireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
+    return registeredDomainGroup.getGroupEmail();
   }
 
   private static String generateRandomChars(String candidateChars, int length) {
@@ -257,8 +262,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
 
-    cloudStorageService.copyAllDemoNotebooks(fcWorkspace.getBucketName());
-
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         new org.pmiops.workbench.db.model.Workspace();
@@ -293,63 +296,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
 
-    org.pmiops.workbench.db.model.Workspace finalDbWorkspace = dbWorkspace;
-    cloudStorageService.readAllDemoCohorts().stream()
-        .map(
-            apiCohort ->
-                cohortFactory.createCohort(
-                    apiCohort, userProvider.get(), finalDbWorkspace.getWorkspaceId()))
-        .forEach(
-            dbCohort -> {
-              try {
-                dbCohort = cohortDao.save(dbCohort);
-              } catch (DataIntegrityViolationException e) {
-                throw new BadRequestException(
-                    String.format(
-                        "Cohort \"/%s/%s/%d\" already exists.",
-                        finalDbWorkspace.getWorkspaceNamespace(),
-                        finalDbWorkspace.getWorkspaceId(),
-                        dbCohort.getCohortId()));
-              }
-            });
-
-    List<JSONObject> demoConceptSets = cloudStorageService.readAllDemoConceptSets();
-    for (JSONObject conceptSet : demoConceptSets) {
-      ConceptSet dbConceptSet = new ConceptSet();
-
-      dbConceptSet.setName(conceptSet.getString("name"));
-      dbConceptSet.setCreator(userProvider.get());
-      dbConceptSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
-      dbConceptSet.setCreationTime(now);
-      dbConceptSet.setLastModifiedTime(now);
-      dbConceptSet.setVersion(1);
-      dbConceptSet.setParticipantCount(conceptSet.getInt("participant_count"));
-      dbConceptSet.setDomain(
-          CommonStorageEnums.domainToStorage(Domain.fromValue(conceptSet.getString("domain"))));
-      try {
-        List<Object> conceptIdsJSON = conceptSet.getJSONArray("concept_ids").toList();
-        Set<Long> conceptIds =
-            conceptIdsJSON.stream()
-                .map(Object::toString)
-                .map(Long::valueOf)
-                .collect(Collectors.toSet());
-        dbConceptSet.getConceptIds().addAll(conceptIds);
-      } catch (JSONException e) {
-        throw new ServerErrorException(
-            String.format("concept_ids cannot be read from %s", conceptSet.getString("name")));
-      }
-
-      try {
-        dbConceptSet = conceptSetDao.save(dbConceptSet);
-      } catch (DataIntegrityViolationException e) {
-        throw new ServerErrorException(
-            String.format(
-                "Concept Set \"/%s/%s/%d\" already exists.",
-                dbWorkspace.getWorkspaceNamespace(),
-                dbWorkspace.getWorkspaceId(),
-                dbConceptSet.getConceptSetId()));
-      }
-    }
     return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
@@ -596,7 +542,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      savedWorkspace = workspaceService.updateWorkspaceAcls(savedWorkspace, clonedRoles);
+      savedWorkspace =
+          workspaceService.updateWorkspaceAcls(
+              savedWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
@@ -628,7 +576,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       shareRolesMap.put(role.getEmail(), role.getRole());
     }
     // This automatically enforces the "canShare" permission.
-    dbWorkspace = workspaceService.updateWorkspaceAcls(dbWorkspace, shareRolesMap);
+    dbWorkspace =
+        workspaceService.updateWorkspaceAcls(
+            dbWorkspace, shareRolesMap, getRegisteredUserDomainEmail());
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
@@ -750,5 +700,34 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setItems(userRoles);
     return ResponseEntity.ok(resp);
+  }
+
+  @Override
+  public ResponseEntity<WorkspaceResponseListResponse> getPublishedWorkspaces() {
+    WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
+    response.setItems(workspaceService.getPublishedWorkspaces());
+    return ResponseEntity.ok(response);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
+  public ResponseEntity<EmptyResponse> publishWorkspace(
+      String workspaceNamespace, String workspaceId) {
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.getRequired(workspaceNamespace, workspaceId);
+
+    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
+  public ResponseEntity<EmptyResponse> unpublishWorkspace(
+      String workspaceNamespace, String workspaceId) {
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.getRequired(workspaceNamespace, workspaceId);
+
+    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 }

@@ -50,6 +50,7 @@ import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
+import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -69,6 +70,9 @@ public class DataSetController implements DataSetApiDelegate {
   private final WorkspaceService workspaceService;
 
   private static int NO_OF_PREVIEW_ROWS = 20;
+  private static String CONCEPT_SET = "conceptSet";
+  private static String COHORT = "cohort";
+
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   @Autowired private final CohortDao cohortDao;
@@ -154,7 +158,7 @@ public class DataSetController implements DataSetApiDelegate {
               now);
       return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(savedDataSet));
     } catch (DataIntegrityViolationException ex) {
-      throw new ConflictException("Data set with the same name already exist");
+      throw new ConflictException("Data set with the same name already exists");
     }
   }
 
@@ -228,8 +232,11 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(
         new DataSetCodeResponse()
             .code(
-                dataSetService.generateCodeFromQueryAndKernelType(
-                    kernelType, dataSet.getName(), bigQueryJobConfig))
+                dataSetService
+                    .generateCodeCellPerDomainFromQueryAndKernelType(
+                        kernelType, dataSet.getName(), bigQueryJobConfig)
+                    .stream()
+                    .collect(Collectors.joining("\n\n")))
             .kernelType(kernelType));
   }
 
@@ -393,8 +400,8 @@ public class DataSetController implements DataSetApiDelegate {
 
     Map<String, QueryJobConfiguration> queryList =
         dataSetService.generateQuery(dataSetExportRequest.getDataSetRequest());
-    String queriesAsStrings =
-        dataSetService.generateCodeFromQueryAndKernelType(
+    List<String> queriesAsStrings =
+        dataSetService.generateCodeCellPerDomainFromQueryAndKernelType(
             dataSetExportRequest.getKernelType(),
             dataSetExportRequest.getDataSetRequest().getName(),
             queryList);
@@ -402,7 +409,7 @@ public class DataSetController implements DataSetApiDelegate {
     if (dataSetExportRequest.getNewNotebook()) {
       notebookFile =
           new JSONObject()
-              .put("cells", new JSONArray().put(createNotebookCodeCellWithString(queriesAsStrings)))
+              .put("cells", new JSONArray())
               .put("metadata", metaData)
               // nbformat and nbformat_minor are the notebook major and minor version we are
               // creating.
@@ -410,8 +417,9 @@ public class DataSetController implements DataSetApiDelegate {
               // See https://nbformat.readthedocs.io/en/latest/api.html
               .put("nbformat", 4)
               .put("nbformat_minor", 2);
-    } else {
-      notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(queriesAsStrings));
+    }
+    for (String query : queriesAsStrings) {
+      notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(query));
     }
 
     notebooksService.saveNotebook(
@@ -430,7 +438,7 @@ public class DataSetController implements DataSetApiDelegate {
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     List<org.pmiops.workbench.db.model.DataSet> dataSets =
-        dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+        dataSetDao.findByWorkspaceIdAndInvalid(workspace.getWorkspaceId(), false);
     DataSetListResponse response = new DataSetListResponse();
 
     response.setItems(
@@ -439,6 +447,34 @@ public class DataSetController implements DataSetApiDelegate {
             .sorted(Comparator.comparing(DataSet::getName))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<Boolean> markDirty(
+      String workspaceNamespace, String workspaceId, MarkDataSetRequest markDataSetRequest) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    List<org.pmiops.workbench.db.model.DataSet> dbDataSetList = new ArrayList<>();
+    if (markDataSetRequest.getResourceType().equalsIgnoreCase(COHORT)) {
+      dbDataSetList = dataSetDao.findDataSetsByCohortSetId(markDataSetRequest.getId());
+    } else if (markDataSetRequest.getResourceType().equalsIgnoreCase(CONCEPT_SET)) {
+      dbDataSetList = dataSetDao.findDataSetsByConceptSetId(markDataSetRequest.getId());
+    }
+    dbDataSetList =
+        dbDataSetList.stream()
+            .map(
+                dataSet -> {
+                  dataSet.setInvalid(true);
+                  return dataSet;
+                })
+            .collect(Collectors.toList());
+    try {
+      dataSetDao.save(dbDataSetList);
+    } catch (OptimisticLockException e) {
+      throw new ConflictException("Failed due to concurrent data set modification");
+    }
+
+    return ResponseEntity.ok(true);
   }
 
   @Override
@@ -485,6 +521,8 @@ public class DataSetController implements DataSetApiDelegate {
       // TODO: add recent resource entry for data sets
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
+    } catch (DataIntegrityViolationException ex) {
+      throw new ConflictException("Data set with the same name already exists");
     }
 
     return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dbDataSet));
@@ -495,8 +533,22 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, Long dataSetId) {
     org.pmiops.workbench.db.model.DataSet dataSet =
         getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.READER);
-
     return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dataSet));
+  }
+
+  @Override
+  public ResponseEntity<Boolean> dataSetByIdExist(
+      String workspaceNamespace, String workspaceId, String resourceType, Long id) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    int countDataSet = 0;
+    if (resourceType.equals(COHORT)) {
+      countDataSet = dataSetDao.countByCohortSetIdContains(id);
+    } else if (resourceType.equals(CONCEPT_SET)) {
+      countDataSet = dataSetDao.countByConceptSetIdContains(id);
+    }
+    return ResponseEntity.ok(countDataSet > 0);
   }
 
   private JSONObject createNotebookCodeCellWithString(String cellInformation) {

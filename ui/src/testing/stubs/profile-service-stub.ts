@@ -96,11 +96,6 @@ export class ProfileServiceStub extends ProfileService {
     return Math.floor(new Date().getTime() / 1000);
   }
 
-  public submitTermsOfService(extraHttpRequestParams?: any): Observable<Profile> {
-    this.profile.termsOfServiceCompletionTime = this.now();
-    return Observable.from([this.profile]);
-  }
-
   public submitDemographicsSurvey(extraHttpRequestParams?: any): Observable<Profile> {
     this.profile.demographicSurveyCompletionTime = this.now();
     return Observable.from([this.profile]);

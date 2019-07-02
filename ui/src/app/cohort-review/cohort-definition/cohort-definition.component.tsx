@@ -16,7 +16,7 @@ const styles = reactStyles({
   defTitle: {
     fontSize: '16px',
     fontWeight: 600,
-    color: colors.purple[0]
+    color: colors.primary
   },
   wrapper: {
     width: '100%',
@@ -41,7 +41,7 @@ const styles = reactStyles({
   },
   groupBackground: {
     backgroundColor: '#E2E2EA',
-    color: colors.black[0],
+    color: colors.primary,
     padding: '0.3rem 0.6rem',
     margin: '0.7rem 0rem',
     display: 'inline-block'

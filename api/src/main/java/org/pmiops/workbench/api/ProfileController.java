@@ -504,14 +504,8 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> submitDemographicsSurvey() {
-    User user = userService.submitDemographicSurvey();
-    return getProfileResponse(saveUserWithConflictHandling(user));
-  }
-
-  @Override
-  public ResponseEntity<Profile> submitTermsOfService() {
-    User user = userService.submitTermsOfService();
-    return getProfileResponse(saveUserWithConflictHandling(user));
+    // TODO: RW-2517.
+    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
   }
 
   @Override

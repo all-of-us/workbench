@@ -9,7 +9,6 @@ import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,7 +17,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
@@ -30,7 +28,6 @@ import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cdr.model.CBCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
-import org.pmiops.workbench.cdr.model.StandardProjection;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -41,6 +38,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
@@ -229,6 +227,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       criteriaResponse.setItems(
           criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
     } else {
+      // TODO:Remove when new search is finished - freemabd
       List<Criteria> criteriaList;
       String matchExp = modifyKeywordMatch(term, domain);
       if (type == null) {
@@ -264,7 +263,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     return ResponseEntity.ok(criteriaResponse);
   }
 
-  // TODO:Remove when new search is finished - freemabd
   @Override
   public ResponseEntity<CriteriaListResponse> getDrugIngredientByConceptId(
       Long cdrVersionId, Long conceptId) {
@@ -309,52 +307,41 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> findCriteriaByDomainAndSearchTerm(
       Long cdrVersionId, String domain, String term, Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    List<CBCriteria> criteriaList = new ArrayList<>();
+    List<CBCriteria> criteriaList;
     int resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT).intValue();
-    List<StandardProjection> projections = cbCriteriaDao.findStandardProjectionByCode(domain, term);
-    boolean isStandard = projections.isEmpty() || projections.get(0).getStandard();
-    if (projections.isEmpty()) {
-      String modTerm = modifyTermMatch(term);
+    List<CBCriteria> exactMatchByCode = cbCriteriaDao.findExactMatchByCode(domain, term);
+    boolean isStandard = exactMatchByCode.isEmpty() || exactMatchByCode.get(0).getStandard();
+
+    if (!isStandard) {
       criteriaList =
-          cbCriteriaDao.findCriteriaByDomainAndSynonyms(
-              domain, isStandard, modTerm, new PageRequest(0, resultLimit));
-    }
-    if (criteriaList.isEmpty()) {
+          cbCriteriaDao.findCriteriaByDomainAndTypeAndCode(
+              domain,
+              exactMatchByCode.get(0).getType(),
+              isStandard,
+              term,
+              new PageRequest(0, resultLimit));
+
+      Map<Boolean, List<CBCriteria>> groups =
+          criteriaList.stream().collect(Collectors.partitioningBy(c -> c.getCode().equals(term)));
+      criteriaList = groups.get(true);
+      criteriaList.addAll(groups.get(false));
+
+    } else {
       criteriaList =
           cbCriteriaDao.findCriteriaByDomainAndCode(
               domain, isStandard, term, new PageRequest(0, resultLimit));
-    }
-    if (criteriaList.isEmpty()) {
-      criteriaList =
-          cbCriteriaDao.findCriteriaByDomainAndCode(
-              domain, !isStandard, term, new PageRequest(0, resultLimit));
-    }
-    if (DomainType.DRUG.equals(DomainType.fromValue(domain))) {
-      Map<Boolean, List<CBCriteria>> groups =
-          criteriaList.stream()
-              .collect(
-                  Collectors.partitioningBy(
-                      c -> c.getType().equals(CriteriaType.BRAND.toString())));
-      List<Long> conceptIds =
-          groups.get(true).stream()
-              .map(c -> Long.valueOf(c.getConceptId()))
-              .collect(Collectors.toList());
-      List<CBCriteria> ingredients = new ArrayList<>();
-      if (!conceptIds.isEmpty()) {
-        List<Integer> relationshipConceptIds =
-            cbCriteriaDao.findDrugConceptId2ByConceptId1(conceptIds);
-        ingredients =
-            cbCriteriaDao.findDrugIngredientByConceptId(
-                relationshipConceptIds.stream()
-                    .map(c -> String.valueOf(c))
-                    .collect(Collectors.toList()),
-                domain,
-                CriteriaType.RXNORM.toString());
+      if (criteriaList.isEmpty() && !term.contains(".")) {
+        String modTerm = modifyTermMatch(term);
+        criteriaList =
+            cbCriteriaDao.findCriteriaByDomainAndSynonyms(
+                domain, isStandard, modTerm, new PageRequest(0, resultLimit));
       }
-      criteriaList =
-          Stream.concat(groups.get(false).stream(), ingredients.stream())
-              .sorted(Comparator.comparing(CBCriteria::getLongCount).reversed())
-              .collect(Collectors.toList());
+      if (criteriaList.isEmpty() && !term.contains(".")) {
+        String modTerm = modifyTermMatch(term);
+        criteriaList =
+            cbCriteriaDao.findCriteriaByDomainAndSynonyms(
+                domain, !isStandard, modTerm, new PageRequest(0, resultLimit));
+      }
     }
     CriteriaListResponse criteriaResponse =
         new CriteriaListResponse()
@@ -558,16 +545,26 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             .flatMap(sg -> sg.getItems().stream())
             .flatMap(sgi -> sgi.getSearchParameters().stream())
             .collect(Collectors.toList());
-    // currently elasticsearch doesn't implement Temporal/BP/DEC
-    return allGroups.stream().anyMatch(sg -> sg.getTemporal())
-        || allParams.stream()
-            .anyMatch(
-                sp ->
-                    TreeSubType.BP.toString().equals(sp.getSubtype())
-                        || TreeSubType.DEC.toString().equals(sp.getSubtype()))
-        || allParams.stream()
-            // TODO(RW-2404): Support these queries.
-            .anyMatch(sp -> TreeType.DRUG.toString().equals(sp.getType()));
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      return allGroups.stream().anyMatch(sg -> sg.getTemporal())
+          || allParams.stream()
+              .anyMatch(
+                  sp ->
+                      CriteriaSubType.BP.toString().equals(sp.getSubtype())
+                          || CriteriaType.DECEASED.toString().equals(sp.getType()));
+    } else {
+      // TODO:Remove when new search is finished - freemabd
+      // currently elasticsearch doesn't implement Temporal/BP/DEC
+      return allGroups.stream().anyMatch(sg -> sg.getTemporal())
+          || allParams.stream()
+              .anyMatch(
+                  sp ->
+                      TreeSubType.BP.toString().equals(sp.getSubtype())
+                          || TreeSubType.DEC.toString().equals(sp.getSubtype()))
+          || allParams.stream()
+              // TODO(RW-2404): Support these queries.
+              .anyMatch(sp -> TreeType.DRUG.toString().equals(sp.getType()));
+    }
   }
 
   // TODO:Remove freemabd

@@ -1,10 +1,13 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.isEmpty;
+
 import com.google.api.client.util.Sets;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -91,11 +94,14 @@ public final class CriteriaLookupUtil {
     // which will eventually hold the results (for now, we mark them with an empty set).
     for (SearchGroup sg : Iterables.concat(req.getIncludes(), req.getExcludes())) {
       for (SearchGroupItem sgi : sg.getItems()) {
+        // Validate that search params exist
+        from(isEmpty())
+            .test(sgi.getSearchParameters())
+            .throwException("Bad Request: search parameters are empty.");
         for (SearchParameter param : sgi.getSearchParameters()) {
           if (!param.getGroup() && !param.getAncestorData()) {
             continue;
           }
-
           CriteriaLookupUtil.FullTreeType treeKey =
               CriteriaLookupUtil.FullTreeType.fromParam(param);
           if (param.getAncestorData()) {
@@ -184,7 +190,7 @@ public final class CriteriaLookupUtil {
     }
 
     // Finally, we unpack the results and map them back to the original SearchParameters.
-    ImmutableMap.Builder<SearchParameter, Set<Long>> builder = ImmutableMap.builder();
+    Map<SearchParameter, Set<Long>> builder = new HashMap<>();
     for (SearchGroup sg : Iterables.concat(req.getIncludes(), req.getExcludes())) {
       for (SearchGroupItem sgi : sg.getItems()) {
         for (SearchParameter param : sgi.getSearchParameters()) {
@@ -203,7 +209,7 @@ public final class CriteriaLookupUtil {
         }
       }
     }
-    return builder.build();
+    return builder;
   }
 
   private void putLeavesOnParent(

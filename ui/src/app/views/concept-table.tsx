@@ -3,10 +3,9 @@ import {Clickable, Link} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase, toggleIncludes} from 'app/utils';
 import {reactStyles} from 'app/utils';
-import * as Color from 'color';
 import {Concept} from 'generated/fetch/api';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
@@ -23,16 +22,17 @@ const styles = reactStyles({
     minWidth: '170px',
     maxWidth: '170px',
     fontStyle: 'italic',
-    color: colors.gray[2]
+    color: colors.primary
   },
   akaIcon: {
     marginLeft: 10,
     verticalAlign: 'middle',
-    color: colors.blue[3]
+    color: colorWithWhiteness(colors.accent, 0.5)
   },
   highlighted: {
-    color: colors.green[3],
-    backgroundColor: Color(colors.green[3]).alpha(0.2).toString(),
+    color: colorWithWhiteness(colors.success, -0.4),
+    backgroundColor: colorWithWhiteness(colors.success, 0.7),
+    padding: '0 0.25rem',
     display: 'inline-block'
   }
 });
