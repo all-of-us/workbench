@@ -4,7 +4,14 @@ import * as React from 'react';
 import {Clickable} from 'app/components/buttons';
 import {Header} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
+import {Spinner} from 'app/components/spinners';
+import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {WorkspacePermissions} from 'app/utils/workspace-permissions';
+import {WorkspaceCard} from 'app/views/workspace-list';
+import {ErrorResponse, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   navPanel: {
@@ -16,14 +23,14 @@ const styles = reactStyles({
     marginTop: '0.5rem', borderStyle: 'none'
   },
   iconStyling: {
-    color: '#262262', marginRight: '0.5rem', marginLeft: '0.5rem'
+    color: colors.primary, marginRight: '0.5rem', marginLeft: '0.5rem'
   },
   menuLink: {
-    color: '#216FB4', fontSize: 14, fontWeight: 600, display: 'flex',
+    color: colors.accent, fontSize: 14, fontWeight: 600, display: 'flex',
     flexDirection: 'row', alignItems: 'center', padding: '0.35rem 0', borderRadius: '3px'
   },
   divider: {
-    width: '100%', backgroundColor: '#262262', borderWidth: '0px', height: '1px',
+    width: '100%', backgroundColor: colors.primary, borderWidth: '0px', height: '1px',
     marginBottom: '0.5rem'
   },
   menuLinkSelected: {
@@ -59,21 +66,66 @@ const LibraryTab: React.FunctionComponent<{
   };
 
 export const WorkspaceLibrary = withUserProfile()
-(class extends React.Component<{}, {currentTab: {title: string, icon: string}}> {
+(class extends React.Component<
+  {profileState: { profile: Profile, reload: Function } },
+  {currentTab: {title: string, icon: string}, errorText: string,
+    workspaceList: WorkspacePermissions[], workspacesLoading: boolean}> {
   constructor(props) {
     super(props);
     this.state = {
-      currentTab: libraryTabEnums.PUBLISHED_WORKSPACES
+      currentTab: libraryTabEnums.PUBLISHED_WORKSPACES,
+      errorText: '',
+      workspaceList: [],
+      workspacesLoading: true
     };
   }
 
+  componentDidMount() {
+    this.reloadPublishedWorkspaces();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // Reload libraries when switching tabs
+    if (this.state.currentTab !== prevState.currentTab) {
+      console.log('here');
+      this.updateListedWorkspaces(this.state.currentTab);
+    }
+  }
+
+  updateListedWorkspaces(tabEnum) {
+    switch (tabEnum) {
+      case tabEnum === libraryTabEnums.PUBLISHED_WORKSPACES:
+        this.reloadPublishedWorkspaces();
+        break;
+      default:
+        break;
+    }
+  }
+
+  async reloadPublishedWorkspaces() {
+    this.setState({workspacesLoading: true});
+    try {
+      const workspacesReceived = await workspacesApi().getPublishedWorkspaces();
+      workspacesReceived.items.sort(
+        (a, b) => a.workspace.name.localeCompare(b.workspace.name));
+      this.setState({workspaceList: workspacesReceived.items
+          .map(w => new WorkspacePermissions(w))});
+      this.setState({workspacesLoading: false});
+    } catch (e) {
+      const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
+      this.setState({errorText: response.message});
+    }
+  }
+
   render() {
+    const {profile} = this.props.profileState;
+    const {currentTab, workspaceList, workspacesLoading} = this.state;
     return <div style={{display: 'flex', flexDirection: 'row', height: '100%'}}>
       <div style={styles.navPanel}>
         <div style={{display: 'flex', flexDirection: 'column'}}>
           {libraryTabs.map((tab, i) => {
             return <React.Fragment key={i}>
-              <LibraryTab icon={tab.icon} title={tab.title} selected={this.state.currentTab === tab}
+              <LibraryTab icon={tab.icon} title={tab.title} selected={currentTab === tab}
                           onClick={() => this.setState({currentTab: tab})}/>
                 {i !== libraryTabs.length - 1 &&
                 <hr style={{width: '100%', margin: '0.5rem 0'}}/>}
@@ -83,18 +135,31 @@ export const WorkspaceLibrary = withUserProfile()
       </div>
       <div style={{padding: '1rem', width: '100%'}}>
         <Header>RESEARCHER WORKBENCH WORKSPACE LIBRARY</Header>
-        <div style={{color: '#262262', fontSize: 16, marginTop: '1rem'}}>
+        <div style={{color: colors.primary, fontSize: 16, marginTop: '1rem'}}>
           Search through featured and public workspaces.
         </div>
         <div style={{display: 'flex', flexDirection: 'column', marginTop: '2rem'}}>
           <div style={{display: 'flex', flexDirection: 'row'}}>
-            <ClrIcon shape={this.state.currentTab.icon} style={styles.iconStyling}
+            <ClrIcon shape={currentTab.icon} style={styles.iconStyling}
                      class='is-solid' size={24}/>
-            <div style={{color: '#262262', fontSize: 18, fontWeight: 600}}>
-              {this.state.currentTab.title}
+            <div style={{color: colors.primary, fontSize: 18, fontWeight: 600}}>
+              {currentTab.title}
             </div>
           </div>
           <hr style={styles.divider}/>
+          {currentTab === libraryTabEnums.PUBLISHED_WORKSPACES &&
+          <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
+            {workspacesLoading ?
+              (<Spinner style={{width: '100%', marginTop: '0.5rem'}}/>) :
+              (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
+                {workspaceList.map(wp => {
+                  return <WorkspaceCard key={wp.workspace.name}
+                                        wp={wp}
+                                        userEmail={profile.username}
+                                        reload={() => {this.reloadPublishedWorkspaces(); }}/>;
+                })}
+              </div>)}
+          </div>}
         </div>
       </div>
     </div>;
