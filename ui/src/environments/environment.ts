@@ -7,5 +7,5 @@ export const environment: Environment = {
   debug: true,
   enableJupyterLab: true,
   enableDatasetBuilder: true,
-  enableCBListSearch: true,
+  enableCBListSearch: false,
 };

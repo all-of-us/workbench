@@ -29,6 +29,7 @@ export const styles = {
 };
 
 const hoverAlpha = 0.3;
+const disabledAlpha = 0.4;
 
 const buttonVariants = {
   primary: {
@@ -37,7 +38,7 @@ const buttonVariants = {
       borderRadius: '0.3rem',
       backgroundColor: colors.primary, color: colors.white,
     },
-    disabledStyle: {backgroundColor: colorWithLightness(colors.dark, 0.4)},
+    disabledStyle: {backgroundColor: colorWithLightness(colors.dark, disabledAlpha)},
     hover: {backgroundColor: colorWithLightness(colors.primary, hoverAlpha)}
   },
   secondary: {
@@ -48,8 +49,8 @@ const buttonVariants = {
       color: colors.primary,
     },
     disabledStyle: {
-      borderColor: colorWithLightness(colors.dark, 0.4),
-      color: colorWithLightness(colors.dark, .4)
+      borderColor: colorWithLightness(colors.dark, disabledAlpha),
+      color: colorWithLightness(colors.dark, disabledAlpha)
     },
     hover: {backgroundColor: colors.primary, color: '#ffffff'}
   },
@@ -61,8 +62,8 @@ const buttonVariants = {
       color: '#0077b7'
     },
     disabledStyle: {
-      borderColor: colorWithLightness(colors.dark, 0.4),
-      color: colorWithLightness(colors.dark, .4)
+      borderColor: colorWithLightness(colors.dark, disabledAlpha),
+      color: colorWithLightness(colors.dark, disabledAlpha)
     },
     hover: {color: colors.accent}
   },
@@ -72,7 +73,7 @@ const buttonVariants = {
       borderRadius: '0.2rem',
       backgroundColor: colors.primary, color: colors.white
     },
-    disabledStyle: {backgroundColor: colorWithLightness(colors.dark, 0.4)},
+    disabledStyle: {backgroundColor: colorWithLightness(colors.dark, disabledAlpha)},
     hover: {backgroundColor: 'rgba(255,255,255,0.3)'}
   },
   secondaryOnDarkBackground: {
@@ -81,7 +82,7 @@ const buttonVariants = {
       borderRadius: '0.2rem',
       backgroundColor: '#0079b8', color: '#ffffff'
     },
-    disabledStyle: {backgroundColor: colorWithLightness(colors.dark, 0.4)},
+    disabledStyle: {backgroundColor: colorWithLightness(colors.dark, disabledAlpha)},
     hover: {backgroundColor: '#50ACE1'}
   },
   purplePrimary: {
@@ -89,7 +90,7 @@ const buttonVariants = {
       ...styles.baseNew,
       backgroundColor: colors.primary, color: colors.white,
     },
-    disabledStyle: {backgroundColor: colorWithLightness(colors.dark, 0.4)},
+    disabledStyle: {backgroundColor: colorWithLightness(colors.dark, disabledAlpha)},
     hover: {backgroundColor: colorWithLightness(colors.primary, hoverAlpha)}
   },
   purpleSecondary: {
@@ -100,8 +101,8 @@ const buttonVariants = {
       color: colors.primary,
     },
     disabledStyle: {
-      borderColor: colorWithLightness(colors.dark, 0.4),
-      color: colorWithLightness(colors.dark, 0.4)
+      borderColor: colorWithLightness(colors.dark, disabledAlpha),
+      color: colorWithLightness(colors.dark, disabledAlpha)
     },
     hover: {backgroundColor: colorWithLightness(colors.primary, hoverAlpha),
       color: '#fff', borderColor: colorWithLightness(colors.primary, hoverAlpha)}
@@ -111,7 +112,7 @@ const buttonVariants = {
       color: colors.accent
     },
     disabledStyle: {
-      color: colorWithLightness(colors.dark, 0.4)
+      color: colorWithLightness(colors.dark, disabledAlpha)
     }
   }
 };
@@ -147,7 +148,7 @@ export const MenuItem = ({tooltip = '', disabled = false, children, ...props}) =
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'start',
         fontSize: 12, minWidth: 125, height: 32,
-        color: disabled ? colorWithLightness(colors.dark, 0.4) : 'black',
+        color: disabled ? colorWithLightness(colors.dark, disabledAlpha) : 'black',
         padding: '0 12px',
         cursor: disabled ? 'not-allowed' : 'pointer'
       }}
