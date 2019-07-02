@@ -10,7 +10,7 @@ import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import { ProfileRegistrationStepStatus } from 'app/views/profile-registration-step-status';
@@ -22,13 +22,13 @@ import {Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   h1: {
-    color: colors.purple[0],
+    color: colors.primary,
     fontSize: 20,
     fontWeight: 500,
     lineHeight: '24px'
   },
   inputLabel: {
-    color: colors.purple[0],
+    color: colors.primary,
     fontSize: 14, lineHeight: '18px',
     marginBottom: 6
   },
@@ -196,7 +196,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 <ClrIcon
                   shape='info-standard'
                   className='is-solid'
-                  style={{marginLeft: 10, verticalAlign: 'middle', color: colors.blue[0]}}
+                  style={{marginLeft: 10, verticalAlign: 'middle', color: colors.accent}}
                 />
               </TooltipTrigger>
             </React.Fragment>,
@@ -229,13 +229,13 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 <ClrIcon
                   shape='times'
                   size='24'
-                  style={{color: colors.red, marginBottom: 17}}
+                  style={{color: colors.accent, marginBottom: 17}}
                 />
               </Clickable>
             </div>
           )}
           <div style={{display: 'flex', width: 520, alignItems: 'center'}}>
-            <div style={{border: `1px solid ${colors.gray[4]}`, flex: 1}}/>
+            <div style={{border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`, flex: 1}}/>
             <Clickable
               onClick={() => this.setState(fp.update(
                 ['profileEdits', 'institutionalAffiliations'],
@@ -246,13 +246,13 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 shape='plus-circle'
                 size='19'
                 style={{
-                  color: colors.purple[0],
+                  color: colors.accent,
                   margin: '0 14px',
                   flex: 'none', verticalAlign: 'text-bottom' // text-bottom makes it centered...?
                 }}
               />
             </Clickable>
-            <div style={{border: `1px solid ${colors.gray[4]}`, flex: 1}}/>
+            <div style={{border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`, flex: 1}}/>
           </div>
           <div style={{marginTop: 100}}>
             <Button
@@ -295,7 +295,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             isComplete={RegistrationTasksMap['complianceTraining'].isComplete(profile)}
             completeStep={RegistrationTasksMap['complianceTraining'].onClick} />
 
-          <ProfileRegistrationStepStatus
+          {serverConfigStore.getValue().enableEraCommons && <ProfileRegistrationStepStatus
             title='ERA Commons Account'
             wasBypassed={!!profile.eraCommonsBypassTime}
             incompleteButtonText='Link'
@@ -303,16 +303,22 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             isComplete={RegistrationTasksMap['eraCommons'].isComplete(profile)}
             completeStep={RegistrationTasksMap['eraCommons'].onClick} >
             <div>
-              <div> Username: </div>
-              <div> { profile.eraCommonsLinkedNihUsername } </div>
-              <div> Link Expiration: </div>
-              <div>
-                { moment.unix(profile.eraCommonsLinkExpireTime)
-                  .format('MMMM Do, YYYY, h:mm:ss A') }
-              </div>
+              {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
+                <div> Username: </div>
+                <div> { profile.eraCommonsLinkedNihUsername } </div>
+              </React.Fragment>}
+              {profile.eraCommonsLinkExpireTime != null &&
+              //  Firecloud returns eraCommons link expiration as 0 if there is no linked account.
+              profile.eraCommonsLinkExpireTime !== 0
+              && <React.Fragment>
+                <div> Link Expiration: </div>
+                <div>
+                  { moment.unix(profile.eraCommonsLinkExpireTime)
+                    .format('MMMM Do, YYYY, h:mm:ss A') }
+                </div>
+              </React.Fragment>}
             </div>
-          </ProfileRegistrationStepStatus>
-
+          </ProfileRegistrationStepStatus>}
           {serverConfigStore.getValue().enableDataUseAgreement && <ProfileRegistrationStepStatus
             title='Data Use Agreement'
             wasBypassed={!!profile.dataUseAgreementBypassTime}

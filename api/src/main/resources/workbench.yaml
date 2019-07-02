@@ -1467,6 +1467,25 @@ paths:
           schema:
             $ref: "#/definitions/ConceptSet"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/survey-concept-sets/{surveyName}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - in: path
+        name: surveyName
+        type: string
+        required: true
+    get:
+      tags:
+        - conceptSets
+      description: Returns all survey concept sets in a workspace
+      operationId: "getSurveyConceptSetsInWorkspace"
+      responses:
+        200:
+          description: A list of concept sets of type surveys.
+          schema:
+            $ref: "#/definitions/ConceptSetListResponse"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -1594,6 +1613,51 @@ paths:
           description: information about the surveys
           schema:
             $ref: "#/definitions/SurveysResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/{surveyName}/surveyQuestions:
+    get:
+      tags:
+        - concepts
+      description: >
+        Returns survey questions and answers in the workspace's CDR version
+      operationId: "getSurveyQuestions"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: path
+          name: surveyName
+          required: true
+          type: string
+      responses:
+        200:
+          description: information about the surveys
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/SurveyQuestionsResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyAnswer:
+    get:
+      tags:
+        - concepts
+      description: >
+        Returns with all the answer for survey Question
+      operationId: "getSurveyAnswers"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: query
+          name: questionConceptId
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: List of Survey Details with Answer
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/SurveyAnswerResponse"
 
 ### Data set ############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
@@ -1845,6 +1909,9 @@ definitions:
       enableDataUseAgreement:
         type: boolean
         description: Feature flag for enabling data use agreement
+      enableEraCommons:
+        type: boolean
+        description: Feature flag for enabling eRA commons
 
   # Mirrors BillingProjectMembership from fireCloud.yaml
   BillingProjectMembership:
@@ -2410,6 +2477,10 @@ definitions:
           here; it makes sense to specify concepts in these domains in cohort criteria, but
           there isn't much value in having concept sets defined for them.
         $ref: "#/definitions/Domain"
+      survey:
+        description: >
+          Survey
+        $ref: "#/definitions/Surveys"
       description:
         type: string
       creator:
@@ -2756,6 +2827,30 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/SurveyModule"
+
+  SurveyQuestionsResponse:
+    type: object
+    properties:
+      question:
+        type: string
+      conceptId:
+        type: integer
+        format: int64
+
+  SurveyAnswerResponse:
+    type: object
+    properties:
+      answer:
+        type: string
+      conceptId:
+        type: integer
+        format: int64
+      participationCount:
+        type: integer
+        format: int64
+      percentAnswered:
+        type: number
+        format: double
 
   CreateAccountRequest:
     type: object

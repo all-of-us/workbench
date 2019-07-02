@@ -48,6 +48,7 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -129,6 +130,19 @@ public class ConceptSetsControllerTest {
           .domainId("Condition")
           .countValue(7890L)
           .prevalence(0.9F)
+          .conceptSynonyms(new ArrayList<String>());
+
+  private static final Concept CLIENT_SURVEY_CONCEPT_1 =
+      new Concept()
+          .conceptId(987L)
+          .conceptName("a concept")
+          .standardConcept(true)
+          .conceptCode("conceptA")
+          .conceptClassId("classId")
+          .vocabularyId("V1")
+          .domainId("Observation")
+          .countValue(123L)
+          .prevalence(0.2F)
           .conceptSynonyms(new ArrayList<String>());
 
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
@@ -372,6 +386,34 @@ public class ConceptSetsControllerTest {
                 .getBody()
                 .getItems())
         .isEmpty();
+  }
+
+  @Test
+  public void testGetSurveyConceptSet() {
+    ConceptSet surveyConceptSet = makeSurveyConceptSet1();
+    assertThat(
+            conceptSetsController
+                .getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, surveyConceptSet.getId())
+                .getBody())
+        .isEqualTo(surveyConceptSet);
+    assertThat(
+            conceptSetsController
+                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
+                .getBody()
+                .getItems())
+        .contains(surveyConceptSet.concepts(null));
+    assertThat(
+            conceptSetsController
+                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
+                .getBody()
+                .getItems())
+        .isEmpty();
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testGetSurveyConceptSetWrongWorkspace() {
+    ConceptSet conceptSet = makeSurveyConceptSet1();
+    conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, conceptSet.getId());
   }
 
   @Test
@@ -675,6 +717,24 @@ public class ConceptSetsControllerTest {
     request.setEtag(etag);
     request.setRemovedIds(ImmutableList.copyOf(conceptIds));
     return request;
+  }
+
+  private ConceptSet makeSurveyConceptSet1(Long... addedIds) {
+    ConceptSet conceptSet = new ConceptSet();
+    conceptSet.setDescription("description 1");
+    conceptSet.setName("Survey Concept set 1");
+    conceptSet.setDomain(Domain.OBSERVATION);
+    conceptSet.setSurvey(Surveys.THE_BASICS);
+    CreateConceptSetRequest request =
+        new CreateConceptSetRequest()
+            .conceptSet(conceptSet)
+            .addAddedIdsItem(CLIENT_SURVEY_CONCEPT_1.getConceptId());
+    if (addedIds.length > 0) {
+      request = request.addedIds(ImmutableList.copyOf(addedIds));
+    }
+    return conceptSetsController
+        .createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request)
+        .getBody();
   }
 
   private ConceptSet makeConceptSet1(Long... addedIds) {

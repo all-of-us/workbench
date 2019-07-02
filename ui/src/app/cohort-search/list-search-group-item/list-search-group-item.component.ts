@@ -34,7 +34,7 @@ export class ListSearchGroupItemComponent implements OnInit {
     this.updateGroup();
     try {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
-      const item = mapGroupItem(this.item);
+      const item = mapGroupItem(this.item, false);
       const request = <SearchRequest>{
         includes: [],
         excludes: [],

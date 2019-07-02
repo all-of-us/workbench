@@ -8,7 +8,7 @@ import * as React from 'react';
 
 const styles = reactStyles({
   headerLinks: {
-    color: colors.blue[0],
+    color: colors.accent,
     fontSize: '20px',
     lineHeight: '24px',
     height: '1.5rem',
@@ -18,7 +18,7 @@ const styles = reactStyles({
     textDecoration: 'none'
   },
   infoIcon: {
-    color: colors.blue[0],
+    color: colors.accent,
     cursor: 'pointer',
     marginLeft: '0.2rem',
     height: '20px',

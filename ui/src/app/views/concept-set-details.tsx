@@ -33,17 +33,17 @@ const styles = reactStyles({
     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingBottom: '1.5rem'
   },
   conceptSetTitle: {
-    color: colors.blue[7], fontSize: 20, fontWeight: 600, marginBottom: '0.5rem',
+    color: colors.primary, fontSize: 20, fontWeight: 600, marginBottom: '0.5rem',
     display: 'flex', flexDirection: 'row'
   },
   conceptSetMetadataWrapper: {
     flexDirection: 'column', alignItems: 'space-between', marginLeft: '0.5rem'
   },
   conceptSetData: {
-    display: 'flex', flexDirection: 'row', color: colors.black[0], fontWeight: 600
+    display: 'flex', flexDirection: 'row', color: colors.primary, fontWeight: 600
   },
   buttonBoxes: {
-    color: colors.blue[0], borderColor: colors.blue[0], marginBottom: '0.3rem'
+    color: colors.accent, borderColor: colors.accent, marginBottom: '0.3rem'
   }
 });
 
@@ -230,7 +230,7 @@ export const ConceptSetDetails =
                                           style={{marginTop: '0.1rem'}}/>
                     </Clickable>
                   </div>
-                  <div style={{marginBottom: '1.5rem', color: colors.black[0]}}
+                  <div style={{marginBottom: '1.5rem', color: colors.primary}}
                        data-test-id='concept-set-description'>
                     {conceptSet.description}</div>
                 </React.Fragment>}
@@ -247,10 +247,6 @@ export const ConceptSetDetails =
                       onClick={() => navigateByUrl('workspaces/' + ns + '/' +
                         wsid + '/concepts' + '?domain=' + conceptSet.domain)}>
                 <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
-              </Button>
-              <Button type='secondaryLight' style={styles.buttonBoxes}
-                      onClick={() => navigate(['workspaces', ns, wsid, 'concepts', 'sets'])}>
-                <ClrIcon shape='grid-view' style={{marginRight: '0.3rem'}}/>Return to concept sets
               </Button>
             </div>
           </div>

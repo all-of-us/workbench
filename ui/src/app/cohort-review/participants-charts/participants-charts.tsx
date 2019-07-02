@@ -65,13 +65,13 @@ const styles = reactStyles({
     whiteSpace: 'nowrap',
     fontSize: '10px',
     fontWeight: 'bold',
-    color: colors.gray[0],
+    color: colors.primary,
   },
   count: {
     paddingLeft: '0.2rem',
     fontSize: '10px',
     fontWeight: 'bold',
-    color: colors.gray[0],
+    color: colors.primary,
   },
   containerMargin: {
     margin: 0,
@@ -84,7 +84,7 @@ const styles = reactStyles({
   },
   chartHeading: {
     textAlign: 'center',
-    color: colors.gray[0],
+    color: colors.primary,
     fontSize: '12px',
     fontWeight: 'bold',
     whiteSpace: 'nowrap',
@@ -93,7 +93,7 @@ const styles = reactStyles({
     paddingBottom: '0.5rem',
     fontSize: '16px',
     fontWeight: 600,
-    color: colors.purple[0],
+    color: colors.primary,
     textTransform: 'capitalize',
     lineHeight: '22px',
   }

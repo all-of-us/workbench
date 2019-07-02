@@ -1,5 +1,14 @@
 import {TreeSubType, TreeType} from 'generated';
-import {CriteriaType, DomainType, SearchGroup, SearchGroupItem, SearchParameter, SearchRequest} from 'generated/fetch';
+import {
+  CriteriaType,
+  DomainType,
+  SearchGroup,
+  SearchGroupItem,
+  SearchParameter,
+  SearchRequest,
+  TemporalMention,
+  TemporalTime
+} from 'generated/fetch';
 import {List} from 'immutable';
 import {DOMAIN_TYPES} from './constant';
 import {idsInUse} from './search-state.service';
@@ -286,8 +295,8 @@ export function parseCohortDefinition(json: string) {
         item.status = 'active';
         return item;
       });
-      grp.mention = grp.mention ? grp.mention : '';
-      grp.time = grp.time ? grp.time : '';
+      grp.mention = grp.mention ? grp.mention : TemporalMention.ANYMENTION;
+      grp.time = grp.time ? grp.time : TemporalTime.DURINGSAMEENCOUNTERAS;
       grp.timeValue = grp.timeValue ? grp.timeValue : 0;
       grp.timeFrame = grp.timeFrame ? grp.timeFrame : '';
       grp.status = 'active';
@@ -311,19 +320,28 @@ export function mapRequest(sr: any) {
 }
 
 export function mapGroup(group: any) {
+  const {id, temporal, mention, time, timeValue} = group;
   const items = group.items.reduce((acc, it) => {
     if (it.status === 'active') {
-      acc.push(mapGroupItem(it));
+      acc.push(mapGroupItem(it, temporal));
     }
     return acc;
   }, []);
-  return <SearchGroup>{id: group.id, items, temporal: false};
+  let searchGroup = <SearchGroup>{id, items, temporal};
+  if (temporal) {
+    searchGroup = {...searchGroup, mention, time, timeValue};
+  }
+  return searchGroup;
 }
 
-export function mapGroupItem(item: any) {
-  const {id, type, modifiers} = item;
+export function mapGroupItem(item: any, temporal: boolean) {
+  const {id, type, modifiers, temporalGroup} = item;
   const searchParameters = item.searchParameters.map(mapParameter);
-  return <SearchGroupItem>{id, type, searchParameters, modifiers};
+  const searchGroupItem = <SearchGroupItem>{id, type, searchParameters, modifiers};
+  if (temporal) {
+    searchGroupItem.temporalGroup = temporalGroup;
+  }
+  return searchGroupItem;
 }
 
 export function mapParameter(sp: any) {

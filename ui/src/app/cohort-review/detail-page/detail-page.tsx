@@ -53,7 +53,7 @@ const styles = reactStyles({
     flex: 1,
     paddingTop: '0.35rem',
     paddingBottom: '0.35rem',
-    color: colors.gray[0],
+    color: colors.primary,
   },
   sidebarContentOpen: {
     width: '385px',

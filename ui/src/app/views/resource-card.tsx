@@ -28,7 +28,7 @@ const styles = reactStyles({
     boxShadow: '0 0 0 0'
   },
   cardName: {
-    fontSize: '18px', fontWeight: 500, lineHeight: '22px', color: colors.blue[0],
+    fontSize: '18px', fontWeight: 500, lineHeight: '22px', color: colors.accent,
     cursor: 'pointer', wordBreak: 'break-all', textOverflow: 'ellipsis',
     overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3,
     WebkitBoxOrient: 'vertical', textDecoration: 'none'
@@ -38,7 +38,7 @@ const styles = reactStyles({
     WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'
   },
   lastModified: {
-    color: colors.gray[0],
+    color: colors.primary,
     fontSize: '11px',
     display: 'inline-block',
     lineHeight: '14px',
@@ -66,16 +66,16 @@ const styles = reactStyles({
 
 const resourceTypeStyles = reactStyles({
   cohort: {
-    backgroundColor: colors.yellow[0]
+    backgroundColor: colors.resourceCardHighlights.cohort
   },
   conceptSet: {
-    backgroundColor: colors.purple[2]
+    backgroundColor: colors.resourceCardHighlights.conceptSet
   },
   notebook: {
-    backgroundColor: colors.green[0]
+    backgroundColor: colors.resourceCardHighlights.notebook
   },
   dataSet: {
-    backgroundColor: colors.blue[2]
+    backgroundColor: colors.resourceCardHighlights.dataSet
   }
 });
 
