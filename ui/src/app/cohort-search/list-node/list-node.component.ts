@@ -155,7 +155,7 @@ export class ListNodeComponent implements OnInit, OnDestroy {
       const func = () => {
         item.expanded = true;
         expand();
-      }
+      };
       if (this.searchTerms.length > 1 && this.isMatch(item.name)) {
         item.name = highlightMatches([this.searchTerms], item.name, false);
         expand();
