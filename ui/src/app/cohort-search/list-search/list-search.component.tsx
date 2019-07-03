@@ -4,11 +4,11 @@ import {domainToTitle} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
-import {SpinnerOverlay} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType} from 'generated/fetch';
+import {CriteriaType, DomainType} from 'generated/fetch';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -50,6 +50,11 @@ const styles = reactStyles({
     color: 'rgb(98, 164, 32)',
     opacity: 0.4,
     cursor: 'not-allowed'
+  },
+  brandIcon: {
+    marginRight: '0.4rem',
+    color: '#9a9a9a',
+    cursor: 'pointer'
   },
   treeIcon: {
     color: '#0086C1',
@@ -126,6 +131,7 @@ interface State {
   loading: boolean;
   results: string;
   sourceMatch: any;
+  ingredients: any;
 }
 
 export const ListSearch = withCurrentWorkspace()(
@@ -138,6 +144,7 @@ export const ListSearch = withCurrentWorkspace()(
         loading: false,
         results: 'all',
         sourceMatch: undefined,
+        ingredients: {}
       };
     }
 
@@ -214,6 +221,39 @@ export const ListSearch = withCurrentWorkspace()(
       this.props.hierarchy(row);
     }
 
+    showIngredients = (row: any) => {
+      const {ingredients} = this.state;
+      if (ingredients[row.id]) {
+        if (ingredients[row.id].error) {
+          ingredients[row.id] = undefined;
+        } else {
+          ingredients[row.id].open = !ingredients[row.id].open;
+        }
+        this.setState({ingredients});
+      } else {
+        try {
+          ingredients[row.id] = {open: false, loading: true, error: false, items: []};
+          this.setState({ingredients});
+          const {workspace: {cdrVersionId}} = this.props;
+          cohortBuilderApi()
+            .getDrugIngredientByConceptId(+cdrVersionId, row.conceptId)
+            .then(resp => {
+              ingredients[row.id] = {
+                open: true,
+                loading: false,
+                error: false,
+                items: resp.items
+              };
+              this.setState({ingredients});
+            });
+        } catch (error) {
+          console.error(error);
+          ingredients[row.id] = {open: true, loading: false, error: true, items: []};
+          this.setState({ingredients});
+        }
+      }
+    }
+
     isSelected = (row: any) => {
       const {selections} = this.props;
       const paramId = this.getParamId(row);
@@ -224,9 +264,60 @@ export const ListSearch = withCurrentWorkspace()(
       return `param${row.conceptId ? (row.conceptId + row.code) : row.id}`;
     }
 
+    renderRow(row: any, child: boolean) {
+      const {ingredients} = this.state;
+      const attributes = row.hasAttributes;
+      const brand = row.type === CriteriaType.BRAND;
+      const selected = !attributes && !brand && this.isSelected(row);
+      const unselected = !attributes && !brand && !this.isSelected(row);
+      const open = ingredients[row.id] && ingredients[row.id].open;
+      const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
+      const columnStyle = child ?
+        {...styles.columnBody, paddingLeft: '1.25rem'} : styles.columnBody;
+      return <tr>
+          <td style={columnStyle}>
+            {row.selectable && <div style={{...styles.selectDiv}}>
+              {attributes &&
+              <ClrIcon style={styles.attrIcon}
+                       shape='slider' dir='right' size='20'
+                       onClick={() => this.launchAttributes(row)}/>
+              }
+              {selected &&
+              <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
+              }
+              {unselected &&
+              <ClrIcon style={styles.selectIcon}
+                       shape='plus-circle' size='16'
+                       onClick={() => this.selectItem(row)}/>
+              }
+              {brand && !loadingIngredients &&
+              <ClrIcon style={styles.brandIcon}
+                       shape={'angle ' + (open ? 'down' : 'right')} size='20'
+                       onClick={() => this.showIngredients(row)}/>
+              }
+              {loadingIngredients && <Spinner size={16}/>}
+            </div>}
+            <div style={{...styles.nameDiv}}>
+              <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
+            </div>
+          </td>
+          <td style={styles.columnBody}>{row.type}</td>
+          <td style={styles.columnBody}>
+            {row.count > -1 && row.count.toLocaleString()}
+          </td>
+          <td style={{...styles.columnBody, padding: '0.2rem'}}>
+            {row.hasHierarchy &&
+            <i className='pi pi-sitemap'
+               style={styles.treeIcon}
+               onClick={() => this.showHierarchy(row)}/>
+            }
+          </td>
+        </tr>;
+    }
+
     render() {
       const {wizard: {domain}} = this.props;
-      const {data, error, loading, results, sourceMatch} = this.state;
+      const {data, error, ingredients, loading, results, sourceMatch} = this.state;
       return <div style={{overflow: 'auto'}}>
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
@@ -273,37 +364,23 @@ export const ListSearch = withCurrentWorkspace()(
             </thead>
             <tbody className='p-datatable-tbody'>
               {data.map((row, r) => {
-                return <tr key={r}>
-                  <td style={styles.columnBody}>
-                    {row.selectable && <div style={{...styles.selectDiv}}>
-                      {row.hasAttributes &&
-                        <ClrIcon style={styles.attrIcon}
-                          shape='slider' dir='right' size='20'
-                          onClick={() => this.launchAttributes(row)}/>
-                      }
-                      {!row.hasAttributes && this.isSelected(row) &&
-                        <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
-                      }
-                      {!row.hasAttributes && !this.isSelected(row) &&
-                        <ClrIcon style={styles.selectIcon}
-                          shape='plus-circle' size='16'
-                          onClick={() => this.selectItem(row)}/>
-                      }
-                    </div>}
-                    <div style={{...styles.nameDiv}}>
-                      <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
-                    </div>
-                  </td>
-                  <td style={styles.columnBody}>{row.type}</td>
-                  <td style={styles.columnBody}>{row.count.toLocaleString()}</td>
-                  <td style={{...styles.columnBody, padding: '0.2rem'}}>
-                    {row.hasHierarchy &&
-                      <i className='pi pi-sitemap'
-                        style={styles.treeIcon}
-                        onClick={() => this.showHierarchy(row)}/>
-                    }
-                  </td>
-                </tr>;
+                const open = ingredients[row.id] && ingredients[row.id].open;
+                const err = ingredients[row.id] && ingredients[row.id].error;
+                return <React.Fragment key={r}>
+                  {this.renderRow(row, false)}
+                  {open && !err && ingredients[row.id].items.map((item, i) => {
+                    return <React.Fragment key={i}>{this.renderRow(item, true)}</React.Fragment>;
+                  })}
+                  {open && err && <tr>
+                    <td colSpan={4}>
+                      <div style={{...styles.error, marginTop: 0}}>
+                        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+                          shape='exclamation-triangle' size='22'/>
+                        Sorry, the request cannot be completed.
+                      </div>
+                    </td>
+                  </tr>}
+                </React.Fragment>;
               })}
             </tbody>
           </table>}
