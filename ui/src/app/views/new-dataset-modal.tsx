@@ -19,7 +19,6 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
 import {
   DataSet,
   DataSetRequest,
