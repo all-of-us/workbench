@@ -149,9 +149,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       } else {
         await dataSetApi().createDataSet(workspaceNamespace, workspaceId, request);
       }
-      if (!this.state.exportToNotebook) {
-        window.history.back();
-      } else {
+      if (this.state.exportToNotebook) {
         await dataSetApi().exportToNotebook(
           workspaceNamespace, workspaceId,
           {
@@ -163,9 +161,9 @@ class NewDataSetModal extends React.Component<Props, State> {
         // Open notebook in a new tab and return back to the Data tab
         const notebookUrl = '\\workspaces\\' + workspaceNamespace + '\\' + workspaceId +
           '\\notebooks\\' + this.state.notebookName + '.ipynb';
-        window.history.back();
         window.open(notebookUrl);
       }
+      window.history.back();
     } catch (e) {
       if (e.status === 409) {
         this.setState({conflictDataSetName: true, loading: false});
