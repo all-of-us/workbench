@@ -1,10 +1,10 @@
-import * as React from 'react';
 import * as Cookies from 'js-cookie';
+import * as React from 'react';
+
 import {Button} from 'app/components/buttons';
 import {CheckBox} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import colors from 'app/styles/colors';
-
 
 export interface Props {
   onCancel: Function;
@@ -28,13 +28,13 @@ export class ConfirmPlaygroundModeModal extends React.Component<Props, State> {
   }
 
   toggleChecked() {
-    let newState = !this.state.checked;
+    const newState = !this.state.checked;
     this.setState({checked: newState});
     Cookies.set(ConfirmPlaygroundModeModal.DO_NOT_SHOW_AGAIN, String(newState));
   }
 
   render() {
-    return <Modal onRequestClose={() => {this.props.onCancel();}}>
+    return <Modal onRequestClose={() => { this.props.onCancel(); }}>
       <ModalTitle>Playground Mode</ModalTitle>
       <ModalBody>
         <p style={{color: colors.primary}}>
@@ -47,14 +47,18 @@ export class ConfirmPlaygroundModeModal extends React.Component<Props, State> {
         </p>
       </ModalBody>
       <ModalFooter style={{alignItems: 'center'}}>
-        <CheckBox checked={this.state.checked} onChange={() => {this.toggleChecked();}} />
+        <CheckBox checked={this.state.checked}
+                  onChange={() => { this.toggleChecked(); }} />
         <label style={{marginLeft: '8px', marginRight: 'auto', color: colors.primary}}>
           Don't show again
         </label>
-        <Button type='secondary' style={{margin: '0 10px'}} onClick={() => {this.props.onCancel();}}>
+        <Button type='secondary'
+                style={{margin: '0 10px'}}
+                onClick={() => { this.props.onCancel(); }}>
           Cancel
         </Button>
-        <Button type='primary' onClick={() => {this.props.onContinue();}}>
+        <Button type='primary'
+                onClick={() => { this.props.onContinue(); }}>
           Continue
         </Button>
       </ModalFooter>

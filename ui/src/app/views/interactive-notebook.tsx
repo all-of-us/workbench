@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
-import * as React from 'react';
 import * as Cookies from 'js-cookie';
+import * as React from 'react';
 
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -124,14 +124,14 @@ export const InteractiveNotebook = withCurrentWorkspace()(
     private startEditMode() {
       if (this.canWrite()) {
         this.setState({userRequestedExecutableNotebook: true});
-        this.runCluster(() => {this.navigateEditMode()});
+        this.runCluster(() => { this.navigateEditMode(); });
       }
     }
 
     private startPlaygroundMode() {
       if (this.canWrite()) {
         this.setState({userRequestedExecutableNotebook: true});
-        this.runCluster(() => {this.navigatePlaygroundMode()});
+        this.runCluster(() => { this.navigatePlaygroundMode(); });
       }
     }
 
@@ -188,7 +188,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(
                 </div>
                 <div style={Object.assign({}, styles.navBarItem,
                   this.canWrite() ? styles.clickable : styles.disabled)}
-                     onClick={() => {this.onPlaygroundModeClick();}}>
+                     onClick={() => { this.onPlaygroundModeClick(); }}>
                   <div style={{...styles.navBarIcon, fill: '#216FB4', marginBottom: '5px'}}>
                     <PlaygroundModeIcon />
                   </div>
@@ -203,11 +203,13 @@ export const InteractiveNotebook = withCurrentWorkspace()(
               (<SpinnerOverlay/>)}
           </div>
           {this.state.showPlaygroundModeModal &&
-            <ConfirmPlaygroundModeModal onCancel={() => {this.setState({showPlaygroundModeModal: false})}}
-                                        onContinue={() => {
-                                          this.setState({showPlaygroundModeModal: false});
-                                          this.startPlaygroundMode()
-                                        }}/>}
+            <ConfirmPlaygroundModeModal
+              onCancel={() => {
+                this.setState({showPlaygroundModeModal: false}); }}
+              onContinue={() => {
+                this.setState({showPlaygroundModeModal: false});
+                this.startPlaygroundMode();
+              }}/>}
         </div>
       );
     }
