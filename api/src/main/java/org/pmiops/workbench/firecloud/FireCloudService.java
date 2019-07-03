@@ -80,6 +80,8 @@ public interface FireCloudService {
 
   boolean isUserMemberOfGroup(String email, String groupName);
 
+  String staticNotebooksConvert(byte[] notebook);
+
   /**
    * Fetches the status of the currently-authenticated user's linkage to NIH's eRA Commons system.
    *

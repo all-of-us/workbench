@@ -80,6 +80,7 @@ import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
+import {InteractiveNotebookComponent} from './views/interactive-notebook';
 import {ToolTipComponent} from './views/tooltip/component';
 
 
@@ -153,6 +154,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ErrorHandlerComponent,
     InitialErrorComponent,
     NewNotebookModalComponent,
+    InteractiveNotebookComponent,
     NotebookListComponent,
     NotebookRedirectComponent,
     PageTemplateSignedOutComponent,

@@ -1,4 +1,5 @@
 import { Inject, NgModule } from '@angular/core';
+import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
 import {bindApiClients} from 'app/services/swagger-fetch-clients';
 import * as portableFetch from 'portable-fetch';
 
@@ -6,6 +7,10 @@ import {
   Configuration as FetchConfiguration,
   FetchAPI,
 } from 'generated/fetch';
+
+import {
+  Configuration as LeoConfiguration
+} from 'notebooks-generated';
 
 
 const FETCH_API_REF = 'fetchApi';
@@ -29,7 +34,10 @@ const FETCH_API_REF = 'fetchApi';
   }]
 })
 export class FetchModule {
-  constructor(conf: FetchConfiguration, @Inject(FETCH_API_REF) fetchApi: FetchAPI) {
+  constructor(conf: FetchConfiguration,
+    leoConf: LeoConfiguration,
+    @Inject(FETCH_API_REF) fetchApi: FetchAPI) {
     bindApiClients(conf, fetchApi);
+    notebooksBindApiClients(leoConf, fetchApi);
   }
 }

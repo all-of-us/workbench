@@ -47,6 +47,7 @@ import org.pmiops.workbench.model.CopyNotebookRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.NotebookRename;
+import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -685,6 +686,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     return ResponseEntity.ok(fileDetail);
+  }
+
+  @Override
+  public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
+      String workspace, String workspaceName, String notebookName) {
+    ReadOnlyNotebookResponse response =
+        new ReadOnlyNotebookResponse()
+            .html(notebooksService.getReadOnlyHtml(workspace, workspaceName, notebookName));
+    return ResponseEntity.ok(response);
   }
 
   @Override

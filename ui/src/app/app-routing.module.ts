@@ -30,6 +30,7 @@ import {WorkspaceComponent} from './views/workspace/component';
 
 import {environment} from 'environments/environment';
 import {BreadcrumbType, NavStore} from './utils/navigation';
+import {InteractiveNotebookComponent} from './views/interactive-notebook';
 
 
 declare let gtag: Function;
@@ -122,6 +123,14 @@ const routes: Routes = [
                     component: NotebookRedirectComponent,
                     data: {
                       pathElementForTitle: 'nbName',  // use the (urldecoded) captured value nbName
+                      breadcrumb: BreadcrumbType.Notebook,
+                      minimizeChrome: true
+                    }
+                  }, {
+                    path: 'preview/:nbName',
+                    component: InteractiveNotebookComponent,
+                    data: {
+                      pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
                       minimizeChrome: true
                     }

@@ -7,6 +7,7 @@ import * as React from 'react';
 export interface EditComponentProps {
   disabled: boolean;
   style: object;
+  enableHoverEffect: boolean;
 }
 
 export interface EditComponentState {
@@ -23,7 +24,7 @@ const defaultStyle = {
 
 const hoverStyle = {...defaultStyle, fill: '#83C3EC'};
 
-const disabledStyle = {...defaultStyle, fill: '#C3C3C3'};
+const disabledStyle = {...defaultStyle, cursor: 'not-allowed', fill: '#C3C3C3'};
 
 export class EditComponentReact extends React.Component<EditComponentProps, EditComponentState> {
 
@@ -35,11 +36,15 @@ export class EditComponentReact extends React.Component<EditComponentProps, Edit
   }
 
   mouseOver(): void {
-    this.setState({style: {...hoverStyle, ...this.props.style}});
+    if (this.props.enableHoverEffect) {
+      this.setState({style: {...hoverStyle, ...this.props.style}});
+    }
   }
 
   mouseLeave(): void {
-    this.setState({style: {...defaultStyle, ...this.props.style}});
+    if (this.props.enableHoverEffect) {
+      this.setState({style: {...defaultStyle, ...this.props.style}});
+    }
   }
 
   render() {

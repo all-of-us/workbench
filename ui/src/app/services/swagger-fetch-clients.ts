@@ -45,7 +45,6 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-
 let frozen = false;
 function checkFrozen() {
   if (frozen) {

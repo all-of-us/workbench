@@ -16,6 +16,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.GoogleCloudLocators;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -79,7 +80,7 @@ public class NotebooksServiceImpl implements NotebooksService {
       String toWorkspaceNamespace,
       String toWorkspaceName,
       String newNotebookName) {
-    newNotebookName = appendSuffixIfNeeded(newNotebookName);
+    newNotebookName = withNotebookExtension(newNotebookName);
     GoogleCloudLocators fromNotebookLocators =
         getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
     GoogleCloudLocators newNotebookLocators =
@@ -144,7 +145,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             originalName,
             workspaceNamespace,
             workspaceName,
-            appendSuffixIfNeeded(newName));
+            withNotebookExtension(newName));
     deleteNotebook(workspaceNamespace, workspaceName, originalName);
 
     return fileDetail;
@@ -154,11 +155,15 @@ public class NotebooksServiceImpl implements NotebooksService {
   public JSONObject getNotebookContents(String bucketName, String notebookName) {
     try {
       return cloudStorageService.getFileAsJson(
-          bucketName, "notebooks/".concat(notebookName.concat(".ipynb")));
+          bucketName, "notebooks/".concat(withNotebookExtension(notebookName)));
     } catch (IOException e) {
       throw new ServerErrorException(
           "Failed to get notebook " + notebookName + " from bucket " + bucketName);
     }
+  }
+
+  private String withNotebookExtension(String notebookName) {
+    return notebookName.endsWith(".ipynb") ? notebookName : notebookName.concat(".ipynb");
   }
 
   @Override
@@ -169,22 +174,21 @@ public class NotebooksServiceImpl implements NotebooksService {
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
   }
 
-  private String appendSuffixIfNeeded(String filename) {
-    if (!filename.matches("^.+\\.ipynb")) {
-      return filename + ".ipynb";
-    }
+  @Override
+  public String getReadOnlyHtml(
+      String workspaceNamespace, String workspaceName, String notebookName) {
+    String bucketName =
+        fireCloudService
+            .getWorkspace(workspaceNamespace, workspaceName)
+            .getWorkspace()
+            .getBucketName();
 
-    return filename;
-  }
-
-  private class GoogleCloudLocators {
-    public final BlobId blobId;
-    public final String fullPath;
-
-    public GoogleCloudLocators(BlobId blobId, String fullPath) {
-      this.blobId = blobId;
-      this.fullPath = fullPath;
-    }
+    // We need to send a byte array so the ApiClient attaches the body as is instead
+    // of serializing it through Gson which it will do for Strings.
+    // The default Gson serializer does not work since it strips out some null fields
+    // which are needed for nbconvert
+    return fireCloudService.staticNotebooksConvert(
+        getNotebookContents(bucketName, notebookName).toString().getBytes());
   }
 
   private GoogleCloudLocators getNotebookLocators(
