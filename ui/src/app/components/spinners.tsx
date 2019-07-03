@@ -1,7 +1,7 @@
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
+import * as Color from 'color';
 import * as React from 'react';
-import * as Color from 'Color';
 
 const styles = reactStyles({
   overlay: {
