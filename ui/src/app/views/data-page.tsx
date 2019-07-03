@@ -5,8 +5,10 @@ import * as React from 'react';
 import {CardButton, TabButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {
@@ -38,14 +40,16 @@ const styles = {
   resourceTypeButtonLast: {
     marginRight: '0rem'
   },
-  cardHeaderText: {
-    color: '#2691D0',
-    fontSize: '20px',
-    marginRight: '0.5rem',
-    marginTop: '0.5rem'
+  cardHeaderText: (disabled) => {
+    return {
+      color: disabled ? colorWithWhiteness(colors.dark, 0.4) : colors.accent,
+      fontSize: '20px',
+      marginRight: '0.5rem',
+      marginTop: '0.5rem'
+    };
   },
   cardText: {
-    color: '#000000',
+    color: colors.primary,
     fontSize: '14px',
     lineHeight: '22px'
   },
@@ -156,8 +160,12 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
   }
 
   render() {
-    const {namespace, id} = this.props.workspace;
+    const {accessLevel, namespace, id} = this.props.workspace;
     const {activeTab, isLoading, resourceList} = this.state;
+
+    const writePermission = accessLevel === WorkspaceAccessLevel.OWNER ||
+      accessLevel === WorkspaceAccessLevel.WRITER;
+
     const filteredList = resourceList.filter((resource) => {
       if (activeTab === Tabs.SHOWALL) {
         return true;
@@ -172,49 +180,64 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
         <h2 style={{marginTop: 0}}>Data</h2>
-        <div style={{color: '#000000', fontSize: '14px'}}>{descriptions.data}</div>
+        <div style={{color: colors.primary, fontSize: '14px'}}>{descriptions.data}</div>
         <div style={styles.cardButtonArea}>
-          <CardButton style={styles.resourceTypeButton} onClick={() => {
-            navigate(['workspaces', namespace, id,  'cohorts', 'build']);
-          }}>
-            <div style={styles.cardHeader}>
-              <h2 style={styles.cardHeaderText}>Cohorts</h2>
-              <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
-            </div>
-            <div style={styles.cardText}>
-              {descriptions.cohorts}
-            </div>
-          </CardButton>
-          <CardButton style={styles.resourceTypeButton}
-                      onClick={() => {
-                        navigate(['workspaces', namespace, id,  'concepts']);
-                      }}>
-            <div style={styles.cardHeader}>
-              <h2 style={styles.cardHeaderText}>Concept Sets</h2>
-              <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
-            </div>
-            <div style={styles.cardText}>
-              {descriptions.conceptSets}
-            </div>
-          </CardButton>
-          <CardButton
-            style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
-            onClick={() => {
-              navigate(['workspaces', namespace, id, 'data', 'data-sets']);
-            }}>
-            <div style={styles.cardHeader}>
-              <h2 style={styles.cardHeaderText}>Datasets</h2>
-              <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
-            </div>
-            <div style={styles.cardText}>
-              {descriptions.datasets}
-            </div>
-          </CardButton>
+          <TooltipTrigger content={!writePermission &&
+          `Write permission required to create cohorts`} side='top'>
+            <CardButton style={styles.resourceTypeButton} disabled={!writePermission}
+                        onClick={() => {
+                          navigate(['workspaces', namespace, id,  'cohorts', 'build']);
+                        }}>
+              <div style={styles.cardHeader}>
+                <h2 style={styles.cardHeaderText(!writePermission)}>Cohorts</h2>
+                <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
+              </div>
+              <div style={styles.cardText}>
+                {descriptions.cohorts}
+              </div>
+            </CardButton>
+          </TooltipTrigger>
+          <TooltipTrigger content={!writePermission &&
+          `Write permission required to create concept sets`} side='top'>
+            <CardButton style={styles.resourceTypeButton}
+                        disabled={!writePermission}
+                        onClick={() => {
+                          navigate(['workspaces', namespace, id,  'concepts']);
+                        }}>
+              <div style={styles.cardHeader}>
+                <h2 style={styles.cardHeaderText(!writePermission)}>Concept Sets</h2>
+                <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
+              </div>
+              <div style={styles.cardText}>
+                {descriptions.conceptSets}
+              </div>
+            </CardButton>
+          </TooltipTrigger>
+          <TooltipTrigger content={!writePermission &&
+          `Write permission required to create data sets`} side='top'>
+            <CardButton
+              style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
+              disabled={!writePermission}
+              onClick={() => {
+                navigate(['workspaces', namespace, id, 'data', 'data-sets']);
+              }}>
+              <div style={styles.cardHeader}>
+                <h2 style={styles.cardHeaderText(!writePermission)}>Datasets</h2>
+                <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
+              </div>
+              <div style={styles.cardText}>
+                {descriptions.datasets}
+              </div>
+            </CardButton>
+          </TooltipTrigger>
         </div>
       </FadeBox>
       <FadeBox style={{marginTop: '1rem'}}>
         <div style={styles.tabContainer}>
-          <h2 style={{margin: 0, color: '#2F2E7E', fontSize: '16px', fontWeight: 600}}>Show:</h2>
+          <h2 style={{margin: 0,
+            color: colors.primary,
+            fontSize: '16px',
+            fontWeight: 600}}>Show:</h2>
           <TabButton active={activeTab === Tabs.SHOWALL} onClick={() => {
             this.setState({
               activeTab: Tabs.SHOWALL
@@ -237,7 +260,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           }} data-test-id='view-only-data-sets'>Datasets</TabButton>
         </div>
         <div style={{
-          borderBottom: '1px solid #525A65',
+          borderBottom: `1px solid ${colors.dark}`,
           marginLeft: '-1rem',
           marginRight: '-1rem',
           opacity: 0.24

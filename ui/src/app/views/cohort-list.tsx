@@ -17,6 +17,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 
 import {CardButton} from 'app/components/buttons';
+import colors from 'app/styles/colors';
 import {navigate} from 'app/utils/navigation';
 import * as React from 'react';
 
@@ -31,7 +32,7 @@ const styles = reactStyles({
   },
 
   cohortsHeader: {
-    color: '#2F2E7E',
+    color: colors.primary,
     fontSize: '20px',
     lineHeight: '24px',
     fontWeight: 600,
@@ -45,7 +46,7 @@ const styles = reactStyles({
   },
 
   infoIcon: {
-    color: '#2691D0',
+    color: colors.accent,
     cursor: 'pointer',
     marginLeft: '0.2rem',
     height: '16px',

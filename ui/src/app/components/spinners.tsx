@@ -1,3 +1,4 @@
+import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
 import * as React from 'react';
 
@@ -12,7 +13,7 @@ const styles = reactStyles({
     display: 'flex', borderRadius: 4, padding: '0.5rem'
   },
   darkBackground: {
-    stroke: '#fff',
+    stroke: colors.white,
     strokeOpacity: 0.6
   }
 });

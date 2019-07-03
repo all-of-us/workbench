@@ -254,9 +254,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             </Clickable>
             <div style={{border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`, flex: 1}}/>
           </div>
-          <div style={{marginTop: 100}}>
-            <Button
-              type='purpleSecondary'
+          <div style={{marginTop: 100, display: 'flex'}}>
+            <Button type='link'
               onClick={() => this.setState({profileEdits: profile})}
             >
               Discard Changes
