@@ -22,14 +22,13 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.TreeSubType;
-import org.pmiops.workbench.model.TreeType;
 
 /**
  * Utility for conversion of Cohort Builder request into Elasticsearch filters. Instances of this
@@ -47,9 +46,9 @@ public final class ElasticFilters {
 
   private static Map<String, String> NON_NESTED_FIELDS =
       ImmutableMap.of(
-          TreeSubType.GEN.toString(), "gender_concept_id",
-          TreeSubType.RACE.toString(), "race_concept_id",
-          TreeSubType.ETH.toString(), "ethnicity_concept_id");
+          CriteriaType.GENDER.toString(), "gender_concept_id",
+          CriteriaType.RACE.toString(), "race_concept_id",
+          CriteriaType.ETHNICITY.toString(), "ethnicity_concept_id");
 
   private final CriteriaLookupUtil criteriaLookupUtil;
 
@@ -119,7 +118,7 @@ public final class ElasticFilters {
         String conceptField =
             "events." + (param.getStandard() ? "concept_id" : "source_concept_id");
         if (isNonNestedSchema(param)) {
-          conceptField = NON_NESTED_FIELDS.get(param.getSubtype());
+          conceptField = NON_NESTED_FIELDS.get(param.getType());
         }
         Set<String> leafConceptIds = toleafConceptIds(ImmutableList.of(param));
         BoolQueryBuilder b = QueryBuilders.boolQuery();
@@ -255,8 +254,8 @@ public final class ElasticFilters {
   }
 
   private static boolean isNonNestedSchema(SearchParameter param) {
-    CriteriaType paramType = CriteriaType.valueOf(param.getType());
-    return TreeType.DEMO.equals(paramType);
+    DomainType domainType = DomainType.valueOf(param.getDomain());
+    return DomainType.PERSON.equals(domainType);
   }
 
   private Set<String> toleafConceptIds(List<SearchParameter> params) {

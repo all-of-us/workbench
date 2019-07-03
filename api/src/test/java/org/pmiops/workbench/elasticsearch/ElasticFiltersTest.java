@@ -764,6 +764,7 @@ public class ElasticFiltersTest {
             .type(CriteriaType.AGE.toString())
             .group(false)
             .ancestorData(false)
+            .standard(true)
             .addAttributesItem(
                 new Attribute()
                     .name(AttrName.AGE)
@@ -786,15 +787,17 @@ public class ElasticFiltersTest {
   }
 
   @Test
-  public void testAgeAndVisitQuery() {
+  public void testAgeAndEthnicityQuery() {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
     Object left = now.minusYears(34).minusYears(1).toLocalDate();
     Object right = now.minusYears(20).toLocalDate();
     SearchParameter ageParam =
         new SearchParameter()
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.AGE.toString())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.AGE.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .addAttributesItem(
                 new Attribute()
                     .name(AttrName.AGE)
@@ -804,9 +807,11 @@ public class ElasticFiltersTest {
     SearchParameter ethParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.ETH.toString())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.ETHNICITY.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(Long.parseLong(conceptId));
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
