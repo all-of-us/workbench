@@ -270,8 +270,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     if (configProvider.get().cohortbuilder.enableListSearch) {
       final List<CBCriteria> criteriaList =
-          cbCriteriaDao.findDrugIngredientByConceptId(
-              String.valueOf(conceptId), DomainType.DRUG.toString());
+          cbCriteriaDao.findDrugIngredientByConceptId(String.valueOf(conceptId));
       criteriaResponse.setItems(
           criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
       return ResponseEntity.ok(criteriaResponse);

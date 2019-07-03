@@ -72,15 +72,6 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(
       value =
-          "select * from cb_criteria where domain_id = :domain and type = :type and code regexp :parentCodeRegex and is_group = 0 and is_selectable = 1",
-      nativeQuery = true)
-  List<CBCriteria> findCriteriaLeavesByDomainAndTypeAndParentCodeRegex(
-      @Param("domain") String domain,
-      @Param("type") String type,
-      @Param("parentCodeRegex") String parentCodeRegex);
-
-  @Query(
-      value =
           "select cr from CBCriteria cr where domain_id = ?1 and type = ?2 and subtype = ?3 and is_group = 0 and is_selectable = 1")
   List<CBCriteria> findCriteriaLeavesByDomainAndTypeAndSubtype(
       String domain, String type, String subtype);
@@ -167,13 +158,13 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(
       value =
-          "select cr.concept_id_2 from cb_criteria_relationship cr join concept c1 on (cr.concept_id_2 = c1.concept_id and cr.concept_id_1 in (:conceptIds) and c1.concept_class_id = 'Ingredient')",
+          "select * from cb_criteria c "
+              + "inner join ( "
+              + "select cr.concept_id_2 from cb_criteria_relationship cr "
+              + "join concept c1 on (cr.concept_id_2 = c1.concept_id "
+              + "and cr.concept_id_1 = :conceptId "
+              + "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2 "
+              + "and c.domain_id = 'DRUG' and c.type = 'RXNORM'",
       nativeQuery = true)
-  List<Integer> findDrugConceptId2ByConceptId1(@Param("conceptIds") List<Long> conceptIds);
-
-  @Query(
-      value =
-          "select c from CBCriteria c where conceptId = :conceptId and domainId = :domain and match(synonyms, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
-  List<CBCriteria> findDrugIngredientByConceptId(
-      @Param("conceptId") String conceptId, @Param("domain") String domain);
+  List<CBCriteria> findDrugIngredientByConceptId(@Param("conceptId") String conceptId);
 }
