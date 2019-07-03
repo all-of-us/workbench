@@ -521,7 +521,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
                     <BoxHeader text='2' header='Select Concept Sets' subHeader='Rows'
                                style={{paddingRight: '1rem'}}>
-                      {plusLink('cohorts-link', conceptSetsPath)}
+                      {plusLink('concept-sets-link', conceptSetsPath)}
                     </BoxHeader>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
