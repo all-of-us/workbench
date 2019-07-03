@@ -224,22 +224,33 @@ export const ListSearch = withCurrentWorkspace()(
     showIngredients = (row: any) => {
       const {ingredients} = this.state;
       if (ingredients[row.id]) {
-        ingredients[row.id].open = !ingredients[row.id].open;
+        if (ingredients[row.id].error) {
+          ingredients[row.id] = undefined;
+        } else {
+          ingredients[row.id].open = !ingredients[row.id].open;
+        }
         this.setState({ingredients});
       } else {
-        ingredients[row.id] = {open: false, loading: true, items: []};
-        this.setState({ingredients});
-        const {workspace: {cdrVersionId}} = this.props;
-        cohortBuilderApi()
-          .getDrugIngredientByConceptId(+cdrVersionId, row.conceptId)
-          .then(resp => {
-            ingredients[row.id] = {
-              open: true,
-              loading: false,
-              items: resp.items
-            };
-            this.setState({ingredients});
-          });
+        try {
+          ingredients[row.id] = {open: false, loading: true, error: false, items: []};
+          this.setState({ingredients});
+          const {workspace: {cdrVersionId}} = this.props;
+          cohortBuilderApi()
+            .getDrugIngredientByConceptId(+cdrVersionId, row.conceptId)
+            .then(resp => {
+              ingredients[row.id] = {
+                open: true,
+                loading: false,
+                error: false,
+                items: resp.items
+              };
+              this.setState({ingredients});
+            });
+        } catch (error) {
+          console.error(error);
+          ingredients[row.id] = {open: true, loading: false, error: true, items: []};
+          this.setState({ingredients});
+        }
       }
     }
 
@@ -261,7 +272,8 @@ export const ListSearch = withCurrentWorkspace()(
       const unselected = !attributes && !brand && !this.isSelected(row);
       const open = ingredients[row.id] && ingredients[row.id].open;
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
-      const columnStyle = child ? {...styles.columnBody, paddingLeft: '1rem'} : styles.columnBody;
+      const columnStyle = child ?
+        {...styles.columnBody, paddingLeft: '1.25rem'} : styles.columnBody;
       return <tr>
           <td style={columnStyle}>
             {row.selectable && <div style={{...styles.selectDiv}}>
@@ -353,11 +365,21 @@ export const ListSearch = withCurrentWorkspace()(
             <tbody className='p-datatable-tbody'>
               {data.map((row, r) => {
                 const open = ingredients[row.id] && ingredients[row.id].open;
+                const err = ingredients[row.id] && ingredients[row.id].error;
                 return <React.Fragment key={r}>
                   {this.renderRow(row, false)}
-                  {open && ingredients[row.id].items.map((item, i) => {
+                  {open && !err && ingredients[row.id].items.map((item, i) => {
                     return <React.Fragment key={i}>{this.renderRow(item, true)}</React.Fragment>;
                   })}
+                  {open && err && <tr>
+                    <td colSpan={4}>
+                      <div style={{...styles.error, marginTop: 0}}>
+                        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+                          shape='exclamation-triangle' size='22'/>
+                        Sorry, the request cannot be completed.
+                      </div>
+                    </td>
+                  </tr>}
                 </React.Fragment>;
               })}
             </tbody>
