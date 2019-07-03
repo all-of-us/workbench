@@ -81,8 +81,9 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(
       value =
-          "select cr from CBCriteria cr where domain_id = ?1 and type = ?2 and is_group = 0 and is_selectable = 1")
-  List<CBCriteria> findCriteriaLeavesByDomainAndType(String domain, String type);
+          "select cr from CBCriteria cr where domain_id = ?1 and type = ?2 and subtype = ?3 and is_group = 0 and is_selectable = 1")
+  List<CBCriteria> findCriteriaLeavesByDomainAndTypeAndSubtype(
+      String domain, String type, String subtype);
 
   @Query(
       value = "select concept_id_2 from cb_criteria_relationship where concept_id_1 = :conceptId",

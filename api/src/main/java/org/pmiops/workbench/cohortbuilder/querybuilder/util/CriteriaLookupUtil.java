@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
@@ -36,11 +37,14 @@ public final class CriteriaLookupUtil {
   private static class FullTreeType {
     final DomainType domain;
     final CriteriaType type;
+    final CriteriaSubType subType;
     final Boolean isStandard;
 
-    private FullTreeType(DomainType domain, CriteriaType type, Boolean isStandard) {
+    private FullTreeType(
+        DomainType domain, CriteriaType type, CriteriaSubType subType, Boolean isStandard) {
       this.domain = domain;
       this.type = type;
+      this.subType = subType;
       this.isStandard = isStandard;
     }
 
@@ -48,6 +52,7 @@ public final class CriteriaLookupUtil {
       return new CriteriaLookupUtil.FullTreeType(
           DomainType.valueOf(param.getDomain()),
           CriteriaType.valueOf(param.getType()),
+          CriteriaSubType.valueOf(param.getSubtype()),
           param.getStandard());
     }
 
@@ -182,8 +187,10 @@ public final class CriteriaLookupUtil {
           .get(treeType)
           .addAll(
               cbCriteriaDao
-                  .findCriteriaLeavesByDomainAndType(
-                      treeType.domain.toString(), treeType.type.toString())
+                  .findCriteriaLeavesByDomainAndTypeAndSubtype(
+                      treeType.domain.toString(),
+                      treeType.type.toString(),
+                      treeType.subType.toString())
                   .stream()
                   .map(c -> Long.parseLong(c.getConceptId()))
                   .collect(Collectors.toSet()));
