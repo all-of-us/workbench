@@ -27,7 +27,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionContext;
-import org.pmiops.workbench.cdr.dao.CriteriaDao;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ElasticsearchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -41,16 +41,16 @@ public class ElasticSearchService {
 
   private static final Logger log = Logger.getLogger(ElasticSearchService.class.getName());
   private RestHighLevelClient client;
-  private CriteriaDao criteriaDao;
+  private CBCriteriaDao cbCriteriaDao;
   private CloudStorageService cloudStorageService;
   private Provider<WorkbenchConfig> configProvider;
 
   @Autowired
   public ElasticSearchService(
-      CriteriaDao criteriaDao,
+      CBCriteriaDao cbCriteriaDao,
       CloudStorageService cloudStorageService,
       Provider<WorkbenchConfig> configProvider) {
-    this.criteriaDao = criteriaDao;
+    this.cbCriteriaDao = cbCriteriaDao;
     this.cloudStorageService = cloudStorageService;
     this.configProvider = configProvider;
   }
@@ -59,7 +59,7 @@ public class ElasticSearchService {
   public Long count(SearchRequest req) throws IOException {
     String personIndex =
         ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getElasticIndexBaseName());
-    QueryBuilder filter = ElasticFilters.fromCohortSearch(criteriaDao, req);
+    QueryBuilder filter = ElasticFilters.fromCohortSearch(cbCriteriaDao, req);
     log.info("Elastic filter: " + filter.toString());
     long count =
         client()
@@ -75,7 +75,7 @@ public class ElasticSearchService {
   public List<DemoChartInfo> demoChartInfo(SearchRequest req) throws IOException {
     String personIndex =
         ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getElasticIndexBaseName());
-    QueryBuilder filter = ElasticFilters.fromCohortSearch(criteriaDao, req);
+    QueryBuilder filter = ElasticFilters.fromCohortSearch(cbCriteriaDao, req);
     log.info("Elastic filter: " + filter.toString());
     SearchResponse searchResponse =
         client()

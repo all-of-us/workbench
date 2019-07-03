@@ -4,28 +4,24 @@ import com.google.api.client.util.Sets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import joptsimple.internal.Strings;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.pmiops.workbench.cdr.dao.CriteriaDao;
-import org.pmiops.workbench.cdr.model.Criteria;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cohortbuilder.querybuilder.util.CriteriaLookupUtil;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.SearchGroup;
@@ -44,24 +40,10 @@ public final class ElasticFilters {
   private static final Logger log = Logger.getLogger(ElasticFilters.class.getName());
 
   /** Translates a Cohort Builder search request into an Elasticsearch filter. */
-  public static QueryBuilder fromCohortSearch(CriteriaDao criteriaDao, SearchRequest req) {
-    ElasticFilters f = new ElasticFilters(criteriaDao);
+  public static QueryBuilder fromCohortSearch(CBCriteriaDao cbCriteriaDao, SearchRequest req) {
+    ElasticFilters f = new ElasticFilters(cbCriteriaDao);
     return f.process(req);
   }
-
-  /**
-   * A hand-maintained mapping of which criteria trees map to standard vs source concept IDs. This
-   * indicates which concept ID field we should be querying against for a SearchRequest on a given
-   * tree. TODO(RW-2249): Document or encode this more centrally.
-   */
-  private static Set<TreeType> STANDARD_TREES =
-      ImmutableSet.of(TreeType.SNOMED, TreeType.DRUG, TreeType.MEAS, TreeType.VISIT);
-  /**
-   * Criteria trees which are coded hierarchically, e.g. parent code "001", child code "001.002".
-   * TODO(RW-2249): Why aren't all trees coded this way?
-   */
-  private static Set<TreeType> HIERARCHICAL_CODE_TREES =
-      ImmutableSet.of(TreeType.ICD9, TreeType.ICD10);
 
   private static Map<String, String> NON_NESTED_FIELDS =
       ImmutableMap.of(
@@ -69,18 +51,18 @@ public final class ElasticFilters {
           TreeSubType.RACE.toString(), "race_concept_id",
           TreeSubType.ETH.toString(), "ethnicity_concept_id");
 
-  private final CriteriaDao criteriaDao;
+  private final CriteriaLookupUtil criteriaLookupUtil;
 
   private boolean processed = false;
   private Map<SearchParameter, Set<Long>> childrenByCriteriaGroup;
 
-  private ElasticFilters(CriteriaDao criteriaDao) {
-    this.criteriaDao = criteriaDao;
+  private ElasticFilters(CBCriteriaDao cbCriteriaDao) {
+    this.criteriaLookupUtil = new CriteriaLookupUtil(cbCriteriaDao);
   }
 
   private QueryBuilder process(SearchRequest req) {
     Preconditions.checkArgument(!processed);
-    childrenByCriteriaGroup = buildCriteriaGroupLookup(req);
+    childrenByCriteriaGroup = criteriaLookupUtil.buildCriteriaLookupMap(req);
 
     BoolQueryBuilder filter = QueryBuilders.boolQuery();
     for (SearchGroup sg : req.getIncludes()) {
@@ -135,7 +117,7 @@ public final class ElasticFilters {
       // TODO(freemabd): Handle Blood Pressure and Deceased
       for (SearchParameter param : sgi.getSearchParameters()) {
         String conceptField =
-            "events." + (isStandardConcept(param) ? "concept_id" : "source_concept_id");
+            "events." + (param.getStandard() ? "concept_id" : "source_concept_id");
         if (isNonNestedSchema(param)) {
           conceptField = NON_NESTED_FIELDS.get(param.getSubtype());
         }
@@ -272,13 +254,8 @@ public final class ElasticFilters {
     return rq;
   }
 
-  private static boolean isStandardConcept(SearchParameter param) {
-    TreeType paramType = TreeType.valueOf(param.getType());
-    return STANDARD_TREES.contains(paramType);
-  }
-
   private static boolean isNonNestedSchema(SearchParameter param) {
-    TreeType paramType = TreeType.valueOf(param.getType());
+    CriteriaType paramType = CriteriaType.valueOf(param.getType());
     return TreeType.DEMO.equals(paramType);
   }
 
@@ -297,173 +274,5 @@ public final class ElasticFilters {
       }
     }
     return out;
-  }
-
-  private static class FullTreeType {
-    final TreeType type;
-    final TreeSubType subType;
-
-    private FullTreeType(TreeType type, TreeSubType subType) {
-      this.type = type;
-      this.subType = subType;
-    }
-
-    static FullTreeType fromParam(SearchParameter param) {
-      return new FullTreeType(
-          TreeType.valueOf(param.getType()), TreeSubType.valueOf(param.getSubtype()));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-      FullTreeType that = (FullTreeType) o;
-      return type == that.type && subType == that.subType;
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(type, subType);
-    }
-  }
-
-  /**
-   * Extracts all criteria groups in the given search request and produces a lookup map from group
-   * parameter to set of matching child concept ids.
-   */
-  private Map<SearchParameter, Set<Long>> buildCriteriaGroupLookup(SearchRequest req) {
-    // Three categories of criteria groups are currently supported in a SearchRequest:
-    // 1. Groups with tree types & a concept ID specified, e.g. drugs.
-    // 2. Groups with tree types & a criteria code specified, e.g. ICD9/ICD10.
-    // 3. Groups with only tree types specified, e.g. PPI surveys (the basics).
-    Map<FullTreeType, Map<Long, Set<Long>>> childrenByParentConcept = Maps.newHashMap();
-    Map<FullTreeType, Map<String, Set<Long>>> childrenByParentCode = Maps.newHashMap();
-    Map<FullTreeType, Set<Long>> childrenByTreeType = Maps.newHashMap();
-
-    // Within each category/tree type combination, we can batch MySQL requests to translate these
-    // groups into child concept IDs. First we build up maps to denote which groups to query and
-    // which will eventually hold the results (for now, we mark them with an empty set).
-    for (SearchGroup sg : Iterables.concat(req.getIncludes(), req.getExcludes())) {
-      for (SearchGroupItem sgi : sg.getItems()) {
-        for (SearchParameter param : sgi.getSearchParameters()) {
-          if (!param.getGroup()) {
-            continue;
-          }
-          if (TreeType.SNOMED.toString().equals(param.getType())) {
-            log.warning(
-                "Received a SNOMED group in a search request - this indicates a client "
-                    + "bug. SNOMED concepts are poly-hierarchical; the SearchRequest does not encode "
-                    + "enough information to determine which criteria ID should be used");
-            throw new BadRequestException("Invalid criteria group of type SNOMED");
-          }
-
-          FullTreeType treeKey = FullTreeType.fromParam(param);
-          if (param.getConceptId() != null) {
-            childrenByParentConcept.putIfAbsent(treeKey, Maps.newHashMap());
-            childrenByParentConcept
-                .get(treeKey)
-                .putIfAbsent(param.getConceptId(), Sets.newHashSet());
-          } else if (param.getValue() != null) {
-            if (!HIERARCHICAL_CODE_TREES.contains(treeKey.type)) {
-              throw new BadRequestException(
-                  "Search on criteria group by code is unsupported in tree " + treeKey.type);
-            }
-            childrenByParentCode.putIfAbsent(treeKey, Maps.newHashMap());
-            childrenByParentCode.get(treeKey).putIfAbsent(param.getValue(), Sets.newHashSet());
-          } else {
-            childrenByTreeType.putIfAbsent(treeKey, Sets.newHashSet());
-          }
-        }
-      }
-    }
-
-    // Now we get the child concept IDs for each batch.
-    for (FullTreeType treeType : childrenByParentConcept.keySet()) {
-      Map<Long, Set<Long>> byParent = childrenByParentConcept.get(treeType);
-      Set<String> parentConceptIds =
-          byParent.keySet().stream().map(c -> c.toString()).collect(Collectors.toSet());
-
-      List<Criteria> parents = Lists.newArrayList();
-      List<Criteria> leaves = Lists.newArrayList();
-      criteriaDao
-          .findCriteriaLeavesAndParentsByTypeAndParentConceptIds(
-              treeType.type.toString(), treeType.subType.toString(), parentConceptIds)
-          .forEach(
-              c -> {
-                if (c.getGroup()) {
-                  parents.add(c);
-                } else {
-                  leaves.add(c);
-                }
-              });
-
-      for (Criteria c : leaves) {
-        // Technically this could scale poorly with many criteria groups. We don't expect this
-        // number to be very high as it requires a user action to add a group, but a better data
-        // structure could be used here if this becomes too slow.
-        for (Criteria parent : parents) {
-          String parentId = Long.toString(parent.getId());
-          if (c.getPath().startsWith(parentId + ".")
-              || c.getPath().contains("." + parentId + ".")
-              || c.getPath().endsWith("." + parentId)) {
-            long parentConceptId = Long.parseLong(parent.getConceptId());
-            byParent.putIfAbsent(parentConceptId, Sets.newHashSet());
-            byParent.get(parentConceptId).add(Long.parseLong(c.getConceptId()));
-          }
-        }
-      }
-    }
-    for (FullTreeType treeType : childrenByParentCode.keySet()) {
-      Map<String, Set<Long>> byParent = childrenByParentCode.get(treeType);
-      List<Criteria> criteriaList =
-          criteriaDao.findCriteriaLeavesByTypeAndParentCodeRegex(
-              treeType.type.toString(),
-              treeType.subType.toString(),
-              String.format("^(%s)", Strings.join(byParent.keySet(), "|")));
-      for (Criteria c : criteriaList) {
-        // See above comment on performance, this has the same characteristics.
-        for (String parentCode : byParent.keySet()) {
-          if (c.getCode().startsWith(parentCode)) {
-            byParent.putIfAbsent(parentCode, Sets.newHashSet());
-            byParent.get(parentCode).add(Long.parseLong(c.getConceptId()));
-          }
-        }
-      }
-    }
-    for (FullTreeType treeType : childrenByTreeType.keySet()) {
-      childrenByTreeType
-          .get(treeType)
-          .addAll(
-              criteriaDao
-                  .findCriteriaLeavesByType(treeType.type.toString(), treeType.subType.toString())
-                  .stream()
-                  .map(c -> Long.parseLong(c.getConceptId()))
-                  .collect(Collectors.toSet()));
-    }
-
-    // Finally, we unpack the results and map them back to the original SearchParameters.
-    Map<SearchParameter, Set<Long>> builder = new HashMap<>();
-    for (SearchGroup sg : Iterables.concat(req.getIncludes(), req.getExcludes())) {
-      for (SearchGroupItem sgi : sg.getItems()) {
-        for (SearchParameter param : sgi.getSearchParameters()) {
-          if (!param.getGroup()) {
-            continue;
-          }
-          FullTreeType treeKey = FullTreeType.fromParam(param);
-          if (param.getConceptId() != null) {
-            builder.put(param, childrenByParentConcept.get(treeKey).get(param.getConceptId()));
-          } else if (param.getValue() != null) {
-            builder.put(param, childrenByParentCode.get(treeKey).get(param.getValue()));
-          } else {
-            builder.put(param, childrenByTreeType.get(treeKey));
-          }
-        }
-      }
-    }
-    return builder;
   }
 }
