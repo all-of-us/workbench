@@ -8,7 +8,7 @@ import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -22,14 +22,14 @@ const styles = reactStyles({
     display: 'flex',
     height: 40,
     backgroundColor: colors.white,
-    border: 'solid thin ' + colors.light, // check this
+    border: 'solid thin ' + colorWithWhiteness(colors.dark, .75),
     fontSize: '16px'
   },
   navBarItem: {
     display: 'flex',
     height: '100%',
     color: colors.primary,
-    borderRight: '1px solid ' + colors.light,
+    borderRight: '1px solid ' + colorWithWhiteness(colors.dark, .75),
     backgroundColor: 'rgba(38,34,98,0.05)',
     alignItems: 'center',
     padding: '0 20px'
