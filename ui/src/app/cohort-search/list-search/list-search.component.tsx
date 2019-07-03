@@ -301,11 +301,11 @@ export const ListSearch = withCurrentWorkspace()(
               <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
             </div>
           </td>
-          <td style={columnStyle}>{row.type}</td>
-          <td style={columnStyle}>
+          <td style={styles.columnBody}>{row.type}</td>
+          <td style={styles.columnBody}>
             {row.count > -1 && row.count.toLocaleString()}
           </td>
-          <td style={{...columnStyle, padding: '0.2rem'}}>
+          <td style={{...styles.columnBody, padding: '0.2rem'}}>
             {row.hasHierarchy &&
             <i className='pi pi-sitemap'
                style={styles.treeIcon}
