@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase} from 'app/utils';
 
 import * as React from 'react';
@@ -18,13 +19,14 @@ const defaultStyle = {
   height: 19,
   width: 19,
   marginLeft: '.5rem',
-  fill: '#2691D0',
+  fill: colors.accent,
   cursor: 'pointer'
 };
 
-const hoverStyle = {...defaultStyle, fill: '#83C3EC'};
+const hoverStyle = {...defaultStyle, fill: colorWithWhiteness(colors.accent, 0.2)};
 
-const disabledStyle = {...defaultStyle, cursor: 'not-allowed', fill: '#C3C3C3'};
+const disabledStyle = {...defaultStyle, cursor: 'not-allowed',
+  fill: colorWithWhiteness(colors.dark, 0.6)};
 
 export class EditComponentReact extends React.Component<EditComponentProps, EditComponentState> {
 

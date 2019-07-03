@@ -423,10 +423,10 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
             })}
           </div>
         </ModalBody>
-        <ModalFooter>
-            <Button type='secondary' style={{marginRight: '.8rem', border: 'none'}}
+        <ModalFooter style={{alignItems: 'center'}}>
+            <Button type='link' style={{marginRight: '.8rem', border: 'none'}}
                     onClick={() => this.onCancel()}>Cancel</Button>
-            <Button data-test-id='save' disabled={!this.hasPermission}
+            <Button type='primary' data-test-id='save' disabled={!this.hasPermission}
                     onClick={() => this.save()}>Save</Button>
         </ModalFooter>
       </Modal>}

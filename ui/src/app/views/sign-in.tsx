@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 
 import {SignInService} from 'app/services/sign-in.service';
+import colors from 'app/styles/colors';
 import {ReactWrapperBase, withWindowSize} from 'app/utils';
 import {AccountCreation} from 'app/views/account-creation';
 import {AccountCreationSuccess} from 'app/views/account-creation-success';
@@ -28,7 +29,7 @@ const styles = {
   template: (windowSize, images) => {
     return {
       backgroundImage: calculateImage(),
-      backgroundColor: '#dedfe1',
+      backgroundColor: colors.light,
       backgroundRepeat: 'no-repeat',
       width: '100%',
       minHeight: '100vh',
@@ -100,7 +101,7 @@ export const SignInReact = withWindowSize()(
     }
 
     componentDidMount() {
-      document.body.style.backgroundColor = '#e2e3e5';
+      document.body.style.backgroundColor = colors.light;
       this.props.onInit();
     }
 

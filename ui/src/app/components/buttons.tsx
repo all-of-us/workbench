@@ -7,14 +7,6 @@ import * as React from 'react';
 import * as Interactive from 'react-interactive';
 
 export const styles = {
-  base: {
-    display: 'inline-flex', justifyContent: 'space-around', alignItems: 'center',
-    height: '1.5rem', minWidth: '3rem', maxWidth: '15rem',
-    fontWeight: 500, fontSize: 12, letterSpacing: '0.02rem', textTransform: 'uppercase',
-    overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
-    userSelect: 'none',
-    margin: 0, padding: '0rem 0.77rem',
-  },
   baseNew: {
     display: 'inline-flex', justifyContent: 'space-around', alignItems: 'center',
     minWidth: '3rem', maxWidth: '15rem',
@@ -28,13 +20,13 @@ export const styles = {
   }
 };
 
-const hoverAlpha = 0.7;
+const hoverAlpha = 0.2;
 const disabledAlpha = 0.6;
 
 const buttonVariants = {
   primary: {
     style: {
-      ...styles.base,
+      ...styles.baseNew,
       borderRadius: '0.3rem',
       backgroundColor: colors.primary, color: colors.white,
     },
@@ -43,8 +35,7 @@ const buttonVariants = {
   },
   secondary: {
     style: {
-      ...styles.base,
-      border: '1px solid', borderRadius: '0.2rem', borderColor: colors.primary,
+      ...styles.baseNew,
       backgroundColor: 'transparent',
       color: colors.primary,
     },
@@ -52,24 +43,23 @@ const buttonVariants = {
       borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
       color: colorWithWhiteness(colors.dark, disabledAlpha)
     },
-    hover: {backgroundColor: colors.primary, color: '#ffffff'}
+    hover: {backgroundColor: colors.primary, color: colors.white}
   },
   secondaryLight: {
     style: {
-      ...styles.base,
-      border: '1px solid', borderRadius: '0.2rem', borderColor: '#0077b7',
+      ...styles.baseNew,
       backgroundColor: 'transparent',
-      color: '#0077b7'
+      color: colors.accent
     },
     disabledStyle: {
       borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
       color: colorWithWhiteness(colors.dark, disabledAlpha)
     },
-    hover: {color: colors.accent}
+    hover: {color: colorWithWhiteness(colors.accent, 0.4)}
   },
   primaryOnDarkBackground: {
     style: {
-      ...styles.base,
+      ...styles.baseNew,
       borderRadius: '0.2rem',
       backgroundColor: colors.primary, color: colors.white
     },
@@ -78,12 +68,12 @@ const buttonVariants = {
   },
   secondaryOnDarkBackground: {
     style: {
-      ...styles.base,
+      ...styles.baseNew,
       borderRadius: '0.2rem',
-      backgroundColor: '#0079b8', color: '#ffffff'
+      backgroundColor: colors.secondary, color: colors.white
     },
     disabledStyle: {backgroundColor: colorWithWhiteness(colors.dark, disabledAlpha)},
-    hover: {backgroundColor: '#50ACE1'}
+    hover: {backgroundColor: colorWithWhiteness(colors.secondary, hoverAlpha)}
   },
   purplePrimary: {
     style: {
@@ -96,7 +86,6 @@ const buttonVariants = {
   purpleSecondary: {
     style: {
       ...styles.baseNew,
-      border: '1px solid', borderColor: colors.primary,
       backgroundColor: 'transparent',
       color: colors.primary,
     },
@@ -105,15 +94,17 @@ const buttonVariants = {
       color: colorWithWhiteness(colors.dark, disabledAlpha)
     },
     hover: {backgroundColor: colorWithWhiteness(colors.primary, hoverAlpha),
-      color: '#fff', borderColor: colorWithWhiteness(colors.primary, hoverAlpha)}
+      color: colors.white, borderColor: colorWithWhiteness(colors.primary, hoverAlpha)}
   },
   link: {
     style: {
+      ...styles.baseNew,
       color: colors.accent
     },
     disabledStyle: {
       color: colorWithWhiteness(colors.dark, disabledAlpha)
-    }
+    },
+    hover: {color: colorWithWhiteness(colors.accent, 0.4)}
   }
 };
 
@@ -178,7 +169,7 @@ const cardButtonBase = {
     alignItems: 'flex-start', alignContent: 'left', fontWeight: 500,
     justifyContent: 'center', padding: '0 1rem', color: colors.accent,
   },
-  disabledStyle: {color: '#c3c3c3', backgroundColor: '#f1f2f2', cursor: 'not-allowed'}
+  disabledStyle: {color: colorWithWhiteness(colors.dark, disabledAlpha), cursor: 'not-allowed'}
 
 };
 
@@ -214,7 +205,7 @@ const tabButtonStyle = {
   style: {
     margin: '0 1rem',
     textAlign: 'center',
-    color: '#2691D0',
+    color: colors.accent,
     fontSize: '16px',
     lineHeight: '28px',
   },
@@ -224,7 +215,7 @@ const tabButtonStyle = {
 
 const activeTabButtonStyle = {
   style: {
-    borderBottom: '4px solid #216FB4',
+    borderBottom: `4px solid ${colors.accent}`,
     fontWeight: 600
   }
 };
@@ -243,7 +234,7 @@ export const TabButton = ({disabled = false, style = {}, active = false, childre
 
 export const Link = ({disabled = false, style = {}, children, ...props}) => {
   const linkStyle = {
-    style: {color: '#2691D0'},
+    style: {color: colors.accent},
     hover: {textDecoration: 'underline'}
   };
   return <Clickable
