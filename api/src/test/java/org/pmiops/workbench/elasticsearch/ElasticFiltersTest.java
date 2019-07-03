@@ -10,6 +10,7 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +35,7 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -49,6 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ElasticFiltersTest {
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
+  @Autowired private JdbcTemplate jdbcTemplate;
 
   private static CBCriteria icd9Criteria() {
     return new CBCriteria()
@@ -133,38 +136,55 @@ public class ElasticFiltersTest {
 
     // Four node PPI tree, survey, question, 2 answers.
     cbCriteriaDao.save(
-        basicsCriteria().id(6).code("006").group(true).selectable(true).parentId(0).path(""));
+        basicsCriteria()
+            .id(6)
+            .code("006")
+            .group(true)
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BASICS.toString())
+            .standard(false)
+            .selectable(true)
+            .parentId(0)
+            .path("")
+            .synonyms("+[SURVEY_rank1]"));
     cbCriteriaDao.save(
         basicsCriteria()
             .id(7)
             .code("007")
             .conceptId("777")
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BASICS.toString())
+            .standard(false)
             .group(true)
             .selectable(true)
             .parentId(6)
-            .path("6"));
+            .path("6.7")
+            .synonyms("+[SURVEY_rank1]"));
     cbCriteriaDao.save(
         basicsCriteria()
             .id(8)
             .code("008")
             // Concept ID matches the question.
-            .conceptId("777")
+            .conceptId("7771")
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BASICS.toString())
+            .standard(false)
             .group(false)
             .selectable(true)
             .parentId(7)
-            .path("6.7"));
-    cbCriteriaDao.save(
-        basicsCriteria()
-            .id(9)
-            .code("009")
-            // Concept ID matches the question.
-            .conceptId("777")
-            .group(false)
-            .selectable(true)
-            .parentId(7)
-            .path("6.7"));
+            .path("6.7")
+            .synonyms("+[SURVEY_rank1]"));
 
     // drug tree
+    // Use jdbcTemplate to create/insert data into the ancestor table
+    // The codebase currently doesn't have a need to implement a DAO for this table
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (19069022, 21600009)");
     cbCriteriaDao.save(
         drugCriteria()
             .id(10)
@@ -173,7 +193,9 @@ public class ElasticFiltersTest {
             .group(true)
             .selectable(false)
             .parentId(0)
-            .path(""));
+            .path("")
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString()));
     cbCriteriaDao.save(
         drugCriteria()
             .id(11)
@@ -182,7 +204,9 @@ public class ElasticFiltersTest {
             .group(true)
             .selectable(true)
             .parentId(10)
-            .path("10"));
+            .path("10")
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString()));
     cbCriteriaDao.save(
         drugCriteria()
             .id(12)
@@ -191,7 +215,9 @@ public class ElasticFiltersTest {
             .group(true)
             .selectable(true)
             .parentId(11)
-            .path("10.11"));
+            .path("10.11")
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString()));
     cbCriteriaDao.save(
         drugCriteria()
             .id(13)
@@ -200,7 +226,9 @@ public class ElasticFiltersTest {
             .group(true)
             .selectable(true)
             .parentId(12)
-            .path("10.11.12"));
+            .path("10.11.12")
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString()));
     cbCriteriaDao.save(
         drugCriteria()
             .id(14)
@@ -209,14 +237,23 @@ public class ElasticFiltersTest {
             .group(false)
             .selectable(true)
             .parentId(13)
-            .path("10.11.12.13"));
+            .path("10.11.12.13")
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.RXNORM.toString()));
 
     leafParam2 =
         new SearchParameter()
             .conceptId(772L)
             .domain(DomainType.CONDITION.toString())
             .type(CriteriaType.ICD9CM.toString())
+            .ancestorData(false)
+            .standard(false)
             .group(false);
+  }
+
+  @After
+  public void tearDown() {
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   private static final QueryBuilder singleNestedQuery(QueryBuilder... inners) {
@@ -284,13 +321,15 @@ public class ElasticFiltersTest {
                                 .addSearchParametersItem(
                                     new SearchParameter()
                                         .conceptId(21600002L)
-                                        .type(TreeType.DRUG.toString())
-                                        .subtype(TreeSubType.ATC.toString())
+                                        .domain(DomainType.DRUG.toString())
+                                        .type(CriteriaType.ATC.toString())
+                                        .ancestorData(true)
+                                        .standard(true)
                                         .group(true)))));
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                QueryBuilders.termsQuery("events.concept_id", ImmutableList.of("19069022"))));
+                QueryBuilders.termsQuery("events.concept_id", ImmutableList.of("21600009"))));
   }
 
   @Test
@@ -373,15 +412,18 @@ public class ElasticFiltersTest {
                             new SearchGroupItem()
                                 .addSearchParametersItem(
                                     new SearchParameter()
-                                        .type(TreeType.PPI.toString())
-                                        .subtype(TreeSubType.BASICS.toString())
+                                        .domain(DomainType.SURVEY.toString())
+                                        .type(CriteriaType.PPI.toString())
+                                        .subtype(CriteriaSubType.BASICS.toString())
                                         .conceptId(777L)
                                         .group(true)
+                                        .ancestorData(false)
+                                        .standard(false)
                                         .addAttributesItem(attr)))));
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777")),
+                QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("7771")),
                 QueryBuilders.rangeQuery("events.value_as_number").gte(1.0F).lte(1.0F)));
   }
 
@@ -587,9 +629,11 @@ public class ElasticFiltersTest {
     SearchParameter genderParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.GEN.toString())
-            .group(false);
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.GENDER.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
             cbCriteriaDao,
@@ -609,9 +653,11 @@ public class ElasticFiltersTest {
     SearchParameter genderParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.GEN.toString())
-            .group(false);
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.GENDER.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
             cbCriteriaDao,
@@ -634,9 +680,11 @@ public class ElasticFiltersTest {
     SearchParameter raceParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.RACE.toString())
-            .group(false);
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.RACE.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
             cbCriteriaDao,
@@ -656,10 +704,11 @@ public class ElasticFiltersTest {
     SearchParameter ethParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.ETH.toString())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.ETHNICITY.toString())
             .group(false)
-            .conceptId(Long.parseLong(conceptId));
+            .ancestorData(false)
+            .standard(true);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
             cbCriteriaDao,
@@ -682,9 +731,11 @@ public class ElasticFiltersTest {
     SearchParameter pregParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.PM.toString())
-            .subtype(TreeSubType.PREG.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(false)
             .attributes(Arrays.asList(attr));
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
@@ -713,9 +764,11 @@ public class ElasticFiltersTest {
     SearchParameter measParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.MEAS.toString())
-            .subtype(TreeSubType.LAB.toString())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .attributes(Arrays.asList(attr));
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
@@ -738,7 +791,10 @@ public class ElasticFiltersTest {
     SearchParameter visitParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.VISIT.toString())
+            .domain(DomainType.VISIT.toString())
+            .type(CriteriaType.VISIT.toString())
+            .ancestorData(false)
+            .standard(true)
             .group(false);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
