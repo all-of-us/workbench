@@ -172,6 +172,7 @@ public class CriteriaLookupUtilTest {
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BASICS.toString())
             .group(true)
             .standard(false)
             .ancestorData(false);

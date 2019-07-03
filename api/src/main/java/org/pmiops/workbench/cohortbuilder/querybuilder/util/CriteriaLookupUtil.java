@@ -52,7 +52,7 @@ public final class CriteriaLookupUtil {
       return new CriteriaLookupUtil.FullTreeType(
           DomainType.valueOf(param.getDomain()),
           CriteriaType.valueOf(param.getType()),
-          CriteriaSubType.valueOf(param.getSubtype()),
+          param.getSubtype() == null ? null : CriteriaSubType.valueOf(param.getSubtype()),
           param.getStandard());
     }
 
