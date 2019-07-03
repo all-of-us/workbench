@@ -388,9 +388,7 @@ public class DataSetServiceImpl implements DataSetService {
                 + "sql, dialect=\"standard\", configuration="
                 + namespace
                 + "query_config)";
-        displayHeadSection =
-            namespace
-                + "df.head(5)";
+        displayHeadSection = namespace + "df.head(5)";
         break;
       case R:
         sqlSection = namespace + "sql <- \"" + queryJobConfiguration.getQuery() + "\"";
@@ -417,15 +415,19 @@ public class DataSetServiceImpl implements DataSetService {
                 + "sql, dialect=\"standard\", configuration="
                 + namespace
                 + "query_config)";
-        displayHeadSection =
-            "head(" + namespace
-                + "df, 5)";
+        displayHeadSection = "head(" + namespace + "df, 5)";
         break;
       default:
         throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
     }
 
-    return sqlSection + "\n\n" + namedParamsSection + "\n\n" + dataFrameSection + "\n\n" + displayHeadSection;
+    return sqlSection
+        + "\n\n"
+        + namedParamsSection
+        + "\n\n"
+        + dataFrameSection
+        + "\n\n"
+        + displayHeadSection;
   }
 
   // BigQuery api returns parameter values either as a list or an object.
