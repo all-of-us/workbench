@@ -241,18 +241,26 @@ export class ListSearchGroupComponent implements AfterViewInit {
 
   getMentionTitle(mentionName) {
     this.setGroupProperty('mention', mentionName);
-    // TODO when new api call are ready, recalculate counts
+    this.calculateTemporal();
   }
 
   getTimeTitle(timeName) {
     this.setGroupProperty('time', timeName);
-    // TODO when new api call are ready, recalculate counts
+    this.calculateTemporal();
   }
 
   getTimeValue(e) {
     if (e.target.value >= 0) {
       this.setGroupProperty('timeValue', e.target.value);
-      // TODO when new api call are ready, recalculate counts
+      this.calculateTemporal();
+    }
+  }
+
+  calculateTemporal() {
+    if (!this.temporalError) {
+      this.loading = true;
+      this.error = false;
+      this.getGroupCount();
     }
   }
 
