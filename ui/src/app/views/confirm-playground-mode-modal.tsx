@@ -3,10 +3,11 @@ import * as Cookies from 'js-cookie';
 import {Button} from 'app/components/buttons';
 import {CheckBox} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import colors from 'app/styles/colors';
 
 
 export interface Props {
-  onClose: Function;
+  onCancel: Function;
   onContinue: Function;
 }
 
@@ -16,38 +17,44 @@ interface State {
 
 export class ConfirmPlaygroundModeModal extends React.Component<Props, State> {
 
-  private KEY = 'DID_USER_CONFIRM_PLAYGROUND_MODE';
+  public static DO_NOT_SHOW_AGAIN = 'DO_NOT_SHOW_AGAIN';
 
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      checked:  Cookies.get(this.KEY) === String(true)
+      checked:  Cookies.get(ConfirmPlaygroundModeModal.DO_NOT_SHOW_AGAIN) === String(true)
     };
   }
 
+  toggleChecked() {
+    let newState = !this.state.checked;
+    this.setState({checked: newState});
+    Cookies.set(ConfirmPlaygroundModeModal.DO_NOT_SHOW_AGAIN, String(newState));
+  }
+
   render() {
-    return <Modal>
+    return <Modal onRequestClose={() => {this.props.onCancel();}}>
       <ModalTitle>Playground Mode</ModalTitle>
       <ModalBody>
-        <p style={{color: '#262262'}}>
+        <p style={{color: colors.primary}}>
           Playground mode allows you to explore, change and run the code,
           but your edits will not be saved.
         </p>
-        <p style={{color: '#262262'}}>
+        <p style={{color: colors.primary}}>
           To save your work, choose <b>Make a Copy</b> from the <b>File Menu</b>
           to make your own version.
         </p>
       </ModalBody>
       <ModalFooter style={{alignItems: 'center'}}>
-        <CheckBox checked={this.state.checked} onChange={() => {this.setState({checked: !this.state.checked})}} />
-        <label style={{marginLeft: '8px', marginRight: 'auto', color: '#262262'}}>
+        <CheckBox checked={this.state.checked} onChange={() => {this.toggleChecked();}} />
+        <label style={{marginLeft: '8px', marginRight: 'auto', color: colors.primary}}>
           Don't show again
         </label>
-        <Button type='secondary' style={{margin: '0 10px'}}>
+        <Button type='secondary' style={{margin: '0 10px'}} onClick={() => {this.props.onCancel();}}>
           Cancel
         </Button>
-        <Button type='primary' onClick={() => {Cookies.set(this.KEY, String(this.state.checked));} }>
+        <Button type='primary' onClick={() => {this.props.onContinue();}}>
           Continue
         </Button>
       </ModalFooter>
