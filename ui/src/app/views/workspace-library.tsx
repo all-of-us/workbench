@@ -7,7 +7,7 @@ import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {WorkspaceCard} from 'app/views/workspace-list';
@@ -15,8 +15,9 @@ import {ErrorResponse, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   navPanel: {
-    display: 'flex', flexDirection: 'column', backgroundColor: '#E7E6F0',
-    minWidth: '300px', maxWidth: '300px', marginLeft: '-0.6rem', padding: '1rem'
+    display: 'flex', flexDirection: 'column',  padding: '1rem',
+    backgroundColor: colorWithWhiteness(colors.primary, 0.85),
+    minWidth: '300px', maxWidth: '300px', marginLeft: '-0.6rem'
   },
   searchBar: {
     height: '2rem', fontSize: '16px', lineHeight: '19px', paddingLeft: '2rem',
@@ -34,7 +35,7 @@ const styles = reactStyles({
     marginBottom: '0.5rem'
   },
   menuLinkSelected: {
-    backgroundColor: '#F3F2F7'
+    backgroundColor: colorWithWhiteness(colors.primary, 0.95)
   }
 });
 
@@ -146,6 +147,8 @@ export const WorkspaceLibrary = withUserProfile()
             </div>
           </div>
           <hr style={styles.divider}/>
+
+          {/* Note: this is not user-facing */}
           {currentTab === libraryTabEnums.PUBLISHED_WORKSPACES &&
           <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
             {workspacesLoading ?
