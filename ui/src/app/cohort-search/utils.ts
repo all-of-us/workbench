@@ -360,7 +360,7 @@ export function mapParameter(sp: any) {
   if (conceptId) {
     param.conceptId = conceptId;
   }
-  if (subtype) {
+  if (domainId === DomainType.SURVEY) {
     param.subtype = subtype;
   }
   if (value) {
