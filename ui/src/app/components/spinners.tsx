@@ -32,11 +32,16 @@ export const Spinner = ({dark = false, size = 72, style = {}, ...props}) => {
 };
 
 interface SpinnerOverlayProps {
-  dark?: boolean,
-  opacity?: number,
-  overrideStylesOverlay?: React.CSSProperties,
-  overrideStylesSquare?: React.CSSProperties
-};
+  // Colors the spinner using darker colors.
+  dark?: boolean;
+  // Sets the background opacity on the spinner overlay. Defaults to 0, which creates a fully-
+  // transparent overlay that blocks mouse interactions.
+  opacity?: number;
+  // CSS styles to apply to the overlay element.
+  overrideStylesOverlay?: React.CSSProperties;
+  // CSS styles to apply to the "square" element directly surrounding the spinner.
+  overrideStylesSquare?: React.CSSProperties;
+}
 
 export const SpinnerOverlay = ({dark = false,
                                  opacity = 0,
