@@ -89,10 +89,11 @@ export const styles = reactStyles({
   }
 });
 
+const pageId = 'homepage';
+
 export const Homepage = withUserProfile()(class extends React.Component<
   { profileState: { profile: Profile, reload: Function } },
-  { accessTasksLoaded: boolean,
-    accessTasksRemaining: boolean,
+  { accessTasksRemaining: boolean,
     betaAccessGranted: boolean,
     billingProjectInitialized: boolean,
     dataUseAgreementCompleted: boolean,
@@ -106,13 +107,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
     videoOpen: boolean,
     videoLink: string
   }> {
-  private pageId = 'homepage';
   private timer: NodeJS.Timer;
 
   constructor(props: any) {
     super(props);
     this.state = {
-      accessTasksLoaded: false,
       accessTasksRemaining: undefined,
       betaAccessGranted: undefined,
       billingProjectInitialized: false,
@@ -129,19 +128,64 @@ export const Homepage = withUserProfile()(class extends React.Component<
     };
   }
 
-  componentDidMount() {
-    this.validateNihToken();
-    this.callProfile();
-    this.checkBillingProjectStatus();
+  static getDerivedStateFromProps(props, state) {
+    const {workbenchAccessTasks} = queryParamsStore.getValue();
+    const profile = props.profileState.profile;
+
+    let accessTasksRemaining = false;
+    if (workbenchAccessTasks) {
+      accessTasksRemaining = true;
+    } else {
+      try {
+        if (serverConfigStore.getValue().enforceRegistered) {
+          accessTasksRemaining = !hasRegisteredAccessFetch(profile.dataAccessLevel);
+        } else {
+          accessTasksRemaining = false;
+        }
+      } catch (ex) {
+        console.error('error fetching config: ' + ex.toString());
+      }
+    }
+
+    const firstVisit = !profile.pageVisits || !profile.pageVisits.some(v => v.page === pageId);
+    return {
+      accessTasksRemaining: accessTasksRemaining,
+      betaAccessGranted: !!profile.betaAccessBypassTime,
+      billingProjectInitialized: profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready,
+      dataUseAgreementCompleted: RegistrationTasksMap['dataUseAgreement'].isComplete(profile),
+      eraCommonsLinked: RegistrationTasksMap['eraCommons'].isComplete(profile),
+      firstVisit: firstVisit,
+      quickTour: firstVisit && !accessTasksRemaining,
+      trainingCompleted: RegistrationTasksMap['complianceTraining'].isComplete(profile),
+      twoFactorAuthCompleted: RegistrationTasksMap['twoFactorAuth'].isComplete(profile),
+    };
+  }
+
+  async componentDidMount() {
+    const {profileState: {reload}} = this.props;
+
+    await this.validateNihToken();
+    await profileApi().syncComplianceTrainingStatus();
+    await profileApi().syncTwoFactorAuthStatus();
+
+    // Trigger the profile store to reload.
+    reload();
   }
 
   componentDidUpdate(prevProps) {
     const {profileState: {profile}} = this.props;
-    if (!this.state.billingProjectInitialized) {
-      this.checkBillingProjectStatus();
+    const oldProfile = prevProps.profileState.profile;
+
+    if (!fp.isEmpty(profile)) {
+      if (!profile.pageVisits || !profile.pageVisits.some(v => v.page === pageId)) {
+        console.log('Setting first page visit');
+        profileApi().updatePageVisits({ page: pageId});
+      }
     }
-    if (!fp.isEqual(prevProps.profileState.profile, profile)) {
-      this.callProfile();
+
+    if (!fp.isEmpty(profile) && !profile.betaAccessRequestTime) {
+      console.log('Requesting beta access');
+      profileApi().requestBetaAccess();
     }
   }
 
@@ -160,97 +204,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
     }
   }
 
-  setFirstVisit() {
-    this.setState({firstVisit: true});
-    profileApi().updatePageVisits({ page: this.pageId});
-  }
-
-  async callProfile() {
-    const {profileState: {profile, reload}} = this.props;
-
-    if (fp.isEmpty(profile)) {
-      setTimeout(() => {
-        reload();
-      }, 10000);
-    } else {
-
-      if (!profile.betaAccessRequestTime) {
-        profileApi().requestBetaAccess();
-      }
-      if (profile.pageVisits) {
-        if (!profile.pageVisits.some(v => v.page === this.pageId)) {
-          this.setFirstVisit();
-        }
-        if (profile.pageVisits.some(v => v.page === 'moodle')) {
-          this.setState({firstVisitTraining: false});
-        }
-      } else {
-        // page visits is null; is first visit
-        this.setFirstVisit();
-      }
-
-      this.setState({
-        eraCommonsLinked: getRegistrationTasksMap()['eraCommons'].isComplete(profile),
-        dataUseAgreementCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
-          (() => getRegistrationTasksMap()['dataUseAgreement'].isComplete(profile))() : true)
-      });
-
-      try {
-        const result = await profileApi().syncComplianceTrainingStatus();
-        this.setState({
-          trainingCompleted: getRegistrationTasksMap()['complianceTraining'].isComplete(result)
-        });
-      } catch (ex) {
-        this.setState({trainingCompleted: false});
-        console.error('error fetching moodle training status');
-      }
-
-      try {
-        const result = await profileApi().syncTwoFactorAuthStatus();
-        this.setState({
-          twoFactorAuthCompleted: getRegistrationTasksMap()['twoFactorAuth'].isComplete(result)
-        });
-      } catch (ex) {
-        this.setState({twoFactorAuthCompleted: false});
-        console.error('error fetching two factor auth status');
-      }
-
-      this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
-
-      const {workbenchAccessTasks} = queryParamsStore.getValue();
-      if (workbenchAccessTasks) {
-        this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
-      } else {
-        try {
-          if (serverConfigStore.getValue().enforceRegistered) {
-            this.setState({
-              accessTasksRemaining: !hasRegisteredAccessFetch(profile.dataAccessLevel),
-              accessTasksLoaded: true
-            });
-          } else {
-            this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
-          }
-        } catch (ex) {
-          console.error('error fetching config: ' + ex.toString());
-        }
-      }
-    }
-
-    this.setState(
-        {quickTour: this.state.firstVisit && this.state.accessTasksRemaining === false});
-  }
-
-  checkBillingProjectStatus() {
-    const {profileState: {profile, reload}} = this.props;
-    if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
-      this.setState({billingProjectInitialized: true});
-    } else {
-      this.timer = setTimeout(() => {
-        reload();
-      }, 10000);
-    }
-  }
-
   openVideo(videoLink: string): void {
     this.setState({videoOpen: true, videoLink: videoLink});
   }
@@ -258,10 +211,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
   render() {
     const {billingProjectInitialized, betaAccessGranted,
-      videoOpen, accessTasksLoaded, accessTasksRemaining, eraCommonsLinked,
+      videoOpen, accessTasksRemaining, eraCommonsLinked,
       eraCommonsError, firstVisitTraining, trainingCompleted, quickTour, videoLink,
       twoFactorAuthCompleted, dataUseAgreementCompleted
     } = this.state;
+    const {profileState: {profile}} = this.props;
 
     const canCreateWorkspaces = billingProjectInitialized ||
       serverConfigStore.getValue().useBillingProjectBuffer;
@@ -304,7 +258,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       <div style={styles.backgroundImage}>
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <div style={styles.singleCard}>
-            {accessTasksLoaded ?
+            {!fp.isEmpty(profile) ?
               (accessTasksRemaining ?
                 (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
                                         eraCommonsError={eraCommonsError}
@@ -312,7 +266,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                         firstVisitTraining={firstVisitTraining}
                                         betaAccessGranted={betaAccessGranted}
                                         twoFactorAuthCompleted={twoFactorAuthCompleted}
-                                        dataUseAgreementCompleted={dataUseAgreementCompleted}/>
+                                        dataUseAgreementCompleted={dataUseAgreementCompleted}
+                                        onBypassStateUpdate={async () => await this.props.profileState.reload()}
+                    />
                 ) : (
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                     <div style={styles.contentWrapperLeft}>
