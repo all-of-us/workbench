@@ -87,7 +87,6 @@ export const WorkspaceLibrary = withUserProfile()
   componentDidUpdate(prevProps, prevState) {
     // Reload libraries when switching tabs
     if (this.state.currentTab !== prevState.currentTab) {
-      console.log('here');
       this.updateListedWorkspaces(this.state.currentTab);
     }
   }
