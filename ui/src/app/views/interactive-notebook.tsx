@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {ClrIcon} from 'app/components/icons';
-import {SpinnerOverlay} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
@@ -13,6 +13,10 @@ import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ClusterStatus} from 'generated/fetch';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from "../components/modals";
+import {Button} from "../components/buttons";
+import {CheckBox} from "../components/inputs";
+import {ConfirmPlaygroundModeModal} from './confirm-playground-mode-modal';
 
 
 const styles = reactStyles({
@@ -169,6 +173,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(
               (<iframe style={styles.previewFrame} srcDoc={this.state.html}></iframe>) :
               (<SpinnerOverlay/>)}
           </div>
+          <ConfirmPlaygroundModeModal onClose={null} onContinue={null}/>
         </div>
       );
     }
