@@ -161,9 +161,11 @@ class NewDataSetModal extends React.Component<Props, State> {
             notebookName: this.state.notebookName,
             newNotebook: this.state.newNotebook
           });
-        navigate(['workspaces',
-          workspaceNamespace,
-          workspaceId, 'notebooks', this.state.notebookName + '.ipynb']);
+        // Open notebook in a new tab and return back to the Data tab
+        const notebookUrl = '\\workspaces\\' + workspaceNamespace + '\\' + workspaceId +
+          '\\notebooks\\' + this.state.notebookName + '.ipynb';
+        window.history.back();
+        window.open(notebookUrl);
       }
     } catch (e) {
       if (e.status === 409) {
