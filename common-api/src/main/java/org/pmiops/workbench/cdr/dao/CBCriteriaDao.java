@@ -1,12 +1,13 @@
 package org.pmiops.workbench.cdr.dao;
 
-import java.util.List;
-import java.util.Set;
 import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Some of our trees are polyhierarchical(Snomed and drug). Since a node may exist multiple times in
@@ -164,7 +165,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
               + "join concept c1 on (cr.concept_id_2 = c1.concept_id "
               + "and cr.concept_id_1 = :conceptId "
               + "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2 "
-              + "and c.domain_id = 'DRUG' and c.type = 'RXNORM'",
+              + "and c.domain_id = 'DRUG' and c.type = 'RXNORM' order by c.est_count desc",
       nativeQuery = true)
   List<CBCriteria> findDrugIngredientByConceptId(@Param("conceptId") String conceptId);
 }
