@@ -253,7 +253,7 @@ export class PopupTrigger extends React.Component {
 
   close() {
     this.setState({open: false});
-    this.props.onCancel();
+    this.props.onClose();
   }
 
   render() {
