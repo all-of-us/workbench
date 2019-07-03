@@ -118,7 +118,7 @@ export const WorkspaceLibrary = withUserProfile()
   }
 
   render() {
-    const {profile} = this.props.profileState;
+    const {profile: {username}} = this.props.profileState;
     const {currentTab, workspaceList, workspacesLoading} = this.state;
     return <div style={{display: 'flex', flexDirection: 'row', height: '100%'}}>
       <div style={styles.navPanel}>
@@ -134,7 +134,7 @@ export const WorkspaceLibrary = withUserProfile()
         </div>
       </div>
       <div style={{padding: '1rem', width: '100%'}}>
-        <Header>RESEARCHER WORKBENCH WORKSPACE LIBRARY</Header>
+        <Header style={{textTransform: 'uppercase'}}>Researcher Workbench Workspace Library</Header>
         <div style={{color: colors.primary, fontSize: 16, marginTop: '1rem'}}>
           Search through featured and public workspaces.
         </div>
@@ -157,7 +157,7 @@ export const WorkspaceLibrary = withUserProfile()
                 {workspaceList.map(wp => {
                   return <WorkspaceCard key={wp.workspace.name}
                                         wp={wp}
-                                        userEmail={profile.username}
+                                        userEmail={username}
                                         reload={() => {this.reloadPublishedWorkspaces(); }}/>;
                 })}
               </div>)}
