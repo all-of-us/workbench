@@ -39,7 +39,9 @@ export function listTypeDisplay(parameter): string {
       'AGE': 'Age',
       'DECEASED': 'Deceased'
     }[type] || '';
-  } else if (type === CriteriaType.SNOMED) {
+  } else if (
+      [DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT].includes(domainId)
+  ) {
     return parameter.code;
   }
 }
