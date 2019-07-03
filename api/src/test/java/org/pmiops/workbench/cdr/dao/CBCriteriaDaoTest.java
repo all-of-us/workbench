@@ -256,8 +256,7 @@ public class CBCriteriaDaoTest {
     cbCriteriaDao.save(drugCriteriaIngredient);
 
     List<CBCriteria> drugList =
-        cbCriteriaDao.findDrugIngredientByConceptId(
-            Arrays.asList("1"), DomainType.DRUG.toString(), CriteriaType.RXNORM.toString());
+        cbCriteriaDao.findDrugIngredientByConceptId("1", DomainType.DRUG.toString());
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
   }

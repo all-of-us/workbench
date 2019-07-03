@@ -173,9 +173,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(
       value =
-          "select c from CBCriteria c where conceptId in (:conceptIds) and domainId = :domain and type = :type and match(synonyms, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
+          "select c from CBCriteria c where conceptId = :conceptId and domainId = :domain and match(synonyms, concat('+[', :domain, '_rank1]')) > 0 order by c.count desc")
   List<CBCriteria> findDrugIngredientByConceptId(
-      @Param("conceptIds") List<String> conceptIds,
-      @Param("domain") String domain,
-      @Param("type") String type);
+      @Param("conceptId") String conceptId, @Param("domain") String domain);
 }

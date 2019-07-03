@@ -268,10 +268,20 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       Long cdrVersionId, Long conceptId) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    final List<Criteria> criteriaList = criteriaDao.findDrugIngredientByConceptId(conceptId);
-    criteriaResponse.setItems(
-        criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
-    return ResponseEntity.ok(criteriaResponse);
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      final List<CBCriteria> criteriaList =
+          cbCriteriaDao.findDrugIngredientByConceptId(
+              String.valueOf(conceptId), DomainType.DRUG.toString());
+      criteriaResponse.setItems(
+          criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
+      return ResponseEntity.ok(criteriaResponse);
+    } else {
+      // TODO:Remove when new search is finished - freemabd
+      final List<Criteria> criteriaList = criteriaDao.findDrugIngredientByConceptId(conceptId);
+      criteriaResponse.setItems(
+          criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+      return ResponseEntity.ok(criteriaResponse);
+    }
   }
 
   /**
