@@ -61,12 +61,12 @@ const styles = reactStyles({
   queryTitle: {
     fontSize: '16px',
     fontWeight: 600,
-    color: colors.purple[0],
+    color: colors.primary,
     lineHeight: '22px',
   },
   queryContent: {
     fontSize: '13px',
-    color: colors.black[0],
+    color: colors.primary,
     lineHeight: '30px',
     paddingBottom: '0.6rem',
   },
@@ -79,7 +79,7 @@ const styles = reactStyles({
     paddingBottom: '0.5rem',
     fontSize: '16px',
     fontWeight: 600,
-    color: colors.purple[0],
+    color: colors.primary,
     lineHeight: '22px',
   },
   graphBorder: {
@@ -89,7 +89,7 @@ const styles = reactStyles({
   groupHeader: {
     backgroundColor: '#E2E2EA',
     padding: '0.2rem',
-    color: colors.purple[0],
+    color: colors.primary,
     marginTop: '1rem'
   },
   groupText: {
@@ -101,11 +101,11 @@ const styles = reactStyles({
   groupContent: {
     paddingTop: '0.2rem',
     paddingLeft: '0.75rem',
-    color: colors.black[0],
+    color: colors.primary,
     fontSize: '13px'
   },
   print: {
-    color: colors.purple[0],
+    color: colors.accent,
     cursor: 'pointer'
   },
   printDisabled: {

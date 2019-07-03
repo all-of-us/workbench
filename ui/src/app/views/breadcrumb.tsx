@@ -61,13 +61,11 @@ export const getTrail = (type: BreadcrumbType, data): {label: string, url: strin
     case BreadcrumbType.ConceptSet:
       return [
         ...getTrail(BreadcrumbType.Workspace, data),
-        {label: 'Concept Sets', url: `${prefix}/concepts/sets`},
         {label: conceptSet ? conceptSet.name : '...', url: `${prefix}/concepts/sets/${csid}`}
       ];
     case BreadcrumbType.Cohort:
       return [
         ...getTrail(BreadcrumbType.Workspace, data),
-        {label: 'Cohorts', url: `${prefix}/cohorts`},
         {label: cohort ? cohort.name : '...', url: `${prefix}/cohorts/${cid}/review/participants`}
       ];
     case BreadcrumbType.Participant:

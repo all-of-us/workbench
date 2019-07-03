@@ -33,10 +33,6 @@
   width:100%;
 }
 
-.search-width {
-  width:100%;
-}
-
 .tree-container {
   margin: 3rem 0 1rem;
   width: 99%;
@@ -47,8 +43,8 @@
   border-radius: 3px;
 }
 
-.tree-container.ingredients {
-  margin-top: 3.5rem;
+.tree-container.no-search {
+  margin-top: 1rem;
 }
 
 .tree-header {

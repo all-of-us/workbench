@@ -16,14 +16,14 @@ import {ResearchPurposeDescription, ResearchPurposeItems, specificPopulations} f
 
 const styles = reactStyles({
   mainHeader: {
-    fontSize: '20px', fontWeight: 600, color: colors.purple[0], marginBottom: '0.5rem',
+    fontSize: '20px', fontWeight: 600, color: colors.primary, marginBottom: '0.5rem',
     display: 'flex', flexDirection: 'row'
   },
   sectionHeader: {
-    fontSize: '16px', fontWeight: 600, color: colors.purple[0], marginTop: '1rem'
+    fontSize: '16px', fontWeight: 600, color: colors.primary, marginTop: '1rem'
   },
   sectionText: {
-    fontSize: '14px', lineHeight: '24px', color: colors.purple[0], marginTop: '0.3rem'
+    fontSize: '14px', lineHeight: '24px', color: colors.primary, marginTop: '0.3rem'
   }
 });
 

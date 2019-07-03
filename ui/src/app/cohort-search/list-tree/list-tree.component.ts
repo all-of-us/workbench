@@ -1,6 +1,6 @@
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {ListNodeComponent} from 'app/cohort-search/list-node/list-node.component';
-import {DomainType, TreeType} from 'generated';
+import {DomainType} from 'generated';
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
@@ -12,19 +12,10 @@ import {DomainType, TreeType} from 'generated';
   templateUrl: './list-tree.component.html',
   styleUrls: ['./list-tree.component.css']
 })
-export class ListTreeComponent extends ListNodeComponent implements OnInit, OnChanges {
+export class ListTreeComponent extends ListNodeComponent implements OnInit {
   @Input() back: Function;
   _type: string;
   name: string;
-
-  ngOnChanges() {
-    if (this.node.type === TreeType[TreeType.ICD9]
-      || this.node.type === TreeType[TreeType.ICD10]
-      || this.node.type === TreeType[TreeType.CPT]
-      || this.node.type === TreeType[TreeType.SNOMED]) {
-      super.ngOnInit();
-    }
-  }
 
   ngOnInit() {
     super.ngOnInit();
@@ -33,7 +24,8 @@ export class ListTreeComponent extends ListNodeComponent implements OnInit, OnCh
   }
 
   get showSearch() {
-    return this.node.domainId !== DomainType[DomainType.PERSON];
+    return this.node.domainId !== DomainType[DomainType.PERSON]
+      && this.node.domainId !== DomainType.VISIT;
   }
 
   get showHeader() {
@@ -42,19 +34,7 @@ export class ListTreeComponent extends ListNodeComponent implements OnInit, OnCh
       && this.node.domainId !== DomainType.VISIT;
   }
 
-  get showDropDown() {
-    return false;
-    // return !this.isEmpty && this.node.type !== TreeType[TreeType.SNOMED];
-  }
-
   get isEmpty() {
     return !this.loading && (this.empty || this.error);
-  }
-
-  optionChange(flag) {
-    if (flag) {
-      this._type = flag;
-      setTimeout(() => super.loadChildren(true));
-    }
   }
 }

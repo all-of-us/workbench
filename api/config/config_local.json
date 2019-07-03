@@ -62,9 +62,10 @@
     "unsafeAllowSelfBypass": true
   },
   "cohortbuilder": {
-    "enableListSearch": false
+    "enableListSearch": true
   },
   "featureFlags": {
+    "enableLeoWelder": false,
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": true
   }

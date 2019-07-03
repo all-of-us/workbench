@@ -18,14 +18,14 @@ const styles = reactStyles({
     display: 'flex',
     height: 40,
     backgroundColor: colors.white,
-    border: 'solid thin ' + colors.gray[5],
+    border: 'solid thin ' + colors.light, // check this
     fontSize: '16px'
   },
   navBarItem: {
     display: 'flex',
     height: '100%',
-    color: colors.blue[9],
-    borderRight: '1px solid ' + colors.gray[5],
+    color: colors.primary,
+    borderRight: '1px solid ' + colors.light,
     backgroundColor: 'rgba(38,34,98,0.05)',
     alignItems: 'center',
     padding: '0 20px'

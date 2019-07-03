@@ -8,14 +8,14 @@ import { reactStyles } from 'app/utils';
 const styles = reactStyles({
   container: {
     backgroundColor: colors.white,
-    color: colors.purple[0],
+    color: colors.primary,
     flex: '0 0 420px',
     borderRadius: 8,
     marginBottom: '10px',
     padding: 21
   },
   title: {
-    color: colors.purple[0],
+    color: colors.primary,
     width: 420,
     fontSize: 16,
     fontWeight: 600,
@@ -33,7 +33,7 @@ const styles = reactStyles({
     height: 38
   },
   successButton: {
-    backgroundColor: colors.green[0],
+    backgroundColor: colors.success,
     cursor: 'default'
   }
 });

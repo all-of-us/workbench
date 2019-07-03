@@ -313,6 +313,12 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
+  public ManagedGroupWithMembers getGroup(String groupName) {
+    GroupsApi groupsApi = groupsApiProvider.get();
+    return retryHandler.run((context) -> groupsApi.getGroup(groupName));
+  }
+
+  @Override
   public ManagedGroupWithMembers createGroup(String groupName) {
     GroupsApi groupsApi = groupsApiProvider.get();
     return retryHandler.run((context) -> groupsApi.createGroup(groupName));

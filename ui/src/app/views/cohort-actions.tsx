@@ -14,7 +14,7 @@ import * as React from 'react';
 
 const styles = reactStyles({
   cohortsHeader: {
-    color: colors.blue[7],
+    color: colors.primary,
     fontSize: '20px',
     lineHeight: '24px',
     fontWeight: 600,
@@ -33,7 +33,7 @@ const styles = reactStyles({
     boxShadow: '0 0 0 0'
   },
   cardName: {
-    fontSize: '18px', fontWeight: 600, lineHeight: '22px', color: colors.blue[7],
+    fontSize: '18px', fontWeight: 600, lineHeight: '22px', color: colors.primary,
     wordBreak: 'break-word', textOverflow: 'ellipsis', overflow: 'hidden',
     display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'
   },

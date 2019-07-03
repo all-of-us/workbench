@@ -260,7 +260,7 @@ class NewDataSetModal extends React.Component<Props, State> {
                     onChange={() => this.changeExportToNotebook()}
                     checked={this.state.exportToNotebook} />
           <div style={{marginLeft: '.5rem',
-            color: colors.black[0]}}>Export to notebook</div>
+            color: colors.primary}}>Export to notebook</div>
         </div>
         {exportToNotebook && <React.Fragment>
           {notebooksLoading && <SpinnerOverlay />}

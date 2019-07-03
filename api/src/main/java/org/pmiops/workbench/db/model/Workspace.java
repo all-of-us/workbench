@@ -85,6 +85,7 @@ public class Workspace {
   private Short activeStatus;
   private Short billingMigrationStatus =
       StorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.OLD);
+  private boolean published;
 
   private boolean diseaseFocusedResearch;
   private String diseaseOfFocus;
@@ -225,6 +226,15 @@ public class Workspace {
 
   public void setLastAccessedTime(Timestamp lastAccessedTime) {
     this.lastAccessedTime = lastAccessedTime;
+  }
+
+  @Column(name = "published")
+  public boolean getPublished() {
+    return published;
+  }
+
+  public void setPublished(boolean published) {
+    this.published = published;
   }
 
   @Column(name = "rp_disease_focused_research")
