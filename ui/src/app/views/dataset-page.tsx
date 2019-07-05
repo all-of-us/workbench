@@ -174,7 +174,7 @@ const BoxHeader = ({text= '', header =  '', subHeader = '', style= {}, ...props}
   return  <div style={styles.selectBoxHeader}>
     <div style={{display: 'flex', marginLeft: '0.2rem'}}>
       <CircleWithText text={text} width='23.78px' height='23.78px'
-                      style={{fill: colorWithWhiteness(colors.dark, 0.5), marginTop: '0.5rem'}}/>
+                      style={{fill: colorWithWhiteness(colors.primary, 0.5), marginTop: '0.5rem'}}/>
       <label style={{marginLeft: '0.5rem', color: colors.primary, display: 'flex', ...style}}>
         <div style={{fontWeight: 600, marginRight: '0.3rem'}}>{header}</div>
         ({subHeader})
