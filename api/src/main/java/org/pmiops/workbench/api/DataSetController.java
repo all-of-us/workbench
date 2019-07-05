@@ -262,7 +262,7 @@ public class DataSetController implements DataSetApiDelegate {
 
               TableResult queryResponse =
                   bigQueryService.executeQuery(
-                      bigQueryService.filterBigQueryConfig(queryJobConfiguration), 60000l);
+                      bigQueryService.filterBigQueryConfig(queryJobConfiguration), 30000l);
               queryResponse
                   .getSchema()
                   .getFields()
@@ -324,9 +324,9 @@ public class DataSetController implements DataSetApiDelegate {
                       });
               break;
             } catch (Exception ex) {
-              if (ex.getCause() != null
+              if ((ex.getCause() != null
                   && ex.getCause().getMessage() != null
-                  && ex.getCause().getMessage().contains("Read timed out")) {
+                  && ex.getCause().getMessage().contains("Read timed out"))) {
                 rowsRequested = (rowsRequested / 2);
                 if (rowsRequested == 0) {
                   throw new GatewayTimeoutException(
