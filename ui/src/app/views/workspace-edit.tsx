@@ -385,21 +385,6 @@ export interface WorkspaceEditState {
   hovering: boolean;
 }
 
-function getDiseaseSuggestions(query) {
-  return new Promise((resolve, reject) => {
-    const url = 'https://firecloud-orchestration.dsde-dev.broadinstitute.org/duos/autocomplete/' + query;
-    fetch(encodeURI(url)).then(function(response) {
-      return response.json();
-    }).then(function(matches) {
-      const labeledMatches = fp.filter((elt) => elt.hasOwnProperty("label"))(matches);
-      const diseases = fp.map((elt) => elt['label'])(labeledMatches);
-      resolve(diseases);
-    }).catch(function(error) {
-      reject(error);
-    });
-  });
-}
-
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
 
@@ -441,10 +426,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         loading: false,
         showUnderservedPopulationDetails: false,
         showStigmatizationDetails: false,
-	      autocompleteLoading: false,
+        autocompleteLoading: false,
         autocompleteDiseases: [],
         diseaseHover: [],
-	      dropDown: false,
+        dropDown: false,
         searchTerm: '',
         hovering: false
       };
@@ -464,20 +449,20 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         return;
       }
       const self = this;
-      const searchTerm = this.state.searchTerm;
-      const url = 'https://firecloud-orchestration.dsde-dev.broadinstitute.org/duos/autocomplete/' + value;
-      fetch(encodeURI(url)).then(function(response) {
+      const url = 'https://firecloud-orchestration.dsde-dev.broadinstitute.org' +
+        '/duos/autocomplete/' + value;
+      fetch(encodeURI(url)).then((response) => {
         return response.json();
-      }).then(function(matches) {
-	      const labeledMatches = fp.filter((elt) => elt.hasOwnProperty("label"))(matches);
-	      const labels = fp.map((elt) => elt['label'])(labeledMatches);
+      }).then((matches) => {
+        const labeledMatches = fp.filter((elt) => elt.hasOwnProperty('label'))(matches);
+        const labels = fp.map((elt) => elt['label'])(labeledMatches);
         const diseaseHover = labels.map(() => false);
-	      self.setState({
+        self.setState({
           autocompleteDiseases: labels,
           diseaseHover: diseaseHover,
           autocompleteLoading: false,
           dropDown: true
-        })
+        });
       });
     }
 
@@ -736,7 +721,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     value={this.state.workspace.researchPurpose[rp.shortName]}
                     onChange={v => this.updateResearchPurpose(rp.shortName, v)}
                     children={rp.shortName === 'diseaseFocusedResearch' ?
-		                <div style={{position: 'relative'}}>
+                    <div style={{position: 'relative'}}>
                       <TooltipTrigger
                         content='You must select disease focused research to enter
                             a disease of focus'
@@ -745,26 +730,38 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                           style={{width: '90%', border: '1px solid #9a9a9', borderRadius: '5px'}}
                           onChange={e => {
                             this.searchTermChangedEvent(e);
-                            this.setState(fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], e));
+                            this.setState(fp.set([
+                              'workspace',
+                              'researchPurpose',
+                              'diseaseOfFocus'
+                            ], e));
                           }}
-                          //onBlur={() => this.setState({dropDown: false})}
                           placeholder='Name of Disease'
                           disabled={!this.state.workspace.researchPurpose.diseaseFocusedResearch}/>
                       </TooltipTrigger>
-                      {this.state.workspace.researchPurpose.diseaseFocusedResearch && this.showSearchResults &&
-                        <div data-test-id='drop-down' style={{...styles.dropdownMenu, ...styles.open, minWidth: '90%'}}>
-                          {this.state.autocompleteDiseases.map((disease, i) => {
-                          return (
-                            <div key={i} style={this.state.diseaseHover[i] ? styles.boxHover : styles.box}
-                                onMouseOver={() => this.setState({diseaseHover: this.toggleDiseaseHover(i)})}
-                                onMouseOut={() => this.setState({diseaseHover: this.toggleDiseaseHover(i)})}
+                      {this.state.workspace.researchPurpose.diseaseFocusedResearch &&
+                       this.showSearchResults &&
+                        <div data-test-id='drop-down' style={{...styles.dropdownMenu,
+                          ...styles.open, minWidth: '90%'}}>
+                          {this.state.autocompleteDiseases.map((disease, j) => {
+                            return (
+                            <div key={j} style={this.state.diseaseHover[j] ?
+                              styles.boxHover : styles.box}
+                                onMouseOver={() =>
+                                  this.setState({diseaseHover: this.toggleDiseaseHover(j)})}
+                                onMouseOut={() =>
+                                  this.setState({diseaseHover: this.toggleDiseaseHover(j)})}
                                 onClick={() => {
-                                  this.setState(fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], disease));
+                                  this.setState(fp.set([
+                                    'workspace',
+                                    'researchPurpose',
+                                    'diseaseOfFocus'
+                                  ], disease));
                                   this.setState({dropDown: false});
                                 }}>
                               <h5 style={styles.boxHoverElement}>{disease}</h5>
                             </div>
-                          );
+                            );
                           })}
                         </div>}
                     </div> : undefined}/>)}
