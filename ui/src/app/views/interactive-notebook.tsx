@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-import {Component, Input} from '@angular/core';
-import * as Cookies from 'js-cookie';
-=======
 import {Component} from '@angular/core';
+import * as Cookies from 'js-cookie';
 import * as fp from 'lodash/fp';
->>>>>>> 91190a9fb7647006caa24147a9e7aa6539382c44
 import * as React from 'react';
 
 import {ClrIcon} from 'app/components/icons';
@@ -13,15 +9,9 @@ import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-<<<<<<< HEAD
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {navigate, urlParamsStore} from 'app/utils/navigation';
-=======
-import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
->>>>>>> 91190a9fb7647006caa24147a9e7aa6539382c44
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConfirmPlaygroundModeModal} from 'app/views/confirm-playground-mode-modal';
@@ -151,14 +141,14 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         this.setState({showPlaygroundModeModal: true});
       }
     }
-    
+
     private navigateOldNotebooksPage(playgroundMode: boolean) {
       const queryParams = {
         playgroundMode: playgroundMode
       };
 
-      navigate(['workspaces', this.props.billingProjectId, this.props.workspaceName,
-        'notebooks', this.props.notebookName], {'queryParams': queryParams});
+      navigate(['workspaces', this.props.urlParams.ns, this.props.urlParams.wsid,
+        'notebooks', this.props.urlParams.nbName], {'queryParams': queryParams});
     }
 
     private navigatePlaygroundMode() {
