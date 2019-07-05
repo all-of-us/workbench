@@ -10,7 +10,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {TwoColPaddedTable} from 'app/components/tables';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {isBlank, reactStyles, ReactWrapperBase, sliceByHalfLength, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {currentWorkspaceStore, navigate, userProfileStore} from 'app/utils/navigation';
 import {CdrVersion, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -259,7 +259,45 @@ const styles = reactStyles({
   },
   checkboxRow: {
     display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
-  }
+  },
+  dropdownMenu: {
+    display: 'block',
+    maxHeight: '12rem',
+    minHeight: '30px',
+    visibility: 'visible',
+    overflowY: 'scroll',
+    width: '35%',
+    marginTop: '.25rem',
+    zIndex: 100,
+    border: '1px solid #979797',
+    borderRadius: '5px',
+    backgroundColor: '#FFFFFF',
+  },
+  open: {
+    position: 'absolute',
+    backgroundColor: colors.white,
+    border: '1px solid'
+  },
+  box: {
+    borderRadius: '5px',
+    paddingTop: '0.2rem',
+    paddingLeft: '0.2rem',
+    color: '#262262',
+  },
+  boxHover: {
+    background: 'rgb(234, 243, 250)',
+    color: '#262262',
+    paddingTop: '0.2rem',
+    paddingLeft: '0.2rem',
+  },
+  boxHoverElement: {
+    color: '#262262',
+    margin: 0,
+    padding: 0,
+    fontFamily: 'Montserrat',
+    fontSize: '14px',
+    lineHeight: '32px',
+  },
 });
 
 
@@ -339,6 +377,27 @@ export interface WorkspaceEditState {
   loading: boolean;
   showUnderservedPopulationDetails: boolean;
   showStigmatizationDetails: boolean;
+  autocompleteLoading: boolean;
+  autocompleteDiseases: Array<string>;
+  diseaseHover: Array<boolean>;
+  dropDown: boolean;
+  searchTerm: string;
+  hovering: boolean;
+}
+
+function getDiseaseSuggestions(query) {
+  return new Promise((resolve, reject) => {
+    const url = 'https://firecloud-orchestration.dsde-dev.broadinstitute.org/duos/autocomplete/' + query;
+    fetch(encodeURI(url)).then(function(response) {
+      return response.json();
+    }).then(function(matches) {
+      const labeledMatches = fp.filter((elt) => elt.hasOwnProperty("label"))(matches);
+      const diseases = fp.map((elt) => elt['label'])(labeledMatches);
+      resolve(diseases);
+    }).catch(function(error) {
+      reject(error);
+    });
+  });
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
@@ -381,8 +440,45 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         cloneUserRole: false,
         loading: false,
         showUnderservedPopulationDetails: false,
-        showStigmatizationDetails: false
+        showStigmatizationDetails: false,
+	      autocompleteLoading: false,
+        autocompleteDiseases: [],
+        diseaseHover: [],
+	      dropDown: false,
+        searchTerm: '',
+        hovering: false
       };
+      this.searchTermChangedEvent = fp.debounce(300, this.diseaseSearch);
+    }
+
+    get showSearchResults(): boolean {
+      return !this.state.autocompleteLoading &&
+        this.state.autocompleteDiseases.length > 0 &&
+        !isBlank(this.state.searchTerm) && this.state.dropDown;
+    }
+
+    diseaseSearch(value: string): void {
+      this.setState({autocompleteLoading: true, autocompleteDiseases: [], searchTerm: value});
+      if (!value.trim()) {
+        this.setState({autocompleteLoading: false, dropDown: false});
+        return;
+      }
+      const self = this;
+      const searchTerm = this.state.searchTerm;
+      const url = 'https://firecloud-orchestration.dsde-dev.broadinstitute.org/duos/autocomplete/' + value;
+      fetch(encodeURI(url)).then(function(response) {
+        return response.json();
+      }).then(function(matches) {
+	      const labeledMatches = fp.filter((elt) => elt.hasOwnProperty("label"))(matches);
+	      const labels = fp.map((elt) => elt['label'])(labeledMatches);
+        const diseaseHover = labels.map(() => false);
+	      self.setState({
+          autocompleteDiseases: labels,
+          diseaseHover: diseaseHover,
+          autocompleteLoading: false,
+          dropDown: true
+        })
+      });
     }
 
     componentDidMount() {
@@ -494,6 +590,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     specificPopulationSelected(populationEnum): boolean {
       return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
+    }
+
+    toggleDiseaseHover(diseaseIndex) {
+      this.state.diseaseHover[diseaseIndex] = !this.state.diseaseHover[diseaseIndex];
+      return this.state.diseaseHover;
     }
 
     async saveWorkspace() {
@@ -635,23 +736,39 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     value={this.state.workspace.researchPurpose[rp.shortName]}
                     onChange={v => this.updateResearchPurpose(rp.shortName, v)}
                     children={rp.shortName === 'diseaseFocusedResearch' ?
+		                <div style={{position: 'relative'}}>
                       <TooltipTrigger
                         content='You must select disease focused research to enter
-                          a disease of focus'
-                        disabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}>
+                            a disease of focus'
+                          disabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}>
                         <TextInput value={this.state.workspace.researchPurpose.diseaseOfFocus}
-                          style={{
-                            width: 'calc(50% - 2rem)',
-                            border: '1px solid #9a9a9',
-                            borderRadius: '5px'
+                          style={{width: '90%', border: '1px solid #9a9a9', borderRadius: '5px'}}
+                          onChange={e => {
+                            this.searchTermChangedEvent(e);
+                            this.setState(fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], e));
                           }}
-                          placeholder='Name of Disease' onChange={v =>
-                          this.setState(
-                            fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], v))}
+                          //onBlur={() => this.setState({dropDown: false})}
+                          placeholder='Name of Disease'
                           disabled={!this.state.workspace.researchPurpose.diseaseFocusedResearch}/>
-                      </TooltipTrigger> : undefined}/>
-              )}
-            </div>
+                      </TooltipTrigger>
+                      {this.state.workspace.researchPurpose.diseaseFocusedResearch && this.showSearchResults &&
+                        <div data-test-id='drop-down' style={{...styles.dropdownMenu, ...styles.open, minWidth: '90%'}}>
+                          {this.state.autocompleteDiseases.map((disease, i) => {
+                          return (
+                            <div key={i} style={this.state.diseaseHover[i] ? styles.boxHover : styles.box}
+                                onMouseOver={() => this.setState({diseaseHover: this.toggleDiseaseHover(i)})}
+                                onMouseOut={() => this.setState({diseaseHover: this.toggleDiseaseHover(i)})}
+                                onClick={() => {
+                                  this.setState(fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], disease));
+                                  this.setState({dropDown: false});
+                                }}>
+                              <h5 style={styles.boxHoverElement}>{disease}</h5>
+                            </div>
+                          );
+                          })}
+                        </div>}
+                    </div> : undefined}/>)}
+                </div>
             <div style={{display: 'flex', flexDirection: 'column', flex: '1 1 0'}}>
               {ResearchPurposeItems.slice(sliceByHalfLength(ResearchPurposeItems))
                 .map((rp, i) =>
@@ -666,7 +783,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                         style={{marginTop: '0.5rem'}}/> : undefined}/>
                 )}
             </div>
-          </div>
+            </div>
         </WorkspaceEditSection>
         <WorkspaceEditSection
           header={researchPurposeQuestions[1].header}
