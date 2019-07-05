@@ -2,7 +2,6 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {
-  dataSetApi,
   registerApiClient, workspacesApi,
 } from 'app/services/swagger-fetch-clients';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
@@ -40,7 +39,7 @@ describe('WorkspaceList', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
 
     // mocking because we don't have access to the angular service
-    reload.mockImplementation(async() => {
+    reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
       userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
     });
@@ -49,7 +48,7 @@ describe('WorkspaceList', () => {
     serverConfigStore.next({useBillingProjectBuffer: false, gsuiteDomain: 'abc'});
   });
 
-  it('displays the correct number of workspaces', async() => {
+  it('displays the correct number of workspaces', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
@@ -57,7 +56,7 @@ describe('WorkspaceList', () => {
     expect(cardNameList).toEqual(workspaceStubs.map(w => w.name));
   });
 
-  it('navigates when clicking on the workspace name', async() => {
+  it('navigates when clicking on the workspace name', async () => {
     const workspace = workspaceStubs[0];
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -65,7 +64,7 @@ describe('WorkspaceList', () => {
     expect(navigate).toHaveBeenCalledWith(['workspaces', workspace.namespace, workspace.id]);
   });
 
-  it('has the correct permissions classes', async() => {
+  it('has the correct permissions classes', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="workspace-card"]').first()
@@ -73,7 +72,7 @@ describe('WorkspaceList', () => {
       .toBe(WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION);
   });
 
-  it('fetches user roles before opening the share dialog', async() => {
+  it('fetches user roles before opening the share dialog', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     const userRolesSpy = jest.spyOn(workspacesApi(), 'getFirecloudWorkspaceUserRoles');
@@ -92,10 +91,5 @@ describe('WorkspaceList', () => {
     const shareModal = wrapper.find('[data-test-id="workspace-share-modal"]').first();
     expect(shareModal.prop('userRoles')).toEqual(userRolesStub);
   });
-
-  // TODO (RW-2625) Exercise a workspace share code path from the workspace list.
-
-  // Note: this spec is not testing the Popup menus on workspace cards due to an issue using
-  //    PopupTrigger in the test suite.
 
 });
