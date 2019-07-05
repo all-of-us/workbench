@@ -522,7 +522,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               accessLevel: ws.accessLevel
             }));
         }
-        navigate(['workspaces', workspace.namespace, workspace.id]);
+        navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
       } catch (error) {
         console.log(error);
         this.setState({loading: false});

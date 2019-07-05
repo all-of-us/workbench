@@ -171,7 +171,7 @@ export class WorkspaceCard extends React.Component<
                 <div style={styles.workspaceName}
                      data-test-id='workspace-card-name'
                      onClick={() => navigate(
-                         ['workspaces', wp.workspace.namespace, wp.workspace.id])}>
+                         ['workspaces', wp.workspace.namespace, wp.workspace.id, 'data'])}>
                   {wp.workspace.name}</div>
               </Clickable>
             </div>
