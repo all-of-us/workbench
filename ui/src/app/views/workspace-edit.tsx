@@ -17,94 +17,95 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 export const ResearchPurposeDescription =
-   'The AoU Research Program requires each user of AoU data to provide a \
-   meaningful description of the intended purpose of data use for each Workspace they \
-   create. The responses provided below will be posted publicly in the AoU Research Hub \
-   website to inform the AoU Research Participants. ';
+  <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
+   of <i>All of Us</i> data to provide a meaningful description of the intended purpose of data use
+   for each workspace they create. The responses provided below will be posted publicly in
+   the <i>All of Us</i> Research Hub website to inform research participants.</div>;
 
 export const ResearchPurposeItems = [
   {
     shortName: 'diseaseFocusedResearch',
     shortDescription: 'Disease-focused research',
-    longDescription: 'The primary purpose of the research is to learn more about a particular \
-    disease or disorder (for example, type 2 diabetes), a trait (for example, blood pressure), \
-    or a set of related conditions (for example, autoimmune diseases, psychiatric disorders).'
+    longDescription: <div>The primary purpose of the research is to learn more about a particular
+    disease or disorder (for example, type 2 diabetes), a trait (for example, blood pressure),
+    or a set of related conditions (for example, autoimmune diseases, psychiatric disorders).</div>
   }, {
     shortName: 'methodsDevelopment',
     shortDescription: 'Methods development/validation study',
-    longDescription: 'The primary purpose of the use of AoU data is to develop and/or  \
-    validate specific methods/tools for analyzing or interpreting data (e.g. statistical  \
-    methods for describing data trends, developing more powerful methods to detect \
-    gene-environment or other types of interactions in genome-wide association studies).'
+    longDescription: <div>The primary purpose of the use of <i>All of Us</i> data is to develop
+    and/or validate specific methods/tools for analyzing or interpreting data (e.g. statistical
+    methods for describing data trends, developing more powerful methods to detec
+    gene-environment or other types of interactions in genome-wide association studies).</div>
   }, {
     shortName: 'controlSet',
     shortDescription: 'Research Control',
-    longDescription: 'AoU data will be used as a reference or control dataset \
-      for comparison with another dataset from a different resource (e.g. Case-control \
-      studies).'
+    longDescription: <div><i>All of Us</i> data will be used as a reference or control dataset
+      for comparison with another dataset from a different resource (e.g. Case-control
+      studies).</div>
   }, {
     shortName: 'ancestry',
     shortDescription: 'Genetic Research',
-    longDescription: 'Research concerning genetics (i.e. the study of genes, genetic variations \
-      and heredity) in the context of diseases or ancestry.'
+    longDescription: <div>Research concerning genetics (i.e. the study of genes, genetic variations
+      and heredity) in the context of diseases or ancestry.</div>
   }, {
     shortName: 'socialBehavioral',
     shortDescription: 'Social/Behavioral Research',
-    longDescription: 'The research focuses on the social or behavioral phenomena or determinants \
-      of health.'
+    longDescription: <div>The research focuses on the social or behavioral phenomena or determinants
+      of health.</div>
   }, {
     shortName: 'populationHealth',
     shortDescription: 'Population Health/Public Health Research',
-    longDescription: 'The primary purpose of using AoU data is to investigate health behaviors, \
-      outcomes, access and disparities in populations.'
+    longDescription: <div>The primary purpose of using <i>All of Us</i> data is to investigate
+      health behaviors, outcomes, access and disparities in populations.</div>
   }, {
     shortName: 'drugDevelopment',
     shortDescription: 'Drug/Therapeutics Development Research',
-    longDescription: 'Primary focus of the research is drug/therapeutics development. The data \
-      will be used to understand treatment-gene interactions or treatment outcomes relevant \
-      to the therapeutic(s) of interest.'
+    longDescription: <div>Primary focus of the research is drug/therapeutics development. The data
+      will be used to understand treatment-gene interactions or treatment outcomes relevant
+      to the therapeutic(s) of interest.</div>
   },  {
     shortName: 'commercialPurpose',
     shortDescription: 'For-Profit Purpose',
-    longDescription: 'The data will be used by a for-profit entity for research or product \
-      or service development (e.g. for understanding drug responses as part of a \
-      pharmaceutical company\'s drug development or market research efforts).'
+    longDescription: <div>The data will be used by a for-profit entity for research or product
+      or service development (e.g. for understanding drug responses as part of a
+      pharmaceutical company's drug development or market research efforts).</div>
   }, {
     shortName: 'educational',
     shortDescription: 'Educational Purpose',
-    longDescription: 'The data will be used for education purposes (e.g. for a college research \
-      methods course, to educate students on population-based research approaches).'
+    longDescription: <div>The data will be used for education purposes (e.g. for a college research
+      methods course, to educate students on population-based research approaches).</div>
   }, {
     shortName: 'otherPurpose',
     shortDescription: 'Other Purpose',
-    longDescription: 'If your Purpose of Use is different from the options listed above, please \
-      select \"Other Purpose\" and provide details regarding your purpose of data use here \
-      (500 character limit).'
+    longDescription: <div>If your Purpose of Use is different from the options listed above, please
+      select "Other Purpose" and provide details regarding your purpose of data use here
+      (500 character limit).</div>
   }
 ];
 
 export const toolTipText = {
-  header: `A Workspace is your place to store and analyze data for a specific project.Each
+  header: <div>A Workspace is your place to store and analyze data for a specific project.Each
     Workspace is a separate Google bucket that serves as a dedicated space for file storage.
     You can share this Workspace with other users, allowing them to view or edit your work. Your
     Workspace is where you will go to build concept sets and cohorts and launch Notebooks for
-    performing analyses on your cohorts.`,
-  cdrSelect: `The curated data repository (CDR) is where research data from the All of Us Research
-    Program is stored. The CDR is periodically updated as new data becomes available for use. You
-    can select which version of the CDR you wish to query in this Workspace.`,
-  billingAccount: `Throughout this period of testing and development, your use of the Workbench is
-    being funded by the National Institutes of Health. In the future researchers may be required to
-    enter billing account information to cover the cost of computing time in the cloud.`,
-  researchPurpose: `You  are required to describe your research purpose, or the reason why you are
-    conducting this study. This information, along with your name, will be posted on the publicly
-    available All of Us website (https://www.researchallofus.org/) to inform our participants and
-    other stakeholders about what kind of research their data is being used for.`,
-  reviewRequest: `If you are concerned that your research may be stigmatizing to a particular group
-    of research participants, you may request a review of your research purpose by the All of Us
-    Resource Access Board (RAB). The RAB will provide feedback regarding potential for stigmatizing
-    specific groups of participants and, if needed, guidance for modifying your research
-    purpose/scope. Even if you request a review, you will be able to create a Workspace and proceed
-    with your research.`
+    performing analyses on your cohorts.</div>,
+  cdrSelect: <div>The curated data repository (CDR) is where research data from the <i>All of Us</i>
+    Research Program is stored. The CDR is periodically updated as new data becomes available for
+    use. You can select which version of the CDR you wish to query in this Workspace.</div>,
+  billingAccount: <div>Throughout this period of testing and development, your use of the Workbench
+    is being funded by the National Institutes of Health. In the future researchers may be required
+    to enter billing account information to cover the cost of computing time in the cloud.</div>,
+  researchPurpose: <div>You  are required to describe your research purpose, or the reason why you
+    are conducting this study. This information, along with your name, will be posted on the
+    publicly available <i>All of Us</i> website (https://www.researchallofus.org/) to inform our
+    participants and other stakeholders about what kind of research their data is being used
+    for.</div>,
+  reviewRequest: <div>If you are concerned that your research may be stigmatizing to a particular
+    group of research participants, you may request a review of your research purpose by
+    the <i>All of Us</i> Resource Access Board (RAB). The RAB will provide feedback regarding
+    potential for stigmatizing specific groups of participants and, if needed, guidance for
+    modifying your research purpose/scope. Even if you request a review, you will be able to
+    create a Workspace and proceed with your research.</div>
 };
 
 export const researchPurposeQuestions = [
@@ -113,7 +114,8 @@ export const researchPurposeQuestions = [
     description: <div>(Please select as many options below as describe your
       research purpose)</div>
   }, {
-    header: '2. Provide the reason for choosing All of Us data for your investigation',
+    header: <div>2. Provide the reason for choosing <i>All of Us</i> data
+      for your investigation</div>,
     description: <div>(Free text; 500 Character limit)</div>
   }, {
     header: '3. What are the specific scientific question(s) you intend to study?',
@@ -616,8 +618,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               sufficiently detailed responses at a 5th grade reading level.  Your responses
               will not be used to make decisions about data access. <br/> <br/>
               <i>Note that you are required to create separate Workspaces for each project
-                for which you access AoU data, hence the responses below are expected to be specific
-                to the project for which you are creating this particular Workspace.</i> </div>
+                for which you access All of Us data, hence the responses below are expected
+                to be specific to the project for which you are creating this particular
+                Workspace.</i></div>
             }/>
         <WorkspaceEditSection header={researchPurposeQuestions[0].header}
             description={researchPurposeQuestions[0].description} required>
@@ -691,12 +694,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <ClrIcon shape='caret' dir='down'/>}
           </Link>
           {this.state.showUnderservedPopulationDetails && <div style={styles.text}>
-            A primary mission of the AoU Research Program is to include research participants
-            who are medically underserved or are historically underrepresented in Biomedical
-            Research, or who, because of systematic social disadvantage, experience health
-            disparities.  As a way to assess the research being conducted with a focus on these
-            populations, AoU requires that you indicate the demographic categories you intend
-            to focus your analysis on.
+            A primary mission of the <i>All of Us</i> Research Program is to include research
+            participants who are medically underserved or are historically underrepresented in
+            Biomedical Research, or who, because of systematic social disadvantage, experience
+            health disparities.  As a way to assess the research being conducted with a focus on
+            these populations, <i>All of Us</i> requires that you indicate the demographic
+            categories you intend to focus your analysis on.
           </div>}
           <div style={{marginTop: '0.5rem'}}>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
@@ -762,8 +765,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 Populations that are historically medically underserved or underrepresented in
                 biomedical research are also more vulnerable to stigmatization. If your population
                 of interest includes the following categories defined as Underrepresented in
-                Biomedical Research (UBR) by the All of Us Research Program, you are encouraged
-                to request a review of your research purpose by the Resource Access Board (RAB).
+                Biomedical Research (UBR) by the <i>All of Us</i> Research Program, you are
+                encouraged to request a review of your research purpose by the Resource Access
+                Board (RAB).
               </div>
               <TwoColPaddedTable header={true} headerLeft='Diversity Categories'
                  headerRight='Groups that are Underrepresented in Biomedical Research (UBR)*'
@@ -781,8 +785,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <label style={styles.text}>
               I am concerned about potential
               <a href='/definitions/stigmatization' target='_blank'> stigmatization </a>
-            of research participants. I would like the All of Us Resource Access Board (RAB) to
-              review my research purpose.
+              of research participants. I would like the <i>All of Us</i> Resource Access Board
+              (RAB) to review my research purpose.
               (This will not prevent you from creating a workspace and proceeding.)
             </label>
           </div>
@@ -801,7 +805,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               { this.isEmpty(this.state.workspace.researchPurpose, 'anticipatedFindings') &&
               <li>Anticipated findings</li>}
               { this.isEmpty(this.state.workspace.researchPurpose, 'reasonForAllOfUs') &&
-              <li>Reason for choosing AoU</li>}
+              <li>Reason for choosing <i>All of Us</i></li>}
               { !this.categoryIsSelected && <li>Research focus</li>}
               { this.noSpecificPopulationSelected && <li>Population of study</li>}
               { this.noDiseaseOfFocusSpecified && <li>Disease of focus</li>}

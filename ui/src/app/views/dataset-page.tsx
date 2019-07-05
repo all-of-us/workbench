@@ -8,6 +8,7 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
+import {CircleWithText} from 'app/icons/circleWithText';
 import {
   cohortsApi,
   conceptsApi,
@@ -46,7 +47,6 @@ export const styles = reactStyles({
     fontSize: '16px',
     height: '2rem',
     lineHeight: '2rem',
-    paddingLeft: '0.55rem',
     paddingRight: '0.55rem',
     color: colors.primary,
     borderBottom: '1px solid #E5E5E5',
@@ -168,6 +168,20 @@ const plusLink = (dataTestId: string, path: string) => {
     <ClrIcon shape='plus-circle' class='is-solid' size={16}
              style={styles.selectBoxHeaderIconLinks}/>
   </a>;
+};
+
+const BoxHeader = ({text= '', header =  '', subHeader = '', style= {}, ...props}) => {
+  return  <div style={styles.selectBoxHeader}>
+    <div style={{display: 'flex', marginLeft: '0.2rem'}}>
+      <CircleWithText text={text} width='23.78px' height='23.78px'
+                      style={{fill: colorWithWhiteness(colors.primary, 0.5), marginTop: '0.5rem'}}/>
+      <label style={{marginLeft: '0.5rem', color: colors.primary, display: 'flex', ...style}}>
+        <div style={{fontWeight: 600, marginRight: '0.3rem'}}>{header}</div>
+        ({subHeader})
+      </label>
+    </div>
+    {props.children}
+  </div>;
 };
 
 interface Props {
@@ -474,14 +488,12 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           <div style={{color: '#000000', fontSize: '14px'}}>Build a dataset by selecting the
             variables and values for one or more of your cohorts. Then export the completed dataset
             to Notebooks where you can perform your analysis</div>
-          <div style={{display: 'flex'}}>
+          <div style={{display: 'flex', paddingTop: '1rem'}}>
             <div style={{width: '33%'}}>
-              <h2>Select Cohorts</h2>
               <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-                <div style={styles.selectBoxHeader}>
-                  Cohorts
+                <BoxHeader text='1' header='Select Cohorts' subHeader='Participants'>
                   {plusLink('cohorts-link', cohortsPath)}
-                </div>
+                </BoxHeader>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
                   <ImmutableListItem name='All AoU Participants' checked={includesAllParticipants}
@@ -504,14 +516,13 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 </div>
               </div>
             </div>
-            <div style={{marginLeft: '1.5rem', width: '65%'}}>
-              <h2>Select Concept Sets</h2>
+            <div style={{marginLeft: '1.5rem', width: '70%'}}>
               <div style={{display: 'flex', backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
                 <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
-                  <div style={styles.selectBoxHeader}>
-                    Concept Sets
-                    {plusLink('concept-sets-link', conceptSetsPath)}
-                  </div>
+                    <BoxHeader text='2' header='Select Concept Sets' subHeader='Rows'
+                               style={{paddingRight: '1rem'}}>
+                      {plusLink('concept-sets-link', conceptSetsPath)}
+                    </BoxHeader>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
                         <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
@@ -525,11 +536,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       left: '10rem'}}/>}
                   </div>
                 </div>
-                <div style={{width: '40%'}}>
-                  <div style={styles.selectBoxHeader}>
-                    <div>
-                      Values
-                    </div>
+                <div style={{width: '55%'}}>
+                    <BoxHeader text='3' header='Select Values' subHeader='Columns'>
                     <div style={styles.selectAllContainer}>
                       <CheckBox style={{height: 17, width: 17}}
                                 disabled={fp.isEmpty(valueSets)}
@@ -540,7 +548,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                         {this.selectAll ? 'Select All' : 'Deselect All'}
                       </div>
                     </div>
-                  </div>
+                  </BoxHeader>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {valuesLoading && <Spinner style={{position: 'relative',
                       top: '2rem', left: 'calc(50% - 36px)'}}/>}

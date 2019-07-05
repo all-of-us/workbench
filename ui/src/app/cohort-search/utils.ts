@@ -39,7 +39,9 @@ export function listTypeDisplay(parameter): string {
       'AGE': 'Age',
       'DECEASED': 'Deceased'
     }[type] || '';
-  } else if (type === CriteriaType.SNOMED) {
+  } else if (
+      [DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT].includes(domainId)
+  ) {
     return parameter.code;
   }
 }
@@ -346,13 +348,12 @@ export function mapGroupItem(item: any, temporal: boolean) {
 
 export function mapParameter(sp: any) {
   const {parameterId, name, domainId, type, subtype, group, attributes, conceptId,
-    hasAncestorData, isStandard} = sp;
+    hasAncestorData, isStandard, value} = sp;
   const param = <SearchParameter>{
     parameterId,
     name: stripHtml(name),
     domain: domainId,
     type,
-    subtype,
     group,
     attributes,
     ancestorData: hasAncestorData,
@@ -360,6 +361,12 @@ export function mapParameter(sp: any) {
   };
   if (conceptId) {
     param.conceptId = conceptId;
+  }
+  if (domainId === DomainType.SURVEY) {
+    param.subtype = subtype;
+  }
+  if (value) {
+    param.value = value;
   }
   return param;
 }

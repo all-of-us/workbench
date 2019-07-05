@@ -540,7 +540,10 @@ public class DataSetControllerTest {
                 + "\n"
                 + "\n"
                 + "\n"
-                + "blah_condition_df = pandas.read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)");
+                + "blah_condition_df = pandas.read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)"
+                + "\n"
+                + "\n"
+                + "blah_condition_df.head(5)");
   }
 
   @Test
@@ -594,7 +597,10 @@ public class DataSetControllerTest {
                 + "  )\n"
                 + ")\n"
                 + "\n"
-                + "blah_condition_df <- pd$read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)");
+                + "blah_condition_df <- pd$read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)"
+                + "\n"
+                + "\n"
+                + "head(blah_condition_df, 5)");
   }
 
   @Test

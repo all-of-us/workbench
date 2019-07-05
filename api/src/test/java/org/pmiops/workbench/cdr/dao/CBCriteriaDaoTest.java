@@ -227,23 +227,13 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findDrugConceptId2ByConceptId1() throws Exception {
+  public void findDrugIngredientsByConceptId() throws Exception {
     jdbcTemplate.execute(
         "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
     jdbcTemplate.execute(
         "insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
     Concept ingredient = new Concept().conceptId(1L).conceptClassId("Ingredient");
     conceptDao.save(ingredient);
-
-    List<Integer> drugList = cbCriteriaDao.findDrugConceptId2ByConceptId1(Arrays.asList(12345L));
-    assertEquals(1, drugList.size());
-    assertEquals(Integer.valueOf(1), drugList.get(0));
-    jdbcTemplate.execute("drop table cb_criteria_relationship");
-  }
-
-  @Test
-  public void findDrugIngredientsByConceptId() throws Exception {
-
     CBCriteria drugCriteriaIngredient =
         new CBCriteria()
             .domainId(DomainType.DRUG.toString())
@@ -255,10 +245,10 @@ public class CBCriteriaDaoTest {
             .synonyms("[DRUG_rank1]");
     cbCriteriaDao.save(drugCriteriaIngredient);
 
-    List<CBCriteria> drugList =
-        cbCriteriaDao.findDrugIngredientByConceptId("1", DomainType.DRUG.toString());
+    List<CBCriteria> drugList = cbCriteriaDao.findDrugIngredientByConceptId("12345");
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
+    jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
   @Test

@@ -4,7 +4,7 @@ import {Component, Input} from '@angular/core';
 
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 
 const styles = reactStyles({
@@ -14,7 +14,7 @@ const styles = reactStyles({
     bottom: '1rem',
     right: '1rem',
     borderRadius: '3rem',
-    backgroundColor: '#2691D0',
+    backgroundColor: colors.accent,
     height: '1.8rem',
     minWidth: '1.8rem',
     cursor: 'pointer'
@@ -29,7 +29,7 @@ const styles = reactStyles({
   },
 
   disable: {
-    backgroundColor: 'grey',
+    backgroundColor: colorWithWhiteness(colors.dark, 0.4),
     cursor: 'not-allowed'
   },
 

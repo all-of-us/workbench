@@ -10,7 +10,7 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {NavStore, queryParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -20,7 +20,6 @@ import {ConceptNavigationBar} from 'app/views/concept-navigation-bar';
 import {ConceptSurveyAddModal} from 'app/views/concept-survey-add-modal';
 import {ConceptTable} from 'app/views/concept-table';
 import {SlidingFabReact} from 'app/views/sliding-fab';
-import * as Color from 'color';
 import {environment} from 'environments/environment';
 import {
   Concept,
@@ -39,7 +38,7 @@ const styles = reactStyles({
   searchBar: {
     marginLeft: '1%', boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)',
     height: '3rem', width: '64.3%',
-    backgroundColor: Color('#A3D3F2').alpha(0.2).toString(), fontSize: '16px',
+    backgroundColor: colorWithWhiteness(colors.secondary, 0.85), fontSize: '16px',
     lineHeight: '19px', paddingLeft: '2rem'
   },
   domainBoxHeader: {
@@ -60,7 +59,7 @@ const styles = reactStyles({
     height: '4px', width: '100%', backgroundColor: colors.accent, border: 'none'
   },
   conceptCounts: {
-    backgroundColor: colors.white, height: '2rem', border: '1px solid #CCCCCC',
+    backgroundColor: colors.white, height: '2rem', border: `1px solid ${colors.dark}`,
     marginTop: '-1px', paddingLeft: '0.5rem', display: 'flex',
     justifyContent: 'flex-start', lineHeight: '15px', fontWeight: 600, fontSize: '14px',
     color: colors.primary, alignItems: 'center'
@@ -258,6 +257,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     browseDomainFromQueryParams() {
       const queryParams = queryParamsStore.getValue();
+      if (queryParams.survey) {
+        this.browseSurvey(queryParams.survey);
+      }
       if (queryParams.domain) {
         this.browseDomain(this.state.conceptDomainList
           .find(dc => dc.domain === queryParams.domain));
@@ -360,6 +362,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
         selectedDomain: conceptDomainCounts
           .find(domainCount => domainCount.domain === domain.domain)},
         this.searchConcepts);
+    }
+
+    browseSurvey(surveyName) {
+      this.setState({browsingSurvey: true,
+        selectedSurvey: surveyName});
     }
 
     domainLoading(domain) {
@@ -470,7 +477,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         <div style={{marginBottom: '6%', marginTop: '1.5%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
             <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
-              fill: '#216FB4', left: 'calc(1rem + 4.5%)'}}/>
+              fill: colors.accent, left: 'calc(1rem + 4.5%)'}}/>
             <TextInput style={styles.searchBar} data-test-id='concept-search-input'
                        placeholder='Search concepts in domain'
                        onKeyDown={e => {this.triggerSearch(e); }}/>

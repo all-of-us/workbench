@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import {Component, Input} from '@angular/core';
 import * as Cookies from 'js-cookie';
+=======
+import {Component} from '@angular/core';
+import * as fp from 'lodash/fp';
+>>>>>>> 91190a9fb7647006caa24147a9e7aa6539382c44
 import * as React from 'react';
 
 import {ClrIcon} from 'app/components/icons';
@@ -8,9 +13,15 @@ import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+<<<<<<< HEAD
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
+=======
+import colors from 'app/styles/colors';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {navigate} from 'app/utils/navigation';
+>>>>>>> 91190a9fb7647006caa24147a9e7aa6539382c44
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConfirmPlaygroundModeModal} from 'app/views/confirm-playground-mode-modal';
@@ -62,9 +73,7 @@ const styles = reactStyles({
 
 interface Props {
   workspace: WorkspaceData;
-  billingProjectId: string;
-  workspaceName: string;
-  notebookName: string;
+  urlParams: any;
 }
 
 interface State {
@@ -74,7 +83,7 @@ interface State {
   showPlaygroundModeModal: boolean;
 }
 
-export const InteractiveNotebook = withCurrentWorkspace()(
+export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
 
     constructor(props) {
@@ -88,8 +97,8 @@ export const InteractiveNotebook = withCurrentWorkspace()(
     }
 
     componentDidMount(): void {
-      workspacesApi().readOnlyNotebook(this.props.billingProjectId,
-        this.props.workspaceName, this.props.notebookName)
+      workspacesApi().readOnlyNotebook(this.props.urlParams.ns,
+        this.props.urlParams.wsid, this.props.urlParams.nbName)
         .then(html => {
           this.setState({html: html.html});
         });
@@ -100,7 +109,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(
         setTimeout(() => this.runCluster(onClusterReady), 5000);
       };
 
-      clusterApi().listClusters(this.props.billingProjectId)
+      clusterApi().listClusters(this.props.urlParams.ns)
         .then((body) => {
           const cluster = body.defaultCluster;
           this.setState({clusterStatus: cluster.status});
@@ -142,7 +151,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(
         this.setState({showPlaygroundModeModal: true});
       }
     }
-
+    
     private navigateOldNotebooksPage(playgroundMode: boolean) {
       const queryParams = {
         playgroundMode: playgroundMode
@@ -219,11 +228,7 @@ export const InteractiveNotebook = withCurrentWorkspace()(
   template: '<div #root></div>'
 })
 export class InteractiveNotebookComponent extends ReactWrapperBase {
-  @Input() billingProjectId = urlParamsStore.getValue().ns;
-  @Input() workspaceName = urlParamsStore.getValue().wsid;
-  @Input() notebookName = urlParamsStore.getValue().nbName;
-
   constructor() {
-    super(InteractiveNotebook, ['billingProjectId', 'workspaceName', 'notebookName']);
+    super(InteractiveNotebook, []);
   }
 }

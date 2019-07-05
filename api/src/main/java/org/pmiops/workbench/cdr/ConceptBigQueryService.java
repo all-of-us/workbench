@@ -33,7 +33,7 @@ public class ConceptBigQueryService {
       "select DISTINCT(question) as question,\n"
           + "question_concept_id as concept_id \n"
           + "from `${projectId}.${dataSetId}.ds_survey`\n"
-          + "where survey = @"
+          + "where UPPER(survey) = @"
           + SURVEY_PARAM;
 
   private static final String SURVEY_ANSWER_SQL_TEMPLATE =
@@ -100,7 +100,7 @@ public class ConceptBigQueryService {
   private QueryJobConfiguration buildSurveyQuestionQuery(String surveyName) {
     String finalSql = SURVEY_QUESTION_SQL_TEMPLATE;
     Map<String, QueryParameterValue> params = new HashMap<>();
-    params.put(SURVEY_PARAM, QueryParameterValue.string(surveyName));
+    params.put(SURVEY_PARAM, QueryParameterValue.string(surveyName.toUpperCase()));
     return QueryJobConfiguration.newBuilder(finalSql)
         .setNamedParameters(params)
         .setUseLegacySql(false)

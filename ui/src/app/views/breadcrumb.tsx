@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import colors from 'app/styles/colors';
 import {
   ReactWrapperBase,
   withCurrentCohort,
@@ -14,11 +15,11 @@ import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/util
 
 const styles = {
   firstLink: {
-    color: '#2691D0',
+    color: colors.accent,
     textDecoration: 'none'
   },
   lastLink: {
-    color: '#262262',
+    color: colors.primary,
     fontWeight: 600,
     fontSize: '1rem',
     textDecoration: 'none'
@@ -116,7 +117,7 @@ const Breadcrumb = fp.flow(
         <BreadcrumbLink href={url} style={styles.firstLink}>
           {label}
         </BreadcrumbLink>
-        <span style={{color: '#c3c3c3'}}> &gt; </span>
+        <span style={{color: colors.primary}}> &gt; </span>
       </React.Fragment>;
     })}
     {last && <div>

@@ -9,7 +9,6 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {summarizeErrors} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
 
 
 import {DataSet, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
@@ -126,9 +125,11 @@ class ExportDataSetModal extends React.Component<
         newNotebook: this.state.newNotebook,
         kernelType: this.state.kernelType
       });
-    navigate(['workspaces',
-      workspaceNamespace,
-      workspaceFirecloudName, 'notebooks', this.state.notebookName + '.ipynb']);
+    // Open notebook in a new tab and close the modal
+    const notebookUrl = '\\workspaces\\' + workspaceNamespace + '\\' + workspaceFirecloudName +
+        '\\notebooks\\' + this.state.notebookName + '.ipynb';
+    window.open(notebookUrl);
+    this.props.closeFunction();
   }
 
   render() {

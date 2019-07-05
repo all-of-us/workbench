@@ -38,7 +38,7 @@ const styles = reactStyles({
     maxWidth: '20rem'
   },
   warningIcon: {
-    color: '#F7981C', position: 'relative', top: 'calc(50% - 10px)',
+    color: colors.warning, position: 'relative', top: 'calc(50% - 10px)',
     height: '20px', width: '20px'
   },
   warningModal: {
@@ -203,7 +203,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       <div style={styles.mainHeader}>Researcher Workbench</div>
       <div style={{...styles.mainHeader, fontSize: '18px', marginBottom: '1rem'}}>
         <ClrIcon shape='warning-standard' class='is-solid'
-                 style={{color: '#fff', marginRight: '0.3rem'}}/>
+                 style={{color: colors.white, marginRight: '0.3rem'}}/>
         In order to get access to data and tools please complete the following steps:
       </div>
       {!betaAccessGranted && <div data-test-id='beta-access-warning'
@@ -227,7 +227,9 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
             <div style={styles.cardDescription}>{card.description}</div>}
             {taskCompletionMap.get(i) ?
               <Button disabled={true} data-test-id='completed-button'
-                      style={{backgroundColor: '#8BC990', width: 'max-content', cursor: 'default'}}>
+                      style={{backgroundColor: colors.success,
+                        width: 'max-content',
+                        cursor: 'default'}}>
                 <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{card.completedText}
               </Button> :
             <Button onClick={ () => this.onCardClick(card) }

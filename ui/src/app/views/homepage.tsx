@@ -5,15 +5,15 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {
-  Button,
   CardButton,
   Clickable,
 } from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {Modal, ModalFooter} from 'app/components/modals';
+import {Modal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {QuickTourReact} from 'app/views/quick-tour-modal';
 import {RecentWork} from 'app/views/recent-work';
@@ -25,7 +25,7 @@ import {
 
 export const styles = reactStyles({
   mainHeader: {
-    color: '#FFFFFF', fontSize: 28, fontWeight: 400,
+    color: colors.white, fontSize: 28, fontWeight: 400,
     display: 'flex', letterSpacing: 'normal'
   },
   backgroundImage: {
@@ -52,11 +52,11 @@ export const styles = reactStyles({
     flexDirection: 'row', marginLeft: '4rem', padding: '1rem'
   },
   quickTourLabel: {
-    fontSize: 28, lineHeight: '34px', color: '#fff', paddingRight: '2.3rem',
+    fontSize: 28, lineHeight: '34px', color: colors.white, paddingRight: '2.3rem',
     marginTop: '2rem', width: '33%'
   },
   footer: {
-    height: '300px', width: '100%', backgroundColor: '#262262',
+    height: '300px', width: '100%', backgroundColor: colors.primary,
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
     marginTop: '2%',
   },
@@ -64,11 +64,11 @@ export const styles = reactStyles({
     display: 'flex', flexDirection: 'column', marginLeft: '5%', marginRight: '5%',
   },
   footerTitle: {
-    height: '34px', opacity: 0.87, color: '#fff', fontSize: 28,
+    height: '34px', opacity: 0.87, color: colors.white, fontSize: 28,
     fontWeight: 600, lineHeight: '34px', width: '87.34%', marginTop: '1.4rem'
   },
   footerText: {
-    height: '176px', opacity: 0.87, color: '#83C3EC', fontSize: '16px',
+    height: '176px', opacity: 0.87, color: colors.secondary, fontSize: '16px',
     fontWeight: 400, lineHeight: '30px', display: 'flex', width: '100%',
     flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'auto'
   },
@@ -77,16 +77,15 @@ export const styles = reactStyles({
     flexDirection: 'column', flexShrink: 1, minWidth: 0
   },
   bottomBanner: {
-    borderTopColor: '#5DAEE1', borderStyle: 'solid', borderWidth: '0.3rem 0 0 0',
-    width: '100%', display: 'flex', backgroundColor: '#483F4B', height: '5rem',
+    width: '100%', display: 'flex', backgroundColor: colors.primary, height: '5rem',
+    paddingLeft: '3.5rem', alignItems: 'center'
   },
   logo: {
-    top: '1rem', left: '6.25rem', height: '3.5rem', width: '7rem',
-    position: 'relative', lineHeight: '85px'
+    height: '3.5rem', width: '7rem', lineHeight: '85px'
   },
   bottomLinks: {
-    color: '#9B9B9B', fontSize: '0.7rem', height: '1rem', left: '5.5rem',
-    top: '2rem', marginLeft: '2.5rem', position: 'relative', fontWeight: 400
+    color: colors.white, fontSize: '0.7rem', height: '1rem',
+    marginLeft: '2.5rem', fontWeight: 400
   }
 });
 
@@ -330,10 +329,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
                     </div>
                     <div style={styles.contentWrapperRight}>
                       <a onClick={() => navigate(['workspaces'])}
-                         style={{fontSize: '14px', color: '#FFFFFF'}}>
+                         style={{fontSize: '14px', color: colors.white}}>
                         See All Workspaces</a>
                       <div style={{marginRight: '3%', display: 'flex', flexDirection: 'column'}}>
-                        <div style={{color: '#fff', height: '1.9rem'}}>
+                        <div style={{color: colors.white, height: '1.9rem'}}>
                           <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
                         </div>
                         <RecentWork dark={true} cardMarginTop='0'/>
@@ -364,7 +363,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                   How to Use the All of Us Researcher Workbench</div>
                 <div style={{display: 'flex', justifyContent: 'flex-end'}}>
                   <TooltipTrigger content='Coming Soon' side='left'>
-                    <a href='#' style={{color: '#fff'}}>See all documentation</a>
+                    <a href='#' style={{color: colors.white}}>See all documentation</a>
                   </TooltipTrigger>
                 </div>
                 <div style={{display: 'flex', flexDirection: 'row',
@@ -373,11 +372,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
                     return <React.Fragment key={i}>
                       <div style={styles.linksBlock}>
                         <div style={styles.footerText}>
-                          <div style={{color: 'white', marginTop: '2%'}}>{col.title}</div>
-                          <ul style={{color: '#83C3EC'}}>
+                          <div style={{color: colors.white, marginTop: '2%'}}>{col.title}</div>
+                          <ul style={{color: colors.secondary}}>
                             {col.links.map((link, ii) => {
                               return <li key={ii}>
-                                <a href='#' style={{color: '#83C3EC'}}>{link}</a>
+                                <a href='#' style={{color: colors.secondary}}>{link}</a>
                               </li>;
                             } )}
                           </ul>
@@ -403,14 +402,19 @@ export const Homepage = withUserProfile()(class extends React.Component<
       {quickTour &&
         <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
       {videoOpen && <Modal width={900}>
+        <div style={{display: 'flex'}}>
+          <div style={{flexGrow: 1}}></div>
+          <Clickable onClick={() => this.setState({videoOpen: false})}>
+            <ClrIcon
+              shape='times'
+              size='24'
+              style={{color: colors.accent, marginBottom: 17}}
+            />
+          </Clickable>
+        </div>
         <video width='100%' controls autoPlay>
           <source src={videoLink} type='video/mp4'/>
         </video>
-        <ModalFooter>
-          <Button type='secondary'
-                  onClick={() => this.setState({videoOpen: false})}>
-            Close</Button>
-        </ModalFooter>
       </Modal>}
     </React.Fragment>;
   }
