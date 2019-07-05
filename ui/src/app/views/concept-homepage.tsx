@@ -257,6 +257,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     browseDomainFromQueryParams() {
       const queryParams = queryParamsStore.getValue();
+      if (queryParams.survey) {
+        this.browseSurvey(queryParams.survey);
+      }
       if (queryParams.domain) {
         this.browseDomain(this.state.conceptDomainList
           .find(dc => dc.domain === queryParams.domain));
@@ -359,6 +362,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
         selectedDomain: conceptDomainCounts
           .find(domainCount => domainCount.domain === domain.domain)},
         this.searchConcepts);
+    }
+
+    browseSurvey(surveyName) {
+      this.setState({browsingSurvey: true,
+        selectedSurvey: surveyName});
     }
 
     domainLoading(domain) {
