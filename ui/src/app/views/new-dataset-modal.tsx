@@ -19,7 +19,6 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
 import {
   DataSet,
   DataSetRequest,
@@ -150,9 +149,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       } else {
         await dataSetApi().createDataSet(workspaceNamespace, workspaceId, request);
       }
-      if (!this.state.exportToNotebook) {
-        window.history.back();
-      } else {
+      if (this.state.exportToNotebook) {
         await dataSetApi().exportToNotebook(
           workspaceNamespace, workspaceId,
           {
@@ -161,10 +158,12 @@ class NewDataSetModal extends React.Component<Props, State> {
             notebookName: this.state.notebookName,
             newNotebook: this.state.newNotebook
           });
-        navigate(['workspaces',
-          workspaceNamespace,
-          workspaceId, 'notebooks', this.state.notebookName + '.ipynb']);
+        // Open notebook in a new tab and return back to the Data tab
+        const notebookUrl = '\\workspaces\\' + workspaceNamespace + '\\' + workspaceId +
+          '\\notebooks\\' + this.state.notebookName + '.ipynb';
+        window.open(notebookUrl);
       }
+      window.history.back();
     } catch (e) {
       if (e.status === 409) {
         this.setState({conflictDataSetName: true, loading: false});
