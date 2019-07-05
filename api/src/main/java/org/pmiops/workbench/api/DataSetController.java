@@ -260,9 +260,15 @@ public class DataSetController implements DataSetApiDelegate {
 
               queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
+              /* Google appengine has a 60 second timeout, we want to make sure this endpoint completes
+               * before that limit is exceeded, or we get a 500 error with the following type:
+               * com.google.apphosting.runtime.HardDeadlineExceededError
+               * See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
+               */
               TableResult queryResponse =
                   bigQueryService.executeQuery(
-                      bigQueryService.filterBigQueryConfig(queryJobConfiguration), 30000l);
+                      bigQueryService.filterBigQueryConfig(queryJobConfiguration),
+                      50000l / retryLimit + 1);
               queryResponse
                   .getSchema()
                   .getFields()
