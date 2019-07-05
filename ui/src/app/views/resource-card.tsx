@@ -12,7 +12,7 @@ import {ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
 import {ExportDataSetModal} from 'app/views/export-data-set-modal';
-import {Domain, RecentResource} from 'generated/fetch';
+import {DataSet, Domain, RecentResource} from 'generated/fetch';
 
 import {Modal, ModalBody, ModalTitle} from 'app/components/modals';
 import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -96,7 +96,7 @@ export interface State {
   renaming: boolean;
   showCopyNotebookModal: boolean;
   showErrorModal: boolean;
-  showDirtyDataSetModal: boolean;
+  dataSetByResourceIdList: Array<DataSet>;
 }
 
 export class ResourceCard extends React.Component<Props, State> {
@@ -118,7 +118,7 @@ export class ResourceCard extends React.Component<Props, State> {
       renaming: false,
       showCopyNotebookModal: false,
       showErrorModal: false,
-      showDirtyDataSetModal: false
+      dataSetByResourceIdList: []
     };
   }
 
@@ -310,18 +310,19 @@ export class ResourceCard extends React.Component<Props, State> {
     }
   }
 
-  async checkForDataSet(id) {
-    if (!this.state.showDirtyDataSetModal) {
+  async getDataSetByResourceId(id) {
+    if (this.state.dataSetByResourceIdList.length === 0) {
       try {
-        return await dataSetApi().dataSetByIdExist(
+        const dataSetList = await dataSetApi().getDataSetByResourceId(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
           this.resourceType, id);
+        return dataSetList.items;
       } catch (ex) {
         console.log(ex);
       }
     } else {
-      this.setState({showDirtyDataSetModal: false});
+      this.setState({dataSetByResourceIdList: []});
     }
     return false;
   }
@@ -340,9 +341,10 @@ export class ResourceCard extends React.Component<Props, State> {
         break;
       }
       case ResourceType.COHORT: {
-        const dataSetExist = await this.checkForDataSet(this.props.resourceCard.cohort.id);
-        if (dataSetExist) {
-          this.setState({showDirtyDataSetModal: dataSetExist});
+        const dataSetByResourceIdList = await
+            this.getDataSetByResourceId(this.props.resourceCard.cohort.id);
+        if (dataSetByResourceIdList && dataSetByResourceIdList.length > 0) {
+          this.setState({dataSetByResourceIdList: dataSetByResourceIdList});
           return;
         }
         cohortsApi().deleteCohort(
@@ -356,9 +358,10 @@ export class ResourceCard extends React.Component<Props, State> {
         break;
       }
       case ResourceType.CONCEPT_SET: {
-        const dataSetExist = await this.checkForDataSet(this.props.resourceCard.conceptSet.id);
-        if (dataSetExist) {
-          this.setState({showDirtyDataSetModal: dataSetExist});
+        const dataSetByResourceIdList = await
+            this.getDataSetByResourceId(this.props.resourceCard.conceptSet.id);
+        if (dataSetByResourceIdList && dataSetByResourceIdList.length > 0) {
+          this.setState({dataSetByResourceIdList: dataSetByResourceIdList});
           return;
         }
         conceptSetsApi().deleteConceptSet(
@@ -635,15 +638,24 @@ export class ResourceCard extends React.Component<Props, State> {
           oldName={this.props.resourceCard.dataSet.name}
           existingNames={this.props.existingNameList}/>
       }
-      {this.state.showDirtyDataSetModal && <Modal>
+      {this.state.dataSetByResourceIdList.length > 0 && <Modal>
         <ModalTitle>WARNING</ModalTitle>
         <ModalBody>
           <div style={{paddingBottom: '1rem'}}>
-            This {this.resourceType} is being used in a Data Set. Do you still want to delete?
+            The {this.resourceType} <b>{fp.startCase(this.displayName)}&nbsp;</b>
+            is referenced by the following Data Sets:
+            <b>
+              &nbsp;
+              {fp.join(', ' ,
+                this.state.dataSetByResourceIdList.map((data) => data.name))}
+            </b>.
+            Deleting the {this.resourceType} <b>{fp.startCase(this.displayName)} </b>
+            will make these Data Sets unavailable for use. Are you sure you want to delete
+            <b>{fp.startCase(this.displayName)}</b> ?
           </div>
           <div style={{float: 'right'}}>
             <Button type='secondary' style={{ marginRight: '2rem'}} onClick={() => {
-              this.setState({showDirtyDataSetModal: false});  this.closeConfirmDelete(); }}>
+              this.setState({dataSetByResourceIdList: []});  this.closeConfirmDelete(); }}>
               Cancel
             </Button>
             <Button type='primary'

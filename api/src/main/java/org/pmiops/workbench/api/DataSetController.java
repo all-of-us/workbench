@@ -548,18 +548,25 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Boolean> dataSetByIdExist(
+  public ResponseEntity<DataSetListResponse> getDataSetByResourceId(
       String workspaceNamespace, String workspaceId, String resourceType, Long id) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    int countDataSet = 0;
+    List<org.pmiops.workbench.db.model.DataSet> dbDataSets =
+        new ArrayList<org.pmiops.workbench.db.model.DataSet>();
     if (resourceType.equals(COHORT)) {
-      countDataSet = dataSetDao.countByCohortSetIdContains(id);
+      dbDataSets = dataSetDao.findDataSetsByCohortSetId(id);
     } else if (resourceType.equals(CONCEPT_SET)) {
-      countDataSet = dataSetDao.countByConceptSetIdContains(id);
+      dbDataSets = dataSetDao.findDataSetsByConceptSetId(id);
     }
-    return ResponseEntity.ok(countDataSet > 0);
+    DataSetListResponse dataSetResponse =
+        new DataSetListResponse()
+            .items(
+                dbDataSets.stream()
+                    .map(dbDataSet -> TO_CLIENT_DATA_SET.apply(dbDataSet))
+                    .collect(Collectors.toList()));
+    return ResponseEntity.ok(dataSetResponse);
   }
 
   private JSONObject createNotebookCodeCellWithString(String cellInformation) {

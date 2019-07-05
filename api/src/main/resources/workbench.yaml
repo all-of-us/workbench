@@ -1794,7 +1794,7 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
-  /v1/{workspaceNamespace}/{workspaceId}/data-sets/dataSetByIdExist:
+  /v1/{workspaceNamespace}/{workspaceId}/data-sets/dataSetByResourceId:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -1811,12 +1811,12 @@ paths:
           required: true
       tags:
         - dataSet
-      operationId: "dataSetByIdExist"
+      operationId: "getDataSetByResourceId"
       responses:
         200:
-          description: Returns true if Data set with cohort or concept Id exist
+          description: A list of data sets containg cohort/concept Id passed.
           schema:
-            type: boolean
+            $ref: "#/definitions/DataSetListResponse"
 
   /v1/{workspaceNamespace}/{workspaceId}/data-set/markDirty:
     parameters:
