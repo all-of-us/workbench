@@ -18,7 +18,7 @@ import {ListPageHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
-import {Spinner} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -33,7 +33,7 @@ import {WorkspaceShare} from 'app/views/workspace-share';
 import {
   BillingProjectStatus,
   ErrorResponse,
-  Profile,
+  Profile, UserRole,
 } from 'generated/fetch';
 import * as React from 'react';
 
@@ -56,7 +56,9 @@ const styles = reactStyles({
     WebkitLineClamp: 2, WebkitBoxOrient: 'vertical'
   },
   workspaceCard: {
-    display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%'
+    display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%',
+    // Set relative positioning so the spinner overlay is centered in the card.
+    position: 'relative'
   },
   workspaceCardFooter: {
     display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
@@ -74,7 +76,6 @@ const WorkspaceCardMenu: React.FunctionComponent<{
   const wsPathPrefix = 'workspaces/' + wp.workspace.namespace + '/' + wp.workspace.id;
 
   return <PopupTrigger
-      data-test-id='workspace-card-menu'
       side='bottom'
       closeOnClick
       content={ <React.Fragment>
@@ -83,26 +84,27 @@ const WorkspaceCardMenu: React.FunctionComponent<{
         </MenuItem>
         <TooltipTrigger content={<div>Requires Write Permission</div>}
                         disabled={wp.canWrite}>
-          <MenuItem onClick={() => {navigate([wsPathPrefix, 'edit']); }}
+          <MenuItem data-test-id='edit-workspace'
+                    onClick={() => {navigate([wsPathPrefix, 'edit']); }}
                     disabled={!wp.canWrite}>
             Edit
           </MenuItem>
         </TooltipTrigger>
         <TooltipTrigger content={<div>Requires Owner Permission</div>}
                         disabled={wp.isOwner}>
-          <MenuItem onClick={onShare} disabled={!wp.isOwner}>
+          <MenuItem data-test-id='share-workspace' onClick={onShare} disabled={!wp.isOwner}>
             Share
           </MenuItem>
         </TooltipTrigger>
         <TooltipTrigger content={<div>Requires Owner Permission</div>}
                         disabled={wp.isOwner}>
-          <MenuItem onClick={onDelete} disabled={!wp.isOwner}>
+          <MenuItem data-test-id='delete-workspace' onClick={onDelete} disabled={!wp.isOwner}>
             Delete
           </MenuItem>
         </TooltipTrigger>
       </React.Fragment>}
   >
-    <Clickable disabled={disabled} data-test-id='workspace-menu'>
+    <Clickable disabled={disabled} data-test-id='workspace-card-menu'>
       <ClrIcon shape='ellipsis-vertical' size={21}
                style={{color: disabled ? '#9B9B9B' : '#216FB4', marginLeft: -9,
                  cursor: disabled ? 'auto' : 'pointer'}}/>
@@ -110,39 +112,80 @@ const WorkspaceCardMenu: React.FunctionComponent<{
   </PopupTrigger>;
 };
 
-export class WorkspaceCard extends React.Component<
-    {wp: WorkspacePermissions, userEmail: string, reload: Function},
-    {sharing: boolean, confirmDeleting: boolean, workspaceDeletionError: boolean,
-      bugReportOpen: boolean, bugReportError: string}> {
+interface WorkspaceCardState {
+  bugReportError: string;
+  bugReportOpen: boolean;
+  confirmDeleting: boolean;
+  // Whether this card is busy loading data specific to the workspace.
+  loadingData: boolean;
+  sharing: boolean;
+  // The list of user roles associated with this workspace. Lazily populated
+  // only when the workspace share dialog is opened.
+  userRoles?: UserRole[];
+  workspaceDeletionError: boolean;
+}
 
+interface WorkspaceCardProps {
+  userEmail: string;
+  wp: WorkspacePermissions;
+  // A reload function that can be called by this component to reqeust a refresh
+  // of the workspace contained in this card.
+  reload(): Promise<void>;
+}
+
+export class WorkspaceCard extends React.Component<WorkspaceCardProps, WorkspaceCardState> {
   constructor(props) {
     super(props);
     this.state = {
-      bugReportOpen: false,
       bugReportError: '',
-      sharing: false,
+      bugReportOpen: false,
       confirmDeleting: false,
+      loadingData: false,
+      sharing: false,
+      userRoles: null,
       workspaceDeletionError: false
     };
   }
 
   async deleteWorkspace() {
     const {wp} = this.props;
-    workspacesApi().deleteWorkspace(wp.workspace.namespace, wp.workspace.id).then(() => {
-      this.setState({confirmDeleting: false});
-      this.props.reload();
-    }).catch(() => {
-      this.setState({workspaceDeletionError: true});
-    });
+    this.setState({
+      confirmDeleting: false,
+      loadingData: true});
+    try {
+      await workspacesApi().deleteWorkspace(wp.workspace.namespace, wp.workspace.id);
+      this.setState({loadingData: false});
+      await this.props.reload();
+    } catch (e) {
+      this.setState({workspaceDeletionError: true, loadingData: false});
+    }
   }
 
-  shareWorkspace(): void {
+  // The function called when the "share" action is called on a workspace card
+  // within the workspaces list.
+  async handleShareAction() {
+    this.setState({
+      loadingData: true
+    });
+    const userRolesResponse = await workspacesApi().getFirecloudWorkspaceUserRoles(
+      this.props.wp.workspace.namespace,
+      this.props.wp.workspace.id);
+    // Trigger the sharing dialog to be shown.
+    this.setState({
+      loadingData: false,
+      sharing: true,
+      userRoles: userRolesResponse.items});
+  }
+
+  async handleShareDialogClose() {
     // Share workspace publishes to current workspace,
     // but here we aren't in the context of a workspace
     // so we need to clear it.
     currentWorkspaceStore.next(undefined);
-    this.setState({sharing: false});
-    this.props.reload();
+    this.setState({
+      sharing: false,
+      userRoles: null});
+    this.reloadData();
   }
 
   submitWorkspaceDeletionError(): void {
@@ -152,20 +195,25 @@ export class WorkspaceCard extends React.Component<
       workspaceDeletionError: false});
   }
 
+  async reloadData() {
+    await this.props.reload();
+  }
+
   render() {
-    const {wp, userEmail} = this.props;
-    const {bugReportOpen, bugReportError, confirmDeleting,
-      sharing, workspaceDeletionError} = this.state;
+    const {userEmail, wp} = this.props;
+    const {bugReportError, bugReportOpen, confirmDeleting, loadingData,
+      sharing, userRoles, workspaceDeletionError} = this.state;
     const permissionBoxColors = {'OWNER': '#4996A2', 'READER': '#8F8E8F', 'WRITER': '#92B572'};
 
     return <React.Fragment>
       <WorkspaceCardBase>
         <div style={styles.workspaceCard} data-test-id='workspace-card'>
+          {loadingData && <SpinnerOverlay/>}
           <div style={{display: 'flex', flexDirection: 'column'}}>
             <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
               <WorkspaceCardMenu wp={wp}
                                  onDelete={() => {this.setState({confirmDeleting: true}); }}
-                                 onShare={() => {this.setState({sharing: true}); }}
+                                 onShare={() => this.handleShareAction()}
                                  disabled={false}/>
               <Clickable>
                 <div style={styles.workspaceName}
@@ -208,15 +256,18 @@ export class WorkspaceCard extends React.Component<
         </ModalFooter>
       </Modal>}
       {confirmDeleting &&
-        <ConfirmDeleteModal resourceType='workspace'
+        <ConfirmDeleteModal data-test-id='confirm-delete-modal'
+                            resourceType='workspace'
                             resourceName={wp.workspace.name}
                             receiveDelete={() => {this.deleteWorkspace(); }}
                             closeFunction={() => {this.setState({confirmDeleting: false}); }}/>}
-      {sharing && <WorkspaceShare workspace={wp.workspace}
+      {sharing && <WorkspaceShare data-test-id='workspace-share-modal'
+                                  workspace={wp.workspace}
                                   accessLevel={wp.accessLevel}
                                   userEmail={userEmail}
                                   sharing={sharing}
-                                  onClose={() => {this.shareWorkspace(); }} />}
+                                  userRoles={userRoles}
+                                  onClose={() => this.handleShareDialogClose()} />}
       {bugReportOpen && <BugReportModal bugReportDescription={bugReportError}
                                         onClose={() => this.setState({bugReportOpen: false})}/>}
     </React.Fragment>;
@@ -323,7 +374,7 @@ export const WorkspaceList = withUserProfile()
                   return <WorkspaceCard key={wp.workspace.name}
                                         wp={wp}
                                         userEmail={profile.username}
-                                        reload={() => {this.reloadWorkspaces(); }}/>;
+                                        reload={() => this.reloadWorkspaces()}/>;
                 })}
               </div>)}
           </div>

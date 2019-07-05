@@ -1050,7 +1050,12 @@ paths:
         - workspaces
       consumes:
         - application/json
-      description: Shares a workspace with users
+      description: >
+        Shares a workspace with the given users and permissions. Note that the entire ACL must
+        be provided to this method (including all existing users and roles), not just the additional
+        roles desired. Clients should first fetch existing ACLs via the getFirecloudWorkspaceUserRoles
+        method, make any changes desired, then pass the final list to this method.
+
       operationId: shareWorkspace
       parameters:
           - in: body
