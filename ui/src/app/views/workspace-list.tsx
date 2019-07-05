@@ -195,6 +195,8 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
       workspaceDeletionError: false});
   }
 
+  // Reloads data by calling the callback from the owning component. This
+  // currently causes the workspace-list to reload the entire list of workspaces.
   async reloadData() {
     await this.props.reload();
   }
