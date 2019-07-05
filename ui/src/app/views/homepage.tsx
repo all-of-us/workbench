@@ -17,7 +17,7 @@ import colors from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {QuickTourReact} from 'app/views/quick-tour-modal';
 import {RecentWork} from 'app/views/recent-work';
-import {RegistrationDashboard, getRegistrationTasksMap} from 'app/views/registration-dashboard';
+import {getRegistrationTasksMap, RegistrationDashboard} from 'app/views/registration-dashboard';
 import {
   BillingProjectStatus,
   Profile,

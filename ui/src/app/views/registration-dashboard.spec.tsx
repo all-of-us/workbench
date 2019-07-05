@@ -5,6 +5,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {RegistrationDashboard, RegistrationDashboardProps} from 'app/views/registration-dashboard';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
+import {serverConfigStore} from 'app/utils/navigation';
 
 describe('RegistrationDashboard', () => {
   let props: RegistrationDashboardProps;
@@ -16,6 +17,15 @@ describe('RegistrationDashboard', () => {
 
   beforeEach(() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
+    serverConfigStore.next({
+      enableDataUseAgreement: true,
+      enforceRegistered: true,
+      gsuiteDomain: 'fake-research-aou.org',
+      projectId: 'aaa',
+      publicApiKeyForErrorReports: 'aaa',
+      useBillingProjectBuffer: true,
+      enableEraCommons: true,
+    });
     props  = {
       eraCommonsLinked: false,
       eraCommonsError: '',
