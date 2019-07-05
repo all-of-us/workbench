@@ -26,11 +26,15 @@ const styles = {
   }
 };
 
+interface WithDynamicPositionProps {
+  target: string;
+}
+
 export const withDynamicPosition = () => WrappedComponent => {
-  const Wrapper = class extends React.Component {
+  const Wrapper = class WithDynamicPosition extends React.Component {
     static displayName = `withDynamicPosition()`;
 
-    props: any;
+    props: WithDynamicPositionProps;
     state: any;
     element: any;
     animation: number;
@@ -202,6 +206,8 @@ export const Popup = fp.flow(
   onClickOutside,
   withDynamicPosition()
 )(class PopupComponent extends React.Component {
+  static displayName = `Popup`;
+
   static readonly defaultProps = {
     side: 'right'
   };

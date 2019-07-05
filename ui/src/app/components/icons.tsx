@@ -24,6 +24,7 @@ export const styles = {
 };
 
 export const ClrIcon = ({className = '', ...props}) => {
+  delete props['data-test-id'];
   return React.createElement('clr-icon', {class: className, ...props});
 };
 
