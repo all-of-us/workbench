@@ -9,7 +9,7 @@ import {ClrIcon} from 'app/components/icons';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {navigate, userProfileStore} from 'app/utils/navigation';
+import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import { Profile } from 'generated/fetch';
 
@@ -38,12 +38,12 @@ const styles = reactStyles({
     maxWidth: '20rem'
   },
   warningIcon: {
-    color: colors.warning, position: 'relative', top: 'calc(50% - 10px)',
-    height: '20px', width: '20px'
+    color: colors.warning, height: '20px', width: '20px'
   },
   warningModal: {
     color: colors.primary, fontSize: '18px', lineHeight: '28px', flexDirection: 'row',
-    boxShadow: 'none', fontWeight: 600, display: 'flex', justifyContent: 'center'
+    boxShadow: 'none', fontWeight: 600, display: 'flex', justifyContent: 'center',
+    alignItems: 'center'
   },
   closeableWarning: {
     margin: '0px 1rem 1rem 0px', display: 'flex', justifyContent: 'space-between'
@@ -75,7 +75,10 @@ async function redirectToTraining() {
   window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
 }
 
-export const RegistrationTasks = [
+// This needs to be a function, because we want it to evaluate at call time,
+// not at compile time, to ensure that we make use of the server config store.
+// This is important so that we can feature flag off registration tasks.
+export const RegistrationTasks = () => serverConfigStore.getValue() ? [
   {
     key: 'twoFactorAuth',
     title: 'Turn on Google 2-Step Verification',
@@ -110,7 +113,7 @@ export const RegistrationTasks = [
       return !!profile.eraCommonsCompletionTime || !!profile.eraCommonsBypassTime;
     },
     onClick: redirectToNiH
-  }, {
+  }, ...(serverConfigStore.getValue().enableDataUseAgreement ? [{
     key: 'dataUseAgreement',
     title: 'Data Use Agreement',
     description: 'This data use agreement describes how All of Us ' +
@@ -121,10 +124,10 @@ export const RegistrationTasks = [
       return !!profile.dataUseAgreementCompletionTime || !!profile.dataUseAgreementBypassTime;
     },
     onClick: () => navigate(['data-use-agreement'])
-  }
-];
+  }] : [])
+] : [];
 
-export const RegistrationTasksMap = RegistrationTasks.reduce((acc, curr) => {
+export const RegistrationTasksMap = () => RegistrationTasks().reduce((acc, curr) => {
   acc[curr.key] = curr;
   return acc;
 }, {});
@@ -214,7 +217,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       </div>}
 
       <div style={{display: 'flex', flexDirection: 'row'}}>
-        {RegistrationTasks.map((card, i) => {
+        {RegistrationTasks().map((card, i) => {
           return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
             style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
               opacity: '0.6', maxHeight: this.allTasksCompleted() ? '160px' : '305px',
