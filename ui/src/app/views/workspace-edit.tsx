@@ -10,7 +10,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {TwoColPaddedTable} from 'app/components/tables';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {isBlank, reactStyles, ReactWrapperBase, sliceByHalfLength, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {currentWorkspaceStore, navigate, userProfileStore} from 'app/utils/navigation';
 import {CdrVersion, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -291,7 +291,7 @@ const styles = reactStyles({
     paddingLeft: '0.2rem',
   },
   boxHoverElement: {
-    color: '#262262',
+    color: colors.primary,
     margin: 0,
     padding: 0,
     fontFamily: 'Montserrat',
@@ -377,12 +377,9 @@ export interface WorkspaceEditState {
   loading: boolean;
   showUnderservedPopulationDetails: boolean;
   showStigmatizationDetails: boolean;
-  autocompleteLoading: boolean;
   autocompleteDiseases: Array<string>;
   diseaseHover: Array<boolean>;
-  dropDown: boolean;
-  searchTerm: string;
-  hovering: boolean;
+  searchTermChangedEvent: Function;
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
@@ -426,42 +423,33 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         loading: false,
         showUnderservedPopulationDetails: false,
         showStigmatizationDetails: false,
-        autocompleteLoading: false,
         autocompleteDiseases: [],
         diseaseHover: [],
-        dropDown: false,
-        searchTerm: '',
-        hovering: false
       };
       this.searchTermChangedEvent = fp.debounce(300, this.diseaseSearch);
     }
 
     get showSearchResults(): boolean {
-      return !this.state.autocompleteLoading &&
-        this.state.autocompleteDiseases.length > 0 &&
-        !isBlank(this.state.searchTerm) && this.state.dropDown;
+      return this.state.autocompleteDiseases.length > 0;
     }
 
     diseaseSearch(value: string): void {
-      this.setState({autocompleteLoading: true, autocompleteDiseases: [], searchTerm: value});
-      if (!value.trim()) {
-        this.setState({autocompleteLoading: false, dropDown: false});
+      this.setState({autocompleteDiseases: []});
+      const searchTerm = value.trim();
+      if (!searchTerm) {
         return;
       }
       const self = this;
       const url = 'https://firecloud-orchestration.dsde-dev.broadinstitute.org' +
-        '/duos/autocomplete/' + value;
+        '/duos/autocomplete/' + searchTerm;
       fetch(encodeURI(url)).then((response) => {
         return response.json();
       }).then((matches) => {
         const labeledMatches = fp.filter((elt) => elt.hasOwnProperty('label'))(matches);
-        const labels = fp.map((elt) => elt['label'])(labeledMatches);
-        const diseaseHover = labels.map(() => false);
+        const diseases = fp.map((elt) => elt['label'])(labeledMatches);
         self.setState({
-          autocompleteDiseases: labels,
-          diseaseHover: diseaseHover,
-          autocompleteLoading: false,
-          dropDown: true
+          autocompleteDiseases: diseases,
+          diseaseHover: diseases.map(() => false),
         });
       });
     }
@@ -757,7 +745,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                                     'researchPurpose',
                                     'diseaseOfFocus'
                                   ], disease));
-                                  this.setState({dropDown: false});
+                                  this.setState({autocompleteDiseases: []});
                                 }}>
                               <h5 style={styles.boxHoverElement}>{disease}</h5>
                             </div>
