@@ -17,7 +17,7 @@ interface State {
 
 export class ConfirmPlaygroundModeModal extends React.Component<Props, State> {
 
-  public static DO_NOT_SHOW_AGAIN = 'DO_NOT_SHOW_AGAIN';
+  public static DO_NOT_SHOW_AGAIN = 'DO_NOT_SHOW_AGAIN_CONFIRM_PLAYGROUND_MODE_MODAL';
 
   constructor(props: Props) {
     super(props);
