@@ -17,7 +17,7 @@ import colors from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {QuickTourReact} from 'app/views/quick-tour-modal';
 import {RecentWork} from 'app/views/recent-work';
-import {RegistrationDashboard, RegistrationTasksMap} from 'app/views/registration-dashboard';
+import {RegistrationDashboard, getRegistrationTasksMap} from 'app/views/registration-dashboard';
 import {
   BillingProjectStatus,
   Profile,
@@ -190,15 +190,15 @@ export const Homepage = withUserProfile()(class extends React.Component<
       }
 
       this.setState({
-        eraCommonsLinked: RegistrationTasksMap()['eraCommons'].isComplete(profile),
+        eraCommonsLinked: getRegistrationTasksMap()['eraCommons'].isComplete(profile),
         dataUseAgreementCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
-          (() => RegistrationTasksMap()['dataUseAgreement'].isComplete(profile))() : true)
+          (() => getRegistrationTasksMap()['dataUseAgreement'].isComplete(profile))() : true)
       });
 
       try {
         const result = await profileApi().syncComplianceTrainingStatus();
         this.setState({
-          trainingCompleted: RegistrationTasksMap()['complianceTraining'].isComplete(result)
+          trainingCompleted: getRegistrationTasksMap()['complianceTraining'].isComplete(result)
         });
       } catch (ex) {
         this.setState({trainingCompleted: false});
@@ -208,7 +208,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       try {
         const result = await profileApi().syncTwoFactorAuthStatus();
         this.setState({
-          twoFactorAuthCompleted: RegistrationTasksMap()['twoFactorAuth'].isComplete(result)
+          twoFactorAuthCompleted: getRegistrationTasksMap()['twoFactorAuth'].isComplete(result)
         });
       } catch (ex) {
         this.setState({twoFactorAuthCompleted: false});

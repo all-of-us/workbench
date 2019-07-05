@@ -78,7 +78,7 @@ async function redirectToTraining() {
 // This needs to be a function, because we want it to evaluate at call time,
 // not at compile time, to ensure that we make use of the server config store.
 // This is important so that we can feature flag off registration tasks.
-export const RegistrationTasks = () => serverConfigStore.getValue() ? [
+export const getRegistrationTasks = () => serverConfigStore.getValue() ? [
   {
     key: 'twoFactorAuth',
     title: 'Turn on Google 2-Step Verification',
@@ -125,9 +125,11 @@ export const RegistrationTasks = () => serverConfigStore.getValue() ? [
     },
     onClick: () => navigate(['data-use-agreement'])
   }] : [])
-] : [];
+] : (() => {
+  throw new Error('Cannot load registration tasks before config loaded');
+})();
 
-export const RegistrationTasksMap = () => RegistrationTasks().reduce((acc, curr) => {
+export const getRegistrationTasksMap = () => getRegistrationTasks().reduce((acc, curr) => {
   acc[curr.key] = curr;
   return acc;
 }, {});
@@ -217,7 +219,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       </div>}
 
       <div style={{display: 'flex', flexDirection: 'row'}}>
-        {RegistrationTasks().map((card, i) => {
+        {getRegistrationTasks().map((card, i) => {
           return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
             style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
               opacity: '0.6', maxHeight: this.allTasksCompleted() ? '160px' : '305px',
