@@ -11,7 +11,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, userProfileStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal';
 import {RecentWorkComponent} from 'app/views/recent-work';
@@ -51,6 +51,7 @@ import {HttpStub} from 'testing/stubs/http-stub';
 import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
 import {NotebooksServiceStub} from 'testing/stubs/notebooks-service-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
+import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
@@ -121,6 +122,8 @@ describe('WorkspaceComponent', () => {
         updateAndTick(fixture);
       });
     currentWorkspaceStore.next(workspaceDataStub);
+    userProfileStore.next({profile: ProfileStubVariables.PROFILE_STUB,
+      reload: () => {}, updateCache: () => {}});
     registerApiClient(ClusterApi, new ClusterApiStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());

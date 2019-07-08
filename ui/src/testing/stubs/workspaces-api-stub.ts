@@ -47,7 +47,8 @@ export const workspaceStubs = [
       reviewRequested: false,
       socialBehavioral: false,
       reasonForAllOfUs: '',
-    }
+    },
+    published: false
   }
 ];
 
@@ -186,6 +187,24 @@ export class WorkspacesApiStub extends WorkspacesApi {
   Promise<WorkspaceUserRolesResponse> {
     return new Promise<WorkspaceUserRolesResponse>(resolve => {
       resolve({items: this.workspaceUserRoles.get(workspaceId)});
+    });
+  }
+
+  getPublishedWorkspaces(options?: any): Promise<WorkspaceResponseListResponse> {
+    return new Promise<WorkspaceResponseListResponse>(resolve => {
+      const publishedWorkspaces = this.workspaces.filter(w => w.published === true);
+      resolve({
+        items: publishedWorkspaces.map(workspace => {
+          let accessLevel = WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
+          if (this.workspaceAccess.has(workspace.id)) {
+            accessLevel = this.workspaceAccess.get(workspace.id);
+          }
+          return {
+            workspace: {...workspace},
+            accessLevel: accessLevel
+          };
+        })
+      });
     });
   }
 
