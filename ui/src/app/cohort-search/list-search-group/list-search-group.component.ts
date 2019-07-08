@@ -48,13 +48,13 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
   count: number;
   error = false;
   loading = false;
+  preventInputCalculate = false;
 
   ngOnInit(): void {
     this.timeForm.valueChanges
       .debounceTime(500)
       .distinctUntilChanged()
       .map(({inputTimeValue}) => inputTimeValue)
-      .filter(value => value && value >= 0)
       .subscribe(this.getTimeValue);
   }
 
@@ -249,18 +249,29 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
   }
 
   getMentionTitle(mentionName) {
-    this.setGroupProperty('mention', mentionName);
-    this.calculateTemporal();
+    if (mentionName !== this.group.mention) {
+      this.setGroupProperty('mention', mentionName);
+      this.calculateTemporal();
+    }
   }
 
   getTimeTitle(timeName) {
-    this.setGroupProperty('time', timeName);
-    this.calculateTemporal();
+    if (timeName !== this.group.time) {
+      // prevents duplicate group count calls if switching from TemporalTime.DURINGSAMEENCOUNTERAS
+      this.preventInputCalculate = this.group.time === TemporalTime.DURINGSAMEENCOUNTERAS;
+      this.setGroupProperty('time', timeName);
+      this.calculateTemporal();
+    }
   }
 
   getTimeValue = (value: number) => {
-    this.setGroupProperty('timeValue', value);
-    this.calculateTemporal();
+    // prevents duplicate group count calls if changes is triggered by rendering of input
+    if (!this.preventInputCalculate) {
+      this.setGroupProperty('timeValue', value);
+      this.calculateTemporal();
+    } else {
+      this.preventInputCalculate = false;
+    }
   }
 
   calculateTemporal() {
@@ -301,7 +312,13 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
       }
       return acc;
     }, [0, 0]);
-    return counts.includes(0);
+    const inputError = this.group.time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
+      (this.group.timeValue === null || this.group.timeValue < 0);
+    return counts.includes(0) || inputError;
+  }
+
+  get validateInput() {
+    return this.group.temporal && this.group.time !== TemporalTime.DURINGSAMEENCOUNTERAS;
   }
 
   setMenuPosition() {
