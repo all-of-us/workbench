@@ -72,6 +72,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private static int NO_OF_PREVIEW_ROWS = 20;
   private static int PREVIEW_RETRY_LIMIT = 2;
+  // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
   private static long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000l;
   private static String CONCEPT_SET = "conceptSet";
   private static String COHORT = "cohort";
