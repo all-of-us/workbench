@@ -216,12 +216,20 @@ public class DataSetServiceImpl implements DataSetService {
                       .collect(Collectors.joining(" ")));
 
       // CONCEPT SETS HERE:
-      if (conceptSetsSelected.stream()
-              .mapToLong(conceptSet -> conceptSet.getConceptIds().size())
-              .sum()
-          == 0) {
-        throw new BadRequestException("Concept Sets must contain at least one concept");
-      }
+      conceptSetsSelected.stream()
+          .map(conceptSet -> conceptSet.getDomain())
+          .distinct()
+          .forEach(
+              domain -> {
+                if (conceptSetsSelected.stream()
+                        .filter(conceptSet -> conceptSet.getDomain() == domain)
+                        .mapToLong(conceptSet -> conceptSet.getConceptIds().size())
+                        .sum()
+                    == 0) {
+                  throw new BadRequestException("Concept Sets must contain at least one concept");
+                }
+              });
+
       String conceptSetQueries =
           conceptSetsSelected.stream()
               .filter(cs -> d == cs.getDomainEnum())
