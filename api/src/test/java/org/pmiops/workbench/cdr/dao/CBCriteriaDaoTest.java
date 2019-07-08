@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,26 @@ public class CBCriteriaDaoTest {
   @Autowired private ConceptDao conceptDao;
 
   @Autowired private JdbcTemplate jdbcTemplate;
+
+  @Test
+  public void findCriteriaLeavesByDomainAndTypeAndSubtype() throws Exception {
+    CBCriteria criteria =
+        new CBCriteria()
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.BASICS.toString())
+            .group(false)
+            .selectable(true);
+    cbCriteriaDao.save(criteria);
+    assertEquals(
+        criteria,
+        cbCriteriaDao
+            .findCriteriaLeavesByDomainAndTypeAndSubtype(
+                DomainType.SURVEY.toString(),
+                CriteriaType.PPI.toString(),
+                CriteriaSubType.BASICS.toString())
+            .get(0));
+  }
 
   @Test
   public void findExactMatchByCode() throws Exception {
