@@ -49,6 +49,7 @@ export class ListOverviewComponent implements OnChanges, OnInit {
   saveError = false;
   temporalError = false;
   cohort: Cohort;
+  apiCallCheck = 0;
 
   ngOnInit(): void {
     if (currentCohortStore.getValue()) {
@@ -66,13 +67,17 @@ export class ListOverviewComponent implements OnChanges, OnInit {
 
   getTotalCount() {
     try {
+      this.apiCallCheck++;
+      const apiCallCheck = this.apiCallCheck;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const request = mapRequest(this.searchRequest);
       cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
-        // TODO remove immutable conversion and modify charts to use vanilla javascript
-        this.chartData = fromJS(response.items);
-        this.total = response.items.reduce((sum, data) => sum + data.count, 0);
-        this.loading = false;
+        if (apiCallCheck === this.apiCallCheck) {
+          // TODO remove immutable conversion and modify charts to use vanilla javascript
+          this.chartData = fromJS(response.items);
+          this.total = response.items.reduce((sum, data) => sum + data.count, 0);
+          this.loading = false;
+        }
       }, (err) => {
         console.error(err);
         this.error = true;
