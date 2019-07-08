@@ -158,7 +158,7 @@ export const WorkspaceLibrary = withUserProfile()
                   return <WorkspaceCard key={wp.workspace.name}
                                         wp={wp}
                                         userEmail={username}
-                                        reload={() => {this.reloadPublishedWorkspaces(); }}/>;
+                                        reload={() => this.reloadPublishedWorkspaces() }/>;
                 })}
               </div>)}
           </div>}
