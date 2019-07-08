@@ -75,10 +75,22 @@ async function redirectToTraining() {
   window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
 }
 
+interface RegistrationTask {
+  key: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  completedText: string;
+  isRefreshable?: boolean;
+  isComplete: Function;
+  onClick: Function;
+  featureFlag?: boolean;
+}
+
 // This needs to be a function, because we want it to evaluate at call time,
 // not at compile time, to ensure that we make use of the server config store.
 // This is important so that we can feature flag off registration tasks.
-export const getRegistrationTasks = () => serverConfigStore.getValue() ? [
+export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   {
     key: 'twoFactorAuth',
     title: 'Turn on Google 2-Step Verification',
@@ -126,16 +138,15 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? [
     },
     onClick: () => navigate(['data-use-agreement'])
   }
-] : (() => {
+] as RegistrationTask[]).filter(registrationTask => registrationTask.featureFlag === undefined
+|| registrationTask.featureFlag) : (() => {
   throw new Error('Cannot load registration tasks before config loaded');
 })();
 
-export const getRegistrationTasksMap = () => getRegistrationTasks()
-  .filter((registrationTask) => registrationTask.featureFlag === undefined
-  || registrationTask.featureFlag).reduce((acc, curr) => {
-    acc[curr.key] = curr;
-    return acc;
-  }, {});
+export const getRegistrationTasksMap = () => getRegistrationTasks().reduce((acc, curr) => {
+  acc[curr.key] = curr;
+  return acc;
+}, {});
 
 export interface RegistrationDashboardProps {
   betaAccessGranted: boolean;
