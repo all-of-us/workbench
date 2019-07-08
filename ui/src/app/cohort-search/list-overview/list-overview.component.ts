@@ -12,7 +12,7 @@ import {
   urlParamsStore
 } from 'app/utils/navigation';
 
-import {Cohort} from 'generated/fetch';
+import {Cohort, TemporalTime} from 'generated/fetch';
 import {fromJS} from 'immutable';
 
 const COHORT_TYPE = 'AoU_Discover';
@@ -105,7 +105,9 @@ export class ListOverviewComponent implements OnChanges, OnInit {
         }
         return acc;
       }, [0, 0]);
-      return activeItems.includes(0);
+      const inputError = grp.time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
+          (grp.timeValue === null || grp.timeValue < 0);
+      return activeItems.includes(0) || inputError;
     });
   }
 
