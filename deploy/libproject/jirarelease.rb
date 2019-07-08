@@ -75,6 +75,7 @@ def format_jira_error(e)
 end
 
 class JiraReleaseClient
+
   def initialize(username, password)
     # Set :http_debug => true to see outgoing JIRA requests
     @client = JIRA::Client.new({
@@ -93,7 +94,7 @@ class JiraReleaseClient
       raise RuntimeError.new "failed to read JIRA login from '#{gcs_uri}'"
     end
     jira_json = JSON.parse(jira_creds)
-    return JiraReleaseClient.new(jira_json['username'], jira_json['password'])
+    return JiraReleaseClient.new(jira_json['username'], jira_json['apiToken'])
   end
 
   def ticket_summary(tag)
