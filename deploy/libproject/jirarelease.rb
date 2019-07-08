@@ -75,7 +75,6 @@ def format_jira_error(e)
 end
 
 class JiraReleaseClient
-
   def initialize(username, password)
     # Set :http_debug => true to see outgoing JIRA requests
     @client = JIRA::Client.new({
