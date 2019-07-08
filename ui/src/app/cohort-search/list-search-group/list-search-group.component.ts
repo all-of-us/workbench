@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, Input} from '@angular/core';
+import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
@@ -16,7 +16,7 @@ import {DomainType, SearchRequest, TemporalMention, TemporalTime} from 'generate
     '../../styles/buttons.css',
   ]
 })
-export class ListSearchGroupComponent implements AfterViewInit {
+export class ListSearchGroupComponent implements AfterViewInit, OnInit {
   @Input() group;
   @Input() index;
   @Input() role: keyof SearchRequest;
@@ -48,6 +48,15 @@ export class ListSearchGroupComponent implements AfterViewInit {
   count: number;
   error = false;
   loading = false;
+
+  ngOnInit(): void {
+    this.timeForm.valueChanges
+      .debounceTime(500)
+      .distinctUntilChanged()
+      .map(({inputTimeValue}) => inputTimeValue)
+      .filter(value => value && value >= 0)
+      .subscribe(this.getTimeValue);
+  }
 
   ngAfterViewInit() {
     if (typeof ResizeObserver === 'function') {
@@ -249,11 +258,9 @@ export class ListSearchGroupComponent implements AfterViewInit {
     this.calculateTemporal();
   }
 
-  getTimeValue(e) {
-    if (e.target.value >= 0) {
-      this.setGroupProperty('timeValue', e.target.value);
-      this.calculateTemporal();
-    }
+  getTimeValue = (value: number) => {
+    this.setGroupProperty('timeValue', value);
+    this.calculateTemporal();
   }
 
   calculateTemporal() {
