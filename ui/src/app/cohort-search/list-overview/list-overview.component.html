@@ -5,7 +5,7 @@
         <button
           type="button"
           class="btn btn-primary"
-          [disabled]="loading || saving || total === null || total === -1"
+          [disabled]="loading || saving || !this.hasActiveItems || this.hasTemporalError"
           [clrLoading]="saving"
           clrDropdownTrigger>
           <span style="margin-right: 5px">Save Cohort</span>
@@ -30,7 +30,7 @@
         type="button"
         class="btn btn-primary"
         style="float: right; margin: 0;"
-        [disabled]="loading || total === null || total === -1"
+        [disabled]="loading || !this.hasActiveItems || this.hasTemporalError"
         (click)="saveModal.open()">Create Cohort</button>
       <button
         class="btn btn-link"
@@ -59,13 +59,13 @@
     </div>
     <h2 class="count-header" id="total-count">
       Total Count:
-      <span *ngIf="loading" class="spinner spinner-sm">
+      <span *ngIf="loading && !hasTemporalError" class="spinner spinner-sm">
         Loading...
       </span>
       <span class="count-header" *ngIf="!loading && hasActiveItems && !hasTemporalError">
         {{total | number}}
       </span>
-      <span *ngIf="!loading && (hasTemporalError || !hasActiveItems)">
+      <span *ngIf="hasTemporalError || !hasActiveItems">
         --
         <clr-icon
           [popper]="errorPopper"
