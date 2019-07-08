@@ -215,7 +215,11 @@ public class CohortQueryBuilder {
       boolean isEnableListSearch = participantCriteria.isEnableListSearch();
       Map<SearchParameter, Set<Long>> criteriaLookup = new HashMap<>();
       if (isEnableListSearch) {
-        criteriaLookup = new CriteriaLookupUtil(cbCriteriaDao).buildCriteriaLookupMap(request);
+        try {
+          criteriaLookup = new CriteriaLookupUtil(cbCriteriaDao).buildCriteriaLookupMap(request);
+        } catch (IllegalArgumentException ex) {
+          throw new BadRequestException("Bad Request: " + ex.getMessage());
+        }
       }
 
       // build query for included search groups

@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.CBCriteria;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
@@ -185,8 +184,8 @@ public final class CriteriaLookupUtil {
     }
     for (CriteriaLookupUtil.FullTreeType treeType : childrenByTreeType.keySet()) {
       if (treeType.subType == null) {
-        throw new BadRequestException(
-            "Bad Request: Please provide a valid criteria subtype. null is not valid.");
+        throw new IllegalArgumentException(
+            "Please provide a valid criteria subtype. null is not valid.");
       }
       childrenByTreeType
           .get(treeType)
