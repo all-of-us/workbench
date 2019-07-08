@@ -42,14 +42,16 @@ export class ConfirmPlaygroundModeModal extends React.Component<Props, State> {
           but your edits will not be saved.
         </p>
         <p style={{color: colors.primary}}>
-          To save your work, choose <b>Make a Copy</b> from the <b>File Menu</b>
+          To save your work, choose <b>Make a Copy</b> from the <b>File Menu </b>
           to make your own version.
         </p>
       </ModalBody>
       <ModalFooter style={{alignItems: 'center'}}>
-        <CheckBox checked={this.state.checked}
+        <CheckBox id='show-again-checkbox'
+                  checked={this.state.checked}
                   onChange={() => { this.toggleChecked(); }} />
-        <label style={{marginLeft: '8px', marginRight: 'auto', color: colors.primary}}>
+        <label htmlFor='show-again-checkbox'
+               style={{marginLeft: '8px', marginRight: 'auto', color: colors.primary}}>
           Don't show again
         </label>
         <Button type='secondary'
