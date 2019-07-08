@@ -71,6 +71,8 @@ public class DataSetController implements DataSetApiDelegate {
   private final WorkspaceService workspaceService;
 
   private static int NO_OF_PREVIEW_ROWS = 20;
+  private static int PREVIEW_RETRY_LIMIT = 2;
+  private static long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000l;
   private static String CONCEPT_SET = "conceptSet";
   private static String COHORT = "cohort";
 
@@ -246,7 +248,6 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    int retryLimit = 2;
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
     bigQueryJobConfig.forEach(
@@ -268,7 +269,7 @@ public class DataSetController implements DataSetApiDelegate {
               TableResult queryResponse =
                   bigQueryService.executeQuery(
                       bigQueryService.filterBigQueryConfig(queryJobConfiguration),
-                      50000l / retryLimit + 1);
+                      APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC / PREVIEW_RETRY_LIMIT + 1);
               queryResponse
                   .getSchema()
                   .getFields()
@@ -343,9 +344,9 @@ public class DataSetController implements DataSetApiDelegate {
                 throw ex;
               }
             }
-          } while (retry < retryLimit);
+          } while (retry < PREVIEW_RETRY_LIMIT);
 
-          if (retry == retryLimit) {
+          if (retry == PREVIEW_RETRY_LIMIT) {
             throw new GatewayTimeoutException(
                 "Timeout while querying the CDR to pull preview information.");
           }
