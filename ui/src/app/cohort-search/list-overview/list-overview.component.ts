@@ -47,7 +47,6 @@ export class ListOverviewComponent implements OnChanges, OnInit {
   showComboChart = true;
   showConflictError = false;
   saveError = false;
-  temporalError = false;
   cohort: Cohort;
   apiCallCheck = 0;
 
