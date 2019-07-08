@@ -16,6 +16,7 @@ import {NewNotebookModal} from 'app/views/new-notebook-modal';
 import {ResourceCard} from 'app/views/resource-card';
 
 import {FileDetail, WorkspaceAccessLevel} from 'generated/fetch';
+import {NotebookResourceCard} from "./notebook-resource-card";
 
 const styles = {
   heading: {
@@ -100,6 +101,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
               onUpdate={() => this.loadNotebooks()}
             />;
           })}
+          <NotebookResourceCard />
         </div>
       </div>
       {loading && <SpinnerOverlay />}
