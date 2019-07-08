@@ -40,11 +40,12 @@
     <span class="of-text"> of </span>
   </div>
 
-  <div *ngFor="let item of items" class="card-block search-item">
+  <div *ngFor="let item of items; let i = index;" class="card-block search-item">
     <app-list-search-group-item
       [role]="role"
       [groupId]="groupId"
       [item]="item"
+      [index]="i"
       [updateGroup]="update">
     </app-list-search-group-item>
     <div *ngIf="status === 'active'" class="item-or">OR</div>

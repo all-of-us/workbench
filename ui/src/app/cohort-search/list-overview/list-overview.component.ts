@@ -58,7 +58,10 @@ export class ListOverviewComponent implements OnChanges, OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.update && this.hasActiveItems && !this.hasTemporalError) {
+    if (changes.update &&
+        !changes.update.firstChange &&
+        this.hasActiveItems &&
+        !this.hasTemporalError) {
       this.loading = true;
       this.error = false;
       this.getTotalCount();

@@ -19,7 +19,7 @@ import {
   isRequstingTotal,
   totalCount,
 } from 'app/cohort-search/redux';
-import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.service';
+import {idsInUse, initExisting, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {parseCohortDefinition} from 'app/cohort-search/utils';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {SearchRequest} from 'generated/fetch';
@@ -78,6 +78,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
                 this.actions.loadFromJSON(cohort.criteria);
                 this.actions.runAllRequests();
               } else {
+                initExisting.next(true);
                 searchRequestStore.next(parseCohortDefinition(cohort.criteria));
               }
             }
