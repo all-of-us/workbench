@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
+import {AfterViewInit, Component, Input, OnInit, ɵViewDefinition} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
-import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {initExisting, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {generateId, mapGroup} from 'app/cohort-search/utils';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
@@ -54,7 +54,7 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
   ngOnInit(): void {
     this.timeForm.valueChanges
       .debounceTime(500)
-      .distinctUntilChanged()
+      .distinctUntilChanged((p: any, n: any) => JSON.stringify(p) === JSON.stringify(n))
       .map(({inputTimeValue}) => inputTimeValue)
       .subscribe(this.getTimeValue);
   }
@@ -95,9 +95,7 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
         [this.role]: [group]
       };
       cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
-        console.log(apiCallCheck);
         if (apiCallCheck === this.apiCallCheck) {
-          console.log(apiCallCheck);
           this.count = count;
           this.loading = false;
         }
@@ -117,7 +115,16 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
     // timeout prevents Angular 'value changed after checked' error
     setTimeout(() => {
       if (this.activeItems) {
-        this.updateRequest();
+        // prevent multiple total count calls when initializing multiple groups simultaneously
+        // (on cohort edit or clone)
+        const init = initExisting.getValue();
+        if (!init || (init && this.index === 0)) {
+          this.updateRequest();
+          if (init) {
+            this.preventInputCalculate = true;
+            initExisting.next(false);
+          }
+        }
         this.loading = true;
         this.error = false;
         this.getGroupCount();

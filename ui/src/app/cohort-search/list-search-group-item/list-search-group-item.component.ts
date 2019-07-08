@@ -4,6 +4,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
 
 import {
+  initExisting,
   searchRequestStore,
   selectionsStore,
   wizardStore
@@ -20,6 +21,7 @@ export class ListSearchGroupItemComponent implements OnInit {
   @Input() role: keyof SearchRequest;
   @Input() groupId: string;
   @Input() item: any;
+  @Input() index: number;
   @Input() updateGroup: Function;
 
   count: number;
@@ -31,7 +33,12 @@ export class ListSearchGroupItemComponent implements OnInit {
   }
 
   getItemCount() {
-    this.updateGroup();
+    // prevent multiple group count calls when initializing multiple items simultaneously
+    // (on cohort edit or clone)
+    const init = initExisting.getValue();
+    if (!init || (init && this.index === 0)) {
+      this.updateGroup();
+    }
     try {
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const item = mapGroupItem(this.item, false);
