@@ -79,8 +79,8 @@ export const RegistrationTasks = [
   {
     key: 'twoFactorAuth',
     title: 'Turn on Google 2-Step Verification',
-    description: 'With 2-Step Verification, you’ll protect your ' +
-      'account with both your password and your phone',
+    description: 'Add an extra layer of security to your account by providing your ' +
+      'phone number in addition to your password to verify your identity upon login.',
     buttonText: 'Get Started',
     completedText: 'Completed',
     isRefreshable: true,
@@ -91,8 +91,8 @@ export const RegistrationTasks = [
   }, {
     key: 'complianceTraining',
     title: 'Complete Online Training',
-    description: 'Researchers must maintain up-to-date completion of compliance ' +
-      'training courses hosted at the NNLM\'s Moodle installation',
+    description: 'Complete mandatory compliance training courses on how data should be used ' +
+      'and handled.',
     buttonText: 'Complete training',
     completedText: 'Completed',
     isComplete: (profile: Profile) => {
@@ -101,9 +101,9 @@ export const RegistrationTasks = [
     onClick: redirectToTraining
   }, {
     key: 'eraCommons',
-    title: 'Login to ERA Commons',
-    description: 'Please login to your ERA Commons account and complete the online training ' +
-      'courses in order to gain full access to the Researcher Workbench data and tools',
+    title: 'Login to eRA Commons',
+    description: 'Link to your eRA Commons account to the workbench to gain full access to data ' +
+      'and tools.',
     buttonText: 'Login',
     completedText: 'Linked',
     isComplete: (profile: Profile) => {
@@ -113,8 +113,7 @@ export const RegistrationTasks = [
   }, {
     key: 'dataUseAgreement',
     title: 'Data Use Agreement',
-    description: 'This data use agreement describes how All of Us ' +
-      'Research Program data can and cannot be used',
+    description: 'Sign our data use agreement consenting to the All of Us data use policy.',
     buttonText: 'View & Sign',
     completedText: 'Signed',
     isComplete: (profile: Profile) => {

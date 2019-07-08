@@ -295,7 +295,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             completeStep={RegistrationTasksMap['complianceTraining'].onClick} />
 
           {serverConfigStore.getValue().enableEraCommons && <ProfileRegistrationStepStatus
-            title='ERA Commons Account'
+            title='eRA Commons Account'
             wasBypassed={!!profile.eraCommonsBypassTime}
             incompleteButtonText='Link'
             completedButtonText={RegistrationTasksMap['eraCommons'].completedText}

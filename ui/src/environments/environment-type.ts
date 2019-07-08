@@ -32,7 +32,7 @@ export interface Environment {
   // The URL to forward users to for the public UI (aka Data Browser).
   // Example value: 'https://aou-db-stable.appspot.com'
   publicUiUrl: string;
-  // The Shibboleth URL for linking ERA Commons accounts
+  // The Shibboleth URL for linking eRA Commons accounts
   shibbolethUrl: string;
   // The TCell API key. See RW-1682 for details.
   // Example value: 'AQEBBAEkx4iE2KxNyI7Wx08EwU1ycTM7E4FMSmaibbMUQxNU6uQvuAJt7fyABAtFYSYfgEE'
