@@ -154,12 +154,11 @@
       </clr-dropdown>
       <form [formGroup]="timeForm" class="form-padding">
         <input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  class="time-inputBox"
-               type="number"
-               [name]="timeValue"
-               [id]="timeValue"
-               [ngModel] = "timeValue"
-               (change)="getTimeValue($event)"
-               formControlName="inputTimeValue">
+          type="number"
+          [name]="timeValue"
+          [id]="timeValue"
+          [ngModel] = "timeValue"
+          formControlName="inputTimeValue">
       </form>
     </div>
     <div *ngFor="let item of temporalItems" class="card-block search-item">
