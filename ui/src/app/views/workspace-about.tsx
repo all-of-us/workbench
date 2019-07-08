@@ -133,7 +133,7 @@ export const WorkspaceAbout = fp.flow(withCurrentWorkspace(), withUserProfile())
               <Button disabled={publishing} type='secondary'
                 onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
               <Button onClick={() => this.publishUnpublishWorkspace(true)}
-                disabled={publishing} style={{marginLeft: '0.5rem'}} >Publish</Button>
+                disabled={publishing} style={{marginLeft: '0.5rem'}}>Publish</Button>
           </div>}
       </FadeBox>;
     }
