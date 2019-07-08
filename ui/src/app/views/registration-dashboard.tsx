@@ -254,7 +254,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       <AlertWarning style={styles.closeableWarning}>
         <div style={{display: 'flex'}}>
           <ClrIcon shape='exclamation-triangle' class='is-solid'/>
-          <div>It may take several minutes for Moodle to update your Online Training
+          <div>Please try refreshing this page in a few minutes as it takes time to update your
             status once you have completed compliance training.</div>
         </div>
         <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
