@@ -86,7 +86,6 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? [
       'account with both your password and your phone',
     buttonText: 'Get Started',
     completedText: 'Completed',
-    isEnabled: true,
     isRefreshable: true,
     isComplete: (profile: Profile) => {
       return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
@@ -98,7 +97,6 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? [
     description: 'Researchers must maintain up-to-date completion of compliance ' +
       'training courses hosted at the NNLM\'s Moodle installation',
     buttonText: 'Complete training',
-    isEnabled: true,
     completedText: 'Completed',
     isComplete: (profile: Profile) => {
       return !!profile.complianceTrainingCompletionTime || !!profile.complianceTrainingBypassTime;
@@ -110,7 +108,6 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? [
     description: 'Please login to your ERA Commons account and complete the online training ' +
       'courses in order to gain full access to the Researcher Workbench data and tools',
     buttonText: 'Login',
-    isEnabled: true,
     completedText: 'Linked',
     isComplete: (profile: Profile) => {
       return !!profile.eraCommonsCompletionTime || !!profile.eraCommonsBypassTime;
@@ -122,7 +119,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? [
     description: 'This data use agreement describes how All of Us ' +
       'Research Program data can and cannot be used',
     buttonText: 'View & Sign',
-    isEnabled: serverConfigStore.getValue().enableDataUseAgreement,
+    featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',
     isComplete: (profile: Profile) => {
       return !!profile.dataUseAgreementCompletionTime || !!profile.dataUseAgreementBypassTime;
@@ -134,7 +131,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? [
 })();
 
 export const getRegistrationTasksMap = () => getRegistrationTasks()
-  .filter((registrationTask) => registrationTask.isEnabled).reduce((acc, curr) => {
+  .filter((registrationTask) => registrationTask.featureFlag === undefined
+  || registrationTask.featureFlag).reduce((acc, curr) => {
     acc[curr.key] = curr;
     return acc;
   }, {});
