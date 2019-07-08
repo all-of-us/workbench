@@ -14,7 +14,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import { ProfileRegistrationStepStatus } from 'app/views/profile-registration-step-status';
-import { RegistrationTasksMap } from 'app/views/registration-dashboard';
+import { getRegistrationTasksMap } from 'app/views/registration-dashboard';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
 
@@ -282,25 +282,25 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             title='Google 2-Step Verification'
             wasBypassed={!!profile.twoFactorAuthBypassTime}
             incompleteButtonText='Set Up'
-            completedButtonText={RegistrationTasksMap['twoFactorAuth'].completedText}
-            isComplete={RegistrationTasksMap['twoFactorAuth'].isComplete(profile)}
-            completeStep={RegistrationTasksMap['twoFactorAuth'].onClick  } />
+            completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
+            isComplete={getRegistrationTasksMap()['twoFactorAuth'].isComplete(profile)}
+            completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick  } />
 
           <ProfileRegistrationStepStatus
             title='Access Training'
             wasBypassed={!!profile.complianceTrainingBypassTime}
             incompleteButtonText='Access Training'
-            completedButtonText={RegistrationTasksMap['complianceTraining'].completedText}
-            isComplete={RegistrationTasksMap['complianceTraining'].isComplete(profile)}
-            completeStep={RegistrationTasksMap['complianceTraining'].onClick} />
+            completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
+            isComplete={getRegistrationTasksMap()['complianceTraining'].isComplete(profile)}
+            completeStep={getRegistrationTasksMap()['complianceTraining'].onClick} />
 
           {serverConfigStore.getValue().enableEraCommons && <ProfileRegistrationStepStatus
             title='ERA Commons Account'
             wasBypassed={!!profile.eraCommonsBypassTime}
             incompleteButtonText='Link'
-            completedButtonText={RegistrationTasksMap['eraCommons'].completedText}
-            isComplete={RegistrationTasksMap['eraCommons'].isComplete(profile)}
-            completeStep={RegistrationTasksMap['eraCommons'].onClick} >
+            completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
+            isComplete={getRegistrationTasksMap()['eraCommons'].isComplete(profile)}
+            completeStep={getRegistrationTasksMap()['eraCommons'].onClick} >
             <div>
               {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
                 <div> Username: </div>
@@ -322,9 +322,9 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             title='Data Use Agreement'
             wasBypassed={!!profile.dataUseAgreementBypassTime}
             incompleteButtonText='Sign'
-            completedButtonText={RegistrationTasksMap['dataUseAgreement'].completedText}
-            isComplete={RegistrationTasksMap['dataUseAgreement'].isComplete(profile)}
-            completeStep={RegistrationTasksMap['dataUseAgreement'].onClick} >
+            completedButtonText={getRegistrationTasksMap()['dataUseAgreement'].completedText}
+            isComplete={getRegistrationTasksMap()['dataUseAgreement'].isComplete(profile)}
+            completeStep={getRegistrationTasksMap()['dataUseAgreement'].onClick} >
             {profile.dataUseAgreementCompletionTime != null && <React.Fragment>
               <div> Agreement Renewal: </div>
               <div>
@@ -334,7 +334,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               </div>
             </React.Fragment>}
             <a
-              onClick={RegistrationTasksMap['dataUseAgreement'].onClick}>
+              onClick={getRegistrationTasksMap()['dataUseAgreement'].onClick}>
               View current agreement
             </a>
           </ProfileRegistrationStepStatus>}
