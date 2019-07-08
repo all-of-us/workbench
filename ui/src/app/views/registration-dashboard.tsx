@@ -51,7 +51,7 @@ const styles = reactStyles({
 });
 
 function redirectToGoogleSecurity(): void {
-  let url = 'https://myaccount.google.com/security';
+  let url = 'https://myaccount.google.com/u/2/signinoptions/two-step-verification/enroll';
   const {profile} = userProfileStore.getValue();
   // The profile should always be available at this point, but avoid making an
   // implicit hard dependency on that, since the authuser'less URL is still useful.
