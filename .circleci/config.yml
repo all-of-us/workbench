@@ -17,6 +17,19 @@ java_defaults: &java_defaults
     TERM: dumb
 
 jobs:
+  lint:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+        name: Lint UI
+        working_directory: ~/workbench/ui
+        command: yarn run lint
+      - run:
+        name: Lint Java
+        working_directory: ~/workbench/api
+        command: ./gradlew spotlessCheck
+
   api-build-test:
     <<: *java_defaults
     steps:
@@ -38,10 +51,6 @@ jobs:
           name: Validate swagger definitions
           working_directory: ~/workbench/api
           command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
-      - run:
-          name: Java linting
-          working_directory: ~/workbench/api
-          command: ./gradlew spotlessCheck
       - run:
           name: Integration tests compile
           working_directory: ~/workbench/api
@@ -213,10 +222,6 @@ jobs:
             - ~/.cache/yarn
           key: ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
       - run:
-          name: Lint Angular app
-          working_directory: ~/workbench/ui
-          command: yarn run lint
-      - run:
           name: Run Angular tests
           working_directory: ~/workbench/ui
           command: |
@@ -304,6 +309,7 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master merge).
       # Note: by default tags are not picked up.
+      - lint
       - api-local-test
       - api-build-test
       - ui-build-test
