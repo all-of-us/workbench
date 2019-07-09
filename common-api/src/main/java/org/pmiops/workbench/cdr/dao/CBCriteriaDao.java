@@ -69,6 +69,19 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(
       value =
+          "select * from cb_criteria "
+              + "where domain_id = :domain "
+              + "and type = :type "
+              + "and parent_id in (:parentIds)"
+              + "or id in (:parentIds)",
+      nativeQuery = true)
+  List<CBCriteria> findCriteriaLeavesAndParentsByDomainAndTypeAndParentIds(
+      @Param("domain") String domain,
+      @Param("type") String type,
+      @Param("parentIds") List<Long> parentIds);
+
+  @Query(
+      value =
           "select cr from CBCriteria cr where domain_id = ?1 and type = ?2 and subtype = ?3 and is_group = 0 and is_selectable = 1")
   List<CBCriteria> findCriteriaLeavesByDomainAndTypeAndSubtype(
       String domain, String type, String subtype);
@@ -161,7 +174,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
               + "join concept c1 on (cr.concept_id_2 = c1.concept_id "
               + "and cr.concept_id_1 = :conceptId "
               + "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2 "
-              + "and c.domain_id = 'DRUG' and c.type = 'RXNORM' order by c.est_count desc",
+              + "and c.domain_id = 'DRUG' and c.type = 'RXNORM' and match(synonyms) against('+[drug_rank1]' in boolean mode) order by c.est_count desc",
       nativeQuery = true)
   List<CBCriteria> findDrugIngredientByConceptId(@Param("conceptId") String conceptId);
 }

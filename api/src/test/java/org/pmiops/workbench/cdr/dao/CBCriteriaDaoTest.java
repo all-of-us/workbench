@@ -10,7 +10,6 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.CBCriteria;
-import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
@@ -245,31 +244,6 @@ public class CBCriteriaDaoTest {
             domainId, type, true, "myMatch", page);
     assertEquals(1, conditions.size());
     assertEquals(snomedCriteria, conditions.get(0));
-  }
-
-  @Test
-  public void findDrugIngredientsByConceptId() throws Exception {
-    jdbcTemplate.execute(
-        "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
-    jdbcTemplate.execute(
-        "insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
-    Concept ingredient = new Concept().conceptId(1L).conceptClassId("Ingredient");
-    conceptDao.save(ingredient);
-    CBCriteria drugCriteriaIngredient =
-        new CBCriteria()
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.RXNORM.toString())
-            .name("ACETAMIN")
-            .selectable(true)
-            .path("1.2.3.4")
-            .conceptId("1")
-            .synonyms("[DRUG_rank1]");
-    cbCriteriaDao.save(drugCriteriaIngredient);
-
-    List<CBCriteria> drugList = cbCriteriaDao.findDrugIngredientByConceptId("12345");
-    assertEquals(1, drugList.size());
-    assertEquals(drugCriteriaIngredient, drugList.get(0));
-    jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
   @Test
