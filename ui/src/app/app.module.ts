@@ -6,6 +6,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouteReuseStrategy} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
+
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 

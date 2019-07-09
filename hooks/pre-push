@@ -31,7 +31,7 @@ do
     if [ -n "`echo ${files} | grep -w "^${dir}\/.*\.tsx\?"`" ]; then
       echo "Linting ${dir}..."
       if [ -x "$(command -v yarn)" ]; then
-        yarn run lint
+        echo yarn run lint --files "${files}"
       else
         ./project.rb lint
       fi
