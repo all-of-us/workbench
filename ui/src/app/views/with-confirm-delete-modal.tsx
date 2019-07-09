@@ -41,11 +41,12 @@ export const withConfirmDeleteModal = () => {
           {this.state.show && <ConfirmDeleteModal
             resourceName={this.state.displayName}
             resourceType={this.state.resourceType}
-            receiveDelete={() => this.state.receiveDelete(this.close)}
-            closeFunction={this.close}/>
+            receiveDelete={() => this.state.receiveDelete(() => this.close())}
+            closeFunction={() => this.close()} />
           }
 
-          <WrappedComponent showConfirmDeleteModal={this.showConfirmDeleteModal}
+          <WrappedComponent showConfirmDeleteModal={(displayName, resourceType, receiveDelete) => {
+            this.showConfirmDeleteModal(displayName, resourceType, receiveDelete)}}
                             {...this.props} />
         </React.Fragment>
       }
