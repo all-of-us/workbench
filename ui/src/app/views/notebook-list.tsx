@@ -101,7 +101,15 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
               onUpdate={() => this.loadNotebooks()}
             />;
           })}
-          <NotebookResourceCard />
+          {notebooks.map(notebook => {
+            return <NotebookResourceCard
+              resourceCard={convertToResource(notebook, namespace, id, al, ResourceType.NOTEBOOK)}
+              onUpdate={() => this.loadNotebooks()}
+              onDuplicateResource={(duplicating) =>
+                this.setState({loading: duplicating})
+              }
+            />;
+          })}
         </div>
       </div>
       {loading && <SpinnerOverlay />}

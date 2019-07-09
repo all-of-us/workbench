@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Clickable} from "../components/buttons";
+import {Clickable, MenuItem} from "../components/buttons";
 import {navigateAndPreventDefaultIfNoKeysPressed} from "../utils/navigation";
 import * as fp from "lodash";
 import {ResourceCardBase} from "../components/card";
@@ -7,6 +7,9 @@ import {reactStyles} from "../utils";
 import colors from "../styles/colors";
 import {ClrIcon} from "../components/icons";
 import {PopupTrigger} from "../components/popups";
+import {environment} from "../../environments/environment";
+import {TextModal} from "../components/text-modal";
+import {ConfirmDeleteModal} from "./confirm-delete-modal";
 
 const styles = reactStyles({
   card: {
@@ -57,60 +60,110 @@ const defaultProps = {
   marginTop: '1rem'
 };
 
-export const ResourceCardTemplate: React.FunctionComponent<{
-  actionsDisabled: boolean,
-  disabled: boolean,
-  resourceUrl: string,
+interface Action {
   displayName: string,
-  description: string,
-  displayDate: string,
-  footerText: string,
-  footerColor: string,
-}> = ({
-  actionsDisabled,
-  disabled,
-  resourceUrl,
-  displayName,
-  description,
-  displayDate,
-  footerText,
-  footerColor}) => {
+  onClick: Function
+}
 
-  return <ResourceCardBase style={{...styles.card, marginTop: defaultProps.marginTop}} // TODO eric: this is a modified value
-                           data-test-id='card'>
-    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
-      <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
-        <PopupTrigger
-          data-test-id='resource-card-menu'
-          side='bottom'
-          closeOnClick
-          content={null}
-        >
-          <Clickable disabled={actionsDisabled} data-test-id='resource-menu'>
-            <ClrIcon shape='ellipsis-vertical' size={21}
-                     style={{color: actionsDisabled ? '#9B9B9B' : '#2691D0', marginLeft: -9,
-                       cursor: actionsDisabled ? 'auto' : 'pointer'}}/>
-          </Clickable>
-        </PopupTrigger>
+interface Props {
+  actions: Action[];
+  actionsDisabled: boolean;
+  disabled: boolean;
+  resourceUrl: string;
+  displayName: string;
+  description: string;
+  displayDate: string;
+  footerText: string;
+  footerColor: string;
+}
 
-        <Clickable disabled={disabled}>
-          <a style={styles.cardName}
-             data-test-id='card-name'
-             href={resourceUrl}
-             onClick={e => {
-               navigateAndPreventDefaultIfNoKeysPressed(e, resourceUrl);
-             }}> {displayName}
-          </a>
-        </Clickable>
-      </div>
-      <div style={styles.cardDescription}>{description}</div>
-    </div>
-    <div style={styles.cardFooter}>
-      <div style={styles.lastModified} data-test-id='last-modified'>
-        Last Modified: {displayDate}</div>
-      <div style={{...styles.resourceType, backgroundColor: footerColor}}
-           data-test-id='card-type'>
-        {fp.startCase(fp.camelCase(footerText))}</div>
-    </div>
-  </ResourceCardBase>
+interface State {
+  errorModal: JSX.Element;
+  confirmDeleteModal: JSX.Element;
+}
+
+export class ResourceCardTemplate extends React.Component<Props, State> {
+
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      errorModal: null,
+      confirmDeleteModal: null
+    }
+  }
+
+  resourceCardFns() {
+    return {
+      showErrorModal: (title, body) => {
+        this.setState({
+          errorModal: <TextModal title={title}
+                                 body={body}
+                                 onConfirm={() => this.setState({errorModal: null})}/>
+        });
+      },
+      showConfirmDeleteModal: (displayName, resourceType, receiveDelete) => {
+        let closeModal = () => this.setState({confirmDeleteModal: null});
+
+        this.setState({
+          confirmDeleteModal: <ConfirmDeleteModal
+            resourceName={displayName}
+            resourceType={resourceType}
+            receiveDelete={() => receiveDelete(closeModal)}
+            closeFunction={closeModal}/>
+        })
+      }
+    }
+  }
+
+  render() {
+    return <React.Fragment>
+      {this.state.errorModal}
+      {this.state.confirmDeleteModal}
+
+      <ResourceCardBase style={{...styles.card, marginTop: defaultProps.marginTop}} // TODO eric: this is a modified value
+                               data-test-id='card'>
+        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
+          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
+            <PopupTrigger
+              data-test-id='resource-card-menu'
+              side='bottom'
+              closeOnClick
+              content={
+                <React.Fragment>
+                  {this.props.actions.map(action => {
+                    return <MenuItem onClick={() => action.onClick(this.resourceCardFns())}> {action.displayName} </MenuItem>
+                  })}
+                </React.Fragment>
+              }
+            >
+              <Clickable disabled={this.props.actionsDisabled} data-test-id='resource-menu'>
+                <ClrIcon shape='ellipsis-vertical' size={21}
+                         style={{color: this.props.actionsDisabled ? '#9B9B9B' : '#2691D0', marginLeft: -9,
+                           cursor: this.props.actionsDisabled ? 'auto' : 'pointer'}}/>
+              </Clickable>
+            </PopupTrigger>
+
+            <Clickable disabled={this.props.disabled}>
+              <a style={styles.cardName}
+                 data-test-id='card-name'
+                 href={this.props.resourceUrl}
+                 onClick={e => {
+                   navigateAndPreventDefaultIfNoKeysPressed(e, this.props.resourceUrl);
+                 }}> {this.props.displayName}
+              </a>
+            </Clickable>
+          </div>
+          <div style={styles.cardDescription}>{this.props.description}</div>
+        </div>
+        <div style={styles.cardFooter}>
+          <div style={styles.lastModified} data-test-id='last-modified'>
+            Last Modified: {this.props.displayDate}</div>
+          <div style={{...styles.resourceType, backgroundColor: this.props.footerColor}}
+               data-test-id='card-type'>
+            {fp.startCase(fp.camelCase(this.props.footerText))}</div>
+        </div>
+      </ResourceCardBase>
+    </React.Fragment>
+  }
+
 };
