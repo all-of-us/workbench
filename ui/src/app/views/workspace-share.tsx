@@ -157,6 +157,8 @@ export interface Props {
   accessLevel: WorkspaceAccessLevel;
   userEmail: string;
   onClose: Function;
+  // The userRoles to pre-populate the share dialog. Must be filled with all
+  // pre-existing roles on the workspace for this dialog to work correctly.
   userRoles: UserRole[];
 }
 

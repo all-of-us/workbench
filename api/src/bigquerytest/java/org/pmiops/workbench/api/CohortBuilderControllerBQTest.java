@@ -1182,6 +1182,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .group(true)
             .standard(false)
             .value("001")
+            .conceptId(1L)
             .ancestorData(false);
 
     SearchRequest searchRequest =
@@ -1445,7 +1446,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .group(true)
             .standard(false)
             .ancestorData(false)
-            .ancestorData(false)
+            .conceptId(1L)
             .value("001");
 
     CBCriteria criteriaParent =

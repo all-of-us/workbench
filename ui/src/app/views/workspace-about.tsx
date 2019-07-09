@@ -1,17 +1,19 @@
 import {Component} from '@angular/core';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Clickable} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {TwoColPaddedTable} from 'app/components/tables';
 import {EditComponentReact} from 'app/icons/edit';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {sliceByHalfLength} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
-import {SpecificPopulationEnum} from 'generated/fetch';
+import {Authority, Profile, SpecificPopulationEnum} from 'generated/fetch';
 import {ResearchPurposeDescription, ResearchPurposeItems, specificPopulations} from './workspace-edit';
 
 const styles = reactStyles({
@@ -28,12 +30,14 @@ const styles = reactStyles({
 });
 
 
-export const WorkspaceAbout = withCurrentWorkspace()(
-  class extends React.Component<{workspace: WorkspaceData},
-    {workspacePermissions: WorkspacePermissions}> {
+export const WorkspaceAbout = fp.flow(withCurrentWorkspace(), withUserProfile())(
+  class extends React.Component<
+    {profileState: { profile: Profile, reload: Function }, workspace: WorkspaceData},
+    {publishing: boolean, workspacePermissions: WorkspacePermissions}> {
     constructor(props) {
       super(props);
       this.state = {
+        publishing: false,
         workspacePermissions: new WorkspacePermissions(props.workspace)
       };
     }
@@ -73,9 +77,26 @@ export const WorkspaceAbout = withCurrentWorkspace()(
       }
     }
 
+    async publishUnpublishWorkspace(publish: boolean) {
+      this.setState({publishing: true});
+      try {
+        if (publish) {
+          await workspacesApi()
+            .publishWorkspace(this.props.workspace.namespace, this.props.workspace.id);
+        } else {
+          await workspacesApi()
+            .unpublishWorkspace(this.props.workspace.namespace, this.props.workspace.id);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.setState({publishing: false});
+      }
+    }
+
     render() {
-      const workspace = this.props.workspace;
-      const {workspacePermissions} = this.state;
+      const {workspace, profileState: {profile}} = this.props;
+      const {publishing, workspacePermissions} = this.state;
       const selectedResearchPurposeItems = this.getSelectedResearchPurposeItems();
       const rpItemsHalfLen = sliceByHalfLength(selectedResearchPurposeItems);
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '98%'}}>
@@ -108,6 +129,13 @@ export const WorkspaceAbout = withCurrentWorkspace()(
                              contentRight={this.getSelectedPopulationsSlice(false)}/>
         </div>
         }
+        {profile.authorities.includes(Authority.FEATUREDWORKSPACEADMIN) &&
+          <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+              <Button disabled={publishing} type='secondary'
+                onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
+              <Button onClick={() => this.publishUnpublishWorkspace(true)}
+                disabled={publishing} style={{marginLeft: '0.5rem'}}>Publish</Button>
+          </div>}
       </FadeBox>;
     }
   }

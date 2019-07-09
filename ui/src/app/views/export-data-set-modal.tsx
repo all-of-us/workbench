@@ -126,8 +126,8 @@ class ExportDataSetModal extends React.Component<
         kernelType: this.state.kernelType
       });
     // Open notebook in a new tab and close the modal
-    const notebookUrl = '\\workspaces\\' + workspaceNamespace + '\\' + workspaceFirecloudName +
-        '\\notebooks\\' + this.state.notebookName + '.ipynb';
+    const notebookUrl = '/workspaces/' + workspaceNamespace + '/' + workspaceFirecloudName +
+        '/notebooks/' + encodeURIComponent(this.state.notebookName) + '.ipynb';
     window.open(notebookUrl);
     this.props.closeFunction();
   }

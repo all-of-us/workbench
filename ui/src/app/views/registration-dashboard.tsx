@@ -9,7 +9,7 @@ import {ClrIcon} from 'app/components/icons';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {navigate, userProfileStore} from 'app/utils/navigation';
+import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import { Profile } from 'generated/fetch';
 
@@ -38,12 +38,12 @@ const styles = reactStyles({
     maxWidth: '20rem'
   },
   warningIcon: {
-    color: colors.warning, position: 'relative', top: 'calc(50% - 10px)',
-    height: '20px', width: '20px'
+    color: colors.warning, height: '20px', width: '20px'
   },
   warningModal: {
     color: colors.primary, fontSize: '18px', lineHeight: '28px', flexDirection: 'row',
-    boxShadow: 'none', fontWeight: 600, display: 'flex', justifyContent: 'center'
+    boxShadow: 'none', fontWeight: 600, display: 'flex', justifyContent: 'center',
+    alignItems: 'center'
   },
   closeableWarning: {
     margin: '0px 1rem 1rem 0px', display: 'flex', justifyContent: 'space-between'
@@ -51,7 +51,7 @@ const styles = reactStyles({
 });
 
 function redirectToGoogleSecurity(): void {
-  let url = 'https://myaccount.google.com/security';
+  let url = 'https://myaccount.google.com/u/2/signinoptions/two-step-verification/enroll';
   const {profile} = userProfileStore.getValue();
   // The profile should always be available at this point, but avoid making an
   // implicit hard dependency on that, since the authuser'less URL is still useful.
@@ -75,12 +75,27 @@ async function redirectToTraining() {
   window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
 }
 
-export const RegistrationTasks = [
+interface RegistrationTask {
+  key: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  completedText: string;
+  isRefreshable?: boolean;
+  isComplete: Function;
+  onClick: Function;
+  featureFlag?: boolean;
+}
+
+// This needs to be a function, because we want it to evaluate at call time,
+// not at compile time, to ensure that we make use of the server config store.
+// This is important so that we can feature flag off registration tasks.
+export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   {
     key: 'twoFactorAuth',
     title: 'Turn on Google 2-Step Verification',
-    description: 'With 2-Step Verification, you’ll protect your ' +
-      'account with both your password and your phone',
+    description: 'Add an extra layer of security to your account by providing your ' +
+      'phone number in addition to your password to verify your identity upon login.',
     buttonText: 'Get Started',
     completedText: 'Completed',
     isRefreshable: true,
@@ -91,8 +106,8 @@ export const RegistrationTasks = [
   }, {
     key: 'complianceTraining',
     title: 'Complete Online Training',
-    description: 'Researchers must maintain up-to-date completion of compliance ' +
-      'training courses hosted at the NNLM\'s Moodle installation',
+    description: 'Complete mandatory compliance training courses on how data should be used ' +
+      'and handled.',
     buttonText: 'Complete training',
     completedText: 'Completed',
     isComplete: (profile: Profile) => {
@@ -101,9 +116,9 @@ export const RegistrationTasks = [
     onClick: redirectToTraining
   }, {
     key: 'eraCommons',
-    title: 'Login to ERA Commons',
-    description: 'Please login to your ERA Commons account and complete the online training ' +
-      'courses in order to gain full access to the Researcher Workbench data and tools',
+    title: 'Login to eRA Commons',
+    description: 'Link to your eRA Commons account to the workbench to gain full access to data ' +
+      'and tools.',
     buttonText: 'Login',
     completedText: 'Linked',
     isComplete: (profile: Profile) => {
@@ -113,18 +128,21 @@ export const RegistrationTasks = [
   }, {
     key: 'dataUseAgreement',
     title: 'Data Use Agreement',
-    description: 'This data use agreement describes how All of Us ' +
-      'Research Program data can and cannot be used',
+    description: 'Sign our data use agreement consenting to the All of Us data use policy.',
     buttonText: 'View & Sign',
+    featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',
     isComplete: (profile: Profile) => {
       return !!profile.dataUseAgreementCompletionTime || !!profile.dataUseAgreementBypassTime;
     },
     onClick: () => navigate(['data-use-agreement'])
   }
-];
+] as RegistrationTask[]).filter(registrationTask => registrationTask.featureFlag === undefined
+|| registrationTask.featureFlag) : (() => {
+  throw new Error('Cannot load registration tasks before config loaded');
+})();
 
-export const RegistrationTasksMap = RegistrationTasks.reduce((acc, curr) => {
+export const getRegistrationTasksMap = () => getRegistrationTasks().reduce((acc, curr) => {
   acc[curr.key] = curr;
   return acc;
 }, {});
@@ -214,7 +232,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       </div>}
 
       <div style={{display: 'flex', flexDirection: 'row'}}>
-        {RegistrationTasks.map((card, i) => {
+        {getRegistrationTasks().map((card, i) => {
           return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
             style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
               opacity: '0.6', maxHeight: this.allTasksCompleted() ? '160px' : '305px',
@@ -255,7 +273,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       <AlertWarning style={styles.closeableWarning}>
         <div style={{display: 'flex'}}>
           <ClrIcon shape='exclamation-triangle' class='is-solid'/>
-          <div>It may take several minutes for Moodle to update your Online Training
+          <div>Please try refreshing this page in a few minutes as it takes time to update your
             status once you have completed compliance training.</div>
         </div>
         <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>

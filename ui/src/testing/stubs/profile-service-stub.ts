@@ -27,6 +27,7 @@ export class ProfileStubVariables {
     currentPosition: 'some',
     organization: 'here',
     areaOfResearch: 'things',
+    authorities: []
   };
 }
 

@@ -24,6 +24,7 @@ import {SignInComponent} from './views/sign-in';
 import {SignedInComponent} from './views/signed-in/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit';
+import {WorkspaceLibraryComponent} from './views/workspace-library';
 import {WorkspaceListComponent} from './views/workspace-list';
 import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
 import {WorkspaceComponent} from './views/workspace/component';
@@ -65,6 +66,10 @@ const routes: Routes = [
         path: 'data-use-agreement',
         component: DataUseAgreementComponent,
         data: {title: 'Data Use Agreement'}
+      }, {
+        path: 'library',
+        component: WorkspaceLibraryComponent,
+        data: {title: 'Workspace Library'}
       }, {
         path: 'workspaces',
         children: [

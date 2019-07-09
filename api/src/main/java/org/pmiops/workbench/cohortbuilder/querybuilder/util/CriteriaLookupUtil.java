@@ -183,6 +183,10 @@ public final class CriteriaLookupUtil {
       putLeavesOnParent(byParent, parents, leaves);
     }
     for (CriteriaLookupUtil.FullTreeType treeType : childrenByTreeType.keySet()) {
+      if (treeType.subType == null) {
+        throw new IllegalArgumentException(
+            "Please provide a valid criteria subtype. null is not valid.");
+      }
       childrenByTreeType
           .get(treeType)
           .addAll(
