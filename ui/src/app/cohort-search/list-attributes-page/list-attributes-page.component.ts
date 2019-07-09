@@ -390,6 +390,10 @@ export class ListAttributesPageComponent implements OnInit {
     return this.criterion.domainId === DomainType[DomainType.PHYSICALMEASUREMENT];
   }
 
+  get isBP() {
+    return this.criterion.subtype === CriteriaSubType[CriteriaSubType.BP];
+  }
+
   get showCalc() {
     let notAny = true;
     if (this.isPM) {
