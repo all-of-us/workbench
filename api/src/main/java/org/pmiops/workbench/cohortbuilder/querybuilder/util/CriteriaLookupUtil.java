@@ -170,7 +170,7 @@ public final class CriteriaLookupUtil {
       // Find the entire hierarchy from parent to leaves. Each parent node is now encoded with
       // concept ids. The following lookups are in 2 separate calls for query efficiency
       cbCriteriaDao
-          .findCriteriaLeavesAndParentsByDomainAndPath(treeType.domain.toString(), ids)
+          .findCriteriaLeavesAndParentsByPath(ids)
           .forEach(
               c -> {
                 if (c.getGroup() && parentConceptIds.contains(c.getConceptId())) {
