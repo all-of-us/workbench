@@ -11,7 +11,11 @@ import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
-import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {
+  workspaceDataStub,
+  workspaceStubs,
+  WorkspaceStubVariables
+} from 'testing/stubs/workspaces-api-stub';
 
 describe('DataSet', () => {
   beforeEach(() => {
@@ -229,5 +233,27 @@ describe('DataSet', () => {
     expect(navSpy).toHaveBeenCalledWith(wsPathPrefix + '/concepts');
   });
 
+  it(' dataSet should show tooltip and disable SAVE button if user has READER access', async() => {
+    const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
+    currentWorkspaceStore.next(readWorkspace);
+    const wrapper = mount(<DataSetPage />);
+    const isTooltipDisable =
+        wrapper.find({'data-test-id': 'save-tooltip'}).first().props().disabled;
+    const isSaveButtonDisable =
+        wrapper.find({'data-test-id': 'save-button'}).first().props().disabled;
+    expect(isTooltipDisable).toBeFalsy();
+    expect(isSaveButtonDisable).toBeTruthy();
+  });
 
+  it(' dataSet should disable cohort/concept PLUS ICON if user has READER access', async() => {
+    const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
+    currentWorkspaceStore.next(readWorkspace);
+    const wrapper = mount(<DataSetPage />);
+    const plusIconTooltip = wrapper.find({'data-test-id': 'plus-icon-tooltip'});
+    const cohortplusIcon = wrapper.find({'data-test-id': 'cohorts-link'});
+    const conceptSetplusIcon = wrapper.find({'data-test-id': 'concept-sets-link'});
+    expect(plusIconTooltip.first().props().disabled).toBeFalsy();
+    expect(cohortplusIcon.first().props().disabled).toBeTruthy();
+    expect(conceptSetplusIcon.first().props().disabled).toBeTruthy();
+  });
 });
