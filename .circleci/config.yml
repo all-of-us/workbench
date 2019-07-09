@@ -22,14 +22,13 @@ jobs:
     steps:
       - checkout
       - run:
-        name: Lint UI
-        working_directory: ~/workbench/ui
-        command: yarn run lint
+          name: Lint UI
+          working_directory: ~/workbench/ui
+          command: yarn run lint
       - run:
-        name: Lint Java
-        working_directory: ~/workbench/api
-        command: ./gradlew spotlessCheck
-
+          name: Lint Java
+          working_directory: ~/workbench/api
+          command: ./gradlew spotlessCheck
   api-build-test:
     <<: *java_defaults
     steps:
