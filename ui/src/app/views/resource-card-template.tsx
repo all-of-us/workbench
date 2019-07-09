@@ -1,14 +1,14 @@
+import * as fp from 'lodash';
 import * as React from 'react';
-import {Clickable, MenuItem} from "../components/buttons";
-import {navigateAndPreventDefaultIfNoKeysPressed} from "../utils/navigation";
-import * as fp from "lodash";
-import {ResourceCardBase} from "../components/card";
-import {reactStyles} from "../utils";
-import colors from "../styles/colors";
-import {ClrIcon} from "../components/icons";
-import {PopupTrigger} from "../components/popups";
-import {TextModal} from "../components/text-modal";
-import {ConfirmDeleteModal} from "./confirm-delete-modal";
+import {Clickable, MenuItem} from '../components/buttons';
+import {ResourceCardBase} from '../components/card';
+import {ClrIcon} from '../components/icons';
+import {PopupTrigger} from '../components/popups';
+import {TextModal} from '../components/text-modal';
+import colors from '../styles/colors';
+import {reactStyles} from '../utils';
+import {navigateAndPreventDefaultIfNoKeysPressed} from '../utils/navigation';
+import {ConfirmDeleteModal} from './confirm-delete-modal';
 
 const styles = reactStyles({
   card: {
@@ -60,8 +60,8 @@ const defaultProps = {
 };
 
 export interface Action {
-  displayName: string,
-  onClick: Function
+  displayName: string;
+  onClick: Function;
 }
 
 interface Props {
@@ -88,7 +88,7 @@ export class ResourceCardTemplate extends React.Component<Props, State> {
     this.state = {
       errorModal: null,
       confirmDeleteModal: null
-    }
+    };
   }
 
   resourceCardFns() {
@@ -101,7 +101,7 @@ export class ResourceCardTemplate extends React.Component<Props, State> {
         });
       },
       showConfirmDeleteModal: (displayName, resourceType, receiveDelete) => {
-        let closeModal = () => this.setState({confirmDeleteModal: null});
+        const closeModal = () => this.setState({confirmDeleteModal: null});
 
         this.setState({
           confirmDeleteModal: <ConfirmDeleteModal
@@ -109,9 +109,9 @@ export class ResourceCardTemplate extends React.Component<Props, State> {
             resourceType={resourceType}
             receiveDelete={() => receiveDelete(closeModal)}
             closeFunction={closeModal}/>
-        })
+        });
       }
-    }
+    };
   }
 
   render() {
@@ -130,7 +130,7 @@ export class ResourceCardTemplate extends React.Component<Props, State> {
               content={
                 <React.Fragment>
                   {this.props.actions.map(action => {
-                    return <MenuItem onClick={() => action.onClick(this.resourceCardFns())}> {action.displayName} </MenuItem>
+                    return <MenuItem onClick={() => action.onClick(this.resourceCardFns())}> {action.displayName} </MenuItem>;
                   })}
                 </React.Fragment>
               }
@@ -162,7 +162,7 @@ export class ResourceCardTemplate extends React.Component<Props, State> {
             {fp.startCase(fp.camelCase(this.props.footerText))}</div>
         </div>
       </ResourceCardBase>
-    </React.Fragment>
+    </React.Fragment>;
   }
 
-};
+}

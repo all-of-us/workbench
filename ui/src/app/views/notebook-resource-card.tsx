@@ -1,12 +1,12 @@
-import * as React from "react";
-import {Action, ResourceCardTemplate} from "./resource-card-template";
-import {RecentResource} from "../../generated/fetch";
-import {ResourceType} from "../utils/resourceActions";
-import colors from "../styles/colors";
-import {navigateByUrl} from "../utils/navigation";
-import {CopyNotebookModal} from "./copy-notebook-modal";
-import {workspacesApi} from "../services/swagger-fetch-clients";
-import {RenameModal} from "./rename-modal";
+import * as React from 'react';
+import {RecentResource} from '../../generated/fetch';
+import {workspacesApi} from '../services/swagger-fetch-clients';
+import colors from '../styles/colors';
+import {navigateByUrl} from '../utils/navigation';
+import {ResourceType} from '../utils/resourceActions';
+import {CopyNotebookModal} from './copy-notebook-modal';
+import {RenameModal} from './rename-modal';
+import {Action, ResourceCardTemplate} from './resource-card-template';
 
 interface Props {
   resourceCard: RecentResource;
@@ -25,14 +25,14 @@ export class NotebookResourceCard extends React.Component<Props, State> {
     this.state = {
       showCopyNotebookModal: false,
       renaming: false
-    }
+    };
   }
 
   get actions(): Action[] {
     return [
       {
         displayName: 'Rename',
-        onClick: () => {this.setState({renaming: true})},
+        onClick: () => {this.setState({renaming: true});},
       },
       {
         displayName: 'Duplicate',
@@ -40,17 +40,17 @@ export class NotebookResourceCard extends React.Component<Props, State> {
       },
       {
         displayName: 'Copy to another Workspace',
-          onClick: () => this.setState({showCopyNotebookModal: true}),
+        onClick: () => this.setState({showCopyNotebookModal: true}),
       },
       {
         displayName: 'Delete',
-          onClick: (resourceCardFns) => {
-        resourceCardFns.showConfirmDeleteModal(this.displayName, 'Notebook', (onComplete) => this.deleteNotebook(onComplete))
-      },
+        onClick: (resourceCardFns) => {
+            resourceCardFns.showConfirmDeleteModal(this.displayName, 'Notebook', (onComplete) => this.deleteNotebook(onComplete));
+          },
       },
       {
         displayName: 'Open in Jupyter Lab',
-          onClick: () => navigateByUrl(this.resourceUrl(true)),
+        onClick: () => navigateByUrl(this.resourceUrl(true)),
       }];
   }
 
@@ -64,7 +64,7 @@ export class NotebookResourceCard extends React.Component<Props, State> {
   }
 
   get displayName(): string {
-    return this.props.resourceCard.notebook.name.replace(/\.ipynb$/, '')
+    return this.props.resourceCard.notebook.name.replace(/\.ipynb$/, '');
   }
 
   get displayDate(): string {
@@ -130,10 +130,10 @@ export class NotebookResourceCard extends React.Component<Props, State> {
       .then(() => {
         this.props.onUpdate();
       }).catch(e => {
-      this.props.onDuplicateResource(false);
-      showErrorModal('Duplicating Notebook Error',
+        this.props.onDuplicateResource(false);
+        showErrorModal('Duplicating Notebook Error',
         'Notebook with the same name already exists.');
-    });
+      });
   }
 
   fullNotebookName(name) {

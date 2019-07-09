@@ -16,7 +16,7 @@ import {NewNotebookModal} from 'app/views/new-notebook-modal';
 import {ResourceCard} from 'app/views/resource-card';
 
 import {FileDetail, WorkspaceAccessLevel} from 'generated/fetch';
-import {NotebookResourceCard} from "./notebook-resource-card";
+import {NotebookResourceCard} from './notebook-resource-card';
 
 const styles = {
   heading: {
