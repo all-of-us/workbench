@@ -51,6 +51,13 @@ const styles = reactStyles({
     opacity: 0.4,
     cursor: 'not-allowed'
   },
+  disabledIcon: {
+    marginRight: '0.4rem',
+    color: '#9a9a9a',
+    opacity: 0.4,
+    cursor: 'not-allowed',
+    pointerEvents: 'none'
+  },
   brandIcon: {
     marginRight: '0.4rem',
     color: '#9a9a9a',
@@ -206,6 +213,9 @@ export const ListSearch = withCurrentWorkspace()(
           const groups = [...groupSelectionsStore.getValue(), row.id];
           groupSelectionsStore.next(groups);
         }
+        if (this.checkSource && !selections.length) {
+          wizard.standard = row.isStandard;
+        }
         wizard.item.searchParameters.push({parameterId, ...row, attributes: []});
         selections = [parameterId, ...selections];
         selectionsStore.next(selections);
@@ -265,6 +275,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     renderRow(row: any, child: boolean) {
+      const {wizard: {standard}} = this.props;
       const {ingredients} = this.state;
       const attributes = row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
@@ -272,47 +283,46 @@ export const ListSearch = withCurrentWorkspace()(
       const unselected = !attributes && !brand && !this.isSelected(row);
       const open = ingredients[row.id] && ingredients[row.id].open;
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
+      const disabled = this.checkSource && standard !== undefined && row.isStandard !== standard;
       const columnStyle = child ?
         {...styles.columnBody, paddingLeft: '1.25rem'} : styles.columnBody;
       return <tr>
-          <td style={columnStyle}>
-            {row.selectable && <div style={{...styles.selectDiv}}>
-              {attributes &&
+        <td style={columnStyle}>
+          {row.selectable && <div style={{...styles.selectDiv}}>
+            {attributes &&
               <ClrIcon style={styles.attrIcon}
-                       shape='slider' dir='right' size='20'
-                       onClick={() => this.launchAttributes(row)}/>
-              }
-              {selected &&
-              <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
-              }
-              {unselected &&
-              <ClrIcon style={styles.selectIcon}
-                       shape='plus-circle' size='16'
-                       onClick={() => this.selectItem(row)}/>
-              }
-              {brand && !loadingIngredients &&
-              <ClrIcon style={styles.brandIcon}
-                       shape={'angle ' + (open ? 'down' : 'right')} size='20'
-                       onClick={() => this.showIngredients(row)}/>
-              }
-              {loadingIngredients && <Spinner size={16}/>}
-            </div>}
-            <div style={{...styles.nameDiv}}>
-              <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
-            </div>
-          </td>
-          <td style={styles.columnBody}>{row.type}</td>
-          <td style={styles.columnBody}>
-            {row.count > -1 && row.count.toLocaleString()}
-          </td>
-          <td style={{...styles.columnBody, padding: '0.2rem'}}>
-            {row.hasHierarchy &&
-            <i className='pi pi-sitemap'
-               style={styles.treeIcon}
-               onClick={() => this.showHierarchy(row)}/>
+                shape='slider' dir='right' size='20'
+                onClick={() => this.launchAttributes(row)}/>
             }
-          </td>
-        </tr>;
+            {selected &&
+              <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
+            }
+            {unselected &&
+              <ClrIcon style={disabled ? styles.disabledIcon : styles.selectIcon}
+                shape='plus-circle' size='16'
+                onClick={() => this.selectItem(row)}/>
+            }
+            {brand && !loadingIngredients &&
+              <ClrIcon style={styles.brandIcon}
+                shape={'angle ' + (open ? 'down' : 'right')} size='20'
+                onClick={() => this.showIngredients(row)}/>
+            }
+            {loadingIngredients && <Spinner size={16}/>}
+          </div>}
+          <div style={{...styles.nameDiv}}>
+            <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
+          </div>
+        </td>
+        <td style={styles.columnBody}>{row.type}</td>
+        <td style={styles.columnBody}>{row.count > -1 && row.count.toLocaleString()}</td>
+        <td style={{...styles.columnBody, padding: '0.2rem'}}>
+          {row.hasHierarchy &&
+            <i className='pi pi-sitemap'
+              style={styles.treeIcon}
+              onClick={() => this.showHierarchy(row)}/>
+          }
+        </td>
+      </tr>;
     }
 
     render() {
