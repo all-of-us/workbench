@@ -63,7 +63,7 @@
   },
   "featureFlags": {
     "enableLeoWelder": false,
-    "useBillingProjectBuffer": false,
+    "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": false
   }
 }
