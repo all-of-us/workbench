@@ -328,10 +328,6 @@ public class CBCriteriaDaoTest {
             .path("1.5.99")
             .synonyms("+[CONDITION_rank1]");
     cbCriteriaDao.save(criteria);
-    assertEquals(
-        criteria,
-        cbCriteriaDao
-            .findCriteriaLeavesAndParentsByDomainAndPath(DomainType.CONDITION.toString(), "5")
-            .get(0));
+    assertEquals(criteria, cbCriteriaDao.findCriteriaLeavesAndParentsByPath("5").get(0));
   }
 }
