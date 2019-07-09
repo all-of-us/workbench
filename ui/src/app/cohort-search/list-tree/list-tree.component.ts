@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {ListNodeComponent} from 'app/cohort-search/list-node/list-node.component';
 import {DomainType} from 'generated';
 
@@ -12,15 +12,19 @@ import {DomainType} from 'generated';
   templateUrl: './list-tree.component.html',
   styleUrls: ['./list-tree.component.css']
 })
-export class ListTreeComponent extends ListNodeComponent implements OnInit {
+export class ListTreeComponent extends ListNodeComponent implements OnInit, OnChanges {
   @Input() back: Function;
-  _type: string;
-  name: string;
 
   ngOnInit() {
     super.ngOnInit();
     setTimeout(() => super.loadChildren(true));
-    this._type = this.node.domainId;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.node && !changes.node.firstChange) {
+      // reload children from api when switching between standard and source trees
+      super.loadChildren(true);
+    }
   }
 
   get showSearch() {
