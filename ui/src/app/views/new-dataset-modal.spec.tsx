@@ -27,6 +27,7 @@ const createNewDataSetModal = () => {
 
 describe('NewDataSetModal', () => {
   beforeEach(() => {
+    window.open = jest.fn();
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(DataSetApi, new DataSetApiStub());
   });
