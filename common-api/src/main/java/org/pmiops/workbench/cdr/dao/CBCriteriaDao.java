@@ -34,7 +34,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
               + "                    and domain_id = :domain "
               + "                    and type = :type "
               + "                    and is_group = 1) b "
-              + "             on (a.path like b.path or a.id = b.id) "
+              + "             on (a.path like b.path) "
               + "          where domain_id = :domain "
               + "            and is_group = 0  "
               + "            and is_selectable = 1 "

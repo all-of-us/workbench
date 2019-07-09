@@ -179,6 +179,7 @@ public final class CriteriaLookupUtil {
                   leaves.add(c);
                 }
               });
+      ;
 
       putLeavesOnParent(byParent, parents, leaves);
     }
@@ -230,10 +231,8 @@ public final class CriteriaLookupUtil {
       // number to be very high as it requires a user action to add a group, but a better data
       // structure could be used here if this becomes too slow.
       for (CBCriteria parent : parents) {
-        String parentId = Long.toString(parent.getId());
-        if (c.getPath().startsWith(parentId + ".")
-            || c.getPath().contains("." + parentId + ".")
-            || c.getPath().endsWith("." + parentId)) {
+        String path = parent.getPath();
+        if (c.getPath().startsWith(path)) {
           long parentConceptId = Long.parseLong(parent.getConceptId());
           byParent.putIfAbsent(parentConceptId, Sets.newHashSet());
           byParent.get(parentConceptId).add(Long.parseLong(c.getConceptId()));
