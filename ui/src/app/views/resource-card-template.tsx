@@ -7,7 +7,6 @@ import {reactStyles} from "../utils";
 import colors from "../styles/colors";
 import {ClrIcon} from "../components/icons";
 import {PopupTrigger} from "../components/popups";
-import {environment} from "../../environments/environment";
 import {TextModal} from "../components/text-modal";
 import {ConfirmDeleteModal} from "./confirm-delete-modal";
 
@@ -60,7 +59,7 @@ const defaultProps = {
   marginTop: '1rem'
 };
 
-interface Action {
+export interface Action {
   displayName: string,
   onClick: Function
 }

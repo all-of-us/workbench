@@ -1,5 +1,5 @@
 import * as React from "react";
-import {ResourceCardTemplate} from "./resource-card-template";
+import {Action, ResourceCardTemplate} from "./resource-card-template";
 import {RecentResource} from "../../generated/fetch";
 import {ResourceType} from "../utils/resourceActions";
 import colors from "../styles/colors";
@@ -28,42 +28,31 @@ export class NotebookResourceCard extends React.Component<Props, State> {
     }
   }
 
-  actions = [
-    {
-      displayName: 'Rename',
-      onClick: () => {this.setState({renaming: true})},
-    },
-    {
-      displayName: 'Duplicate',
-      onClick: (resourceCardFns) => {
-        workspacesApi().cloneNotebook(
-          this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName,
-          this.props.resourceCard.notebook.name)
-          .then(() => {
-            this.props.onUpdate();
-          }).catch(e => {
-          this.props.onDuplicateResource(false);
-          resourceCardFns.showErrorModal('Duplicating Notebook Error',
-            'Notebook with the same name already exists.');
-        });
+  get actions(): Action[] {
+    return [
+      {
+        displayName: 'Rename',
+        onClick: () => {this.setState({renaming: true})},
       },
-    },
-    {
-      displayName: 'Copy to another Workspace',
-      onClick: () => this.setState({showCopyNotebookModal: true}),
-    },
-    {
-      displayName: 'Delete',
-      onClick: (resourceCardFns) => {
+      {
+        displayName: 'Duplicate',
+        onClick: (resourceCardFns) => this.duplicateNotebook(resourceCardFns.showErrorModal),
+      },
+      {
+        displayName: 'Copy to another Workspace',
+          onClick: () => this.setState({showCopyNotebookModal: true}),
+      },
+      {
+        displayName: 'Delete',
+          onClick: (resourceCardFns) => {
         resourceCardFns.showConfirmDeleteModal(this.displayName, 'Notebook', (onComplete) => this.deleteNotebook(onComplete))
       },
-    },
-    {
-      displayName: 'Open in Jupyter Lab',
-      onClick: () => navigateByUrl(this.resourceUrl(true)),
-    }
-  ];
+      },
+      {
+        displayName: 'Open in Jupyter Lab',
+          onClick: () => navigateByUrl(this.resourceUrl(true)),
+      }];
+  }
 
   get readOnly(): boolean {
     return this.props.resourceCard.permission === 'READER';
@@ -131,6 +120,20 @@ export class NotebookResourceCard extends React.Component<Props, State> {
         onComplete();
         this.props.onUpdate();
       });
+  }
+
+  async duplicateNotebook(showErrorModal) {
+    workspacesApi().cloneNotebook(
+      this.props.resourceCard.workspaceNamespace,
+      this.props.resourceCard.workspaceFirecloudName,
+      this.props.resourceCard.notebook.name)
+      .then(() => {
+        this.props.onUpdate();
+      }).catch(e => {
+      this.props.onDuplicateResource(false);
+      showErrorModal('Duplicating Notebook Error',
+        'Notebook with the same name already exists.');
+    });
   }
 
   fullNotebookName(name) {
