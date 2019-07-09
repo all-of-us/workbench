@@ -51,7 +51,7 @@ const styles = reactStyles({
 });
 
 function redirectToGoogleSecurity(): void {
-  let url = 'https://myaccount.google.com/security';
+  let url = 'https://myaccount.google.com/u/2/signinoptions/two-step-verification/enroll';
   const {profile} = userProfileStore.getValue();
   // The profile should always be available at this point, but avoid making an
   // implicit hard dependency on that, since the authuser'less URL is still useful.
@@ -94,8 +94,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   {
     key: 'twoFactorAuth',
     title: 'Turn on Google 2-Step Verification',
-    description: 'With 2-Step Verification, you’ll protect your ' +
-      'account with both your password and your phone',
+    description: 'Add an extra layer of security to your account by providing your ' +
+      'phone number in addition to your password to verify your identity upon login.',
     buttonText: 'Get Started',
     completedText: 'Completed',
     isRefreshable: true,
@@ -106,8 +106,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   }, {
     key: 'complianceTraining',
     title: 'Complete Online Training',
-    description: 'Researchers must maintain up-to-date completion of compliance ' +
-      'training courses hosted at the NNLM\'s Moodle installation',
+    description: 'Complete mandatory compliance training courses on how data should be used ' +
+      'and handled.',
     buttonText: 'Complete training',
     completedText: 'Completed',
     isComplete: (profile: Profile) => {
@@ -116,9 +116,9 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     onClick: redirectToTraining
   }, {
     key: 'eraCommons',
-    title: 'Login to ERA Commons',
-    description: 'Please login to your ERA Commons account and complete the online training ' +
-      'courses in order to gain full access to the Researcher Workbench data and tools',
+    title: 'Login to eRA Commons',
+    description: 'Link to your eRA Commons account to the workbench to gain full access to data ' +
+      'and tools.',
     buttonText: 'Login',
     completedText: 'Linked',
     isComplete: (profile: Profile) => {
@@ -128,8 +128,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   }, {
     key: 'dataUseAgreement',
     title: 'Data Use Agreement',
-    description: 'This data use agreement describes how All of Us ' +
-      'Research Program data can and cannot be used',
+    description: 'Sign our data use agreement consenting to the All of Us data use policy.',
     buttonText: 'View & Sign',
     featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',
@@ -274,7 +273,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       <AlertWarning style={styles.closeableWarning}>
         <div style={{display: 'flex'}}>
           <ClrIcon shape='exclamation-triangle' class='is-solid'/>
-          <div>It may take several minutes for Moodle to update your Online Training
+          <div>Please try refreshing this page in a few minutes as it takes time to update your
             status once you have completed compliance training.</div>
         </div>
         <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
