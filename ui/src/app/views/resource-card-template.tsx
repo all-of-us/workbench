@@ -1,14 +1,14 @@
+import {Clickable, MenuItem} from 'app/components/buttons';
+import {ResourceCardBase} from 'app/components/card';
+import {ClrIcon} from 'app/components/icons';
+import {PopupTrigger} from 'app/components/popups';
+import {TextModal} from 'app/components/text-modal';
+import colors from 'app/styles/colors';
+import {reactStyles} from 'app/utils';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
 import * as fp from 'lodash';
 import * as React from 'react';
-import {Clickable, MenuItem} from '../components/buttons';
-import {ResourceCardBase} from '../components/card';
-import {ClrIcon} from '../components/icons';
-import {PopupTrigger} from '../components/popups';
-import {TextModal} from '../components/text-modal';
-import colors from '../styles/colors';
-import {reactStyles} from '../utils';
-import {navigateAndPreventDefaultIfNoKeysPressed} from '../utils/navigation';
-import {ConfirmDeleteModal} from './confirm-delete-modal';
 
 const styles = reactStyles({
   card: {
@@ -81,6 +81,7 @@ interface State {
   confirmDeleteModal: JSX.Element;
 }
 
+// This will be renamed to ResourceCard once the old code is removed
 export class ResourceCardTemplate extends React.Component<Props, State> {
 
   constructor(props: Props) {
@@ -119,7 +120,8 @@ export class ResourceCardTemplate extends React.Component<Props, State> {
       {this.state.errorModal}
       {this.state.confirmDeleteModal}
 
-      <ResourceCardBase style={{...styles.card, marginTop: defaultProps.marginTop}} // TODO eric: this is a modified value
+      // TODO eric: this is a modified value
+      <ResourceCardBase style={{...styles.card, marginTop: defaultProps.marginTop}}
                                data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
@@ -130,15 +132,18 @@ export class ResourceCardTemplate extends React.Component<Props, State> {
               content={
                 <React.Fragment>
                   {this.props.actions.map(action => {
-                    return <MenuItem onClick={() => action.onClick(this.resourceCardFns())}> {action.displayName} </MenuItem>;
+                    return <MenuItem onClick={() => action.onClick(this.resourceCardFns())}>
+                      {action.displayName}
+                    </MenuItem>;
                   })}
                 </React.Fragment>
               }
             >
               <Clickable disabled={this.props.actionsDisabled} data-test-id='resource-menu'>
                 <ClrIcon shape='ellipsis-vertical' size={21}
-                         style={{color: this.props.actionsDisabled ? '#9B9B9B' : '#2691D0', marginLeft: -9,
-                           cursor: this.props.actionsDisabled ? 'auto' : 'pointer'}}/>
+                         style={{color: this.props.actionsDisabled ? '#9B9B9B' : '#2691D0',
+                           marginLeft: -9, cursor: this.props.actionsDisabled ? 'auto' : 'pointer'}
+                         }/>
               </Clickable>
             </PopupTrigger>
 
