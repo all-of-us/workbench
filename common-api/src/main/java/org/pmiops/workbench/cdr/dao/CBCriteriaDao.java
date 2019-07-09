@@ -64,11 +64,8 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
       @Param("standard") Boolean isStandard,
       @Param("parentConceptIds") Set<String> parentConceptIds);
 
-  @Query(
-      value =
-          "select c from CBCriteria c where match(path, :path) > 0 and match(synonyms, concat('+[', :domain, '_rank1]')) > 0) order by id asc")
-  List<CBCriteria> findCriteriaLeavesAndParentsByDomainAndPath(
-      @Param("domain") String domain, @Param("path") String path);
+  @Query(value = "select c from CBCriteria c where match(path, :path) > 0 order by id asc")
+  List<CBCriteria> findCriteriaLeavesAndParentsByPath(@Param("path") String path);
 
   @Query(
       value =
