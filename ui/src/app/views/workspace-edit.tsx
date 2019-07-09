@@ -587,7 +587,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 <select style={{borderColor: 'rgb(151, 151, 151)', borderRadius: '6px',
                   height: '1.5rem', width: '12rem'}}
                   value={this.state.workspace.cdrVersionId}
-                  onChange={(v:React.FormEvent<HTMLSelectElement> ) => {
+                  onChange={(v: React.FormEvent<HTMLSelectElement>) => {
                     this.setState(fp.set(['workspace', 'cdrVersionId'], v.currentTarget.value));
                   }}
                   disabled={this.isMode(WorkspaceEditMode.Edit)}>
