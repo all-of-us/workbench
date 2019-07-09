@@ -1,5 +1,6 @@
 import {reactStyles, withStyle} from 'app/utils';
 
+
 export const baseStyles = reactStyles({
   card: {
     padding: '1rem',
