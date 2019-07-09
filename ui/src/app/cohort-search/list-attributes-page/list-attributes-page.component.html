@@ -91,7 +91,7 @@
         </div>
       </ng-container>
     </ng-container>
-    <div *ngIf="isValid || attrs.EXISTS" class="count-preview">
+    <div class="count-preview">
       <div class="row">
         <div *ngIf="showCalc" class="col-lg-3">
           <button type="button" [ngClass]="[loading ? 'greyed-button': 'calculate-btn']"
@@ -110,13 +110,13 @@
             <div>
               Number Participants:
               <span class="text-bold" *ngIf="!loading">
-             {{count  | number}}
+             {{count | number}}
              </span>
             </div>
           </div>
         </ng-container>
-        <div class="col-lg-3 button-padding" *ngIf="showAdd">
-          <button class="btn add-button" type="submit" [disabled]="rangeAlert"> ADD THIS RESULT</button>
+        <div class="col-lg-3 button-padding" *ngIf="!disabled">
+          <button class="btn add-button" type="submit"> ADD THIS RESULT</button>
         </div>
       </div>
     </div>
