@@ -62,10 +62,10 @@
       <span *ngIf="loading && !hasTemporalError" class="spinner spinner-sm">
         Loading...
       </span>
-      <span class="count-header" *ngIf="!loading && hasErrors">
+      <span class="count-header" *ngIf="!loading && !hasErrors">
         {{total | number}}
       </span>
-      <span *ngIf="!hasErrors">
+      <span *ngIf="hasErrors">
         --
         <clr-icon
           [popper]="errorPopper"
