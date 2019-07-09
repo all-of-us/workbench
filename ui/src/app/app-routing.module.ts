@@ -5,7 +5,6 @@ import {DataSetGuard} from './guards/dataset-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
-
 import {DataPageComponent} from 'app/views/data-page'
 import {DataUseAgreementComponent} from 'app/views/data-use-agreement';
 import {DataSetPageComponent} from 'app/views/dataset-page';
