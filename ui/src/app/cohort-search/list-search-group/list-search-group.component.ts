@@ -86,7 +86,7 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
   getGroupCount() {
     try {
       this.apiCallCheck++;
-      const apiCallCheck = this.apiCallCheck;
+      const localCheck = this.apiCallCheck;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const group = mapGroup(this.group);
       const request = <SearchRequest>{
@@ -95,7 +95,7 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
         [this.role]: [group]
       };
       cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
-        if (apiCallCheck === this.apiCallCheck) {
+        if (localCheck === this.apiCallCheck) {
           this.count = count;
           this.loading = false;
         }
