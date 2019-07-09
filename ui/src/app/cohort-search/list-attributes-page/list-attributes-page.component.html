@@ -102,21 +102,18 @@
             Calculate
           </button>
         </div>
-        <ng-container *ngIf="!loading">
-          <div class="col-lg-5 text-padding" *ngIf="count >= 0">
-            <div class="result-text">
-              Results
-            </div>
-            <div>
-              Number Participants:
-              <span class="text-bold" *ngIf="!loading">
-             {{count | number}}
-             </span>
-            </div>
+        <div class="col-lg-5 text-padding">
+          <div class="result-text">
+            Results
           </div>
-        </ng-container>
+          <div>
+            Number Participants:
+            <span class="text-bold" *ngIf="count >= 0">{{count | number}}</span>
+            <span *ngIf="count === null"> -- </span>
+          </div>
+        </div>
         <div class="col-lg-3 button-padding" *ngIf="!disabled">
-          <button class="btn add-button" type="submit"> ADD THIS RESULT</button>
+          <button class="btn add-button" type="submit"> ADD THIS</button>
         </div>
       </div>
     </div>

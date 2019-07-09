@@ -28,7 +28,7 @@ export class ListAttributesPageComponent implements OnInit {
     labels: ['', ''],
     codes: ['', '']
   };
-  count = -1;
+  count = null;
   loading: boolean;
   error: boolean;
   selectedCode: any;
@@ -174,7 +174,7 @@ export class ListAttributesPageComponent implements OnInit {
       }
       this.setValidation(option.name);
       this.count = option.value === AttrName.ANY
-        ? this.criterion.count : -1;
+        ? this.criterion.count : null;
     }
   }
 
@@ -217,7 +217,7 @@ export class ListAttributesPageComponent implements OnInit {
         this.form.controls.NUM.get(['num' + index, name]).setValue(value, {emitEvent: false});
       }
     }
-    this.count = -1;
+    this.count = null;
   }
 
   get isValid() {
@@ -239,7 +239,7 @@ export class ListAttributesPageComponent implements OnInit {
   }
 
   refresh() {
-    this.count = -1;
+    this.count = null;
     this.form.reset();
     this.attrs.NUM.forEach(num => {
       num.operator = null;
@@ -329,6 +329,7 @@ export class ListAttributesPageComponent implements OnInit {
   }
 
   requestPreview() {
+    this.count = null;
     this.loading = true;
     this.error = false;
     const param = this.paramWithAttributes;
