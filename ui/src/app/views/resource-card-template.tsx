@@ -76,40 +76,16 @@ interface Props {
   footerColor: string;
 }
 
-interface State {
-  confirmDeleteModal: JSX.Element;
-}
-
 // This will be renamed to ResourceCard once the old code is removed
-export class ResourceCardTemplate extends React.Component<Props, State> {
+export class ResourceCardTemplate extends React.Component<Props, {}> {
 
   constructor(props: Props) {
-    super(props);
-    this.state = {
-      confirmDeleteModal: null
-    };
-  }
-
-  resourceCardFns() {
-    return {
-      showConfirmDeleteModal: (displayName, resourceType, receiveDelete) => {
-        const closeModal = () => this.setState({confirmDeleteModal: null});
-
-        this.setState({
-          confirmDeleteModal: <ConfirmDeleteModal
-            resourceName={displayName}
-            resourceType={resourceType}
-            receiveDelete={() => receiveDelete(closeModal)}
-            closeFunction={closeModal}/>
-        });
-      }
-    };
+    super(props)
   }
 
   // TODO eric: marginTOp this is a modified value
   render() {
     return <React.Fragment>
-      {this.state.confirmDeleteModal}
 
       <ResourceCardBase style={{...styles.card, marginTop: defaultProps.marginTop}}
                                data-test-id='card'>
@@ -122,7 +98,7 @@ export class ResourceCardTemplate extends React.Component<Props, State> {
               content={
                 <React.Fragment>
                   {this.props.actions.map(action => {
-                    return <MenuItem onClick={() => action.onClick(this.resourceCardFns())}>
+                    return <MenuItem onClick={() => action.onClick()}>
                       {action.displayName}
                     </MenuItem>;
                   })}
