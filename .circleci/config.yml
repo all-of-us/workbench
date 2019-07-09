@@ -17,18 +17,6 @@ java_defaults: &java_defaults
     TERM: dumb
 
 jobs:
-  lint:
-    <<: *defaults
-    steps:
-      - checkout
-      - run:
-          name: Lint UI
-          working_directory: ~/workbench/ui
-          command: yarn run lint
-      - run:
-          name: Lint Java
-          working_directory: ~/workbench/api
-          command: ./gradlew spotlessCheck
   api-build-test:
     <<: *java_defaults
     steps:
@@ -58,6 +46,11 @@ jobs:
           name: Unit tests
           working_directory: ~/workbench/api
           command: ./project.rb test
+      - run:
+          # Lint last; it's more important to surface test failures early.
+          name: Java linting
+          working_directory: ~/workbench/api
+          command: ./gradlew spotlessCheck
       - save_cache:
           paths:
             - ~/.gradle
@@ -234,6 +227,11 @@ jobs:
           name: Build with strict compilation
           working_directory: ~/workbench/ui
           command: ./project.rb build --environment test
+      - run:
+          # Lint last; it's more important to surface test failures early.
+          name: Lint Typescript
+          working_directory: ~/workbench/ui
+          command: yarn run lint
       - persist_to_workspace:
           root: .
           paths:
@@ -308,7 +306,6 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master merge).
       # Note: by default tags are not picked up.
-      - lint
       - api-local-test
       - api-build-test
       - ui-build-test
