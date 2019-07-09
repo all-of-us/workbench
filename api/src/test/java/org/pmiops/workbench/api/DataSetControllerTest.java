@@ -1,7 +1,14 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
@@ -222,6 +229,8 @@ public class DataSetControllerTest {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
       workbenchConfig.featureFlags.useBillingProjectBuffer = false;
+      workbenchConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
+      workbenchConfig.cohortbuilder.enableListSearch = true;
       return workbenchConfig;
     }
   }
@@ -236,7 +245,8 @@ public class DataSetControllerTest {
             cdrBigQuerySchemaConfigService,
             cohortDao,
             conceptSetDao,
-            cohortQueryBuilder);
+            cohortQueryBuilder,
+            workbenchConfigProvider);
     dataSetController =
         new DataSetController(
             bigQueryService,
