@@ -8,7 +8,7 @@ import {ClarityModule} from '@clr/angular';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 
 
-import {environment} from 'environments/environment';
+import {environment} from 'environments/environment'
 import * as StackTrace from 'stacktrace-js';
 
 import {InterceptedHttp} from './factory/InterceptedHttp';
