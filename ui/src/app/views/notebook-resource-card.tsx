@@ -9,7 +9,7 @@ import {RecentResource} from 'generated/fetch';
 import * as React from 'react';
 
 interface Props {
-  resourceCard: RecentResource;
+  resourceCard: RecentResource; // Destructure this into used parameters only
   onUpdate: Function; // TODO eric: this could use a better name
   onDuplicateResource: Function;
 }
