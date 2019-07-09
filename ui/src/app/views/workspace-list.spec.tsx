@@ -61,7 +61,8 @@ describe('WorkspaceList', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-card-name"]').first().simulate('click');
-    expect(navigate).toHaveBeenCalledWith(['workspaces', workspace.namespace, workspace.id]);
+    expect(navigate).toHaveBeenCalledWith(
+      ['workspaces', workspace.namespace, workspace.id, 'data']);
   });
 
   it('has the correct permissions classes', async () => {

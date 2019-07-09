@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, Input} from '@angular/core';
+import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
-import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {initExisting, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {generateId, mapGroup} from 'app/cohort-search/utils';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
@@ -16,7 +16,7 @@ import {DomainType, SearchRequest, TemporalMention, TemporalTime} from 'generate
     '../../styles/buttons.css',
   ]
 })
-export class ListSearchGroupComponent implements AfterViewInit {
+export class ListSearchGroupComponent implements AfterViewInit, OnInit {
   @Input() group;
   @Input() index;
   @Input() role: keyof SearchRequest;
@@ -48,6 +48,16 @@ export class ListSearchGroupComponent implements AfterViewInit {
   count: number;
   error = false;
   loading = false;
+  preventInputCalculate = false;
+  apiCallCheck = 0;
+
+  ngOnInit(): void {
+    this.timeForm.valueChanges
+      .debounceTime(500)
+      .distinctUntilChanged((p: any, n: any) => JSON.stringify(p) === JSON.stringify(n))
+      .map(({inputTimeValue}) => inputTimeValue)
+      .subscribe(this.getTimeValue);
+  }
 
   ngAfterViewInit() {
     if (typeof ResizeObserver === 'function') {
@@ -75,6 +85,8 @@ export class ListSearchGroupComponent implements AfterViewInit {
 
   getGroupCount() {
     try {
+      this.apiCallCheck++;
+      const localCheck = this.apiCallCheck;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const group = mapGroup(this.group);
       const request = <SearchRequest>{
@@ -83,8 +95,10 @@ export class ListSearchGroupComponent implements AfterViewInit {
         [this.role]: [group]
       };
       cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
-        this.count = count;
-        this.loading = false;
+        if (localCheck === this.apiCallCheck) {
+          this.count = count;
+          this.loading = false;
+        }
       }, (err) => {
         console.error(err);
         this.error = true;
@@ -101,7 +115,16 @@ export class ListSearchGroupComponent implements AfterViewInit {
     // timeout prevents Angular 'value changed after checked' error
     setTimeout(() => {
       if (this.activeItems) {
-        this.updateRequest();
+        // prevent multiple total count calls when initializing multiple groups simultaneously
+        // (on cohort edit or clone)
+        const init = initExisting.getValue();
+        if (!init || (init && this.index === 0)) {
+          this.updateRequest();
+          if (init) {
+            this.preventInputCalculate = true;
+            initExisting.next(false);
+          }
+        }
         this.loading = true;
         this.error = false;
         this.getGroupCount();
@@ -240,19 +263,36 @@ export class ListSearchGroupComponent implements AfterViewInit {
   }
 
   getMentionTitle(mentionName) {
-    this.setGroupProperty('mention', mentionName);
-    // TODO when new api call are ready, recalculate counts
+    if (mentionName !== this.group.mention) {
+      this.setGroupProperty('mention', mentionName);
+      this.calculateTemporal();
+    }
   }
 
   getTimeTitle(timeName) {
-    this.setGroupProperty('time', timeName);
-    // TODO when new api call are ready, recalculate counts
+    if (timeName !== this.group.time) {
+      // prevents duplicate group count calls if switching from TemporalTime.DURINGSAMEENCOUNTERAS
+      this.preventInputCalculate = this.group.time === TemporalTime.DURINGSAMEENCOUNTERAS;
+      this.setGroupProperty('time', timeName);
+      this.calculateTemporal();
+    }
   }
 
-  getTimeValue(e) {
-    if (e.target.value >= 0) {
-      this.setGroupProperty('timeValue', e.target.value);
-      // TODO when new api call are ready, recalculate counts
+  getTimeValue = (value: number) => {
+    // prevents duplicate group count calls if changes is triggered by rendering of input
+    if (!this.preventInputCalculate) {
+      this.setGroupProperty('timeValue', value);
+      this.calculateTemporal();
+    } else {
+      this.preventInputCalculate = false;
+    }
+  }
+
+  calculateTemporal() {
+    if (!this.temporalError) {
+      this.loading = true;
+      this.error = false;
+      this.getGroupCount();
     }
   }
 
@@ -286,7 +326,13 @@ export class ListSearchGroupComponent implements AfterViewInit {
       }
       return acc;
     }, [0, 0]);
-    return counts.includes(0);
+    const inputError = this.group.time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
+      (this.group.timeValue === null || this.group.timeValue < 0);
+    return counts.includes(0) || inputError;
+  }
+
+  get validateInput() {
+    return this.group.temporal && this.group.time !== TemporalTime.DURINGSAMEENCOUNTERAS;
   }
 
   setMenuPosition() {
