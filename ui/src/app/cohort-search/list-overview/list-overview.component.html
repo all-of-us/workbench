@@ -5,7 +5,7 @@
         <button
           type="button"
           class="btn btn-primary"
-          [disabled]="loading || saving || !this.hasActiveItems || this.hasTemporalError"
+          [disabled]="loading || saving || hasErrors"
           [clrLoading]="saving"
           clrDropdownTrigger>
           <span style="margin-right: 5px">Save Cohort</span>
@@ -30,7 +30,7 @@
         type="button"
         class="btn btn-primary"
         style="float: right; margin: 0;"
-        [disabled]="loading || !this.hasActiveItems || this.hasTemporalError"
+        [disabled]="loading || hasErrors"
         (click)="saveModal.open()">Create Cohort</button>
       <button
         class="btn btn-link"
@@ -62,10 +62,10 @@
       <span *ngIf="loading && !hasTemporalError" class="spinner spinner-sm">
         Loading...
       </span>
-      <span class="count-header" *ngIf="!loading && hasActiveItems && !hasTemporalError">
+      <span class="count-header" *ngIf="!loading && hasErrors">
         {{total | number}}
       </span>
-      <span *ngIf="hasTemporalError || !hasActiveItems">
+      <span *ngIf="!hasErrors">
         --
         <clr-icon
           [popper]="errorPopper"
@@ -75,11 +75,11 @@
       </span>
     </h2>
   </div>
-  <div *ngIf="error && hasActiveItems && !hasTemporalError" class="total-error">
+  <div *ngIf="error && !hasErrors" class="total-error">
     <clr-icon class="is-solid" shape="exclamation-triangle" size="22"></clr-icon>
     Sorry, the request cannot be completed.
   </div>
-  <div *ngIf="hasActiveItems && !hasTemporalError && !loading && chartData && total">
+  <div *ngIf="!hasErrors && !loading && chartData && total">
     <div class="card bg-faded">
       <div class="card-header header-text">
         Results by Gender

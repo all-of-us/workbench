@@ -57,10 +57,8 @@ export class ListOverviewComponent implements OnChanges, OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.update &&
-        !changes.update.firstChange &&
-        this.hasActiveItems &&
-        !this.hasTemporalError) {
+    const notFirstUpdate = changes.update && !changes.update.firstChange;
+    if (notFirstUpdate && !this.hasErrors) {
       this.loading = true;
       this.error = false;
       this.getTotalCount();
@@ -70,11 +68,11 @@ export class ListOverviewComponent implements OnChanges, OnInit {
   getTotalCount() {
     try {
       this.apiCallCheck++;
-      const apiCallCheck = this.apiCallCheck;
+      const localCheck = this.apiCallCheck;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const request = mapRequest(this.searchRequest);
       cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
-        if (apiCallCheck === this.apiCallCheck) {
+        if (localCheck === this.apiCallCheck) {
           // TODO remove immutable conversion and modify charts to use vanilla javascript
           this.chartData = fromJS(response.items);
           this.total = response.items.reduce((sum, data) => sum + data.count, 0);
@@ -116,6 +114,10 @@ export class ListOverviewComponent implements OnChanges, OnInit {
           (grp.timeValue === null || grp.timeValue < 0);
       return activeItems.includes(0) || inputError;
     });
+  }
+
+  get hasErrors() {
+    return this.hasTemporalError || !this.hasActiveItems;
   }
 
   get name() {
