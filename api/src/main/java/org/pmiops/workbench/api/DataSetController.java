@@ -71,6 +71,9 @@ public class DataSetController implements DataSetApiDelegate {
   private final WorkspaceService workspaceService;
 
   private static int NO_OF_PREVIEW_ROWS = 20;
+  private static int PREVIEW_RETRY_LIMIT = 2;
+  // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
+  private static long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000l;
   private static String CONCEPT_SET = "conceptSet";
   private static String COHORT = "cohort";
 
@@ -246,7 +249,6 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    int retryLimit = 2;
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
     bigQueryJobConfig.forEach(
@@ -260,9 +262,15 @@ public class DataSetController implements DataSetApiDelegate {
 
               queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
+              /* Google appengine has a 60 second timeout, we want to make sure this endpoint completes
+               * before that limit is exceeded, or we get a 500 error with the following type:
+               * com.google.apphosting.runtime.HardDeadlineExceededError
+               * See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
+               */
               TableResult queryResponse =
                   bigQueryService.executeQuery(
-                      bigQueryService.filterBigQueryConfig(queryJobConfiguration), 60000l);
+                      bigQueryService.filterBigQueryConfig(queryJobConfiguration),
+                      APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC / PREVIEW_RETRY_LIMIT + 1);
               queryResponse
                   .getSchema()
                   .getFields()
@@ -324,9 +332,9 @@ public class DataSetController implements DataSetApiDelegate {
                       });
               break;
             } catch (Exception ex) {
-              if (ex.getCause() != null
+              if ((ex.getCause() != null
                   && ex.getCause().getMessage() != null
-                  && ex.getCause().getMessage().contains("Read timed out")) {
+                  && ex.getCause().getMessage().contains("Read timed out"))) {
                 rowsRequested = (rowsRequested / 2);
                 if (rowsRequested == 0) {
                   throw new GatewayTimeoutException(
@@ -337,9 +345,9 @@ public class DataSetController implements DataSetApiDelegate {
                 throw ex;
               }
             }
-          } while (retry < retryLimit);
+          } while (retry < PREVIEW_RETRY_LIMIT);
 
-          if (retry == retryLimit) {
+          if (retry == PREVIEW_RETRY_LIMIT) {
             throw new GatewayTimeoutException(
                 "Timeout while querying the CDR to pull preview information.");
           }
