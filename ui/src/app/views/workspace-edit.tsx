@@ -342,7 +342,7 @@ export interface WorkspaceEditState {
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
-  class extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
+  class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
 
     constructor(props: WorkspaceEditProps) {
       super(props);
@@ -587,7 +587,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 <select style={{borderColor: 'rgb(151, 151, 151)', borderRadius: '6px',
                   height: '1.5rem', width: '12rem'}}
                   value={this.state.workspace.cdrVersionId}
-                  onChange={v => this.setState(fp.set(['workspace', 'cdrVersionId'], v))}
+                  onChange={(v:React.FormEvent<HTMLSelectElement> ) => {
+                    this.setState(fp.set(['workspace', 'cdrVersionId'], v.currentTarget.value));
+                  }}
                   disabled={this.isMode(WorkspaceEditMode.Edit)}>
                     {this.state.cdrVersionItems.map((version, i) => (
                       <option key={version.cdrVersionId} value={version.cdrVersionId}>
