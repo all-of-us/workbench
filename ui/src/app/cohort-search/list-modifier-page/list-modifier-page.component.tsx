@@ -428,6 +428,8 @@ export const ListModifierPage = withCurrentWorkspace()(
               }
             }
           });
+        } else if (item.values[0] !== undefined) {
+          initialState = false;
         }
         return acc;
       }, new Set());
