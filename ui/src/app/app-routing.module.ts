@@ -6,7 +6,7 @@ import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
 
-import {DataPageComponent} from 'app/views/data-page';
+import {DataPageComponent} from 'app/views/data-page'
 import {DataUseAgreementComponent} from 'app/views/data-use-agreement';
 import {DataSetPageComponent} from 'app/views/dataset-page';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';

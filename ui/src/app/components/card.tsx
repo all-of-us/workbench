@@ -12,7 +12,7 @@ export const baseStyles = reactStyles({
     flexDirection: 'column',
     margin: '0 1rem 1rem 0'
   }
-});
+})
 
 export const styles = reactStyles({
   workspaceCard: {
