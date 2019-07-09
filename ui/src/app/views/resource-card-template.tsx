@@ -77,7 +77,6 @@ interface Props {
 }
 
 interface State {
-  errorModal: JSX.Element;
   confirmDeleteModal: JSX.Element;
 }
 
@@ -87,20 +86,12 @@ export class ResourceCardTemplate extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      errorModal: null,
       confirmDeleteModal: null
     };
   }
 
   resourceCardFns() {
     return {
-      showErrorModal: (title, body) => {
-        this.setState({
-          errorModal: <TextModal title={title}
-                                 body={body}
-                                 onConfirm={() => this.setState({errorModal: null})}/>
-        });
-      },
       showConfirmDeleteModal: (displayName, resourceType, receiveDelete) => {
         const closeModal = () => this.setState({confirmDeleteModal: null});
 
@@ -115,12 +106,11 @@ export class ResourceCardTemplate extends React.Component<Props, State> {
     };
   }
 
+  // TODO eric: marginTOp this is a modified value
   render() {
     return <React.Fragment>
-      {this.state.errorModal}
       {this.state.confirmDeleteModal}
 
-      // TODO eric: this is a modified value
       <ResourceCardBase style={{...styles.card, marginTop: defaultProps.marginTop}}
                                data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
