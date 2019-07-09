@@ -27,7 +27,7 @@
     </div>
     <ng-container *ngIf="!attrs.EXISTS" formGroupName="NUM">
       <div *ngFor="let attr of attrs.NUM; let i = index">
-        <div class="attr-name-color">{{dropdowns.labels[i]}}</div>
+        <div *ngIf="isMeasurement || isBP" class="attr-name-color">{{dropdowns.labels[i]}}</div>
           <div class="container" [formGroupName]="'num'+i">
             <div class="dropdown-width">
               <clr-dropdown>

@@ -103,7 +103,8 @@ export class ListModalComponent implements OnInit, OnDestroy {
     autocompleteStore.next('');
     selectionsStore.next([]);
     subtreePathStore.next([]);
-    this.hierarchyNode = null;
+    this.attributesNode = undefined;
+    this.hierarchyNode = undefined;
     this.open = false;
   }
 
