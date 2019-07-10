@@ -53,5 +53,14 @@ else
     exit 1
 fi
 
+echo "Making denormalized dataset tables"
+if ./generate-cdr/make-bq-denormalized-dataset.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
+then
+    echo "Denormalized dataset tables generated"
+else
+    echo "FAILED To generate denormalized dataset tables"
+    exit 1
+fi
+
 echo " Finished make-bq-denormalized-tables"
 
