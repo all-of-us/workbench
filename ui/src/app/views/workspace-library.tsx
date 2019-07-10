@@ -102,6 +102,10 @@ export const WorkspaceLibrary = withUserProfile()
     }
   }
 
+  getFeaturedWorkspaces(): WorkspacePermissions[] {
+    return this.state.workspaceList;
+  }
+
   async reloadPublishedWorkspaces() {
     this.setState({workspacesLoading: true});
     try {

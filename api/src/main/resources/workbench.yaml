@@ -100,6 +100,19 @@ paths:
           schema:
             $ref: "#/definitions/ConfigResponse"
 
+  /v1/featured-workspace-config:
+    get:
+      tags:
+        - featured-workspaces-config
+      description: Returns the featured workspaces config
+      operationId: getFeaturedWorkspacesConfig
+      security: []
+      responses:
+        200:
+          description: List of featured workspaces
+          schema:
+            $ref: "#/definitions/FeaturedWorkspacesConfigResponse"
+
 
    # User methods ########################################################################
 
@@ -1937,6 +1950,24 @@ definitions:
       enableEraCommons:
         type: boolean
         description: Feature flag for enabling eRA commons
+
+  FeaturedWorkspacesConfigResponse:
+    type: object
+    properties:
+      featuredWorkspacesList:
+        type: "array"
+        items:
+          $ref: "#/definitions/FeaturedWorkspace"
+
+  FeaturedWorkspace:
+    type: object
+    properties:
+      name:
+        type: string
+        description: the name of the workspace
+      id:
+        type: string
+        description: the id of the workspace
 
   # Mirrors BillingProjectMembership from fireCloud.yaml
   BillingProjectMembership:
