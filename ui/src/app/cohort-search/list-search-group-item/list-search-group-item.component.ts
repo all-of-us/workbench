@@ -164,14 +164,17 @@ export class ListSearchGroupItemComponent implements OnInit {
   launchWizard() {
     const selections = this.item.searchParameters.map(sp => sp.parameterId);
     selectionsStore.next(selections);
-    const codes = getCodeOptions(this.item.type);
     const fullTree = this.item.fullTree;
     const {role, groupId} = this;
     const item = JSON.parse(JSON.stringify(this.item));
     const itemId = this.item.id;
     const domain = this.item.type;
+    let isStandard;
+    if ([DomainType.CONDITION, DomainType.PROCEDURE].includes(domain)) {
+      isStandard = item.searchParameters[0].isStandard;
+    }
     const {type, standard} = this.typeAndStandard;
-    const context = {item, domain, type, standard, role, groupId, itemId, fullTree, codes};
+    const context = {item, domain, type, isStandard, role, groupId, itemId, fullTree, standard};
     wizardStore.next(context);
   }
 }
