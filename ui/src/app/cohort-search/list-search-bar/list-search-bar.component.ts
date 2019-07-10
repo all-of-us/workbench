@@ -77,6 +77,7 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
       );
     apiCall.then(resp => {
       this.options = [];
+      this.noResults = resp.items.length === 0;
       const optionNames: Array<string> = [];
       this.highlightedOption = null;
       resp.items.forEach(option => {
