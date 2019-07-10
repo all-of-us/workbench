@@ -54,6 +54,9 @@
     <div class="col-xl-4 col-lg-12" id="list-charts">
       <app-list-overview *ngIf="overview" [searchRequest]="criteria" [update]="triggerUpdate"></app-list-overview>
     </div>
+    <div *ngIf="loading" class="spinner root-spinner">
+      Loading...
+    </div>
   </div>
 </div>
 <app-modal *ngIf="!listSearch"></app-modal>
