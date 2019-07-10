@@ -172,7 +172,7 @@ paths:
             type: string
           - in: path
             description: role of user for project
-            name: workbenchRole
+            name: role
             required: true
             type: string
             enum: ["user", "owner"]
@@ -186,7 +186,7 @@ paths:
         summary: remove user or group from billing project the caller owns
         operationId: removeUserFromBillingProject
         security:
-          - authorization:
+          - googleoauth:
               - openid
               - email
               - profile
