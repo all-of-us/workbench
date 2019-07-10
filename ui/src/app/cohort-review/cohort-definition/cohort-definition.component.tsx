@@ -1,7 +1,8 @@
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
-import {typeToTitle} from 'app/cohort-search/utils';
+import {domainToTitle} from 'app/cohort-search/utils';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {CriteriaType, DomainType} from 'generated/fetch';
 import * as React from 'react';
 
 const css = `
@@ -80,24 +81,24 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
     });
   }
 
-  mapParams(_type: string, params: Array<any>, mod) {
-    let groupedData;
-    _type === 'DRUG' ? groupedData = this.getGroupedData(params, 'group')
-      : groupedData = this.getGroupedData(params, 'type');
+  mapParams(domain: string, params: Array<any>, mod) {
+    const groupedData = domain === DomainType[DomainType.DRUG]
+      ? this.getGroupedData(params, 'group')
+      : this.getGroupedData(params, 'domain');
     if (mod.length) {
-      return this.getModifierFormattedData(groupedData, params, mod, _type);
+      return this.getModifierFormattedData(groupedData, params, mod, domain);
     } else {
-      return this.getOtherTreeFormattedData(groupedData, params, _type);
+      return this.getOtherTreeFormattedData(groupedData, params, domain);
     }
   }
 
-  getModifierFormattedData(groupedData, params, mod, _type) {
+  getModifierFormattedData(groupedData, params, mod, domain) {
     let typeMatched;
     const modArray =  params.map(eachParam => {
-      if (eachParam.type === 'DRUG') {
+      if (eachParam.domain === DomainType.DRUG) {
         typeMatched = groupedData.find( matched => matched.group === eachParam.group.toString());
       } else {
-        typeMatched = groupedData.find( matched => matched.group === eachParam.type);
+        typeMatched = groupedData.find( matched => matched.group === eachParam.domain);
       }
       let name;
       name = mod.reduce((acc, m) => {
@@ -113,37 +114,37 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
             ${concatOperand}`;
       }, '');
       return {
-        items: `${typeToTitle(_type)} | ${eachParam.type} |
+        items: `${domainToTitle(domain)} | ${eachParam.domain} |
           ${typeMatched.customString} | ${name}`,
-        type: eachParam.type
+        domain: eachParam.domain
       };
     });
     return this.removeDuplicates(modArray);
   }
 
-  getOtherTreeFormattedData(groupedData, params, _type) {
+  getOtherTreeFormattedData(groupedData, params, domain) {
     let typeMatched;
     const noModArray = params.map(param => {
-      if (param.type === 'DRUG') {
+      if (param.domain === DomainType.DRUG) {
         typeMatched = groupedData.find( matched => matched.group === param.group.toString());
       } else {
-        typeMatched = groupedData.find( matched => matched.group === param.type);
+        typeMatched = groupedData.find( matched => matched.group === param.domain);
       }
-      if (param.type === 'DEMO') {
-        return {items: param.subtype === 'DEC' ? `${typeToTitle(_type)}
+      if (param.domain === DomainType.PERSON) {
+        return {items: param.type === CriteriaType.DECEASED ? `${domainToTitle(domain)}
                       | ${param.name}` :
-                      `${typeToTitle(_type)}
-                      | ${this.operatorConversion(param.subtype)} | ${param.name}`,
-          type: param.type};
-      } else if (param.type === 'VISIT') {
-        return {items: `${typeToTitle(_type)} | ${typeMatched.customString}`,
-          type: param.type};
+            `${domainToTitle(domain)}
+                      | ${this.operatorConversion(param.type)} | ${param.name}`,
+          domain: param.domain};
+      } else if (param.domain === DomainType.VISIT) {
+        return {items: `${domainToTitle(domain)} | ${typeMatched.customString}`,
+          domain: param.domain};
       } else {
-        return _type === 'CONDITION' || _type === 'PROCEDURE' ?
-        {items: `${typeToTitle(_type)} | ${param.type} | ${typeMatched.customString}`,
-          type: param.type} :
-        {items: `${typeToTitle(_type)} | ${typeMatched.customString}`,
-          type: param.type};
+        return domain === DomainType.CONDITION || domain === DomainType.PROCEDURE ?
+        {items: `${domainToTitle(domain)} | ${param.type} | ${typeMatched.customString}`,
+          domain: param.domain} :
+        {items: `${domainToTitle(domain)} | ${typeMatched.customString}`,
+          domain: param.domain};
       }
     });
     return this.removeDuplicates(noModArray);
@@ -170,18 +171,18 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
   }
 
   getFormattedString(acc, d) {
-    if (d.type === 'DRUG') {
+    if (d.domain === DomainType.DRUG) {
       if (d.group === false) {
         return acc === '' ? `RXNORM | ${d.value}` : `${acc}, ${d.value}`;
       } else {
         return acc === '' ? `ATC | ${d.value}` : `${acc}, ${d.value}`;
       }
-    } else if (d.type === 'PM' || d.type === 'VISIT') {
+    } else if (d.domain === DomainType.PHYSICALMEASUREMENT || d.domain === DomainType.VISIT) {
       return acc === '' ? `${d.name}` : `${acc}, ${d.name}`;
-    } else if (d.type === 'PPI') {
+    } else if (d.domain === DomainType.SURVEY) {
       if (!d.group) {
         return  acc === '' ? `${d.name}` :
-           `${acc}, ${d.name}`;
+          `${acc}, ${d.name}`;
       } else if (d.group && !d.conceptId) {
         return acc === '' ? `Survey - ${d.name}` :
           `${acc}, Survey - ${d.name}`;
@@ -201,7 +202,7 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
   removeDuplicates(arr) {
     return arr.filter((thing, index, self) =>
       index === self.findIndex((t) => (
-        t.items === thing.items && t.type === thing.type
+        t.items === thing.items && t.domain === thing.domain
       ))
     );
   }
@@ -216,13 +217,13 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
         return '=';
       case 'BETWEEN' :
         return 'Between';
-      case 'ETH' :
+      case 'ETHNICITY' :
         return 'Ethnicity';
       case 'RACE' :
         return 'Race';
       case 'AGE' :
         return 'Age';
-      case 'GEN' :
+      case 'GENDER' :
         return 'Gender';
       case 'AGE_AT_EVENT' :
         return 'Age at Event';
@@ -256,8 +257,8 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
                       {param.map((crit, c) => (
                         <React.Fragment key={c}>
                           {c > 0 && <React.Fragment>
-                            {crit.type === 'DEMO' && <div>AND</div>}
-                            {crit.type !== 'DEMO' && <div>OR</div>}
+                            {crit.domain === DomainType.PERSON && <div>AND</div>}
+                            {crit.domain !== DomainType.PERSON && <div>OR</div>}
                           </React.Fragment>}
                           <div>{crit.items}</div>
                         </React.Fragment>
