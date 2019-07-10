@@ -61,8 +61,8 @@ public class CacheSpringConfiguration {
     return (CdrBigQuerySchemaConfig) configCache.get(Config.CDR_BIGQUERY_SCHEMA_CONFIG_ID);
   }
 
-  public static FeaturedWorkspacesConfig lookupFeaturedWorkspacesConfig(LoadingCache<String, Object> configCache)
-      throws ExecutionException {
+  public static FeaturedWorkspacesConfig lookupFeaturedWorkspacesConfig(
+      LoadingCache<String, Object> configCache) throws ExecutionException {
     return (FeaturedWorkspacesConfig) configCache.get(Config.FEATURED_WORKSPACES_CONFIG_ID);
   }
 
@@ -77,8 +77,8 @@ public class CacheSpringConfiguration {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   FeaturedWorkspacesConfig getFeaturedWorkspacesConfig(
-          @Qualifier("configCache") LoadingCache<String, Object> configCache)
-          throws ExecutionException {
+      @Qualifier("configCache") LoadingCache<String, Object> configCache)
+      throws ExecutionException {
     return lookupFeaturedWorkspacesConfig(configCache);
   }
 
