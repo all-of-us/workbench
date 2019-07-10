@@ -34,7 +34,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
               + "                    and domain_id = :domain "
               + "                    and type = :type "
               + "                    and is_group = 1) b "
-              + "             on (a.path like b.path or a.id = b.id) "
+              + "             on (a.path like b.path) "
               + "          where domain_id = :domain "
               + "            and is_group = 0  "
               + "            and is_selectable = 1 "
@@ -64,11 +64,21 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
       @Param("standard") Boolean isStandard,
       @Param("parentConceptIds") Set<String> parentConceptIds);
 
+  @Query(value = "select c from CBCriteria c where match(path, :path) > 0 order by id asc")
+  List<CBCriteria> findCriteriaLeavesAndParentsByPath(@Param("path") String path);
+
   @Query(
       value =
-          "select c from CBCriteria c where match(path, :path) > 0 and match(synonyms, concat('+[', :domain, '_rank1]')) > 0) order by id asc")
-  List<CBCriteria> findCriteriaLeavesAndParentsByDomainAndPath(
-      @Param("domain") String domain, @Param("path") String path);
+          "select * from cb_criteria "
+              + "where domain_id = :domain "
+              + "and type = :type "
+              + "and parent_id in (:parentIds)"
+              + "or id in (:parentIds)",
+      nativeQuery = true)
+  List<CBCriteria> findCriteriaLeavesAndParentsByDomainAndTypeAndParentIds(
+      @Param("domain") String domain,
+      @Param("type") String type,
+      @Param("parentIds") List<Long> parentIds);
 
   @Query(
       value =
@@ -164,7 +174,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
               + "join concept c1 on (cr.concept_id_2 = c1.concept_id "
               + "and cr.concept_id_1 = :conceptId "
               + "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2 "
-              + "and c.domain_id = 'DRUG' and c.type = 'RXNORM' order by c.est_count desc",
+              + "and c.domain_id = 'DRUG' and c.type = 'RXNORM' and match(synonyms) against('+[drug_rank1]' in boolean mode) order by c.est_count desc",
       nativeQuery = true)
   List<CBCriteria> findDrugIngredientByConceptId(@Param("conceptId") String conceptId);
 }
