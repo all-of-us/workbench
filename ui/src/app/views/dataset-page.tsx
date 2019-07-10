@@ -418,30 +418,34 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       } catch (ex) {
         const exceptionResponse = await ex.json() as unknown as ErrorResponse;
         let errorText: string;
-        if (exceptionResponse.statusCode === 400) {
-          if (exceptionResponse.message ===
-            'Data Sets must include at least one cohort and concept.') {
-            errorText = exceptionResponse.message;
-          } else if (exceptionResponse.message ===
-            'Concept Sets must contain at least one concept') {
-            errorText = 'One or more of your concept sets has no concepts. ' +
-              'Please check your concept sets to ensure all concept sets have concepts.';
-          }
-        } else if (exceptionResponse.statusCode === 404) {
-          if (exceptionResponse.message.startsWith(
-            'Not Found: No Cohort definition matching cohortId')) {
-            errorText = 'Error with one or more cohorts in the data set. ' +
+        switch (exceptionResponse.statusCode) {
+          case 400:
+            if (exceptionResponse.message ===
+              'Data Sets must include at least one cohort and concept.') {
+              errorText = exceptionResponse.message;
+            } else if (exceptionResponse.message ===
+              'Concept Sets must contain at least one concept') {
+              errorText = 'One or more of your concept sets has no concepts. ' +
+                'Please check your concept sets to ensure all concept sets have concepts.';
+            }
+            break;
+          case 404:
+            if (exceptionResponse.message.startsWith(
+              'Not Found: No Cohort definition matching cohortId')) {
+              errorText = 'Error with one or more cohorts in the data set. ' +
+                'Please submit a bug using the contact support button';
+            }
+            break;
+          case 504:
+            if (exceptionResponse.message ===
+              'Timeout while querying the CDR to pull preview information.') {
+              errorText = 'Query to load data from the All of Us Database timed out. ' +
+                'Please either try again or export data set to a notebook to try there';
+            }
+            break;
+          default:
+            errorText = 'An unexpected error has occurred. ' +
               'Please submit a bug using the contact support button';
-          }
-        } else if (exceptionResponse.statusCode === 504) {
-          if (exceptionResponse.message ===
-            'Timeout while querying the CDR to pull preview information.') {
-            errorText = 'Query to load data from the All of Us Database timed out. ' +
-              'Please either try again or export data set to a notebook to try there';
-          }
-        } else {
-          errorText = 'An unexpected error has occurred. ' +
-            'Please submit a bug using the contact support button';
         }
         this.setState({previewError: true, previewErrorText: errorText});
         console.error(ex);
