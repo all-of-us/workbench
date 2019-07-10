@@ -6,7 +6,12 @@ import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients'
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {DataSetPage} from 'app/views/dataset-page';
 import {
-  CohortsApi, ConceptsApi, ConceptSetsApi, DataSetApi, WorkspaceAccessLevel} from 'generated/fetch';
+  CohortsApi,
+  ConceptsApi,
+  ConceptSetsApi,
+  DataSetApi,
+  WorkspaceAccessLevel
+} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';

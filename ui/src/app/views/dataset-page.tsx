@@ -159,7 +159,7 @@ export const ValueListItem: React.FunctionComponent <
     </div>;
   };
 
-const plusLink = (dataTestId: string, path: string, disable: boolean) => {
+const plusLink = (dataTestId: string, path: string, disable?: boolean) => {
   return <TooltipTrigger data-test-id='plus-icon-tooltip' disabled={!disable}
                          content='Requires Owner or Writer permission'>
     <Clickable disabled={disable} data-test-id={dataTestId} href={path}
@@ -370,7 +370,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       }
     }
 
-    canWrite() {
+    get canWrite() {
       return WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel);
     }
 
@@ -495,7 +495,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             <div style={{width: '33%'}}>
               <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
                 <BoxHeader text='1' header='Select Cohorts' subHeader='Participants'>
-                  {plusLink('cohorts-link', cohortsPath, !this.canWrite())}
+                  {plusLink('cohorts-link', cohortsPath, !this.canWrite)}
                 </BoxHeader>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
@@ -524,7 +524,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
                     <BoxHeader text='2' header='Select Concept Sets' subHeader='Rows'
                                style={{paddingRight: '1rem'}}>
-                      {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite())}
+                      {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite)}
                     </BoxHeader>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
@@ -600,11 +600,11 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               </div>
               </div>
               <TooltipTrigger data-test-id='save-tooltip'
-                           content='Requires Owner or Writer permission' disabled={this.canWrite()}>
+                           content='Requires Owner or Writer permission' disabled={this.canWrite}>
                 <Button data-test-id='save-button'
                   onClick ={() => this.setState({openSaveModal: true})}
-                  disabled={this.disableSave() || !this.canWrite()}>
-                  {this.editing ? !(dataSetTouched && this.canWrite()) ? 'Analyze' :
+                  disabled={this.disableSave() || !this.canWrite}>
+                  {this.editing ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
                     'Update And Analyze' : 'Save And Analyze'}
                 </Button>
               </TooltipTrigger>
