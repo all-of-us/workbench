@@ -6,6 +6,7 @@ import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
@@ -37,6 +38,7 @@ import {
   DomainValue,
   DomainValuePair,
   DomainValuesResponse,
+  ErrorResponse,
   ValueSet,
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
@@ -198,6 +200,8 @@ interface State {
   includesAllParticipants: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
+  previewError: boolean;
+  previewErrorText: string;
   previewList: Array<DataSetPreviewList>;
   previewDataLoading: boolean;
   selectedCohortIds: number[];
@@ -410,6 +414,34 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain
         });
       } catch (ex) {
+        const exceptionResponse = await ex.json() as unknown as ErrorResponse;
+        let errorText: string;
+        if (exceptionResponse.statusCode === 400) {
+          if (exceptionResponse.message ===
+            'Data Sets must include at least one cohort and concept.') {
+            errorText = exceptionResponse.message;
+          } else if (exceptionResponse.message ===
+            'Concept Sets must contain at least one concept') {
+            errorText = 'One or more of your concept sets has no concepts. ' +
+              'Please check your concept sets to ensure all concept sets have concepts.';
+          }
+        } else if (exceptionResponse.statusCode === 404) {
+          if (exceptionResponse.message.startsWith(
+            'Not Found: No Cohort definition matching cohortId')) {
+            errorText = 'Error with one or more cohorts in the data set. ' +
+              'Please submit a bug using the contact support button';
+          }
+        } else if (exceptionResponse.statusCode === 504) {
+          if (exceptionResponse.message ===
+            'Timeout while querying the CDR to pull preview information.') {
+            errorText = 'Query to load data from the All of Us Database timed out. ' +
+              'Please either try again or export data set to a notebook to try there';
+          }
+        } else {
+          errorText = 'An unexpected error has occurred. ' +
+            'Please submit a bug using the contact support button';
+        }
+        this.setState({previewError: true, previewErrorText: errorText});
         console.error(ex);
       } finally {
         this.setState({previewDataLoading: false});
@@ -473,6 +505,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         loadingResources,
         openSaveModal,
         previewDataLoading,
+        previewError,
+        previewErrorText,
         previewList,
         selectedCohortIds,
         selectedConceptSetIds,
@@ -663,6 +697,15 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                              this.setState({openSaveModal: false});
                                            }}
         />}
+        {previewError && <Modal>
+          <ModalTitle>Error Loading Data Set Preview</ModalTitle>
+          <ModalBody>{previewErrorText}</ModalBody>
+          <ModalFooter>
+            <Button type='secondary' onClick={() => {this.setState({previewError: false}); }}>
+              Close
+            </Button>
+          </ModalFooter>
+        </Modal>}
       </React.Fragment>;
     }
   });
