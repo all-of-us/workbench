@@ -6,7 +6,7 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
-const trigger = 2;
+const trigger = 3;
 
 @Component({
   selector: 'app-list-search-bar',
@@ -50,9 +50,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
           if (value.length >= trigger) {
             this.inputChange();
           } else {
-            if (!this.optionSelected) {
-              autocompleteStore.next('');
-            }
             this.options = [];
             this.noResults = false;
           }
