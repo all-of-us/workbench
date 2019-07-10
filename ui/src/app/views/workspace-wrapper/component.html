@@ -1,8 +1,8 @@
 <app-workspace-nav-bar *ngIf="displayNavBar"
-                       [shareFunction]="share"
+                       [shareFunction]="handleShareAction"
                        [deleteFunction]="openConfirmDelete"
                        [tabPath]="tabPath"></app-workspace-nav-bar>
-
+<span *ngIf="menuDataLoading" class="spinner spinner-lg" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"></span>
 <ng-container *ngIf="workspace">
   <clr-modal [(clrModalOpen)]="workspaceDeletionError">
     <h3 class="modal-title">Error:</h3>
@@ -15,6 +15,7 @@
   <app-workspace-share *ngIf="sharing" [onClose]="closeShare"
                        [workspace]="workspace"
                        [accessLevel]="accessLevel"
+                       [userRoles]="userRoles"
                        [userEmail]="username"></app-workspace-share>
   <app-confirm-delete-modal *ngIf="confirmDeleting"
                             [resourceType]="'workspace'"
