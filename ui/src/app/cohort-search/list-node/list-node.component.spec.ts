@@ -4,6 +4,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {ListNodeInfoComponent} from 'app/cohort-search/list-node-info/list-node-info.component';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
+import {wizardStore} from 'app/cohort-search/search-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderApi} from 'generated/fetch';
@@ -36,6 +37,7 @@ describe('ListNodeComponent', () => {
       ...workspaceDataStub,
       cdrVersionId: '1',
     });
+    wizardStore.next({});
   }));
 
   beforeEach(() => {
