@@ -1,6 +1,8 @@
-[
-  {
-  "name": "bug",
-  "id": 6
-  }
-]
+{
+  "featuredWorkspaces": [
+    {
+    "name": "bug",
+    "id": "bug"
+    }
+  ]
+}

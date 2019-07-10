@@ -35,7 +35,7 @@ import {
   ConfigApi,
   Configuration as FetchConfiguration,
   CronApi,
-  DataSetApi,
+  DataSetApi, FeaturedWorkspacesConfigApi,
   FetchAPI,
   OfflineClusterApi,
   ProfileApi,
@@ -94,6 +94,7 @@ export const conceptSetsApi = bindCtor(ConceptSetsApi);
 export const configApi = bindCtor(ConfigApi);
 export const cronApi = bindCtor(CronApi);
 export const dataSetApi = bindCtor(DataSetApi);
+export const featuredWorkspacesConfigApi = bindCtor(FeaturedWorkspacesConfigApi);
 export const offlineClusterApi = bindCtor(OfflineClusterApi);
 export const profileApi = bindCtor(ProfileApi);
 export const statusApi = bindCtor(StatusApi);

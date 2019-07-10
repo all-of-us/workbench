@@ -57,6 +57,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_staging.json",
     :cdr_versions_json => "cdr_versions_staging.json",
+    :featured_workspaces_json => "featured_workspaces_staging.json",
     :gae_vars => TEST_GAE_VARS
   },
   "all-of-us-rw-stable" => {
@@ -64,6 +65,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_stable.json",
     :cdr_versions_json => "cdr_versions_stable.json",
+    :featured_workspaces_json => "featured_workspaces_stable.json",
     :gae_vars => TEST_GAE_VARS
   },
   "all-of-us-rw-prod" => {
@@ -71,6 +73,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
     :config_json => "config_prod.json",
     :cdr_versions_json => "cdr_versions_prod.json",
+    :featured_workspaces_json => "featured_workspaces_prod.json",
     :gae_vars => make_gae_vars(10, 64)
   }
 }

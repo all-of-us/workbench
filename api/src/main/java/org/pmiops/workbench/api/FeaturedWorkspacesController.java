@@ -21,7 +21,7 @@ public class FeaturedWorkspacesController implements FeaturedWorkspacesConfigApi
         FeaturedWorkspacesConfig fwConfig = configProvider.get();
         return ResponseEntity.ok(
                 new FeaturedWorkspacesConfigResponse()
-                        .featuredWorkspacesList(fwConfig.featuredWorkspacesList)
+                        .featuredWorkspacesList(fwConfig.featuredWorkspaces)
         );
     }
 

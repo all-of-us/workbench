@@ -146,6 +146,16 @@ definitions:
         type: integer
         format: int32
 
+  FeaturedWorkspace:
+    type: object
+    properties:
+      name:
+        type: string
+        description: the name of the workspace
+      id:
+        type: string
+        description: the id of the workspace
+
   ErrorResponse:
     type: object
     properties:

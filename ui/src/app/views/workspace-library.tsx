@@ -6,7 +6,7 @@ import {Header} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {featuredWorkspacesConfigApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
@@ -70,19 +70,22 @@ export const WorkspaceLibrary = withUserProfile()
 (class extends React.Component<
   {profileState: { profile: Profile, reload: Function } },
   {currentTab: {title: string, icon: string}, errorText: string,
-    workspaceList: WorkspacePermissions[], workspacesLoading: boolean}> {
+    workspaceList: WorkspacePermissions[], featuredWorkspaceIds: Array<string>,
+    workspacesLoading: boolean}> {
   constructor(props) {
     super(props);
     this.state = {
       currentTab: libraryTabEnums.PUBLISHED_WORKSPACES,
       errorText: '',
+      featuredWorkspaceIds: [],
       workspaceList: [],
       workspacesLoading: true
     };
   }
 
-  componentDidMount() {
-    this.reloadPublishedWorkspaces();
+  async componentDidMount() {
+    this.loadPublishedWorkspaces();
+    this.loadFeaturedWorkspaces();
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -95,19 +98,26 @@ export const WorkspaceLibrary = withUserProfile()
   updateListedWorkspaces(tabEnum) {
     switch (tabEnum) {
       case tabEnum === libraryTabEnums.PUBLISHED_WORKSPACES:
-        this.reloadPublishedWorkspaces();
+        this.loadPublishedWorkspaces();
         break;
       default:
+        this.loadFeaturedWorkspaces();
         break;
     }
   }
 
-  getFeaturedWorkspaces(): WorkspacePermissions[] {
-    return this.state.workspaceList;
+  async loadFeaturedWorkspaces() {
+    try {
+      const resp = await featuredWorkspacesConfigApi().getFeaturedWorkspacesConfig();
+      this.setState({featuredWorkspaceIds: resp.featuredWorkspacesList.map(ws => ws.id)});
+      this.setState({workspacesLoading: false});
+    } catch (e) {
+      const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
+      this.setState({errorText: response.message});
+    }
   }
 
-  async reloadPublishedWorkspaces() {
-    this.setState({workspacesLoading: true});
+  async loadPublishedWorkspaces() {
     try {
       const workspacesReceived = await workspacesApi().getPublishedWorkspaces();
       workspacesReceived.items.sort(
@@ -123,7 +133,7 @@ export const WorkspaceLibrary = withUserProfile()
 
   render() {
     const {profile: {username}} = this.props.profileState;
-    const {currentTab, workspaceList, workspacesLoading} = this.state;
+    const {currentTab, featuredWorkspaceIds, workspaceList, workspacesLoading} = this.state;
     return <div style={{display: 'flex', flexDirection: 'row', height: '100%'}}>
       <div style={styles.navPanel}>
         <div style={{display: 'flex', flexDirection: 'column'}}>
@@ -152,7 +162,6 @@ export const WorkspaceLibrary = withUserProfile()
           </div>
           <hr style={styles.divider}/>
 
-          {/* Note: this is not user-facing */}
           {currentTab === libraryTabEnums.PUBLISHED_WORKSPACES &&
           <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
             {workspacesLoading ?
@@ -162,8 +171,24 @@ export const WorkspaceLibrary = withUserProfile()
                   return <WorkspaceCard key={wp.workspace.name}
                                         wp={wp}
                                         userEmail={username}
-                                        reload={() => {this.reloadPublishedWorkspaces(); }}/>;
+                                        reload={() => this.loadPublishedWorkspaces()}/>;
                 })}
+              </div>)}
+          </div>}
+          {currentTab === libraryTabEnums.FEATURED_WORKSPACES &&
+          <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
+            {workspacesLoading ?
+              (<Spinner style={{width: '100%', marginTop: '0.5rem'}}/>) :
+              (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
+                {workspaceList
+                  .filter(ws => featuredWorkspaceIds
+                    .includes(ws.workspace.id.toString()))
+                  .map(wp => {
+                    return <WorkspaceCard key={wp.workspace.name}
+                                          wp={wp}
+                                          userEmail={username}
+                                          reload={() => this.loadFeaturedWorkspaces()}/>;
+                  })}
               </div>)}
           </div>}
         </div>

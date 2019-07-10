@@ -95,5 +95,5 @@
   <include file="changelog/db.changelog-85-drop-user_workspace.xml"/>
   <include file="changelog/db.changelog-86-drop-tos.xml"/>
   <include file="changelog/db.changelog-87-add-survey-concept-set"/>
-  <include file="changelog/db.changelog-88-published-workspaces.xml"/>
+  <!--<include file="changelog/db.changelog-88-published-workspaces.xml"/>-->
 </databaseChangeLog>

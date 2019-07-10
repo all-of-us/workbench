@@ -9,11 +9,11 @@ import java.util.ArrayList;
  * directory.
  */
 public class FeaturedWorkspacesConfig {
-    public ArrayList<FeaturedWorkspace> featuredWorkspacesList;
+    public ArrayList<FeaturedWorkspace> featuredWorkspaces;
 
     public static FeaturedWorkspacesConfig createEmptyConfig() {
         FeaturedWorkspacesConfig fwConfig = new FeaturedWorkspacesConfig();
-        fwConfig.featuredWorkspacesList = new ArrayList<>();
+        fwConfig.featuredWorkspaces = new ArrayList<>();
         return fwConfig;
     }
 

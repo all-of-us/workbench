@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
+import org.pmiops.workbench.config.FeaturedWorkspacesConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
@@ -39,7 +40,9 @@ public class ConfigLoader {
           Config.MAIN_CONFIG_ID,
           WorkbenchConfig.class,
           Config.CDR_BIGQUERY_SCHEMA_CONFIG_ID,
-          CdrBigQuerySchemaConfig.class);
+          CdrBigQuerySchemaConfig.class,
+          Config.FEATURED_WORKSPACES_CONFIG_ID,
+          FeaturedWorkspacesConfig.class);
 
   @Bean
   public CommandLineRunner run(ConfigDao configDao) {
@@ -69,6 +72,7 @@ public class ConfigLoader {
       String marshalledJson = gson.toJson(configObj, configClass);
       JsonNode marshalledNode = jackson.readTree(marshalledJson);
       JsonNode marshalledDiff = JsonDiff.asJson(newJson, marshalledNode);
+      log.info(marshalledDiff.toString());
       if (marshalledDiff.size() > 0) {
         log.info(
             String.format(
