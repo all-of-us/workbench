@@ -218,7 +218,7 @@ export const ListSearch = withCurrentWorkspace()(
           groupSelectionsStore.next(groups);
         }
         if (this.checkSource && !selections.length) {
-          wizard.standard = row.isStandard;
+          wizard.isStandard = row.isStandard;
         }
         wizard.item.searchParameters.push({parameterId, ...row, attributes: []});
         selections = [parameterId, ...selections];
@@ -279,7 +279,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     renderRow(row: any, child: boolean) {
-      const {wizard: {standard}} = this.props;
+      const {wizard: {isStandard}} = this.props;
       const {ingredients} = this.state;
       const attributes = row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
@@ -287,7 +287,8 @@ export const ListSearch = withCurrentWorkspace()(
       const unselected = !attributes && !brand && !this.isSelected(row);
       const open = ingredients[row.id] && ingredients[row.id].open;
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
-      const disabled = this.checkSource && standard !== undefined && row.isStandard !== standard;
+      const disabled = this.checkSource && isStandard !== undefined
+        && row.isStandard !== isStandard;
       const columnStyle = child ?
         {...styles.columnBody, paddingLeft: '1.25rem'} : styles.columnBody;
       return <tr>

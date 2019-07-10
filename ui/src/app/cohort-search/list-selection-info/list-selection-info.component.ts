@@ -24,7 +24,7 @@ export class ListSelectionInfoComponent {
       groupSelectionsStore.next(groups);
     }
     if (!selections.length && this.resetStandard) {
-      wizard.standard = undefined;
+      wizard.isStandard = undefined;
     }
     selectionsStore.next(selections);
     wizardStore.next(wizard);

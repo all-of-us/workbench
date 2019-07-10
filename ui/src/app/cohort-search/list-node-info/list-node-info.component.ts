@@ -21,7 +21,6 @@ import {Subscription} from 'rxjs/Subscription';
 })
 export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() node: any;
-  @Input() standard: boolean;
   private selected: boolean;
   private selectedChild: boolean;
   private subscription: Subscription;
@@ -163,7 +162,7 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
         };
         const wizard = wizardStore.getValue();
         if (!selections.length && this.checkStandard) {
-          wizard.standard = param.isStandard;
+          wizard.isStandard = param.isStandard;
         }
         wizard.item.searchParameters.push(param);
         selections = [this.paramId, ...selections];
@@ -219,8 +218,7 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get isDisabled() {
-    return this.checkStandard
-      && this.standard !== undefined
-      && this.node.isStandard !== this.standard;
+    const standard = wizardStore.getValue().isStandard;
+    return this.checkStandard && standard !== undefined && this.node.isStandard !== standard;
   }
 }
