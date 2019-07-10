@@ -339,14 +339,15 @@ Description of arguments these scripts take are as follows.
 * bucket: A GCS Bucket where csv data dumps are of the generated data. This must exist.
 * instance: Cloud Sql Instance. Ex: workbenchmaindb
 
-### Examples below need to be run in the following order
+### Examples below need to be run in the following order. It's also very important that the prep tables are in a viable state before starting this process(Jon Scherdin can shed more light on this process).
 
 #### Generate all denormalized tables(search, review and data set) in the BigQuery cdr only one time when it is released or as needed
 `./project.rb make-bq-denormalized-tables --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
 ##### Result is
 * The BigQuery dataset has new denormalized tables(search, review and data set) for cohort builder to work.
-* Each of these can be run individually if needed:
+* Each of these can be run individually if needed(sequential ordering is very important here:
 * `./project.rb make-bq-denormalized-search --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
+* `./project.rb generate-cb-criteria-tables --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
 * `./project.rb make-bq-denormalized-review --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
 * `./project.rb make-bq-denormalized-dataset --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
 * Info/examples for dataset script below:
@@ -354,9 +355,6 @@ Description of arguments these scripts take are as follows.
 * CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20181107/*.csv.gz 
 * Browse csvs in browser like here :https://console.cloud.google.com/storage/browser?project=all-of-us-workbench-test&organizationId=394551486437
 * Note cdr-version can be '' to make dataset named cdr
-
-#### Generate criteria tables in the BigQuery cdr only one time when it is released or as needed
-`./project.rb generate-criteria-table --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
 
 #### The next 2 scripts are used to generate cloud cdr database instances. Generate cdr count data using deidentified cdr release.
 `./project.rb generate-private-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --workbench-project all-of-us-workbench-test --cdr-version synth_r_2019q3_1 --bucket all-of-us-workbench-private-cloudsql`
