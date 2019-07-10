@@ -104,7 +104,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
         cohortBuilderApi().getDrugIngredientByConceptId(cdrId, option.conceptId)
           .then(resp => {
             if (resp.items.length) {
-              // TODO check if we need to highlight all ingredients
               // just grabbing the first one on the list for now
               const {name, path, id} = resp.items[0];
               autocompleteStore.next(name);
