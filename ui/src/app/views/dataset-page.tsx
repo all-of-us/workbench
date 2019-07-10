@@ -226,6 +226,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         includesAllParticipants: false,
         loadingResources: true,
         openSaveModal: false,
+        previewError: false,
+        previewErrorText: '',
         previewList: [],
         previewDataLoading: false,
         selectedCohortIds: [],
