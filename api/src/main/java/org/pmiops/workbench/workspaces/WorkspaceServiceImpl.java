@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -14,7 +15,6 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.elasticsearch.common.util.set.Sets;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
