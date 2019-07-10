@@ -112,7 +112,7 @@ describe('WorkspaceShareComponent', () => {
   it('does not allow self role change', () => {
     const wrapper = component();
     expect(wrapper.find('[data-test-id="harry.potter@hogwarts.edu-user-role"]').first()
-      .props()['isSelected']).toBe(true);
+      .props()['isDisabled']).toBe(true);
   });
 
   it('saves acl correctly after changes made', async() => {
