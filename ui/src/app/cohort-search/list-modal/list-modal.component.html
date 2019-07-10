@@ -48,13 +48,13 @@
             <ng-container [ngSwitch]="wizard.domain">
               <crit-list-demographics *ngSwitchCase="domainType[domainType.PERSON]"></crit-list-demographics>
               <ng-container *ngSwitchDefault>
-                <div *ngIf="disableCursor" class="spinner spinner-lg spin-in-overlay">
+                <div *ngIf="loadingSubtree" class="spinner spinner-lg spin-in-overlay">
                   Loading...
                 </div>
                 <div
                   id="tree"
                   class="panel"
-                  [class.disable-tree]="disableCursor"
+                  [class.disable-tree]="loadingSubtree"
                   [class.show]="['tree', 'list', 'modifiers', 'attributes'].includes(mode)">
                   <!-- Tree View -->
                   <div class="panel-left" [class.show]="mode === 'tree'">
