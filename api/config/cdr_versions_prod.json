@@ -8,7 +8,7 @@
     "creationTime": "2017-12-26 00:00:00Z",
     "releaseNumber": 1,
     "numParticipants": 946237,
-    "cdrDbName": "cdr20181213"
+    "cdrDbName": "synth_r_2019q3_1"
   },
   {
     "cdrVersionId": 2,
@@ -19,7 +19,7 @@
     "creationTime": "2018-11-13 15:09:27Z",
     "releaseNumber": 1,
     "numParticipants": 116157,
-    "cdrDbName": "r_2019q1_2"
+    "cdrDbName": "r_2019q1_3"
   },
   {
     "cdrVersionId": 3,

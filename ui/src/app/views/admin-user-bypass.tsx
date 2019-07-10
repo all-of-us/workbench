@@ -6,6 +6,7 @@ import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {serverConfigStore} from 'app/utils/navigation';
 import {AccessModule, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -99,11 +100,11 @@ export class AdminUserBypass extends React.Component<
                   data-test-id='two-factor-auth-toggle'
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.TWOFACTORAUTH])}); }}/>
-          <Toggle name='Data Use Agreement'
+          {serverConfigStore.getValue().enableDataUseAgreement && <Toggle name='Data Use Agreement'
                   enabled={selectedModules.includes(AccessModule.DATAUSEAGREEMENT)}
                   data-test-id='data-use-agreement-toggle'
                   onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.DATAUSEAGREEMENT])}); }}/>
+                    fp.xor(selectedModules, [AccessModule.DATAUSEAGREEMENT])}); }}/>}
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
             <IconButton icon='times'
                         onClick={() => this.cancel()}
