@@ -136,6 +136,14 @@ export const styles = reactStyles({
   }
 });
 
+const stylesFunction = {
+  plusIconColor: (disabled) => {
+    return {
+      fill: disabled ? colorWithWhiteness(colors.dark, 0.4) : colors.accent
+    };
+  }
+};
+
 const ImmutableListItem: React.FunctionComponent <{
   name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
     return <div style={styles.listItem}>
@@ -165,7 +173,7 @@ const plusLink = (dataTestId: string, path: string, disable?: boolean) => {
     <Clickable disabled={disable} data-test-id={dataTestId} href={path}
             onClick={e => {navigateAndPreventDefaultIfNoKeysPressed(e, path); }}>
     <ClrIcon shape='plus-circle' class='is-solid' size={16}
-             style={{fill: disable ? colorWithWhiteness(colors.dark, 0.4) : colors.accent}}/>
+             style={stylesFunction.plusIconColor(disable)}/>
   </Clickable></TooltipTrigger>;
 };
 
