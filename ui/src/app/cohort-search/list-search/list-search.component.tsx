@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {attributesStore, groupSelectionsStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle} from 'app/cohort-search/utils';
-import {Button} from 'app/components/buttons';
+import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
@@ -51,6 +51,13 @@ const styles = reactStyles({
     opacity: 0.4,
     cursor: 'not-allowed'
   },
+  disabledIcon: {
+    marginRight: '0.4rem',
+    color: '#9a9a9a',
+    opacity: 0.4,
+    cursor: 'not-allowed',
+    pointerEvents: 'none'
+  },
   brandIcon: {
     marginRight: '0.4rem',
     color: '#9a9a9a',
@@ -66,6 +73,10 @@ const styles = reactStyles({
     margin: '2.75rem 0 1rem',
     fontSize: '12px',
     color: '#262262',
+  },
+  vocabLink: {
+    display: 'inline-block',
+    color: '#1E8FE1',
   },
   table: {
     width: '100%',
@@ -206,6 +217,9 @@ export const ListSearch = withCurrentWorkspace()(
           const groups = [...groupSelectionsStore.getValue(), row.id];
           groupSelectionsStore.next(groups);
         }
+        if (this.checkSource && !selections.length) {
+          wizard.standard = row.isStandard;
+        }
         wizard.item.searchParameters.push({parameterId, ...row, attributes: []});
         selections = [parameterId, ...selections];
         selectionsStore.next(selections);
@@ -265,6 +279,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     renderRow(row: any, child: boolean) {
+      const {wizard: {standard}} = this.props;
       const {ingredients} = this.state;
       const attributes = row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
@@ -272,47 +287,46 @@ export const ListSearch = withCurrentWorkspace()(
       const unselected = !attributes && !brand && !this.isSelected(row);
       const open = ingredients[row.id] && ingredients[row.id].open;
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
+      const disabled = this.checkSource && standard !== undefined && row.isStandard !== standard;
       const columnStyle = child ?
         {...styles.columnBody, paddingLeft: '1.25rem'} : styles.columnBody;
       return <tr>
-          <td style={columnStyle}>
-            {row.selectable && <div style={{...styles.selectDiv}}>
-              {attributes &&
+        <td style={columnStyle}>
+          {row.selectable && <div style={{...styles.selectDiv}}>
+            {attributes &&
               <ClrIcon style={styles.attrIcon}
-                       shape='slider' dir='right' size='20'
-                       onClick={() => this.launchAttributes(row)}/>
-              }
-              {selected &&
-              <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
-              }
-              {unselected &&
-              <ClrIcon style={styles.selectIcon}
-                       shape='plus-circle' size='16'
-                       onClick={() => this.selectItem(row)}/>
-              }
-              {brand && !loadingIngredients &&
-              <ClrIcon style={styles.brandIcon}
-                       shape={'angle ' + (open ? 'down' : 'right')} size='20'
-                       onClick={() => this.showIngredients(row)}/>
-              }
-              {loadingIngredients && <Spinner size={16}/>}
-            </div>}
-            <div style={{...styles.nameDiv}}>
-              <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
-            </div>
-          </td>
-          <td style={styles.columnBody}>{row.type}</td>
-          <td style={styles.columnBody}>
-            {row.count > -1 && row.count.toLocaleString()}
-          </td>
-          <td style={{...styles.columnBody, padding: '0.2rem'}}>
-            {row.hasHierarchy &&
-            <i className='pi pi-sitemap'
-               style={styles.treeIcon}
-               onClick={() => this.showHierarchy(row)}/>
+                shape='slider' dir='right' size='20'
+                onClick={() => this.launchAttributes(row)}/>
             }
-          </td>
-        </tr>;
+            {selected &&
+              <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
+            }
+            {unselected &&
+              <ClrIcon style={disabled ? styles.disabledIcon : styles.selectIcon}
+                shape='plus-circle' size='16'
+                onClick={() => this.selectItem(row)}/>
+            }
+            {brand && !loadingIngredients &&
+              <ClrIcon style={styles.brandIcon}
+                shape={'angle ' + (open ? 'down' : 'right')} size='20'
+                onClick={() => this.showIngredients(row)}/>
+            }
+            {loadingIngredients && <Spinner size={16}/>}
+          </div>}
+          <div style={{...styles.nameDiv}}>
+            <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
+          </div>
+        </td>
+        <td style={styles.columnBody}>{row.type}</td>
+        <td style={styles.columnBody}>{row.count > -1 && row.count.toLocaleString()}</td>
+        <td style={{...styles.columnBody, padding: '0.2rem'}}>
+          {row.hasHierarchy &&
+            <i className='pi pi-sitemap'
+              style={styles.treeIcon}
+              onClick={() => this.showHierarchy(row)}/>
+          }
+        </td>
+      </tr>;
     }
 
     render() {
@@ -331,11 +345,10 @@ export const ListSearch = withCurrentWorkspace()(
           {results === 'all' && sourceMatch && <div style={{marginBottom: '0.75rem'}}>
             There are {sourceMatch.count.toLocaleString()} participants with source code
             &nbsp;{sourceMatch.code}. For more results, browse
-            &nbsp;<Button type='link'
-              style={{display: 'inline-block'}}
+            &nbsp;<Clickable style={styles.vocabLink}
               onClick={() => this.getStandardResults()}>
               Standard Vocabulary
-            </Button>.
+            </Clickable>.
           </div>}
           {results === 'standard' && <div style={{marginBottom: '0.75rem'}}>
             {!!data.length && <span>
@@ -345,11 +358,10 @@ export const ListSearch = withCurrentWorkspace()(
             {!data.length && <span>
               There are no standard matches for source code {sourceMatch.code}.
             </span>}
-            &nbsp;<Button type='link'
-              style={{display: 'inline-block'}}
+            &nbsp;<Clickable style={styles.vocabLink}
               onClick={() => this.getResults(sourceMatch.code)}>
               Return to source code
-            </Button>.
+          </Clickable>.
           </div>}
           {!!data.length && <table className='p-datatable' style={styles.table}>
             <thead className='p-datatable-thead'>
@@ -391,11 +403,10 @@ export const ListSearch = withCurrentWorkspace()(
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
             shape='exclamation-triangle' size='22'/>
           Sorry, the request cannot be completed.
-          {results === 'standard' && <Button type='link'
-            style={{display: 'inline-block'}}
+          {results === 'standard' && <Clickable style={styles.vocabLink}
             onClick={() => this.getResults(sourceMatch.code)}>
             &nbsp;Return to source code.
-            </Button>}
+          </Clickable>}
         </div>}
       </div>;
     }

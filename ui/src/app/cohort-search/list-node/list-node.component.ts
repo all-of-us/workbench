@@ -64,7 +64,7 @@ export class ListNodeComponent implements OnInit, OnDestroy {
   }
 
   loadChildren(event) {
-    if (!event || !!this.children) { return ; }
+    if (!event || (this.node.id !== 0 && !!this.children)) { return; }
     this.loading = true;
     const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
     const {domainId, id, isStandard, name} = this.node;
