@@ -7,12 +7,14 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.elasticsearch.common.util.set.Sets;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
@@ -50,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService {
+
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
@@ -268,18 +271,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // userRoleMap is a map of the new permissions for ALL users on the ws
     Map<String, WorkspaceAccessEntry> aclsMap =
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-    ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
 
     // Iterate through existing roles, update/remove them
+    ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
+    Map<String, WorkspaceAccessLevel> toAdd = new HashMap<>(updatedAclsMap);
     for (Map.Entry<String, WorkspaceAccessEntry> entry : aclsMap.entrySet()) {
       String currentUserEmail = entry.getKey();
-      WorkspaceAccessLevel updatedAccess = updatedAclsMap.get(currentUserEmail);
+      WorkspaceAccessLevel updatedAccess = toAdd.get(currentUserEmail);
       if (updatedAccess != null) {
         WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
         currentUpdate.setEmail(currentUserEmail);
         currentUpdate = updateFirecloudAclsOnUser(updatedAccess, currentUpdate);
         updateACLRequestList.add(currentUpdate);
-        updatedAclsMap.remove(currentUserEmail);
+        toAdd.remove(currentUserEmail);
       } else {
         // This is how to remove a user from the FireCloud ACL:
         // Pass along an update request with NO ACCESS as the given access level.
@@ -295,7 +299,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     // Iterate through remaining new roles; add them
-    for (Entry<String, WorkspaceAccessLevel> remainingRole : updatedAclsMap.entrySet()) {
+    for (Entry<String, WorkspaceAccessLevel> remainingRole : toAdd.entrySet()) {
       WorkspaceACLUpdate newUser = new WorkspaceACLUpdate();
       newUser.setEmail(remainingRole.getKey());
       newUser = updateFirecloudAclsOnUser(remainingRole.getValue(), newUser);
@@ -314,6 +318,24 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
       throw new BadRequestException(usersNotFound);
     }
+
+    // Finally, keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
+    // canCompute on the workspace / billing project, nor does it grant the ability to grant
+    // canCompute to other users.
+    for (String user : Sets.union(updatedAclsMap.keySet(), aclsMap.keySet())) {
+      String fromAccess =
+          aclsMap.getOrDefault(user, new WorkspaceAccessEntry().accessLevel("")).getAccessLevel();
+      WorkspaceAccessLevel toAccess =
+          updatedAclsMap.getOrDefault(user, WorkspaceAccessLevel.NO_ACCESS);
+      if ("OWNER".equals(fromAccess) && WorkspaceAccessLevel.OWNER != toAccess) {
+        log.info("removing user '" + user + "' from billing project");
+        fireCloudService.removeUserFromBillingProject(user, workspace.getWorkspaceNamespace());
+      } else if (!"OWNER".equals(fromAccess) && WorkspaceAccessLevel.OWNER == toAccess) {
+        log.info("adding user '" + user + "' to billing project");
+        fireCloudService.addUserToBillingProject(user, workspace.getWorkspaceNamespace());
+      }
+    }
+
     return this.saveWithLastModified(workspace);
   }
 
