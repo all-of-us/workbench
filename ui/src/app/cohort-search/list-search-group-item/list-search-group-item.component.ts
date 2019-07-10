@@ -1,16 +1,9 @@
 import {Component, Input, OnInit} from '@angular/core';
-
+import {initExisting, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {domainToTitle, listAttributeDisplay, listNameDisplay, listTypeDisplay, mapGroupItem} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
-
-import {
-  initExisting,
-  searchRequestStore,
-  selectionsStore,
-  wizardStore
-} from 'app/cohort-search/search-state.service';
-import {domainToTitle, getCodeOptions, listAttributeDisplay, listNameDisplay, listTypeDisplay, mapGroupItem} from 'app/cohort-search/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
 
 @Component({
   selector: 'app-list-search-group-item',
