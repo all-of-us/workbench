@@ -62,7 +62,7 @@
       <button class="btn btn-primary nav-link"
           [class.active]="createWorkspaceActive"
           routerLink="/workspaces/build"
-          [disabled]="(hasDataAccess ? null : true) || !billingProjectInitialized"
+          [disabled]="(hasDataAccess ? null : true)"
           (click)="sidenavToggle = false">Create Workspace</button>
       <button class="btn btn-primary nav-link"
           [class.active]="workspacesActive"
