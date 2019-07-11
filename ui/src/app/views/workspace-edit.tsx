@@ -388,17 +388,19 @@ export interface WorkspaceEditState {
   diseaseEntryState: number;
 }
 
+// States for disease search interaction
+enum DiseaseSearchState {
+    DS_START,   // Input box lacks focus, drop-down invisible
+    DS_ACTIVE,  // Input box focused, drop-down invisible
+    DS_SUGGEST, // Input box focused, search results visible
+    DS_HOVER,   // Input box focused, search results visible, item activated
+}
+
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     // Declare this ahead of time so the typescript compiler won't choke on the following
     // this.searchTermChangedEvent = ...
     searchTermChangedEvent;
-
-    // States for disease search interaction
-    DS_START;   // Input box lacks focus, drop-down invisible
-    DS_ACTIVE;  // Input box focused, drop-down invisible
-    DS_SUGGEST; // Input box focused, search results visible
-    DS_HOVER;   // Input box focused, search results visible, item activated
 
     constructor(props: WorkspaceEditProps) {
       super(props);
@@ -451,7 +453,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     get showSearchResults(): boolean {
       const state = this.state.diseaseEntryState;
-      return state === this.DS_SUGGEST || state === this.DS_HOVER;
+      return state === DiseaseSearchState.DS_SUGGEST || state === DiseaseSearchState.DS_HOVER;
     }
 
     diseaseSearch(value: string): void {
@@ -469,7 +471,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         const diseases = fp.map((elt) => elt['label'])(labeledMatches);
         this.setState({
           diseaseList: diseases,
-          diseaseEntryState: diseases.length > 0 ? this.DS_SUGGEST : this.DS_ACTIVE,
+          diseaseEntryState: diseases.length > 0 ?
+            DiseaseSearchState.DS_SUGGEST : DiseaseSearchState.DS_ACTIVE,
           diseaseHover: diseases.map(() => false),
         });
       });
@@ -738,13 +741,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                           disabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}>
                         <TextInput value={this.state.workspace.researchPurpose.diseaseOfFocus}
                           style={{width: '90%', border: '1px solid #9a9a9', borderRadius: '5px'}}
-                          onFocus={() => this.setState({diseaseEntryState: this.DS_ACTIVE})}
+                          onFocus={() =>
+                            this.setState({diseaseEntryState: DiseaseSearchState.DS_ACTIVE})}
                           onBlur={() => {
                             const state = this.state.diseaseEntryState;
-                            if (state === this.DS_ACTIVE  ||
-                                state === this.DS_SUGGEST ||
-                                state === this.DS_HOVER) {
-                              this.setState({diseaseEntryState: this.DS_START});
+                            if (state === DiseaseSearchState.DS_ACTIVE  ||
+                                state === DiseaseSearchState.DS_SUGGEST ||
+                                state === DiseaseSearchState.DS_HOVER) {
+                              this.setState({diseaseEntryState: DiseaseSearchState.DS_START});
                             }
                           }}
                           onChange={e => {
@@ -769,13 +773,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                               styles.boxHover : styles.box}
                                 onMouseOver={() =>
                                   this.setState({
-                                    diseaseEntryState: this.DS_HOVER,
+                                    diseaseEntryState: DiseaseSearchState.DS_HOVER,
                                     diseaseHover: this.toggleDiseaseHover(j)
                                   })
                                 }
                                 onMouseOut={() =>
                                   this.setState({
-                                    diseaseEntryState: this.DS_SUGGEST,
+                                    diseaseEntryState: DiseaseSearchState.DS_SUGGEST,
                                     diseaseHover: this.toggleDiseaseHover(j)
                                   })
                                 }
