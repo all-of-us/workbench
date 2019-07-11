@@ -46,8 +46,9 @@ describe('DataSet', () => {
   it ('should display all concepts sets in workspace', async() => {
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
+    // Concept set list filters out surveys
     expect(wrapper.find('[data-test-id="concept-set-list-item"]').length)
-      .toBe(ConceptSetsApiStub.stubConceptSets().length);
+      .toBe(ConceptSetsApiStub.stubConceptSets().length - 3);
   });
 
   it('should display all cohorts in workspace', async() => {

@@ -283,7 +283,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         const [conceptSets, cohorts] = await Promise.all([
           conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
           cohortsApi().getCohortsInWorkspace(namespace, id)]);
-        this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
+        const conceptSetNoSurvey = conceptSets.items.filter((concept) => !concept.survey);
+        this.setState({conceptSetList: conceptSetNoSurvey, cohortList: cohorts.items,
           loadingResources: false});
         return Promise.resolve();
       } catch (error) {
