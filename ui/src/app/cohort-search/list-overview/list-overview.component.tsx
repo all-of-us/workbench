@@ -25,33 +25,52 @@ interface Props {
 }
 
 interface State {
-
+  error: boolean;
+  loading: boolean;
+  total: number;
+  chartData: any;
+  saving: boolean;
+  deleting: boolean;
+  stackChart: boolean;
+  showConflictError: boolean;
+  saveError: boolean;
+  cohort: Cohort;
+  apiCallCheck: number;
 }
 
 export const ListOverview = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
+    constructor(props: Props) {
+      super(props);
+      this.state = {
+        error: false,
+        loading: false,
+        total: undefined,
+        chartData: undefined,
+        saving: false,
+        deleting: false,
+        stackChart: false,
+        showConflictError: false,
+        saveError: false,
+        cohort: undefined,
+        apiCallCheck: 0,
+      };
+    }
     cohortForm = new FormGroup({
       name: new FormControl('', [Validators.required]),
       description: new FormControl()
     });
 
-    error: boolean;
-    loading: boolean;
-    total: number;
-    chartData: any;
-    saving = false;
-    deleting = false;
-    stackChart = false;
-    showGenderChart = true;
-    showComboChart = true;
-    showConflictError = false;
-    saveError = false;
-    cohort: Cohort;
-    apiCallCheck = 0;
-
-    ngOnInit(): void {
+    componentDidMount(): void {
       if (currentCohortStore.getValue()) {
-        this.cohort = currentCohortStore.getValue();
+        this.setState({cohort: currentCohortStore.getValue()});
+      }
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+      if (this.props.update > prevProps.update && !this.hasErrors) {
+        this.setState({loading: true, error: false});
+        this.getTotalCount();
       }
     }
 
@@ -204,14 +223,6 @@ export const ListOverview = withCurrentWorkspace()(
 
         toggleChartMode() {
           this.stackChart = !this.stackChart;
-        }
-
-        toggleShowGender() {
-          this.showGenderChart = !this.showGenderChart;
-        }
-
-        toggleShowCombo() {
-          this.showComboChart = !this.showComboChart;
         }
   }
 );
