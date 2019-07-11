@@ -28,6 +28,7 @@ import {
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {NewDataSetModal} from 'app/views/new-dataset-modal';
 import {
   Cohort,
@@ -55,10 +56,6 @@ export const styles = reactStyles({
     display: 'flex',
     justifyContent: 'space-between',
     flexDirection: 'row'
-  },
-
-  selectBoxHeaderIconLinks: {
-    fill: colors.accent
   },
 
   listItem: {
@@ -141,6 +138,14 @@ export const styles = reactStyles({
   }
 });
 
+const stylesFunction = {
+  plusIconColor: (disabled) => {
+    return {
+      fill: disabled ? colorWithWhiteness(colors.dark, 0.4) : colors.accent
+    };
+  }
+};
+
 const ImmutableListItem: React.FunctionComponent <{
   name: string, onChange: Function, checked: boolean}> = ({name, onChange, checked}) => {
     return <div style={styles.listItem}>
@@ -164,12 +169,14 @@ export const ValueListItem: React.FunctionComponent <
     </div>;
   };
 
-const plusLink = (dataTestId: string, path: string) => {
-  return <a data-test-id={dataTestId} href={path}
+const plusLink = (dataTestId: string, path: string, disable?: boolean) => {
+  return <TooltipTrigger data-test-id='plus-icon-tooltip' disabled={!disable}
+                         content='Requires Owner or Writer permission'>
+    <Clickable disabled={disable} data-test-id={dataTestId} href={path}
             onClick={e => {navigateAndPreventDefaultIfNoKeysPressed(e, path); }}>
     <ClrIcon shape='plus-circle' class='is-solid' size={16}
-             style={styles.selectBoxHeaderIconLinks}/>
-  </a>;
+             style={stylesFunction.plusIconColor(disable)}/>
+  </Clickable></TooltipTrigger>;
 };
 
 const BoxHeader = ({text= '', header =  '', subHeader = '', style= {}, ...props}) => {
@@ -377,11 +384,15 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       }
     }
 
+    get canWrite() {
+      return WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel);
+    }
+
     disableSave() {
       return !this.state.selectedConceptSetIds || this.state.selectedConceptSetIds.length === 0 ||
-          ((!this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0)
-                && !this.state.includesAllParticipants) ||
-            !this.state.selectedValues || this.state.selectedValues.length === 0;
+          ((!this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0) &&
+              !this.state.includesAllParticipants) || !this.state.selectedValues ||
+          this.state.selectedValues.length === 0;
     }
 
     getDataTableValue(data) {
@@ -532,7 +543,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             <div style={{width: '33%'}}>
               <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
                 <BoxHeader text='1' header='Select Cohorts' subHeader='Participants'>
-                  {plusLink('cohorts-link', cohortsPath)}
+                  {plusLink('cohorts-link', cohortsPath, !this.canWrite)}
                 </BoxHeader>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
@@ -561,7 +572,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
                     <BoxHeader text='2' header='Select Concept Sets' subHeader='Rows'
                                style={{paddingRight: '1rem'}}>
-                      {plusLink('concept-sets-link', conceptSetsPath)}
+                      {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite)}
                     </BoxHeader>
                   <div style={{height: '10rem', overflowY: 'auto'}}>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
@@ -636,12 +647,15 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 based on the variable and value you selected above
               </div>
               </div>
-              <Button data-test-id='save-button'
-                onClick ={() => this.setState({openSaveModal: true})}
-                disabled={this.disableSave()}>
-                {this.editing ? !dataSetTouched ? 'Analyze' :
+              <TooltipTrigger data-test-id='save-tooltip'
+                           content='Requires Owner or Writer permission' disabled={this.canWrite}>
+                <Button data-test-id='save-button'
+                  onClick ={() => this.setState({openSaveModal: true})}
+                  disabled={this.disableSave() || !this.canWrite}>
+                  {this.editing ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
                     'Update And Analyze' : 'Save And Analyze'}
-              </Button>
+                </Button>
+              </TooltipTrigger>
             </div>
             {previewDataLoading && <div style={styles.warningMessage}>
               <Spinner style={{position: 'relative', top: '2rem'}} />
