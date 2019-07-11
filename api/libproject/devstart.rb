@@ -41,6 +41,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "workbench",
     :config_json => "config_local.json",
     :cdr_versions_json => "cdr_versions_local.json",
+    :featured_workspaces_json => "featured_workspaces_local.json",
     :gae_vars => TEST_GAE_VARS
   },
   "all-of-us-workbench-test" => {
@@ -48,6 +49,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_test.json",
     :cdr_versions_json => "cdr_versions_test.json",
+    :featured_workspaces_json => "featured_workspaces_test.json",
     :gae_vars => make_gae_vars(10, 10)
   },
   "all-of-us-rw-staging" => {
@@ -55,6 +57,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_staging.json",
     :cdr_versions_json => "cdr_versions_staging.json",
+    :featured_workspaces_json => "featured_workspaces_staging.json",
     :gae_vars => TEST_GAE_VARS
   },
   "all-of-us-rw-stable" => {
@@ -62,6 +65,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_stable.json",
     :cdr_versions_json => "cdr_versions_stable.json",
+    :featured_workspaces_json => "featured_workspaces_stable.json",
     :gae_vars => TEST_GAE_VARS
   },
   "all-of-us-rw-prod" => {
@@ -69,6 +73,7 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
     :config_json => "config_prod.json",
     :cdr_versions_json => "cdr_versions_prod.json",
+    :featured_workspaces_json => "featured_workspaces_prod.json",
     :gae_vars => make_gae_vars(10, 64)
   }
 }
@@ -83,6 +88,13 @@ def get_config(env)
     raise ArgumentError.new("env '#{env}' lacks a valid configuration")
   end
   return ENVIRONMENTS[env][:config_json]
+end
+
+def get_featured_workspaces_config(env)
+  unless ENVIRONMENTS.fetch(env, {}).has_key?(:featured_workspaces_json)
+    raise ArgumentError.new("env '#{env}' lacks a valid featured workspaces configuration")
+  end
+  return ENVIRONMENTS[env][:featured_workspaces_json]
 end
 
 def get_cdr_versions_file(project)
@@ -190,6 +202,11 @@ def dev_up()
     docker-compose run update-config
     -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
   }
+  common.status "Updating featured workspaces..."
+  common.run_inline %W{
+    docker-compose run update-config
+    -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
+  }
 
   run_api()
 end
@@ -254,6 +271,7 @@ def run_local_migrations()
   end
   common.run_inline %W{gradle :loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json}
   common.run_inline %W{gradle :loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json}
+  common.run_inline %W{gradle :loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json}
   common.run_inline %W{gradle :updateCdrVersions -PappArgs=['config/cdr_versions_local.json',false]}
 end
 
@@ -1511,7 +1529,8 @@ end
 
 def load_config(project, dry_run = false)
   config_json = get_config(project)
-  unless config_json
+  featured_workspaces_config = get_featured_workspaces_config(project)
+  unless config_json and featured_workspaces_config
     raise("unknown project #{project}, expected one of #{configs.keys}")
   end
 
@@ -1519,6 +1538,7 @@ def load_config(project, dry_run = false)
   common.status "Loading #{config_json} into database..."
   run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=main -Pconfig_file=config/#{config_json}})
   run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json})
+  run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/#{featured_workspaces_config}})
 end
 
 def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
