@@ -271,7 +271,7 @@ const styles = reactStyles({
     zIndex: 100,
     border: '1px solid #979797',
     borderRadius: '5px',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
   },
   open: {
     position: 'absolute',
@@ -282,7 +282,7 @@ const styles = reactStyles({
     borderRadius: '5px',
     paddingTop: '0.2rem',
     paddingLeft: '0.2rem',
-    color: '#262262',
+    color: colors.primary,
   },
   boxHover: {
     background: 'rgb(234, 243, 250)',
@@ -400,7 +400,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     // Declare this ahead of time so the typescript compiler won't choke on the following
     // this.searchTermChangedEvent = ...
-    searchTermChangedEvent;
+    searchTermChangedEvent: Function;
 
     constructor(props: WorkspaceEditProps) {
       super(props);
@@ -445,10 +445,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         diseaseEntryState: 0,
       };
       this.searchTermChangedEvent = fp.debounce(300, this.diseaseSearch);
-      this.DS_START = 1;
-      this.DS_ACTIVE = 2;
-      this.DS_SUGGEST = 4;
-      this.DS_HOVER = 8;
     }
 
     get showSearchResults(): boolean {
@@ -475,7 +471,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             DiseaseSearchState.DS_SUGGEST : DiseaseSearchState.DS_ACTIVE,
           diseaseHover: diseases.map(() => false),
         });
-      });
+      }).catch(() => {});
     }
 
     componentDidMount() {
