@@ -11,10 +11,11 @@ import * as fp from 'lodash';
 import {withErrorModal, WithErrorModalProps} from "app/views/with-error-modal";
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from "app/views/with-confirm-delete-modal";
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from "app/views/with-spinner-overlay";
+import {formatRecentResourceDisplayDate} from "app/utils";
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resourceCard: RecentResource; // Destructure this into used parameters only
-  onResourceUpdate: Function;
+  onNotebookUpdate: Function;
 }
 
 interface State {
@@ -38,6 +39,29 @@ export const NotebookResourceCard = fp.flow(
 
     get resourceType(): string {
       return 'Notebook';
+    }
+
+    get displayName(): string {
+      return this.props.resourceCard.notebook.name.replace(/\.ipynb$/, '');
+    }
+
+    get readOnly(): boolean {
+      return this.props.resourceCard.permission === 'READER';
+    }
+
+    get writePermission(): boolean {
+      return this.props.resourceCard.permission === 'OWNER'
+        || this.props.resourceCard.permission === 'WRITER';
+    }
+
+    get displayDate(): string {
+      if (!this.props.resourceCard.modifiedTime) {
+        return '';
+      }
+
+      const date = new Date(this.props.resourceCard.modifiedTime);
+      // datetime formatting to slice off weekday from readable date string
+      return date.toDateString().split(' ').slice(1).join(' ');
     }
 
     get actions(): Action[] {
@@ -68,29 +92,6 @@ export const NotebookResourceCard = fp.flow(
         }];
     }
 
-    get readOnly(): boolean {
-      return this.props.resourceCard.permission === 'READER';
-    }
-
-    get writePermission(): boolean {
-      return this.props.resourceCard.permission === 'OWNER'
-        || this.props.resourceCard.permission === 'WRITER';
-    }
-
-    get displayName(): string {
-      return this.props.resourceCard.notebook.name.replace(/\.ipynb$/, '');
-    }
-
-    get displayDate(): string {
-      if (!this.props.resourceCard.modifiedTime) {
-        return '';
-      }
-
-      const date = new Date(this.props.resourceCard.modifiedTime);
-      // datetime formatting to slice off weekday from readable date string
-      return date.toDateString().split(' ').slice(1).join(' ');
-    }
-
     fullNotebookName(name) {
       return !name || /^.+\.ipynb$/.test(name) ? name : `${name}.ipynb`;
     }
@@ -119,7 +120,7 @@ export const NotebookResourceCard = fp.flow(
         {
           name: resourceCard.notebook.name,
           newName: this.fullNotebookName(newName)
-        }).then(() => this.props.onResourceUpdate())
+        }).then(() => this.props.onNotebookUpdate())
         .catch(error => console.error(error))
         .finally(() => {
           this.setState({showRenameModal: false});
@@ -134,7 +135,7 @@ export const NotebookResourceCard = fp.flow(
         this.props.resourceCard.workspaceFirecloudName,
         this.props.resourceCard.notebook.name)
         .then(() => {
-          this.props.onResourceUpdate();
+          this.props.onNotebookUpdate();
         })
         .catch(() => {
           this.props.showErrorModal('Duplicating Notebook Error',
@@ -151,7 +152,7 @@ export const NotebookResourceCard = fp.flow(
         this.props.resourceCard.workspaceFirecloudName,
         this.props.resourceCard.notebook.name)
         .then(() => {
-          this.props.onResourceUpdate();
+          this.props.onNotebookUpdate();
         });
     }
 
@@ -163,7 +164,7 @@ export const NotebookResourceCard = fp.flow(
           fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
           fromNotebook={this.props.resourceCard.notebook}
           onClose={() => this.setState({showCopyNotebookModal: false})}
-          onCopy={() => this.props.onResourceUpdate()}/>
+          onCopy={() => this.props.onNotebookUpdate()}/>
         }
 
         {this.state.showRenameModal &&
@@ -182,7 +183,7 @@ export const NotebookResourceCard = fp.flow(
           resourceUrl={this.resourceUrl()}
           displayName={this.displayName}
           description={''}
-          displayDate={this.displayDate}
+          displayDate={formatRecentResourceDisplayDate(this.props.resourceCard.modifiedTime)}
           footerText={ResourceType.NOTEBOOK}
           footerColor={colors.resourceCardHighlights.notebook}
         />

@@ -93,18 +93,9 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
         </TooltipTrigger>
         <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
           {notebooks.map(notebook => {
-            return <ResourceCard key={notebook.path}
-              onDuplicateResource={(duplicating) =>
-                this.setState({loading: duplicating})
-              }
-              resourceCard={convertToResource(notebook, namespace, id, al, ResourceType.NOTEBOOK)}
-              onUpdate={() => this.loadNotebooks()}
-            />;
-          })}
-          {notebooks.map(notebook => {
             return <NotebookResourceCard
               resourceCard={convertToResource(notebook, namespace, id, al, ResourceType.NOTEBOOK)}
-              onResourceUpdate={() => this.loadNotebooks()}
+              onNotebookUpdate={() => this.loadNotebooks()}
             />;
           })}
         </div>
