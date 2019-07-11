@@ -602,3 +602,12 @@ task updateCdrVersions(type: JavaExec) {
     args Eval.me(appArgs)
   }
 }
+
+task bulkCloneWorkspaces(type: JavaExec) {
+  classpath sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.CloneWorkspaces"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}

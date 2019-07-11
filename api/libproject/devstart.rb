@@ -1038,6 +1038,27 @@ Common.register_command({
   :fn => ->(*args) {fetch_firecloud_user_profile("fetch-firecloud-user-profile", *args)}
 })
 
+def bulk_clone_workspaces(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  with_cloud_proxy_and_db(gcc) do
+    common = Common.new
+    common.run_inline %W{
+      gradle bulkCloneWorkspaces
+     -PappArgs=[]}
+  end
+end
+
+Common.register_command({
+  :invocation => "bulk-clone-workspaces",
+  :description => "Bulk Clone Workspaces",
+  :fn => ->(*args) { bulk_clone_workspaces("bulk-clone-workspaces", *args) }
+})
+
 def authority_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.remove = false
