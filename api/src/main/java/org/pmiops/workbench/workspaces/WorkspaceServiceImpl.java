@@ -53,6 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService {
 
+  private static final String FC_OWNER_ROLE = "OWNER";
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
@@ -321,18 +322,24 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     // Finally, keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
     // canCompute on the workspace / billing project, nor does it grant the ability to grant
-    // canCompute to other users.
-    for (String user : Sets.union(updatedAclsMap.keySet(), aclsMap.keySet())) {
+    // canCompute to other users. See RW-3009 for details.
+    for (String email : Sets.union(updatedAclsMap.keySet(), aclsMap.keySet())) {
       String fromAccess =
-          aclsMap.getOrDefault(user, new WorkspaceAccessEntry().accessLevel("")).getAccessLevel();
+          aclsMap.getOrDefault(email, new WorkspaceAccessEntry().accessLevel("")).getAccessLevel();
       WorkspaceAccessLevel toAccess =
-          updatedAclsMap.getOrDefault(user, WorkspaceAccessLevel.NO_ACCESS);
-      if ("OWNER".equals(fromAccess) && WorkspaceAccessLevel.OWNER != toAccess) {
-        log.info("removing user '" + user + "' from billing project");
-        fireCloudService.removeUserFromBillingProject(user, workspace.getWorkspaceNamespace());
-      } else if (!"OWNER".equals(fromAccess) && WorkspaceAccessLevel.OWNER == toAccess) {
-        log.info("adding user '" + user + "' to billing project");
-        fireCloudService.addUserToBillingProject(user, workspace.getWorkspaceNamespace());
+          updatedAclsMap.getOrDefault(email, WorkspaceAccessLevel.NO_ACCESS);
+      if (FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER != toAccess) {
+        log.info(
+            String.format(
+                "removing user '%s' from billing project '%s'",
+                email, workspace.getWorkspaceNamespace()));
+        fireCloudService.removeUserFromBillingProject(email, workspace.getWorkspaceNamespace());
+      } else if (!FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER == toAccess) {
+        log.info(
+            String.format(
+                "adding user '%s' to billing project '%s'",
+                email, workspace.getWorkspaceNamespace()));
+        fireCloudService.addUserToBillingProject(email, workspace.getWorkspaceNamespace());
       }
     }
 
