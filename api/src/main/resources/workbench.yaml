@@ -1937,6 +1937,9 @@ definitions:
       enableEraCommons:
         type: boolean
         description: Feature flag for enabling eRA commons
+      firecloudURL:
+        type: string
+        description: The Firecloud URL to use for REST requests.
 
   # Mirrors BillingProjectMembership from fireCloud.yaml
   BillingProjectMembership:
