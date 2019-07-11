@@ -9,7 +9,7 @@ import {ClarityModule} from '@clr/angular';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 
 import {BugReportComponent} from 'app/views/bug-report';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal';
@@ -18,15 +18,16 @@ import {WorkspaceShareComponent} from 'app/views/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 
 import {UserService, WorkspaceAccessLevel} from 'generated';
-import {WorkspacesApi} from 'generated/fetch';
+import {WorkspaceAccessLevel as FetchWorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
-import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {WorkspacesApiStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
-import {updateAndTick} from 'testing/test-helpers';
+import {findElements} from 'testing/react-testing-utility';
+import {setupModals, updateAndTick} from 'testing/test-helpers';
 
 @Component({
   selector: 'app-test',
@@ -34,9 +35,13 @@ import {updateAndTick} from 'testing/test-helpers';
 })
 class FakeAppComponent {}
 
+const workspace = {
+  ...workspaceStubs[0],
+  accessLevel: FetchWorkspaceAccessLevel.OWNER,
+};
 
-fdescribe('WorkspaceWrapperComponent', () => {
-  let fixture: ComponentFixture<FakeAppComponent>;
+describe('WorkspaceWrapperComponent', () => {
+  let fixture: ComponentFixture<WorkspaceWrapperComponent>;
   let router: Router;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
@@ -76,22 +81,26 @@ fdescribe('WorkspaceWrapperComponent', () => {
     }).compileComponents().then(() => {
       registerApiClient(WorkspacesApi, new WorkspacesApiStub());
       fixture = TestBed.createComponent(WorkspaceWrapperComponent);
+      setupModals(fixture);
       router = TestBed.get(Router);
 
       router.navigateByUrl(
         `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/` +
         WorkspaceStubVariables.DEFAULT_WORKSPACE_ID);
+
       spyOn(workspacesApi(), 'getWorkspace')
-        .and.returnValue(Promise.resolve(WorkspacesServiceStub.stubWorkspace));
+        .and.returnValue(Promise.resolve(workspace));
 
       urlParamsStore.next({
         ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
         wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
       });
+
       // Clarity needs several ticks/redraw cycles to render its button group.
       tick();
       updateAndTick(fixture);
       updateAndTick(fixture);
+      currentWorkspaceStore.next(workspace);
     });
   }));
 
@@ -104,18 +113,25 @@ fdescribe('WorkspaceWrapperComponent', () => {
     updateAndTick(fixture);
 
     const userRolesSpy = spyOn(workspacesApi(), 'getFirecloudWorkspaceUserRoles')
-      .and.callFake(new WorkspacesApiStub().getFirecloudWorkspaceUserRoles);
+      .and.callThrough();
 
     // Ideally, we would do this through clicks on the page, rather than running
     // the function directly. However we could not actually access the react menu
     // component to click on.
     fixture.componentInstance.handleShareAction();
 
+    updateAndTick(fixture);
+    updateAndTick(fixture);
+    const elements = findElements(fixture, '[data-test-id="collab-user-name"]');
     // We should have called the userRoles API before opening the share modal.
     expect(userRolesSpy).toHaveBeenCalledTimes(1);
-
-    // Ideally, we would check the share modal to ensure it was opened with the correct
-    // information. However, the react component was not being accessible to the angular
-    // component, so punting on that for now.
+    let expectedRoles;
+    workspacesApi().getFirecloudWorkspaceUserRoles(
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS, WorkspaceStubVariables.DEFAULT_WORKSPACE_ID)
+      .then(resp => {
+        expectedRoles = resp.items.length;
+    });
+    tick();
+    expect(elements.length).toBe(expectedRoles);
   }));
 });
