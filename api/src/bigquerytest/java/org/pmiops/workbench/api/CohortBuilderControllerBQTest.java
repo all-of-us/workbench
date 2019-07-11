@@ -553,7 +553,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void anyMentionOfICD9Parent5DaysAfterICD10Child() throws Exception {
+  public void anyMentionOfCPTParent5DaysAfterICD10Child() throws Exception {
     CBCriteria icd9Parent =
         new CBCriteria()
             .ancestorData(false)
@@ -585,7 +585,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter icd9 =
         new SearchParameter()
             .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
+            .type(CriteriaType.CPT4.toString())
             .standard(false)
             .ancestorData(false)
             .group(true)
