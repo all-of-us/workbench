@@ -96,6 +96,7 @@ const styles = reactStyles({
   },
   button: {
     color: '#ffffff',
+    height: '1.5rem',
     margin: '0.25rem 0.5rem 0.25rem 0',
     borderRadius: '3px',
   },
@@ -338,7 +339,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         formState[index].values[1] = undefined;
       }
       formState[index].operator = sel;
-      this.setState({formState});
+      this.setState({count: null, formState});
       this.updateMods();
 
     }
@@ -346,7 +347,7 @@ export const ListModifierPage = withCurrentWorkspace()(
     inputChange = (index: string, field: string, value: any) => {
       const {formState} = this.state;
       formState[index].values[field] = value;
-      this.setState({formState});
+      this.setState({count: null, formState});
       this.updateInput();
     }
 
@@ -382,7 +383,7 @@ export const ListModifierPage = withCurrentWorkspace()(
     calculate = () => {
       // TODO update when new api call is ready, currently this will always fail
       try {
-        this.setState({loading: true, error: false});
+        this.setState({loading: true, count: null, error: false});
         const {
           wizard: {domain, item: {modifiers, searchParameters}, role},
           workspace: {cdrVersionId}
@@ -428,6 +429,8 @@ export const ListModifierPage = withCurrentWorkspace()(
               }
             }
           });
+        } else if (item.values[0] !== undefined) {
+          initialState = false;
         }
         return acc;
       }, new Set());
@@ -521,7 +524,7 @@ export const ListModifierPage = withCurrentWorkspace()(
                 Calculate
               </Button>
             </div>
-            {!loading && count && <div style={columns.col8}>
+            {!loading && count !== null && <div style={columns.col8}>
               <div style={{color: '#262262'}}>Results</div>
               {!loading && <div>
                 Number Participants: <span style={styles.previewCount}>{count}</span>
