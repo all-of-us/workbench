@@ -2,6 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {serverConfigStore} from 'app/utils/navigation';
 import {RegistrationDashboard, RegistrationDashboardProps} from 'app/views/registration-dashboard';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
@@ -35,6 +36,7 @@ describe('RegistrationDashboard', () => {
       twoFactorAuthCompleted: false,
       dataUseAgreementCompleted: false
     };
+    serverConfigStore.next({...serverConfigStore.getValue()});
   });
 
   it('should render', () => {
@@ -82,6 +84,18 @@ describe('RegistrationDashboard', () => {
     props.dataUseAgreementCompleted = true;
     const wrapper = component();
     expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
+  });
+
+  it('should not show self-bypass UI when unsafeSelfBypass is false', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), unsafeAllowSelfBypass: false});
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="self-bypass"]').length).toBe(0);
+  });
+
+  it('should show self-bypass when unsafeSelfBypass is true', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), unsafeAllowSelfBypass: true});
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="self-bypass"]').length).toBe(1);
   });
 
 });
