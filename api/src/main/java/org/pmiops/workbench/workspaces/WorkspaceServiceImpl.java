@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -7,6 +8,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -50,6 +52,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService {
+
+  private static final String FC_OWNER_ROLE = "OWNER";
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
@@ -268,18 +272,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // userRoleMap is a map of the new permissions for ALL users on the ws
     Map<String, WorkspaceAccessEntry> aclsMap =
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-    ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
 
     // Iterate through existing roles, update/remove them
+    ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
+    Map<String, WorkspaceAccessLevel> toAdd = new HashMap<>(updatedAclsMap);
     for (Map.Entry<String, WorkspaceAccessEntry> entry : aclsMap.entrySet()) {
       String currentUserEmail = entry.getKey();
-      WorkspaceAccessLevel updatedAccess = updatedAclsMap.get(currentUserEmail);
+      WorkspaceAccessLevel updatedAccess = toAdd.get(currentUserEmail);
       if (updatedAccess != null) {
         WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
         currentUpdate.setEmail(currentUserEmail);
         currentUpdate = updateFirecloudAclsOnUser(updatedAccess, currentUpdate);
         updateACLRequestList.add(currentUpdate);
-        updatedAclsMap.remove(currentUserEmail);
+        toAdd.remove(currentUserEmail);
       } else {
         // This is how to remove a user from the FireCloud ACL:
         // Pass along an update request with NO ACCESS as the given access level.
@@ -295,7 +300,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     // Iterate through remaining new roles; add them
-    for (Entry<String, WorkspaceAccessLevel> remainingRole : updatedAclsMap.entrySet()) {
+    for (Entry<String, WorkspaceAccessLevel> remainingRole : toAdd.entrySet()) {
       WorkspaceACLUpdate newUser = new WorkspaceACLUpdate();
       newUser.setEmail(remainingRole.getKey());
       newUser = updateFirecloudAclsOnUser(remainingRole.getValue(), newUser);
@@ -314,6 +319,30 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
       throw new BadRequestException(usersNotFound);
     }
+
+    // Finally, keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
+    // canCompute on the workspace / billing project, nor does it grant the ability to grant
+    // canCompute to other users. See RW-3009 for details.
+    for (String email : Sets.union(updatedAclsMap.keySet(), aclsMap.keySet())) {
+      String fromAccess =
+          aclsMap.getOrDefault(email, new WorkspaceAccessEntry().accessLevel("")).getAccessLevel();
+      WorkspaceAccessLevel toAccess =
+          updatedAclsMap.getOrDefault(email, WorkspaceAccessLevel.NO_ACCESS);
+      if (FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER != toAccess) {
+        log.info(
+            String.format(
+                "removing user '%s' from billing project '%s'",
+                email, workspace.getWorkspaceNamespace()));
+        fireCloudService.removeUserFromBillingProject(email, workspace.getWorkspaceNamespace());
+      } else if (!FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER == toAccess) {
+        log.info(
+            String.format(
+                "adding user '%s' to billing project '%s'",
+                email, workspace.getWorkspaceNamespace()));
+        fireCloudService.addUserToBillingProject(email, workspace.getWorkspaceNamespace());
+      }
+    }
+
     return this.saveWithLastModified(workspace);
   }
 

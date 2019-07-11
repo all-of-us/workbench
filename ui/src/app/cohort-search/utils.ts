@@ -286,7 +286,7 @@ export function parseCohortDefinition(json: string) {
             group,
             conceptId,
             attributes,
-            hasAttributes: sp.attributes.length > 0,
+            hasAttributes: attributes && attributes.length > 0,
             hasAncestorData: ancestorData,
             isStandard: standard
           };
@@ -348,7 +348,7 @@ export function mapGroupItem(item: any, temporal: boolean) {
 
 export function mapParameter(sp: any) {
   const {parameterId, name, domainId, type, subtype, group, attributes, conceptId,
-    hasAncestorData, isStandard, value} = sp;
+    hasAncestorData, isStandard, value, code} = sp;
   const param = <SearchParameter>{
     parameterId,
     name: stripHtml(name),
@@ -367,6 +367,8 @@ export function mapParameter(sp: any) {
   }
   if (value) {
     param.value = value;
+  } else if (code) {
+    param.value = code;
   }
   return param;
 }

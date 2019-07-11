@@ -29,9 +29,10 @@
   color: rgb(98, 164, 32);
 }
 
-selection-icon-blue {
-  margin: calc((1.25rem - 20px) / 2);
-  color: #216FB4;
+.not-selectable {
+  color: #9a9a9a;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .code {

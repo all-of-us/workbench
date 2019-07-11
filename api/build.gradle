@@ -489,6 +489,7 @@ task startCronEmulator(dependsOn: ':appengine-cron-emulator:jar') {
 }
 
 appengineRun.dependsOn startCronEmulator
+appengineStart.dependsOn startCronEmulator
 
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output

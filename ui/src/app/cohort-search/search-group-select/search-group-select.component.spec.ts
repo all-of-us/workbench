@@ -4,14 +4,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 
-import {
-  CohortSearchActions,
-  INIT_SEARCH_GROUP,
-  initGroup,
-  OPEN_WIZARD,
-  openWizard,
-} from 'app/cohort-search/redux';
-
+import {CohortSearchActions, initGroup, openWizard} from 'app/cohort-search/redux';
 import {CohortBuilderService} from 'generated';
 import {SearchGroupSelectComponent} from './search-group-select.component';
 
@@ -56,32 +49,4 @@ describe('SearchGroupSelectComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
-  it('Should dispatch INIT_SEARCH_GROUP on Add Group button click', () => {
-    const spy = spyOn(mockReduxInst, 'dispatch');
-    component.role = 'includes';
-    fixture.detectChanges();
-    component.launchWizard({type: 'test'});
-    expect(spy).toHaveBeenCalledWith({
-      type: INIT_SEARCH_GROUP,
-      role: 'includes',
-      groupId: 'Testincludes',
-    });
-    expect(spy).toHaveBeenCalledWith({
-      type: OPEN_WIZARD,
-      itemId: 'Testitems',
-      itemType: 'test',
-      context: {
-        criteriaType: 'test',
-        criteriaSubtype: undefined,
-        role: 'includes',
-        groupId: 'Testincludes',
-        itemId: 'Testitems',
-        fullTree: false,
-        codes: false,
-      },
-      tempGroup: undefined,
-    });
-  });
-
 });

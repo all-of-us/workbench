@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyListOf;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
@@ -141,6 +143,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
+
   private static final Instant NOW = Instant.now();
   private static final long NOW_TIME = Timestamp.from(NOW).getTime();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
@@ -226,6 +229,7 @@ public class WorkspacesControllerTest {
     ConceptService.class
   })
   static class Configuration {
+
     @Bean
     Clock clock() {
       return CLOCK;
@@ -1514,7 +1518,11 @@ public class WorkspacesControllerTest {
         convertUserRolesToUpdateAclRequestList(collaborators);
 
     verify(fireCloudService)
-        .updateWorkspaceACL(eq("cloned-ns"), eq("cloned"), eq(updateACLRequestList));
+        .updateWorkspaceACL(
+            eq("cloned-ns"),
+            eq("cloned"),
+            // Accept the ACL update list in any order.
+            argThat(arg -> new HashSet(updateACLRequestList).equals(new HashSet(arg))));
   }
 
   @Test(expected = BadRequestException.class)
@@ -1641,6 +1649,102 @@ public class WorkspacesControllerTest {
     ArrayList<WorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
+  }
+
+  @Test
+  public void testShareWorkspaceAddBillingProjectUser() throws Exception {
+    stubFcGetGroup();
+    User writerUser = new User();
+    writerUser.setEmail("writerfriend@gmail.com");
+    writerUser.setUserId(124L);
+    writerUser.setDisabled(false);
+
+    writerUser = userDao.save(writerUser);
+    User ownerUser = new User();
+    ownerUser.setEmail("ownerfriend@gmail.com");
+    ownerUser.setUserId(125L);
+    ownerUser.setDisabled(false);
+    ownerUser = userDao.save(ownerUser);
+
+    stubFcGetWorkspaceACL();
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest =
+        new ShareWorkspaceRequest()
+            .workspaceEtag(workspace.getEtag())
+            .addItemsItem(
+                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER))
+            .addItemsItem(
+                new UserRole().email(writerUser.getEmail()).role(WorkspaceAccessLevel.WRITER))
+            .addItemsItem(
+                new UserRole().email(ownerUser.getEmail()).role(WorkspaceAccessLevel.OWNER));
+
+    stubFcUpdateWorkspaceACL();
+    workspacesController.shareWorkspace(
+        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+    verify(fireCloudService, times(1))
+        .addUserToBillingProject(ownerUser.getEmail(), workspace.getNamespace());
+    verify(fireCloudService, never()).addUserToBillingProject(eq(writerUser.getEmail()), any());
+    verify(fireCloudService, never()).removeUserFromBillingProject(any(), any());
+  }
+
+  @Test
+  public void testShareWorkspaceRemoveBillingProjectUser() throws Exception {
+    stubFcGetGroup();
+    User writerUser = new User();
+    writerUser.setEmail("writerfriend@gmail.com");
+    writerUser.setUserId(124L);
+    writerUser.setDisabled(false);
+
+    writerUser = userDao.save(writerUser);
+    User ownerUser = new User();
+    ownerUser.setEmail("ownerfriend@gmail.com");
+    ownerUser.setUserId(125L);
+    ownerUser.setDisabled(false);
+    ownerUser = userDao.save(ownerUser);
+
+    when(fireCloudService.getWorkspaceAcl(anyString(), anyString()))
+        .thenReturn(
+            createWorkspaceACL(
+                new JSONObject()
+                    .put(
+                        currentUser.getEmail(),
+                        new JSONObject()
+                            .put("accessLevel", "OWNER")
+                            .put("canCompute", true)
+                            .put("canShare", true))
+                    .put(
+                        writerUser.getEmail(),
+                        new JSONObject()
+                            .put("accessLevel", "WRITER")
+                            .put("canCompute", true)
+                            .put("canShare", true))
+                    .put(
+                        ownerUser.getEmail(),
+                        new JSONObject()
+                            .put("accessLevel", "OWNER")
+                            .put("canCompute", true)
+                            .put("canShare", true))));
+
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest =
+        new ShareWorkspaceRequest()
+            .workspaceEtag(workspace.getEtag())
+            .addItemsItem(
+                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER))
+            // Removed WRITER, demoted OWNER to READER.
+            .addItemsItem(
+                new UserRole().email(ownerUser.getEmail()).role(WorkspaceAccessLevel.READER));
+
+    stubFcUpdateWorkspaceACL();
+    workspacesController.shareWorkspace(
+        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+    verify(fireCloudService, times(1))
+        .removeUserFromBillingProject(ownerUser.getEmail(), workspace.getNamespace());
+    verify(fireCloudService, never())
+        .removeUserFromBillingProject(eq(writerUser.getEmail()), any());
+    verify(fireCloudService, never()).addUserToBillingProject(any(), any());
   }
 
   @Test

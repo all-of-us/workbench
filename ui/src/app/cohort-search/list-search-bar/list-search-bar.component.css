@@ -44,6 +44,7 @@ input {
     max-height: 15rem;
     min-height: 30px;
     overflow-y: auto;
+    padding: 0.25rem 0;
 }
 .dropdown-menu.overflow {
   overflow-y: visible;

@@ -10,6 +10,7 @@ import {
 import {WorkspaceShareComponent} from 'app/views/workspace-share';
 
 import {
+  UserRole,
   Workspace,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
@@ -32,6 +33,8 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   displayNavBar = true;
   confirmDeleting = false;
   username: string;
+  menuDataLoading = false;
+  userRoles?: UserRole[];
 
   bugReportOpen: boolean;
   bugReportDescription = '';
@@ -42,7 +45,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
   ) {
-    this.share = this.share.bind(this);
+    this.handleShareAction = this.handleShareAction.bind(this);
     this.closeShare = this.closeShare.bind(this);
     this.openConfirmDelete = this.openConfirmDelete.bind(this);
     this.receiveDelete = this.receiveDelete.bind(this);
@@ -143,7 +146,16 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     this.confirmDeleting = false;
   }
 
-  share(): void {
+  // The function called when the "share" action is called from the workspace nav bar menu dropdown
+  async handleShareAction() {
+    this.menuDataLoading = true;
+
+    const userRolesResponse = await workspacesApi().getFirecloudWorkspaceUserRoles(
+      this.workspace.namespace,
+      this.workspace.id);
+    // Trigger the sharing dialog to be shown.
+    this.menuDataLoading = false;
+    this.userRoles = userRolesResponse.items;
     this.sharing = true;
   }
 

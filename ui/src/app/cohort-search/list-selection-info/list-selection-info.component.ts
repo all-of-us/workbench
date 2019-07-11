@@ -23,6 +23,9 @@ export class ListSelectionInfoComponent {
       const groups = groupSelectionsStore.getValue().filter(id => id !== this.parameter.id);
       groupSelectionsStore.next(groups);
     }
+    if (!selections.length && this.resetStandard) {
+      wizard.isStandard = undefined;
+    }
     selectionsStore.next(selections);
     wizardStore.next(wizard);
   }
@@ -37,6 +40,10 @@ export class ListSelectionInfoComponent {
   }
   get showOr() {
     return (this.indexes && (this.indexes[0] > 0)) && this.parameter.domainId !== DomainType.PERSON;
+  }
+  get resetStandard() {
+    return this.parameter.domainId === DomainType.CONDITION
+      || this.parameter.domainId === DomainType.PROCEDURE;
   }
 }
 

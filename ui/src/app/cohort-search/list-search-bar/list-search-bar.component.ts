@@ -6,7 +6,7 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
-const trigger = 2;
+const trigger = 3;
 
 @Component({
   selector: 'app-list-search-bar',
@@ -50,9 +50,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
           if (value.length >= trigger) {
             this.inputChange();
           } else {
-            if (!this.optionSelected) {
-              autocompleteStore.next('');
-            }
             this.options = [];
             this.noResults = false;
           }
@@ -80,6 +77,7 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
       );
     apiCall.then(resp => {
       this.options = [];
+      this.noResults = resp.items.length === 0;
       const optionNames: Array<string> = [];
       this.highlightedOption = null;
       resp.items.forEach(option => {
@@ -101,12 +99,11 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
       this.optionSelected = true;
       this.searchTerm.reset('');
       this.searchTerm.setValue(option.name, {emitEvent: false});
-      if (option.type === CriteriaType[CriteriaType.BRAND]) {
+      if (option.subtype === CriteriaType[CriteriaType.BRAND]) {
         const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
         cohortBuilderApi().getDrugIngredientByConceptId(cdrId, option.conceptId)
           .then(resp => {
             if (resp.items.length) {
-              // TODO check if we need to highlight all ingredients
               // just grabbing the first one on the list for now
               const {name, path, id} = resp.items[0];
               autocompleteStore.next(name);

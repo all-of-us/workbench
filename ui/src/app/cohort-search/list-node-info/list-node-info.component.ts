@@ -21,8 +21,8 @@ import {Subscription} from 'rxjs/Subscription';
 })
 export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() node: any;
-  private isSelected: boolean;
-  private isSelectedChild: boolean;
+  private selected: boolean;
+  private selectedChild: boolean;
   private subscription: Subscription;
   @ViewChild('name') name: ElementRef;
   isTruncated = false;
@@ -30,12 +30,12 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit() {
     this.subscription = selectionsStore.subscribe(selections => {
-      this.isSelected = selections.includes(this.paramId);
+      this.selected = selections.includes(this.paramId);
     });
 
     this.subscription.add(groupSelectionsStore
       .subscribe(groupIds => {
-        this.isSelectedChild = groupIds.some(
+        this.selectedChild = groupIds.some(
           id => this.node.path.split('.')
             .filter(pathId => pathId !== this.node.id.toString())
             .includes(id.toString())
@@ -161,6 +161,9 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
           name: modifiedName
         };
         const wizard = wizardStore.getValue();
+        if (!selections.length && this.checkStandard) {
+          wizard.isStandard = param.isStandard;
+        }
         wizard.item.searchParameters.push(param);
         selections = [this.paramId, ...selections];
         selectionsStore.next(selections);
@@ -198,8 +201,8 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.node.hasAttributes;
   }
 
-  get isDisabled() {
-    return this.isSelected || this.isSelectedChild;
+  get isSelected() {
+    return this.selected || this.selectedChild;
   }
 
   get isPMCat() {
@@ -207,5 +210,15 @@ export class ListNodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       this.node.subtype === CriteriaSubType.PREG ||
       this.node.subtype === CriteriaSubType.HRIRR ||
       this.node.subtype === CriteriaSubType.HRNOIRR;
+  }
+
+  get checkStandard() {
+    return this.node.domainId === DomainType.CONDITION
+      || this.node.domainId === DomainType.PROCEDURE;
+  }
+
+  get isDisabled() {
+    const standard = wizardStore.getValue().isStandard;
+    return this.checkStandard && standard !== undefined && this.node.isStandard !== standard;
   }
 }

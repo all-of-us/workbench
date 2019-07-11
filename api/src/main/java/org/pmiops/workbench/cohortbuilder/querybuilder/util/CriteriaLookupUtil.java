@@ -156,29 +156,55 @@ public final class CriteriaLookupUtil {
 
       List<CBCriteria> parents = Lists.newArrayList();
       List<CBCriteria> leaves = Lists.newArrayList();
-      // This dao call returns all parents matching the parentConceptIds.
-      String ids =
-          cbCriteriaDao
-              .findCriteriaParentsByDomainAndTypeAndParentConceptIds(
-                  treeType.domain.toString(),
-                  treeType.type.toString(),
-                  treeType.isStandard,
-                  parentConceptIds)
-              .stream()
-              .map(c -> String.valueOf(c.getId()))
-              .collect(Collectors.joining(","));
-      // Find the entire hierarchy from parent to leaves. Each parent node is now encoded with
-      // concept ids. The following lookups are in 2 separate calls for query efficiency
-      cbCriteriaDao
-          .findCriteriaLeavesAndParentsByDomainAndPath(treeType.domain.toString(), ids)
-          .forEach(
-              c -> {
-                if (c.getGroup() && parentConceptIds.contains(c.getConceptId())) {
-                  parents.add(c);
-                } else {
-                  leaves.add(c);
-                }
-              });
+      if (treeType.type.equals(CriteriaType.ICD9CM)) {
+        // This dao call returns all parents matching the parentConceptIds.
+        List<Long> ids =
+            cbCriteriaDao
+                .findCriteriaParentsByDomainAndTypeAndParentConceptIds(
+                    treeType.domain.toString(),
+                    treeType.type.toString(),
+                    treeType.isStandard,
+                    parentConceptIds)
+                .stream()
+                .map(c -> c.getId())
+                .collect(Collectors.toList());
+        // TODO: freemabd this is a temporary fix until we get a real fix for cb_criteria table
+        cbCriteriaDao
+            .findCriteriaLeavesAndParentsByDomainAndTypeAndParentIds(
+                treeType.domain.toString(), treeType.type.toString(), ids)
+            .forEach(
+                c -> {
+                  if (c.getGroup() && parentConceptIds.contains(c.getConceptId())) {
+                    parents.add(c);
+                  } else {
+                    leaves.add(c);
+                  }
+                });
+      } else {
+        // This dao call returns all parents matching the parentConceptIds.
+        String ids =
+            cbCriteriaDao
+                .findCriteriaParentsByDomainAndTypeAndParentConceptIds(
+                    treeType.domain.toString(),
+                    treeType.type.toString(),
+                    treeType.isStandard,
+                    parentConceptIds)
+                .stream()
+                .map(c -> String.valueOf(c.getId()))
+                .collect(Collectors.joining(","));
+        // Find the entire hierarchy from parent to leaves. Each parent node is now encoded with
+        // concept ids. The following lookups are in 2 separate calls for query efficiency
+        cbCriteriaDao
+            .findCriteriaLeavesAndParentsByPath(ids)
+            .forEach(
+                c -> {
+                  if (c.getGroup() && parentConceptIds.contains(c.getConceptId())) {
+                    parents.add(c);
+                  } else {
+                    leaves.add(c);
+                  }
+                });
+      }
 
       putLeavesOnParent(byParent, parents, leaves);
     }
@@ -230,10 +256,8 @@ public final class CriteriaLookupUtil {
       // number to be very high as it requires a user action to add a group, but a better data
       // structure could be used here if this becomes too slow.
       for (CBCriteria parent : parents) {
-        String parentId = Long.toString(parent.getId());
-        if (c.getPath().startsWith(parentId + ".")
-            || c.getPath().contains("." + parentId + ".")
-            || c.getPath().endsWith("." + parentId)) {
+        String path = parent.getPath();
+        if (c.getPath().startsWith(path)) {
           long parentConceptId = Long.parseLong(parent.getConceptId());
           byParent.putIfAbsent(parentConceptId, Sets.newHashSet());
           byParent.get(parentConceptId).add(Long.parseLong(c.getConceptId()));

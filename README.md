@@ -327,65 +327,46 @@ Workbench schema lives in `api/db` --> all workbench related activities access/p
 
 CDR schema lives in `api/db-cdr` --> all cdr/cohort builder related activities access/persist data here
 
-## Generate cdr and public count databases for a CDR version
+## Generate cdr count databases for a CDR version
 
-This happens anytime a new cdr is released or if you want all the count data for databrowser and cohort builder generated locally.
+The following scripts need to be run anytime a new cdr is released or if you want all the count data for cohort builder.
 
 Description of arguments these scripts take are as follows.
-* bq-project : Project where BigQuery cdr lives that you want to generate data from. This must exist
-* bq-dataset : BigQuery Dataset for the cdr release that you want to generate data from. This must exist
+* bq-project : Project where BigQuery cdr lives. Ex: all-of-us-ehr-dev, all-of-us-workbench-test
+* bq-dataset : BigQuery Dataset name of the cdr release. Ex: synthetic_cdr20180606
 * workbench-project:  Project where private count dataset (cdr) is generated. This must exist.
-* public-project: Project where public count dataset (public) is generated. This must exist.
-* cdr-version: Version of form YYYYMMDD or empty string '' . It is used to name resulting datasets, csv folders, and databases.
+* cdr-version: Name of the cloud cdr your creating. Ex: synth_r_2019q3_1
 * bucket: A GCS Bucket where csv data dumps are of the generated data. This must exist.
-* db-name: Name of database
-* database: Name of database
-* instance: Cloud Sql Instance
+* instance: Cloud Sql Instance. Ex: workbenchmaindb
 
-###Examples:
-#### Generate criteria tables in the BigQuery cdr only one time when it is released or as needed
-`./project.rb generate-criteria-table --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
-#### Generate denormalized search tables in the BigQuery cdr only one time when it is released or as needed
-`./project.rb make-bq-denormalized-search --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 `
-##### Result is
-1. The BigQuery dataset has new denormalized search tables for cohort builder to work.
-#### Generate denormalized review tables in the BigQuery cdr only one time when it is released or as needed
-`./project.rb make-bq-denormalized-review --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 `
-##### Result is
-1. The BigQuery dataset has new denormalized review tables for cohort builder to work.
-#### Generate all denormalized tables(search and review) in the BigQuery cdr only one time when it is released or as needed
-`./project.rb make-bq-denormalized-tables --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 `
-##### Result is
-1. The BigQuery dataset has new denormalized tables(search and review) for cohort builder to work.
-#### Generate cdr count data for use by workbench in BigQuery from a deidentified cdr release
-`./project.rb generate-private-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --workbench-project all-of-us-workbench-test --cdr-version 20181107 --bucket all-of-us-workbench-private-cloudsql`
-#### Generate denormalized data set builder tables in the BigQuery cdr only one time when it is released or as needed
-`./project.rb make-bq-denormalized-dataset --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 `
-##### Result is
-1. Cdr BigQuery dataset:  all-of-us-workbench-test:cdr20181107
-2. CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20181107/*.csv.gz 
-3. Browse csvs in browser like here :https://console.cloud.google.com/storage/browser?project=all-of-us-workbench-test&organizationId=394551486437
-3. Note cdr-version can be '' to make dataset named cdr
-#### Generate public count data for use by databrowser in BigQuery from a non de-identified cdr release
-`./project.rb generate-public-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --public-project all-of-us-workbench-test --cdr-version 20181107 --bin-size 20 --bucket all-of-us-workbench-public-cloudsql`
-##### Result is
-1. Public BigQuery dataset:  all-of-us-workbench-test:public20181107
-2. CSV dumps of tables in bucket all-of-us-workbench-public-cloudsql: public20181107/*.csv.gz 
-3. Browse csvs in browser like here :https://console.cloud.google.com/storage/browser?project=all-of-us-workbench-test&organizationId=394551486437
-3. Note cdr-version can be '' to make dataset named public
-#### Generate cloudsql databases from a bucket without downloading the data
-##### * NOTE The cloudsql instance is set in code for each environment in /api/libproject/devstart.rb. Thus each cdr release will be on the same cloudsql instance for an environment.  
-`# Once for private cdr`
+### Examples below need to be run in the following order. It's also very important that the prep tables are in a viable state before starting this process(Jon Scherdin can shed more light on this process).
 
-`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database cdr20180913 --bucket all-of-us-workbench-private-cloudsql/cdr20180913`
-
-`# Once for public cdr.`
-
-`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database public20180913 --bucket all-of-us-workbench-public-cloudsql/public20180913`
+#### Generate all denormalized tables(search, review and data set) in the BigQuery cdr only one time when it is released or as needed
+`./project.rb make-bq-denormalized-tables --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
 ##### Result is
-1. Databases are live on cloudsql.
+* The BigQuery dataset has new denormalized tables(search, review and data set) for cohort builder to work.
+* Each of these can be run individually if needed(sequential ordering is very important here:
+* `./project.rb make-bq-denormalized-search --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
+* `./project.rb generate-cb-criteria-tables --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
+* `./project.rb make-bq-denormalized-review --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
+* `./project.rb make-bq-denormalized-dataset --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
+* Info/examples for dataset script below:
+* Cdr BigQuery dataset:  all-of-us-workbench-test:cdr20181107
+* CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20181107/*.csv.gz 
+* Browse csvs in browser like here :https://console.cloud.google.com/storage/browser?project=all-of-us-workbench-test&organizationId=394551486437
+* Note cdr-version can be '' to make dataset named cdr
 
-#### Tell workbench and databrowser about your new cdr release so they can use it
+#### The next 2 scripts are used to generate cloud cdr database instances. Generate cdr count data using deidentified cdr release.
+`./project.rb generate-private-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --workbench-project all-of-us-workbench-test --cdr-version synth_r_2019q3_1 --bucket all-of-us-workbench-private-cloudsql`
+##### Result is
+* Generates csv.gz files in the specified bucket. These files will be used in the next step
+
+#### Generate cloudsql databases from a bucket using *.csv.gz files 
+`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database synth_r_2019q3_1 --bucket all-of-us-workbench-private-cloudsql/synth_r_2019q3_1`
+##### Result is
+* Databases are live on cloudsql.
+
+#### Tell workbench about your new cdr release so they can use it
 1. For the environment you want, in the workbench/api/config/cdr_versions_ENV.json , add a new object to the array for your cdr. Properties are:
    * name: unique name
    * dataAccessLevel: 1 = registered, 2 = controlled
@@ -393,9 +374,8 @@ Description of arguments these scripts take are as follows.
    * bigqueryDataset: dataset of cdr,
    * creationTime: date string in this format "2018-09-20 00:00:00Z",
    * releaseNumber: gets incremented by 1 each time an official release is made. It has the same value for a registered and controlled cdr release. 
-   * numParticipants: To get the number of participants look in your new cdrXXXXXXX cloudsql database at the achilles_results table where analysis_id = 1. `select count_value from achilles_results where analysis_id = 1` 
-   * cdrDbName: name of the the cloudsql count database used by workbench "cdr20180920",
-   * publicDbName: name of the public cloudsql database use by data browser and public api
+   * numParticipants: Number of participants in CDR.
+   * cdrDbName: name of the the cloudsql count database used by workbench "synth_r_2019q3_1". CDR versioning doc: https://docs.google.com/document/d/1W8DnEN7FnnPgGW6yrvGsdzLZhQrdOtTjvgdFUL6e4oc/edit
 2. Set the default cdr version for the environment in config_ENV.json. 
    * You probably don’t want to set your new cdr to the default before testing it.
    * NOTE The cloudsql instance is set in code for each environment in /api/libproject/devstart.rb  
@@ -405,44 +385,38 @@ Description of arguments these scripts take are as follows.
      * OR run `./project.rb update-cloud-config --project <project>` where project is the project for your environment. You can find this project in config_<ENV>.json server.projectId
    * For local , run dev-up to build your api
 
-#### Generate full local mysql test databases -- cdr and public for data generated above if you need to develop with a full test database
-1. DO NOT do this with production data. It is not allowed.
-2. Make a sql dump from cloud console of the database you want.
-2. Run `./project.rb local-mysql-import --sql-dump-file <FILE.sql> --bucket <BUCKET>`
-3. Update your local environment per above.
+#### Generate full local mysql test databases -- cdr for data generated above if you need to develop with a full test database
+* DO NOT do this with production data. It is not allowed.
+* Make a sql dump from cloud console of the database you want.
+* Run `./project.rb local-mysql-import --sql-dump-file <FILE.sql> --bucket <BUCKET>`
+* Update your local environment per above.
 
 Alternatively if you want to make a local database from csvs in gcs  
- * Run `./project.rb generate-local-count-dbs --cdr-version 20180206 --bucket all-of-us-workbench-private-cloudsql`
+ * Run `./project.rb generate-local-count-dbs --cdr-version synth_r_2019q3_1 --bucket all-of-us-workbench-private-cloudsql`
  * You may want to do this if generate-cloudsql-db fails because of limited gcloud sql import csv functionality
  * Or you have some local schema changes you need and just need csv data 
 ##### Result is
-1. Local mysql database or databases.
-2. cdr-version in the alternative method can be an empty string, '',  to make databases named 'cdr' or 'public'
+* Local mysql database or databases.
+* cdr-version in the alternative method can be an empty string, '',  to make databases named 'cdr'
 
 #### Put mysqldump of local mysql database in bucket for importing into cloudsql. Call once for each db you want to dump
-`./project.rb mysqldump-local-db --db-name cdr20180206 --bucket all-of-us-workbench-private-cloudsql`
-`./project.rb mysqldump-local-db --db-name public20180206 --bucket all-of-us-workbench-public-cloudsql`
+`./project.rb mysqldump-local-db --db-name synth_r_2019q3_1 --bucket all-of-us-workbench-private-cloudsql`
 ##### Result is
-1. cdr20180206.sql uploaded to all-of-us-workbench-private-cloudsql
-1. public20180206.sql uploaded to all-of-us-workbench-public-cloudsql
+* synth_r_2019q3_1.sql uploaded to all-of-us-workbench-private-cloudsql
 
 #### Import a dump to cloudsql instance by specifying dump file in the --file option.
-`./project.rb cloudsql-import --project all-of-us-workbench-test --instance workbenchmaindb --bucket all-of-us-workbench-private-cloudsql --database cdr20180206 --file cdr20180206.sql `
+`./project.rb cloudsql-import --project all-of-us-workbench-test --instance workbenchmaindb --bucket all-of-us-workbench-private-cloudsql --database synth_r_2019q3_1 --file synth_r_2019q3_1.sql `
 ##### Note a 3GB dump like cdr and public can take an hour or so to finish. You must wait before running another import on same instance (Cloudsql limitation) You can check status of import at the website: https://console.cloud.google.com/sql/instances/workbenchmaindb/operations?project=all-of-us-workbench-test
 ##### Or with this command:
 `gcloud sql operations list --instance [INSTANCE_NAME] --limit 10`
-
-##### Run again for the public db
-`./project.rb cloudsql-import --project all-of-us-workbench-test --instance workbenchmaindb --bucket all-of-us-workbench-public-cloudsql --database public20180206 --file public20180206.sql`
-
 ##### Result
-1) databases are in cloudsql
+* databases are in cloudsql
 
 #### Import a dump to local mysql db.
-`./project.rb local-mysql-import --sql-dump-file cdr20180206.sql --bucket all-of-us-workbench-private-cloudsql`
+`./project.rb local-mysql-import --sql-dump-file synth_r_2019q3_1.sql --bucket all-of-us-workbench-private-cloudsql`
 
 ##### Result
-1) mysql db is in your local mysql for development. You need to alter your env per above to use it.
+* mysql db is in your local mysql for development. You need to alter your env per above to use it.
 
 
 ## Elasticsearch
