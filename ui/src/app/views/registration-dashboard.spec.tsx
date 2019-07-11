@@ -6,7 +6,6 @@ import {serverConfigStore} from 'app/utils/navigation';
 import {RegistrationDashboard, RegistrationDashboardProps} from 'app/views/registration-dashboard';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {serverConfigStore} from 'app/utils/navigation';
 
 describe('RegistrationDashboard', () => {
   let props: RegistrationDashboardProps;
@@ -36,7 +35,6 @@ describe('RegistrationDashboard', () => {
       twoFactorAuthCompleted: false,
       dataUseAgreementCompleted: false
     };
-    serverConfigStore.next({...serverConfigStore.getValue()});
   });
 
   it('should render', () => {
