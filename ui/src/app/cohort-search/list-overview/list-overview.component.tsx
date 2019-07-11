@@ -1,10 +1,16 @@
 import {Component, Input} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
+import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
+import {GenderChart} from 'app/cohort-search/gender-chart/gender-chart.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {mapRequest} from 'app/cohort-search/utils';
+import {Button, Clickable} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
+
 import {
   currentCohortStore,
   currentWorkspaceStore,
@@ -12,9 +18,9 @@ import {
   navigateByUrl,
   urlParamsStore
 } from 'app/utils/navigation';
-
 import {Cohort, TemporalTime} from 'generated/fetch';
 import {fromJS} from 'immutable';
+import {Menu} from 'primereact/menu';
 import * as React from 'react';
 
 const COHORT_TYPE = 'AoU_Discover';
@@ -40,6 +46,7 @@ interface State {
 
 export const ListOverview = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
+    dropdown: any;
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -218,202 +225,82 @@ export const ListOverview = withCurrentWorkspace()(
       const {stackChart} = this.state;
       this.setState({stackChart: !stackChart});
     }
-    
+
     render() {
-      const {cohort} = this.state;
-    }
+      const {cohort, chartData, deleting, error, loading, saving, stackChart, total} = this.state;
+      const disableSave = cohort.criteria === this.criteria;
+      const items = [
+        {label: 'Save', command: () => this.saveCohort(), disabled: disableSave},
+        {label: 'Save as', command: () => {/* open modal */}},
+      ];
       return <React.Fragment>
         <div>
           <div className='overview-header'>
             <div className='actions-container'>
-              <clr-dropdown *ngIf='cohort' style='float: right'>
-              <button
-                type='button'
-                className='btn btn-primary'
-              [disabled]='loading || saving || hasErrors'
-          [clrLoading]='saving'
-          clrDropdownTrigger>
-          <span style='margin-right: 5px'>Save Cohort</span>
-          <clr-icon shape='caret down'></clr-icon>
-        </button>
-        <clr-dropdown-menu>
-          <button
-            type='button'
-            className='dropdown-item'
-            [disabled]='unchanged'
-            (click)='saveCohort()'
-              clrDropdownItem>Save</button>
-            <button
-              type='button'
-              className='dropdown-item'
-            (click)='saveModal.open()'
-            clrDropdownItem>Save as</button>
-        </clr-dropdown-menu>
-      </clr-dropdown>
-      <button
-        *ngIf='!cohort'
-    type='button'
-    className='btn btn-primary'
-    style='float: right; margin: 0;'
-    [disabled]='loading || hasErrors'
-        (click)='saveModal.open()'>Create Cohort</button>
-      <button
-        className='btn btn-link'
-        (click)='navigateTo('notebook')'
-        disabled
-        [popper]=''Export to notebook''
-        [popperTrigger]=''hover''>
-        <clr-icon shape='export' className='is-solid' size='30'></clr-icon>
-      </button>
-      <button
-        className='btn btn-link'
-        (click)='deleting = true'
-        [disabled]='loading || !cohort'
-        [popper]=''Delete cohort''
-        [popperTrigger]=''hover''>
-        <clr-icon shape='trash' className='is-solid' size='30'></clr-icon>
-      </button>
-      <button
-        className='btn btn-link'
-        (click)='navigateTo('review')'
-        [disabled]='loading || !cohort'
-        [popper]=''Review participant level data''
-        [popperTrigger]=''hover''>
-        <clr-icon shape='copy' className='is-solid disabled' size='30'></clr-icon>
-      </button>
-    </div>
-    <h2 className='count-header' id='total-count'>
-      Total Count:
-      <span *ngIf='loading && !hasTemporalError' className='spinner spinner-sm'>
-        Loading...
-      </span>
-      <span className='count-header' *ngIf='!loading && !hasErrors'>
-        {{total | number}}
-      </span>
-      <span *ngIf='hasErrors'>
-        --
-        <clr-icon
-          [popper]='errorPopper'
-          [popperTrigger]=''hover''
-          shape='warning-standard'
-          size='18'></clr-icon>
-      </span>
-    </h2>
-  </div>
-  <div *ngIf='error && !hasErrors' className='total-error'>
-    <clr-icon className='is-solid' shape='exclamation-triangle' size='22'></clr-icon>
-    Sorry, the request cannot be completed.
-  </div>
-  <div *ngIf='!hasErrors && !loading && chartData && total'>
-    <div className='card bg-faded'>
-      <div className='card-header header-text'>
-        Results by Gender
-      </div>
-      <div className='card-block'>
-        <app-gender-chart *ngIf='chartData.size'
-          [data]='chartData'>
-        </app-gender-chart>
-      </div>
-    </div>
-    <div className='card bg-faded'>
-      <div className='card-header header-text'>
-        Results By Gender, Age Range, and Race
-        <clr-icon shape='sort-by'
-          [className.is-info]='stackChart'
-          (click)='toggleChartMode()'>
-        </clr-icon>
-      </div>
-      <div className='card-block'>
-        <app-combo-chart *ngIf='chartData.size'
-          [data]='chartData'
-          [mode]='stackChart ? 'stacked' : 'normalized''>
-        </app-combo-chart>
-      </div>
-    </div>
-  </div>
-</div>
-<popper-content #errorPopper>
-  <p   *ngIf='error && !hasTemporalError' [style.margin]=''0''>
-    A problem occurred and we were not able to retrieve the requested data
-    </p>
-    {this.hasTemporalError && this.hasActiveItems && <p style={{margin: 0}}>
-        Please complete criteria selections before saving temporal relationship.
-      </p>}
-    <p *ngIf='!hasActiveItems' [style.margin]=''0''>
-        All criteria are suppressed. Un-suppress criteria to update the total count based on the visible criteria.
-    </p>
-    </popper-content>
-    <clr-modal #saveModal
-    [clrModalSize]=''md''
-    (clrModalOpenChange)='modalChange($event)'>
-    <div className='modal-title'>
-    <h2>Save New Cohort</h2>
-    </div>
-    <div className='modal-body'>
-    <form [formGroup]='cohortForm' (ngSubmit)='submit()'>
-    <label
-    for='name-control'
-    [className.show]='(name.dirty || name.touched) && cohortForm.invalid'>
-    <em>*A Cohort Name is Required</em>
-    </label>
-    <div className='name-area'>
-    <input
-    name='name'
-    id='name-control'
-    className='control'
-    placeholder='Cohort Name'
-    maxlength='80'
-    formControlName='name'
-    type='text'
-    [className.invalid]='(name.dirty || name.touched) && cohortForm.invalid'
-    (input)='showConflictError = false'
-    [className.alreadyTaken]='showConflictError'
-    autofocus>
-    <clr-icon shape='warning-standard' className='warning-standard is-solid' *ngIf='showConflictError'></clr-icon>
-    <div *ngIf='showConflictError' className='error'>
-    {{name.value}} already exists. Please choose another name.
-    </div>
-    </div>
-    <textarea
-    name='description'
-    id='description-control'
-    className='control'
-    placeholder='Description'
-    rows='60'
-    formControlName='description'>
-    </textarea>
-    </form>
-    <div *ngIf='saveError' className='total-error'>
-    <clr-icon className='is-solid' shape='exclamation-triangle' size='22'></clr-icon>
-    Data cannot be saved. Please try again.
-    </div>
-    </div>
-    <div className='modal-footer'>
-    <div>
-    <button
-    type='button'
-    className='btn btn-link'
-    (click)='saveModal.close()'>
-    Cancel
-    </button>
-    <button
-    type='button'
-    className='btn btn-primary'
-    (click)='submit()'
-    [clrLoading]='saving'
-    [disabled]='!cohortForm.valid || saveError'>
-    Save Cohort
-    </button>
-    </div>
-    </div>
-    </clr-modal>
-    <app-confirm-delete-modal
-    *ngIf='deleting'
-    [resourceName]='cohort.name'
-    [resourceType]=''cohort''
-    [receiveDelete]='delete'
-    [closeFunction]='cancel'>
-    </app-confirm-delete-modal>
+              {!!cohort && <React.Fragment>
+                <Menu model={items} popup={true} ref={el => this.dropdown = el} />
+                <Button type='primary' onClick={(event) => this.dropdown.toggle(event)}
+                  disabled={loading || saving || this.hasErrors}>
+                  SAVE COHORT <ClrIcon shape='caret down' />
+                </Button>
+              </React.Fragment>}
+              {!cohort && <Button type='primary'
+                onClick={() => {/* open modal */}}
+                style={{float: 'right', margin: 0}}
+                disabled={loading || this.hasErrors}>CREATE COHORT</Button>}
+              <Clickable onClick={this.navigateTo('notebook')} disabled>
+                <ClrIcon shape='export' className='is-solid' size={30} title='Export to notebook' />
+              </Clickable>
+              <Clickable onClick={this.setState({deleting: true})} disabled={loading || !cohort}>
+                <ClrIcon shape='trash' className='is-solid' size={30} title='Delete cohort' />
+              </Clickable>
+              <Clickable onClick={this.navigateTo('review')} disabled={loading || !cohort}>
+                <ClrIcon shape='copy' className='is-solid' size={30}
+                  title='Review participant level data' />
+              </Clickable>
+            </div>
+            <h2 className='count-header' id='total-count'>
+              Total Count:
+              {loading && !this.hasTemporalError &&
+                <span className='spinner spinner-sm'>Loading...</span>
+              }
+              {!loading && !this.hasErrors &&
+                <span className='count-header'>{total.toLocaleString()}</span>
+              }
+              {this.hasErrors && <span>-- <ClrIcon shape='warning-standard' size={18} /></span>}
+            </h2>
+          </div>
+          {error && !this.hasErrors && <div className='total-error'>
+            <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
+            Sorry, the request cannot be completed.
+          </div>}
+          {!this.hasErrors && !loading && !!chartData && total && <div>
+            <div className='card bg-faded'>
+              <div className='card-header header-text'>
+                Results by Gender
+              </div>
+              <div className='card-block'>
+                {chartData.size && <GenderChart data={chartData} />}
+              </div>
+            </div>
+            <div className='card bg-faded'>
+              <div className='card-header header-text'>
+                Results By Gender, Age Range, and Race
+                <ClrIcon shape='sort-by'
+                  className={stackChart ? 'is-info' : ''}
+                  onClick={this.toggleChartMode()} />
+              </div>
+              <div className='card-block'>
+                {chartData.size &&
+                <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
+              </div>
+            </div>
+          </div>}
+        </div>
+        {deleting && <ConfirmDeleteModal closeFunction={this.cancel}
+          resourceType='cohort'
+          receiveDelete={this.delete}
+          resourceName={cohort.name} />}
       </React.Fragment>;
     }
   }
