@@ -130,7 +130,7 @@ describe('WorkspaceWrapperComponent', () => {
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS, WorkspaceStubVariables.DEFAULT_WORKSPACE_ID)
       .then(resp => {
         expectedRoles = resp.items.length;
-    });
+      });
     tick();
     expect(elements.length).toBe(expectedRoles);
   }));
