@@ -11,9 +11,8 @@ import {TwoColPaddedTable} from 'app/components/tables';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
-import {currentWorkspaceStore, navigate, userProfileStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {CdrVersion, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
-import {serverConfigStore} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
