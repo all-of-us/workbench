@@ -4,14 +4,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 
-import {
-  CohortSearchActions,
-  INIT_SEARCH_GROUP,
-  initGroup,
-  OPEN_WIZARD,
-  openWizard,
-} from 'app/cohort-search/redux';
-
+import {CohortSearchActions, initGroup, openWizard} from 'app/cohort-search/redux';
 import {CohortBuilderService} from 'generated';
 import {SearchGroupSelectComponent} from './search-group-select.component';
 
