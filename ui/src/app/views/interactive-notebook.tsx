@@ -51,9 +51,14 @@ const styles = reactStyles({
     marginLeft: 0,
     marginRight: '5px'
   },
+  previewDiv: {
+    width: '100%',
+    border: 0
+  },
   previewFrame: {
     width: '100%',
-    height: 800,
+    height: 'calc(100% - 40px)',
+    position: 'absolute',
     border: 0
   },
   rotate: {
@@ -172,7 +177,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
             </div>
             {this.state.userRequestedExecutableNotebook ? (
               <div style={{...styles.navBarItem}}>
-                <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}></ClrIcon>
+                <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
                 Preparing your Jupyter environment. This may take up to 10 minutes.
               </div>) : (
               <div style={{display: 'flex'}}>
@@ -196,9 +201,9 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
               </div>)
             }
           </div>
-          <div style={styles.previewFrame}>
+          <div style={styles.previewDiv}>
             {this.state.html ?
-              (<iframe style={styles.previewFrame} srcDoc={this.state.html}></iframe>) :
+              (<iframe style={styles.previewFrame} srcDoc={this.state.html}/>) :
               (<SpinnerOverlay/>)}
           </div>
           {this.state.showPlaygroundModeModal &&
