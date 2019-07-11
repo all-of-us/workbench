@@ -10,5 +10,4 @@ import org.pmiops.workbench.model.FeaturedWorkspace;
  */
 public class FeaturedWorkspacesConfig {
   public ArrayList<FeaturedWorkspace> featuredWorkspaces;
-
 }

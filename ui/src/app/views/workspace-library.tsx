@@ -86,7 +86,6 @@ export const WorkspaceLibrary = withUserProfile()
 
   async componentDidMount() {
     this.loadPublishedWorkspaces();
-    this.loadFeaturedWorkspaces();
   }
 
   componentDidUpdate(prevProps, prevState) {
