@@ -1959,16 +1959,6 @@ definitions:
         items:
           $ref: "#/definitions/FeaturedWorkspace"
 
-  FeaturedWorkspace:
-    type: object
-    properties:
-      name:
-        type: string
-        description: the name of the workspace
-      id:
-        type: string
-        description: the id of the workspace
-
   # Mirrors BillingProjectMembership from fireCloud.yaml
   BillingProjectMembership:
     description: ''

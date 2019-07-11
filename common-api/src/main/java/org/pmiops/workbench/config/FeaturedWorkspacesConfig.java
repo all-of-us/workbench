@@ -11,9 +11,4 @@ import org.pmiops.workbench.model.FeaturedWorkspace;
 public class FeaturedWorkspacesConfig {
   public ArrayList<FeaturedWorkspace> featuredWorkspaces;
 
-  public static FeaturedWorkspacesConfig createEmptyConfig() {
-    FeaturedWorkspacesConfig fwConfig = new FeaturedWorkspacesConfig();
-    fwConfig.featuredWorkspaces = new ArrayList<>();
-    return fwConfig;
-  }
 }

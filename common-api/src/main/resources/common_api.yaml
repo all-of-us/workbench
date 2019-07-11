@@ -152,9 +152,12 @@ definitions:
       name:
         type: string
         description: the name of the workspace
+      namespace:
+        type: string
+        description: the namespace of the workspace
       id:
         type: string
-        description: the id of the workspace
+        description: the Firecloud id of the workspace
 
   ErrorResponse:
     type: object

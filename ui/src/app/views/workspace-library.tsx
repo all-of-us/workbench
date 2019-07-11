@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import * as React from 'react';
 
+import {AlertDanger} from 'app/components/alert';
 import {Clickable} from 'app/components/buttons';
 import {Header} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
@@ -70,14 +71,14 @@ export const WorkspaceLibrary = withUserProfile()
 (class extends React.Component<
   {profileState: { profile: Profile, reload: Function } },
   {currentTab: {title: string, icon: string}, errorText: string,
-    workspaceList: WorkspacePermissions[], featuredWorkspaceIds: Array<string>,
+    workspaceList: WorkspacePermissions[], featuredWorkspaces: WorkspacePermissions[],
     workspacesLoading: boolean}> {
   constructor(props) {
     super(props);
     this.state = {
       currentTab: libraryTabEnums.PUBLISHED_WORKSPACES,
       errorText: '',
-      featuredWorkspaceIds: [],
+      featuredWorkspaces: [],
       workspaceList: [],
       workspacesLoading: true
     };
@@ -109,8 +110,14 @@ export const WorkspaceLibrary = withUserProfile()
   async loadFeaturedWorkspaces() {
     try {
       const resp = await featuredWorkspacesConfigApi().getFeaturedWorkspacesConfig();
-      this.setState({featuredWorkspaceIds: resp.featuredWorkspacesList.map(ws => ws.id)});
-      this.setState({workspacesLoading: false});
+      const idToNamespace = new Map();
+      resp.featuredWorkspacesList.map(fw => idToNamespace.set(fw.id, fw.namespace));
+
+      this.setState({
+        featuredWorkspaces: this.state.workspaceList.filter(ws => idToNamespace.get(ws.workspace.id)
+          && idToNamespace.get(ws.workspace.id) === ws.workspace.namespace),
+        workspacesLoading: false
+      });
     } catch (e) {
       const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
       this.setState({errorText: response.message});
@@ -122,9 +129,11 @@ export const WorkspaceLibrary = withUserProfile()
       const workspacesReceived = await workspacesApi().getPublishedWorkspaces();
       workspacesReceived.items.sort(
         (a, b) => a.workspace.name.localeCompare(b.workspace.name));
-      this.setState({workspaceList: workspacesReceived.items
-          .map(w => new WorkspacePermissions(w))});
-      this.setState({workspacesLoading: false});
+      this.setState({
+        workspaceList: workspacesReceived.items
+          .map(w => new WorkspacePermissions(w)),
+        workspacesLoading: false
+      });
     } catch (e) {
       const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
       this.setState({errorText: response.message});
@@ -133,14 +142,16 @@ export const WorkspaceLibrary = withUserProfile()
 
   render() {
     const {profile: {username}} = this.props.profileState;
-    const {currentTab, featuredWorkspaceIds, workspaceList, workspacesLoading} = this.state;
+    const {currentTab, errorText, featuredWorkspaces, workspaceList,
+      workspacesLoading} = this.state;
     return <div style={{display: 'flex', flexDirection: 'row', height: '100%'}}>
       <div style={styles.navPanel}>
         <div style={{display: 'flex', flexDirection: 'column'}}>
           {libraryTabs.map((tab, i) => {
             return <React.Fragment key={i}>
               <LibraryTab icon={tab.icon} title={tab.title} selected={currentTab === tab}
-                          onClick={() => this.setState({currentTab: tab})}/>
+                          onClick={() => this.setState({currentTab: tab})}
+                          data-test-id={tab.title}/>
                 {i !== libraryTabs.length - 1 &&
                 <hr style={{width: '100%', margin: '0.5rem 0'}}/>}
             </React.Fragment>;
@@ -161,6 +172,7 @@ export const WorkspaceLibrary = withUserProfile()
             </div>
           </div>
           <hr style={styles.divider}/>
+          {errorText && <AlertDanger>{errorText}</AlertDanger>}
 
           {currentTab === libraryTabEnums.PUBLISHED_WORKSPACES &&
           <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
@@ -180,9 +192,7 @@ export const WorkspaceLibrary = withUserProfile()
             {workspacesLoading ?
               (<Spinner style={{width: '100%', marginTop: '0.5rem'}}/>) :
               (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
-                {workspaceList
-                  .filter(ws => featuredWorkspaceIds
-                    .includes(ws.workspace.id.toString()))
+                {featuredWorkspaces
                   .map(wp => {
                     return <WorkspaceCard key={wp.workspace.name}
                                           wp={wp}
