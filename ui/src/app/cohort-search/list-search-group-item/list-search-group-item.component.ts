@@ -1,16 +1,9 @@
 import {Component, Input, OnInit} from '@angular/core';
-
+import {initExisting, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {domainToTitle, listAttributeDisplay, listNameDisplay, listTypeDisplay, mapGroupItem} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
-
-import {
-  initExisting,
-  searchRequestStore,
-  selectionsStore,
-  wizardStore
-} from 'app/cohort-search/search-state.service';
-import {domainToTitle, getCodeOptions, listAttributeDisplay, listNameDisplay, listTypeDisplay, mapGroupItem} from 'app/cohort-search/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
+import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
 
 @Component({
   selector: 'app-list-search-group-item',
@@ -164,14 +157,17 @@ export class ListSearchGroupItemComponent implements OnInit {
   launchWizard() {
     const selections = this.item.searchParameters.map(sp => sp.parameterId);
     selectionsStore.next(selections);
-    const codes = getCodeOptions(this.item.type);
     const fullTree = this.item.fullTree;
     const {role, groupId} = this;
     const item = JSON.parse(JSON.stringify(this.item));
     const itemId = this.item.id;
     const domain = this.item.type;
+    let isStandard;
+    if ([DomainType.CONDITION, DomainType.PROCEDURE].includes(domain)) {
+      isStandard = item.searchParameters[0].isStandard;
+    }
     const {type, standard} = this.typeAndStandard;
-    const context = {item, domain, type, standard, role, groupId, itemId, fullTree, codes};
+    const context = {item, domain, type, isStandard, role, groupId, itemId, fullTree, standard};
     wizardStore.next(context);
   }
 }

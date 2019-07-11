@@ -36,7 +36,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
   mode = 'list';
   backMode: string;
   count = 0;
-  disableCursor = false;
+  loadingSubtree = false;
   modifiersDisabled = false;
   conceptType: string = null;
   wizard: any;
@@ -73,9 +73,9 @@ export class ListModalComponent implements OnInit, OnDestroy {
       });
 
     this.subscription.add(selectionsStore.subscribe(list => this.selectionIds = list));
-
+    this.subscription.add(subtreeSelectedStore.subscribe(
+      sel => this.loadingSubtree = sel !== undefined));
     this.subscription.add(scrollStore.filter(id => !!id).subscribe(id => this.setScroll(id)));
-
     this.subscription.add(attributesStore
       .filter(crit => !!crit)
       .subscribe(criterion => {
@@ -91,7 +91,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
     if (node) {
       setTimeout(() => node.scrollIntoView({behavior: 'smooth', block: 'center'}), 200);
     }
-    this.disableCursor = false;
+    this.loadingSubtree = false;
   }
 
   ngOnDestroy() {
@@ -105,6 +105,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
     subtreePathStore.next([]);
     this.attributesNode = undefined;
     this.hierarchyNode = undefined;
+    this.loadingSubtree = false;
     this.open = false;
   }
 

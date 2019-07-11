@@ -5,7 +5,7 @@
     type="button"
     class="btn btn-sm btn-link selection-button"
     [class.pm]="isPM"
-    [disabled]="isSelected && !hasAttributes"
+    [disabled]="(isSelected && !hasAttributes) || isDisabled"
     (click)="select($event)">
     <clr-icon *ngIf="isSelected && !hasAttributes" shape="check-circle" size="20" class="selection-icon"></clr-icon>
     <clr-icon *ngIf="!isSelected && !hasAttributes" shape="plus-circle" size="20" class="selection-icon" [class.not-selectable]="isDisabled"></clr-icon>

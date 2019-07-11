@@ -1,6 +1,6 @@
 <clr-tree-node>
   <div [id]="nodeId" class="clr-treenode-link container" (click)="toggleExpanded()">
-    <crit-list-node-info [node]="node" [standard]="wizard.standard"></crit-list-node-info>
+    <crit-list-node-info [node]="node"></crit-list-node-info>
   </div>
   <ng-template *ngIf="node.group && !wizard.fullTree"
     [(clrIfExpanded)]="expanded"
