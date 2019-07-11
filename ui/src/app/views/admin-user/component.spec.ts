@@ -16,6 +16,7 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
+import {serverConfigStore} from 'app/utils/navigation';
 import {AdminUserBypassComponent} from 'app/views/admin-user-bypass';
 import {AdminUserComponent} from 'app/views/admin-user/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
@@ -44,6 +45,15 @@ describe('AdminUserComponent', () => {
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(AdminUserComponent);
+      serverConfigStore.next({
+        enableDataUseAgreement: true,
+        enforceRegistered: true,
+        gsuiteDomain: 'fake-research-aou.org',
+        projectId: 'aaa',
+        publicApiKeyForErrorReports: 'aaa',
+        useBillingProjectBuffer: true,
+        enableEraCommons: true,
+      });
       setupModals(fixture);
       tick();
     });

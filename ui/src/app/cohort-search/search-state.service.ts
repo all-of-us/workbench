@@ -13,3 +13,4 @@ export const attributesStore = new BehaviorSubject<any>(undefined);
 export const autocompleteStore = new BehaviorSubject<any>('');
 export const idsInUse = new BehaviorSubject<any>(new Set());
 export const ppiQuestions = new BehaviorSubject<any>({});
+export const initExisting = new BehaviorSubject<boolean>(false);

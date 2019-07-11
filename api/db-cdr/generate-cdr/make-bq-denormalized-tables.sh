@@ -35,6 +35,24 @@ then
   exit 1
 fi
 
+echo "Making denormalized search tables"
+if ./generate-cdr/make-bq-denormalized-search.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
+then
+    echo "Denormalized search tables generated"
+else
+    echo "FAILED To generate denormalized search tables"
+    exit 1
+fi
+
+echo "Making criteria tables"
+if ./generate-cdr/generate-cb-criteria-tables.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
+then
+    echo "criteria tables generated"
+else
+    echo "FAILED To generate criteria tables"
+    exit 1
+fi
+
 echo "Making denormalized review tables"
 if ./generate-cdr/make-bq-denormalized-review.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
 then
@@ -44,12 +62,12 @@ else
     exit 1
 fi
 
-echo "Making denormalized search tables"
-if ./generate-cdr/make-bq-denormalized-search.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
+echo "Making denormalized dataset tables"
+if ./generate-cdr/make-bq-denormalized-dataset.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
 then
-    echo "Denormalized search tables generated"
+    echo "Denormalized dataset tables generated"
 else
-    echo "FAILED To generate denormalized search tables"
+    echo "FAILED To generate denormalized dataset tables"
     exit 1
 fi
 

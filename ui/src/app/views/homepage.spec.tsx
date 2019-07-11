@@ -44,7 +44,15 @@ describe('HomepageComponent', () => {
     });
 
     userProfileStore.next({profile, reload, updateCache: () => {}});
-    serverConfigStore.next({useBillingProjectBuffer: false, gsuiteDomain: "abc"})
+    serverConfigStore.next({
+      enableDataUseAgreement: true,
+      enforceRegistered: true,
+      gsuiteDomain: 'fake-research-aou.org',
+      projectId: 'aaa',
+      publicApiKeyForErrorReports: 'aaa',
+      useBillingProjectBuffer: false,
+      enableEraCommons: true,
+    });
   });
 
   it('should render the homepage', () => {
