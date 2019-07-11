@@ -10,7 +10,7 @@ import {hasRegisteredAccess} from 'app/utils';
 import {routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget, openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
-import {Authority, BillingProjectStatus} from 'generated';
+import {Authority} from 'generated';
 
 @Component({
   selector: 'app-signed-in',
@@ -41,10 +41,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   // True if the user tried to open the Zendesk support widget and an error
   // occurred.
   zendeskLoadError = false;
-  billingProjectInitialized = false;
-  billingProjectQuery: NodeJS.Timer;
   private profileLoadingSub: Subscription;
-  private profileBlockingSub: Subscription;
   private subscriptions = [];
 
   @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
@@ -98,17 +95,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
 
-    this.profileBlockingSub = this.profileStorageService.profile$.subscribe((profile) => {
-      // This will block workspace creation until the billing project is initialized
-      if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
-        this.billingProjectInitialized = true;
-      } else {
-        this.billingProjectQuery = setTimeout(() => {
-          this.profileStorageService.reload();
-        }, 10000);
-      }
-    });
-
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.minimizeChrome = minimizeChrome;
     }));
@@ -123,9 +109,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy() {
     if (this.profileLoadingSub) {
       this.profileLoadingSub.unsubscribe();
-    }
-    if (this.profileBlockingSub) {
-      this.profileBlockingSub.unsubscribe();
     }
     for (const s of this.subscriptions) {
       s.unsubscribe();
