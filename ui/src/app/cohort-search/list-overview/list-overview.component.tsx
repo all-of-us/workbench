@@ -76,8 +76,9 @@ export const ListOverview = withCurrentWorkspace()(
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
       if (this.props.update > prevProps.update && !this.hasErrors) {
-        this.setState({loading: true, error: false});
-        this.getTotalCount();
+        // TODO fix below code so it doesn't constantly call setState and crash the browser
+        // this.setState({loading: true, error: false});
+        // this.getTotalCount();
       }
     }
 
@@ -228,7 +229,7 @@ export const ListOverview = withCurrentWorkspace()(
 
     render() {
       const {cohort, chartData, deleting, error, loading, saving, stackChart, total} = this.state;
-      const disableSave = cohort.criteria === this.criteria;
+      const disableSave = cohort && cohort.criteria === this.criteria;
       const items = [
         {label: 'Save', command: () => this.saveCohort(), disabled: disableSave},
         {label: 'Save as', command: () => {/* open modal */}},
@@ -248,13 +249,14 @@ export const ListOverview = withCurrentWorkspace()(
                 onClick={() => {/* open modal */}}
                 style={{float: 'right', margin: 0}}
                 disabled={loading || this.hasErrors}>CREATE COHORT</Button>}
-              <Clickable onClick={this.navigateTo('notebook')} disabled>
+              <Clickable onClick={() => this.navigateTo('notebook')} disabled>
                 <ClrIcon shape='export' className='is-solid' size={30} title='Export to notebook' />
               </Clickable>
-              <Clickable onClick={this.setState({deleting: true})} disabled={loading || !cohort}>
+              <Clickable onClick={() => this.setState({deleting: true})}
+                 disabled={loading || !cohort}>
                 <ClrIcon shape='trash' className='is-solid' size={30} title='Delete cohort' />
               </Clickable>
-              <Clickable onClick={this.navigateTo('review')} disabled={loading || !cohort}>
+              <Clickable onClick={() => this.navigateTo('review')} disabled={loading || !cohort}>
                 <ClrIcon shape='copy' className='is-solid' size={30}
                   title='Review participant level data' />
               </Clickable>
@@ -264,7 +266,7 @@ export const ListOverview = withCurrentWorkspace()(
               {loading && !this.hasTemporalError &&
                 <span className='spinner spinner-sm'>Loading...</span>
               }
-              {!loading && !this.hasErrors &&
+              {!loading && !this.hasErrors && total !== undefined &&
                 <span className='count-header'>{total.toLocaleString()}</span>
               }
               {this.hasErrors && <span>-- <ClrIcon shape='warning-standard' size={18} /></span>}
@@ -315,6 +317,6 @@ export class ListOverviewComponent extends ReactWrapperBase {
   @Input('update') update: Props['update'];
 
   constructor() {
-    super(ListOverview, ['searchReaquest', 'update']);
+    super(ListOverview, ['searchRequest', 'update']);
   }
 }
