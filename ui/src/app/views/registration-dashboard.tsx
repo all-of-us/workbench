@@ -80,6 +80,7 @@ async function redirectToTraining() {
 
 interface RegistrationTask {
   key: string;
+  completionPropsKey: string;
   title: string;
   description: string;
   buttonText: string;
@@ -188,7 +189,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   }
 
   getTaskCompletionList(): Array<boolean> {
-    const list = RegistrationTasks.map((config) => {
+    const list = getRegistrationTasks().map((config) => {
       return this.props[config.completionPropsKey] as boolean;
     });
     return list;
