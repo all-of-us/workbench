@@ -8,33 +8,36 @@ import {Action, ResourceCardTemplate} from 'app/views/resource-card-template';
 import {RecentResource} from 'generated/fetch';
 import * as React from 'react';
 import * as fp from 'lodash';
-import {withErrorModal} from "app/views/with-error-modal";
-import {withConfirmDeleteModal} from "app/views/with-confirm-delete-modal";
+import {withErrorModal, WithErrorModalProps} from "app/views/with-error-modal";
+import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from "app/views/with-confirm-delete-modal";
+import {withSpinnerOverlay, WithSpinnerOverlayProps} from "app/views/with-spinner-overlay";
 
-interface Props {
+interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resourceCard: RecentResource; // Destructure this into used parameters only
-  onUpdate: Function; // TODO eric: this could use a better name
-  onDuplicateResource: Function;
-  showErrorModal: Function;
-  showConfirmDeleteModal: Function;
+  onResourceUpdate: Function;
 }
 
 interface State {
   showCopyNotebookModal: boolean;
-  renaming: boolean;
+  showRenameModal: boolean;
 }
 
 export const NotebookResourceCard = fp.flow(
   withErrorModal(),
   withConfirmDeleteModal(),
+  withSpinnerOverlay(),
 )(class extends React.Component<Props, State> {
 
     constructor(props: Props) {
       super(props);
       this.state = {
         showCopyNotebookModal: false,
-        renaming: false
+        showRenameModal: false
       };
+    }
+
+    get resourceType(): string {
+      return 'Notebook';
     }
 
     get actions(): Action[] {
@@ -42,12 +45,12 @@ export const NotebookResourceCard = fp.flow(
         {
           displayName: 'Rename',
           onClick: () => {
-            this.setState({renaming: true});
+            this.setState({showRenameModal: true});
           },
         },
         {
           displayName: 'Duplicate',
-          onClick: (resourceCardFns) => this.duplicateNotebook(),
+          onClick: () => this.duplicateNotebook(),
         },
         {
           displayName: 'Copy to another Workspace',
@@ -56,8 +59,7 @@ export const NotebookResourceCard = fp.flow(
         {
           displayName: 'Delete',
           onClick: () => {
-            this.props.showConfirmDeleteModal(this.displayName, 'Notebook',
-              (onComplete) => this.deleteNotebook(onComplete));
+            this.props.showConfirmDeleteModal(this.displayName, this.resourceType, () => this.deleteNotebook());
           },
         },
         {
@@ -89,6 +91,10 @@ export const NotebookResourceCard = fp.flow(
       return date.toDateString().split(' ').slice(1).join(' ');
     }
 
+    fullNotebookName(name) {
+      return !name || /^.+\.ipynb$/.test(name) ? name : `${name}.ipynb`;
+    }
+
     resourceUrl(jupyterLab = false): string {
       const {workspaceNamespace, workspaceFirecloudName, notebook} =
         this.props.resourceCard;
@@ -105,51 +111,48 @@ export const NotebookResourceCard = fp.flow(
       return `${workspacePrefix}/notebooks/preview/${encodeURIComponent(notebook.name)}`;
     }
 
-    async receiveNotebookRename(newName) {
+    receiveNotebookRename(newName) {
       const {resourceCard} = this.props;
-      try {
-        await workspacesApi().renameNotebook(
-          resourceCard.workspaceNamespace,
-          resourceCard.workspaceFirecloudName,
-          {
-            name: resourceCard.notebook.name,
-            newName: this.fullNotebookName(newName)
-          });
-      } catch (error) {
-        console.error(error); // TODO: better error handling
-      } finally {
-        this.setState({renaming: false});
-        this.props.onUpdate();
-      }
+      return workspacesApi().renameNotebook(
+        resourceCard.workspaceNamespace,
+        resourceCard.workspaceFirecloudName,
+        {
+          name: resourceCard.notebook.name,
+          newName: this.fullNotebookName(newName)
+        }).then(() => this.props.onResourceUpdate())
+        .catch(error => console.error(error))
+        .finally(() => {
+          this.setState({showRenameModal: false});
+        })
     }
 
-    async deleteNotebook(onComplete: Function) {
-      workspacesApi().deleteNotebook(
+    duplicateNotebook() {
+      this.props.showSpinner();
+
+      return workspacesApi().cloneNotebook(
         this.props.resourceCard.workspaceNamespace,
         this.props.resourceCard.workspaceFirecloudName,
         this.props.resourceCard.notebook.name)
         .then(() => {
-          onComplete();
-          this.props.onUpdate();
-        });
-    }
-
-    async duplicateNotebook() {
-      workspacesApi().cloneNotebook(
-        this.props.resourceCard.workspaceNamespace,
-        this.props.resourceCard.workspaceFirecloudName,
-        this.props.resourceCard.notebook.name)
-        .then(() => {
-          this.props.onUpdate();
-        }).catch(e => {
-          this.props.onDuplicateResource(false);
+          this.props.onResourceUpdate();
+        })
+        .catch(() => {
           this.props.showErrorModal('Duplicating Notebook Error',
             'Notebook with the same name already exists.');
+        })
+        .finally(() => {
+          this.props.hideSpinner();
         });
     }
 
-    fullNotebookName(name) {
-      return !name || /^.+\.ipynb$/.test(name) ? name : `${name}.ipynb`;
+    deleteNotebook() {
+      return workspacesApi().deleteNotebook(
+        this.props.resourceCard.workspaceNamespace,
+        this.props.resourceCard.workspaceFirecloudName,
+        this.props.resourceCard.notebook.name)
+        .then(() => {
+          this.props.onResourceUpdate();
+        });
     }
 
     render() {
@@ -160,13 +163,13 @@ export const NotebookResourceCard = fp.flow(
           fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
           fromNotebook={this.props.resourceCard.notebook}
           onClose={() => this.setState({showCopyNotebookModal: false})}
-          onCopy={() => this.props.onUpdate()}/>
+          onCopy={() => this.props.onResourceUpdate()}/>
         }
 
-        {this.state.renaming &&
-        <RenameModal type='Notebook'
+        {this.state.showRenameModal &&
+        <RenameModal type={this.resourceType}
                      onRename={(newName) => this.receiveNotebookRename(newName)}
-                     onCancel={() => this.setState({renaming: false})}
+                     onCancel={() => this.setState({showRenameModal: false})}
                      hideDescription={true}
                      oldName={this.props.resourceCard.notebook.name}
                      nameFormat={(name) => this.fullNotebookName(name)}/>

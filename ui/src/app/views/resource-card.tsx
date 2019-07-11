@@ -12,7 +12,7 @@ import {ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
 import {ExportDataSetModal} from 'app/views/export-data-set-modal';
-import {DataSet, Domain, RecentResource} from 'generated/fetch';
+import {DataSet, RecentResource} from 'generated/fetch';
 
 import {Modal, ModalBody, ModalTitle} from 'app/components/modals';
 import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -120,18 +120,6 @@ export class ResourceCard extends React.Component<Props, State> {
       showErrorModal: false,
       dataSetByResourceIdList: []
     };
-  }
-
-  // TODO [1/31/19] This method is only necessary until the parent components
-  //    (notebook-list, cohort-list, conceptSet-list) have been converted and use the
-  //    fetch API models.
-  static castConceptSet(resourceCard: RecentResource): RecentResource {
-    if (resourceCard.conceptSet) {
-      const myTempConceptSet = {...resourceCard.conceptSet,
-        domain: resourceCard.conceptSet.domain as Domain};
-      return {...resourceCard, conceptSet: myTempConceptSet};
-    }
-    return resourceCard;
   }
 
   showErrorModal(title: string, body: string) {

@@ -2,11 +2,9 @@ import {Clickable, MenuItem} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
-import {TextModal} from 'app/components/text-modal';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
-import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
 import * as fp from 'lodash';
 import * as React from 'react';
 
@@ -61,7 +59,7 @@ const defaultProps = {
 
 export interface Action {
   displayName: string;
-  onClick: Function;
+  onClick: () => void;
 }
 
 interface Props {
@@ -86,6 +84,7 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
   // TODO eric: marginTOp this is a modified value
   render() {
     return <React.Fragment>
+
 
       <ResourceCardBase style={{...styles.card, marginTop: defaultProps.marginTop}}
                                data-test-id='card'>

@@ -5,7 +5,11 @@ interface State {
   show: boolean;
   displayName: string;
   resourceType: string;
-  receiveDelete: Function;
+  receiveDelete: () => Promise<void>;
+}
+
+export interface WithConfirmDeleteModalProps {
+  showConfirmDeleteModal: (displayName: string, resourceType: string, receiveDelete: () => Promise<void>) => void;
 }
 
 export const withConfirmDeleteModal = () => {
@@ -23,7 +27,7 @@ export const withConfirmDeleteModal = () => {
         };
       }
 
-      showConfirmDeleteModal(displayName: string, resourceType: string, receiveDelete: Function) {
+      showConfirmDeleteModal(displayName: string, resourceType: string, receiveDelete: () => Promise<void>) {
         this.setState({
           show: true,
           displayName: displayName,
@@ -41,7 +45,7 @@ export const withConfirmDeleteModal = () => {
           {this.state.show && <ConfirmDeleteModal
             resourceName={this.state.displayName}
             resourceType={this.state.resourceType}
-            receiveDelete={() => this.state.receiveDelete(() => this.close())}
+            receiveDelete={() => this.state.receiveDelete().then(() => this.close())}
             closeFunction={() => this.close()} />
           }
 

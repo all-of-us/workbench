@@ -7,6 +7,10 @@ interface State {
   body: string;
 }
 
+export interface WithErrorModalProps {
+  showErrorModal: (title: string, body: string) => void;
+}
+
 export const withErrorModal = () => {
   return (WrappedComponent) => {
     return class ErrorModalWrapper extends React.Component<any, State> {
