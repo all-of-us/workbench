@@ -14,7 +14,9 @@
     "xAppIdValue": "staging-AoU-RW"
   },
   "auth": {
-    "serviceAccountApiUsers": [ "all-of-us-rw-staging@appspot.gserviceaccount.com" ]
+    "serviceAccountApiUsers": [
+      "all-of-us-rw-staging@appspot.gserviceaccount.com"
+    ]
   },
   "cdr": {
     "debugQueries": true
@@ -59,7 +61,7 @@
     "unsafeAllowSelfBypass": false
   },
   "cohortbuilder": {
-    "enableListSearch": false
+    "enableListSearch": true
   },
   "featureFlags": {
     "enableLeoWelder": false,

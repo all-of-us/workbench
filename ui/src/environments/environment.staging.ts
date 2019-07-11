@@ -17,5 +17,5 @@ export const environment: Environment = {
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   enableJupyterLab: false,
   enableDatasetBuilder: true,
-  enableCBListSearch: false,
+  enableCBListSearch: true,
 };
