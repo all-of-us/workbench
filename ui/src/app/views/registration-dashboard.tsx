@@ -162,14 +162,13 @@ export interface RegistrationDashboardProps {
   firstVisitTraining: boolean;
   twoFactorAuthCompleted: boolean;
   dataUseAgreementCompleted: boolean;
-  onBypassStateUpdate: Function;
 }
 
 interface State {
   showRefreshButton: boolean;
   trainingWarningOpen: boolean;
+  bypassActionComplete: boolean;
   bypassInProgress: boolean;
-  waitingForProfileRefresh: boolean;
 }
 
 export class RegistrationDashboard extends React.Component<RegistrationDashboardProps, State> {
@@ -179,20 +178,13 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     this.state = {
       trainingWarningOpen: !props.firstVisitTraining,
       showRefreshButton: false,
+      bypassActionComplete: false,
       bypassInProgress: false,
-      waitingForProfileRefresh: false,
     };
   }
 
   componentDidMount() {
     this.setState({showRefreshButton: false});
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.state.waitingForProfileRefresh) {
-      this.setState({bypassInProgress: false,
-        waitingForProfileRefresh: false});
-    }
   }
 
   getTaskCompletionList(): Array<boolean> {
@@ -255,19 +247,20 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     }
 
     // Call the callback (which refreshes the user's profile).
-    await this.props.onBypassStateUpdate();
-    this.setState({waitingForProfileRefresh: true});
+    this.setState({bypassInProgress: false, bypassActionComplete: true});
   }
 
   render() {
-    const {bypassInProgress, trainingWarningOpen} = this.state;
+    const {bypassActionComplete, bypassInProgress, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
     // todo: move this to the state
     const canUnsafeSelfBypass = serverConfigStore.getValue().unsafeAllowSelfBypass;
 
+    const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
+
     return <div style={styles.registrationPage}
                 data-test-id='registration-dashboard'>
-      {bypassInProgress && <SpinnerOverlay opacity={0.3}/>}
+      {bypassInProgress && <SpinnerOverlay />}
       <div style={styles.mainHeader}>Researcher Workbench</div>
       <div style={{...styles.mainHeader, fontSize: '18px', marginBottom: '1rem'}}>
         <ClrIcon shape='warning-standard' class='is-solid'
@@ -277,14 +270,17 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       {canUnsafeSelfBypass &&
         <div data-test-id='self-bypass'
              style={{...baseStyles.card, ...styles.warningModal}}>
-          [Test environment] Self-service bypass is enabled:&nbsp;
-          {!(this.allTasksCompleted() && betaAccessGranted) &&
-            <Button onClick={() => this.setAllModulesBypassed(true)}
-                    disabled={bypassInProgress}>Bypass all</Button>
-          }
-          {(this.allTasksCompleted() && betaAccessGranted) &&
-            <Button onClick={() => this.setAllModulesBypassed(false)}
-                    disabled={bypassInProgress}>Un-bypass all</Button>
+          {bypassActionComplete &&
+            <span>Bypass action is complete. Reload the page to continue.</span>}
+          {!bypassActionComplete && <span>
+            [Test environment] Self-service bypass is enabled:&nbsp;
+            {anyBypassActionsRemaining &&
+              <Button onClick={() => this.setAllModulesBypassed(true)}
+                      disabled={bypassInProgress}>Bypass all</Button>}
+            {!anyBypassActionsRemaining &&
+              <Button onClick={() => this.setAllModulesBypassed(false)}
+                      disabled={bypassInProgress}>Un-bypass all</Button>}
+          </span>
           }
         </div>
       }
