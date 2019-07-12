@@ -35,12 +35,30 @@ const styles = reactStyles({
     alignItems: 'center',
     justifyContent: 'space-between'
   },
+  saveButton: {
+    height: '1.5rem',
+    borderRadius: '3px',
+    float: 'right',
+  },
+  totalCount: {
+    marginTop: 0,
+    fontSize: '16px',
+    fontWeight: 'bold'
+  },
   totalError: {
     background: '#f7981c',
     color: '#ffffff',
     padding: '0.25rem 0.5rem',
     borderRadius: '5px',
     marginBottom: '0.5rem'
+  },
+  actionIcon: {
+    float: 'right',
+    margin: '0 1rem 0 0',
+    minWidth: 0,
+    padding: 0,
+    color: '#262262',
+    cursor: 'pointer'
   },
   card: {
     background: '#ffffff',
@@ -117,13 +135,12 @@ export const ListOverview = withCurrentWorkspace()(
       this.getTotalCount();
     }
 
-    // componentDidUpdate(prevProps: Readonly<Props>): void {
-    //   if (this.props.update > prevProps.update && !this.hasErrors) {
-    //     // TODO fix below code so it doesn't constantly call setState and crash the browser
-    //     // this.setState({loading: true, error: false});
-    //     // this.getTotalCount();
-    //   }
-    // }
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+      if (this.props.update > prevProps.update && !this.hasErrors) {
+        this.setState({loading: true, error: false});
+        this.getTotalCount();
+      }
+    }
 
     getTotalCount() {
       try {
@@ -187,18 +204,6 @@ export const ListOverview = withCurrentWorkspace()(
     get criteria() {
       const mappedRequest = mapRequest(searchRequestStore.getValue());
       return JSON.stringify(mappedRequest);
-    }
-
-    get unchanged() {
-      const {cohort} = this.state;
-      return this.criteria === cohort.criteria;
-    }
-
-    modalChange(value) {
-      if (!value) {
-        this.cohortForm.reset();
-        this.setState({showConflictError: false, saveError: false});
-      }
     }
 
     saveCohort() {
@@ -276,7 +281,7 @@ export const ListOverview = withCurrentWorkspace()(
       const disableSave = cohort && cohort.criteria === this.criteria;
       const items = [
         {label: 'Save', command: () => this.saveCohort(), disabled: disableSave},
-        {label: 'Save as', command: () => {/* open modal */}},
+        {label: 'Save as', command: () => this.setState({saveModal: true})},
       ];
       const errors = validate({name}, {name: {presence: {allowEmpty: false}}});
       return <React.Fragment>
@@ -284,30 +289,34 @@ export const ListOverview = withCurrentWorkspace()(
           <div style={styles.overviewHeader}>
             <div style={{width: '100%'}}>
               {!!cohort && <React.Fragment>
-                <Menu model={items} popup={true} ref={el => this.dropdown = el} />
-                <Button type='primary' onClick={(event) => this.dropdown.toggle(event)}
+                <Menu appendTo={document.body}
+                  model={items} popup={true} ref={el => this.dropdown = el} />
+                <Button type='primary' style={styles.saveButton}
+                  onClick={(event) => this.dropdown.toggle(event)}
                   disabled={loading || saving || this.hasErrors}>
                   SAVE COHORT <ClrIcon shape='caret down' />
                 </Button>
               </React.Fragment>}
               {!cohort && <Button type='primary'
-                onClick={() => {/* open modal */}}
+                onClick={() => this.setState({saveModal: true})}
                 style={{float: 'right', margin: 0}}
                 disabled={loading || this.hasErrors}>CREATE COHORT</Button>}
-              <Clickable onClick={() => this.navigateTo('notebook')} disabled>
+              <Clickable style={styles.actionIcon}
+                onClick={() => this.navigateTo('notebook')} disabled>
                 <ClrIcon shape='export' className='is-solid' size={30} title='Export to notebook' />
               </Clickable>
-              <Clickable onClick={() => this.setState({deleting: true})}
-                 disabled={loading || !cohort}>
+              <Clickable style={styles.actionIcon} disabled={loading || !cohort}
+                onClick={() => this.setState({deleting: true})}>
                 <ClrIcon shape='trash' className='is-solid' size={30} title='Delete cohort' />
               </Clickable>
-              <Clickable onClick={() => this.navigateTo('review')} disabled={loading || !cohort}>
+              <Clickable style={styles.actionIcon} disabled={loading || !cohort}
+                onClick={() => this.navigateTo('review')}>
                 <ClrIcon shape='copy' className='is-solid' size={30}
                   title='Review participant level data' />
               </Clickable>
             </div>
-            <h2 style={{fontSize: '16px', fontWeight: 'bold'}}>
-              Total Count:
+            <h2 style={styles.totalCount}>
+              Total Count: &nbsp;
               {loading && !this.hasTemporalError && <Spinner size={16} />}
               {!loading && !this.hasErrors && total !== undefined &&
                 <span>{total.toLocaleString()}</span>
@@ -335,11 +344,11 @@ export const ListOverview = withCurrentWorkspace()(
                 Results By Gender, Age Range, and Race
                 <ClrIcon shape='sort-by'
                   className={stackChart ? 'is-info' : ''}
-                  onClick={this.toggleChartMode()} />
+                  onClick={() => this.toggleChartMode()} />
               </div>
               <div style={{padding: '0.5rem 0.75rem'}}>
                 {chartData.size &&
-                <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
+                  <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
               </div>
             </div>
           </div>}
@@ -347,7 +356,7 @@ export const ListOverview = withCurrentWorkspace()(
         {saveModal && <Modal>
           <ModalTitle>Save New Cohort</ModalTitle>
           <ModalBody>
-            <TextInput value={name} placeholder='Cohort Name'
+            <TextInput style={{marginBottom: '1rem'}} value={name} placeholder='Cohort Name'
               onChange={(v) => this.setState({name: v, nameTouched: true})} />
             <ValidationError>
               {summarizeErrors(nameTouched && errors && errors.name)}
