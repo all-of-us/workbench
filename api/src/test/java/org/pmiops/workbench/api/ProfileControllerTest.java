@@ -867,14 +867,13 @@ public class ProfileControllerTest {
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
     config.firecloud.billingRetryCount = 2;
     config.firecloud.registeredDomainName = "";
-    config.access.enableEraCommons = false; // todo: this line <-
     config.access.enableComplianceTraining = false;
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
     // All access modules are enabled for these tests. So completing any one module should maintain
     // UNREGISTERED status.
     config.access.enableComplianceTraining = true;
     config.access.enableBetaAccess = true;
-    config.access.enableEraCommons = true; // todo: this duplicates the line above
+    config.access.enableEraCommons = true;
     config.access.enableDataUseAgreement = true;
     return config;
   }
