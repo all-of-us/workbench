@@ -96,4 +96,7 @@
   <include file="changelog/db.changelog-86-drop-tos.xml"/>
   <include file="changelog/db.changelog-87-add-survey-concept-set.xml"/>
   <include file="changelog/db.changelog-88-published-workspaces.xml"/>
+  <include file="changelog/db.changelog-89-add-data-use-agreement-signed-version.xml"/>
+
+  <!-- Note: to update the DB locally, run the following: todo: add commands here-->
 </databaseChangeLog>

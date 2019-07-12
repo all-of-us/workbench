@@ -18,7 +18,7 @@ describe('DataUseAgreement', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should make a request with the DataUseAgreement version', () => {
+  it('should submit DataUseAgreement acceptance with version number', () => {
     const wrapper = component();
     const spy = jest.spyOn(profileApi(), 'submitDataUseAgreement');
     expect(wrapper.find('[data-test-id="submit-dua-button"]').prop('disabled')).toBeTruthy();

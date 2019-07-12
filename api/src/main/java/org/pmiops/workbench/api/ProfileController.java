@@ -509,8 +509,8 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> submitDataUseAgreement() {
-    User user = userService.submitDataUseAgreement();
+  public ResponseEntity<Profile> submitDataUseAgreement(Integer dataUseAgreementSignedVersion) {
+    User user = userService.submitDataUseAgreement(dataUseAgreementSignedVersion);
     return getProfileResponse(saveUserWithConflictHandling(user));
   }
 
