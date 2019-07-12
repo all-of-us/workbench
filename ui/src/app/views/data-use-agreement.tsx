@@ -212,8 +212,7 @@ const DataUseAgreementText = () => {
 };
 
 const DuaTextInput = (props) => {
-  // Don't propagate test IDs to the rendered child component.
-  // delete props['data-test-id']; todo: remove this from other places and run tests
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
   return <TextInput {...fp.omit(['data-test-id'], props)}
                     style={{
                       padding: '0 1ex',

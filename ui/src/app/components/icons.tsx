@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import colors from 'app/styles/colors';
@@ -24,8 +25,8 @@ export const styles = {
 };
 
 export const ClrIcon = ({className = '', ...props}) => {
-  delete props['data-test-id'];
-  return React.createElement('clr-icon', {class: className, ...props});
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  return React.createElement('clr-icon', {class: className, ...fp.omit(['data-test-id'], props)});
 };
 
 export const InfoIcon = ({style = {}, ...props}) =>
