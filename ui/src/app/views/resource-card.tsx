@@ -475,7 +475,7 @@ export class ResourceCard extends React.Component<Props, State> {
 
     switch (this.resourceType) {
       case ResourceType.COHORT: {
-        return `${workspacePrefix}/cohorts/${cohort.id}/review`;
+        return `${workspacePrefix}/cohorts/build?cohortId=${cohort.id}`;
       }
       case ResourceType.CONCEPT_SET: {
         return `${workspacePrefix}/concepts/sets/${conceptSet.id}`;
