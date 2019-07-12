@@ -5,7 +5,7 @@ import * as React from 'react';
 
 const styles = reactStyles({
   overlay: {
-    backgroundColor: 'rgba(200, 200, 200, 0)',
+    backgroundColor: new Color(colors.light).alpha(0).toString(),
     position: 'absolute', top: 0, left: 0, bottom: 0, right: 0,
     display: 'flex', justifyContent: 'center', alignItems: 'center',
     zIndex: 1
