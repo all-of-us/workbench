@@ -3,7 +3,7 @@ import {Component, Input} from '@angular/core';
 import {
   Button
 } from 'app/components/buttons';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 
 import * as React from 'react';
@@ -11,6 +11,8 @@ import * as React from 'react';
 const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
   'omop-common-data-model-and-standardized-vocabularies/';
 const OMOPDataSetLink = 'https://www.ohdsi.org/data-standardization/the-common-data-model/';
+
+const notReachedSelectorColor = colorWithWhiteness(colors.dark, 0.4);
 
 export const panels = [
   {
@@ -98,7 +100,7 @@ const styles = reactStyles({
     bottom: 0,
     right: 0,
     left: 0,
-    backgroundColor: '#313131',
+    backgroundColor: colors.dark,
     opacity: .8,
     zIndex: 1040,
   },
@@ -137,7 +139,7 @@ const styles = reactStyles({
     flexDirection: 'row'
   },
   circle: {
-    border: '2px solid #8C9BA5',
+    border: `2px solid ${notReachedSelectorColor}`,
     borderRadius: '50%',
     height: '21.92px',
     width: '21.92px',
@@ -159,7 +161,7 @@ const styles = reactStyles({
     display: 'inline-block'
   },
   connector: {
-    border: '2px solid #8C9BA5',
+    border: `2px solid ${notReachedSelectorColor}`,
     boxSizing: 'border-box',
     height: '3px',
     width: '107px',
@@ -177,7 +179,7 @@ const styles = reactStyles({
     boxSizing: 'border-box',
     height: '2px',
     width: '90%',
-    border: '0.5px solid #FFFFFF',
+    border: `0.5px solid ${colors.white}`,
     boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
     margin: 'auto'
   },
@@ -241,11 +243,11 @@ const completedStyles = {
   circleCompleted: {
     ...styles.circle,
     left: '0px',
-    border: '2px solid #2691D0',
+    border: `2px solid ${colors.secondary}`,
   },
   connectorCompleted: {
     ...styles.connector,
-    border: '2px solid #2691D0'
+    border: `2px solid ${colors.secondary}`
   }
 };
 

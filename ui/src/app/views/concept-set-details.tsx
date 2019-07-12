@@ -67,7 +67,7 @@ const ConceptSetMenu: React.FunctionComponent<{
   >
     <Clickable  data-test-id='workspace-menu'>
       <ClrIcon shape='ellipsis-vertical' size={21}
-               style={{color: '#216FB4', marginLeft: -9,
+               style={{color: colors.accent, marginLeft: -9,
                  cursor: 'pointer'}}/>
     </Clickable>
   </PopupTrigger>;

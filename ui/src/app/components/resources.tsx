@@ -3,6 +3,7 @@ import * as React from 'react';
 import {Clickable, MenuItem} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {switchCase} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {environment} from 'environments/environment';
@@ -71,8 +72,8 @@ export const ResourceCardMenu: React.FunctionComponent<{
   >
     <Clickable disabled={disabled} data-test-id='resource-menu'>
       <ClrIcon shape='ellipsis-vertical' size={21}
-               style={{color: disabled ? '#9B9B9B' : '#2691D0', marginLeft: -9,
-                 cursor: disabled ? 'auto' : 'pointer'}}/>
+               style={{color: disabled ? colorWithWhiteness(colors.dark, 0.6) : colors.accent,
+                 marginLeft: -9, cursor: disabled ? 'auto' : 'pointer'}}/>
     </Clickable>
   </PopupTrigger>;
 };

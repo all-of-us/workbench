@@ -1,12 +1,15 @@
 import {reactStyles, withStyle} from 'app/utils';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
+
+const cardBorderColor = colorWithWhiteness(colors.dark, 0.6);
 
 export const baseStyles = reactStyles({
   card: {
     padding: '1rem',
     borderRadius: '0.2rem',
-    boxShadow: '0 0.125rem 0.125rem 0 #d7d7d7',
-    backgroundColor: '#fff',
-    border: '1px solid #d7d7d7',
+    boxShadow: `0 0.125rem 0.125rem 0 ${cardBorderColor}`,
+    backgroundColor: colors.white,
+    border: `1px solid ${cardBorderColor}`,
     display: 'flex',
     flexDirection: 'column',
     margin: '0 1rem 1rem 0'

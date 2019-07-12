@@ -9,6 +9,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
@@ -23,7 +24,7 @@ import {validate} from 'validate.js';
 
 const styles = reactStyles({
   label: {
-    color: '#000',
+    color: colors.primary,
     paddingLeft: '0.5rem',
     lineHeight: '19px',
     fontSize: '14px',

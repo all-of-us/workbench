@@ -110,7 +110,7 @@ export class StigmatizatonPage extends React.Component<{}, {}> {
       <ol style={styles.list}>
         {ListText.map(({header, text}, index) => {
           return  <li key={index} style={{marginTop: '1rem'}}>
-             <span style={{...styles.text, 'fontWeight': 600, 'color': '#262262'}}>
+             <span style={{...styles.text, 'fontWeight': 600, 'color': colors.primary}}>
                {header}
              </span>
              <span style={{...styles.text, marginLeft: '0.3rem'}}>

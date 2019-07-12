@@ -8,22 +8,20 @@ import Switch from 'react-switch';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withStyle} from 'app/utils/index';
 
-export const styles = {
-  unsuccessfulInput: {
-    backgroundColor: '#FCEFEC',
-    borderColor: '#F68D76'
-  },
+export const inputBorderColor = colorWithWhiteness(colors.dark, 0.6);
 
+export const styles = {
   successfulInput: {
-    borderColor: '#7AC79B'
+    borderColor: colors.success
   },
 
   error: {
     padding: '0 0.5rem',
     fontWeight: 600,
-    color: '#2F2E7E',
+    color: colors.primary,
     marginTop: '0.2rem',
     width: '90%'
   },
@@ -33,9 +31,10 @@ export const styles = {
     padding: '.25rem',
     float: 'right' as 'right',
     marginTop: 0,
-    background: '#f5dbd9',
-    color: '#565656',
-    border: '1px solid #ebafa6',
+    background: colorWithWhiteness(colors.danger, 0.9),
+    color: colors.primary,
+    border: `1px solid ${colors.danger}`,
+    borderRadius: '2px',
     display: 'flex' as 'flex',
     flexDirection: 'row' as 'row',
     fontSize: '13px'
@@ -58,7 +57,7 @@ export const ValidationError = ({children}) => {
   }
   return <div
     style={{
-      color: '#c72314',
+      color: colors.danger,
       fontSize: 10, fontWeight: 500, textTransform: 'uppercase',
       marginLeft: '0.5rem', marginTop: '0.25rem'
     }}
@@ -75,10 +74,10 @@ export const TextInput = React.forwardRef(({style = {}, onChange, invalid = fals
     type='text'
     style={{
       width: '100%', height: '1.5rem',
-      borderColor: '#c5c5c5', borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
+      borderColor: inputBorderColor, borderWidth: 1,
+      borderStyle: 'solid', borderRadius: 3,
       padding: '0 0.5rem',
-      backgroundColor: '#fff',
-      ...(invalid ? styles.unsuccessfulInput : {}),
+      backgroundColor: colors.white,
       ...style
     }}
   />;
@@ -103,10 +102,9 @@ export const TextArea = ({style = {}, onChange, invalid = false, ...props}) => {
     onChange={onChange ? (e => onChange(e.target.value)) : undefined}
     style={{
       width: '100%',
-      borderColor: '#c5c5c5', borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
+      borderColor: inputBorderColor, borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
       padding: '0.25rem 0.5rem',
-      backgroundColor: '#fff',
-      ...(invalid ? styles.unsuccessfulInput : {}),
+      backgroundColor: colors.white,
       ...style
     }}
   />;
@@ -165,7 +163,7 @@ export class DatePicker extends React.Component<
         width: '100%', height: '1.5rem',
         border: 0,
         padding: '0',
-        color: '#565656', background: 'transparent',
+        color: colors.dark, background: 'transparent',
         ...(disabled ? {opacity: .5} : {}),
       }}
     >
@@ -190,7 +188,7 @@ export class DatePicker extends React.Component<
         <Clickable style={{display: 'flex', alignItems: 'center', flex: 1,
           ...(disabled ? {cursor: 'not-allowed'} : {})}} disabled={disabled}>
           <ClrIcon
-            style={{flex: 'none', marginLeft: '4px', color: '#216FB4'}}
+            style={{flex: 'none', marginLeft: '4px', color: colors.accent}}
             shape='calendar'
             size={20} />
         </Clickable>
