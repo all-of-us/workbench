@@ -4,10 +4,6 @@ threadsafe: true
 default_expiration: "2m"
 
 handlers:
-  # TODO(calbach): Remove once verified, see RW-2016.
-- url: /.well-known/pki-validation/gsdv.txt
-  static_files: dist/assets/gsdv.txt
-  upload: dist/assets/gsdv.txt
 - url: /(.*\.(css|eot|gz|html|ico|jpg|jpeg|js|map|mp4|png|svg|ttf|woff|woff2))
   static_files: dist/\1
   upload: dist/(.*)
