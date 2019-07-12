@@ -7,11 +7,11 @@ import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {mapRequest} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
+import {TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {
   currentCohortStore,
   currentWorkspaceStore,
@@ -24,7 +24,6 @@ import {Cohort, TemporalTime} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import {Menu} from 'primereact/menu';
 import * as React from 'react';
-import {validate} from 'validate.js';
 
 const COHORT_TYPE = 'AoU_Discover';
 
@@ -74,7 +73,16 @@ const styles = reactStyles({
     fontSize: '13px',
     borderBottom: 'none',
     padding: '0.5rem 0.75rem',
-  }
+  },
+  error: {
+    background: '#f5dbd9',
+    color: '#565656',
+    fontSize: '11px',
+    border: '1px solid #ebafa6',
+    borderRadius: '3px',
+    marginBottom: '0.25rem',
+    padding: '3px 5px'
+  },
 });
 
 interface Props {
@@ -279,11 +287,11 @@ export const ListOverview = withCurrentWorkspace()(
       const {cohort, chartData, deleting, error, loading, saveModal, name, description, nameTouched,
         saving, stackChart, total} = this.state;
       const disableSave = cohort && cohort.criteria === this.criteria;
+      const invalid = nameTouched && !name;
       const items = [
         {label: 'Save', command: () => this.saveCohort(), disabled: disableSave},
         {label: 'Save as', command: () => this.setState({saveModal: true})},
       ];
-      const errors = validate({name}, {name: {presence: {allowEmpty: false}}});
       return <React.Fragment>
         <div>
           <div style={styles.overviewHeader}>
@@ -354,27 +362,21 @@ export const ListOverview = withCurrentWorkspace()(
           </div>}
         </div>
         {saveModal && <Modal>
-          <ModalTitle>Save New Cohort</ModalTitle>
-          <ModalBody>
-            <TextInput style={{marginBottom: '1rem'}} value={name} placeholder='Cohort Name'
+          <ModalTitle style={invalid ? {marginBottom: 0} : {}}>Save Cohort as</ModalTitle>
+          <ModalBody style={{marginTop: '0.2rem'}}>
+            {invalid && <div style={styles.error}>Cohort name is required</div>}
+            <TextInput style={{marginBottom: '0.5rem'}} value={name} placeholder='COHORT NAME'
               onChange={(v) => this.setState({name: v, nameTouched: true})} />
-            <ValidationError>
-              {summarizeErrors(nameTouched && errors && errors.name)}
-            </ValidationError>
-            <TextArea value={description} placeholder='Description'
+            <TextArea value={description} placeholder='DESCRIPTION'
               onChange={(v) => this.setState({description: v})}/>
           </ModalBody>
           <ModalFooter>
-            <Button type='link' onClick={() => this.setState({
+            <Button style={{color: '#262262'}} type='link' onClick={() => this.setState({
               saveModal: false,
               name: undefined,
               description: undefined
-            })}>
-              CANCEL
-            </Button>
-            <Button type='primary' onClick={() => this.submit()}>
-              SAVE COHORT
-            </Button>
+            })}>CANCEL</Button>
+            <Button type='primary' disabled={!name} onClick={() => this.submit()}>SAVE</Button>
           </ModalFooter>
         </Modal>}
         {deleting && <ConfirmDeleteModal closeFunction={this.cancel}
