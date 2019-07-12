@@ -87,9 +87,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceService workspaceService;
   private final WorkspaceMapper workspaceMapper;
   private final CdrVersionDao cdrVersionDao;
-  private final CohortDao cohortDao;
-  private final CohortFactory cohortFactory;
-  private final ConceptSetDao conceptSetDao;
   private final UserDao userDao;
   private Provider<User> userProvider;
   private final FireCloudService fireCloudService;
@@ -105,9 +102,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceService workspaceService,
       WorkspaceMapper workspaceMapper,
       CdrVersionDao cdrVersionDao,
-      CohortDao cohortDao,
-      CohortFactory cohortFactory,
-      ConceptSetDao conceptSetDao,
       UserDao userDao,
       Provider<User> userProvider,
       FireCloudService fireCloudService,
@@ -120,9 +114,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.workspaceMapper = workspaceMapper;
     this.cdrVersionDao = cdrVersionDao;
-    this.cohortDao = cohortDao;
-    this.cohortFactory = cohortFactory;
-    this.conceptSetDao = conceptSetDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;

@@ -1,7 +1,8 @@
-package org.pmiops.workbench.db.dao;
+package org.pmiops.workbench.conceptset;
 
 import java.util.List;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
