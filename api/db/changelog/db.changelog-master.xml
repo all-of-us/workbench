@@ -98,5 +98,10 @@
   <include file="changelog/db.changelog-88-published-workspaces.xml"/>
   <include file="changelog/db.changelog-89-add-data-use-agreement-signed-version.xml"/>
 
-  <!-- Note: to update the DB locally, run the following: todo: add commands here-->
+  <!--
+  Note: to update the DB locally, do the following:
+  - Migrate schema changes: `./project.rb run-local-all-migrations`
+  - Restart the local API service to generate the new API files.
+  - Restart the local UI service to generate the API files.
+  -->
 </databaseChangeLog>
