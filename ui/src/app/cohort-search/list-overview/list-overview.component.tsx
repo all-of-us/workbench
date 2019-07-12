@@ -7,11 +7,11 @@ import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {mapRequest} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
-
+import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {
   currentCohortStore,
   currentWorkspaceStore,
@@ -19,10 +19,12 @@ import {
   navigateByUrl,
   urlParamsStore
 } from 'app/utils/navigation';
+import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
 import {Cohort, TemporalTime} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import {Menu} from 'primereact/menu';
 import * as React from 'react';
+import {validate} from 'validate.js';
 
 const COHORT_TYPE = 'AoU_Discover';
 
@@ -67,6 +69,10 @@ interface State {
   loading: boolean;
   total: number;
   chartData: any;
+  saveModal: boolean;
+  name: string;
+  description: string;
+  nameTouched: boolean;
   saving: boolean;
   deleting: boolean;
   stackChart: boolean;
@@ -86,6 +92,10 @@ export const ListOverview = withCurrentWorkspace()(
         loading: false,
         total: undefined,
         chartData: undefined,
+        saveModal: false,
+        name: undefined,
+        description: undefined,
+        nameTouched: false,
         saving: false,
         deleting: false,
         stackChart: false,
@@ -261,12 +271,14 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     render() {
-      const {cohort, chartData, deleting, error, loading, saving, stackChart, total} = this.state;
+      const {cohort, chartData, deleting, error, loading, saveModal, name, description, nameTouched,
+        saving, stackChart, total} = this.state;
       const disableSave = cohort && cohort.criteria === this.criteria;
       const items = [
         {label: 'Save', command: () => this.saveCohort(), disabled: disableSave},
         {label: 'Save as', command: () => {/* open modal */}},
       ];
+      const errors = validate({name}, {name: {presence: {allowEmpty: false}}});
       return <React.Fragment>
         <div>
           <div style={styles.overviewHeader}>
@@ -332,6 +344,30 @@ export const ListOverview = withCurrentWorkspace()(
             </div>
           </div>}
         </div>
+        {saveModal && <Modal>
+          <ModalTitle>Save New Cohort</ModalTitle>
+          <ModalBody>
+            <TextInput value={name} placeholder='Cohort Name'
+              onChange={(v) => this.setState({name: v, nameTouched: true})} />
+            <ValidationError>
+              {summarizeErrors(nameTouched && errors && errors.name)}
+            </ValidationError>
+            <TextArea value={description} placeholder='Description'
+              onChange={(v) => this.setState({description: v})}/>
+          </ModalBody>
+          <ModalFooter>
+            <Button type='link' onClick={() => this.setState({
+              saveModal: false,
+              name: undefined,
+              description: undefined
+            })}>
+              CANCEL
+            </Button>
+            <Button type='primary' onClick={() => this.submit()}>
+              SAVE COHORT
+            </Button>
+          </ModalFooter>
+        </Modal>}
         {deleting && <ConfirmDeleteModal closeFunction={this.cancel}
           resourceType='cohort'
           receiveDelete={this.delete}
