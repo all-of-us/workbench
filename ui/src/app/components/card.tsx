@@ -1,5 +1,5 @@
-import {reactStyles, withStyle} from 'app/utils';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles, withStyle} from 'app/utils';
 
 const cardBorderColor = colorWithWhiteness(colors.dark, 0.6);
 

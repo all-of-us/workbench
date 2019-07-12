@@ -644,8 +644,9 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                     Refresh Preview
                   </Clickable>
               </div>
-              <div style={{color: colors.primary, fontSize: '14px'}}>A visualization of your data table
-                based on the variable and value you selected above
+              <div style={{color: colors.primary, fontSize: '14px'}}>
+                A visualization of your data table based on the variable
+                and value you selected above
               </div>
               </div>
               <TooltipTrigger data-test-id='save-tooltip'

@@ -9,7 +9,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors'
+import colors from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
