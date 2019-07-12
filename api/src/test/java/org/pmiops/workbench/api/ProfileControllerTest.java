@@ -237,7 +237,7 @@ public class ProfileControllerTest {
   public void testSubmitDataUseAgreement_success() throws Exception {
     createUser();
     assertThat(profileController.submitDataUseAgreement(0).getStatusCode())
-            .isEqualTo(HttpStatus.OK);
+        .isEqualTo(HttpStatus.OK);
   }
 
   @Test
