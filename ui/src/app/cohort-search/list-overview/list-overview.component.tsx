@@ -7,6 +7,7 @@ import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {mapRequest} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
@@ -24,6 +25,37 @@ import {Menu} from 'primereact/menu';
 import * as React from 'react';
 
 const COHORT_TYPE = 'AoU_Discover';
+
+const styles = reactStyles({
+  overviewHeader: {
+    display: 'flex',
+    flexFlow: 'row wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  totalError: {
+    background: '#f7981c',
+    color: '#ffffff',
+    padding: '0.25rem 0.5rem',
+    borderRadius: '5px',
+    marginBottom: '0.5rem'
+  },
+  card: {
+    background: '#ffffff',
+    padding: '0.25rem 0.5rem',
+    borderBottom: 'none',
+    borderTop: 'none',
+    borderRadius: '3px',
+    marginBottom: 0,
+    marginTop: 0,
+  },
+  cardHeader: {
+    color: '#302C71',
+    fontSize: '13px',
+    borderBottom: 'none',
+    padding: '0.5rem 0.75rem',
+  }
+});
 
 interface Props {
   searchRequest: any;
@@ -72,15 +104,16 @@ export const ListOverview = withCurrentWorkspace()(
       if (currentCohortStore.getValue()) {
         this.setState({cohort: currentCohortStore.getValue()});
       }
+      this.getTotalCount();
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (this.props.update > prevProps.update && !this.hasErrors) {
-        // TODO fix below code so it doesn't constantly call setState and crash the browser
-        // this.setState({loading: true, error: false});
-        // this.getTotalCount();
-      }
-    }
+    // componentDidUpdate(prevProps: Readonly<Props>): void {
+    //   if (this.props.update > prevProps.update && !this.hasErrors) {
+    //     // TODO fix below code so it doesn't constantly call setState and crash the browser
+    //     // this.setState({loading: true, error: false});
+    //     // this.getTotalCount();
+    //   }
+    // }
 
     getTotalCount() {
       try {
@@ -236,8 +269,8 @@ export const ListOverview = withCurrentWorkspace()(
       ];
       return <React.Fragment>
         <div>
-          <div className='overview-header'>
-            <div className='actions-container'>
+          <div style={styles.overviewHeader}>
+            <div style={{width: '100%'}}>
               {!!cohort && <React.Fragment>
                 <Menu model={items} popup={true} ref={el => this.dropdown = el} />
                 <Button type='primary' onClick={(event) => this.dropdown.toggle(event)}
@@ -261,38 +294,38 @@ export const ListOverview = withCurrentWorkspace()(
                   title='Review participant level data' />
               </Clickable>
             </div>
-            <h2 className='count-header' id='total-count'>
+            <h2 style={{fontSize: '16px', fontWeight: 'bold'}}>
               Total Count:
-              {loading && !this.hasTemporalError &&
-                <span className='spinner spinner-sm'>Loading...</span>
-              }
+              {loading && !this.hasTemporalError && <Spinner size={16} />}
               {!loading && !this.hasErrors && total !== undefined &&
-                <span className='count-header'>{total.toLocaleString()}</span>
+                <span>{total.toLocaleString()}</span>
               }
-              {this.hasErrors && <span>-- <ClrIcon shape='warning-standard' size={18} /></span>}
+              {this.hasErrors && <span>
+                -- <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
+              </span>}
             </h2>
           </div>
-          {error && !this.hasErrors && <div className='total-error'>
+          {error && !this.hasErrors && <div style={styles.totalError}>
             <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
             Sorry, the request cannot be completed.
           </div>}
           {!this.hasErrors && !loading && !!chartData && total && <div>
-            <div className='card bg-faded'>
-              <div className='card-header header-text'>
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
                 Results by Gender
               </div>
-              <div className='card-block'>
+              <div style={{padding: '0.5rem 0.75rem'}}>
                 {chartData.size && <GenderChart data={chartData} />}
               </div>
             </div>
-            <div className='card bg-faded'>
-              <div className='card-header header-text'>
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
                 Results By Gender, Age Range, and Race
                 <ClrIcon shape='sort-by'
                   className={stackChart ? 'is-info' : ''}
                   onClick={this.toggleChartMode()} />
               </div>
-              <div className='card-block'>
+              <div style={{padding: '0.5rem 0.75rem'}}>
                 {chartData.size &&
                 <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
               </div>
