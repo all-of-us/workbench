@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
+import org.owasp.html.HtmlPolicyBuilder;
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -25,6 +28,25 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class NotebooksServiceImpl implements NotebooksService {
+
+  private static final PolicyFactory PREVIEW_SANITIZER =
+      Sanitizers.FORMATTING
+          .and(Sanitizers.BLOCKS)
+          .and(Sanitizers.LINKS)
+          .and(Sanitizers.STYLES)
+          .and(Sanitizers.TABLES)
+          .and(
+              new HtmlPolicyBuilder()
+                  // nbconvert renders styles into a style tag; unfortunately the OWASP library does
+                  // not provide a good way of sanitizing this. This may render our iframe
+                  // vulnerable to injection if vulnerabilities in nbconvert allow for custom style
+                  // tag injection.
+                  .allowTextIn("style")
+                  .allowElements("style")
+                  // Allow id/class in order to interact with the style tag.
+                  .allowAttributes("id", "class")
+                  .globally()
+                  .toFactory());
 
   private final Clock clock;
   private final CloudStorageService cloudStorageService;
@@ -187,8 +209,8 @@ public class NotebooksServiceImpl implements NotebooksService {
     // of serializing it through Gson which it will do for Strings.
     // The default Gson serializer does not work since it strips out some null fields
     // which are needed for nbconvert
-    return fireCloudService.staticNotebooksConvert(
-        getNotebookContents(bucketName, notebookName).toString().getBytes());
+    byte[] contents = getNotebookContents(bucketName, notebookName).toString().getBytes();
+    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticNotebooksConvert(contents));
   }
 
   private GoogleCloudLocators getNotebookLocators(

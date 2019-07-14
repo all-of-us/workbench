@@ -337,6 +337,7 @@ dependencies {
   compile 'com.google.cloud:google-cloud-storage:1.51.0'
   compile 'com.google.code.gson:gson:2.8.5'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
+  compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1'
   compile 'com.squareup.okhttp:okhttp:2.7.5'
   compile 'com.squareup.okhttp:logging-interceptor:2.7.5'
   compile 'joda-time:joda-time:2.10'
