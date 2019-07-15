@@ -117,7 +117,7 @@ export class AdminUserBypass extends React.Component<
         </div>}>
       <Button type='secondaryLight' data-test-id='bypass-popup'>
         <ClrIcon shape={open ? 'caret down' : 'caret right'} size={19}
-                 style={{color: '#0077b7', marginRight: '1px', cursor: 'pointer'}}/>
+                 style={{color: colors.accent, marginRight: '1px', cursor: 'pointer'}}/>
         Bypass
       </Button>
     </PopupTrigger>;

@@ -7,7 +7,7 @@ export const styles = {
     color: colors.accent,
     height: '22px',
     width: '22px',
-    fill: '#2691D0'
+    fill: colors.accent
   },
 
   successIcon: {

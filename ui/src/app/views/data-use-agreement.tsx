@@ -7,7 +7,7 @@ import {
 import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {profileApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
@@ -279,7 +279,8 @@ export const DataUseAgreement = withUserProfile()(
         <div style={{height: '1rem'}}/>
         <div style={{
           display: 'flex', flexDirection: 'column', borderRadius: '1rem',
-          backgroundColor: '#D4D3E0', padding: '1rem', alignItems: 'flex-start'
+          backgroundColor: colorWithWhiteness(colors.primary, 0.8),
+          padding: '1rem', alignItems: 'flex-start'
         }}>
           <SecondHeader style={{marginTop: 0}}>Agreement:</SecondHeader>
           <div style={{marginTop: '0.5rem', fontWeight: 600}}>I

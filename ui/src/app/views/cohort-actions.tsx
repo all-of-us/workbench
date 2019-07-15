@@ -138,7 +138,7 @@ const CohortActions = withCurrentWorkspace()(
           <div style={{marginTop: '0.25rem'}}>
             The cohort
              <a
-               style={{color: '#5DAEE1', margin: '0 4px'}}
+               style={{color: colors.accent, margin: '0 4px'}}
                onClick={() => this.navigateTo('cohort')}>
                 {cohort.name}
              </a>

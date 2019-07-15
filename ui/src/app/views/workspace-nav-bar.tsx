@@ -39,7 +39,7 @@ const styles = reactStyles({
   dropdownHeader: {
     fontSize: 12,
     lineHeight: '30px',
-    color: '#262262',
+    color: colors.primary,
     fontWeight: 600,
     paddingLeft: 12,
     width: 160

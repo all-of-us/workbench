@@ -21,7 +21,7 @@ export const styles = {
   },
   h4: {
     fontWeight: 300,
-    color: '#000',
+    color: colors.primary,
   },
   formLabel: {
     color: colors.primary,
