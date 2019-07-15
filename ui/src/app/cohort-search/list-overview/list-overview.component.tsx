@@ -32,10 +32,12 @@ const styles = reactStyles({
     display: 'flex',
     flexFlow: 'row wrap',
     alignItems: 'center',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   saveButton: {
     height: '1.5rem',
+    fontSize: '12px',
+    padding: '0 0.75rem',
     borderRadius: '3px',
     float: 'right',
   },
@@ -59,12 +61,20 @@ const styles = reactStyles({
     color: '#262262',
     cursor: 'pointer'
   },
-  card: {
-    background: '#ffffff',
-    padding: '0.25rem 0.5rem',
+  disabled: {
+    opacity: 0.4,
+    cursor: 'not-allowed',
+    pointerEvents: 'none'
+  },
+  cardContainer: {
+    boxShadow: '0 0.125rem 0 0 #d7d7d7',
+    border: '1px solid #d7d7d7',
     borderBottom: 'none',
     borderTop: 'none',
     borderRadius: '3px',
+  },
+  card: {
+    background: '#ffffff',
     marginBottom: 0,
     marginTop: 0,
   },
@@ -286,6 +296,7 @@ export const ListOverview = withCurrentWorkspace()(
     render() {
       const {cohort, chartData, deleting, error, loading, saveModal, name, description, nameTouched,
         saving, stackChart, total} = this.state;
+      const disableIcon = loading || !cohort ;
       const disableSave = cohort && cohort.criteria === this.criteria;
       const invalid = nameTouched && !name;
       const items = [
@@ -307,17 +318,17 @@ export const ListOverview = withCurrentWorkspace()(
               </React.Fragment>}
               {!cohort && <Button type='primary'
                 onClick={() => this.setState({saveModal: true})}
-                style={{float: 'right', margin: 0}}
+                style={styles.saveButton}
                 disabled={loading || this.hasErrors}>CREATE COHORT</Button>}
-              <Clickable style={styles.actionIcon}
+              <Clickable style={{...styles.actionIcon, ...styles.disabled}}
                 onClick={() => this.navigateTo('notebook')} disabled>
                 <ClrIcon shape='export' className='is-solid' size={30} title='Export to notebook' />
               </Clickable>
-              <Clickable style={styles.actionIcon} disabled={loading || !cohort}
+              <Clickable style={{...styles.actionIcon, ...(disableIcon ? styles.disabled : {})}}
                 onClick={() => this.setState({deleting: true})}>
                 <ClrIcon shape='trash' className='is-solid' size={30} title='Delete cohort' />
               </Clickable>
-              <Clickable style={styles.actionIcon} disabled={loading || !cohort}
+              <Clickable style={{...styles.actionIcon, ...(disableIcon ? styles.disabled : {})}}
                 onClick={() => this.navigateTo('review')}>
                 <ClrIcon shape='copy' className='is-solid' size={30}
                   title='Review participant level data' />
@@ -338,7 +349,7 @@ export const ListOverview = withCurrentWorkspace()(
             <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
             Sorry, the request cannot be completed.
           </div>}
-          {!this.hasErrors && !loading && !!chartData && total && <div>
+          {!this.hasErrors && !loading && !!chartData && total && <div style={styles.cardContainer}>
             <div style={styles.card}>
               <div style={styles.cardHeader}>
                 Results by Gender
