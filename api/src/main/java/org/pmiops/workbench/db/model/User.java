@@ -86,6 +86,7 @@ public class User {
   private Timestamp betaAccessBypassTime;
   private Timestamp dataUseAgreementCompletionTime;
   private Timestamp dataUseAgreementBypassTime;
+  private Integer dataUseAgreementSignedVersion;
   private Timestamp complianceTrainingCompletionTime;
   private Timestamp complianceTrainingBypassTime;
   private Timestamp complianceTrainingExpirationTime;
@@ -478,6 +479,15 @@ public class User {
 
   public void setDataUseAgreementBypassTime(Timestamp dataUseAgreementBypassTime) {
     this.dataUseAgreementBypassTime = dataUseAgreementBypassTime;
+  }
+
+  @Column(name = "data_use_agreement_signed_version")
+  public Integer getDataUseAgreementSignedVersion() {
+    return dataUseAgreementSignedVersion;
+  }
+
+  public void setDataUseAgreementSignedVersion(Integer dataUseAgreementSignedVersion) {
+    this.dataUseAgreementSignedVersion = dataUseAgreementSignedVersion;
   }
 
   @Column(name = "compliance_training_completion_time")

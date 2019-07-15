@@ -353,6 +353,12 @@ paths:
         - profile
       description: Submits consent to the data use agreement for researchers.
       operationId: submitDataUseAgreement
+      parameters:
+        - in: query
+          name: dataUseAgreementSignedVersion
+          description: Version \# of the Data Use Agreement that was signed.
+          type: integer
+          required: true
       responses:
         200:
           description: The user's profile.
@@ -1901,7 +1907,7 @@ paths:
             A SQL query for each domain in the Data Set
           schema:
             $ref: "#/definitions/DataSetPreviewResponse"
-            
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -3116,6 +3122,10 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when a user was bypassed for completing the data use agreement.
+      dataUseAgreementSignedVersion:
+        type: integer
+        format: int32
+        description: Version of the data use agreement that the user last signed.
 
   InstitutionalAffiliation:
     type: object

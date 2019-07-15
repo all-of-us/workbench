@@ -248,11 +248,12 @@ public class UserService {
     return user;
   }
 
-  public User submitDataUseAgreement() {
+  public User submitDataUseAgreement(Integer dataUseAgreementSignedVersion) {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     return updateUserWithRetries(
         (user) -> {
           user.setDataUseAgreementCompletionTime(timestamp);
+          user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
           return user;
         });
   }
