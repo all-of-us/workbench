@@ -42,7 +42,9 @@ public class NotebooksServiceImpl implements NotebooksService {
                   // vulnerable to injection if vulnerabilities in nbconvert allow for custom style
                   // tag injection.
                   .allowTextIn("style")
-                  .allowElements("style")
+                  // <pre> is not included in the prebuilt sanitizers; it is used for monospace code
+                  // block formatting
+                  .allowElements("style", "pre")
                   // Allow id/class in order to interact with the style tag.
                   .allowAttributes("id", "class")
                   .globally()
