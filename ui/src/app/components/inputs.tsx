@@ -64,8 +64,8 @@ export const ValidationError = ({children}) => {
   >{children}</div>;
 };
 
-export const TextInput = React.forwardRef(({style = {}, onChange, invalid = false, ...props}:
-      {style?: React.CSSProperties, onChange: Function, invalid?: boolean, [key: string]: any},
+export const TextInput = React.forwardRef(({style = {}, onChange, ...props}:
+      {style?: React.CSSProperties, onChange: Function, [key: string]: any},
                                            ref: React.Ref<HTMLInputElement>) => {
   return <input
     {...props}
@@ -96,7 +96,7 @@ export const NumberInput = ({style = {}, value, onChange, ...props}) => {
   />;
 };
 
-export const TextArea = ({style = {}, onChange, invalid = false, ...props}) => {
+export const TextArea = ({style = {}, onChange, ...props}) => {
   return <textarea
     {...props}
     onChange={onChange ? (e => onChange(e.target.value)) : undefined}
@@ -198,12 +198,10 @@ export class DatePicker extends React.Component<
 }
 
 export const Toggle = ({name, enabled, onToggle, ...props}) => {
-
   return <label style={{display: 'flex', flexDirection: 'row', paddingBottom: '.5rem'}}>
     <Switch onChange={onToggle} checked={enabled} checkedIcon={false}
             {...props}
     />
     <span style={{marginLeft: '.5rem'}}>{name}</span>
   </label>;
-
 };
