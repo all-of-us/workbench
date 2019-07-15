@@ -1303,6 +1303,31 @@ paths:
           schema:
             $ref: '#/definitions/ReadOnlyNotebookResponse'
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/lockingMetadata:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    get:
+      tags:
+        - workspaces
+      summary: Get the locking metadata for a notebook
+      description: |
+        Get the locking metadata for a notebook, if available.  If the notebook is not locked
+        (e.g. at first creation) this may be empty.  Additionally, the caller of this endpoint
+        may not have the appropriate permissions to determine who is locking this notebook.
+        When this is the case, the lastLockedBy field is set to UNKNOWN.
+      operationId: "notebookLockingMetadata"
+      parameters:
+        - in: path
+          name: notebookName
+          required: true
+          type: string
+      responses:
+        200:
+          description: The locking metadata fields for the notebook
+          schema:
+            $ref: '#/definitions/NotebookLockingMetadataResponse'
+
   # Cohort Reviews #######################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews:
@@ -3441,3 +3466,11 @@ definitions:
       notebookName:
         type: string
 
+  NotebookLockingMetadataResponse:
+    type: object
+    properties:
+      lastLockedBy:
+        type: string
+      lockExpirationTime:
+        type: integer
+        format: int64
