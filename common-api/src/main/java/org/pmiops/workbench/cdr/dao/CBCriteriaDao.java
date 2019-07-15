@@ -168,7 +168,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(
       value =
-          "select * from criteria c "
+          "select * from cb_criteria c "
               + "where c.domain_id = 'DRUG' "
               + "and c.type in ('ATC', 'BRAND', 'RXNORM') "
               + "and c.is_selectable = 1 "
