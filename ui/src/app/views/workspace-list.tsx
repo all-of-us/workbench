@@ -79,12 +79,13 @@ const WorkspaceCardMenu: React.FunctionComponent<{
       side='bottom'
       closeOnClick
       content={ <React.Fragment>
-        <MenuItem onClick={() => {navigate([wsPathPrefix, 'duplicate']); }}>
+        <MenuItem icon='copy'
+                  onClick={() => {navigate([wsPathPrefix, 'duplicate']); }}>
           Duplicate
         </MenuItem>
         <TooltipTrigger content={<div>Requires Write Permission</div>}
                         disabled={wp.canWrite}>
-          <MenuItem data-test-id='edit-workspace'
+          <MenuItem icon='pencil'
                     onClick={() => {navigate([wsPathPrefix, 'edit']); }}
                     disabled={!wp.canWrite}>
             Edit
@@ -92,13 +93,13 @@ const WorkspaceCardMenu: React.FunctionComponent<{
         </TooltipTrigger>
         <TooltipTrigger content={<div>Requires Owner Permission</div>}
                         disabled={wp.isOwner}>
-          <MenuItem data-test-id='share-workspace' onClick={onShare} disabled={!wp.isOwner}>
+          <MenuItem icon='pencil' onClick={onShare} disabled={!wp.isOwner}>
             Share
           </MenuItem>
         </TooltipTrigger>
         <TooltipTrigger content={<div>Requires Owner Permission</div>}
                         disabled={wp.isOwner}>
-          <MenuItem data-test-id='delete-workspace' onClick={onDelete} disabled={!wp.isOwner}>
+          <MenuItem icon='trash' onClick={onDelete} disabled={!wp.isOwner}>
             Delete
           </MenuItem>
         </TooltipTrigger>
