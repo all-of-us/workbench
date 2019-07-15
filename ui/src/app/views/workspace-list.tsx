@@ -48,7 +48,7 @@ const styles = reactStyles({
     margin: '0 1rem 1rem 0', fontWeight: 600, color: 'rgb(33, 111, 180)'
   },
   workspaceName: {
-    color: '#216FB4', marginBottom: '0.5rem', fontWeight: 600,
+    color: colors.accent, marginBottom: '0.5rem', fontWeight: 600,
     fontSize: 18, wordBreak: 'break-all', cursor: 'pointer',
   },
   workspaceDescription: {
@@ -205,7 +205,6 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
     const {userEmail, wp} = this.props;
     const {bugReportError, bugReportOpen, confirmDeleting, loadingData,
       sharing, userRoles, workspaceDeletionError} = this.state;
-    const permissionBoxColors = {'OWNER': '#4996A2', 'READER': '#8F8E8F', 'WRITER': '#92B572'};
 
     return <React.Fragment>
       <WorkspaceCardBase>
@@ -241,7 +240,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
               {displayDate(wp.workspace.lastModifiedTime)}</div>
             <div style={{
               ...styles.permissionBox,
-              backgroundColor: permissionBoxColors[wp.accessLevel]}}
+              backgroundColor: colors.workspacePermissionsHighlights[wp.accessLevel]}}
                  data-test-id='workspace-access-level'>{wp.accessLevel}</div>
           </div>
         </div>

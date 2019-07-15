@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -47,14 +47,14 @@ const styles = reactStyles( {
     fontSize: '.66667rem',
     marginTop: '1rem',
     letterSpacing: '.01em',
-    color: '#565656'
+    color: colors.primary
   },
 
   dropdown: {
     width: '100%',
     height: '1.75rem',
     marginTop: '0',
-    backgroundColor: '#E0EAF1',
+    backgroundColor: colorWithWhiteness(colors.secondary, 0.85),
     borderRadius: '5px'
   },
 
@@ -110,7 +110,7 @@ const styles = reactStyles( {
     paddingTop: '0',
     fontSize: '0.58333rem',
     height: '4.5%',
-    color: '#888',
+    color: colors.primary,
     fontFamily: 'Montserrat',
     lineHeight: '1rem',
     whiteSpace: 'nowrap'

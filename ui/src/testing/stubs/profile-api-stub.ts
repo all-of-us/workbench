@@ -111,4 +111,10 @@ export class ProfileApiStub extends ProfileApi {
       resolve({});
     });
   }
+
+  public submitDataUseAgreement(dataUseAgreementVersion: number) {
+    this.profile.dataUseAgreementSignedVersion = dataUseAgreementVersion;
+    return Promise.resolve(this.profile);
+  }
+
 }
