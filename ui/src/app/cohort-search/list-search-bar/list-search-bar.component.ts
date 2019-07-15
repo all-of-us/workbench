@@ -99,7 +99,7 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
       this.optionSelected = true;
       this.searchTerm.reset('');
       this.searchTerm.setValue(option.name, {emitEvent: false});
-      if (option.subtype === CriteriaType[CriteriaType.BRAND]) {
+      if (option.type === CriteriaType[CriteriaType.BRAND]) {
         const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
         cohortBuilderApi().getDrugIngredientByConceptId(cdrId, option.conceptId)
           .then(resp => {
