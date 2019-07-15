@@ -1,6 +1,4 @@
 import {Component, Input} from '@angular/core';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
-
 import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {GenderChart} from 'app/cohort-search/gender-chart/gender-chart.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
@@ -85,6 +83,15 @@ const styles = reactStyles({
     padding: '0.5rem 0.75rem',
   },
   error: {
+    background: '#f7981c',
+    color: '#ffffff',
+    fontSize: '11px',
+    border: '1px solid #ebafa6',
+    borderRadius: '3px',
+    marginBottom: '0.25rem',
+    padding: '3px 5px'
+  },
+  invalid: {
     background: '#f5dbd9',
     color: '#565656',
     fontSize: '11px',
@@ -141,10 +148,6 @@ export const ListOverview = withCurrentWorkspace()(
         apiCallCheck: 0,
       };
     }
-    cohortForm = new FormGroup({
-      name: new FormControl('', [Validators.required]),
-      description: new FormControl()
-    });
 
     componentDidMount(): void {
       if (currentCohortStore.getValue()) {
@@ -215,10 +218,6 @@ export const ListOverview = withCurrentWorkspace()(
       return this.hasTemporalError || !this.hasActiveItems;
     }
 
-    get name() {
-      return this.cohortForm.get('name');
-    }
-
     get criteria() {
       const mappedRequest = mapRequest(searchRequestStore.getValue());
       return JSON.stringify(mappedRequest);
@@ -227,33 +226,29 @@ export const ListOverview = withCurrentWorkspace()(
     saveCohort() {
       const {cohort} = this.state;
       cohort.criteria = this.criteria;
-      this.setState({cohort, saving: true});
+      this.setState({cohort, saving: true, saveError: false});
       const {ns, wsid} = urlParamsStore.getValue();
       const cid = cohort.id;
       cohortsApi().updateCohort(ns, wsid, cid, cohort).then(() => {
         this.setState({saving: false});
         navigate(['workspaces', ns, wsid, 'cohorts', cid, 'actions']);
       }, (error) => {
-        if (error.status === 500) {
-          console.log(error);
-          this.setState({saveError: true});
-        }
+        console.error(error);
+        this.setState({saving: false, saveError: true});
       });
     }
 
     submit() {
-      this.setState({saving: true});
+      this.setState({saving: true, saveError: false});
       const {ns, wsid} = urlParamsStore.getValue();
-      const name = this.cohortForm.get('name').value;
-      const description = this.cohortForm.get('description').value;
+      const {name, description} = this.state;
       const cohort = {name, description, criteria: this.criteria, type: COHORT_TYPE};
       cohortsApi().createCohort(ns, wsid, cohort).then((c) => {
         navigate(['workspaces', ns, wsid, 'cohorts', c.id, 'actions']);
       }, (error) => {
         if (error.status === 400) {
           this.setState({saving: false, showConflictError: true});
-        }
-        if (error.status === 500) {
+        } else {
           this.setState({saving: false, saveError: true});
         }
       });
@@ -295,7 +290,7 @@ export const ListOverview = withCurrentWorkspace()(
 
     render() {
       const {cohort, chartData, deleting, error, loading, saveModal, name, description, nameTouched,
-        saving, stackChart, total} = this.state;
+        saving, saveError, stackChart, total} = this.state;
       const disableIcon = loading || !cohort ;
       const disableSave = cohort && cohort.criteria === this.criteria;
       const invalid = nameTouched && !name;
@@ -336,7 +331,7 @@ export const ListOverview = withCurrentWorkspace()(
             </div>
             <h2 style={styles.totalCount}>
               Total Count: &nbsp;
-              {loading && !this.hasTemporalError && <Spinner size={16} />}
+              {loading && !this.hasTemporalError && <Spinner size={18} />}
               {!loading && !this.hasErrors && total !== undefined &&
                 <span>{total.toLocaleString()}</span>
               }
@@ -375,19 +370,26 @@ export const ListOverview = withCurrentWorkspace()(
         {saveModal && <Modal>
           <ModalTitle style={invalid ? {marginBottom: 0} : {}}>Save Cohort as</ModalTitle>
           <ModalBody style={{marginTop: '0.2rem'}}>
-            {invalid && <div style={styles.error}>Cohort name is required</div>}
+            {saveError && <div style={styles.error}>
+              <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
+              Data cannot be saved. Please try again.
+            </div>}
+            {invalid && <div style={styles.invalid}>Cohort name is required</div>}
             <TextInput style={{marginBottom: '0.5rem'}} value={name} placeholder='COHORT NAME'
-              onChange={(v) => this.setState({name: v, nameTouched: true})} />
-            <TextArea value={description} placeholder='DESCRIPTION'
+              onChange={(v) => this.setState({name: v, nameTouched: true})}
+              disabled={saving} />
+            <TextArea value={description} placeholder='DESCRIPTION' disabled={saving}
               onChange={(v) => this.setState({description: v})}/>
           </ModalBody>
           <ModalFooter>
             <Button style={{color: '#262262'}} type='link' onClick={() => this.setState({
-              saveModal: false,
-              name: undefined,
-              description: undefined
-            })}>CANCEL</Button>
-            <Button type='primary' disabled={!name} onClick={() => this.submit()}>SAVE</Button>
+              saveModal: false, name: undefined, description: undefined, saveError: false,
+              nameTouched: false
+            })} disabled={saving}>CANCEL</Button>
+            <Button type='primary' disabled={!name || saving} onClick={() => this.submit()}>
+              {saving && <Spinner style={{marginRight: '0.25rem'}} size={18} />}
+               SAVE
+            </Button>
           </ModalFooter>
         </Modal>}
         {deleting && <ConfirmDeleteModal closeFunction={this.cancel}
