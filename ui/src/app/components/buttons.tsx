@@ -1,4 +1,5 @@
 import {styles as cardStyles} from 'app/components/card';
+import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {IconComponent} from 'app/icons/icon';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -132,7 +133,7 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
   />;
 };
 
-export const MenuItem = ({tooltip = '', disabled = false, children, ...props}) => {
+export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
       // data-test-id is the text within the MenuItem, with whitespace removed
@@ -149,6 +150,7 @@ export const MenuItem = ({tooltip = '', disabled = false, children, ...props}) =
       hover={!disabled ? {backgroundColor: colorWithWhiteness(colors.accent, 0.92)} : undefined}
       {...props}
     >
+      <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>
       {children}
     </Clickable>
   </TooltipTrigger>;
