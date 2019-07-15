@@ -533,7 +533,11 @@ def commandLineSpringProperties = [
   // so our connections are either local or through the encrypted proxy.
   'spring.datasource.url': "jdbc:mysql://${db_host}:${db_port}/workbench?useSSL=false",
   'spring.datasource.username': System.getenv("WORKBENCH_DB_USER"),
-  'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
+  'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD"),
+
+  'cdr.datasource.url': "jdbc:mysql://localhost:3307/workbench?useSSL=false",
+  'cdr.datasource.username': System.getenv("WORKBENCH_DB_USER"),
+  'cdr.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
 ]
 
 // See project.rb command: load-es-index
@@ -604,6 +608,8 @@ task updateCdrVersions(type: JavaExec) {
 }
 
 task bulkCloneWorkspaces(type: JavaExec) {
+  println commandLineSpringProperties
+
   classpath sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.CloneWorkspaces"
   systemProperties = commandLineSpringProperties

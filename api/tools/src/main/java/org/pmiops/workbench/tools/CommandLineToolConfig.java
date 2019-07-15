@@ -7,11 +7,22 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.gson.Gson;
 import java.io.IOException;
+import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.cdr.CdrDbConfig;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cohorts.CohortCloningService;
+import org.pmiops.workbench.cohorts.CohortFactoryImpl;
+import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.config.BigQueryConfig;
+import org.pmiops.workbench.config.CacheSpringConfiguration;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.WorkbenchDbConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -35,11 +46,26 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
  */
 @Configuration
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
-@Import({RetryConfig.class, CommonConfig.class})
+@Import({
+    RetryConfig.class,
+    CommonConfig.class,
+    BigQueryConfig.class,
+    CacheSpringConfiguration.class,
+    WorkbenchDbConfig.class,
+    CdrDbConfig.class,
+    CohortCloningService.class,
+    CohortFactoryImpl.class,
+    ConceptService.class,
+    ConceptBigQueryService.class,
+    BigQueryService.class,
+    CdrBigQuerySchemaConfigService.class
+})
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")
 // Scan the FireCloud module, for FireCloudService bean.
 @ComponentScan("org.pmiops.workbench.firecloud")
+@ComponentScan("org.pmiops.workbench.workspaces")
+@ComponentScan("org.pmiops.workbench.conceptset")
 // Scan the ServiceAccounts class, but exclude other classes in auth (since they
 // bring in JPA-related beans, which include a whole bunch of other deps that are
 // more complicated than we need for now).
@@ -50,7 +76,7 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
     basePackageClasses = ServiceAccounts.class,
     useDefaultFilters = false,
     includeFilters = {
-      @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = ServiceAccounts.class),
+      @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = ServiceAccounts.class)
     })
 public class CommandLineToolConfig {
 

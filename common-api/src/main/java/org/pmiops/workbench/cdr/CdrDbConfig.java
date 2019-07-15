@@ -66,6 +66,11 @@ public class CdrDbConfig {
       String dbPassword = cdrPoolConfig.getPassword();
       String originalDbUrl = cdrPoolConfig.getUrl();
 
+      log.error("!!!CDR CONfIG!!!");
+      log.error(dbUser);
+      log.error(dbPassword);
+      log.error(originalDbUrl);
+
       // Build a map of CDR version ID -> DataSource for use later, based on all the entries in the
       // cdr_version table. Note that if new CDR versions are inserted, we need to restart the
       // server in order for it to be used.
