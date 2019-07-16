@@ -1615,6 +1615,10 @@ paths:
             name: domain
             required: true
             type: string
+          - in: query
+            name: survey
+            required: false
+            type: string
         responses:
           200:
             description: the values/column names in the domain.
@@ -2819,6 +2823,10 @@ definitions:
         description: >
           Domain corresponding to an OMOP table.
         $ref: "#/definitions/Domain"
+      survey:
+        description: >
+          Survey corresponding to an OMOP table.
+        $ref: "#/definitions/Surveys"
       values:
         $ref: "#/definitions/DomainValuesResponse"
 

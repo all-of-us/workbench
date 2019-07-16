@@ -28,6 +28,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.ServerUnavailableException;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.Surveys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -144,6 +145,15 @@ public class BigQueryService {
     } else {
       throw new BadRequestException("Invalid domain, unable to fetch fields from table");
     }
+    TableId tableId =
+        TableId.of(cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), tableName);
+
+    return bigquery.getTable(tableId).getDefinition().getSchema().getFields();
+  }
+
+  public FieldList getTableFieldsFromSurvey() {
+    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    String tableName = "ds_survey";
     TableId tableId =
         TableId.of(cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), tableName);
 
