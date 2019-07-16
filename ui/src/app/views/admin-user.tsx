@@ -128,7 +128,7 @@ export const AdminUser = withUserProfile()(class extends React.Component<
   }
 
   convertDate(date): string {
-    return new Date(date).toDateString();
+    return new Date(date).toString().split(' ').slice(1, 5).join(' ');
   }
 
   convertProfilesToFields(profiles: Profile[]) {
@@ -152,10 +152,10 @@ export const AdminUser = withUserProfile()(class extends React.Component<
           <Column field='name' header='Name' bodyStyle={{...styles.colStyle, width: '15%'}}
                   headerStyle={{width: '15%'}} sortable={true}/>
           <Column field='username' header='User Name' bodyStyle={{...styles.colStyle, width: '20%'}}
-                  headerStyle={{width: '20%'}}/>
+                  headerStyle={{width: '20%'}} sortable={true}/>
           <Column field='contactEmail' header='Contact Email' sortable={true}
                   bodyStyle={{...styles.colStyle, width: '19%'}} headerStyle={{width: '19%'}}/>
-          <Column field='betaAccessRequestTime' header='Beta Access Time Requested'
+          <Column field='betaAccessRequestTime' header='Beta Access Time Requested' sortable={true}
                   bodyStyle={{...styles.colStyle, width: '15%'}} headerStyle={{width: '15%'}}/>
           <Column field='userLockout' header='User Lockout'
                   bodyStyle={{...styles.colStyle, width: '10%'}} headerStyle={{width: '10%'}}/>

@@ -1,11 +1,10 @@
-import {Component, Input} from '@angular/core';
 import {Button, IconButton} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {AccessModule, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';

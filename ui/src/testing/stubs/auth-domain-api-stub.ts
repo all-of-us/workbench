@@ -1,4 +1,4 @@
-import {AuthDomainApi, EmptyResponse, UpdateUserDisabledRequest} from 'generated/fetch';
+import {AuthDomainApi, UpdateUserDisabledRequest} from 'generated/fetch';
 
 
 export class AuthDomainApiStub extends AuthDomainApi {
