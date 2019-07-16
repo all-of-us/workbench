@@ -1307,6 +1307,26 @@
           "foreignKey": "visit_occurrence"
         }
       ]
+    },
+    "survey": {
+      "domain": "SURVEY",
+      "columns": [{
+        "type": "integer",
+        "name": "question_concept_id",
+        "mode": "required",
+        "description": "A foreign key that refers to a Survey question concept id.",
+        "foreignKey": "concept",
+        "domainConcept": "standard"
+      },
+        {
+          "type": "integer",
+          "name": "answer_concept_id",
+          "mode": "required",
+          "description": "A foreign key that refers to Survey answer concept Id.",
+          "foreignKey": "concept",
+          "domainConcept": "source"
+        }
+      ]
     }
   }
 

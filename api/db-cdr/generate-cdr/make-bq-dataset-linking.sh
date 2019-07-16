@@ -243,14 +243,14 @@ echo "ds_linking - inserting survey data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM(SELECT person_id, survey_datetime, question_concept_id, answer, answer_concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.ds_survey\` a) answer', 'Survey'),
-    ('PERSON_ID', 'answer.person_id', 'FROM(SELECT person_id, question_concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.ds_survey\` a) answer', 'Survey'),
-    ('SURVEY_DATETIME', 'answer.survey_datetime', 'FROM(SELECT survey_datetime, question_concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.ds_survey\` a) answer', 'Survey'),
-    ('SURVEY', 'question.survey', 'JOIN (select survey, question_concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.ds_survey\` a) question', 'Survey'),
-    ('QUESTION_CONCEPT_ID', 'question.question_concept_id', 'JOIN (select b.name as survey, c.concept_id as question_concept_id, c.name as question, observation_concept_id, value_source_concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor_count\` a LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.criteria\` b on a.ancestor_id = b.id LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.criteria\` c on a.descendant_id = c.id where ancestor_id in (SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = \'PPI\' and parent_id = 0)) question on answer.question_concept_id = question.question_concept_id', 'Survey'),
-    ('QUESTION', 'question.question', 'JOIN (select b.name as survey, c.concept_id as question_concept_id, c.name as question, observation_concept_id, value_source_concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor_count\` a LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.criteria\` b on a.ancestor_id = b.id LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.criteria\` c on a.descendant_id = c.id where ancestor_id in (SELECT id FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = \'PPI\' and parent_id = 0)) question on answer.question_concept_id = question.question_concept_id', 'Survey'),
-    ('ANSWER_CONCEPT_ID', 'answer.answer_concept_id', 'FROM(SELECT person_id, observation_datetime as survey_datetime, observation_source_concept_id as question_concept_id, case when observation_source_concept_id = 1585747 then CAST(value_as_number as STRING) else concept_name end as answer, value_as_concept_id as answer_concept_id, observation_concept_id, value_source_concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_as_concept_id = b.concept_id WHERE a.observation_source_concept_id in (SELECT concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = \`PPI\` and is_group = 0 and is_selectable = 1 )) answer', 'Survey'),
-    ('ANSWER', 'answer.answer', 'FROM(SELECT person_id, observation_datetime as survey_datetime, observation_source_concept_id as question_concept_id, case when observation_source_concept_id = 1585747 then CAST(value_as_number as STRING) else concept_name end as answer, value_as_concept_id as answer_concept_id, observation_concept_id, value_source_concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_as_concept_id = b.concept_id WHERE a.observation_source_concept_id in (SELECT concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = \`PPI\` and is_group = 0 and is_selectable = 1 )) answer', 'Survey')"
+    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`$BQ_PROJECT.$BQ_DATASET.ds_survey\` a) answer', 'Survey'),
+    ('PERSON_ID', 'answer.person_id', 'FROM(SELECT person_id, question_concept_id ', 'Survey'),
+    ('SURVEY_DATETIME', 'answer.survey_datetime', 'FROM(SELECT survey_datetime, question_concept_id ', 'Survey'),
+    ('SURVEY', 'question.survey', 'FROM (select survey, question_concept_id ', 'Survey'),
+    ('QUESTION_CONCEPT_ID', 'question.question_concept_id', 'FROM (select question_concept_id ', 'Survey'),
+    ('QUESTION', 'question.question', 'FROM (select question ', 'Survey'),
+    ('ANSWER_CONCEPT_ID', 'answer.answer_concept_id', 'FROM(SELECT answer_concept_id ', 'Survey'),
+    ('ANSWER', 'answer.answer', 'FROM(SELECT  answer ', 'Survey')"
 
 echo "ds_linking - inserting visit data"
 
