@@ -106,7 +106,7 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
               const ingredients = resp.items.map(it => it.name);
               this.ingredients.emit(ingredients);
               // just grabbing the first one on the list for now
-              const {name, path, id} = resp.items[0];
+              const {path, id} = resp.items[0];
               subtreePathStore.next(path.split('.'));
               subtreeSelectedStore.next(id);
             }
