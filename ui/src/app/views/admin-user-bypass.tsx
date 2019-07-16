@@ -124,16 +124,3 @@ export class AdminUserBypass extends React.Component<
   }
 
 }
-
-
-@Component({
-  selector: 'app-admin-user-bypass',
-  template: '<div #root></div>',
-})
-export class AdminUserBypassComponent extends ReactWrapperBase {
-  @Input('profile') profile: Profile;
-
-  constructor() {
-    super(AdminUserBypass, ['profile']);
-  }
-}
