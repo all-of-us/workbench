@@ -205,11 +205,12 @@ public class FireCloudServiceImpl implements FireCloudService {
     }
 
     boolean enableVpcFlowLogs = configProvider.get().featureFlags.enableVpcFlowLogs;
-    CreateRawlsBillingProjectFullRequest request = new CreateRawlsBillingProjectFullRequest()
-        .billingAccount("billingAccounts/" + configProvider.get().firecloud.billingAccountId)
-        .projectName(projectName)
-        .highSecurityNetwork(enableVpcFlowLogs)
-        .enableFlowLogs(enableVpcFlowLogs);
+    CreateRawlsBillingProjectFullRequest request =
+        new CreateRawlsBillingProjectFullRequest()
+            .billingAccount("billingAccounts/" + configProvider.get().firecloud.billingAccountId)
+            .projectName(projectName)
+            .highSecurityNetwork(enableVpcFlowLogs)
+            .enableFlowLogs(enableVpcFlowLogs);
 
     BillingApi billingApi = billingApiProvider.get();
     retryHandler.run(
