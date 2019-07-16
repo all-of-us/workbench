@@ -188,7 +188,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     this.setState({showRefreshButton: false});
   }
 
-  getTaskCompletionList(): Array<boolean> {
+  get taskCompletionList(): Array<boolean> {
     const list = getRegistrationTasks().map((config) => {
       return this.props[config.completionPropsKey] as boolean;
     });
@@ -196,11 +196,11 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   }
 
   allTasksCompleted(): boolean {
-    return this.getTaskCompletionList().reduce((acc, val) => acc && val);
+    return this.taskCompletionList.reduce((acc, val) => acc && val);
   }
 
   isEnabled(i: number): boolean {
-    const taskCompletionList = this.getTaskCompletionList();
+    const taskCompletionList = this.taskCompletionList;
 
     if (i === 0) {
       return !taskCompletionList[i];
@@ -227,7 +227,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     }
   }
 
-  async setAllModulesBypassed(isBypassed: boolean) {
+  async setAllModulesBypassState(isBypassed: boolean) {
     this.setState({bypassInProgress: true});
 
     // TypeScript enum iteration is nonfunctional
@@ -254,7 +254,6 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   render() {
     const {bypassActionComplete, bypassInProgress, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
-    // todo: move this to the state
     const canUnsafeSelfBypass = serverConfigStore.getValue().unsafeAllowSelfBypass;
 
     const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
@@ -276,16 +275,18 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
           {!bypassActionComplete && <span>
             [Test environment] Self-service bypass is enabled:&nbsp;
             {anyBypassActionsRemaining &&
-              <Button onClick={() => this.setAllModulesBypassed(true)}
+              <Button style={{marginLeft: '0.5rem'}}
+                      onClick={() => this.setAllModulesBypassState(true)}
                       disabled={bypassInProgress}>Bypass all</Button>}
             {!anyBypassActionsRemaining &&
-              <Button onClick={() => this.setAllModulesBypassed(false)}
+              <Button style={{marginLeft: '0.5rem'}}
+                      onClick={() => this.setAllModulesBypassState(false)}
                       disabled={bypassInProgress}>Un-bypass all</Button>}
           </span>
           }
         </div>
       }
-      {!betaAccessGranted && !canUnsafeSelfBypass &&
+      {!betaAccessGranted &&
         <div data-test-id='beta-access-warning'
              style={{...baseStyles.card, ...styles.warningModal}}>
           <ClrIcon shape='warning-standard' class='is-solid'
@@ -304,7 +305,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
             </div>
             {!this.allTasksCompleted() &&
             <div style={styles.cardDescription}>{card.description}</div>}
-            {this.getTaskCompletionList()[i] ?
+            {this.taskCompletionList[i] ?
               <Button disabled={true} data-test-id='completed-button'
                       style={{backgroundColor: colors.success,
                         width: 'max-content',
