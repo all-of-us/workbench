@@ -150,10 +150,10 @@ export const AdminUser = withUserProfile()(class extends React.Component<
           <Column field='disabled' header='Disabled' bodyStyle={{...styles.colStyle, width: '7%'}}
                   headerStyle={{width: '7%'}}/>
           <Column field='name' header='Name' bodyStyle={{...styles.colStyle, width: '15%'}}
-                  headerStyle={{width: '15%'}}/>
+                  headerStyle={{width: '15%'}} sortable={true}/>
           <Column field='username' header='User Name' bodyStyle={{...styles.colStyle, width: '20%'}}
                   headerStyle={{width: '20%'}}/>
-          <Column field='contactEmail' header='Contact Email'
+          <Column field='contactEmail' header='Contact Email' sortable={true}
                   bodyStyle={{...styles.colStyle, width: '19%'}} headerStyle={{width: '19%'}}/>
           <Column field='betaAccessRequestTime' header='Beta Access Time Requested'
                   bodyStyle={{...styles.colStyle, width: '15%'}} headerStyle={{width: '15%'}}/>

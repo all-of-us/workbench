@@ -22,7 +22,7 @@ import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
-import {AdminUserComponent} from './views/admin-user/admin-user';
+import {AdminUserComponent} from './views/admin-user';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb';
 import {BugReportComponent} from './views/bug-report';
