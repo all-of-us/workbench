@@ -53,6 +53,12 @@
   border-bottom: 1px solid #cccccc;
 }
 
+.tree-header > .ingredients {
+  float: left;
+  font-weight: bold;
+  padding: 0.5rem;
+}
+
 .tree-header > .btn-link {
   float: right;
   color: #216FB4;

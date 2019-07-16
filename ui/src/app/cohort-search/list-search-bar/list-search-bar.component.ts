@@ -1,4 +1,4 @@
-import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {autocompleteStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
@@ -15,6 +15,7 @@ const trigger = 3;
 })
 export class ListSearchBarComponent implements OnInit, OnDestroy {
   @Input() node: any;
+  @Output() ingredients = new EventEmitter<any>();
   searchTerm: FormControl = new FormControl();
   typedTerm: string;
   options = [];
@@ -23,7 +24,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
   optionSelected = false;
   error = false;
   subscription: Subscription;
-  ingredientList = [];
   highlightedOption: number;
   subtype: string;
 
@@ -66,7 +66,6 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
     this.typedTerm = this.searchTerm.value;
     this.loading = true;
     this.optionSelected = false;
-    this.ingredientList = [];
     this.noResults = false;
     const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
     const {domainId, isStandard, type} = this.node;
@@ -104,14 +103,16 @@ export class ListSearchBarComponent implements OnInit, OnDestroy {
         cohortBuilderApi().getDrugIngredientByConceptId(cdrId, option.conceptId)
           .then(resp => {
             if (resp.items.length) {
+              const ingredients = resp.items.map(it => it.name);
+              this.ingredients.emit(ingredients);
               // just grabbing the first one on the list for now
               const {name, path, id} = resp.items[0];
-              autocompleteStore.next(name);
               subtreePathStore.next(path.split('.'));
               subtreeSelectedStore.next(id);
             }
           });
       } else {
+        this.ingredients.emit(null);
         autocompleteStore.next(option.name);
         subtreePathStore.next(option.path.split('.'));
         subtreeSelectedStore.next(option.id);
