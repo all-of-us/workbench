@@ -6,6 +6,7 @@ import {
 } from 'app/components/headers';
 import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
@@ -244,7 +245,8 @@ export const DataUseAgreement = withUserProfile()(
     name: string,
     initialName: string,
     initialWork: string,
-    initialSanctions: string
+    initialSanctions: string,
+    submitting: boolean
   }> {
     constructor(props) {
       super(props);
@@ -252,11 +254,13 @@ export const DataUseAgreement = withUserProfile()(
         name: '',
         initialName: '',
         initialWork: '',
-        initialSanctions: ''
+        initialSanctions: '',
+        submitting: false
       };
     }
 
     submitDataUseAgreement() {
+      this.setState({submitting: true});
       profileApi().submitDataUseAgreement(dataUseAgreementVersion).then((profile) => {
         this.props.profileState.updateCache(profile);
         window.history.back();
@@ -264,7 +268,7 @@ export const DataUseAgreement = withUserProfile()(
     }
 
     render() {
-      const {name, initialName, initialWork, initialSanctions} = this.state;
+      const {name, initialName, initialWork, initialSanctions, submitting} = this.state;
       const errors = validate({name, initialName, initialWork, initialSanctions}, {
         name: {
           presence: {allowEmpty: false}
@@ -285,8 +289,9 @@ export const DataUseAgreement = withUserProfile()(
         <div style={{
           display: 'flex', flexDirection: 'column', borderRadius: '1rem',
           backgroundColor: colorWithWhiteness(colors.primary, 0.8),
-          padding: '1rem', alignItems: 'flex-start'
+          padding: '1rem', alignItems: 'flex-start', position: 'relative'
         }}>
+          {submitting && <SpinnerOverlay/>}
           <SecondHeader style={{marginTop: 0}}>Agreement:</SecondHeader>
           <div style={{marginTop: '0.5rem', fontWeight: 600}}>I
             <DuaTextInput placeholder='FIRST AND LAST NAME' style={{margin: '0 1ex'}}
@@ -327,7 +332,7 @@ export const DataUseAgreement = withUserProfile()(
           <TooltipTrigger content={errors && 'All fields required'}>
             <Button
               style={{marginTop: '1rem', cursor: errors && 'not-allowed', padding: '0 1.3rem'}}
-              data-test-id='submit-dua-button' disabled={errors}
+              disabled={errors || submitting} data-test-id='submit-dua-button'
               onClick={() => this.submitDataUseAgreement()}>Submit</Button>
           </TooltipTrigger>
         </div>
