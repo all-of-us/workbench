@@ -36,6 +36,9 @@ public interface CohortReviewService {
       long workspaceId,
       WorkspaceAccessLevel requiredAccess);
 
+  WorkspaceAccessLevel enforceWorkspaceAccessLevel(
+      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess);
+
   /**
    * Find the {@link CohortReview} for the specified cohortId and cdrVersionId.
    *
@@ -44,6 +47,15 @@ public interface CohortReviewService {
    * @return
    */
   CohortReview findCohortReview(Long cohortId, Long cdrVersionId);
+
+  /**
+   * Find the {@link CohortReview} for the specified workspaceNamespace and workspaceId.
+   *
+   * @param workspaceNamespace
+   * @param workspaceId
+   * @return
+   */
+  List<CohortReview> getRequiredWithCohortReviews(String workspaceNamespace, String workspaceId);
 
   /**
    * Save the specified {@link CohortReview}.

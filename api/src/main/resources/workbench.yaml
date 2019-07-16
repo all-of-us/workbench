@@ -114,7 +114,7 @@ paths:
             $ref: "#/definitions/FeaturedWorkspacesConfigResponse"
 
 
-   # User methods ########################################################################
+    # User methods ########################################################################
 
   /v1/profile:
     get:
@@ -326,7 +326,7 @@ paths:
   /v1/page-visits:
     post:
       tags:
-      - profile
+        - profile
       consumes:
         - application/json
       description: Updates a users page visits
@@ -371,7 +371,7 @@ paths:
         - profile
       summary: Sync compliance training status
       description: Retrieves moodleId(either from DB or call from Moodle API)
-                   and gets Training status on the basis of that
+        and gets Training status on the basis of that
       operationId: syncComplianceTrainingStatus
       responses:
         200:
@@ -391,7 +391,7 @@ paths:
         - profile
       summary: Sync eRA Commons status
       description: Retrieves and stores the current user's NIH / eRA Commons
-                   linkage status, fetched via the FireCloud API.
+        linkage status, fetched via the FireCloud API.
       operationId: syncEraCommonsStatus
       responses:
         200:
@@ -557,16 +557,16 @@ paths:
       tags:
         - cluster
       parameters:
-      - in: path
-        name: clusterNamespace
-        description: clusterNamespace
-        required: true
-        type: string
-      - in: path
-        name: clusterName
-        description: clusterName
-        required: true
-        type: string
+        - in: path
+          name: clusterNamespace
+          description: clusterNamespace
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
       responses:
         202:
           description: Deletion success
@@ -589,21 +589,21 @@ paths:
       consumes:
         - application/json
       parameters:
-      - in: path
-        name: clusterNamespace
-        description: clusterNamespace
-        required: true
-        type: string
-      - in: path
-        name: clusterName
-        description: clusterName
-        required: true
-        type: string
-      - in: body
-        name: body
-        description: Localization request.
-        schema:
-          $ref: '#/definitions/ClusterLocalizeRequest'
+        - in: path
+          name: clusterNamespace
+          description: clusterNamespace
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Localization request.
+          schema:
+            $ref: '#/definitions/ClusterLocalizeRequest'
       responses:
         200:
           description: Success
@@ -781,8 +781,8 @@ paths:
       tags:
         - workspaces
       description: >
-          Returns workspaces that need research purpose review. Requires
-          REVIEW_RESEARCH_PURPOSE authority.
+        Returns workspaces that need research purpose review. Requires
+        REVIEW_RESEARCH_PURPOSE authority.
       operationId: getWorkspacesForReview
       responses:
         200:
@@ -827,35 +827,35 @@ paths:
             $ref: '#/definitions/ErrorResponse'
 
   /v1/admin/unsafe-self-bypass-access-requirement:
-      post:
-        tags:
-          - profile
-        consumes:
-          - application/json
-        description: >
-          Updates the given user to bypass the request access requirement
-        parameters:
-          - in: body
-            name: bypassed
-            schema:
-              $ref: '#/definitions/AccessBypassRequest'
-            description: >
-              Whether the requirement should be bypassed or not. Defaults to
-              true, so an empty body  will cause the requirement to be bypassed.
-        operationId: unsafeSelfBypassAccessRequirement
-        responses:
-          200:
-            description: success
-            schema:
-              $ref: "#/definitions/EmptyResponse"
-          403:
-            description: Self bypass is disallowed in this environment
-            schema:
-              $ref: "#/definitions/ErrorResponse"
-          400:
-            description: No module exists with name submitted
-            schema:
-              $ref: "#/definitions/ErrorResponse"
+    post:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      description: >
+        Updates the given user to bypass the request access requirement
+      parameters:
+        - in: body
+          name: bypassed
+          schema:
+            $ref: '#/definitions/AccessBypassRequest'
+          description: >
+            Whether the requirement should be bypassed or not. Defaults to
+            true, so an empty body  will cause the requirement to be bypassed.
+      operationId: unsafeSelfBypassAccessRequirement
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+        403:
+          description: Self bypass is disallowed in this environment
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        400:
+          description: No module exists with name submitted
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
   /v1/admin/users/{userId}/bypass-access-requirement:
     post:
@@ -895,8 +895,8 @@ paths:
       tags:
         - profile
       description: >
-          Returns a list of profiles for users to be reviewed. Requires
-          ACCESS_CONTROL_ADMIN authority.
+        Returns a list of profiles for users to be reviewed. Requires
+        ACCESS_CONTROL_ADMIN authority.
       operationId: getAllUsers
       responses:
         200:
@@ -1077,11 +1077,11 @@ paths:
 
       operationId: shareWorkspace
       parameters:
-          - in: body
-            name: body
-            description: users to share the workspace with
-            schema:
-              $ref: "#/definitions/ShareWorkspaceRequest"
+        - in: body
+          name: body
+          description: users to share the workspace with
+          schema:
+            $ref: "#/definitions/ShareWorkspaceRequest"
       responses:
         200:
           description: Successful share response
@@ -1106,10 +1106,10 @@ paths:
           - notebooks located in the default notebook directory for this workspace
       operationId: cloneWorkspace
       parameters:
-          - in: body
-            name: body
-            schema:
-              $ref: "#/definitions/CloneWorkspaceRequest"
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/CloneWorkspaceRequest"
       responses:
         200:
           description: Successful duplicate response
@@ -1283,6 +1283,23 @@ paths:
           schema:
             $ref: '#/definitions/ReadOnlyNotebookResponse'
 
+  # Cohort Reviews #######################################################################
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    get:
+      tags:
+        - cohortReview
+      description: Returns all cohort reviews in a workspace
+      operationId: "getCohortReviewsInWorkspace"
+      responses:
+        200:
+          description: A list of cohort definitions.
+          schema:
+            $ref: "#/definitions/CohortReviewListResponse"
+
   # Cohorts ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
@@ -1402,18 +1419,18 @@ paths:
         Materializes a cohort for a given CDR version to specified output.
       operationId: "materializeCohort"
       parameters:
-       - in: body
-         name: request
-         description: cohort materialization request
-         schema:
-           $ref: "#/definitions/MaterializeCohortRequest"
+        - in: body
+          name: request
+          description: cohort materialization request
+          schema:
+            $ref: "#/definitions/MaterializeCohortRequest"
       responses:
         200:
           description: The results of materializing the cohort
           schema:
             $ref: "#/definitions/MaterializeCohortResponse"
 
-######### USER RECENT RESOURCES ########################################
+  ######### USER RECENT RESOURCES ########################################
   /v1/workspaces/user-recent-resources:
     get:
       tags:
@@ -1476,7 +1493,7 @@ paths:
             $ref: "#/definitions/EmptyResponse"
 
 
-# Concept sets ##############################################################################
+  # Concept sets ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets:
     parameters:
@@ -1601,46 +1618,46 @@ paths:
           schema:
             $ref: "#/definitions/ConceptSet"
 
-# Concepts ###############################################################################
+  # Concepts ###############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/domainInfo:
-      get:
-        tags:
-          - concepts
-        description: >
-          Returns information on the domains of data in the workspace's CDR version along
-          with participant and concept counts
-        operationId: "getDomainInfo"
-        parameters:
-          - $ref: '#/parameters/workspaceNamespace'
-          - $ref: '#/parameters/workspaceId'
-        responses:
-          200:
-            description: information on the domains
-            schema:
-              $ref: "#/definitions/DomainInfoResponse"
+    get:
+      tags:
+        - concepts
+      description: >
+        Returns information on the domains of data in the workspace's CDR version along
+        with participant and concept counts
+      operationId: "getDomainInfo"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+      responses:
+        200:
+          description: information on the domains
+          schema:
+            $ref: "#/definitions/DomainInfoResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/domainValues/{domain}:
-      get:
-        tags:
-          - concepts
-        description: >
-          Returns all column names/values for a given domain.
-        operationId: "getValuesFromDomain"
-        parameters:
-          - $ref: '#/parameters/workspaceNamespace'
-          - $ref: '#/parameters/workspaceId'
-          - in: path
-            name: domain
-            required: true
-            type: string
-        responses:
-          200:
-            description: the values/column names in the domain.
-            schema:
-              $ref: "#/definitions/DomainValuesResponse"
+    get:
+      tags:
+        - concepts
+      description: >
+        Returns all column names/values for a given domain.
+      operationId: "getValuesFromDomain"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: path
+          name: domain
+          required: true
+          type: string
+      responses:
+        200:
+          description: the values/column names in the domain.
+          schema:
+            $ref: "#/definitions/DomainValuesResponse"
 
-### Surveys #############################################
+  ### Surveys #############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyInfo:
     get:
       tags:
@@ -1703,7 +1720,7 @@ paths:
             items:
               $ref: "#/definitions/SurveyAnswerResponse"
 
-### Data set ############################################
+  ### Data set ############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
     post:
       tags:
@@ -1731,46 +1748,46 @@ paths:
             $ref: "#/definitions/DataSetCodeResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    get:
+      tags:
+        - dataSet
+      description: Returns all data sets in a workspace
+      operationId: "getDataSetsInWorkspace"
+      responses:
+        200:
+          description: A list of data sets.
+          schema:
+            $ref: "#/definitions/DataSetListResponse"
+    post:
+      tags:
+        - dataSet
+      description: >
+        Creates Data Set
+      operationId: "createDataSet"
       parameters:
         - $ref: '#/parameters/workspaceNamespace'
         - $ref: '#/parameters/workspaceId'
-      get:
-        tags:
-          - dataSet
-        description: Returns all data sets in a workspace
-        operationId: "getDataSetsInWorkspace"
-        responses:
-          200:
-            description: A list of data sets.
-            schema:
-              $ref: "#/definitions/DataSetListResponse"
-      post:
-        tags:
-          - dataSet
-        description: >
-          Creates Data Set
-        operationId: "createDataSet"
-        parameters:
-          - $ref: '#/parameters/workspaceNamespace'
-          - $ref: '#/parameters/workspaceId'
-          - in: body
-            name: dataSetRequest
-            required: true
-            schema:
-              $ref: "#/definitions/DataSetRequest"
-        responses:
-          200:
-            description: Data set has been created successfully
-            schema:
-              $ref: "#/definitions/DataSet"
-          400:
-            description: Invalid data set request
-            schema:
-              $ref: "#/definitions/ErrorResponse"
-          409:
-            description: Data Set with the same name already exists
-            schema:
-              $ref: "#/definitions/ErrorResponse"
+        - in: body
+          name: dataSetRequest
+          required: true
+          schema:
+            $ref: "#/definitions/DataSetRequest"
+      responses:
+        200:
+          description: Data set has been created successfully
+          schema:
+            $ref: "#/definitions/DataSet"
+        400:
+          description: Invalid data set request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        409:
+          description: Data Set with the same name already exists
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
   /v1/{workspaceNamespace}/{workspaceId}/data-sets/{dataSetId}:
     parameters:
@@ -2025,13 +2042,13 @@ definitions:
     type: string
     description: actions a user can have authority/permission to perform
     enum: [
-        # Note: Swagger trims any common prefix from enum values' corresponding
-        # Java fields by default; this has no side-effect currently as there is
-        # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
-        REVIEW_RESEARCH_PURPOSE,
-        DEVELOPER,
-        ACCESS_CONTROL_ADMIN,
-        FEATURED_WORKSPACE_ADMIN
+      # Note: Swagger trims any common prefix from enum values' corresponding
+      # Java fields by default; this has no side-effect currently as there is
+      # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
+      REVIEW_RESEARCH_PURPOSE,
+      DEVELOPER,
+      ACCESS_CONTROL_ADMIN,
+      FEATURED_WORKSPACE_ADMIN
     ]
 
   PageVisit:
@@ -2049,27 +2066,27 @@ definitions:
   WorkspaceListResponse:
     type: object
     required:
-     - items
+      - items
     properties:
       items:
         type: "array"
         items:
-           $ref: "#/definitions/Workspace"
+          $ref: "#/definitions/Workspace"
 
   WorkspaceResponseListResponse:
     type: object
     required:
-     - items
+      - items
     properties:
       items:
         type: "array"
         items:
-           $ref: "#/definitions/WorkspaceResponse"
+          $ref: "#/definitions/WorkspaceResponse"
 
   Workspace:
     type: object
     required:
-     - name
+      - name
     properties:
       id:
         type: string
@@ -2122,7 +2139,7 @@ definitions:
   ShareWorkspaceRequest:
     type: object
     required:
-     - items
+      - items
     properties:
       workspaceEtag:
         type: string
@@ -2133,7 +2150,7 @@ definitions:
       items:
         type: "array"
         items:
-           $ref: "#/definitions/UserRole"
+          $ref: "#/definitions/UserRole"
 
   WorkspaceUserRolesResponse:
     type: object
@@ -2164,7 +2181,7 @@ definitions:
   CloneWorkspaceRequest:
     type: object
     required:
-     - workspace
+      - workspace
     properties:
       includeUserRoles:
         type: boolean
@@ -2198,7 +2215,7 @@ definitions:
   UpdateWorkspaceRequest:
     type: object
     required:
-     - workspace
+      - workspace
     properties:
       workspace:
         $ref: "#/definitions/Workspace"
@@ -2216,22 +2233,22 @@ definitions:
   ResearchPurpose:
     type: object
     required:
-     - diseaseFocusedResearch
-     - methodsDevelopment
-     - controlSet
-     - ancestry
-     - commercialPurpose
-     - population
-     - reviewRequested
-     - containsUnderservedPopulation
-     - socialBehavioral
-     - populationHealth
-     - educational
-     - otherPurpose
-     - reasonForAllOfUs
-     - intendedStudy
-     - anticipatedFindings
-     - drugDevelopment
+      - diseaseFocusedResearch
+      - methodsDevelopment
+      - controlSet
+      - ancestry
+      - commercialPurpose
+      - population
+      - reviewRequested
+      - containsUnderservedPopulation
+      - socialBehavioral
+      - populationHealth
+      - educational
+      - otherPurpose
+      - reasonForAllOfUs
+      - intendedStudy
+      - anticipatedFindings
+      - drugDevelopment
     properties:
       additionalNotes:
         type: string
@@ -2368,6 +2385,16 @@ definitions:
       isBypassed:
         type: boolean
 
+  CohortReviewListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/CohortReview"
+
   CohortListResponse:
     type: object
     required:
@@ -2376,7 +2403,7 @@ definitions:
       items:
         type: "array"
         items:
-           $ref: "#/definitions/Cohort"
+          $ref: "#/definitions/Cohort"
 
   Cohort:
     type: object
@@ -2421,7 +2448,7 @@ definitions:
     properties:
       cohortName:
         description: >
-         The name of a cohort that is to be evaluated. Either this or cohortSpec should be specified
+          The name of a cohort that is to be evaluated. Either this or cohortSpec should be specified
         type: string
       cohortSpec:
         description: >
@@ -2506,7 +2533,7 @@ definitions:
       items:
         type: "array"
         items:
-           $ref: "#/definitions/ConceptSet"
+          $ref: "#/definitions/ConceptSet"
 
   ConceptSet:
     type: object
@@ -2736,7 +2763,7 @@ definitions:
       items:
         type: "array"
         items:
-           $ref: "#/definitions/DataSet"
+          $ref: "#/definitions/DataSet"
 
 
   DataSetCodeResponse:
@@ -3386,8 +3413,8 @@ definitions:
         type: string
 
   RecentResourceRequest:
-      type: object
-      properties:
-        notebookName:
-          type: string
+    type: object
+    properties:
+      notebookName:
+        type: string
 

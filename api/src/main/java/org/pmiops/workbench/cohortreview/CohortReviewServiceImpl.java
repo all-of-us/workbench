@@ -17,6 +17,7 @@ import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -25,6 +26,7 @@ import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.PageRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,6 +89,13 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
+  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
+      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
+    return workspaceService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, requiredAccess);
+  }
+
+  @Override
   public CohortReview findCohortReview(Long cohortId, Long cdrVersionId) {
     CohortReview cohortReview =
         cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
@@ -98,6 +107,14 @@ public class CohortReviewServiceImpl implements CohortReviewService {
               cohortId, cdrVersionId));
     }
     return cohortReview;
+  }
+
+  @Override
+  public List<CohortReview> getRequiredWithCohortReviews(String ns, String firecloudName) {
+    return cohortReviewDao.findByFirecloudNameAndActiveStatus(
+        ns,
+        firecloudName,
+        StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   @Override
