@@ -7,6 +7,7 @@ import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -315,19 +316,24 @@ export const ListOverview = withCurrentWorkspace()(
                 onClick={() => this.setState({saveModal: true})}
                 style={styles.saveButton}
                 disabled={loading || this.hasErrors}>CREATE COHORT</Button>}
-              <Clickable style={{...styles.actionIcon, ...styles.disabled}}
-                onClick={() => this.navigateTo('notebook')} disabled>
-                <ClrIcon shape='export' className='is-solid' size={30} title='Export to notebook' />
-              </Clickable>
-              <Clickable style={{...styles.actionIcon, ...(disableIcon ? styles.disabled : {})}}
-                onClick={() => this.setState({deleting: true})}>
-                <ClrIcon shape='trash' className='is-solid' size={30} title='Delete cohort' />
-              </Clickable>
-              <Clickable style={{...styles.actionIcon, ...(disableIcon ? styles.disabled : {})}}
-                onClick={() => this.navigateTo('review')}>
-                <ClrIcon shape='copy' className='is-solid' size={30}
-                  title='Review participant level data' />
-              </Clickable>
+              <TooltipTrigger content={<div>Export to notebook</div>}>
+                <Clickable style={{...styles.actionIcon, ...styles.disabled}}
+                  onClick={() => this.navigateTo('notebook')} disabled>
+                  <ClrIcon shape='export' className='is-solid' size={30} />
+                </Clickable>
+              </TooltipTrigger>
+              <TooltipTrigger content={<div>Delete cohort</div>}>
+                <Clickable style={{...styles.actionIcon, ...(disableIcon ? styles.disabled : {})}}
+                  onClick={() => this.setState({deleting: true})}>
+                  <ClrIcon shape='trash' className='is-solid' size={30} />
+                </Clickable>
+              </TooltipTrigger>
+              <TooltipTrigger content={<div>Review participant level data</div>}>
+                <Clickable style={{...styles.actionIcon, ...(disableIcon ? styles.disabled : {})}}
+                  onClick={() => this.navigateTo('review')}>
+                  <ClrIcon shape='copy' className='is-solid' size={30} />
+                </Clickable>
+              </TooltipTrigger>
             </div>
             <h2 style={styles.totalCount}>
               Total Count: &nbsp;
@@ -336,7 +342,12 @@ export const ListOverview = withCurrentWorkspace()(
                 <span>{total.toLocaleString()}</span>
               }
               {this.hasErrors && <span>
-                -- <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
+                -- <TooltipTrigger content={this.hasTemporalError ?
+                    'Please complete criteria selections before saving temporal relationship.' :
+                    `All criteria are suppressed. Un-suppress criteria to update the total count
+                     based on the visible criteria.`}>
+                  <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
+                </TooltipTrigger>
               </span>}
             </h2>
           </div>
