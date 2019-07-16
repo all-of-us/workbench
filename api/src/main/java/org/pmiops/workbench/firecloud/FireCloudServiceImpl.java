@@ -207,6 +207,13 @@ public class FireCloudServiceImpl implements FireCloudService {
     BillingApi billingApi = billingApiProvider.get();
     CreateRawlsBillingProjectFullRequest request = new CreateRawlsBillingProjectFullRequest();
     request.setBillingAccount("billingAccounts/" + configProvider.get().firecloud.billingAccountId);
+    if (configProvider.get().featureFlags.enableVpcFlowLogs) {
+      request.setHighSecurityNetwork(true);
+      request.setEnableFlowLogs(true);
+    } else {
+      request.setHighSecurityNetwork(false);
+      request.setEnableFlowLogs(false);
+    }
     request.setProjectName(projectName);
     retryHandler.run(
         (context) -> {

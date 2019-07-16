@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -30,6 +32,7 @@ import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.auth.OAuth;
+import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.firecloud.model.SystemStatus;
@@ -41,6 +44,8 @@ public class FireCloudServiceImplTest {
   private static final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
 
   private FireCloudServiceImpl service;
+
+  private WorkbenchConfig workbenchConfig;
 
   @Mock private ProfileApi profileApi;
   @Mock private BillingApi billingApi;
@@ -58,10 +63,10 @@ public class FireCloudServiceImplTest {
 
   @Before
   public void setUp() {
-    WorkbenchConfig workbenchConfig = new WorkbenchConfig();
-    workbenchConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.firecloud.baseUrl = "https://api.firecloud.org";
     workbenchConfig.firecloud.debugEndpoints = true;
+    workbenchConfig.firecloud.billingAccountId = "test-billing-account";
 
     service =
         new FireCloudServiceImpl(
@@ -203,5 +208,41 @@ public class FireCloudServiceImplTest {
     // The impersonated access token should be assigned to the generated API client.
     OAuth oauth = (OAuth) apiClient.getAuthentication("googleoauth");
     assertThat(oauth.getAccessToken()).isEqualTo("impersonated-access-token");
+  }
+
+  @Test
+  public void testCreateAllOfUsBillingProject() throws Exception {
+    workbenchConfig.featureFlags.enableVpcFlowLogs = false;
+
+    service.createAllOfUsBillingProject("project-name");
+
+    ArgumentCaptor<CreateRawlsBillingProjectFullRequest> captor =
+        ArgumentCaptor.forClass(CreateRawlsBillingProjectFullRequest.class);
+    verify(billingApi).createBillingProjectFull(captor.capture());
+    CreateRawlsBillingProjectFullRequest request = captor.getValue();
+
+    // N.B. FireCloudServiceImpl doesn't add the project prefix; this is done by callers such
+    // as BillingProjectBufferService.
+    assertThat(request.getProjectName()).isEqualTo("project-name");
+    // FireCloudServiceImpl always adds the "billingAccounts/" prefix to the billing account
+    // from config.
+    assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
+    assertThat(request.getEnableFlowLogs()).isFalse();
+    assertThat(request.getHighSecurityNetwork()).isFalse();
+  }
+
+  @Test
+  public void testVpcFlowLogsParams() throws Exception {
+    workbenchConfig.featureFlags.enableVpcFlowLogs = true;
+
+    service.createAllOfUsBillingProject("project-name");
+
+    ArgumentCaptor<CreateRawlsBillingProjectFullRequest> captor =
+        ArgumentCaptor.forClass(CreateRawlsBillingProjectFullRequest.class);
+    verify(billingApi).createBillingProjectFull(captor.capture());
+    CreateRawlsBillingProjectFullRequest request = captor.getValue();
+
+    assertThat(request.getEnableFlowLogs()).isTrue();
+    assertThat(request.getHighSecurityNetwork()).isTrue();
   }
 }
