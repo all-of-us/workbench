@@ -15,6 +15,8 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
+import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.compliance.ComplianceServiceImpl;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.BigQueryConfig;
 import org.pmiops.workbench.config.CacheSpringConfiguration;
@@ -24,6 +26,7 @@ import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.WorkbenchDbConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.Config;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +34,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
@@ -58,7 +62,9 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
     ConceptService.class,
     ConceptBigQueryService.class,
     BigQueryService.class,
-    CdrBigQuerySchemaConfigService.class
+    CdrBigQuerySchemaConfigService.class,
+    UserService.class,
+    ComplianceServiceImpl.class
 })
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")
@@ -130,6 +136,7 @@ public class CommandLineToolConfig {
    */
   @Bean
   @Lazy
+  @Primary
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
     Config config = configDao.findOne(Config.MAIN_CONFIG_ID);
     Gson gson = new Gson();
