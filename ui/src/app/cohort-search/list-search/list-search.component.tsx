@@ -316,9 +316,10 @@ export const ListSearch = withCurrentWorkspace()(
           </div>}
           <div style={{...styles.nameDiv}}>
             <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
+            {brand && <span> (BRAND NAME)</span>}
           </div>
         </td>
-        <td style={styles.columnBody}>{row.type}</td>
+        <td style={styles.columnBody}>{!brand && row.type}</td>
         <td style={styles.columnBody}>{row.count > -1 && row.count.toLocaleString()}</td>
         <td style={{...styles.columnBody, padding: '0.2rem'}}>
           {row.hasHierarchy &&
