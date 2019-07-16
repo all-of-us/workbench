@@ -846,17 +846,17 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </div>}
           <div style={{marginTop: '0.5rem'}}>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
-              onChange={v => this.updateResearchPurpose('population', true)}
-              checked={this.state.workspace.researchPurpose.population}/>
-            <label style={styles.text}>Yes, I am interested in the focused study of specific
-            population(s), either on their own or in comparison to other groups.</label>
+                         onChange={v => this.updateResearchPurpose('population', false)}
+                         checked={!this.state.workspace.researchPurpose.population}/>
+            <label style={styles.text}>No, I am not interested in focusing on
+              specific population(s) in my research.</label>
           </div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
-              onChange={v => this.updateResearchPurpose('population', false)}
-              checked={!this.state.workspace.researchPurpose.population}/>
-            <label style={styles.text}>No, I am not interested in focusing on
-              specific population(s) in my research.</label>
+                         onChange={v => this.updateResearchPurpose('population', true)}
+                         checked={this.state.workspace.researchPurpose.population}/>
+            <label style={styles.text}>Yes, I am interested in the focused study of specific
+              population(s), either on their own or in comparison to other groups.</label>
           </div>
           <div style={{...styles.text, marginLeft: '2rem'}}>
             <strong>If "Yes": </strong> Please specify the demographic category or categories of the
