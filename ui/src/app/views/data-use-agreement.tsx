@@ -8,9 +8,10 @@ import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {Profile} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
@@ -46,6 +47,9 @@ const IndentedOl = (props) => {
 const coreValuesUrl =
   'https://docs.google.com/document/d/1UG3soAONYE0prmhMgleBIoO8fl3Gh5THIPLeoJzaTmc/edit';
 
+const dataUseAgreementVersion = 1;
+
+{/* NOTE: Make sure to update dataUseAgreementVersion if there is any change to the DUA text. */}
 const DataUseAgreementText = () => {
   return <div>
     <BolderHeader>All of Us Research Program - Data Use Agreement</BolderHeader>
@@ -209,7 +213,8 @@ const DataUseAgreementText = () => {
 };
 
 const DuaTextInput = (props) => {
-  return <TextInput {...props}
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  return <TextInput {...fp.omit(['data-test-id'], props)}
                     style={{
                       padding: '0 1ex',
                       width: '12rem',
@@ -222,7 +227,7 @@ const DuaTextInput = (props) => {
 const InitialsAgreement = (props) => {
   return <div style={{display: 'flex', marginTop: '0.5rem'}}>
     <DuaTextInput onChange={props.onChange} value={props.value}
-                  placeholder='INITIALS'
+                  placeholder='INITIALS' data-test-id='dua-initials-input'
                   style={{width: '4ex', textAlign: 'center', padding: 0}}/>
     <div style={{marginLeft: '0.5rem'}}>{props.children}</div>
   </div>;
@@ -254,9 +259,9 @@ export const DataUseAgreement = withUserProfile()(
       };
     }
 
-    async submitDataUseAgreement() {
+    submitDataUseAgreement() {
       this.setState({submitting: true});
-      profileApi().submitDataUseAgreement().then((profile) => {
+      profileApi().submitDataUseAgreement(dataUseAgreementVersion).then((profile) => {
         this.props.profileState.updateCache(profile);
         window.history.back();
       });
@@ -283,14 +288,15 @@ export const DataUseAgreement = withUserProfile()(
         <div style={{height: '1rem'}}/>
         <div style={{
           display: 'flex', flexDirection: 'column', borderRadius: '1rem',
-          backgroundColor: '#D4D3E0', padding: '1rem', alignItems: 'flex-start',
-          position: 'relative'
+          backgroundColor: colorWithWhiteness(colors.primary, 0.8),
+          padding: '1rem', alignItems: 'flex-start', position: 'relative'
         }}>
           {submitting && <SpinnerOverlay/>}
           <SecondHeader style={{marginTop: 0}}>Agreement:</SecondHeader>
           <div style={{marginTop: '0.5rem', fontWeight: 600}}>I
             <DuaTextInput placeholder='FIRST AND LAST NAME' style={{margin: '0 1ex'}}
-                          onChange={(v) => this.setState({name: v})} value={name}/>
+                          onChange={(v) => this.setState({name: v})} value={name}
+                          data-test-id='dua-name-input'/>
             ("Authorized User") have
             personally reviewed this data use agreement. I agree to follow each of the policies
             and procedures it describes.
@@ -326,7 +332,7 @@ export const DataUseAgreement = withUserProfile()(
           <TooltipTrigger content={errors && 'All fields required'}>
             <Button
               style={{marginTop: '1rem', cursor: errors && 'not-allowed', padding: '0 1.3rem'}}
-              disabled={errors || submitting}
+              disabled={errors || submitting} data-test-id='submit-dua-button'
               onClick={() => this.submitDataUseAgreement()}>Submit</Button>
           </TooltipTrigger>
         </div>

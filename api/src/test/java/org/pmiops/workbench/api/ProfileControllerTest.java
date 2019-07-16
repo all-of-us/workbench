@@ -234,6 +234,23 @@ public class ProfileControllerTest {
   }
 
   @Test
+  public void testSubmitDataUseAgreement_success() throws Exception {
+    createUser();
+    assertThat(profileController.submitDataUseAgreement(0).getStatusCode())
+        .isEqualTo(HttpStatus.OK);
+  }
+
+  @Test
+  public void testSubmitDataUseAgreement_updateVersion() throws Exception {
+    createUser();
+    int oldDuaVersion = 0;
+    int newDuaVersion = 1;
+    profileController.submitDataUseAgreement(oldDuaVersion);
+    profileController.submitDataUseAgreement(newDuaVersion);
+    assertThat(user.getDataUseAgreementSignedVersion() == newDuaVersion);
+  }
+
+  @Test
   public void testMe_success() throws Exception {
     createUser();
 
@@ -850,7 +867,6 @@ public class ProfileControllerTest {
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
     config.firecloud.billingRetryCount = 2;
     config.firecloud.registeredDomainName = "";
-    config.access.enableEraCommons = false;
     config.access.enableComplianceTraining = false;
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
     // All access modules are enabled for these tests. So completing any one module should maintain

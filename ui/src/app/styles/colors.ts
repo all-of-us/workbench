@@ -24,6 +24,11 @@ export default {
     notebook: '#8BC990'
   },
   white: '#fff',
+  workspacePermissionsHighlights: {
+    'OWNER': '#4996A2',
+    'READER': '#8F8E8F',
+    'WRITER': '#92B572'
+  }
 };
 
 // Range for whiteness is {-1, 1} where -1 is fully black, 0 is the color, and 1 is fully white.

@@ -128,6 +128,9 @@ public class ProfileService {
     if (user.getDataUseAgreementBypassTime() != null) {
       profile.setDataUseAgreementBypassTime(user.getDataUseAgreementBypassTime().getTime());
     }
+    if (user.getDataUseAgreementSignedVersion() != null) {
+      profile.setDataUseAgreementSignedVersion(user.getDataUseAgreementSignedVersion());
+    }
     if (user.getTwoFactorAuthCompletionTime() != null) {
       profile.setTwoFactorAuthCompletionTime(user.getTwoFactorAuthCompletionTime().getTime());
     }

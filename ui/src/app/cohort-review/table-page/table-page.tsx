@@ -81,7 +81,7 @@ const styles = reactStyles({
   },
   columnHeader: {
     background: '#f4f4f4',
-    color: '#262262',
+    color: colors.primary,
     fontWeight: 600,
   },
   columnBody: {
@@ -96,7 +96,7 @@ const styles = reactStyles({
     cursor: 'pointer',
   },
   graphColumnBody: {
-    background: '#ffffff',
+    background: colors.white,
     padding: '5px',
     verticalAlign: 'top',
     textAlign: 'left',

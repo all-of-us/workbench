@@ -67,7 +67,8 @@ export const LoginReactComponent: React.FunctionComponent<{
         <SmallHeader>
           Don't have an account?
         </SmallHeader>
-        <Button type='secondary' style={{fontSize: '10px', margin: '.25rem .5rem .25rem 0'}}
+        <Button type='secondary' style={{fontSize: '10px', margin: '.25rem .5rem .25rem 0',
+          border: `1px solid ${colors.primary}`, height: '48px'}}
                 onClick={onCreateAccount}>
           Create Account
         </Button>
