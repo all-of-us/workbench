@@ -318,11 +318,9 @@ export const ListSearch = withCurrentWorkspace()(
             }
             {loadingIngredients && <Spinner size={16}/>}
           </div>}
-          <div style={{...styles.nameDiv}}>
-            <span style={{fontWeight: 'bold'}}>{row.code}</span> {row.name}
-            {brand && <span> (BRAND NAME)</span>}
-          </div>
+          <div style={styles.nameDiv}>{row.name}{brand && <span> (BRAND NAME)</span>}</div>
         </td>
+        <td style={styles.columnBody}>{row.code}</td>
         <td style={styles.columnBody}>{!brand && row.type}</td>
         <td style={styles.columnBody}>{row.count > -1 && row.count.toLocaleString()}</td>
         <td style={{...styles.columnBody, padding: '0.2rem'}}>
@@ -379,9 +377,10 @@ export const ListSearch = withCurrentWorkspace()(
             <thead className='p-datatable-thead'>
               <tr>
                 <th style={styles.columnHeader}>Name</th>
-                <th style={{...styles.columnHeader, width: '15%'}}>Vocab</th>
-                <th style={{...styles.columnHeader, width: '15%'}}>Count</th>
-                <th style={{...styles.columnHeader, padding: '0.2rem 0.5rem', width: '10%'}}>
+                <th style={{...styles.columnHeader, width: '10%'}}>Code</th>
+                <th style={{...styles.columnHeader, width: '10%'}}>Vocab</th>
+                <th style={{...styles.columnHeader, width: '10%'}}>Count</th>
+                <th style={{...styles.columnHeader, padding: '0.2rem 0.5rem', width: '7%'}}>
                   More Info
                 </th>
               </tr>
