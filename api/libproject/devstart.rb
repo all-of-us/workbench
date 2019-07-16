@@ -701,6 +701,19 @@ Generates big query denormalized dataset tables. Used by Data Set Builder. Must 
                             :fn => ->(*args) { make_bq_denormalized_dataset(*args) }
                         })
 
+def make_bq_dataset_linking(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh} + args
+end
+
+Common.register_command({
+                            :invocation => "make-bq-dataset-linking",
+                            :description => "make-bq-dataset-linking --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query dataset linking tables. Used by Data Set Builder to show users values information.
+Must be run once when a new cdr is released",
+                            :fn => ->(*args) { make_bq_denormalized_dataset(*args) }
+                        })
+
 def generate_criteria_table(*args)
   common = Common.new
   common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-criteria-table.sh} + args
