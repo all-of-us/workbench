@@ -258,7 +258,6 @@ export const DataUseAgreement = withUserProfile()(
       this.setState({submitting: true});
       profileApi().submitDataUseAgreement().then((profile) => {
         this.props.profileState.updateCache(profile);
-        this.setState({submitting: false});
         window.history.back();
       });
     }
