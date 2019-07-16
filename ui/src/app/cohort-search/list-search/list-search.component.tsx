@@ -35,6 +35,10 @@ const styles = reactStyles({
     border: 0,
     outline: 'none',
   },
+  drugsText: {
+    fontSize: '12px',
+    marginTop: '0.25rem'
+  },
   attrIcon: {
     marginRight: '0.5rem',
     color: '#216FB4',
@@ -334,6 +338,8 @@ export const ListSearch = withCurrentWorkspace()(
     render() {
       const {wizard: {domain}} = this.props;
       const {data, error, ingredients, loading, results, sourceMatch} = this.state;
+      const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '3.75rem'}
+        : styles.listContainer;
       return <div style={{overflow: 'auto'}}>
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
@@ -342,8 +348,12 @@ export const ListSearch = withCurrentWorkspace()(
               placeholder={`Search ${domainToTitle(domain)} by code or description`}
               onKeyPress={this.handleInput} />
           </div>
+          {domain === DomainType.DRUG && <div style={styles.drugsText}>
+            Your search may bring back brand name drugs. You must select ingredients to include them
+             in your cohort.
+          </div>}
         </div>
-        {!loading && data && <div style={styles.listContainer}>
+        {!loading && data && <div style={listStyle}>
           {results === 'all' && sourceMatch && <div style={{marginBottom: '0.75rem'}}>
             There are {sourceMatch.count.toLocaleString()} participants with source code
             &nbsp;{sourceMatch.code}. For more results, browse
