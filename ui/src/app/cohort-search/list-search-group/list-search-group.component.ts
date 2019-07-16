@@ -124,7 +124,7 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
           initExisting.next(false);
         }
       }
-      if (this.activeItems) {
+      if (this.activeItems && (!this.temporal || !this.temporalError)) {
         this.loading = true;
         this.error = false;
         this.getGroupCount();
