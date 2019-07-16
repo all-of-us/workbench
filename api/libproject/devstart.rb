@@ -711,7 +711,7 @@ Common.register_command({
                             :description => "make-bq-dataset-linking --bq-project <PROJECT> --bq-dataset <DATASET>
 Generates big query dataset linking tables. Used by Data Set Builder to show users values information.
 Must be run once when a new cdr is released",
-                            :fn => ->(*args) { make_bq_denormalized_dataset(*args) }
+                            :fn => ->(*args) { make_bq_denormalized_linking(*args) }
                         })
 
 def generate_criteria_table(*args)
