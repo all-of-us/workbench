@@ -7,10 +7,47 @@ import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.servi
 import {mapParameter, stripHtml} from 'app/cohort-search/utils';
 import {CheckBox} from 'app/components/inputs';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
+
+const styles = reactStyles({
+  countPreview: {
+    backgroundColor: '#E4F3FC',
+    padding: '0.5rem',
+    marginTop: '1rem',
+    position: 'absolute',
+    width: '93%',
+    bottom: '1rem',
+  },
+  label: {
+    color: '#262262',
+    padding: '0.5rem',
+    fontWeight: 500,
+    display: 'flex',
+  },
+  orCircle: {
+    backgroundColor: '#e2e2e9',
+    borderRadius: '50%',
+    width: '2.25rem',
+    height: '2.25rem',
+    margin: '0.75rem 3rem 0.25rem',
+    lineHeight: '2.25rem',
+    textAlign: 'center',
+    fontSize: '0.45rem',
+  },
+  container: {
+    display: 'flex',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    padding: '0.2rem 0.5rem 0',
+  },
+  dropdown: {
+    width: '12rem',
+    marginRight: '1rem',
+  }
+});
 
 const optionUtil = {
   ANY: {display: 'Any', code: 'Any'},
@@ -388,19 +425,19 @@ export const AttributesPage = withCurrentWorkspace() (
       const {criterion} = this.props;
       const {count, dropdowns, error, form, loading, options} = this.state;
       return <div>
-        <section className='form-block'>
+        <section style={{margin: '0.5rem 0 1.5rem'}}>
           {this.isMeasurement && <div>
-          <div className='attr-name-color'>{this.displayName}</div>
-          <CheckBox onChange={(v) => this.radioChange(v)}/> Any value (lab exists)
-          {!form.EXISTS && form.NUM.length && <div className='or-circle'>OR</div>}
+            <div style={styles.label}>{this.displayName}</div>
+            <CheckBox onChange={(v) => this.radioChange(v)}/> Any value (lab exists)
+            {!form.EXISTS && form.NUM.length > 0 && <div style={styles.orCircle}>OR</div>}
           </div>}
-          {form.EXISTS && <React.Fragment>
+          {!form.EXISTS && <React.Fragment>
             {form.NUM.map((attr, a) => <div key={a}>
-              {(this.isMeasurement || this.isBP) && <div className='attr-name-color'>
+              {(this.isMeasurement || this.isBP) && <div style={styles.label}>
                 {dropdowns.labels[a]}
               </div>}
-              <div className='container'>
-                <div className='dropdown-width'>
+              <div style={styles.container}>
+                <div style={styles.dropdown}>
                   <Dropdown value={attr.operator} options={options} placeholder='Select Operator'
                     onChange={(e) => this.selectChange(a, e.value)}/>
                 </div>
@@ -412,7 +449,7 @@ export const AttributesPage = withCurrentWorkspace() (
                     onChange={(e) => this.inputChange(e.target.value, a, 0)}/>
                   {this.hasUnits && <span>{PM_UNITS[criterion.subtype]}</span>}
                 </div>}
-                {this.isBetween(a) && <div className='form-group and-text'>
+                {this.isBetween(a) && <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>
                   <div>and</div>
                 </div>}
                 {this.isBetween(a) && <div className='form-group range-container'>
@@ -423,23 +460,23 @@ export const AttributesPage = withCurrentWorkspace() (
                     onChange={(e) => this.inputChange(e.target.value, a, 1)}/>
                   {this.hasUnits && <span>{PM_UNITS[criterion.subtype]}</span>}
                 </div>}
-                {this.isMeasurement && this.showInput(a) && <span className='range-padding'>
+                {this.isMeasurement && this.showInput(a) && <span style={{paddingTop: '0.2rem'}}>
                   Range: {attr.MIN} - {attr.MAX}
                 </span>}
               </div>
             </div>)}
-            {form.CAT.length && <React.Fragment>
+            {form.CAT.length > 0 && <React.Fragment>
               <div className='or-circle'>OR</div>
-              <div className='attr-name-color'>Categorical Values</div>
+              <div style={styles.label}>Categorical Values</div>
               <div className='form-group'>
                 {form.CAT.map((attr, a) => <React.Fragment>
-                  <CheckBox key={a} checked={attr.checked} onChange={(e) => {}} />
+                  <CheckBox key={a} checked={attr.checked} onChange={(e) => console.log(e)} />
                   {attr.conceptName} <span className='badge badge-info'>{attr.estCount}</span>
                 </React.Fragment>)}
               </div>
             </React.Fragment>}
           </React.Fragment>}
-          <div className='count-preview'>
+          <div style={styles.countPreview}>
             <div className='row'>
               {this.showCalc && <div className='col-lg-3'>
                 <button type='button'
