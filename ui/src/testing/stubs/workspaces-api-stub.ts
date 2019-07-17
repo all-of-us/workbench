@@ -216,7 +216,8 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  reviewWorkspace(workspaceNamespace: string, workspaceId: string, review?: ResearchPurposeReviewRequest): Promise<EmptyResponse> {
+  reviewWorkspace(workspaceNamespace: string, workspaceId: string,
+    review?: ResearchPurposeReviewRequest): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(resolve => {
       resolve({});
     });
