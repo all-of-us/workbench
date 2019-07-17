@@ -82,48 +82,43 @@ public class ElasticFiltersTest {
     // Generate a simple test criteria tree
     // 1
     // | - 2
-    // | - 3 - 4
-    cbCriteriaDao.save(
+    // | - 3
+    CBCriteria icd9Parent =
         icd9Criteria()
-            .id(1)
             .code("001")
             .conceptId("771")
             .group(true)
             .selectable(false)
+            .standard(false)
             .parentId(0)
-            .path(""));
+            .path("")
+            .synonyms("[CONDITION_rank1]");
+    cbCriteriaDao.save(icd9Parent);
+
     cbCriteriaDao.save(
         icd9Criteria()
-            .id(2)
             .code("001.002")
             .conceptId("772")
             .group(false)
             .selectable(true)
-            .parentId(1)
-            .path("1"));
+            .standard(false)
+            .parentId(icd9Parent.getId())
+            .path(String.valueOf(icd9Parent.getId()))
+            .synonyms("[CONDITION_rank1]"));
     cbCriteriaDao.save(
         icd9Criteria()
-            .id(3)
             .code("001.003")
             .conceptId("773")
             .group(true)
             .selectable(true)
-            .parentId(1)
-            .path("1"));
-    cbCriteriaDao.save(
-        icd9Criteria()
-            .id(4)
-            .code("001.003.004")
-            .conceptId("774")
-            .group(false)
-            .selectable(true)
-            .parentId(3)
-            .path("1.3"));
+            .standard(false)
+            .parentId(icd9Parent.getId())
+            .path(String.valueOf(icd9Parent.getId()))
+            .synonyms("[CONDITION_rank1]"));
 
     // Singleton SNOMED code.
     cbCriteriaDao.save(
         new CBCriteria()
-            .id(5)
             .code("005")
             .conceptId("775")
             .domainId(DomainType.CONDITION.toString())
@@ -134,10 +129,9 @@ public class ElasticFiltersTest {
             .parentId(0)
             .path(""));
 
-    // Four node PPI tree, survey, question, 2 answers.
-    cbCriteriaDao.save(
+    // Four node PPI tree, survey, question, 1 answer.
+    CBCriteria survey =
         basicsCriteria()
-            .id(6)
             .code("006")
             .group(true)
             .domainId(DomainType.SURVEY.toString())
@@ -147,10 +141,10 @@ public class ElasticFiltersTest {
             .selectable(true)
             .parentId(0)
             .path("")
-            .synonyms("+[SURVEY_rank1]"));
-    cbCriteriaDao.save(
+            .synonyms("+[SURVEY_rank1]");
+    cbCriteriaDao.save(survey);
+    CBCriteria question =
         basicsCriteria()
-            .id(7)
             .code("007")
             .conceptId("777")
             .domainId(DomainType.SURVEY.toString())
@@ -159,12 +153,12 @@ public class ElasticFiltersTest {
             .standard(false)
             .group(true)
             .selectable(true)
-            .parentId(6)
-            .path("6.7")
-            .synonyms("+[SURVEY_rank1]"));
+            .parentId(survey.getId())
+            .path(String.valueOf(survey.getId()))
+            .synonyms("+[SURVEY_rank1]");
+    cbCriteriaDao.save(question);
     cbCriteriaDao.save(
         basicsCriteria()
-            .id(8)
             .code("008")
             // Concept ID matches the question.
             .conceptId("7771")
@@ -174,8 +168,8 @@ public class ElasticFiltersTest {
             .standard(false)
             .group(false)
             .selectable(true)
-            .parentId(7)
-            .path("6.7")
+            .parentId(question.getId())
+            .path(String.valueOf(survey.getId()))
             .synonyms("+[SURVEY_rank1]"));
 
     // drug tree
@@ -185,9 +179,8 @@ public class ElasticFiltersTest {
         "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (19069022, 21600009)");
-    cbCriteriaDao.save(
+    CBCriteria drugParent =
         drugCriteria()
-            .id(10)
             .code("A")
             .conceptId("21600001")
             .group(true)
@@ -195,49 +188,56 @@ public class ElasticFiltersTest {
             .parentId(0)
             .path("")
             .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString()));
-    cbCriteriaDao.save(
+            .type(CriteriaType.ATC.toString());
+    cbCriteriaDao.save(drugParent);
+    CBCriteria drug1 =
         drugCriteria()
-            .id(11)
             .code("A01")
             .conceptId("21600002")
             .group(true)
             .selectable(true)
-            .parentId(10)
-            .path("10")
+            .parentId(drugParent.getId())
+            .path(String.valueOf(drugParent.getId()))
             .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString()));
-    cbCriteriaDao.save(
+            .type(CriteriaType.ATC.toString());
+    cbCriteriaDao.save(drug1);
+    CBCriteria drug2 =
         drugCriteria()
-            .id(12)
             .code("A01A")
             .conceptId("21600003")
             .group(true)
             .selectable(true)
-            .parentId(11)
-            .path("10.11")
+            .parentId(drug1.getId())
+            .path(drugParent.getId() + "." + drug1.getId())
             .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString()));
+            .type(CriteriaType.ATC.toString());
+    cbCriteriaDao.save(drug2);
+    CBCriteria drug3 =
+        cbCriteriaDao.save(
+            drugCriteria()
+                .code("A01AA")
+                .conceptId("21600004")
+                .group(true)
+                .selectable(true)
+                .parentId(drug2.getId())
+                .path(drugParent.getId() + "." + drug1.getId() + "." + drug2.getId())
+                .domainId(DomainType.DRUG.toString())
+                .type(CriteriaType.ATC.toString()));
     cbCriteriaDao.save(
         drugCriteria()
-            .id(13)
-            .code("A01AA")
-            .conceptId("21600004")
-            .group(true)
-            .selectable(true)
-            .parentId(12)
-            .path("10.11.12")
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString()));
-    cbCriteriaDao.save(
-        drugCriteria()
-            .id(14)
             .code("9873")
             .conceptId("19069022")
             .group(false)
             .selectable(true)
-            .parentId(13)
-            .path("10.11.12.13")
+            .parentId(drug3.getId())
+            .path(
+                drugParent.getId()
+                    + "."
+                    + drug1.getId()
+                    + "."
+                    + drug2.getId()
+                    + "."
+                    + drug3.getId())
             .domainId(DomainType.DRUG.toString())
             .type(CriteriaType.RXNORM.toString()));
 
@@ -345,14 +345,17 @@ public class ElasticFiltersTest {
                                 .addSearchParametersItem(
                                     new SearchParameter()
                                         .value("001")
-                                        .type(TreeType.ICD9.toString())
-                                        .subtype(TreeSubType.CM.toString())
-                                        .group(true)))));
+                                        .conceptId(771L)
+                                        .domain(DomainType.CONDITION.toString())
+                                        .type(CriteriaType.ICD9CM.toString())
+                                        .group(true)
+                                        .ancestorData(false)
+                                        .standard(false)))));
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
                 QueryBuilders.termsQuery(
-                    "events.source_concept_id", ImmutableList.of("772", "774"))));
+                    "events.source_concept_id", ImmutableList.of("772", "773"))));
   }
 
   @Test
@@ -525,8 +528,10 @@ public class ElasticFiltersTest {
     SearchParameter heightAnyParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.PM.toString())
-            .subtype(TreeSubType.HEIGHT.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(false);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
@@ -552,9 +557,11 @@ public class ElasticFiltersTest {
     SearchParameter heightParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.PM.toString())
-            .subtype(TreeSubType.HEIGHT.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(false)
             .addAttributesItem(attr);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
@@ -583,8 +590,10 @@ public class ElasticFiltersTest {
     SearchParameter weightParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.PM.toString())
-            .subtype(TreeSubType.HEIGHT.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(false)
             .addAttributesItem(attr);
     QueryBuilder resp =
@@ -607,8 +616,10 @@ public class ElasticFiltersTest {
     SearchParameter genderParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.GEN.toString())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.GENDER.toString())
+            .standard(true)
+            .ancestorData(false)
             .group(false);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
