@@ -341,7 +341,7 @@ public class DataSetServiceImpl implements DataSetService {
     String valuesQuery =
         "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
             + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
-    
+
     Map<String, QueryParameterValue> valuesQueryParams = new HashMap<>();
     valuesQueryParams.put("pDomain", QueryParameterValue.string(domainAsName));
     valuesQueryParams.put(

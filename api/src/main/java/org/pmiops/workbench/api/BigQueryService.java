@@ -141,18 +141,11 @@ public class BigQueryService {
       tableName = "ds_drug_exposure";
     } else if (Domain.MEASUREMENT.equals(d)) {
       tableName = "ds_measurement";
+    } else if (Domain.OBSERVATION.equals(d)) {
+      tableName = "ds_survey";
     } else {
       throw new BadRequestException("Invalid domain, unable to fetch fields from table");
     }
-    TableId tableId =
-        TableId.of(cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), tableName);
-
-    return bigquery.getTable(tableId).getDefinition().getSchema().getFields();
-  }
-
-  public FieldList getTableFieldsFromSurvey() {
-    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
-    String tableName = "ds_survey";
     TableId tableId =
         TableId.of(cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), tableName);
 

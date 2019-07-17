@@ -284,8 +284,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         const [conceptSets, cohorts] = await Promise.all([
           conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
           cohortsApi().getCohortsInWorkspace(namespace, id)]);
-        const conceptSetNoSurvey = conceptSets.items.filter((concept) => !concept.survey);
-        this.setState({conceptSetList: conceptSetNoSurvey, cohortList: cohorts.items,
+        this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
           loadingResources: false});
         return Promise.resolve();
       } catch (error) {
@@ -307,8 +306,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           ({domain: domain, values: valueSet, survey: survey}),
         domains,
         await Promise.all(domains.map((domain) =>
-          conceptsApi().getValuesFromDomain(namespace, id, domain.toString(),
-            survey ? survey.toString() : null))));
+          conceptsApi().getValuesFromDomain(namespace, id, domain.toString()))));
       return valueSets;
     }
 

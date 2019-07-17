@@ -306,27 +306,17 @@ public class ConceptsController implements ConceptsApiDelegate {
 
   @Override
   public ResponseEntity<DomainValuesResponse> getValuesFromDomain(
-      String workspaceNamespace, String workspaceId, String domainValue, String survey) {
+      String workspaceNamespace, String workspaceId, String domainValue) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    FieldList fieldList = null;
     DomainValuesResponse response = new DomainValuesResponse();
 
-    if (survey != null) {
-      fieldList = bigQueryService.getTableFieldsFromSurvey();
-      response.setItems(
-          fieldList.stream()
-              .map(field -> new DomainValue().value(field.getName()))
-              .collect(Collectors.toList()));
-    }
-    if (!domainValue.equals(Domain.OBSERVATION.toString())) {
-      Domain domain = Domain.valueOf(domainValue);
-      fieldList = bigQueryService.getTableFieldsFromDomain(domain);
-      response.setItems(
-          fieldList.stream()
-              .map(field -> new DomainValue().value(field.getName()))
-              .collect(Collectors.toList()));
-    }
+    Domain domain = Domain.valueOf(domainValue);
+    FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
+    response.setItems(
+        fieldList.stream()
+            .map(field -> new DomainValue().value(field.getName()))
+            .collect(Collectors.toList()));
 
     return ResponseEntity.ok(response);
   }

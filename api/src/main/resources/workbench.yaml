@@ -1651,10 +1651,6 @@ paths:
             name: domain
             required: true
             type: string
-          - in: query
-            name: survey
-            required: false
-            type: string
         responses:
           200:
             description: the values/column names in the domain.
