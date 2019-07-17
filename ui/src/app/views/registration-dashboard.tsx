@@ -189,14 +189,13 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   }
 
   get taskCompletionList(): Array<boolean> {
-    const list = getRegistrationTasks().map((config) => {
+    return getRegistrationTasks().map((config) => {
       return this.props[config.completionPropsKey] as boolean;
     });
-    return list;
   }
 
   allTasksCompleted(): boolean {
-    return this.taskCompletionList.reduce((acc, val) => acc && val);
+    return this.taskCompletionList.every(v => v);
   }
 
   isEnabled(i: number): boolean {
@@ -247,7 +246,6 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       });
     }
 
-    // Call the callback (which refreshes the user's profile).
     this.setState({bypassInProgress: false, bypassActionComplete: true});
   }
 
