@@ -8,7 +8,7 @@ System requirements:
 
   * [Docker CE](https://www.docker.com/community-edition)
     * Docker must be installed to build and run code (For Google workstations, see http://go/installdocker).
-    * __IMPORTANT__: be sure to allocate at least 6GB of memory to the Docker Engine. See 
+    * __IMPORTANT__: be sure to allocate at least 6GB of memory to the Docker Engine. See
 See https://docs.docker.com/docker-for-mac/#advanced for screenshots and instructions for Mac.
   * [Ruby](https://www.ruby-lang.org/en/downloads/)
     * Our team's dev/ops scripts are written in Ruby. Most common operations are launched via the project.rb script at the root of each sub-project.
@@ -75,8 +75,8 @@ From the `api/` directory:
 ```
 
 When the console displays "Listening for transport dt_socket at address: 8001", your
-local API server endpoints are available under http://localhost:8081/.  You can test this by 
-navigating to the [status endpoint](http://localhost:8081/v1/status) in your browser or 
+local API server endpoints are available under http://localhost:8081/.  You can test this by
+navigating to the [status endpoint](http://localhost:8081/v1/status) in your browser or
 executing `curl http://localhost:8081/v1/status`
 
 **Note:** If you haven't loaded any data locally for the app, please run the goal below. Also, this will not run while dev-up is running, so please kill dev-up first.
@@ -106,7 +106,7 @@ All commands should be run from `workbench/api`
 
 ##### Setup
 * Install Java 8
-* Add following to `~/.bash_profile`. Note: 
+* Add following to `~/.bash_profile`. Note:
     * Your Java8 library directory may be different.  
       YOUR_WORKBENCH_DIRECTORY_PATH is the pathname to your workbench git repo.
       ```Shell
@@ -352,7 +352,7 @@ Description of arguments these scripts take are as follows.
 * `./project.rb make-bq-denormalized-dataset --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
 * Info/examples for dataset script below:
 * Cdr BigQuery dataset:  all-of-us-workbench-test:cdr20181107
-* CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20181107/*.csv.gz 
+* CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20181107/*.csv.gz
 * Browse csvs in browser like here :https://console.cloud.google.com/storage/browser?project=all-of-us-workbench-test&organizationId=394551486437
 * Note cdr-version can be '' to make dataset named cdr
 
@@ -361,7 +361,7 @@ Description of arguments these scripts take are as follows.
 ##### Result is
 * Generates csv.gz files in the specified bucket. These files will be used in the next step
 
-#### Generate cloudsql databases from a bucket using *.csv.gz files 
+#### Generate cloudsql databases from a bucket using *.csv.gz files
 `./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database synth_r_2019q3_1 --bucket all-of-us-workbench-private-cloudsql/synth_r_2019q3_1`
 ##### Result is
 * Databases are live on cloudsql.
@@ -373,14 +373,14 @@ Description of arguments these scripts take are as follows.
    * bigqueryProject: project the BigQuery cdr is
    * bigqueryDataset: dataset of cdr,
    * creationTime: date string in this format "2018-09-20 00:00:00Z",
-   * releaseNumber: gets incremented by 1 each time an official release is made. It has the same value for a registered and controlled cdr release. 
+   * releaseNumber: gets incremented by 1 each time an official release is made. It has the same value for a registered and controlled cdr release.
    * numParticipants: Number of participants in CDR.
    * cdrDbName: name of the the cloudsql count database used by workbench "synth_r_2019q3_1". CDR versioning doc: https://docs.google.com/document/d/1W8DnEN7FnnPgGW6yrvGsdzLZhQrdOtTjvgdFUL6e4oc/edit
-2. Set the default cdr version for the environment in config_ENV.json. 
+2. Set the default cdr version for the environment in config_ENV.json.
    * You probably don’t want to set your new cdr to the default before testing it.
    * NOTE The cloudsql instance is set in code for each environment in /api/libproject/devstart.rb  
 3. Make your config changes take effect:
-   * For non local environments: 
+   * For non local environments:
      * commit and merge your config files with master and the changes will take effect on the next build.
      * OR run `./project.rb update-cloud-config --project <project>` where project is the project for your environment. You can find this project in config_<ENV>.json server.projectId
    * For local , run dev-up to build your api
@@ -394,7 +394,7 @@ Description of arguments these scripts take are as follows.
 Alternatively if you want to make a local database from csvs in gcs  
  * Run `./project.rb generate-local-count-dbs --cdr-version synth_r_2019q3_1 --bucket all-of-us-workbench-private-cloudsql`
  * You may want to do this if generate-cloudsql-db fails because of limited gcloud sql import csv functionality
- * Or you have some local schema changes you need and just need csv data 
+ * Or you have some local schema changes you need and just need csv data
 ##### Result is
 * Local mysql database or databases.
 * cdr-version in the alternative method can be an empty string, '',  to make databases named 'cdr'
@@ -560,6 +560,7 @@ This approach is required if you want to issue a request to a backend as a servi
 
 This approach requires [oauth2l](https://github.com/google/oauth2l) to be installed:
 ```
+(For macs: `brew install go`)
 go get github.com/google/oauth2l
 go install github.com/google/oauth2l
 ```
@@ -568,7 +569,7 @@ The following shows how to make an authenticated backend request as the shared  
 
 ```
 # From the "api" directory.
-curl -X GET -H "$(oauth2l header --json build/exploded-api/WEB-INF/sa-key.json userinfo.email userinfo.profile cloud-billing)" -H "Content-Type: application/json" https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing
+curl -X GET -H "$(~/go/bin/oauth2l header --json build/exploded-api/WEB-INF/sa-key.json userinfo.email userinfo.profile cloud-billing)" -H "Content-Type: application/json" https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing
 
 # If you get 401 errors, you may need to clear your token cache.
 oauth2l reset

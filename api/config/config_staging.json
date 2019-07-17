@@ -14,7 +14,9 @@
     "xAppIdValue": "staging-AoU-RW"
   },
   "auth": {
-    "serviceAccountApiUsers": [ "all-of-us-rw-staging@appspot.gserviceaccount.com" ]
+    "serviceAccountApiUsers": [
+      "all-of-us-rw-staging@appspot.gserviceaccount.com"
+    ]
   },
   "cdr": {
     "debugQueries": true
@@ -45,7 +47,7 @@
   "elasticsearch": {
     "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
     "enableBasicAuth": true,
-    "enableElasticsearchBackend": true
+    "enableElasticsearchBackend": false
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",
@@ -59,11 +61,12 @@
     "unsafeAllowSelfBypass": false
   },
   "cohortbuilder": {
-    "enableListSearch": false
+    "enableListSearch": true
   },
   "featureFlags": {
     "enableLeoWelder": false,
     "useBillingProjectBuffer": true,
-    "unsafeAllowDeleteUser": false
+    "unsafeAllowDeleteUser": false,
+    "enableVpcFlowLogs": false
   }
 }

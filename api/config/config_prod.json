@@ -14,7 +14,9 @@
     "xAppIdValue": "AoU-RW"
   },
   "auth": {
-    "serviceAccountApiUsers": [ "all-of-us-rw-prod@appspot.gserviceaccount.com" ]
+    "serviceAccountApiUsers": [
+      "all-of-us-rw-prod@appspot.gserviceaccount.com"
+    ]
   },
   "cdr": {
     "debugQueries": false
@@ -59,11 +61,12 @@
     "unsafeAllowSelfBypass": false
   },
   "cohortbuilder": {
-    "enableListSearch": false
+    "enableListSearch": true
   },
   "featureFlags": {
     "enableLeoWelder": false,
     "useBillingProjectBuffer": true,
-    "unsafeAllowDeleteUser": false
+    "unsafeAllowDeleteUser": false,
+    "enableVpcFlowLogs": false
   }
 }

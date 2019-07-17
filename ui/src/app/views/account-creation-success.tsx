@@ -3,6 +3,7 @@ import {
   Header,
   SmallHeader
 } from 'app/components/headers';
+import colors from 'app/styles/colors';
 import {
   AccountCreationResendModal,
   AccountCreationUpdateModal
@@ -16,7 +17,7 @@ const styles = {
     border: 'none',
     cursor: 'pointer',
     outlineColor: 'transparent',
-    color: '#2691D0',
+    color: colors.accent,
     backgroundColor: 'transparent',
   }
 };

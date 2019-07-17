@@ -28,6 +28,7 @@ public class ConfigController implements ConfigApiDelegate {
             .useBillingProjectBuffer(config.featureFlags.useBillingProjectBuffer)
             .publicApiKeyForErrorReports(config.server.publicApiKeyForErrorReports)
             .enableDataUseAgreement(config.access.enableDataUseAgreement)
-            .enableEraCommons(config.access.enableEraCommons));
+            .enableEraCommons(config.access.enableEraCommons)
+            .firecloudURL(config.firecloud.baseUrl));
   }
 }

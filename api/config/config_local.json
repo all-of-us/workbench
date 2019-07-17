@@ -67,6 +67,7 @@
   "featureFlags": {
     "enableLeoWelder": false,
     "useBillingProjectBuffer": true,
-    "unsafeAllowDeleteUser": true
+    "unsafeAllowDeleteUser": true,
+    "enableVpcFlowLogs": true
   }
 }

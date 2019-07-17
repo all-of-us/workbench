@@ -48,7 +48,7 @@ const styles = reactStyles({
     margin: '0 1rem 1rem 0', fontWeight: 600, color: 'rgb(33, 111, 180)'
   },
   workspaceName: {
-    color: '#216FB4', marginBottom: '0.5rem', fontWeight: 600,
+    color: colors.accent, marginBottom: '0.5rem', fontWeight: 600,
     fontSize: 18, wordBreak: 'break-all', cursor: 'pointer',
   },
   workspaceDescription: {
@@ -79,12 +79,13 @@ const WorkspaceCardMenu: React.FunctionComponent<{
       side='bottom'
       closeOnClick
       content={ <React.Fragment>
-        <MenuItem onClick={() => {navigate([wsPathPrefix, 'duplicate']); }}>
+        <MenuItem icon='copy'
+                  onClick={() => {navigate([wsPathPrefix, 'duplicate']); }}>
           Duplicate
         </MenuItem>
         <TooltipTrigger content={<div>Requires Write Permission</div>}
                         disabled={wp.canWrite}>
-          <MenuItem data-test-id='edit-workspace'
+          <MenuItem icon='pencil'
                     onClick={() => {navigate([wsPathPrefix, 'edit']); }}
                     disabled={!wp.canWrite}>
             Edit
@@ -92,13 +93,13 @@ const WorkspaceCardMenu: React.FunctionComponent<{
         </TooltipTrigger>
         <TooltipTrigger content={<div>Requires Owner Permission</div>}
                         disabled={wp.isOwner}>
-          <MenuItem data-test-id='share-workspace' onClick={onShare} disabled={!wp.isOwner}>
+          <MenuItem icon='pencil' onClick={onShare} disabled={!wp.isOwner}>
             Share
           </MenuItem>
         </TooltipTrigger>
         <TooltipTrigger content={<div>Requires Owner Permission</div>}
                         disabled={wp.isOwner}>
-          <MenuItem data-test-id='delete-workspace' onClick={onDelete} disabled={!wp.isOwner}>
+          <MenuItem icon='trash' onClick={onDelete} disabled={!wp.isOwner}>
             Delete
           </MenuItem>
         </TooltipTrigger>
@@ -205,7 +206,6 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
     const {userEmail, wp} = this.props;
     const {bugReportError, bugReportOpen, confirmDeleting, loadingData,
       sharing, userRoles, workspaceDeletionError} = this.state;
-    const permissionBoxColors = {'OWNER': '#4996A2', 'READER': '#8F8E8F', 'WRITER': '#92B572'};
 
     return <React.Fragment>
       <WorkspaceCardBase>
@@ -241,7 +241,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
               {displayDate(wp.workspace.lastModifiedTime)}</div>
             <div style={{
               ...styles.permissionBox,
-              backgroundColor: permissionBoxColors[wp.accessLevel]}}
+              backgroundColor: colors.workspacePermissionsHighlights[wp.accessLevel]}}
                  data-test-id='workspace-access-level'>{wp.accessLevel}</div>
           </div>
         </div>

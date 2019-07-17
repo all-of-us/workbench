@@ -53,14 +53,14 @@ export const styles = reactStyles({
     lineHeight: '2rem',
     paddingRight: '0.55rem',
     color: colors.primary,
-    borderBottom: '1px solid #E5E5E5',
+    borderBottom: `1px solid ${colors.light}`,
     display: 'flex',
     justifyContent: 'space-between',
     flexDirection: 'row'
   },
 
   listItem: {
-    border: '0.5px solid #C3C3C3',
+    border: `0.5px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
     margin: '.4rem .4rem .4rem .55rem',
     height: '1.5rem',
     display: 'flex'
@@ -109,7 +109,7 @@ export const styles = reactStyles({
     paddingBottom: '0.5rem',
     paddingLeft: '0.5rem',
     paddingRight: '0.5rem',
-    borderBottom: '1px solid #E5E5E5',
+    borderBottom: `1px solid ${colors.light}`,
     alignItems: 'center',
     justifyContent: 'space-between',
     height: 'auto'
@@ -284,7 +284,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         const [conceptSets, cohorts] = await Promise.all([
           conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
           cohortsApi().getCohortsInWorkspace(namespace, id)]);
-        this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
+        const conceptSetNoSurvey = conceptSets.items.filter((concept) => !concept.survey);
+        this.setState({conceptSetList: conceptSetNoSurvey, cohortList: cohorts.items,
           loadingResources: false});
         return Promise.resolve();
       } catch (error) {
@@ -547,12 +548,12 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         <FadeBox style={{marginTop: '1rem'}}>
           <h2 style={{marginTop: 0}}>Datasets{this.editing &&
             dataSet !== undefined && ' - ' + dataSet.name}</h2>
-          <div style={{color: '#000000', fontSize: '14px'}}>Build a dataset by selecting the
+          <div style={{color: colors.primary, fontSize: '14px'}}>Build a dataset by selecting the
             variables and values for one or more of your cohorts. Then export the completed dataset
             to Notebooks where you can perform your analysis</div>
           <div style={{display: 'flex', paddingTop: '1rem'}}>
             <div style={{width: '33%'}}>
-              <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
+              <div style={{backgroundColor: 'white', border: `1px solid ${colors.light}`}}>
                 <BoxHeader text='1' header='Select Cohorts' subHeader='Participants'>
                   {plusLink('cohorts-link', cohortsPath, !this.canWrite)}
                 </BoxHeader>
@@ -579,8 +580,9 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               </div>
             </div>
             <div style={{marginLeft: '1.5rem', width: '70%'}}>
-              <div style={{display: 'flex', backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-                <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
+              <div style={{display: 'flex', backgroundColor: colors.white,
+                border: `1px solid ${colors.light}`}}>
+                <div style={{width: '60%', borderRight: `1px solid ${colors.light}`}}>
                     <BoxHeader text='2' header='Select Concept Sets' subHeader='Rows'
                                style={{paddingRight: '1rem'}}>
                       {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite)}
@@ -635,7 +637,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           </div>
         </FadeBox>
         <FadeBox style={{marginTop: '1rem'}}>
-          <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
+          <div style={{backgroundColor: 'white', border: `1px solid ${colors.light}`}}>
             <div style={styles.previewDataHeaderBox}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
               <div style={{display: 'flex', alignItems: 'flex-end'}}>
@@ -654,8 +656,9 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                     Refresh Preview
                   </Clickable>
               </div>
-              <div style={{color: '#000000', fontSize: '14px'}}>A visualization of your data table
-                based on the variable and value you selected above
+              <div style={{color: colors.primary, fontSize: '14px'}}>
+                A visualization of your data table based on the variable
+                and value you selected above
               </div>
               </div>
               <TooltipTrigger data-test-id='save-tooltip'

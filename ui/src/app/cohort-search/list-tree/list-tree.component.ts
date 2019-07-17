@@ -14,6 +14,7 @@ import {DomainType} from 'generated';
 })
 export class ListTreeComponent extends ListNodeComponent implements OnInit, OnChanges {
   @Input() back: Function;
+  ingredients: any;
 
   ngOnInit() {
     super.ngOnInit();

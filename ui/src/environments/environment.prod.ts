@@ -21,5 +21,5 @@ export const environment: Environment = {
   // exit criteria and Jira ticket links.
   enableJupyterLab: false,
   enableDatasetBuilder: true,
-  enableCBListSearch: false,
+  enableCBListSearch: true,
 };

@@ -87,7 +87,7 @@
     "highcharts-react-official": "^2.0.0",
     "immutable": "^4.0.0-rc.9",
     "js-cookie": "^2.2.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "moment": "^2.24.0",
     "mutationobserver-shim": "^0.3.2",
     "ng2-nouislider": "^1.7.7",
@@ -117,7 +117,7 @@
     "ts-jest": "^23.10.5",
     "tslib": "^1.9.0",
     "validate.js": "^0.12.0",
-    "yarn": "^1.12.3",
+    "yarn": "^1.17.3",
     "zone.js": "0.8.26"
   },
   "devDependencies": {

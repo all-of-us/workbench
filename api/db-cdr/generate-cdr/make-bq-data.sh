@@ -580,8 +580,20 @@ on ob.observation_source_concept_id=cr.concept_id_1 join \`${OUTPUT_PROJECT}.${O
 on cr.concept_id_2 = sm.concept_id
 where cr.relationship_id = 'Has Module'
 group by survey_concept_id,cr.concept_id_1)
-where c1.concept_id=question_id
-"
+where c1.concept_id=question_id"
+
+# Set the question count on the survey_module row
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` sm
+set sm.question_count=num_questions from
+(select cr.ancestor_concept_id,c1.concept_name,count(*) as num_questions
+ from \`${BQ_PROJECT}.${BQ_DATASET}.concept_ancestor` cr
+ join \`${BQ_PROJECT}.${BQ_DATASET}.concept` c on c.concept_id=cr.descendant_concept_id
+ join \`${BQ_PROJECT}.${BQ_DATASET}.concept` c1 on c1.concept_id=cr.ancestor_concept_id
+ where cr.ancestor_concept_id in (1586134, 1585855, 1585710)
+ and c.concept_class_id='Question'
+ group by cr.ancestor_concept_id,c1.concept_name)
+where sm.concept_id = ancestor_concept_id"
 
 ########################
 # concept_relationship #
