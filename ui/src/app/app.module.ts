@@ -22,8 +22,7 @@ import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
-import {AdminUserBypassComponent} from './views/admin-user-bypass';
-import {AdminUserComponent} from './views/admin-user/component';
+import {AdminUserComponent} from './views/admin-user';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb';
 import {BugReportComponent} from './views/bug-report';
@@ -136,7 +135,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   ],
   declarations: [
     AdminReviewWorkspaceComponent,
-    AdminUserBypassComponent,
     AdminUserComponent,
     AppComponent,
     BreadcrumbComponent,

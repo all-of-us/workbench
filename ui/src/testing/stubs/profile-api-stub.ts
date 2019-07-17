@@ -117,4 +117,8 @@ export class ProfileApiStub extends ProfileApi {
     return Promise.resolve(this.profile);
   }
 
+  public getUser(userId: number): Promise<Profile> {
+    return Promise.resolve(this.profile);
+  }
+
 }
