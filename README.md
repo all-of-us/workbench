@@ -339,7 +339,7 @@ Description of arguments these scripts take are as follows.
 * bucket: A GCS Bucket where csv data dumps are of the generated data. This must exist.
 * instance: Cloud Sql Instance. Ex: workbenchmaindb
 
-### Examples below need to be run in the following order. It's also very important that the prep tables are in a viable state before starting this process(Jon Scherdin can shed more light on this process).
+### Examples below need to be run in the following order. It's also very important that the prep tables are in a viable state before starting this process(Check with CB team on this).
 
 #### Generate all denormalized tables(search, review and data set) in the BigQuery cdr only one time when it is released or as needed
 `./project.rb make-bq-denormalized-tables --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
