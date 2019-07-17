@@ -1,61 +1,31 @@
 import {Component} from '@angular/core';
 import * as React from 'react';
 
-import {SpinnerOverlay} from 'app/components/spinners';
-import {ReactWrapperBase, withUserProfile} from 'app/utils';
-import {Profile} from 'generated/fetch';
+import {Button} from 'app/components/buttons';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {Profile, Workspace} from 'generated/fetch';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
 
+const styles = reactStyles({
+  tableStyle: {
+    fontSize: 12,
+    minWidth: 1100
+  },
+  colStyle: {
+    lineHeight: '0.5rem',
+    fontSize: 12
+  }
+});
 
 /**
  * Review Workspaces. Users with the REVIEW_RESEARCH_PURPOSE permission use this
  * to view other users' workspaces for which a review has been requested, and approve/reject them.
  */
 // TODO(RW-85) Design this UI. Current implementation is a rough sketch.
-// export class AdminReviewWorkspaceComponent implements OnInit {
-//   workspaces: Workspace[] = [];
-//   contentLoaded = false;
-//   fetchingWorkspacesError = false;
-//   reviewedWorkspace: Workspace;
-//   reviewError = false;
-//
-//   bugReportOpen: boolean;
-//   bugReportDescription = '';
-//   constructor(
-//     private workspacesService: WorkspacesService
-//   ) {
-//     this.closeBugReport = this.closeBugReport.bind(this);
-//   }
-//
-//   ngOnInit(): void {
-//     this.workspacesService.getWorkspacesForReview()
-//       .subscribe(
-//         workspacesResp => {
-//           this.workspaces = workspacesResp.items;
-//           this.contentLoaded = true;
-//         }, () => {
-//           this.fetchingWorkspacesError = true;
-//         });
-//   }
-//
-//   approve(workspace: Workspace, approved: boolean): void {
-//     const request = <ResearchPurposeReviewRequest> {approved};
-//     this.workspacesService.reviewWorkspace(
-//       workspace.namespace, workspace.id, request)
-//       .subscribe(
-//         resp => {
-//           const i = this.workspaces.indexOf(workspace, 0);
-//           if (i >= 0) {
-//             this.workspaces.splice(i, 1);
-//           }
-//         }, () => {
-//           const i = this.workspaces.indexOf(workspace, 0);
-//           if (i >= 0) {
-//             this.reviewedWorkspace = this.workspaces[i];
-//           }
-//           this.reviewError = true;
-//         });
-//   }
-//
+
 //   submitFetchingWorkspacesBugReport(): void {
 //     this.bugReportDescription =
 //       'Could not fetch workspaces for approval';
@@ -77,22 +47,79 @@ import {Profile} from 'generated/fetch';
 
 export const AdminReviewWorkspace = withUserProfile()(class extends React.Component<
   {profileState: {profile: Profile, reload: Function, updateCache: Function}},
-  {contentLoaded: boolean}> {
+  {contentLoaded: boolean, workspaces: Workspace[], fetchingWorkspaceError: boolean,
+    reviewedWorkspace: Workspace, reviewError: boolean}> {
 
   constructor(props) {
     super(props);
 
     this.state = {
-      contentLoaded: false
+      contentLoaded: false,
+      workspaces: [],
+      fetchingWorkspaceError: false,
+      reviewedWorkspace: null,
+      reviewError: false,
     };
   }
 
+  async componentDidMount() {
+    try {
+      const resp = await workspacesApi().getWorkspacesForReview();
+      this.setState({workspaces: resp.items, contentLoaded: true});
+    } catch (error) {
+      this.setState({fetchingWorkspaceError: true});
+    }
+  }
+
+  async approve(workspace: Workspace, approved: boolean) {
+    const {workspaces} = this.state;
+    this.setState({reviewedWorkspace: workspace});
+    try {
+      await workspacesApi()
+        .reviewWorkspace(workspace.namespace, workspace.id, {approved});
+      const i = workspaces.indexOf(workspace, 0);
+      if (i >= 0) {
+        workspaces.splice(i, 1);
+        this.setState({workspaces: workspaces, reviewedWorkspace: null});
+      }
+    } catch (error) {
+      this.setState({reviewError: true});
+    }
+  }
+
+  convertWorkspaceToFields(workspaces: Workspace[]) {
+    return workspaces.map(ws => ({...ws, description: <div>
+        <i>Field of intended study:</i>
+        <br/>{ws.researchPurpose.intendedStudy}<br/>
+        <i>Reason for choosing All of Us:</i>
+        <br/>{ws.researchPurpose.reasonForAllOfUs}<br/>
+        <i>Anticipated findings:</i>
+        <br/>{ws.researchPurpose.anticipatedFindings}<br/>
+    </div>, actions: <div>
+        {this.state.reviewedWorkspace === ws ? <Spinner size={50}/> :
+        <React.Fragment>
+          <Button onClick={() => this.approve(ws, true)}>Approve</Button>
+          <Button type='secondary' onClick={() => this.approve(ws, false)}
+                style={{marginLeft: '0.5rem'}}>Reject</Button>
+        </React.Fragment>}
+      </div>}));
+  }
+
   render() {
-    const {contentLoaded} = this.state;
+    const {contentLoaded, workspaces} = this.state;
     return <div style={{position: 'relative'}}>
       <h2>Review Workspaces</h2>
       {contentLoaded ?
-        <div>content</div> :
+        <DataTable value={this.convertWorkspaceToFields(workspaces)} style={styles.tableStyle}>
+          <Column field='name' header='Workspace Name' headerStyle={{width: '20%'}}
+                  bodyStyle={{...styles.colStyle, fontSize: 14, fontWeight: 600}}
+                  sortable={true}/>
+          <Column field='creator' header='Workspace Author' headerStyle={{width: '20%'}}
+                  sortable={true}/>
+          <Column field='description' header='Research Purpose' headerStyle={{width: '40%'}}/>
+          <Column field='actions' header='Approve/Reject' headerStyle={{width: '20%'}}
+                  bodyStyle={{textAlign: 'center'}}/>
+        </DataTable> :
         <div>
           Loading workspaces for review...
           <SpinnerOverlay overrideStylesOverlay={{alignItems: 'flex-start', marginTop: '2rem'}}/>
