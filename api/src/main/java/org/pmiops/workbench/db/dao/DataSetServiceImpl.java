@@ -332,18 +332,17 @@ public class DataSetServiceImpl implements DataSetService {
             .map(valueSet -> valueSet.getValue().toUpperCase())
             .collect(Collectors.toList());
     values.add(0, "CORE_TABLE_FOR_DOMAIN");
-    String valuesQuery = "";
-    Map<String, QueryParameterValue> valuesQueryParams = new HashMap<>();
 
     if (d == Domain.OBSERVATION) {
       d = Domain.SURVEY;
     }
     String domainAsName = d.toString().charAt(0) + d.toString().substring(1).toLowerCase();
 
-    valuesQuery =
+    String valuesQuery =
         "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
             + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
-
+    
+    Map<String, QueryParameterValue> valuesQueryParams = new HashMap<>();
     valuesQueryParams.put("pDomain", QueryParameterValue.string(domainAsName));
     valuesQueryParams.put(
         "pValuesList", QueryParameterValue.array(values.toArray(new String[0]), String.class));
