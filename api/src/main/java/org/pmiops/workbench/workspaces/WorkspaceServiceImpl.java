@@ -113,8 +113,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         getFirecloudWorkspaces();
     List<Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
-    System.out.println("Firecloud response size : " + fcWorkspaces.size());
-    System.out.println("Filtered DB responses : " + dbWorkspaces.size());
+//    System.out.println("Firecloud response size : " + fcWorkspaces.size());
+//    System.out.println("Filtered DB responses : " + dbWorkspaces.size());
+//
+//    for (Workspace workspace : dbWorkspaces) {
+//      org.pmiops.workbench.firecloud.model.WorkspaceResponse workspaceResponse = fcWorkspaces.get(workspace.getFirecloudUuid());
+//      System.out.println(workspaceResponse);
+//
+//      fireCloudService.getWorkspace(workspaceResponse.getWorkspace().getNamespace(), workspaceResponse.getWorkspace().getName());
+//    }
 
     return dbWorkspaces.stream()
         .filter(

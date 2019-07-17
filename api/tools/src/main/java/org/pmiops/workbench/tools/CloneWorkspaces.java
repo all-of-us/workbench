@@ -1,8 +1,12 @@
 package org.pmiops.workbench.tools;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -101,7 +105,8 @@ public class CloneWorkspaces {
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
       UserService userService,
-      DirectoryService directoryService) {
+      DirectoryService directoryService,
+      UserDao userDao) {
     return (args) -> {
       padding();
       initializeApis();
@@ -110,11 +115,23 @@ public class CloneWorkspaces {
       List<User> failedUsers = new ArrayList<>();
 
       int processedWorkspaces = 0;
-      List<Workspace> failedWorkspaces = new ArrayList<>();
+      List<WorkspaceResponse> failedWorkspaces = new ArrayList<>();
 
       System.out.println("Apis initialized");
 
-      for (User user : userService.getAllUsers()) {
+      File file = new File(
+          getClass().getClassLoader().getResource("temp").getFile()
+      );
+
+      Scanner scanner = new Scanner(file);
+
+      while (scanner.hasNextLine()) {
+        String line = scanner.nextLine();
+
+        List<String> tokens = Arrays.stream(line.split(":")).map(s -> s.trim()).collect(Collectors.toList());
+
+        User user = userDao.findUserByEmail(tokens.get(4));
+
         if (user.getDisabled() ||
             user.getFirstSignInTime() == null ||
             directoryService.getUser(user.getEmail()) == null) {
@@ -123,54 +140,81 @@ public class CloneWorkspaces {
         }
 
         System.out.println("Impersonating " + user.getEmail());
-        ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
+        ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(tokens.get(4));
         impersonateUser(apiClient);
 
-        List<WorkspaceResponse> workspaces;
-        try {
-          workspaces = workspaceService.getWorkspaces();
-        } catch (WorkbenchException e) {
-          failedUsers.add(user);
-          continue;
-        }
-
-        processedUsers++;
-        for (WorkspaceResponse workspaceResponse : workspaces) {
-          Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndNameAndActiveStatus(
-              workspaceResponse.getWorkspace().getNamespace(),
-              workspaceResponse.getWorkspace().getName(),
-              (short) 0
-          );
-
-          try {
-            WorkspaceAccessLevel accessLevel = workspaceService.getWorkspaceAccessLevel(
-                workspace.getWorkspaceNamespace(),
-                workspace.getFirecloudName());
-
-            System.out.println(workspace.getWorkspaceNamespace() + " : " + workspace.getFirecloudName() + " : " + accessLevel + " : " + workspaceResponse.getAccessLevel().equals(accessLevel));
-            processedWorkspaces++;
-          } catch (WorkbenchException e) {
-            failedWorkspaces.add(workspace);
+        for (WorkspaceResponse workspaceResponse : workspaceService.getWorkspaces()) {
+          System.out.println(workspaceResponse);
+          if (workspaceResponse.getWorkspace().getNamespace().equals(tokens.get(2))) {
+            System.out.println(workspaceResponse.getWorkspace().getId() + " : " + workspaceResponse.getAccessLevel());
           }
-
         }
       }
 
-      padding();
 
-      System.out.println("Processed Users : " + processedUsers);
-      System.out.println("Failed Users : " + failedUsers.size());
-      for (User user : failedUsers) {
-        System.out.println(user.getEmail() + " : " + user.getFirstSignInTime());
-      }
 
-      System.out.println("Processed Workspaces : " + processedWorkspaces);
-      System.out.println("Failed Workspaces : " + failedWorkspaces.size());
-      for (Workspace workspace : failedWorkspaces) {
-        System.out.println(workspace.getWorkspaceId() + " : " + workspace.getFirecloudUuid() + " : " +
-            workspace.getWorkspaceNamespace() + " : " + workspace.getFirecloudName() + " : " +
-            workspace.getCreator().getEmail() + " : " + workspace.getLastAccessedTime());
-      }
+
+
+
+//      for (User user : userService.getAllUsers()) {
+//        if (user.getDisabled() ||
+//            user.getFirstSignInTime() == null ||
+//            directoryService.getUser(user.getEmail()) == null) {
+//          System.out.println("Skipping " + user.getEmail());
+//          continue;
+//        }
+//
+//        System.out.println("Impersonating " + user.getEmail());
+//        ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
+//        impersonateUser(apiClient);
+//
+//        List<WorkspaceResponse> workspaces;
+//        try {
+//          workspaces = workspaceService.getWorkspaces();
+//        } catch (WorkbenchException e) {
+//          failedUsers.add(user);
+//          continue;
+//        }
+//
+//        processedUsers++;
+//        for (WorkspaceResponse workspaceResponse : workspaces) {
+//          Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndNameAndActiveStatus(
+//              workspaceResponse.getWorkspace().getNamespace(),
+//              workspaceResponse.getWorkspace().getName(),
+//              (short) 0
+//          );
+//
+//          try {
+//            WorkspaceAccessLevel accessLevel = workspaceService.getWorkspaceAccessLevel(
+//                workspace.getWorkspaceNamespace(),
+//                workspace.getFirecloudName());
+//
+//            System.out.println(workspace.getWorkspaceNamespace() + " : " + workspace.getFirecloudName() + " : " + accessLevel + " : " + workspaceResponse.getAccessLevel().equals(accessLevel));
+//            processedWorkspaces++;
+//          } catch (WorkbenchException e) {
+//            System.out.println(workspaceResponse.getAccessLevel());
+//            failedWorkspaces.add(workspaceResponse);
+//          }
+//
+//        }
+//      }
+//
+//      padding();
+//
+//      System.out.println("Processed Users : " + processedUsers);
+//      System.out.println("Failed Users : " + failedUsers.size());
+//      for (User user : failedUsers) {
+//        System.out.println(user.getEmail() + " : " + user.getFirstSignInTime());
+//      }
+//
+//      System.out.println("Processed Workspaces : " + processedWorkspaces);
+//      System.out.println("Failed Workspaces : " + failedWorkspaces.size());
+//      for (WorkspaceResponse workspaceResponse : failedWorkspaces) {
+//        org.pmiops.workbench.model.Workspace workspace = workspaceResponse.getWorkspace();
+//        System.out.println(workspace.getId() + " : " + workspaceResponse.getAccessLevel() + " : " +
+//            workspace.getNamespace() + " : " + workspace.getName() + " : " +
+//            workspace.getCreator() + " : " + workspace.getCreationTime());
+//      }
 
       padding();
     };
