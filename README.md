@@ -350,6 +350,7 @@ Description of arguments these scripts take are as follows.
 * `./project.rb generate-cb-criteria-tables --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
 * `./project.rb make-bq-denormalized-review --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
 * `./project.rb make-bq-denormalized-dataset --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
+* `./project.rb make-bq-dataset-linking --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
 * Info/examples for dataset script below:
 * Cdr BigQuery dataset:  all-of-us-workbench-test:cdr20181107
 * CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20181107/*.csv.gz
