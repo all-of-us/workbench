@@ -1,3 +1,13 @@
 {
-  "featuredWorkspaces": []
+  "featuredWorkspaces": [
+    {
+      "name": "",
+      "namespace": "aou-rw-36",
+      "id": "featuredworkspacehiv"
+    }, {
+      "name": "",
+      "namespace": "aou-rw-36",
+      "id": "featuredworkspacedementia"
+    }
+  ]
 }
