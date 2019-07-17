@@ -110,16 +110,16 @@ export const PREDEFINED_ATTRIBUTES = {
     {
       conceptId: 903118,
       name: 'Systolic',
-      operands: [null],
-      operator: null,
+      operands: [],
+      operator: AttrName.ANY,
       MIN: 0,
       MAX: 1000
     },
     {
       conceptId: 903115,
       name: 'Diastolic',
-      operands: [null],
-      operator: null,
+      operands: [],
+      operator: AttrName.ANY,
       MIN: 0,
       MAX: 1000
     }
