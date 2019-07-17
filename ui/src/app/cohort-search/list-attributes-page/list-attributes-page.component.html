@@ -71,12 +71,12 @@
                 formControlName="valueB"
                 [(ngModel)]="attr.operands[1]"
                 (ngModelChange)="inputChange($event, i, 'valueB')">
-              <span *ngIf="hasUnits">{{units[criterion.subtype]}}</span>
-            </div>
-              <span class="range-padding" *ngIf="isMeasurement && showInput(i)">
-              Range: {{attr.MIN}} - {{attr.MAX}}
-              </span>
+            <span *ngIf="hasUnits">{{units[criterion.subtype]}}</span>
           </div>
+          <span class="range-padding" *ngIf="isMeasurement && showInput(i)">
+          Range: {{attr.MIN}} - {{attr.MAX}}
+          </span>
+        </div>
       </div>
       <ng-container *ngIf="attrs.CAT.length">
         <div class="or-circle">OR</div>

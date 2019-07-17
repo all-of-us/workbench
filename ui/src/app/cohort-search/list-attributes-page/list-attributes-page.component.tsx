@@ -5,10 +5,20 @@ import * as React from 'react';
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {mapParameter, stripHtml} from 'app/cohort-search/utils';
+import {CheckBox} from 'app/components/inputs';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {Dropdown} from 'primereact/dropdown';
+
+const optionUtil = {
+  ANY: {display: 'Any', code: 'Any'},
+  EQUAL: {display: '= ', code: '01'},
+  GREATER_THAN_OR_EQUAL_TO: {display: '>= ', code: '02'},
+  LESS_THAN_OR_EQUAL_TO: {display: '<= ', code: '03'},
+  BETWEEN: {display: '', code: '04'},
+};
 
 interface Props {
   criterion: any;
@@ -35,30 +45,10 @@ export const AttributesPage = withCurrentWorkspace() (
         form: {EXISTS: false, NUM: [], CAT: []},
         dropdowns: {selected: ['', ''], oldVals: ['', ''], labels: ['', ''], codes: ['', '']},
         options: [
-          {
-            value: 'EQUAL',
-            name: 'Equals',
-            display: '= ',
-            code: '01'
-          },
-          {
-            value: 'GREATER_THAN_OR_EQUAL_TO',
-            name: 'Greater than or Equal to',
-            display: '>= ',
-            code: '02'
-          },
-          {
-            value: 'LESS_THAN_OR_EQUAL_TO',
-            name: 'Less than or Equal to',
-            display: '<= ',
-            code: '03'
-          },
-          {
-            value: 'BETWEEN',
-            name: 'Between',
-            display: '',
-            code: '04'
-          },
+          {label: 'Equals', value: Operator.EQUAL},
+          {label: 'Greater than or Equal to', value: Operator.GREATERTHANOREQUALTO},
+          {label: 'Less than or Equal to', value: Operator.LESSTHANOREQUALTO},
+          {label: 'Between', value: Operator.BETWEEN},
         ],
         count: null,
         loading: false,
@@ -97,9 +87,7 @@ export const AttributesPage = withCurrentWorkspace() (
             this.setState({dropdowns, form});
           });
       } else {
-        options.unshift(
-    {value: AttrName[AttrName.ANY], name: 'Any', display: 'Any', code: 'Any'}
-        );
+        options.unshift({label: 'Any', value: AttrName[AttrName.ANY]});
         form.NUM = criterion.subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{
@@ -118,9 +106,9 @@ export const AttributesPage = withCurrentWorkspace() (
       }
     }
 
-    radioChange() {
+    radioChange(checked: boolean) {
       const {form} = this.state;
-      if (form.EXISTS) {
+      if (checked) {
         const {criterion: {count}} = this.props;
         form.NUM = form.NUM.map(attr => ({...attr, operator: AttrName.ANY, operands: []}));
         this.selectedCode = 'Any';
@@ -133,15 +121,16 @@ export const AttributesPage = withCurrentWorkspace() (
     selectChange(index: number, option: any) {
       const {criterion} = this.props;
       const {dropdowns, form} = this.state;
+      const code = optionUtil[option.operator];
       if (form.NUM[index].operator !== option.value) {
         form.NUM[index].operator = option.value;
-        dropdowns.selected[index] = option.name;
+        dropdowns.selected[index] = option.label;
         if (criterion.subtype === 'BP' && dropdowns.oldVals[index] !== option.value) {
           const other = index === 0 ? 1 : 0;
           if (dropdowns.codes[other] === '') {
-            dropdowns.codes = [option.code, option.code];
+            dropdowns.codes = [code, code];
           } else {
-            dropdowns.codes[index] = option.code;
+            dropdowns.codes[index] = code;
           }
           if (!dropdowns.codes.includes('')) {
             this.selectedCode = (dropdowns.codes.join(''));
@@ -151,14 +140,14 @@ export const AttributesPage = withCurrentWorkspace() (
             dropdowns.selected[other] = 'Any';
           } else if (dropdowns.oldVals[index] === AttrName[AttrName.ANY]) {
             form.NUM[other].operator = dropdowns.oldVals[other] = option.value;
-            dropdowns.selected[other] = option.name;
+            dropdowns.selected[other] = option.label;
           }
           dropdowns.oldVals[index] = option.value;
         } else {
           if (option.value !== 'BETWEEN') {
             form.NUM[index].operands.splice(1);
           }
-          this.selectedCode = option.code;
+          this.selectedCode = code;
         }
         const count = option.value === AttrName.ANY ? criterion.count : null;
         this.setState({form, dropdowns, count});
@@ -197,9 +186,9 @@ export const AttributesPage = withCurrentWorkspace() (
     //   }
     // }
 
-    inputChange(input: number, index: number, operand: number) {
+    inputChange(input: string, index: number, operand: number) {
       const {form} = this.state;
-      let value = input.toString();
+      let value = input;
       if (value && value.length > 10) {
         value = value.slice(0, 10);
       }
@@ -394,6 +383,89 @@ export const AttributesPage = withCurrentWorkspace() (
     //     this.attrs.EXISTS ||
     //     this.attrs.NUM.every(attr => attr.operator === 'ANY');
     // }
+
+    render() {
+      const {criterion} = this.props;
+      const {count, dropdowns, error, form, loading, options} = this.state;
+      return <div>
+        <section className='form-block'>
+          {this.isMeasurement && <div>
+          <div className='attr-name-color'>{this.displayName}</div>
+          <CheckBox onChange={(v) => this.radioChange(v)}/> Any value (lab exists)
+          {!form.EXISTS && form.NUM.length && <div className='or-circle'>OR</div>}
+          </div>}
+          {form.EXISTS && <React.Fragment>
+            {form.NUM.map((attr, a) => <div key={a}>
+              {(this.isMeasurement || this.isBP) && <div className='attr-name-color'>
+                {dropdowns.labels[a]}
+              </div>}
+              <div className='container'>
+                <div className='dropdown-width'>
+                  <Dropdown value={attr.operator} options={options} placeholder='Select Operator'
+                    onChange={(e) => this.selectChange(a, e.value)}/>
+                </div>
+                {this.showInput(a) && <div className='form-group range-container'>
+                  <input className='number-container'
+                    type='number'
+                    min={attr.MIN}
+                    max={attr.MAX}
+                    onChange={(e) => this.inputChange(e.target.value, a, 0)}/>
+                  {this.hasUnits && <span>{PM_UNITS[criterion.subtype]}</span>}
+                </div>}
+                {this.isBetween(a) && <div className='form-group and-text'>
+                  <div>and</div>
+                </div>}
+                {this.isBetween(a) && <div className='form-group range-container'>
+                  <input className='number-container'
+                    type='number'
+                    min={attr.MIN}
+                    max={attr.MAX}
+                    onChange={(e) => this.inputChange(e.target.value, a, 1)}/>
+                  {this.hasUnits && <span>{PM_UNITS[criterion.subtype]}</span>}
+                </div>}
+                {this.isMeasurement && this.showInput(a) && <span className='range-padding'>
+                  Range: {attr.MIN} - {attr.MAX}
+                </span>}
+              </div>
+            </div>)}
+            {form.CAT.length && <React.Fragment>
+              <div className='or-circle'>OR</div>
+              <div className='attr-name-color'>Categorical Values</div>
+              <div className='form-group'>
+                {form.CAT.map((attr, a) => <React.Fragment>
+                  <CheckBox key={a} checked={attr.checked} onChange={(e) => {}} />
+                  {attr.conceptName} <span className='badge badge-info'>{attr.estCount}</span>
+                </React.Fragment>)}
+              </div>
+            </React.Fragment>}
+          </React.Fragment>}
+          <div className='count-preview'>
+            <div className='row'>
+              {this.showCalc && <div className='col-lg-3'>
+                <button type='button'
+                  className='btn'
+                  onClick={() => this.requestPreview()}>
+                  Calculate
+                </button>
+              </div>}
+              <div className='col-lg-5 text-padding'>
+                <div className='result-text'>
+                  Results
+                </div>
+                <div>
+                  Number Participants:
+                  {count !== null && <span className='text-bold'>{count.toLocaleString()}</span>}
+                  {count === null && <span> -- </span>}
+                </div>
+              </div>
+              {!loading && <div className='col-lg-3 button-padding'>
+                <button className='btn add-button' type='submit'> ADD THIS</button>
+              </div>}
+            </div>
+          </div>
+        </section>
+      </div>;
+    }
   }
 );
 
