@@ -4,10 +4,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -395,8 +395,7 @@ public class WorkspacesControllerTest {
   }
 
   private void stubFcUpdateWorkspaceACL() {
-    when(fireCloudService.updateWorkspaceACL(
-            anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class)))
+    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyList()))
         .thenReturn(new WorkspaceACLUpdateResponseList());
   }
 
