@@ -195,9 +195,7 @@ public class DataSetServiceImpl implements DataSetService {
                 })
             .collect(Collectors.joining(" UNION DISTINCT "));
     List<Domain> domainList =
-        dataSet.getValues().stream()
-            .map(value -> value.getDomain())
-            .collect(Collectors.toList());
+        dataSet.getValues().stream().map(value -> value.getDomain()).collect(Collectors.toList());
 
     for (Domain d : domainList) {
       Map<String, Map<String, QueryParameterValue>> queryMap = new HashMap<>();
@@ -245,9 +243,10 @@ public class DataSetServiceImpl implements DataSetService {
               .collect(Collectors.joining(", "));
       String conceptSetListQuery = " IN (" + conceptSetQueries + ")";
 
+      String domainName = d == Domain.OBSERVATION ? Domain.SURVEY.toString() : d.toString();
       Optional<DomainConceptIds> domainConceptIds =
           bigQuerySchemaConfig.cohortTables.values().stream()
-              .filter(config -> d.toString().equals(config.domain))
+              .filter(config -> domainName.equals(config.domain))
               .map(
                   tableConfig ->
                       new DomainConceptIds(
@@ -329,7 +328,9 @@ public class DataSetServiceImpl implements DataSetService {
   @VisibleForTesting
   public ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> valueSetList, Domain d) {
     List<String> values =
-        valueSetList.stream().map(valueSet -> valueSet.getValue().toUpperCase()).collect(Collectors.toList());
+        valueSetList.stream()
+            .map(valueSet -> valueSet.getValue().toUpperCase())
+            .collect(Collectors.toList());
     values.add(0, "CORE_TABLE_FOR_DOMAIN");
     String valuesQuery = "";
     Map<String, QueryParameterValue> valuesQueryParams = new HashMap<>();
@@ -337,16 +338,15 @@ public class DataSetServiceImpl implements DataSetService {
     if (d == Domain.OBSERVATION) {
       d = Domain.SURVEY;
     }
-      String domainAsName = d.toString().charAt(0) + d.toString().substring(1).toLowerCase();
+    String domainAsName = d.toString().charAt(0) + d.toString().substring(1).toLowerCase();
 
-      valuesQuery =
-          "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` " +
-              "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
+    valuesQuery =
+        "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
+            + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
 
-      valuesQueryParams.put("pDomain", QueryParameterValue.string(domainAsName));
-      valuesQueryParams.put(
-          "pValuesList", QueryParameterValue.array(values.toArray(new String[0]), String.class));
-
+    valuesQueryParams.put("pDomain", QueryParameterValue.string(domainAsName));
+    valuesQueryParams.put(
+        "pValuesList", QueryParameterValue.array(values.toArray(new String[0]), String.class));
 
     TableResult valuesLinking =
         bigQueryService.executeQuery(

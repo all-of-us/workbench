@@ -29,7 +29,6 @@ import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.SurveyAnswerResponse;
 import org.pmiops.workbench.model.SurveyQuestionsResponse;
-import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.VocabularyCount;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -313,7 +312,7 @@ public class ConceptsController implements ConceptsApiDelegate {
     FieldList fieldList = null;
     DomainValuesResponse response = new DomainValuesResponse();
 
-    if (survey !=null) {
+    if (survey != null) {
       fieldList = bigQueryService.getTableFieldsFromSurvey();
       response.setItems(
           fieldList.stream()
@@ -328,7 +327,6 @@ public class ConceptsController implements ConceptsApiDelegate {
               .map(field -> new DomainValue().value(field.getName()))
               .collect(Collectors.toList()));
     }
-
 
     return ResponseEntity.ok(response);
   }

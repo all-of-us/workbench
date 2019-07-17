@@ -695,7 +695,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                               justifyContent: 'center',
                               lineHeight: '32px',
                             }}>
-                       {previewRow.domain}
+                       {previewRow.domain === 'OBSERVATION' ? 'SURVEY' : previewRow.domain}
                      </Clickable>
                   )}
                 </div>

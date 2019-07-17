@@ -838,7 +838,7 @@ public class ConceptsControllerTest {
                 Field.of("FIELD_TWO", LegacySQLTypeName.STRING)));
     List<DomainValue> domainValues =
         conceptsController
-            .getValuesFromDomain("ns", "name", Domain.CONDITION.toString())
+            .getValuesFromDomain("ns", "name", Domain.CONDITION.toString(), "")
             .getBody()
             .getItems();
     verify(bigQueryService).getTableFieldsFromDomain(Domain.CONDITION);
