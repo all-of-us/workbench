@@ -1,13 +1,14 @@
 import {Component} from '@angular/core';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {BugReportModal} from 'app/views/bug-report';
 import {Profile, Workspace} from 'generated/fetch';
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
 
 const styles = reactStyles({
   tableStyle: {
@@ -24,27 +25,6 @@ const styles = reactStyles({
  * Review Workspaces. Users with the REVIEW_RESEARCH_PURPOSE permission use this
  * to view other users' workspaces for which a review has been requested, and approve/reject them.
  */
-// TODO(RW-85) Design this UI. Current implementation is a rough sketch.
-
-//   submitFetchingWorkspacesBugReport(): void {
-//     this.bugReportDescription =
-//       'Could not fetch workspaces for approval';
-//     this.bugReportOpen = true;
-//   }
-//
-//   submitReviewWorkspaceBugReport(): void {
-//     this.reviewError = false;
-//     this.bugReportDescription =
-//       'Could not review workspace: \'' + this.reviewedWorkspace.namespace + '/' +
-//       this.reviewedWorkspace.name + '\'';
-//     this.bugReportOpen = true;
-//   }
-//
-//   closeBugReport(): void {
-//     this.bugReportOpen = false;
-//   }
-// }
-
 export const AdminReviewWorkspace = withUserProfile()(class extends React.Component<
   {profileState: {profile: Profile, reload: Function, updateCache: Function}},
   {contentLoaded: boolean, workspaces: Workspace[], fetchingWorkspaceError: boolean,
@@ -98,7 +78,8 @@ export const AdminReviewWorkspace = withUserProfile()(class extends React.Compon
     </div>, actions: <div>
         {this.state.reviewedWorkspace === ws ? <Spinner size={50}/> :
         <React.Fragment>
-          <Button onClick={() => this.approve(ws, true)}>Approve</Button>
+          <Button onClick={() => this.approve(ws, true)}
+                  data-test-id='approve'>Approve</Button>
           <Button type='secondary' onClick={() => this.approve(ws, false)}
                 style={{marginLeft: '0.5rem'}}>Reject</Button>
         </React.Fragment>}
@@ -106,25 +87,34 @@ export const AdminReviewWorkspace = withUserProfile()(class extends React.Compon
   }
 
   render() {
-    const {contentLoaded, workspaces} = this.state;
+    const {contentLoaded, fetchingWorkspaceError, workspaces,
+      reviewError, reviewedWorkspace} = this.state;
     return <div style={{position: 'relative'}}>
       <h2>Review Workspaces</h2>
       {contentLoaded ?
-        <DataTable value={this.convertWorkspaceToFields(workspaces)} style={styles.tableStyle}>
+        <DataTable value={this.convertWorkspaceToFields(workspaces)} style={styles.tableStyle}
+                   data-test-id='reviewWorkspacesTable'>
           <Column field='name' header='Workspace Name' headerStyle={{width: '20%'}}
                   bodyStyle={{...styles.colStyle, fontSize: 14, fontWeight: 600}}
-                  sortable={true}/>
+                  sortable={true} data-test-id='workspaceName'/>
           <Column field='creator' header='Workspace Author' headerStyle={{width: '20%'}}
                   sortable={true}/>
           <Column field='description' header='Research Purpose' headerStyle={{width: '40%'}}/>
           <Column field='actions' header='Approve/Reject' headerStyle={{width: '20%'}}
-                  bodyStyle={{textAlign: 'center'}}/>
+                  bodyStyle={{textAlign: 'center'}} data-test-id='actionButtons'/>
         </DataTable> :
         <div>
           Loading workspaces for review...
           <SpinnerOverlay overrideStylesOverlay={{alignItems: 'flex-start', marginTop: '2rem'}}/>
         </div>
       }
+      {fetchingWorkspaceError &&
+      <BugReportModal bugReportDescription='Could not fetch workspaces for approval'
+        onClose={() => this.setState({fetchingWorkspaceError: false})}/>}
+      {reviewError &&
+      <BugReportModal bugReportDescription={'Could not review workspace ' +
+          reviewedWorkspace.namespace + '/' + reviewedWorkspace.name}
+        onClose={() => this.setState({reviewError: false, reviewedWorkspace: null})}/>}
     </div>;
   }
 });

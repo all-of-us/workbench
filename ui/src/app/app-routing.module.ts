@@ -8,7 +8,7 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {DataPageComponent} from 'app/views/data-page';
 import {DataUseAgreementComponent} from 'app/views/data-use-agreement';
 import {DataSetPageComponent} from 'app/views/dataset-page';
-import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
+import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace';
 import {AdminUserComponent} from './views/admin-user/component';
 import {CohortActionsComponent} from './views/cohort-actions';
 import {CohortListComponent} from './views/cohort-list';
