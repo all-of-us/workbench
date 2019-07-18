@@ -2325,6 +2325,35 @@ public class WorkspacesControllerTest {
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(0);
   }
 
+  @Test
+  public void notebookLockingEmailHashTest() {
+    final String[][] knownTestData = {
+      {
+        "fc-bucket-id-1",
+        "user@aou",
+        "dc5acd54f734a2e2350f2adcb0a25a4d1978b45013b76d6bc0a2d37d035292fe"
+      },
+      {
+        "fc-bucket-id-1",
+        "another-user@aou",
+        "bc90f9f740702e5e0408f2ea13fed9457a7ee9c01117820f5c541067064468c3"
+      },
+      {
+        "fc-bucket-id-2",
+        "user@aou",
+        "a759e5aef091fd22bbf40bf8ee7cfde4988c668541c18633bd79ab84b274d622"
+      },
+    };
+
+    for (final String[] test : knownTestData) {
+      final String bucket = test[0];
+      final String email = test[1];
+      final String hash = test[2];
+
+      assertThat(WorkspacesController.notebookLockingEmailHash(bucket, email)).isEqualTo(hash);
+    }
+  }
+
   private void assertNotebookLockingMetadata(
       Map<String, String> gcsMetadata,
       NotebookLockingMetadataResponse expectedResponse,
