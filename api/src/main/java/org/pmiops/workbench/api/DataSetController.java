@@ -205,9 +205,6 @@ public class DataSetController implements DataSetApiDelegate {
               dataSet.getValues().stream()
                   .map(TO_CLIENT_DOMAIN_VALUE)
                   .collect(Collectors.toList()));
-          if (dataSet.getConceptSetId().contains(null)) {
-            result.getConceptSets().add(new ConceptSet().domain(Domain.PERSON));
-          }
           return result;
         }
       };
