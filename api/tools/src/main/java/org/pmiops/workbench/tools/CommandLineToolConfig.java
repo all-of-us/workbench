@@ -28,6 +28,7 @@ import org.pmiops.workbench.db.WorkbenchDbConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.Config;
+import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;

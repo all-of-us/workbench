@@ -1,21 +1,34 @@
 package org.pmiops.workbench.tools;
 
+import static org.pmiops.workbench.firecloud.FireCloudConfig.BILLING_SCOPES;
+import static org.pmiops.workbench.firecloud.FireCloudConfig.SERVICE_ACCOUNT_API_CLIENT;
+import static org.pmiops.workbench.firecloud.FireCloudConfig.SERVICE_ACCOUNT_WORKSPACE_API;
+import static org.pmiops.workbench.firecloud.FireCloudConfig.buildApiClient;
+
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.pmiops.workbench.api.WorkspacesController;
+import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.ApiException;
@@ -28,6 +41,7 @@ import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.Me;
+import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -47,7 +61,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.web.context.annotation.RequestScope;
 
 @SpringBootApplication
 @EnableConfigurationProperties
@@ -113,10 +129,11 @@ public class CloneWorkspaces {
 
       int processedUsers = 0;
       int skippedUsers = 0;
+      List<User> invalidAccessUsers = new ArrayList<>();
       List<User> failedUsers = new ArrayList<>();
 
       int processedWorkspaces = 0;
-      int skippedWorkspaces = 0;
+      List<WorkspaceResponse> skippedWorkspaces = new ArrayList<>();
       List<WorkspaceResponse> failedWorkspaces = new ArrayList<>();
 
       for (User user : userService.getAllUsers()) {
@@ -132,29 +149,38 @@ public class CloneWorkspaces {
         ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
         impersonateUser(apiClient);
 
-        List<WorkspaceResponse> workspaces;
+        List<WorkspaceResponse> workspaceResponses;
         try {
-          workspaces = workspaceService.getWorkspaces();
+          workspaceResponses = workspaceService.getWorkspaces();
+          processedUsers++;
         } catch (WorkbenchException e) {
           failedUsers.add(user);
           continue;
         }
 
-        processedUsers++;
-        for (WorkspaceResponse workspaceResponse : workspaces) {
+        long noAccessCount = workspaceResponses.stream()
+            .filter(wr -> wr.getAccessLevel().equals(WorkspaceAccessLevel.NO_ACCESS)).count();
+        if (noAccessCount > 0) {
+          System.out.println("Found a user with no access : " + user.getEmail());
+          invalidAccessUsers.add(user);
+        }
+
+        for (WorkspaceResponse workspaceResponse : workspaceResponses) {
           Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndNameAndActiveStatus(
               workspaceResponse.getWorkspace().getNamespace(),
               workspaceResponse.getWorkspace().getName(),
               (short) 0
           );
 
-          if (workspace.getCreator().getUserId() != user.getUserId()) {
+          if (workspace.getCreator().getUserId() != user.getUserId() &&
+              workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)
+          ) {
             // Not counting this as a "skip" since these are duplicates
             continue;
           }
 
           if (workspaceResponse.getAccessLevel().equals(WorkspaceAccessLevel.NO_ACCESS)) {
-            skippedWorkspaces++;
+            skippedWorkspaces.add(workspaceResponse);
             continue;
           }
 
@@ -177,13 +203,23 @@ public class CloneWorkspaces {
 
       System.out.println("Processed Users : " + processedUsers);
       System.out.println("Skipped Users : " + skippedUsers);
+      System.out.println("Invalid Access Users : " + invalidAccessUsers.size());
+      for (User user : invalidAccessUsers) {
+        System.out.println(user.getEmail());
+      }
       System.out.println("Failed Users : " + failedUsers.size());
       for (User user : failedUsers) {
         System.out.println(user.getEmail());
       }
 
       System.out.println("Processed Workspaces : " + processedWorkspaces);
-      System.out.println("Skipped Workspaces : " + skippedWorkspaces);
+      System.out.println("Skipped Workspaces : " + skippedWorkspaces.size());
+      for (WorkspaceResponse workspaceResponse : skippedWorkspaces) {
+        org.pmiops.workbench.model.Workspace workspace = workspaceResponse.getWorkspace();
+        System.out.println(workspace.getId() + " : " + workspaceResponse.getAccessLevel() + " : " +
+            workspace.getNamespace() + " : " + workspace.getName() + " : " +
+            workspace.getCreator() + " : " + workspace.getCreationTime());
+      }
       System.out.println("Failed Workspaces : " + failedWorkspaces.size());
       for (WorkspaceResponse workspaceResponse : failedWorkspaces) {
         org.pmiops.workbench.model.Workspace workspace = workspaceResponse.getWorkspace();
