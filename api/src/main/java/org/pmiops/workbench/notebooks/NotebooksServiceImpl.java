@@ -2,7 +2,6 @@ package org.pmiops.workbench.notebooks;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -16,7 +15,6 @@ import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.GoogleCloudLocators;
@@ -177,13 +175,8 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public JSONObject getNotebookContents(String bucketName, String notebookName) {
-    try {
-      return cloudStorageService.getFileAsJson(
-          bucketName, "notebooks/".concat(withNotebookExtension(notebookName)));
-    } catch (IOException e) {
-      throw new ServerErrorException(
-          "Failed to get notebook " + notebookName + " from bucket " + bucketName);
-    }
+    return cloudStorageService.getFileAsJson(
+        bucketName, "notebooks/".concat(withNotebookExtension(notebookName)));
   }
 
   private String withNotebookExtension(String notebookName) {

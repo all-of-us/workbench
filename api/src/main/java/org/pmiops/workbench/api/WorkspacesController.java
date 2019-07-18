@@ -4,6 +4,10 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.io.BaseEncoding;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.HashMap;
@@ -11,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -46,6 +51,7 @@ import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.CopyNotebookRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -690,11 +696,78 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
-      String workspace, String workspaceName, String notebookName) {
+      String workspaceNamespace, String workspaceName, String notebookName) {
     ReadOnlyNotebookResponse response =
         new ReadOnlyNotebookResponse()
-            .html(notebooksService.getReadOnlyHtml(workspace, workspaceName, notebookName));
+            .html(
+                notebooksService.getReadOnlyHtml(workspaceNamespace, workspaceName, notebookName));
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<NotebookLockingMetadataResponse> getNotebookLockingMetadata(
+      String workspaceNamespace, String workspaceName, String notebookName) {
+
+    // Retrieving the workspace is done first, which acts as an access check.
+    String bucketName =
+        fireCloudService
+            .getWorkspace(workspaceNamespace, workspaceName)
+            .getWorkspace()
+            .getBucketName();
+
+    // response may be empty - fill in what we can
+    NotebookLockingMetadataResponse response = new NotebookLockingMetadataResponse();
+
+    // throws NotFoundException if the notebook is not in GCS
+    // returns null if found but no user-metadata
+    Map<String, String> metadata =
+        cloudStorageService.getMetadata(bucketName, "notebooks/" + notebookName);
+
+    if (metadata != null) {
+      String lockExpirationTime = metadata.get("lockExpirationTime");
+      if (lockExpirationTime != null) {
+        response.lockExpirationTime(Long.valueOf(lockExpirationTime));
+      }
+
+      // stored as a SHA-256 hash of bucketName:userEmail
+      String lastLockedByHash = metadata.get("lastLockedBy");
+      if (lastLockedByHash != null) {
+
+        // the caller should not necessarily know the identities of all notebook users
+        // so we check against the set of users of this workspace which are known to the caller
+
+        // NOTE: currently, users of workspace X of any access level can see all other
+        // workspace X users. This is not desired.
+        // https://precisionmedicineinitiative.atlassian.net/browse/RW-3094
+
+        Set<String> workspaceUsers =
+            workspaceService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
+
+        response.lastLockedBy(findHashedUser(bucketName, workspaceUsers, lastLockedByHash));
+      }
+    }
+
+    return ResponseEntity.ok(response);
+  }
+
+  private String findHashedUser(String bucket, Set<String> workspaceUsers, String hash) {
+    return workspaceUsers.stream()
+        .filter(email -> notebookLockingEmailHash(bucket, email).equals(hash))
+        .findAny()
+        .orElse("UNKNOWN");
+  }
+
+  @VisibleForTesting
+  static String notebookLockingEmailHash(String bucket, String email) {
+    String toHash = String.format("%s:%s", bucket, email);
+    try {
+      MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+      byte[] hash = sha256.digest(toHash.getBytes(StandardCharsets.UTF_8));
+      // convert to printable hex text
+      return BaseEncoding.base16().lowerCase().encode(hash);
+    } catch (final NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

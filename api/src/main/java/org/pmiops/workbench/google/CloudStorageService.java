@@ -5,6 +5,7 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.json.JSONObject;
 
@@ -37,7 +38,9 @@ public interface CloudStorageService {
 
   GoogleCredential getDefaultServiceAccountCredentials() throws IOException;
 
-  JSONObject getFileAsJson(String bucketName, String fileName) throws IOException;
+  JSONObject getFileAsJson(String bucketName, String fileName);
+
+  Map<String, String> getMetadata(String bucketName, String objectPath);
 
   void deleteBlob(BlobId blobId);
 
