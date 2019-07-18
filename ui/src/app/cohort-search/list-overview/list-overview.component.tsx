@@ -10,6 +10,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {
   currentCohortStore,
@@ -47,7 +48,7 @@ const styles = reactStyles({
   },
   totalError: {
     background: '#f7981c',
-    color: '#ffffff',
+    color: colors.white,
     padding: '0.25rem 0.5rem',
     borderRadius: '5px',
     marginBottom: '0.5rem'
@@ -57,7 +58,7 @@ const styles = reactStyles({
     margin: '0 1rem 0 0',
     minWidth: 0,
     padding: 0,
-    color: '#262262',
+    color: colors.primary,
     cursor: 'pointer'
   },
   disabled: {
@@ -73,19 +74,19 @@ const styles = reactStyles({
     borderRadius: '3px',
   },
   card: {
-    background: '#ffffff',
+    background: colors.white,
     marginBottom: 0,
     marginTop: 0,
   },
   cardHeader: {
-    color: '#302C71',
+    color: colors.primary,
     fontSize: '13px',
     borderBottom: 'none',
     padding: '0.5rem 0.75rem',
   },
   error: {
-    background: '#f7981c',
-    color: '#ffffff',
+    background: colors.warning,
+    color: colors.white,
     fontSize: '11px',
     border: '1px solid #ebafa6',
     borderRadius: '3px',
@@ -93,8 +94,8 @@ const styles = reactStyles({
     padding: '3px 5px'
   },
   invalid: {
-    background: '#f5dbd9',
-    color: '#565656',
+    background: colorWithWhiteness(colors.danger, .7),
+    color: colorWithWhiteness(colors.dark, .1),
     fontSize: '11px',
     border: '1px solid #ebafa6',
     borderRadius: '3px',
@@ -109,11 +110,11 @@ interface Props {
 }
 
 interface State {
-  error: boolean;
+  apiError: boolean;
   loading: boolean;
   total: number;
   chartData: any;
-  saveModal: boolean;
+  saveModalOpen: boolean;
   name: string;
   description: string;
   nameTouched: boolean;
@@ -132,21 +133,21 @@ export const ListOverview = withCurrentWorkspace()(
     constructor(props: Props) {
       super(props);
       this.state = {
-        error: false,
-        loading: false,
-        total: undefined,
-        chartData: undefined,
-        saveModal: false,
-        name: undefined,
-        description: undefined,
-        nameTouched: false,
-        saving: false,
-        deleting: false,
-        stackChart: false,
-        showConflictError: false,
-        saveError: false,
-        cohort: undefined,
         apiCallCheck: 0,
+        apiError: false,
+        chartData: undefined,
+        cohort: undefined,
+        deleting: false,
+        description: undefined,
+        loading: true,
+        name: undefined,
+        nameTouched: false,
+        saveError: false,
+        saveModalOpen: false,
+        saving: false,
+        showConflictError: false,
+        stackChart: false,
+        total: undefined,
       };
     }
 
@@ -158,8 +159,8 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (this.props.update > prevProps.update && !this.hasErrors) {
-        this.setState({loading: true, error: false});
+      if (this.props.update > prevProps.update && !this.definitionErrors) {
+        this.setState({loading: true, apiError: false});
         this.getTotalCount();
       }
     }
@@ -183,7 +184,7 @@ export const ListOverview = withCurrentWorkspace()(
         });
       } catch (error) {
         console.error(error);
-        this.setState({error: true, loading: false});
+        this.setState({apiError: true, loading: false});
       }
     }
 
@@ -201,7 +202,7 @@ export const ListOverview = withCurrentWorkspace()(
     get hasTemporalError() {
       const {searchRequest} = this.props;
       const activeGroups = searchRequest.includes
-      .filter(grp => grp.temporal && grp.status === 'active');
+        .filter(grp => grp.temporal && grp.status === 'active');
       return activeGroups.some(grp => {
         const activeItems = grp.items.reduce((acc, it) => {
           if (it.status === 'active') {
@@ -215,7 +216,7 @@ export const ListOverview = withCurrentWorkspace()(
       });
     }
 
-    get hasErrors() {
+    get definitionErrors() {
       return this.hasTemporalError || !this.hasActiveItems;
     }
 
@@ -290,32 +291,32 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     render() {
-      const {cohort, chartData, deleting, error, loading, saveModal, name, description, nameTouched,
-        saving, saveError, stackChart, total} = this.state;
+      const {cohort, chartData, deleting, apiError, loading, saveModalOpen, name, description,
+        nameTouched, saving, saveError, stackChart, total} = this.state;
       const disableIcon = loading || !cohort ;
-      const disableSave = cohort && cohort.criteria === this.criteria;
       const invalid = nameTouched && !name;
       const items = [
-        {label: 'Save', command: () => this.saveCohort(), disabled: disableSave},
-        {label: 'Save as', command: () => this.setState({saveModal: true})},
+        {label: 'Save', command: () => this.saveCohort(),
+          disabled: cohort && cohort.criteria === this.criteria},
+        {label: 'Save as', command: () => this.setState({saveModalOpen: true})},
       ];
       return <React.Fragment>
         <div>
           <div style={styles.overviewHeader}>
             <div style={{width: '100%'}}>
-              {!!cohort && <React.Fragment>
+              {!!cohort ? <React.Fragment>
                 <Menu appendTo={document.body}
                   model={items} popup={true} ref={el => this.dropdown = el} />
                 <Button type='primary' style={styles.saveButton}
                   onClick={(event) => this.dropdown.toggle(event)}
-                  disabled={loading || saving || this.hasErrors}>
-                  SAVE COHORT <ClrIcon shape='caret down' />
+                  disabled={loading || saving || this.definitionErrors}>
+                  Save Cohort <ClrIcon shape='caret down' />
                 </Button>
-              </React.Fragment>}
-              {!cohort && <Button type='primary'
-                onClick={() => this.setState({saveModal: true})}
+              </React.Fragment>
+              : <Button type='primary'
+                onClick={() => this.setState({saveModalOpen: true})}
                 style={styles.saveButton}
-                disabled={loading || this.hasErrors}>CREATE COHORT</Button>}
+                disabled={loading || this.definitionErrors}>Create Cohort</Button>}
               <TooltipTrigger content={<div>Export to notebook</div>}>
                 <Clickable style={{...styles.actionIcon, ...styles.disabled}}
                   onClick={() => this.navigateTo('notebook')} disabled>
@@ -337,25 +338,22 @@ export const ListOverview = withCurrentWorkspace()(
             </div>
             <h2 style={styles.totalCount}>
               Total Count: &nbsp;
-              {loading && !this.hasTemporalError && <Spinner size={18} />}
-              {!loading && !this.hasErrors && total !== undefined &&
-                <span>{total.toLocaleString()}</span>
-              }
-              {this.hasErrors && <span>
+              {this.definitionErrors ? <span>
                 -- <TooltipTrigger content={this.hasTemporalError ?
-                    'Please complete criteria selections before saving temporal relationship.' :
-                    `All criteria are suppressed. Un-suppress criteria to update the total count
+                'Please complete criteria selections before saving temporal relationship.' :
+                `All criteria are suppressed. Un-suppress criteria to update the total count
                      based on the visible criteria.`}>
                   <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
                 </TooltipTrigger>
-              </span>}
+              </span>
+              : loading ? <Spinner size={18} /> : <span>{total.toLocaleString()}</span>}
             </h2>
           </div>
-          {error && !this.hasErrors && <div style={styles.totalError}>
+          {apiError && !this.definitionErrors && <div style={styles.totalError}>
             <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
             Sorry, the request cannot be completed.
           </div>}
-          {!this.hasErrors && !loading && !!chartData && total && <div style={styles.cardContainer}>
+          {!this.definitionErrors && !loading && !!chartData && <div style={styles.cardContainer}>
             <div style={styles.card}>
               <div style={styles.cardHeader}>
                 Results by Gender
@@ -378,7 +376,7 @@ export const ListOverview = withCurrentWorkspace()(
             </div>
           </div>}
         </div>
-        {saveModal && <Modal>
+        {saveModalOpen && <Modal>
           <ModalTitle style={invalid ? {marginBottom: 0} : {}}>Save Cohort as</ModalTitle>
           <ModalBody style={{marginTop: '0.2rem'}}>
             {saveError && <div style={styles.error}>
@@ -393,13 +391,13 @@ export const ListOverview = withCurrentWorkspace()(
               onChange={(v) => this.setState({description: v})}/>
           </ModalBody>
           <ModalFooter>
-            <Button style={{color: '#262262'}} type='link' onClick={() => this.setState({
-              saveModal: false, name: undefined, description: undefined, saveError: false,
+            <Button style={{color: colors.white}} type='link' onClick={() => this.setState({
+              saveModalOpen: false, name: undefined, description: undefined, saveError: false,
               nameTouched: false
-            })} disabled={saving}>CANCEL</Button>
+            })} disabled={saving}>Cancel</Button>
             <Button type='primary' disabled={!name || saving} onClick={() => this.submit()}>
               {saving && <Spinner style={{marginRight: '0.25rem'}} size={18} />}
-               SAVE
+               Save
             </Button>
           </ModalFooter>
         </Modal>}
