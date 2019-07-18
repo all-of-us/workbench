@@ -52,13 +52,12 @@ import {SignedInComponent} from './views/signed-in/component';
 import {SlidingFabComponent} from './views/sliding-fab';
 import {StigmatizationPageComponent} from './views/stigmatization-page';
 import {TopBoxComponent} from './views/top-box/component';
-import {WorkspaceAboutComponent} from './views/workspace-about';
 import {WorkspaceEditComponent} from './views/workspace-edit';
 import {WorkspaceLibraryComponent} from './views/workspace-library';
 import {WorkspaceListComponent} from './views/workspace-list';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar';
 import {WorkspaceShareComponent} from './views/workspace-share';
-import {WorkspaceComponent} from './views/workspace/component';
+import {WorkspaceComponent} from './views/workspace/workspace';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
@@ -167,7 +166,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     StigmatizationPageComponent,
     ToolTipComponent,
     TopBoxComponent,
-    WorkspaceAboutComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceLibraryComponent,

@@ -30,7 +30,7 @@ const styles = reactStyles({
 });
 
 
-export const WorkspaceAbout = fp.flow(withCurrentWorkspace(), withUserProfile())(
+export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withUserProfile())(
   class extends React.Component<
     {profileState: { profile: Profile, reload: Function }, workspace: WorkspaceData},
     {publishing: boolean, workspacePermissions: WorkspacePermissions}> {
@@ -99,7 +99,7 @@ export const WorkspaceAbout = fp.flow(withCurrentWorkspace(), withUserProfile())
       const {publishing, workspacePermissions} = this.state;
       const selectedResearchPurposeItems = this.getSelectedResearchPurposeItems();
       const rpItemsHalfLen = sliceByHalfLength(selectedResearchPurposeItems);
-      return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '98%'}}>
+      return <FadeBox style={{margin: '1rem', width: '98%'}}>
         <div style={styles.mainHeader}>Research Purpose
           <Clickable disabled={!workspacePermissions.canWrite}
                      data-test-id='edit-workspace'
@@ -148,6 +148,6 @@ export const WorkspaceAbout = fp.flow(withCurrentWorkspace(), withUserProfile())
 export class WorkspaceAboutComponent extends ReactWrapperBase {
 
   constructor() {
-    super(WorkspaceAbout, []);
+    super(ResearchPurpose, []);
   }
 }

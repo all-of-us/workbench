@@ -15,14 +15,14 @@ import {currentWorkspaceStore, userProfileStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal';
 import {RecentWorkComponent} from 'app/views/recent-work';
+import {WorkspaceAboutComponent} from 'app/views/research-purpose';
 import {ResetClusterButtonComponent} from 'app/views/reset-cluster-button';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
-import {WorkspaceAboutComponent} from 'app/views/workspace-about';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar';
 import {WorkspaceShareComponent} from 'app/views/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
-import {WorkspaceComponent} from 'app/views/workspace/component';
+import {WorkspaceComponent} from 'app/views/workspace/workspace';
 import {
   ClusterService,
   DataAccessLevel,

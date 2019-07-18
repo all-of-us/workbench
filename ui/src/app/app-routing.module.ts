@@ -27,7 +27,7 @@ import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit'
 import {WorkspaceLibraryComponent} from './views/workspace-library';
 import {WorkspaceListComponent} from './views/workspace-list';
 import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
-import {WorkspaceComponent} from './views/workspace/component';
+import {WorkspaceComponent} from './views/workspace/workspace';
 
 import {environment} from 'environments/environment';
 import {BreadcrumbType, NavStore} from './utils/navigation';
