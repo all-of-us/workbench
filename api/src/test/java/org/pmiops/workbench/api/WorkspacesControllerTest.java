@@ -2343,19 +2343,11 @@ public class WorkspacesControllerTest {
     final String testNotebookPath = "notebooks/" + testNotebook;
     doReturn(gcsMetadata).when(cloudStorageService).getMetadata(BUCKET_NAME, testNotebookPath);
 
-    // this is what I want to do, but it's broken somehow (never fails)
-    //    assertThat(
-    //        workspacesController
-    //            .notebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
-    //            .getBody()
-    //            .equals(expectedResponse));
-
-    NotebookLockingMetadataResponse actualResponse =
-        workspacesController
-            .notebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
-            .getBody();
-
-    assertEquals(expectedResponse, actualResponse);
+    assertThat(
+            workspacesController
+                .notebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
+                .getBody())
+        .isEqualTo(expectedResponse);
   }
 
   @Test
