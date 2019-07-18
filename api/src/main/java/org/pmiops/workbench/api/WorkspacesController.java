@@ -4,7 +4,8 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import java.nio.charset.Charset;
+import com.google.common.io.BaseEncoding;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
@@ -761,15 +762,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     String toHash = String.format("%s:%s", bucket, email);
     try {
       MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-      byte[] hash = sha256.digest(toHash.getBytes(Charset.forName("UTF-8")));
-
-      // convert to printable hex text
-      StringBuilder sb = new StringBuilder();
-      for (byte b : hash) {
-        sb.append(String.format("%02x", b));
-      }
-
-      return sb.toString();
+      byte[] hash = sha256.digest(toHash.getBytes(StandardCharsets.UTF_8));
+      final String hex = BaseEncoding.base16().lowerCase().encode(hash);
+      return hex;
     } catch (final NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
