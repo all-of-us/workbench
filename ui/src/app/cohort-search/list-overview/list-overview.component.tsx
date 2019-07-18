@@ -110,21 +110,21 @@ interface Props {
 }
 
 interface State {
-  apiError: boolean;
-  loading: boolean;
-  total: number;
-  chartData: any;
-  saveModalOpen: boolean;
-  name: string;
-  description: string;
-  nameTouched: boolean;
-  saving: boolean;
-  deleting: boolean;
-  stackChart: boolean;
-  showConflictError: boolean;
-  saveError: boolean;
-  cohort: Cohort;
   apiCallCheck: number;
+  apiError: boolean;
+  chartData: any;
+  cohort: Cohort;
+  deleting: boolean;
+  description: string;
+  loading: boolean;
+  name: string;
+  nameTouched: boolean;
+  saveError: boolean;
+  saveModalOpen: boolean;
+  saving: boolean;
+  showConflictError: boolean;
+  stackChart: boolean;
+  total: number;
 }
 
 export const ListOverview = withCurrentWorkspace()(
