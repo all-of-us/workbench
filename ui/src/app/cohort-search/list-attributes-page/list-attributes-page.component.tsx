@@ -5,8 +5,10 @@ import * as React from 'react';
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {mapParameter, stripHtml} from 'app/cohort-search/utils';
+import {Button} from 'app/components/buttons';
 import {CheckBox} from 'app/components/inputs';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -20,6 +22,10 @@ const styles = reactStyles({
     position: 'absolute',
     width: '93%',
     bottom: '1rem',
+  },
+  row: {
+    display: 'flex',
+    flexWrap: 'wrap'
   },
   label: {
     color: '#262262',
@@ -46,6 +52,41 @@ const styles = reactStyles({
   dropdown: {
     width: '12rem',
     marginRight: '1rem',
+  },
+  number: {
+    borderRadius: '3px',
+    border: '1px solid #a6a6a6',
+    width: '3rem',
+    height: '1.6rem',
+    verticalAlign: 'middle',
+  },
+  badge: {
+    background: colors.primary,
+    color: colors.white,
+    fontSize: '10px',
+    height: '0.625rem',
+    padding: '0 4px',
+    borderRadius: '10px',
+    display: 'inline-flex'
+  },
+  buttonContainer: {
+    flex: '0 0 25%',
+    maxWidth: '25%',
+    padding: '0 0.5rem',
+  },
+  button: {
+    height: '1.75rem',
+    margin: '.25rem .5rem .25rem 0',
+    borderRadius: '4px',
+    fontWeight: 600
+  },
+  resultsContainer: {
+    flex: '0 0 41.66667%',
+    maxWidth: '41.66667%',
+    padding: '0.3rem 0.5rem 0',
+    color: colors.primary,
+    fontSize: '14px',
+    lineHeight: '20px'
   }
 });
 
@@ -65,7 +106,6 @@ interface Props {
 
 interface State {
   form: any;
-  dropdowns: any;
   options: any;
   count: number;
   loading: boolean;
@@ -80,7 +120,6 @@ export const AttributesPage = withCurrentWorkspace() (
       super(props);
       this.state = {
         form: {EXISTS: false, NUM: [], CAT: []},
-        dropdowns: {selected: ['', ''], oldVals: ['', ''], labels: ['', ''], codes: ['', '']},
         options: [
           {label: 'Equals', value: Operator.EQUAL},
           {label: 'Greater than or Equal to', value: Operator.GREATERTHANOREQUALTO},
@@ -95,7 +134,7 @@ export const AttributesPage = withCurrentWorkspace() (
 
     componentDidMount() {
       const {criterion} = this.props;
-      const{dropdowns, form, options} = this.state;
+      const{form, options} = this.state;
       if (this.isMeasurement) {
         const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
         cohortBuilderApi().getCriteriaAttributeByConceptId(cdrid, criterion.conceptId)
@@ -103,7 +142,6 @@ export const AttributesPage = withCurrentWorkspace() (
             resp.items.forEach(attr => {
               if (attr.type === AttrName[AttrName.NUM]) {
                 if (!form.NUM.length) {
-                  dropdowns.labels[0] = 'Numeric Values';
                   form.NUM.push({
                     name: AttrName.NUM,
                     operator: null,
@@ -121,7 +159,7 @@ export const AttributesPage = withCurrentWorkspace() (
                 }
               }
             });
-            this.setState({dropdowns, form});
+            this.setState({form});
           });
       } else {
         options.unshift({label: 'Any', value: AttrName[AttrName.ANY]});
@@ -134,61 +172,43 @@ export const AttributesPage = withCurrentWorkspace() (
             MIN: 0,
             MAX: 10000
           }];
-        form.NUM.forEach((attr, i) => {
-          dropdowns.selected[i] = AttrName[AttrName.ANY];
-          dropdowns.oldVals[i] = AttrName[AttrName.ANY];
-          dropdowns.labels[i] = attr.name;
-        });
-        this.setState({dropdowns, form, options, count: criterion.count});
+        this.setState({form, options, count: criterion.count});
       }
     }
 
     radioChange(checked: boolean) {
       const {form} = this.state;
+      let {criterion: {count}} = this.props;
       if (checked) {
-        const {criterion: {count}} = this.props;
-        form.NUM = form.NUM.map(attr => ({...attr, operator: AttrName.ANY, operands: []}));
-        this.selectedCode = 'Any';
-        this.setState({form, count});
+        form.EXISTS = true;
+        form.NUM = form.NUM.map(attr =>
+          ({...attr, operator: this.isPM ? AttrName.ANY : null, operands: []}));
+        form.CAT = form.CAT.map(attr => ({...attr, checked: false}));
       } else {
-        this.refresh();
+        count = null;
+        form.EXISTS = false;
       }
+      this.setState({form, count});
     }
 
-    selectChange(index: number, option: any) {
+    selectChange(index: number, value: string) {
       const {criterion} = this.props;
-      const {dropdowns, form} = this.state;
-      const code = optionUtil[option.operator];
-      if (form.NUM[index].operator !== option.value) {
-        form.NUM[index].operator = option.value;
-        dropdowns.selected[index] = option.label;
-        if (criterion.subtype === 'BP' && dropdowns.oldVals[index] !== option.value) {
-          const other = index === 0 ? 1 : 0;
-          if (dropdowns.codes[other] === '') {
-            dropdowns.codes = [code, code];
-          } else {
-            dropdowns.codes[index] = code;
-          }
-          if (!dropdowns.codes.includes('')) {
-            this.selectedCode = (dropdowns.codes.join(''));
-          }
-          if (option.value === AttrName.ANY) {
-            form.NUM[other].operator = dropdowns.oldVals[other] = AttrName[AttrName.ANY];
-            dropdowns.selected[other] = 'Any';
-          } else if (dropdowns.oldVals[index] === AttrName[AttrName.ANY]) {
-            form.NUM[other].operator = dropdowns.oldVals[other] = option.value;
-            dropdowns.selected[other] = option.label;
-          }
-          dropdowns.oldVals[index] = option.value;
-        } else {
-          if (option.value !== 'BETWEEN') {
-            form.NUM[index].operands.splice(1);
-          }
-          this.selectedCode = code;
+      const {form} = this.state;
+      form.NUM[index].operator = value;
+      if (criterion.subtype === 'BP') {
+        const other = index === 0 ? 1 : 0;
+        if (value === AttrName[AttrName.ANY]) {
+          form.NUM[other].operator = AttrName[AttrName.ANY];
+        } else if (form.NUM[other].operator === AttrName[AttrName.ANY]) {
+          form.NUM[other].operator = value;
         }
-        const count = option.value === AttrName.ANY ? criterion.count : null;
-        this.setState({form, dropdowns, count});
+      } else {
+        if (value !== Operator[Operator.BETWEEN]) {
+          form.NUM[index].operands.splice(1);
+        }
       }
+      const count = value === AttrName[AttrName.ANY] ? criterion.count : null;
+      this.setState({form, count});
     }
 
     // TODO remove or refactor with custom validation
@@ -254,14 +274,6 @@ export const AttributesPage = withCurrentWorkspace() (
     //   });
     //   return valid;
     // }
-
-    refresh() {
-      const {form} = this.state;
-      form.EXISTS = false;
-      form.NUM = form.NUM.map(attr => ({...attr, operator: AttrName.ANY, operands: []}));
-      form.CAT = form.CAT.map(attr => ({...attr, checked: false}));
-      this.setState({form, count: null});
-    }
 
     get paramId() {
       const {criterion: {conceptId, id}} = this.props;
@@ -378,16 +390,6 @@ export const AttributesPage = withCurrentWorkspace() (
       this.props.close();
     }
 
-    showInput(index: number) {
-      const {form} = this.state;
-      return form.NUM[index].operator && form.NUM[index].operator !== AttrName.ANY;
-    }
-
-    isBetween(index: number) {
-      const {form} = this.state;
-      return form.NUM[index].operator === Operator.BETWEEN;
-    }
-
     get hasUnits() {
       return typeof PM_UNITS[this.props.criterion.subtype] !== 'undefined';
     }
@@ -413,94 +415,81 @@ export const AttributesPage = withCurrentWorkspace() (
       return !form.EXISTS && notAny;
     }
 
-    // TODO move to render function
-    // get disabled() {
-    //   return !this.isValid ||
-    //     this.loading ||
-    //     this.attrs.EXISTS ||
-    //     this.attrs.NUM.every(attr => attr.operator === 'ANY');
-    // }
-
     render() {
       const {criterion} = this.props;
-      const {count, dropdowns, error, form, loading, options} = this.state;
-      return <div>
-        <section style={{margin: '0.5rem 0 1.5rem'}}>
-          {this.isMeasurement && <div>
-            <div style={styles.label}>{this.displayName}</div>
-            <CheckBox onChange={(v) => this.radioChange(v)}/> Any value (lab exists)
-            {!form.EXISTS && form.NUM.length > 0 && <div style={styles.orCircle}>OR</div>}
-          </div>}
-          {!form.EXISTS && <React.Fragment>
-            {form.NUM.map((attr, a) => <div key={a}>
-              {(this.isMeasurement || this.isBP) && <div style={styles.label}>
-                {dropdowns.labels[a]}
-              </div>}
-              <div style={styles.container}>
-                <div style={styles.dropdown}>
-                  <Dropdown value={attr.operator} options={options} placeholder='Select Operator'
-                    onChange={(e) => this.selectChange(a, e.value)}/>
-                </div>
-                {this.showInput(a) && <div className='form-group range-container'>
-                  <input className='number-container'
-                    type='number'
-                    min={attr.MIN}
-                    max={attr.MAX}
-                    onChange={(e) => this.inputChange(e.target.value, a, 0)}/>
-                  {this.hasUnits && <span>{PM_UNITS[criterion.subtype]}</span>}
-                </div>}
-                {this.isBetween(a) && <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>
-                  <div>and</div>
-                </div>}
-                {this.isBetween(a) && <div className='form-group range-container'>
-                  <input className='number-container'
-                    type='number'
-                    min={attr.MIN}
-                    max={attr.MAX}
-                    onChange={(e) => this.inputChange(e.target.value, a, 1)}/>
-                  {this.hasUnits && <span>{PM_UNITS[criterion.subtype]}</span>}
-                </div>}
-                {this.isMeasurement && this.showInput(a) && <span style={{paddingTop: '0.2rem'}}>
-                  Range: {attr.MIN} - {attr.MAX}
-                </span>}
+      const {count, error, form, loading, options} = this.state;
+      // TODO add validation check here
+      const disabled = loading || form.EXISTS || form.NUM.every(attr => attr.operator === 'ANY');
+      return <div style={{margin: '0.5rem 0 1.5rem', paddingTop: '0.5rem'}}>
+        {this.isMeasurement && <div>
+          <div style={styles.label}>{this.displayName}</div>
+          <CheckBox style={{marginLeft: '0.5rem'}}
+            onChange={(v) => this.radioChange(v)}/> Any value (lab exists)
+          {!form.EXISTS && form.NUM.length > 0 && <div style={styles.orCircle}>OR</div>}
+        </div>}
+        {!form.EXISTS && <React.Fragment>
+          {form.NUM.map((attr, a) => <div key={a}>
+            {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
+            {this.isBP && <div style={styles.label}>{attr.name}</div>}
+            <div style={styles.container}>
+              <div style={styles.dropdown}>
+                <Dropdown style={{width: '100%'}}value={attr.operator} options={options}
+                  placeholder='Select Operator' onChange={(e) => this.selectChange(a, e.value)}/>
               </div>
-            </div>)}
-            {form.CAT.length > 0 && <React.Fragment>
-              <div className='or-circle'>OR</div>
-              <div style={styles.label}>Categorical Values</div>
-              <div className='form-group'>
-                {form.CAT.map((attr, a) => <React.Fragment>
-                  <CheckBox key={a} checked={attr.checked} onChange={(e) => console.log(e)} />
-                  {attr.conceptName} <span className='badge badge-info'>{attr.estCount}</span>
-                </React.Fragment>)}
-              </div>
-            </React.Fragment>}
-          </React.Fragment>}
-          <div style={styles.countPreview}>
-            <div className='row'>
-              {this.showCalc && <div className='col-lg-3'>
-                <button type='button'
-                  className='btn'
-                  onClick={() => this.requestPreview()}>
-                  Calculate
-                </button>
+              {![null, 'ANY'].includes(attr.operator) && <div>
+                <input style={styles.number} type='number' min={attr.MIN} max={attr.MAX}
+                  onChange={(e) => this.inputChange(e.target.value, a, 0)}/>
+                {this.hasUnits && <span> {PM_UNITS[criterion.subtype]}</span>}
               </div>}
-              <div className='col-lg-5 text-padding'>
-                <div className='result-text'>
-                  Results
-                </div>
+              {attr.operator === Operator.BETWEEN && <React.Fragment>
+                <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
                 <div>
-                  Number Participants:
-                  {count !== null && <span className='text-bold'>{count.toLocaleString()}</span>}
-                  {count === null && <span> -- </span>}
+                  <input style={styles.number} type='number' min={attr.MIN} max={attr.MAX}
+                    onChange={(e) => this.inputChange(e.target.value, a, 1)}/>
+                  {this.hasUnits && <span> {PM_UNITS[criterion.subtype]}</span>}
                 </div>
-              </div>
-              {!loading && <div className='col-lg-3 button-padding'>
-                <button className='btn add-button' type='submit'> ADD THIS</button>
-              </div>}
+              </React.Fragment>}
+              {this.isMeasurement && attr.operator !== null &&
+                <span style={{paddingTop: '0.2rem'}}>&nbsp;Ranges: {attr.MIN} - {attr.MAX}</span>
+              }
             </div>
+          </div>)}
+          {form.CAT.length > 0 && <React.Fragment>
+            <div style={styles.orCircle}>OR</div>
+            <div style={styles.label}>Categorical Values</div>
+            <div>
+              {form.CAT.map((attr, a) => <React.Fragment>
+                <CheckBox key={a} checked={attr.checked} onChange={(e) => console.log(e)} />
+                {attr.conceptName} <span style={styles.badge}> {attr.estCount}</span>
+              </React.Fragment>)}
+            </div>
+          </React.Fragment>}
+        </React.Fragment>}
+        <div style={styles.countPreview}>
+          <div style={styles.row}>
+            {this.showCalc && <div style={styles.buttonContainer}>
+              <Button type='primary' disabled={disabled}
+                style={{
+                  ...styles.button,
+                  ...(disabled ? {opacity: 0.4} : {}),
+                  background: colorWithWhiteness(colors.primary, .2)
+                }}
+                onClick={() => this.requestPreview()}>Calculate</Button>
+            </div>}
+            <div style={styles.resultsContainer}>
+              <div style={{fontWeight: 'bold'}}>Results</div>
+              <div>
+                Number Participants:
+                {count === null ? <span> -- </span> : <span> {count.toLocaleString()}</span>}
+              </div>
+            </div>
+            {!loading && <div style={styles.buttonContainer}>
+              <Button type='link'
+                style={{...styles.button, color: colorWithWhiteness(colors.primary, .2)}}
+                onClick={() => this.addAttrs()}> ADD THIS</Button>
+            </div>}
           </div>
-        </section>
+        </div>
       </div>;
     }
   }
