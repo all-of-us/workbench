@@ -2361,7 +2361,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testNotebookLockingMetadata() {
     final String lastLockedUser = LOGGED_IN_USER_EMAIL;
-    final Long lockExpirationTime = Instant.now().minus(Duration.ofMinutes(1)).toEpochMilli();
+    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
     final Map<String, String> gcsMetadata =
         new HashMap<String, String>() {
@@ -2405,7 +2405,7 @@ public class WorkspacesControllerTest {
                         .put("canShare", true)));
 
     final String lastLockedUser = readerOnMyWorkspace;
-    final Long lockExpirationTime = Instant.now().minus(Duration.ofMinutes(1)).toEpochMilli();
+    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
     final Map<String, String> gcsMetadata =
         new HashMap<String, String>() {
@@ -2431,7 +2431,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testNotebookLockingMetadataUnknownUser() {
     final String lastLockedUser = "a-stranger@fake-research-aou.org";
-    final Long lockExpirationTime = Instant.now().minus(Duration.ofMinutes(1)).toEpochMilli();
+    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
     final Map<String, String> gcsMetadata =
         new HashMap<String, String>() {
