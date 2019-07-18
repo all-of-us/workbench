@@ -2455,6 +2455,32 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testNotebookLockingMetadataPlaintextUser() {
+    final String lastLockedUser = LOGGED_IN_USER_EMAIL;
+    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
+
+    final Map<String, String> gcsMetadata =
+        new HashMap<String, String>() {
+          {
+            put("lockExpirationTime", lockExpirationTime.toString());
+            // store directly in plaintext, to show that this does not work
+            put("lastLockedBy", lastLockedUser);
+            put("extraMetadata", "is not a problem");
+          }
+        };
+
+    // in case of accidentally storing the user email in plaintext
+    // it can't be retrieved by this endpoint
+
+    final NotebookLockingMetadataResponse expectedResponse =
+        new NotebookLockingMetadataResponse()
+            .lockExpirationTime(lockExpirationTime)
+            .lastLockedBy("UNKNOWN");
+
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
   public void testNotebookLockingNullMetadata() {
     final Map<String, String> gcsMetadata = null;
 
