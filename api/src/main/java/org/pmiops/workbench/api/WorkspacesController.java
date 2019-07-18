@@ -763,8 +763,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     try {
       MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
       byte[] hash = sha256.digest(toHash.getBytes(StandardCharsets.UTF_8));
-      final String hex = BaseEncoding.base16().lowerCase().encode(hash);
-      return hex;
+      // convert to printable hex text
+      return BaseEncoding.base16().lowerCase().encode(hash);
     } catch (final NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
