@@ -202,10 +202,8 @@ export const AttributesPage = withCurrentWorkspace() (
         } else if (form.NUM[other].operator === AttrName[AttrName.ANY]) {
           form.NUM[other].operator = value;
         }
-      } else {
-        if (value !== Operator[Operator.BETWEEN]) {
-          form.NUM[index].operands.splice(1);
-        }
+      } else if (value !== Operator[Operator.BETWEEN]) {
+        form.NUM[index].operands.splice(1);
       }
       const count = value === AttrName[AttrName.ANY] ? criterion.count : null;
       this.setState({form, count});
@@ -253,30 +251,30 @@ export const AttributesPage = withCurrentWorkspace() (
       this.setState({form, count: null});
     }
 
-    // TODO refactor with custom validation
-    // get isValid() {
-    //   if (this.isPM || !this.form.valid) {
-    //     return this.form.valid;
-    //   }
-    //   if (this.attrs.EXISTS) {
-    //     return true;
-    //   }
-    //   let valid = false;
-    //   this.attrs.NUM.forEach(num => {
-    //     if (num.operator) {
-    //       valid = true;
-    //     }
-    //   });
-    //   this.attrs.CAT.forEach(cat => {
-    //     if (cat.checked) {
-    //       valid = true;
-    //     }
-    //   });
-    //   return valid;
-    // }
+    get isValid() {
+      const {form} = this.state;
+      if (form.EXISTS) {
+        return true;
+      }
+      const numErrors = form.NUM.some(attr => {
+        switch (attr.operator) {
+          case null:
+            return true;
+          case 'Any':
+            return false;
+          case Operator.BETWEEN:
+            return attr.operands.length > 2;
+          default:
+            return attr.operands.length === 0;
+        }
+      });
+      const catErrors = !form.CAT.some(attr => attr.checked);
+      return !numErrors && !catErrors;
+    }
 
     get paramId() {
       const {criterion: {conceptId, id}} = this.props;
+      // TODO replace this.selectedCode below
       return `param${(conceptId || id) + this.selectedCode}`;
     }
 
