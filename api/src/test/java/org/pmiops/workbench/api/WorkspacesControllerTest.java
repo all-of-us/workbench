@@ -2374,7 +2374,7 @@ public class WorkspacesControllerTest {
 
     assertThat(
             workspacesController
-                .notebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
+                .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
                 .getBody())
         .isEqualTo(expectedResponse);
   }

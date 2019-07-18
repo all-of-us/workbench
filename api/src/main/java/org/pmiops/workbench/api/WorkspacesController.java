@@ -705,7 +705,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<NotebookLockingMetadataResponse> notebookLockingMetadata(
+  public ResponseEntity<NotebookLockingMetadataResponse> getNotebookLockingMetadata(
       String workspaceNamespace, String workspaceName, String notebookName) {
 
     // Retrieving the workspace is done first, which acts as an access check.

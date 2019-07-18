@@ -1316,7 +1316,7 @@ paths:
         (e.g. at first creation) this may be empty.  Additionally, the caller of this endpoint
         may not have the appropriate permissions to determine who is locking this notebook.
         When this is the case, the lastLockedBy field is set to UNKNOWN.
-      operationId: "notebookLockingMetadata"
+      operationId: "getNotebookLockingMetadata"
       parameters:
         - in: path
           name: notebookName
@@ -3472,5 +3472,6 @@ definitions:
       lastLockedBy:
         type: string
       lockExpirationTime:
+        description: The time when the lock will expire, in ms from the Unix epoch
         type: integer
         format: int64
