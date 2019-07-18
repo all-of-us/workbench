@@ -360,6 +360,147 @@ export const LabeledCheckBox = (props) => {
 
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Duplicate = 3 }
 
+export interface SearchInputState {
+  matches: Array<string>;
+  hover: Array<boolean>;
+  state: number;
+}
+
+function getDiseaseNames(keyword) {
+  const baseurl = serverConfigStore.getValue().firecloudURL;
+  const url = baseurl + '/duos/autocomplete/' + keyword;;
+  return fetch(encodeURI(url)).then((response) => {
+    return response.json();
+  }).then((matches) => {
+    const labeledMatches = fp.filter((elt) => elt.hasOwnProperty('label'))(matches);
+    const diseases = fp.map((elt) => elt['label'])(labeledMatches);
+    return diseases;
+  });
+}
+
+class SearchInput extends React.Component<any, SearchInputState> {
+  // Forward declarations
+  searchTermChangedEvent: Function;
+  START: number;
+  ACTIVE: number;
+  SUGGEST: number;
+  HOVER: number;
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      matches: [],
+      hover: [],
+      state: this.START,
+    };
+    this.searchTermChangedEvent = fp.debounce(300, this._search);
+
+    // State machine states
+    this.START = 0;   // Input box lacks focus, drop-down invisible
+    this.ACTIVE = 1;  // Input box focused, drop-down invisible
+    this.SUGGEST = 2; // Input box focused, search results visible
+    this.HOVER = 3;   // Input box focused, search results visible, item activated
+  }
+
+  _toggleHover(j) {
+    return this.state.hover.map((elt, i) => {
+      return (i === j) ? !elt : elt;
+    });
+  }
+
+  _search(keyword: string): void {
+    this.setState({matches: []});
+    keyword = keyword.trim();
+    if (!keyword) {
+      return;
+    }
+    this.props.onSearch(keyword).then((matches) => {
+      this.setState({
+        matches: matches,
+        state: matches.length > 0 ?
+          this.SUGGEST : this.ACTIVE,
+        hover: matches.map(() => false),
+      });
+    }).catch((e) => {});
+  }
+
+  _onBlur() {
+    const state = this.state.state;
+    if (state === this.ACTIVE  ||
+        state === this.SUGGEST ||
+        state === this.HOVER) {
+      this.setState({state: this.START});
+    }
+  }
+
+  _onChange(match) {
+    this.setState({state: this.ACTIVE});
+    this.searchTermChangedEvent(match);
+    this.props.onChange(match)
+  }
+
+  _onFocus() {
+    this.setState({state: this.ACTIVE});
+  }
+
+  _onMouseOver(j) {
+    this.setState({
+      state: this.HOVER,
+      hover: this._toggleHover(j)
+    });
+  }
+
+  _onMouseOut(j) {
+    this.setState({
+      state: this.SUGGEST,
+      hover: this._toggleHover(j)
+    });
+  }
+
+  _onMouseDown(match) {
+    this.props.onChange(match);
+  }
+
+  _suggest() {
+    const s = this.state.state;
+    const rval = this.props.enabled &&
+      (s === this.SUGGEST || s === this.HOVER);
+    return rval;
+  }    
+
+  render() {
+    return (
+      <div style={{position: 'relative'}}>
+        <TooltipTrigger
+          content={this.props.tooltip}
+          disabled={this.props.enabled}>
+          <TextInput
+            value={this.props.value}
+            style={{width: '90%', border: '1px solid #9a9a9', borderRadius: '5px'}}
+            onFocus={this._onFocus.bind(this)}
+            onBlur={this._onBlur.bind(this)}
+            onChange={e => this._onChange(e)}
+            placeholder={this.props.placeholder}
+            disabled={!this.props.enabled}/>
+        </TooltipTrigger>
+        {this._suggest() &&
+          <div data-test-id='drop-down' style={{...styles.dropdownMenu, ...styles.open, minWidth: '90%'}}>
+            {this.state.matches.map((disease, j) => {
+              return (
+                <div key={j} style={this.state.hover[j] ? styles.boxHover : styles.box}
+                  onMouseOver={this._onMouseOver.bind(this, j)}
+                  onMouseOut={this._onMouseOut.bind(this, j)}
+                  onMouseDown={this._onMouseDown.bind(this, disease)}>
+                  <h5 style={styles.boxHoverElement}>{disease}</h5>
+                </div>
+              );
+            })}
+          </div>
+        }
+      </div>
+    );
+  }
+}
 
 export interface WorkspaceEditProps {
   routeConfigData: any;
@@ -377,31 +518,10 @@ export interface WorkspaceEditState {
   loading: boolean;
   showUnderservedPopulationDetails: boolean;
   showStigmatizationDetails: boolean;
-
-  // The results returned by disease search.
-  diseaseList: Array<string>;
-
-  // An element is true if the mouse is hovering over its associated <div>
-  diseaseHover: Array<boolean>;
-
-  // The current state of the disease search state machine.
-  diseaseEntryState: number;
-}
-
-// States for disease search interaction
-enum DiseaseSearchState {
-    DS_START,   // Input box lacks focus, drop-down invisible
-    DS_ACTIVE,  // Input box focused, drop-down invisible
-    DS_SUGGEST, // Input box focused, search results visible
-    DS_HOVER,   // Input box focused, search results visible, item activated
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
-    // Declare this ahead of time so the typescript compiler won't choke on the following
-    // this.searchTermChangedEvent = ...
-    searchTermChangedEvent: Function;
-
     constructor(props: WorkspaceEditProps) {
       super(props);
       this.state = {
@@ -440,38 +560,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         loading: false,
         showUnderservedPopulationDetails: false,
         showStigmatizationDetails: false,
-        diseaseList: [],
-        diseaseHover: [],
-        diseaseEntryState: 0,
       };
-      this.searchTermChangedEvent = fp.debounce(300, this.diseaseSearch);
-    }
-
-    get showSearchResults(): boolean {
-      const state = this.state.diseaseEntryState;
-      return state === DiseaseSearchState.DS_SUGGEST || state === DiseaseSearchState.DS_HOVER;
-    }
-
-    diseaseSearch(value: string): void {
-      this.setState({diseaseList: []});
-      const searchTerm = value.trim();
-      if (!searchTerm) {
-        return;
-      }
-      const baseurl = serverConfigStore.getValue().firecloudURL;
-      const url = baseurl + '/duos/autocomplete/' + searchTerm;
-      fetch(encodeURI(url)).then((response) => {
-        return response.json();
-      }).then((matches) => {
-        const labeledMatches = fp.filter((elt) => elt.hasOwnProperty('label'))(matches);
-        const diseases = fp.map((elt) => elt['label'])(labeledMatches);
-        this.setState({
-          diseaseList: diseases,
-          diseaseEntryState: diseases.length > 0 ?
-            DiseaseSearchState.DS_SUGGEST : DiseaseSearchState.DS_ACTIVE,
-          diseaseHover: diseases.map(() => false),
-        });
-      }).catch(() => {});
     }
 
     componentDidMount() {
@@ -583,12 +672,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     specificPopulationSelected(populationEnum): boolean {
       return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
-    }
-
-    toggleDiseaseHover(j) {
-      return this.state.diseaseHover.map((elt, i) => {
-        return (i === j) ? !elt : elt;
-      });
     }
 
     async saveWorkspace() {
@@ -730,69 +813,19 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     value={this.state.workspace.researchPurpose[rp.shortName]}
                     onChange={v => this.updateResearchPurpose(rp.shortName, v)}
                     children={rp.shortName === 'diseaseFocusedResearch' ?
-                    <div style={{position: 'relative'}}>
-                      <TooltipTrigger
-                        content='You must select disease focused research to enter
-                            a disease of focus'
-                          disabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}>
-                        <TextInput value={this.state.workspace.researchPurpose.diseaseOfFocus}
-                          style={{width: '90%', border: '1px solid #9a9a9', borderRadius: '5px'}}
-                          onFocus={() =>
-                            this.setState({diseaseEntryState: DiseaseSearchState.DS_ACTIVE})}
-                          onBlur={() => {
-                            const state = this.state.diseaseEntryState;
-                            if (state === DiseaseSearchState.DS_ACTIVE  ||
-                                state === DiseaseSearchState.DS_SUGGEST ||
-                                state === DiseaseSearchState.DS_HOVER) {
-                              this.setState({diseaseEntryState: DiseaseSearchState.DS_START});
-                            }
-                          }}
-                          onChange={e => {
-                            this.setState({diseaseEntryState: 1});
-                            this.searchTermChangedEvent(e);
-                            this.setState(fp.set([
-                              'workspace',
-                              'researchPurpose',
-                              'diseaseOfFocus'
-                            ], e));
-                          }}
-                          placeholder='Name of Disease'
-                          disabled={!this.state.workspace.researchPurpose.diseaseFocusedResearch}/>
-                      </TooltipTrigger>
-                      {this.state.workspace.researchPurpose.diseaseFocusedResearch &&
-                       this.showSearchResults &&
-                        <div data-test-id='drop-down' style={{...styles.dropdownMenu,
-                          ...styles.open, minWidth: '90%'}}>
-                          {this.state.diseaseList.map((disease, j) => {
-                            return (
-                            <div key={j} style={this.state.diseaseHover[j] ?
-                              styles.boxHover : styles.box}
-                                onMouseOver={() =>
-                                  this.setState({
-                                    diseaseEntryState: DiseaseSearchState.DS_HOVER,
-                                    diseaseHover: this.toggleDiseaseHover(j)
-                                  })
-                                }
-                                onMouseOut={() =>
-                                  this.setState({
-                                    diseaseEntryState: DiseaseSearchState.DS_SUGGEST,
-                                    diseaseHover: this.toggleDiseaseHover(j)
-                                  })
-                                }
-                                onMouseDown={() => {
-                                  this.setState(fp.set([
-                                    'workspace',
-                                    'researchPurpose',
-                                    'diseaseOfFocus'
-                                  ], disease));
-                                }}>
-                              <h5 style={styles.boxHoverElement}>{disease}</h5>
-                            </div>
-                            );
-                          })}
-                        </div>}
-                    </div> : undefined}/>)}
-                </div>
+                      <SearchInput
+                        enabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}
+                        placeholder="Name of Disease"
+                        value={this.state.workspace.researchPurpose.diseaseOfFocus}
+                        onSearch={getDiseaseNames}
+                        tooltip='You must select disease focused research to enter a disease of focus'
+                        onChange={(disease) => this.setState(fp.set([
+                          'workspace',
+                          'researchPurpose',
+                          'diseaseOfFocus'
+                        ], disease))}/>
+                      : undefined} />)}
+            </div>
             <div style={{display: 'flex', flexDirection: 'column', flex: '1 1 0'}}>
               {ResearchPurposeItems.slice(sliceByHalfLength(ResearchPurposeItems))
                 .map((rp, i) =>
@@ -807,7 +840,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                         style={{marginTop: '0.5rem'}}/> : undefined}/>
                 )}
             </div>
-            </div>
+          </div>
         </WorkspaceEditSection>
         <WorkspaceEditSection
           header={researchPurposeQuestions[1].header}
