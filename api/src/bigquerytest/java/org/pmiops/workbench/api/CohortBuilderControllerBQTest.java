@@ -128,7 +128,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     when(configProvider.get()).thenReturn(testConfig);
 
     ElasticSearchService elasticSearchService =
-        new ElasticSearchService(criteriaDao, cloudStorageService, configProvider);
+        new ElasticSearchService(cbCriteriaDao, cloudStorageService, configProvider);
 
     controller =
         new CohortBuilderController(
@@ -1187,9 +1187,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(),
-            Arrays.asList(icd9Child, icd9Parent),
-            new ArrayList<>());
+            DomainType.CONDITION.toString(), Arrays.asList(icd9Parent), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1218,7 +1216,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .group(true)
             .selectable(true)
             .ancestorData(false)
-            .conceptId("2");
+            .conceptId("2")
+            .synonyms("[CONDITION_rank1]");
     saveCriteriaWithPath("0", criteriaParent);
     CBCriteria criteriaChild =
         new CBCriteria()
@@ -1446,7 +1445,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .group(true)
             .standard(false)
             .ancestorData(false)
-            .conceptId(1L)
+            .conceptId(2L)
             .value("001");
 
     CBCriteria criteriaParent =
@@ -1461,7 +1460,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .group(true)
             .selectable(true)
             .ancestorData(false)
-            .conceptId("2");
+            .conceptId("2")
+            .synonyms("[CONDITION_rank1]");
     saveCriteriaWithPath("0", criteriaParent);
     CBCriteria criteriaChild =
         new CBCriteria()
