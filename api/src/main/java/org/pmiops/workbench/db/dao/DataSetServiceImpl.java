@@ -153,7 +153,7 @@ public class DataSetServiceImpl implements DataSetService {
     if (((cohortsSelected == null || cohortsSelected.size() == 0) && !includesAllParticipants)
         || conceptSetsSelected == null
         || (conceptSetsSelected.size() == 0 &&
-        (dataSet.getValues().size() > 0 && dataSet.getValues().get(0).getDomain() != Domain.PERSON))) {
+        (dataSet.getValues().size() == 0 || dataSet.getValues().get(0).getDomain() != Domain.PERSON))) {
       throw new BadRequestException("Data Sets must include at least one cohort and concept.");
     }
 
