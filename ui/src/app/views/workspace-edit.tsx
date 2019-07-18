@@ -368,7 +368,7 @@ export interface SearchInputState {
 
 function getDiseaseNames(keyword) {
   const baseurl = serverConfigStore.getValue().firecloudURL;
-  const url = baseurl + '/duos/autocomplete/' + keyword;;
+  const url = baseurl + '/duos/autocomplete/' + keyword;
   return fetch(encodeURI(url)).then((response) => {
     return response.json();
   }).then((matches) => {
@@ -436,7 +436,7 @@ class SearchInput extends React.Component<any, SearchInputState> {
   _onChange(match) {
     this.setState({state: this.ACTIVE});
     this.searchTermChangedEvent(match);
-    this.props.onChange(match)
+    this.props.onChange(match);
   }
 
   _onFocus() {
@@ -466,7 +466,7 @@ class SearchInput extends React.Component<any, SearchInputState> {
     const rval = this.props.enabled &&
       (s === this.SUGGEST || s === this.HOVER);
     return rval;
-  }    
+  }
 
   render() {
     return (
@@ -484,7 +484,8 @@ class SearchInput extends React.Component<any, SearchInputState> {
             disabled={!this.props.enabled}/>
         </TooltipTrigger>
         {this._suggest() &&
-          <div data-test-id='drop-down' style={{...styles.dropdownMenu, ...styles.open, minWidth: '90%'}}>
+          <div data-test-id='drop-down'
+            style={{...styles.dropdownMenu, ...styles.open, minWidth: '90%'}}>
             {this.state.matches.map((disease, j) => {
               return (
                 <div key={j} style={this.state.hover[j] ? styles.boxHover : styles.box}
@@ -586,6 +587,22 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         }
       }
       this.setCdrVersions();
+    }
+
+    makeDiseaseInput() {
+      return (
+        <SearchInput
+          enabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}
+          placeholder='Name of Disease'
+          value={this.state.workspace.researchPurpose.diseaseOfFocus}
+          onSearch={getDiseaseNames}
+          tooltip='You must select disease focused research to enter a disease of focus'
+          onChange={(disease) => this.setState(fp.set([
+            'workspace',
+            'researchPurpose',
+            'diseaseOfFocus'
+          ], disease))}/>
+      );
     }
 
     async setCdrVersions() {
@@ -813,18 +830,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     value={this.state.workspace.researchPurpose[rp.shortName]}
                     onChange={v => this.updateResearchPurpose(rp.shortName, v)}
                     children={rp.shortName === 'diseaseFocusedResearch' ?
-                      <SearchInput
-                        enabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}
-                        placeholder="Name of Disease"
-                        value={this.state.workspace.researchPurpose.diseaseOfFocus}
-                        onSearch={getDiseaseNames}
-                        tooltip='You must select disease focused research to enter a disease of focus'
-                        onChange={(disease) => this.setState(fp.set([
-                          'workspace',
-                          'researchPurpose',
-                          'diseaseOfFocus'
-                        ], disease))}/>
-                      : undefined} />)}
+                      this.makeDiseaseInput() : undefined} />)}
             </div>
             <div style={{display: 'flex', flexDirection: 'column', flex: '1 1 0'}}>
               {ResearchPurposeItems.slice(sliceByHalfLength(ResearchPurposeItems))
