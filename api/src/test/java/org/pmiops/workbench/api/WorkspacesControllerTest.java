@@ -2356,15 +2356,13 @@ public class WorkspacesControllerTest {
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
     final Map<String, String> gcsMetadata =
-        new HashMap<String, String>() {
-          {
-            put("lockExpirationTime", lockExpirationTime.toString());
-            put(
+        new ImmutableMap.Builder<String, String>()
+            .put("lockExpirationTime", lockExpirationTime.toString())
+            .put(
                 "lastLockedBy",
-                WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser));
-            put("extraMetadata", "is not a problem");
-          }
-        };
+                WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
+            .put("extraMetadata", "is not a problem")
+            .build();
 
     // I can see that I have locked it myself, and when
 
@@ -2400,15 +2398,13 @@ public class WorkspacesControllerTest {
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
     final Map<String, String> gcsMetadata =
-        new HashMap<String, String>() {
-          {
-            put("lockExpirationTime", lockExpirationTime.toString());
-            put(
+        new ImmutableMap.Builder<String, String>()
+            .put("lockExpirationTime", lockExpirationTime.toString())
+            .put(
                 "lastLockedBy",
-                WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser));
-            put("extraMetadata", "is not a problem");
-          }
-        };
+                WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
+            .put("extraMetadata", "is not a problem")
+            .build();
 
     // I'm the owner so I can see readers on my workspace
 
@@ -2426,15 +2422,13 @@ public class WorkspacesControllerTest {
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
     final Map<String, String> gcsMetadata =
-        new HashMap<String, String>() {
-          {
-            put("lockExpirationTime", lockExpirationTime.toString());
-            put(
+        new ImmutableMap.Builder<String, String>()
+            .put("lockExpirationTime", lockExpirationTime.toString())
+            .put(
                 "lastLockedBy",
-                WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser));
-            put("extraMetadata", "is not a problem");
-          }
-        };
+                WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
+            .put("extraMetadata", "is not a problem")
+            .build();
 
     // This user is not listed in the Workspace ACL so I don't know them
 
@@ -2452,14 +2446,12 @@ public class WorkspacesControllerTest {
     final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
 
     final Map<String, String> gcsMetadata =
-        new HashMap<String, String>() {
-          {
-            put("lockExpirationTime", lockExpirationTime.toString());
+        new ImmutableMap.Builder<String, String>()
+            .put("lockExpirationTime", lockExpirationTime.toString())
             // store directly in plaintext, to show that this does not work
-            put("lastLockedBy", lastLockedUser);
-            put("extraMetadata", "is not a problem");
-          }
-        };
+            .put("lastLockedBy", lastLockedUser)
+            .put("extraMetadata", "is not a problem")
+            .build();
 
     // in case of accidentally storing the user email in plaintext
     // it can't be retrieved by this endpoint
