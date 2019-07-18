@@ -152,7 +152,8 @@ public class DataSetServiceImpl implements DataSetService {
 
     if (((cohortsSelected == null || cohortsSelected.size() == 0) && !includesAllParticipants)
         || conceptSetsSelected == null
-        || conceptSetsSelected.size() == 0) {
+        || (conceptSetsSelected.size() == 0
+            && dataSet.getValues().size() > 0 && dataSet.getValues().get(0).getDomain() != Domain.PERSON)) {
       throw new BadRequestException("Data Sets must include at least one cohort and concept.");
     }
 
@@ -225,6 +226,7 @@ public class DataSetServiceImpl implements DataSetService {
       conceptSetsSelected.stream()
           .map(conceptSet -> conceptSet.getDomain())
           .distinct()
+          .filter(cs -> d != Domain.PERSON)
           .forEach(
               domain -> {
                 if (conceptSetsSelected.stream()
@@ -239,38 +241,44 @@ public class DataSetServiceImpl implements DataSetService {
       String conceptSetQueries =
           conceptSetsSelected.stream()
               .filter(cs -> d == cs.getDomainEnum())
+              .filter(cs -> d != Domain.PERSON)
               .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
               .collect(Collectors.joining(", "));
       String conceptSetListQuery = " IN (" + conceptSetQueries + ")";
 
-      Optional<DomainConceptIds> domainConceptIds =
-          bigQuerySchemaConfig.cohortTables.values().stream()
-              .filter(config -> d.toString().equals(config.domain))
-              .map(
-                  tableConfig ->
-                      new DomainConceptIds(
-                          getColumnName(tableConfig, "source"),
-                          getColumnName(tableConfig, "standard")))
-              .findFirst();
-      if (!domainConceptIds.isPresent()) {
-        throw new ServerErrorException(
-            "Couldn't find source and standard columns for domain: " + d.toString());
-      }
-      DomainConceptIds columnNames = domainConceptIds.get();
+      if (d != Domain.PERSON) {
+        Optional<DomainConceptIds> domainConceptIds =
+            bigQuerySchemaConfig.cohortTables.values().stream()
+                .filter(config -> d.toString().equals(config.domain))
+                .map(
+                    tableConfig ->
+                        new DomainConceptIds(
+                            getColumnName(tableConfig, "source"),
+                            getColumnName(tableConfig, "standard")))
+                .findFirst();
+        if (!domainConceptIds.isPresent()) {
+          throw new ServerErrorException(
+              "Couldn't find source and standard columns for domain: " + d.toString());
+        }
+        DomainConceptIds columnNames = domainConceptIds.get();
 
-      // This adds the where clauses for cohorts and concept sets.
-      query =
-          query.concat(
-              " WHERE \n("
-                  + columnNames.getStandardConceptIdColumn()
-                  + conceptSetListQuery
-                  + " OR \n"
-                  + columnNames.getSourceConceptIdColumn()
-                  + conceptSetListQuery
-                  + ")");
-      if (!includesAllParticipants) {
-        query = query.concat(" \nAND (PERSON_ID IN (" + cohortQueries + "))");
+        // This adds the where clauses for cohorts and concept sets.
+        query =
+            query.concat(
+                " WHERE \n("
+                    + columnNames.getStandardConceptIdColumn()
+                    + conceptSetListQuery
+                    + " OR \n"
+                    + columnNames.getSourceConceptIdColumn()
+                    + conceptSetListQuery
+                    + ")");
+        if (!includesAllParticipants) {
+          query = query.concat(" \nAND (PERSON_ID IN (" + cohortQueries + "))");
+        }
+      } else if (!includesAllParticipants) {
+        query = query.concat(" \nWHERE PERSON_ID IN (" + cohortQueries + ")");
       }
+
       queryMap.put(query, cohortParameters);
       QueryJobConfiguration queryJobConfiguration =
           QueryJobConfiguration.newBuilder(query)
