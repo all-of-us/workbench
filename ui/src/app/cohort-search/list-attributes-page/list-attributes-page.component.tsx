@@ -87,7 +87,19 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '14px',
     lineHeight: '20px'
-  }
+  },
+  errors: {
+    background: '#f5dbd9',
+    color: '#565656',
+    fontSize: '11px',
+    border: '1px solid #ebafa6',
+    borderRadius: '3px',
+    margin: '0.25rem 0.5rem',
+    padding: '3px 5px'
+  },
+  errorItem: {
+    lineHeight: '16px',
+  },
 });
 
 const optionUtil = {
@@ -105,11 +117,11 @@ interface Props {
 }
 
 interface State {
-  form: any;
-  options: any;
   count: number;
+  countError: boolean;
+  form: any;
   loading: boolean;
-  error: boolean;
+  options: any;
 }
 export const AttributesPage = withCurrentWorkspace() (
   class extends React.Component<Props, State> {
@@ -119,16 +131,16 @@ export const AttributesPage = withCurrentWorkspace() (
     constructor(props: Props) {
       super(props);
       this.state = {
+        count: null,
+        countError: false,
         form: {EXISTS: false, NUM: [], CAT: []},
+        loading: false,
         options: [
           {label: 'Equals', value: Operator.EQUAL},
           {label: 'Greater than or Equal to', value: Operator.GREATERTHANOREQUALTO},
           {label: 'Less than or Equal to', value: Operator.LESSTHANOREQUALTO},
           {label: 'Between', value: Operator.BETWEEN},
         ],
-        count: null,
-        loading: false,
-        error: false,
       };
     }
 
@@ -195,13 +207,16 @@ export const AttributesPage = withCurrentWorkspace() (
       const {criterion} = this.props;
       const {form} = this.state;
       form.NUM[index].operator = value;
-      if (criterion.subtype === 'BP') {
+      if (this.isBP) {
         const other = index === 0 ? 1 : 0;
         if (value === AttrName[AttrName.ANY]) {
           form.NUM[other].operator = AttrName[AttrName.ANY];
+          form.NUM[other].operands = form.NUM[index].operands = [];
         } else if (form.NUM[other].operator === AttrName[AttrName.ANY]) {
           form.NUM[other].operator = value;
         }
+      } else if (value === AttrName[AttrName.ANY]) {
+        form.NUM[index].operands = [];
       } else if (value !== Operator[Operator.BETWEEN]) {
         form.NUM[index].operands.splice(1);
       }
@@ -209,67 +224,58 @@ export const AttributesPage = withCurrentWorkspace() (
       this.setState({form, count});
     }
 
-    // TODO remove or refactor with custom validation
-    // setValidation(option: string) {
-    //   if (option === 'Any') {
-    //     this.form.controls.NUM.get(['num0', 'valueA']).clearValidators();
-    //     this.form.controls.NUM.get(['num0', 'valueB']).clearValidators();
-    //     if (this.attrs.NUM.length === 2) {
-    //       this.form.controls.NUM.get(['num1', 'valueA']).clearValidators();
-    //       this.form.controls.NUM.get(['num1', 'valueB']).clearValidators();
-    //     }
-    //     this.form.controls.NUM.reset();
-    //   } else {
-    //     const validators = [Validators.required];
-    //     if (this.isMeasurement) {
-    //       const min = parseFloat(this.attrs.NUM[0].MIN);
-    //       const max = parseFloat(this.attrs.NUM[0].MAX);
-    //       validators.push(rangeValidator('Values', min, max));
-    //     } else {
-    //       validators.push(numberAndNegativeValidator('Form'));
-    //     }
-    //     this.attrs.NUM.forEach((attr, i) => {
-    //       this.form.controls.NUM.get(['num' + i, 'valueA']).setValidators(validators);
-    //       if (option === 'Between') {
-    //         this.form.controls.NUM.get(['num' + i, 'valueB']).setValidators(validators);
-    //       } else {
-    //         this.form.controls.NUM.get(['num' + i, 'valueB']).clearValidators();
-    //         this.form.controls.NUM.get(['num' + i, 'valueB']).reset();
-    //       }
-    //     });
-    //     this.cdref.detectChanges();
-    //   }
-    // }
-
     inputChange(input: string, index: number, operand: number) {
+      console.log(parseInt(input, 10));
       const {form} = this.state;
       let value = input;
       if (value && value.length > 10) {
         value = value.slice(0, 10);
       }
-      form.NUM[index].operands[operand] = value;
+      form.NUM[index].operands[operand] = parseInt(value, 10);
+      console.log(form.NUM[index].operands);
+      console.log(form.NUM[index].operands.some(op => op < 0));
       this.setState({form, count: null});
     }
 
-    get isValid() {
+    validateForm() {
       const {form} = this.state;
+      let formErrors = new Set(), formValid = true;
       if (form.EXISTS) {
-        return true;
+        return {formValid, formErrors};
       }
-      const numErrors = form.NUM.some(attr => {
+      formErrors = form.NUM.reduce((acc, attr) => {
         switch (attr.operator) {
           case null:
-            return true;
-          case 'Any':
-            return false;
+            formValid = false;
+            return acc;
+          case 'ANY':
+            return acc;
           case Operator.BETWEEN:
-            return attr.operands.length > 2;
+            if (attr.operands.length < 2) {
+              formValid = false;
+            }
+            break;
           default:
-            return attr.operands.length === 0;
+            if (attr.operands.length === 0) {
+              formValid = false;
+            }
         }
-      });
-      const catErrors = !form.CAT.some(attr => attr.checked);
-      return !numErrors && !catErrors;
+        if (attr.operands.includes(NaN)) {
+          formValid = false;
+          acc.add('Form can only accept valid numbers');
+        }
+        if (this.isPM && attr.operands.some(op => op < 0)) {
+          formValid = false;
+          acc.add('Form cannot accept negative values');
+        }
+        if (this.isMeasurement && attr.operands.some(op => op < attr.MIN || op > attr.MAX)) {
+          formValid = false;
+          acc.add(`Values must be between ${attr.MIN} and ${attr.MAX}`);
+        }
+        return acc;
+      }, formErrors);
+      formValid = formValid || (this.isMeasurement && form.CAT.some(attr => attr.checked));
+      return {formValid, formErrors};
     }
 
     get paramId() {
@@ -351,7 +357,7 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     requestPreview() {
-      this.setState({count: null, loading: true, error: false});
+      this.setState({count: null, loading: true, countError: false});
       const param = this.paramWithAttributes;
       const cdrVersionId = +(currentWorkspaceStore.getValue().cdrVersionId);
       const request = {
@@ -368,7 +374,7 @@ export const AttributesPage = withCurrentWorkspace() (
       cohortBuilderApi().countParticipants(cdrVersionId, request).then(response => {
         this.setState({count: response, loading: false});
       }, () => {
-        this.setState({loading: false, error: true});
+        this.setState({loading: false, countError: true});
       });
     }
 
@@ -393,32 +399,29 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     get isMeasurement() {
-      return this.props.criterion.domainId === DomainType[DomainType.MEASUREMENT];
+      return this.props.criterion.domainId === DomainType.MEASUREMENT;
     }
 
     get isPM() {
-      return this.props.criterion.domainId === DomainType[DomainType.PHYSICALMEASUREMENT];
+      return this.props.criterion.domainId === DomainType.PHYSICALMEASUREMENT;
     }
 
     get isBP() {
-      return this.props.criterion.subtype === CriteriaSubType[CriteriaSubType.BP];
-    }
-
-    get showCalc() {
-      const {form} = this.state;
-      let notAny = true;
-      if (this.isPM) {
-        notAny = form.NUM && form.NUM[0].operator !== AttrName.ANY;
-      }
-      return !form.EXISTS && notAny;
+      return this.props.criterion.subtype === CriteriaSubType.BP;
     }
 
     render() {
       const {criterion} = this.props;
-      const {count, error, form, loading, options} = this.state;
-      // TODO add validation check here
-      const disabled = loading || form.EXISTS || form.NUM.every(attr => attr.operator === 'ANY');
-      return <div style={{margin: '0.5rem 0 1.5rem', paddingTop: '0.5rem'}}>
+      const {count, countError, form, loading, options} = this.state;
+      const {formValid, formErrors} = this.validateForm();
+      const disabled = loading || form.EXISTS || !formValid
+        || form.NUM.every(attr => attr.operator === 'ANY');
+      return <div style={{margin: '0.5rem 0 1.5rem'}}>
+        {!!formErrors.size && <div style={styles.errors}>
+          {Array.from(formErrors).map((err, e) => <div key={e} style={styles.errorItem}>
+            {err}
+          </div>)}
+        </div>}
         {this.isMeasurement && <div>
           <div style={styles.label}>{this.displayName}</div>
           <CheckBox style={{marginLeft: '0.5rem'}}
@@ -465,7 +468,7 @@ export const AttributesPage = withCurrentWorkspace() (
         </React.Fragment>}
         <div style={styles.countPreview}>
           <div style={styles.row}>
-            {this.showCalc && <div style={styles.buttonContainer}>
+            <div style={styles.buttonContainer}>
               <Button type='primary' disabled={disabled}
                 style={{
                   ...styles.button,
@@ -473,7 +476,7 @@ export const AttributesPage = withCurrentWorkspace() (
                   background: colorWithWhiteness(colors.primary, .2)
                 }}
                 onClick={() => this.requestPreview()}>Calculate</Button>
-            </div>}
+            </div>
             <div style={styles.resultsContainer}>
               <div style={{fontWeight: 'bold'}}>Results</div>
               <div>
@@ -481,7 +484,7 @@ export const AttributesPage = withCurrentWorkspace() (
                 {count === null ? <span> -- </span> : <span> {count.toLocaleString()}</span>}
               </div>
             </div>
-            {!loading && <div style={styles.buttonContainer}>
+            {!loading && formValid && <div style={styles.buttonContainer}>
               <Button type='link'
                 style={{...styles.button, color: colorWithWhiteness(colors.primary, .2)}}
                 onClick={() => this.addAttrs()}> ADD THIS</Button>
