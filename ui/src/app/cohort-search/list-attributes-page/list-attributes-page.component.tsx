@@ -125,9 +125,6 @@ interface State {
 }
 export const AttributesPage = withCurrentWorkspace() (
   class extends React.Component<Props, State> {
-    units = PM_UNITS;
-    selectedCode: any;
-
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -188,7 +185,7 @@ export const AttributesPage = withCurrentWorkspace() (
       }
     }
 
-    radioChange(checked: boolean) {
+    toggleCheckbox(checked: boolean) {
       const {form} = this.state;
       let {criterion: {count}} = this.props;
       if (checked) {
@@ -225,15 +222,12 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     inputChange(input: string, index: number, operand: number) {
-      console.log(parseInt(input, 10));
       const {form} = this.state;
       let value = input;
       if (value && value.length > 10) {
         value = value.slice(0, 10);
       }
       form.NUM[index].operands[operand] = parseInt(value, 10);
-      console.log(form.NUM[index].operands);
-      console.log(form.NUM[index].operands.some(op => op < 0));
       this.setState({form, count: null});
     }
 
@@ -280,8 +274,12 @@ export const AttributesPage = withCurrentWorkspace() (
 
     get paramId() {
       const {criterion: {conceptId, id}} = this.props;
-      // TODO replace this.selectedCode below
-      return `param${(conceptId || id) + this.selectedCode}`;
+      const {form} = this.state;
+      const code = form.EXISTS ? 'Any' : form.NUM.reduce((acc, attr) => {
+        acc += optionUtil[attr.operator].code;
+        return acc;
+      }, '');
+      return `param${(conceptId || id) + code}`;
     }
 
     get displayName() {
@@ -322,7 +320,7 @@ export const AttributesPage = withCurrentWorkspace() (
           attrs.push({name: AttrName.CAT, operator: Operator.IN, operands: catOperands});
         }
         name += (this.isPM && attrs[0] && attrs[0].name !== AttrName.ANY
-          ? this.units[criterion.subtype]
+          ? PM_UNITS[criterion.subtype]
           : '') + ')';
       }
       return {
@@ -335,7 +333,7 @@ export const AttributesPage = withCurrentWorkspace() (
 
     get paramName() {
       const {criterion} = this.props;
-      const {form, options} = this.state;
+      const {form} = this.state;
       let name = criterion.name + ' (';
       form.NUM.forEach((attr, i) => {
         if (attr.operator === AttrName.ANY) {
@@ -349,7 +347,7 @@ export const AttributesPage = withCurrentWorkspace() (
           if (criterion.subtype === CriteriaSubType.BP) {
             name += attr.name + ' ';
           }
-          name += options.find(option => option.value === attr.operator).display
+          name += optionUtil[attr.operator].display
             + attr.operands.join('-');
         }
       });
@@ -425,7 +423,7 @@ export const AttributesPage = withCurrentWorkspace() (
         {this.isMeasurement && <div>
           <div style={styles.label}>{this.displayName}</div>
           <CheckBox style={{marginLeft: '0.5rem'}}
-            onChange={(v) => this.radioChange(v)}/> Any value (lab exists)
+            onChange={(v) => this.toggleCheckbox(v)}/> Any value (lab exists)
           {!form.EXISTS && form.NUM.length > 0 && <div style={styles.orCircle}>OR</div>}
         </div>}
         {!form.EXISTS && <React.Fragment>
