@@ -8,6 +8,12 @@ import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.gson.Gson;
 import java.io.IOException;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
+import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
+import org.pmiops.workbench.workspaces.WorkspacesController;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.cdr.CdrDbConfig;
@@ -15,9 +21,7 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
-import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.compliance.ComplianceServiceImpl;
-import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.BigQueryConfig;
 import org.pmiops.workbench.config.CacheSpringConfiguration;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -28,7 +32,6 @@ import org.pmiops.workbench.db.WorkbenchDbConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.Config;
-import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -65,7 +68,11 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
     BigQueryService.class,
     CdrBigQuerySchemaConfigService.class,
     UserService.class,
-    ComplianceServiceImpl.class
+    ComplianceServiceImpl.class,
+    WorkspacesController.class,
+    BillingProjectBufferService.class,
+    NotebooksServiceImpl.class,
+    UserRecentResourceServiceImpl.class
 })
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")

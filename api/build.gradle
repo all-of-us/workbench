@@ -611,7 +611,7 @@ task bulkCloneWorkspaces(type: JavaExec) {
   println commandLineSpringProperties
 
   classpath sourceSets.tools.runtimeClasspath
-  main = "org.pmiops.workbench.tools.CloneWorkspaces"
+  main = "org.pmiops.workbench.tools.BulkCloneWorkspacesTool"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)

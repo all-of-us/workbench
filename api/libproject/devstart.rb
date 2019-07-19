@@ -1041,6 +1041,13 @@ Common.register_command({
 def bulk_clone_workspaces(cmd_name, *args)
   ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
+
+  op.add_typed_option(
+      "--n [processN]",
+      Integer,
+      ->(opts, v) { opts.processN = v},
+      "Number of workspaces to clone")
+
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
@@ -1049,7 +1056,7 @@ def bulk_clone_workspaces(cmd_name, *args)
     common = Common.new
     common.run_inline %W{
       gradle bulkCloneWorkspaces
-     -PappArgs=[]}
+     -PappArgs=["#{op.opts.processN}"]}
   end
 end
 

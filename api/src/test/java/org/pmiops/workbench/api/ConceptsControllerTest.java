@@ -848,7 +848,7 @@ public class ConceptsControllerTest {
             new DomainValue().value("FIELD_ONE"), new DomainValue().value("FIELD_TWO"));
   }
 
-  static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
+  public static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
     org.pmiops.workbench.cdr.model.Concept result = new org.pmiops.workbench.cdr.model.Concept();
     result.setConceptId(concept.getConceptId());
     result.setConceptName(concept.getConceptName());
