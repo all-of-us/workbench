@@ -231,6 +231,12 @@ export const AttributesPage = withCurrentWorkspace() (
       this.setState({form, count: null});
     }
 
+    checkboxChange(checked: boolean, index: number) {
+      const {form} = this.state;
+      form.CAT[index].checked = checked;
+      this.setState({form});
+    }
+
     validateForm() {
       const {form} = this.state;
       let formErrors = new Set(), formValid = true;
@@ -310,13 +316,13 @@ export const AttributesPage = withCurrentWorkspace() (
           }
         });
 
-        const catOperands = form.CAT.reduce((checked, current) => {
-          if (current.checked) {
-            checked.push(current.valueAsConceptId);
-          }
-          return checked;
-        }, []);
-        if (catOperands.length) {
+        if (form.CAT.some(at => at.checked)) {
+          const catOperands = form.CAT.reduce((checked, current) => {
+            if (current.checked) {
+              checked.push(current.valueAsConceptId);
+            }
+            return checked;
+          }, []);
           attrs.push({name: AttrName.CAT, operator: Operator.IN, operands: catOperands});
         }
         name += (this.isPM && attrs[0] && attrs[0].name !== AttrName.ANY
@@ -458,7 +464,8 @@ export const AttributesPage = withCurrentWorkspace() (
             <div style={styles.label}>Categorical Values</div>
             <div>
               {form.CAT.map((attr, a) => <React.Fragment>
-                <CheckBox key={a} checked={attr.checked} onChange={(e) => console.log(e)} />
+                <CheckBox key={a} checked={attr.checked}
+                  onChange={(v) => this.checkboxChange(v, a)} />
                 {attr.conceptName} <span style={styles.badge}> {attr.estCount}</span>
               </React.Fragment>)}
             </div>
