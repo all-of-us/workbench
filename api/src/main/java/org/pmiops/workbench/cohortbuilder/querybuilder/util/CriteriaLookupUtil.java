@@ -136,10 +136,13 @@ public final class CriteriaLookupUtil {
       // order to allow the client to determine the relationship between the returned Criteria.
       cbCriteriaDao
           .findCriteriaAncestors(
-              treeType.domain.toString(), treeType.type.toString(), parentConceptIds)
+              treeType.domain.toString(),
+              treeType.type.toString(),
+              CriteriaType.ATC.equals(treeType.type),
+              parentConceptIds)
           .forEach(
               c -> {
-                if (c.getGroup()) {
+                if (parentConceptIds.contains(c.getConceptId())) {
                   parents.add(c);
                 } else {
                   leaves.add(c);
