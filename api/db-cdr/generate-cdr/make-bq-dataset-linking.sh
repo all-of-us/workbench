@@ -243,7 +243,7 @@ echo "ds_linking - inserting survey data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 VALUES
-    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', ', question_concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.ds_survey\` a) answer', 'Survey'),
+    ('CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', ' FROM \`$BQ_PROJECT.$BQ_DATASET.ds_survey\` answer', 'Survey'),
     ('PERSON_ID', 'answer.person_id', ' ', 'Survey'),
     ('SURVEY_DATETIME', 'answer.survey_datetime', ' ', 'Survey'),
     ('SURVEY', 'answer.survey', ' ', 'Survey'),

@@ -118,7 +118,7 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
       const conceptSet: ConceptSet = {
         name: name,
         description: newSetDescription,
-        domain: Domain.OBSERVATION,
+        domain: Domain.SURVEY,
         survey: survey
       };
       const request: CreateConceptSetRequest = {

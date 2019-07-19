@@ -141,7 +141,7 @@ public class BigQueryService {
       tableName = "ds_drug_exposure";
     } else if (Domain.MEASUREMENT.equals(d)) {
       tableName = "ds_measurement";
-    } else if (Domain.OBSERVATION.equals(d)) {
+    } else if (Domain.SURVEY.equals(d)) {
       tableName = "ds_survey";
     } else {
       throw new BadRequestException("Invalid domain, unable to fetch fields from table");

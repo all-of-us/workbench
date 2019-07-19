@@ -243,10 +243,9 @@ public class DataSetServiceImpl implements DataSetService {
               .collect(Collectors.joining(", "));
       String conceptSetListQuery = " IN (" + conceptSetQueries + ")";
 
-      String domainName = d == Domain.OBSERVATION ? Domain.SURVEY.toString() : d.toString();
       Optional<DomainConceptIds> domainConceptIds =
           bigQuerySchemaConfig.cohortTables.values().stream()
-              .filter(config -> domainName.equals(config.domain))
+              .filter(config -> d.toString().equals(config.domain))
               .map(
                   tableConfig ->
                       new DomainConceptIds(
@@ -333,9 +332,6 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(Collectors.toList());
     values.add(0, "CORE_TABLE_FOR_DOMAIN");
 
-    if (d == Domain.OBSERVATION) {
-      d = Domain.SURVEY;
-    }
     String domainAsName = d.toString().charAt(0) + d.toString().substring(1).toLowerCase();
 
     String valuesQuery =
