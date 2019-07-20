@@ -128,7 +128,7 @@ const optionUtil = {
 };
 
 interface Props {
-  criterion: any;
+  node: any;
   close: Function;
   workspace: WorkspaceData;
 }
@@ -159,11 +159,11 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     componentDidMount() {
-      const {criterion} = this.props;
+      const {node} = this.props;
       const{form, options} = this.state;
       if (this.isMeasurement) {
         const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-        cohortBuilderApi().getCriteriaAttributeByConceptId(cdrid, criterion.conceptId)
+        cohortBuilderApi().getCriteriaAttributeByConceptId(cdrid, node.conceptId)
           .then(resp => {
             resp.items.forEach(attr => {
               if (attr.type === AttrName[AttrName.NUM]) {
@@ -172,7 +172,7 @@ export const AttributesPage = withCurrentWorkspace() (
                     name: AttrName.NUM,
                     operator: null,
                     operands: [],
-                    conceptId: criterion.conceptId,
+                    conceptId: node.conceptId,
                     [attr.conceptName]: attr.estCount
                   });
                 } else {
@@ -189,20 +189,20 @@ export const AttributesPage = withCurrentWorkspace() (
           });
       } else {
         options.unshift({label: 'Any', value: AttrName[AttrName.ANY]});
-        form.NUM = criterion.subtype === CriteriaSubType[CriteriaSubType.BP]
+        form.NUM = node.subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{
-            name: criterion.subtype,
+            name: node.subtype,
             operator: AttrName.ANY,
             operands: []
           }];
-        this.setState({form, options, count: criterion.count});
+        this.setState({form, options, count: node.count});
       }
     }
 
     toggleCheckbox(checked: boolean) {
       const {form} = this.state;
-      let {criterion: {count}} = this.props;
+      let {node: {count}} = this.props;
       if (checked) {
         form.EXISTS = true;
         form.NUM = form.NUM.map(attr =>
@@ -216,7 +216,7 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     selectChange(index: number, value: string) {
-      const {criterion} = this.props;
+      const {node} = this.props;
       const {form} = this.state;
       form.NUM[index].operator = value;
       if (this.isBP) {
@@ -232,7 +232,7 @@ export const AttributesPage = withCurrentWorkspace() (
       } else if (value !== Operator[Operator.BETWEEN]) {
         form.NUM[index].operands.splice(1);
       }
-      const count = value === AttrName[AttrName.ANY] ? criterion.count : null;
+      const count = value === AttrName[AttrName.ANY] ? node.count : null;
       this.setState({form, count});
     }
 
@@ -295,7 +295,7 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     get paramId() {
-      const {criterion: {conceptId, id}} = this.props;
+      const {node: {conceptId, id}} = this.props;
       const {form} = this.state;
       const code = form.EXISTS ? 'Any' : form.NUM.reduce((acc, attr) => {
         acc += optionUtil[attr.operator].code;
@@ -305,34 +305,33 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     get displayName() {
-      const {criterion: {name}} = this.props;
+      const {node: {name}} = this.props;
       return stripHtml(name);
     }
 
     get paramWithAttributes() {
-      const {criterion} = this.props;
+      const {node} = this.props;
       const {form} = this.state;
       let name;
       const attrs = [];
       if (form.EXISTS) {
-        name = criterion.name + ' (Any)';
+        name = node.name + ' (Any)';
       } else {
         name = this.paramName;
-        form.NUM.forEach((attr) => {
-          if (criterion.subtype !== CriteriaSubType.BP) {
-            delete attr.conceptId;
+        form.NUM.forEach(({operator, operands, conceptId}) => {
+          const attr = {name: AttrName.NUM, operator, operands};
+          if (node.subtype === CriteriaSubType.BP) {
+            attr['conceptId'] = conceptId;
           }
-          if (attr.operator === AttrName.ANY && criterion.subtype === CriteriaSubType.BP) {
+          if (attr.operator === AttrName.ANY && node.subtype === CriteriaSubType.BP) {
             attr.name = AttrName.ANY;
             attr.operands = [];
-            delete(attr.operator);
+            delete attr.operator;
             attrs.push(attr);
           } else if (attr.operator !== AttrName.ANY) {
-            attr.name = AttrName.NUM;
             attrs.push(attr);
           }
         });
-
         if (form.CAT.some(at => at.checked)) {
           const catOperands = form.CAT.reduce((checked, current) => {
             if (current.checked) {
@@ -343,11 +342,11 @@ export const AttributesPage = withCurrentWorkspace() (
           attrs.push({name: AttrName.CAT, operator: Operator.IN, operands: catOperands});
         }
         name += (this.isPM && attrs[0] && attrs[0].name !== AttrName.ANY
-          ? PM_UNITS[criterion.subtype]
+          ? PM_UNITS[node.subtype]
           : '') + ')';
       }
       return {
-        ...criterion,
+        ...node,
         parameterId: this.paramId,
         name: name,
         attributes: attrs
@@ -355,9 +354,9 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     get paramName() {
-      const {criterion} = this.props;
+      const {node} = this.props;
       const {form} = this.state;
-      let name = criterion.name + ' (';
+      let name = node.name + ' (';
       form.NUM.forEach((attr, i) => {
         if (attr.operator === AttrName.ANY) {
           if (i === 0) {
@@ -367,7 +366,7 @@ export const AttributesPage = withCurrentWorkspace() (
           if (i > 0) {
             name += ' / ';
           }
-          if (criterion.subtype === CriteriaSubType.BP) {
+          if (node.subtype === CriteriaSubType.BP) {
             name += attr.name + ' ';
           }
           name += optionUtil[attr.operator].display
@@ -416,23 +415,23 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     get hasUnits() {
-      return typeof PM_UNITS[this.props.criterion.subtype] !== 'undefined';
+      return typeof PM_UNITS[this.props.node.subtype] !== 'undefined';
     }
 
     get isMeasurement() {
-      return this.props.criterion.domainId === DomainType.MEASUREMENT;
+      return this.props.node.domainId === DomainType.MEASUREMENT;
     }
 
     get isPM() {
-      return this.props.criterion.domainId === DomainType.PHYSICALMEASUREMENT;
+      return this.props.node.domainId === DomainType.PHYSICALMEASUREMENT;
     }
 
     get isBP() {
-      return this.props.criterion.subtype === CriteriaSubType.BP;
+      return this.props.node.subtype === CriteriaSubType.BP;
     }
 
     render() {
-      const {criterion} = this.props;
+      const {node} = this.props;
       const {count, countError, form, loading, options} = this.state;
       const {formValid, formErrors} = this.validateForm();
       const disabled = loading || form.EXISTS || !formValid
@@ -466,14 +465,14 @@ export const AttributesPage = withCurrentWorkspace() (
               {![null, 'ANY'].includes(attr.operator) && <div>
                 <input style={styles.number} type='number' min={attr.MIN} max={attr.MAX}
                   onChange={(e) => this.inputChange(e.target.value, a, 0)}/>
-                {this.hasUnits && <span> {PM_UNITS[criterion.subtype]}</span>}
+                {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
               </div>}
               {attr.operator === Operator.BETWEEN && <React.Fragment>
                 <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
                 <div>
                   <input style={styles.number} type='number' min={attr.MIN} max={attr.MAX}
                     onChange={(e) => this.inputChange(e.target.value, a, 1)}/>
-                  {this.hasUnits && <span> {PM_UNITS[criterion.subtype]}</span>}
+                  {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
                 </div>
               </React.Fragment>}
               {this.isMeasurement && attr.operator !== null &&
@@ -531,10 +530,10 @@ export const AttributesPage = withCurrentWorkspace() (
   template: '<div #root></div>'
 })
 export class ListAttributesPageComponent extends ReactWrapperBase {
-  @Input('criterion') criterion: Props['criterion'];
+  @Input('node') node: Props['node'];
   @Input('close') close: Props['close'];
 
   constructor() {
-    super(AttributesPage, ['criterion', 'close']);
+    super(AttributesPage, ['node', 'close']);
   }
 }
