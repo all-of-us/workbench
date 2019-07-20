@@ -6,7 +6,9 @@ import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {mapParameter, stripHtml} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
+import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -28,7 +30,7 @@ const styles = reactStyles({
     flexWrap: 'wrap'
   },
   label: {
-    color: '#262262',
+    color: colors.primary,
     padding: '0.5rem',
     fontWeight: 500,
     display: 'flex',
@@ -80,6 +82,10 @@ const styles = reactStyles({
     borderRadius: '4px',
     fontWeight: 600
   },
+  spinner: {
+    marginRight: '0.25rem',
+    marginLeft: '-0.25rem'
+  },
   resultsContainer: {
     flex: '0 0 41.66667%',
     maxWidth: '41.66667%',
@@ -88,9 +94,20 @@ const styles = reactStyles({
     fontSize: '14px',
     lineHeight: '20px'
   },
+  error: {
+    background: colors.warning,
+    color: colors.white,
+    fontSize: '12px',
+    fontWeight: 500,
+    textAlign: 'left',
+    border: '1px solid #ebafa6',
+    borderRadius: '5px',
+    margin: '0.25rem 0.5rem',
+    padding: '8px',
+  },
   errors: {
-    background: '#f5dbd9',
-    color: '#565656',
+    background: colorWithWhiteness(colors.danger, .7),
+    color: colorWithWhiteness(colors.dark, .1),
     fontSize: '11px',
     border: '1px solid #ebafa6',
     borderRadius: '3px',
@@ -177,9 +194,7 @@ export const AttributesPage = withCurrentWorkspace() (
           : [{
             name: criterion.subtype,
             operator: AttrName.ANY,
-            operands: [],
-            MIN: 0,
-            MAX: 10000
+            operands: []
           }];
         this.setState({form, options, count: criterion.count});
       }
@@ -227,7 +242,7 @@ export const AttributesPage = withCurrentWorkspace() (
       if (value && value.length > 10) {
         value = value.slice(0, 10);
       }
-      form.NUM[index].operands[operand] = parseInt(value, 10);
+      form.NUM[index].operands[operand] = value;
       this.setState({form, count: null});
     }
 
@@ -264,11 +279,12 @@ export const AttributesPage = withCurrentWorkspace() (
           formValid = false;
           acc.add('Form can only accept valid numbers');
         }
-        if (this.isPM && attr.operands.some(op => op < 0)) {
+        if (this.isPM && attr.operands.some(op => parseInt(op, 10) < 0)) {
           formValid = false;
           acc.add('Form cannot accept negative values');
         }
-        if (this.isMeasurement && attr.operands.some(op => op < attr.MIN || op > attr.MAX)) {
+        if (this.isMeasurement && attr.operands
+          .some(op => parseInt(op, 10) < attr.MIN || parseInt(op, 10) > attr.MAX)) {
           formValid = false;
           acc.add(`Values must be between ${attr.MIN} and ${attr.MAX}`);
         }
@@ -304,7 +320,7 @@ export const AttributesPage = withCurrentWorkspace() (
         name = this.paramName;
         form.NUM.forEach((attr) => {
           if (criterion.subtype !== CriteriaSubType.BP) {
-            delete(attr.conceptId);
+            delete attr.conceptId;
           }
           if (attr.operator === AttrName.ANY && criterion.subtype === CriteriaSubType.BP) {
             attr.name = AttrName.ANY;
@@ -312,6 +328,7 @@ export const AttributesPage = withCurrentWorkspace() (
             delete(attr.operator);
             attrs.push(attr);
           } else if (attr.operator !== AttrName.ANY) {
+            attr.name = AttrName.NUM;
             attrs.push(attr);
           }
         });
@@ -421,6 +438,11 @@ export const AttributesPage = withCurrentWorkspace() (
       const disabled = loading || form.EXISTS || !formValid
         || form.NUM.every(attr => attr.operator === 'ANY');
       return <div style={{margin: '0.5rem 0 1.5rem'}}>
+        {countError && <div style={styles.error}>
+          <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+                   shape='exclamation-triangle' size='22'/>
+          Sorry, the request cannot be completed.
+        </div>}
         {!!formErrors.size && <div style={styles.errors}>
           {Array.from(formErrors).map((err, e) => <div key={e} style={styles.errorItem}>
             {err}
@@ -480,7 +502,10 @@ export const AttributesPage = withCurrentWorkspace() (
                   ...(disabled ? {opacity: 0.4} : {}),
                   background: colorWithWhiteness(colors.primary, .2)
                 }}
-                onClick={() => this.requestPreview()}>Calculate</Button>
+                onClick={() => this.requestPreview()}>
+                {loading && <Spinner size={16} style={styles.spinner}/>}
+                Calculate
+              </Button>
             </div>
             <div style={styles.resultsContainer}>
               <div style={{fontWeight: 'bold'}}>Results</div>
