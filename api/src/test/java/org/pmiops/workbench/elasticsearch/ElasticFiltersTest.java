@@ -275,7 +275,8 @@ public class ElasticFiltersTest {
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                QueryBuilders.termsQuery("events.concept_id", ImmutableList.of("21600009"))));
+                QueryBuilders.termsQuery(
+                    "events.concept_id", ImmutableList.of("21600002", "21600009"))));
   }
 
   @Test
@@ -351,7 +352,7 @@ public class ElasticFiltersTest {
         .isEqualTo(
             singleNestedQuery(
                 QueryBuilders.termsQuery(
-                    "events.source_concept_id", ImmutableList.of("777", "7771"))));
+                    "events.source_concept_id", ImmutableList.of("7771", "777"))));
   }
 
   @Test
