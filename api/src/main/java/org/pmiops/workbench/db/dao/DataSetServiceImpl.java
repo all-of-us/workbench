@@ -188,7 +188,7 @@ public class DataSetServiceImpl implements DataSetService {
                             participantQuery.getAndSet(
                                 participantQuery
                                     .get()
-                                    .replaceAll("@".concat(npKey), "@".concat(newKey)));
+                                    .replaceAll("@".concat(npKey).concat("_"), "@".concat(newKey).concat("_")));
                             cohortParameters.put(newKey, npValue);
                           });
                   return participantQuery.get();
