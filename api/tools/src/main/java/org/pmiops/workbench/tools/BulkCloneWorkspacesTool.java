@@ -178,14 +178,9 @@ public class BulkCloneWorkspacesTool {
 //      int numToProcess = Integer.parseInt(args[0]);
       String targetUser = args[0];
 
-      int processedUsers = 0;
-      int skippedUsers = 0;
-      List<User> invalidAccessUsers = new ArrayList<>();
-      List<User> failedUsers = new ArrayList<>();
-
       List<CloneWorkspaceResponse> processedWorkspaces = new ArrayList<>();
-      List<WorkspaceResponse> skippedWorkspaces = new ArrayList<>();
-      List<WorkspaceResponse> failedWorkspaces = new ArrayList<>();
+      List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> skippedWorkspaces = new ArrayList<>();
+      List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> failedWorkspaces = new ArrayList<>();
 
       for (org.pmiops.workbench.firecloud.model.WorkspaceResponse workspaceResponse : saWorkspaceApi.listWorkspaces()) {
         if (!workspaceResponse.getWorkspace().getCreatedBy().equals(targetUser)) {
@@ -207,175 +202,70 @@ public class BulkCloneWorkspacesTool {
         if (workspaceResponse.getAccessLevel().equals(WorkspaceAccessLevel.NO_ACCESS)) {
           System.out.println("Found NO ACCESS workspace (" + workspaceResponse.getWorkspace().getNamespace() +
               "  : " + workspaceResponse.getWorkspace().getWorkspaceId() + ")");
-//          skippedWorkspaces.add(workspaceResponse);
+          skippedWorkspaces.add(workspaceResponse);
           continue;
         }
 
         try {
-          System.out.println("Trying to clone");
-          System.out.println(dbWorkspace);
+          System.out.println("About to clone " + shorthand(dbWorkspace));
 
           providedUser = userDao.findUserByEmail(dbWorkspace.getCreator().getEmail());
           impersonateUser(fireCloudService.getApiClientWithImpersonation(providedUser.getEmail()));
 
-          WorkspaceResponse currentWorkspace = workspacesController.getWorkspace(
+          WorkspaceResponse apiWorkspace = workspacesController.getWorkspace(
               dbWorkspace.getWorkspaceNamespace(),
               dbWorkspace.getFirecloudName()).getBody();
 
           org.pmiops.workbench.model.Workspace toWorkspace = new org.pmiops.workbench.model.Workspace();
           toWorkspace.setNamespace(dbWorkspace.getWorkspaceNamespace());
           toWorkspace.setName(dbWorkspace.getName());
-          toWorkspace.setResearchPurpose(currentWorkspace.getWorkspace().getResearchPurpose());
-          toWorkspace.setCdrVersionId(currentWorkspace.getWorkspace().getCdrVersionId());
+          toWorkspace.setResearchPurpose(apiWorkspace.getWorkspace().getResearchPurpose());
+          toWorkspace.setCdrVersionId(apiWorkspace.getWorkspace().getCdrVersionId());
 
           CloneWorkspaceRequest request = new CloneWorkspaceRequest();
           request.setWorkspace(toWorkspace);
           request.setIncludeUserRoles(true);
 
           System.out.println("Sending clone request");
-          providedUser = userDao.findUserByEmail(currentWorkspace.getWorkspace().getCreator());
           CloneWorkspaceResponse cloneResponse = workspacesController.cloneWorkspace(dbWorkspace.getWorkspaceNamespace(),
               dbWorkspace.getFirecloudName(), request).getBody();
+          System.out.println("Successful Clone into " + shorthand(cloneResponse.getWorkspace()));
 
-          System.out.println("Successful Clone!");
-          System.out.println(cloneResponse);
+          dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.MIGRATED);
+          workspaceDao.save(dbWorkspace);
+
+          processedWorkspaces.add(cloneResponse);
         } catch (WorkbenchException e) {
-          System.out.println("Failed on " + dbWorkspace.getWorkspaceNamespace() + " : " + dbWorkspace.getFirecloudName());
-//          failedWorkspaces.add(workspaceResponse);
+          System.out.println("Failed on " + shorthand(dbWorkspace));
+          failedWorkspaces.add(workspaceResponse);
         }
 
-        if (1 == 1) {
-          return;
-        }
-      }
-
-      if (1 == 1) {
-        System.out.println("Skipped: " + skippedWorkspaces.size());
-        System.out.println("Failed: " + failedWorkspaces.size());
-        return;
-      }
-
-      for (User user : userService.getAllUsers()
-          .stream().filter(user -> user.getEmail().equals(targetUser)).collect(Collectors.toList())) {
-        if (user.getDisabled() ||
-            user.getFirstSignInTime() == null ||
-            directoryService.getUser(user.getEmail()) == null) {
-          System.out.println("Skipping " + user.getEmail());
-          skippedUsers++;
-          continue;
-        }
-
-        System.out.println("Impersonating " + user.getEmail());
-        ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
-        impersonateUser(apiClient);
-        providedUser = user;
-
-        List<WorkspaceResponse> workspaceResponses;
-        try {
-          workspaceResponses = workspaceService.getWorkspaces();
-          processedUsers++;
-        } catch (WorkbenchException e) {
-          failedUsers.add(user);
-          continue;
-        }
-
-        long noAccessCount = workspaceResponses.stream()
-            .filter(wr -> wr.getAccessLevel().equals(WorkspaceAccessLevel.NO_ACCESS)).count();
-        if (noAccessCount > 0) {
-          System.out.println("Found a providedUser with no access : " + user.getEmail());
-          invalidAccessUsers.add(user);
-        }
-
-        for (WorkspaceResponse workspaceResponse : workspaceResponses) {
-          Workspace dbWorkspace = workspaceDao.findByWorkspaceNamespaceAndNameAndActiveStatus(
-              workspaceResponse.getWorkspace().getNamespace(),
-              workspaceResponse.getWorkspace().getName(),
-              (short) 0
-          );
-
-          if (dbWorkspace.getCreator().getUserId() != user.getUserId() &&
-              dbWorkspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)
-          ) {
-            // Not counting this as a "skip" since these are duplicates
-            continue;
-          }
-
-          if (workspaceResponse.getAccessLevel().equals(WorkspaceAccessLevel.NO_ACCESS)) {
-            skippedWorkspaces.add(workspaceResponse);
-            continue;
-          }
-
-          try {
-            WorkspaceResponse currentApiWorkspace = workspacesController.getWorkspace(dbWorkspace.getWorkspaceNamespace(),
-                dbWorkspace.getFirecloudName()).getBody();
-
-            org.pmiops.workbench.model.Workspace toWorkspace = new org.pmiops.workbench.model.Workspace();
-            toWorkspace.setNamespace(dbWorkspace.getWorkspaceNamespace());
-            toWorkspace.setName(dbWorkspace.getName());
-            toWorkspace.setResearchPurpose(currentApiWorkspace.getWorkspace().getResearchPurpose());
-            toWorkspace.setCdrVersionId(currentApiWorkspace.getWorkspace().getCdrVersionId());
-
-            CloneWorkspaceRequest request = new CloneWorkspaceRequest();
-            request.setWorkspace(toWorkspace);
-            request.setIncludeUserRoles(true);
-
-            System.out.println("Sending clone request");
-            CloneWorkspaceResponse cloneResponse = workspacesController.cloneWorkspace(dbWorkspace.getWorkspaceNamespace(),
-                dbWorkspace.getFirecloudName(), request).getBody();
-
-            dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.MIGRATED);
-            workspaceDao.save(dbWorkspace);
-
-            System.out.println("Cloned (" + currentApiWorkspace.getWorkspace().getNamespace() + ":" +
-                currentApiWorkspace.getWorkspace().getId() + ") into (" + cloneResponse.getWorkspace().getNamespace() + ":" +
-                cloneResponse.getWorkspace().getName() + ")");
-            processedWorkspaces.add(cloneResponse);
-
-//            if (processedWorkspaces.size() == numToProcess) {
-            if (1 == 1) {
-//              System.out.println("Cloned " + numToProcess + " workspaces as requested. Exiting.");
-              return;
-            }
-
-          } catch (WorkbenchException e) {
-            System.out.println("Failed on " + dbWorkspace.getWorkspaceNamespace() + " : " + dbWorkspace.getFirecloudName());
-            failedWorkspaces.add(workspaceResponse);
-          }
-
-        }
       }
 
       padding();
-
-      System.out.println("Processed Users : " + processedUsers);
-      System.out.println("Skipped Users : " + skippedUsers);
-      System.out.println("Invalid Access Users : " + invalidAccessUsers.size());
-      for (User user : invalidAccessUsers) {
-        System.out.println(user.getEmail());
-      }
-      System.out.println("Failed Users : " + failedUsers.size());
-      for (User user : failedUsers) {
-        System.out.println(user.getEmail());
-      }
-
       System.out.println("Processed Workspaces : " + processedWorkspaces.size());
       System.out.println("Skipped Workspaces : " + skippedWorkspaces.size());
-      for (WorkspaceResponse workspaceResponse : skippedWorkspaces) {
-        org.pmiops.workbench.model.Workspace workspace = workspaceResponse.getWorkspace();
-        System.out.println(workspace.getId() + " : " + workspaceResponse.getAccessLevel() + " : " +
-            workspace.getNamespace() + " : " + workspace.getName() + " : " +
-            workspace.getCreator() + " : " + workspace.getCreationTime());
+      for (org.pmiops.workbench.firecloud.model.WorkspaceResponse workspaceResponse : skippedWorkspaces) {
+        System.out.println(shorthand(workspaceResponse.getWorkspace()));
       }
       System.out.println("Failed Workspaces : " + failedWorkspaces.size());
-      for (WorkspaceResponse workspaceResponse : failedWorkspaces) {
-        org.pmiops.workbench.model.Workspace workspace = workspaceResponse.getWorkspace();
-        System.out.println(workspace.getId() + " : " + workspaceResponse.getAccessLevel() + " : " +
-            workspace.getNamespace() + " : " + workspace.getName() + " : " +
-            workspace.getCreator() + " : " + workspace.getCreationTime());
+      for (org.pmiops.workbench.firecloud.model.WorkspaceResponse workspaceResponse : failedWorkspaces) {
+        System.out.println(shorthand(workspaceResponse.getWorkspace()));
       }
-
       padding();
     };
+  }
+
+  private String shorthand(Workspace workspace) {
+    return "(" + workspace.getWorkspaceNamespace() + " : " + workspace.getFirecloudName() + ")";
+  }
+
+  private String shorthand(org.pmiops.workbench.model.Workspace workspace) {
+    return "(" + workspace.getNamespace() + " : " + workspace.getId() + ")";
+  }
+
+  private String shorthand(org.pmiops.workbench.firecloud.model.Workspace workspace) {
+    return "(" + workspace.getNamespace() + " : " + workspace.getName() + ")";
   }
 
   private void padding() {
