@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 /** Created by brubenst on 7/16/19. */
 public class FirecloudApiClientTracer extends ApiClient {
   private static final Tracer tracer = Tracing.getTracer();
-  private static final Logger log = Logger.getLogger(FirecloudApiClientTracer.class.getName());
 
   @Override
   public <T> ApiResponse<T> execute(Call call, Type returnType) throws ApiException {
