@@ -87,6 +87,7 @@ public class WorkbenchConfig {
     public String projectId;
     public String shortName;
     public String oauthClientId;
+    public boolean alwaysTrace;
   }
 
   public static class AdminConfig {
