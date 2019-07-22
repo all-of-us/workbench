@@ -7,7 +7,6 @@ import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.logging.Logger;
 
 /** Created by brubenst on 7/22/19. */
 public class NotebooksApiClientTracer extends ApiClient {
