@@ -5,8 +5,6 @@ import com.squareup.okhttp.Response;
 import io.opencensus.common.Scope;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
-import io.opencensus.trace.samplers.Samplers;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.logging.Logger;

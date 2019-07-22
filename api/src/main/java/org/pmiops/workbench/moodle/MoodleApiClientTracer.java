@@ -5,15 +5,11 @@ import com.squareup.okhttp.Response;
 import io.opencensus.common.Scope;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
-import io.opencensus.trace.samplers.Samplers;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.logging.Logger;
 
-/**
- * Created by brubenst on 7/22/19.
- */
+/** Created by brubenst on 7/22/19. */
 public class MoodleApiClientTracer extends ApiClient {
   private static final Tracer tracer = Tracing.getTracer();
   private static final Logger log = Logger.getLogger(MoodleApiClientTracer.class.getName());
@@ -23,9 +19,9 @@ public class MoodleApiClientTracer extends ApiClient {
     Response response;
     T data;
     try (Scope ss =
-             tracer
-                 .spanBuilderWithExplicitParent("MoodleApiCall", tracer.getCurrentSpan())
-                 .startScopedSpan()) {
+        tracer
+            .spanBuilderWithExplicitParent("MoodleApiCall", tracer.getCurrentSpan())
+            .startScopedSpan()) {
       response = call.execute();
       data = handleResponseWithTracing(response, returnType);
     } catch (IOException e) {

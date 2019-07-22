@@ -41,7 +41,6 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to setup tracing");
     }
-
   }
 
   /**
