@@ -405,7 +405,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 toWorkspace.getNamespace(), toWorkspace.getName()));
       }
     }
-    
+
     User user = userProvider.get();
 
     String toWorkspaceName;
@@ -448,6 +448,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .getWorkspace(
                 toFcWorkspaceId.getWorkspaceNamespace(), toFcWorkspaceId.getWorkspaceName())
             .getWorkspace();
+
+    System.out.println(toFcWorkspace);
 
     // In the future, we may want to allow callers to specify whether notebooks
     // should be cloned at all (by default, yes), else they are currently stuck
@@ -520,6 +522,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspaceService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
 
+      System.out.println(fromAclsMap);
       Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
       for (Map.Entry<String, WorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
         if (!entry.getKey().equals(user.getEmail())) {
@@ -529,6 +532,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
+      System.out.println(clonedRoles);
+      System.out.println(getRegisteredUserDomainEmail());
       savedWorkspace =
           workspaceService.updateWorkspaceAcls(
               savedWorkspace, clonedRoles, getRegisteredUserDomainEmail());
