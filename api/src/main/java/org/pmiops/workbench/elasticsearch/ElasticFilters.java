@@ -137,14 +137,12 @@ public final class ElasticFilters {
           filter.should(b);
         } else {
           // "should" gives us "OR" behavior so long as we're in a filter context, which we are.
-          // This
-          // translates to N occurrences of criteria 1 OR N occurrences of criteria 2, etc.
+          // This translates to N occurrences of criteria 1 OR N occurrences of criteria 2, etc.
           filter.should(
               QueryBuilders.functionScoreQuery(
                       QueryBuilders.nestedQuery(
                           // We sum a constant score for each matching document, yielding the total
-                          // number
-                          // of matching nested documents (events).
+                          // number of matching nested documents (events).
                           "events", QueryBuilders.constantScoreQuery(b), ScoreMode.Total))
                   .setMinScore(occurredAtLeast));
         }
