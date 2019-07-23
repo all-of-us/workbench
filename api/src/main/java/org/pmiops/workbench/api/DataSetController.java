@@ -579,9 +579,9 @@ public class DataSetController implements DataSetApiDelegate {
         demographicsCS.setCreationTime(now);
         demographicsCS.setLastModifiedTime(now);
         demographicsCS.setWorkspaceId(workspaceId);
-        Set<Long> conceptSet = new HashSet<Long>();
-        conceptSet.add(genderRaceConcept.get(0).getConceptId());
-        demographicsCS.setConceptIds(conceptSet);
+        Set<Long> conceptIdsSet = new HashSet<Long>();
+        conceptIdsSet.add(genderRaceConcept.get(0).getConceptId());
+        demographicsCS.setConceptIds(conceptIdsSet);
         demographicsCS = conceptSetDao.save(demographicsCS);
         request.getConceptSetIds().add(demographicsCS.getConceptSetId());
       }
