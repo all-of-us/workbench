@@ -1,12 +1,10 @@
 package org.pmiops.workbench.mandrill;
 
-
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Response;
 import io.opencensus.common.Scope;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 
@@ -18,9 +16,9 @@ public class MandrillApiClientTracer extends ApiClient {
     Response response;
     T data;
     try (Scope ss =
-             tracer
-                 .spanBuilderWithExplicitParent("MandrillApiCall", tracer.getCurrentSpan())
-                 .startScopedSpan()) {
+        tracer
+            .spanBuilderWithExplicitParent("MandrillApiCall", tracer.getCurrentSpan())
+            .startScopedSpan()) {
       response = call.execute();
       data = handleResponseWithTracing(response, returnType);
     } catch (IOException e) {
@@ -32,7 +30,10 @@ public class MandrillApiClientTracer extends ApiClient {
   private <T> T handleResponseWithTracing(Response response, Type returnType) throws ApiException {
     String targetUrl = response.request().httpUrl().encodedPath();
     Scope urlSpan =
-        tracer.spanBuilderWithExplicitParent("Response Received: ".concat(targetUrl), tracer.getCurrentSpan()).startScopedSpan();
+        tracer
+            .spanBuilderWithExplicitParent(
+                "Response Received: ".concat(targetUrl), tracer.getCurrentSpan())
+            .startScopedSpan();
     urlSpan.close();
     return super.handleResponse(response, returnType);
   }
