@@ -33,7 +33,7 @@ LEFT JOIN (
         v.visit_concept_id,
         value_as_number,
         value_as_concept_id,
-        value_source_concept_id)) observations
+        value_source_concept_id as value_as_source_concept_id)) observations
   FROM
     `{BQ_DATASET}.observation` ob
   LEFT JOIN
@@ -62,7 +62,7 @@ LEFT JOIN (
         v.visit_concept_id,
         CAST(NULL as FLOAT64) as value_as_number,
         CAST(NULL as INT64) as value_as_concept_id,
-        CAST(NULL as INT64) as value_source_concept_id)) conditions
+        CAST(NULL as INT64) as value_as_source_concept_id)) conditions
   FROM
     `{BQ_DATASET}.condition_occurrence` co
   LEFT JOIN
@@ -91,7 +91,7 @@ LEFT JOIN (
         v.visit_concept_id,
         CAST(NULL as FLOAT64) as value_as_number,
         CAST(NULL as INT64) as value_as_concept_id,
-        CAST(NULL as INT64) as value_source_concept_id)) drugs
+        CAST(NULL as INT64) as value_as_source_concept_id)) drugs
   FROM
     `{BQ_DATASET}.drug_exposure` d
   LEFT JOIN
@@ -120,7 +120,7 @@ LEFT JOIN (
         v.visit_concept_id,
         CAST(NULL as FLOAT64) as value_as_number,
         CAST(NULL as INT64) as value_as_concept_id,
-        CAST(NULL as INT64) as value_source_concept_id)) procedures
+        CAST(NULL as INT64) as value_as_source_concept_id)) procedures
   FROM
     `{BQ_DATASET}.procedure_occurrence` pr
   LEFT JOIN
@@ -149,7 +149,7 @@ LEFT JOIN (
         v.visit_concept_id,
         value_as_number,
         value_as_concept_id,
-        CAST(NULL as INT64) as value_source_concept_id)) measurements
+        CAST(NULL as INT64) as value_as_source_concept_id)) measurements
   FROM
     `{BQ_DATASET}.measurement` m
   LEFT JOIN

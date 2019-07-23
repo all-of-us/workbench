@@ -47,7 +47,7 @@ public class ElasticDocument {
           .put("visit_concept_id", 4)
           .put("value_as_number", 5)
           .put("value_as_concept_id", 6)
-          .put("value_source_concept_id", 7)
+          .put("value_as_source_concept_id", 7)
           .build();
 
   private static final Map<String, Object> NESTED_FOREIGN_SCHEMA =
@@ -63,7 +63,7 @@ public class ElasticDocument {
                   .put("visit_concept_id", esType(ElasticType.KEYWORD))
                   .put("value_as_number", esType(ElasticType.FLOAT))
                   .put("value_as_concept_id", esType(ElasticType.KEYWORD))
-                  .put("value_source_concept_id", esType(ElasticType.KEYWORD))
+                  .put("value_as_source_concept_id", esType(ElasticType.KEYWORD))
                   .build());
 
   public static final Map<String, Object> PERSON_SCHEMA =

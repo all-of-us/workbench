@@ -396,6 +396,33 @@ public class ElasticFiltersTest {
   }
 
   @Test
+  public void testPPIAnswerQueryCat() {
+    Attribute attr = new Attribute().name(AttrName.CAT).operator(Operator.IN).addOperandsItem("1");
+    QueryBuilder resp =
+        ElasticFilters.fromCohortSearch(
+            criteriaDao,
+            new SearchRequest()
+                .addIncludesItem(
+                    new SearchGroup()
+                        .addItemsItem(
+                            new SearchGroupItem()
+                                .addSearchParametersItem(
+                                    new SearchParameter()
+                                        .domain(DomainType.SURVEY.toString())
+                                        .type(TreeType.PPI.toString())
+                                        .subtype(TreeSubType.BASICS.toString())
+                                        .conceptId(777L)
+                                        .group(true)
+                                        .addAttributesItem(attr)))));
+    assertThat(resp)
+        .isEqualTo(
+            singleNestedQuery(
+                QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777")),
+                QueryBuilders.termsQuery(
+                    "events.value_as_source_concept_id", ImmutableList.of("1"))));
+  }
+
+  @Test
   public void testAgeAtEventModifierQuery() {
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(

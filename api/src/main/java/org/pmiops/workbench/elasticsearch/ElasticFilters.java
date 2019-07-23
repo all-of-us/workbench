@@ -157,7 +157,7 @@ public final class ElasticFilters {
     if (AttrName.CAT.equals(attr.getName())) {
       // Currently the UI only uses the In operator for CAT which fits the terms query
       String name =
-          isSourceConceptId ? "events.value_source_concept_id" : "events.value_as_concept_id";
+          isSourceConceptId ? "events.value_as_source_concept_id" : "events.value_as_concept_id";
       return QueryBuilders.termsQuery(name, attr.getOperands());
     }
     Object left = null, right = null;
