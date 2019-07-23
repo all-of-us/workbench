@@ -25,7 +25,19 @@ const styles = reactStyles({
     height: '100%',
     color: colors.primary,
   },
-  h2: {...headerStyles.h2, lineHeight: '24px', fontWeight: 600, fontSize: '16px'}
+  h2: {...headerStyles.h2, lineHeight: '24px', fontWeight: 600, fontSize: '16px'},
+  sanctionModalTitle: {
+    fontFamily: 'Montserrat',
+    fontSize: 16,
+    fontWeight: 600,
+    lineHeight: '19px'
+  },
+  modalLabel: {
+    fontFamily: 'Montserrat',
+    fontSize: 14,
+    lineHeight: '24px',
+    color: colors.primary
+  }
 });
 
 const SecondHeader = (props) => {
@@ -238,25 +250,21 @@ const InitialsAgreement = (props) => {
 
 const SanctionModal = (props) => {
   return <Modal width = {750}>
-    <ModalTitle style={{fontFamily: 'Montserrat',	fontSize: 16,	fontWeight: 600,	lineHeight: '19px'}}>
+    <ModalTitle style={styles.sanctionModalTitle}>
       All of Us Research Program - Sanctions on Violations of the Code of Conduct
     </ModalTitle>
     <ModalBody>
-      <label style={{
-        fontFamily: 'Montserrat',
-        fontSize: 14,
-        lineHeight: '24px',
-        color: colors.primary
-      }}>
-        The Resource Access Board (RAB) of the All of Us Research Program determines whether an
-        investigator has violated the Code of Conduct outlined in the Data Use Agreement
+      <label style={styles.modalLabel}>
+        The Resource Access Board (RAB) of the <i>All of Us</i> Research Program determines whether
+        an investigator has violated the Code of Conduct outlined in the Data Use Agreement
         signed by each user. The RAB notifies the All of Us Research Program office of the
         violation.
         <IndentedUl>
-          <li><label>The All of Us Research Program office and/or the All of Us IRB may implement
-            the
-            following sanctions if it is determined that an investigator has violated the Code of
-            Conduct:</label>
+          <li>
+            <label>The <i>All of Us</i> Research Program office and/or the All of Us IRB may
+            implement the following sanctions if it is determined that an investigator has violated
+            the Code of Conduct:
+            </label>
             <IndentedUl>
               <IndentedLi>
                 Determine whether any action by the investigator is required to remedy the
@@ -268,11 +276,11 @@ const SanctionModal = (props) => {
               </IndentedLi>
               <IndentedLi>
                 Revoke and/or deny access of the violator to all non-public (Registered and
-                Controlled tier) All of Us data.
+                Controlled tier) <i>All of Us</i> data.
               </IndentedLi>
               <IndentedLi>
-                Post the name and affiliation of the violator on a public All of Us Research Program
-                webpage.
+                Post the name and affiliation of the violator on a public <i>All of Us</i>
+                Research Program webpage.
               </IndentedLi>
               <IndentedLi>
                 Revoke extant NIH funding and/or prohibit future funding, either permanently or for
