@@ -36,6 +36,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,6 +82,7 @@ public class ElasticFiltersTest {
   private SearchParameter leafParam2;
 
   @Before
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   public void setUp() {
     // Generate a simple test criteria tree
     // 1
@@ -199,6 +201,15 @@ public class ElasticFiltersTest {
 
   @After
   public void tearDown() {
+    // jdbcTemplate is used to create/insert data into the criteria ancestor table. The codebase
+    // currently doesn't have a need to implement a DAO for this table. The @DirtiesContext
+    // annotation seems to only recognized Hibernate persisted entities and their related tables.
+    // So the following tear down method needs to drop to table to keep from colliding with
+    // other test classes that also use this approach to create the cb_criteria_ancestor table. Not
+    // implementing this drop causes subsequent test suite runs to fail with a
+    // BadSqlGrammarException: StatementCallback; bad SQL grammar [create table
+    // cb_criteria_ancestor(ancestor_id integer, descendant_id integer)]; nested exception is
+    // org.h2.jdbc.JdbcSQLException: Table "CB_CRITERIA_ANCESTOR" already exists
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
