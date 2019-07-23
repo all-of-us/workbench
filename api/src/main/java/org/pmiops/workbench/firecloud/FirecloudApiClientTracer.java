@@ -8,7 +8,6 @@ import io.opencensus.trace.Tracing;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-/** Created by brubenst on 7/16/19. */
 public class FirecloudApiClientTracer extends ApiClient {
   private static final Tracer tracer = Tracing.getTracer();
 
@@ -18,7 +17,7 @@ public class FirecloudApiClientTracer extends ApiClient {
     T data;
     try (Scope ss =
         tracer
-            .spanBuilderWithExplicitParent("TerraApiCall", tracer.getCurrentSpan())
+            .spanBuilderWithExplicitParent("FirecloudApiCall", tracer.getCurrentSpan())
             .startScopedSpan()) {
       response = call.execute();
       data = handleResponseWithTracing(response, returnType);

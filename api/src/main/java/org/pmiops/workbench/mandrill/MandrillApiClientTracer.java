@@ -1,14 +1,16 @@
-package org.pmiops.workbench.notebooks;
+package org.pmiops.workbench.mandrill;
+
 
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Response;
 import io.opencensus.common.Scope;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-public class NotebooksApiClientTracer extends ApiClient {
+public class MandrillApiClientTracer extends ApiClient {
   private static final Tracer tracer = Tracing.getTracer();
 
   @Override
@@ -16,9 +18,9 @@ public class NotebooksApiClientTracer extends ApiClient {
     Response response;
     T data;
     try (Scope ss =
-        tracer
-            .spanBuilderWithExplicitParent("NotebooksApiCall", tracer.getCurrentSpan())
-            .startScopedSpan()) {
+             tracer
+                 .spanBuilderWithExplicitParent("MandrillApiCall", tracer.getCurrentSpan())
+                 .startScopedSpan()) {
       response = call.execute();
       data = handleResponseWithTracing(response, returnType);
     } catch (IOException e) {

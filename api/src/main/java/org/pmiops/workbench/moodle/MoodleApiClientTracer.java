@@ -8,7 +8,6 @@ import io.opencensus.trace.Tracing;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-/** Created by brubenst on 7/22/19. */
 public class MoodleApiClientTracer extends ApiClient {
   private static final Tracer tracer = Tracing.getTracer();
 

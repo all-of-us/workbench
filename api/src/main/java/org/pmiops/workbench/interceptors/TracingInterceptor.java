@@ -8,8 +8,6 @@ import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -27,15 +25,13 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 public class TracingInterceptor extends HandlerInterceptorAdapter {
   private static final Tracer tracer = Tracing.getTracer();
   private static final Logger log = Logger.getLogger(FirecloudApiClientTracer.class.getName());
+  private static final String TRACE_ATTRIBUTE_KEY = "Tracing Span";
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-
-  private Map<Integer, Scope> spanMap;
 
   @Autowired
   public TracingInterceptor(Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.spanMap = new HashMap<>();
     try {
       StackdriverTraceExporter.createAndRegister(StackdriverTraceConfiguration.builder().build());
     } catch (IOException e) {
@@ -55,12 +51,12 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
         tracer.spanBuilder(
             workbenchConfigProvider.get().server.shortName + request.getRequestURI());
 
-    if (workbenchConfigProvider.get().server.alwaysTrace) {
+    if (workbenchConfigProvider.get().server.traceAllRequests) {
       requestSpanBuilder.setSampler(Samplers.alwaysSample());
     }
 
     Scope requestSpan = requestSpanBuilder.startScopedSpan();
-    this.spanMap.put(request.hashCode(), requestSpan);
+    request.setAttribute(TRACE_ATTRIBUTE_KEY, requestSpan);
     return true;
   }
 
@@ -71,8 +67,6 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
       Object handler,
       ModelAndView modelAndView)
       throws Exception {
-    if (spanMap.get(request.hashCode()) != null) {
-      spanMap.get(request.hashCode()).close();
-    }
+    ((Scope)request.getAttribute(TRACE_ATTRIBUTE_KEY)).close();
   }
 }
