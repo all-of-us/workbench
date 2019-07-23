@@ -1,8 +1,8 @@
 import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@angular/router';
 
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {ConfigResponse, Profile} from 'generated';
-import {Cohort, ConceptSet} from 'generated/fetch';
+import {ConfigResponse} from 'generated';
+import {Cohort, ConceptSet, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 

@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -10,7 +9,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   Concept,
@@ -229,17 +228,3 @@ export const ConceptAddModal = withCurrentWorkspace()
 
 });
 
-
-@Component({
-  selector: 'app-concept-add-modal',
-  template: '<div #root></div>',
-})
-export class ConceptAddModalComponent extends ReactWrapperBase {
-  @Input('selectedDomain') selectedDomain: DomainCount;
-  @Input('selectedConcepts') selectedConcepts: Concept[];
-  @Input('onSave') onSave: Function;
-  @Input('onClose') onClose: Function;
-  constructor() {
-    super(ConceptAddModal, ['selectedDomain', 'selectedConcepts', 'onSave', 'onClose']);
-  }
-}

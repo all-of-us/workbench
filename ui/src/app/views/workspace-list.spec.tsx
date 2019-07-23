@@ -5,11 +5,10 @@ import {
   registerApiClient, workspacesApi,
 } from 'app/services/swagger-fetch-clients';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
-import {Profile} from 'generated';
-import {ProfileApi, WorkspacesApi} from 'generated/fetch';
+import {Profile, ProfileApi, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {
   userRolesStub,
   WorkspacesApiStub,
@@ -41,7 +40,7 @@ describe('WorkspaceList', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async() => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
+      userProfileStore.next({profile: newProfile, reload, updateCache});
     });
 
     userProfileStore.next({profile, reload, updateCache});

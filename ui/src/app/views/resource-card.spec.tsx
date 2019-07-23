@@ -1,10 +1,10 @@
 import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 
-import {ResourceCard} from './resource-card';
-import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import { WorkspaceAccessLevel } from 'generated';
+import {ResourceCard} from './resource-card';
+import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
+import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 
 const ResourceCardWrapper = {
   cohortCard: {
@@ -12,7 +12,7 @@ const ResourceCardWrapper = {
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
-    cohort: new CohortsServiceStub().cohorts[0],
+    cohort: new CohortsApiStub().cohorts[0],
     modifiedTime: new Date().toISOString()
   },
   conceptSetCard: {

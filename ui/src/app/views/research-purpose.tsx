@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -8,7 +7,7 @@ import {TwoColPaddedTable} from 'app/components/tables';
 import {EditComponentReact} from 'app/icons/edit';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
+import {reactStyles, withCurrentWorkspace, withUserProfile} from 'app/utils';
 import {sliceByHalfLength} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -141,13 +140,3 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withUserProfile()
   }
 );
 
-@Component({
-  selector: 'app-workspace-about',
-  template: '<div #root></div>'
-})
-export class WorkspaceAboutComponent extends ReactWrapperBase {
-
-  constructor() {
-    super(ResearchPurpose, []);
-  }
-}

@@ -4,8 +4,7 @@ import * as React from 'react';
 
 import {WorkspaceAbout} from './workspace-about';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {Profile} from 'generated';
-import {ClusterApi, ProfileApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {ClusterApi, Profile, ProfileApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
@@ -38,7 +37,7 @@ describe('WorkspaceAbout', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
+      userProfileStore.next({profile: newProfile, reload, updateCache});
     });
 
     userProfileStore.next({profile, reload, updateCache});

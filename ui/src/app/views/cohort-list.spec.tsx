@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
 import {CohortList} from 'app/views/cohort-list';
 

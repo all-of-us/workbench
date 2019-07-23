@@ -1,10 +1,9 @@
-import {Component, Input} from '@angular/core';
 
 import {
   Button
 } from 'app/components/buttons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 
 import * as React from 'react';
 
@@ -391,17 +390,5 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
           </div>
         </div>
       </React.Fragment>;
-  }
-}
-
-@Component({
-  selector: 'app-quick-tour-modal',
-  template: '<div #root></div>',
-})
-export class QuickTourModalComponent extends ReactWrapperBase {
-  @Input('closeFunction') closeFunction: QuickTourReactProps['closeFunction'];
-
-  constructor() {
-    super(QuickTourReact, ['closeFunction']);
   }
 }

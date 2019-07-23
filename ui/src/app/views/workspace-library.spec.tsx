@@ -3,12 +3,11 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {userProfileStore} from 'app/utils/navigation';
-import {Profile} from 'generated';
-import {FeaturedWorkspacesConfigApi, ProfileApi, WorkspacesApi} from 'generated/fetch';
+import {FeaturedWorkspacesConfigApi, Profile, ProfileApi, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {FeaturedWorkspacesConfigApiStub} from 'testing/stubs/featured-workspaces-config-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceLibrary} from './workspace-library';
 
@@ -36,7 +35,7 @@ describe('WorkspaceLibrary', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
+      userProfileStore.next({profile: newProfile, reload, updateCache});
     });
 
     userProfileStore.next({profile, reload, updateCache});
