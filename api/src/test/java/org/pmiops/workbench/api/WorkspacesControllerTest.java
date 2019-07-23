@@ -2476,7 +2476,7 @@ public class WorkspacesControllerTest {
 
     final Map<String, String> gcsMetadata =
         new ImmutableMap.Builder<String, String>()
-            .put("lockExpiresA0t", lockExpirationTime.toString())
+            .put("lockExpiresAt", lockExpirationTime.toString())
             // store directly in plaintext, to show that this does not work
             .put("lastLockedBy", lastLockedUser)
             .put("extraMetadata", "is not a problem")
