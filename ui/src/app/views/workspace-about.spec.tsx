@@ -99,5 +99,9 @@ describe('WorkspaceAbout', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="dataAccessLevel"]').text())
       .toContain(fp.capitalize(workspace.dataAccessLevel.toString()));
+    expect(wrapper.find('[data-test-id="creationDate"]').text())
+      .toContain(new Date(workspace.creationTime).toDateString());
+    expect(wrapper.find('[data-test-id="lastUpdated"]').text())
+      .toContain(new Date(workspace.lastModifiedTime).toDateString());
   });
 });
