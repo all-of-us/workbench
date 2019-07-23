@@ -1,4 +1,5 @@
 import {
+  DataAccessLevel,
   FileDetail, ShareWorkspaceRequest,
   UserRole,
   Workspace,
@@ -16,7 +17,6 @@ export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
   static DEFAULT_WORKSPACE_NAME = 'defaultWorkspace';
   static DEFAULT_WORKSPACE_ID = '1';
-  static DEFAULT_WORKSPACE_DESCRIPTION = 'Stub workspace';
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
   static DEFAULT_WORKSPACE_PERMISSION = WorkspaceAccessLevel.OWNER;
 }
@@ -48,7 +48,8 @@ export const workspaceStubs = [
       socialBehavioral: false,
       reasonForAllOfUs: '',
     },
-    published: false
+    published: false,
+    dataAccessLevel: DataAccessLevel.Registered
   }
 ];
 

@@ -17,11 +17,11 @@ import {reactStyles, ReactWrapperBase, withUrlParams, withUserProfile} from 'app
 import {ResearchPurpose} from 'app/views/research-purpose';
 import {ResetClusterButton} from 'app/views/reset-cluster-button';
 import {CdrVersion, Cohort, Profile, UserRole, WorkspaceAccessLevel} from 'generated/fetch';
+import {WorkspaceShare} from './workspace-share';
 
 
 interface WorkspaceState {
   sharing: boolean;
-  showTip: boolean;
   cdrVersion: CdrVersion;
   useBillingProjectBuffer: boolean;
   freeTierBillingProject: string;
@@ -95,7 +95,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
     super(props);
     this.state = {
       sharing: false,
-      showTip: false,
       cdrVersion: undefined,
       useBillingProjectBuffer: undefined,
       freeTierBillingProject: undefined,
@@ -123,7 +122,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
   async setVisits() {
     const {profileState: {profile}} = this.props;
     if (!profile.pageVisits.some(v => v.page === pageId)) {
-      this.setState({showTip: true});
       await profileApi().updatePageVisits({ page: pageId});
     }
   }
@@ -191,9 +189,10 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
   }
 
   render() {
-    const {cdrVersion, workspace, workspaceUserRoles, googleBucketModalOpen} = this.state;
+    const {profileState: {profile}} = this.props;
+    const {cdrVersion, workspace, workspaceUserRoles, googleBucketModalOpen, sharing} = this.state;
     return <div style={styles.mainPage}>
-      <ResearchPurpose/>
+      <ResearchPurpose data-test-id='researchPurpose'/>
       <div style={styles.rightSidebar}>
         <div style={styles.shareHeader}>
           <h3 style={{marginTop: 0}}>Collaborators:</h3>
@@ -201,12 +200,16 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
             <InfoIcon style={{margin: '0 0.3rem'}}/>
           </TooltipTrigger>
           <Button style={{height: '22px', fontSize: 12, marginRight: '0.5rem',
-            maxWidth: '13px'}}>Share</Button>
+            maxWidth: '13px'}} disabled={workspaceUserRoles.length === 0}
+                  data-test-id='workspaceShareButton'
+                  onClick={() => this.setState({sharing: true})}>Share</Button>
         </div>
         {workspaceUserRoles.length > 0 ?
           <React.Fragment>
             {workspaceUserRoles.map((user, i) =>
-              <div key={i}>{user.role + ' : ' + user.email}</div>)}
+              <div key={i} data-test-id={'workspaceUser-' + i}>
+                {user.role + ' : ' + user.email}
+              </div>)}
           </React.Fragment> :
           <Spinner size={50} style={{display: 'flex', alignSelf: 'center'}}/>}
         <div>
@@ -215,19 +218,19 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
               <InfoIcon style={{margin: '0 0.3rem'}}/>
             </TooltipTrigger>
           </h3>
-          <div style={styles.infoBox}>
+          <div style={styles.infoBox} data-test-id='cdrVersion'>
             <div style={styles.infoBoxHeader}>Dataset</div>
             <div style={{fontSize: '0.5rem'}}>{cdrVersion ? cdrVersion.name : 'Loading...'}</div>
           </div>
-          <div style={styles.infoBox}>
+          <div style={styles.infoBox} data-test-id='creationDate'>
             <div style={styles.infoBoxHeader}>Creation Date</div>
             <div style={{fontSize: '0.5rem'}}>{this.workspaceCreationTime}</div>
           </div>
-          <div style={styles.infoBox}>
+          <div style={styles.infoBox} data-test-id='lastUpdated'>
             <div style={styles.infoBoxHeader}>Last Updated</div>
             <div style={{fontSize: '0.5rem'}}>{this.workspaceLastModifiedTime}</div>
           </div>
-          <div style={styles.infoBox}>
+          <div style={styles.infoBox} data-test-id='dataAccessLevel'>
             <div style={styles.infoBoxHeader}>Data Access Level</div>
             <div style={{fontSize: '0.5rem'}}>{workspace ?
               fp.capitalize(workspace.dataAccessLevel.toString()) : 'Loading...'}</div>
@@ -255,6 +258,12 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
                   style={{marginLeft: '0.5rem'}}>Continue</Button>
         </ModalFooter>
       </Modal>}
+      {sharing && <WorkspaceShare workspace={workspace}
+                                  accessLevel={workspace.accessLevel}
+                                  userEmail={profile.username}
+                                  onClose={() => this.setState({sharing: false})}
+                                  userRoles={workspaceUserRoles}
+                                  data-test-id='workspaceShareModal'/>}
     </div>;
   }
 });
