@@ -9,14 +9,14 @@ import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {Button, Link} from 'app/components/buttons';
 import {InfoIcon} from 'app/components/icons';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {Spinner} from 'app/components/spinners';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUrlParams, withUserProfile} from 'app/utils';
 import {ResearchPurpose} from 'app/views/research-purpose';
+import {ResetClusterButton} from 'app/views/reset-cluster-button';
 import {CdrVersion, Cohort, Profile, UserRole, WorkspaceAccessLevel} from 'generated/fetch';
-import {Spinner} from "app/components/spinners";
-import colors, {colorWithWhiteness} from "app/styles/colors";
-import {Modal, ModalBody, ModalFooter, ModalTitle} from "../../components/modals";
-import {ResetClusterButton} from "../reset-cluster-button";
 
 
 interface WorkspaceState {
@@ -39,11 +39,13 @@ const styles = reactStyles({
     height: 'calc(100% - 60px)'
   },
   rightSidebar: {
-    backgroundColor: '#E2E2EA', marginRight: '-0.6rem', paddingLeft: '0.5rem',
-    paddingTop: '1rem', width: '22%', display: 'flex', flexDirection: 'column'
+    backgroundColor: colorWithWhiteness(colors.primary, 0.85), marginRight: '-0.6rem',
+    paddingLeft: '0.5rem', paddingTop: '1rem', width: '22%', display: 'flex',
+    flexDirection: 'column'
   },
   shareHeader: {
-    display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '0.5rem'
+    display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingRight: '0.5rem',
+    paddingBottom: '0.5rem'
   },
   infoBox: {
     backgroundColor: colorWithWhiteness(colors.primary, 0.75), height: '2rem', width: '6rem',
@@ -228,12 +230,12 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
           <div style={styles.infoBox}>
             <div style={styles.infoBoxHeader}>Data Access Level</div>
             <div style={{fontSize: '0.5rem'}}>{workspace ?
-              fp.upperCase(workspace.accessLevel) : 'Loading...'}</div>
+              fp.capitalize(workspace.dataAccessLevel.toString()) : 'Loading...'}</div>
           </div>
           <Link disabled={!workspace}
                 onClick={() => this.setState({googleBucketModalOpen: true})}>Google Bucket</Link>
           {!!this.workspaceClusterBillingProjectId() &&
-            <ResetClusterButton billingProjectId={() => this.workspaceClusterBillingProjectId()}/>}
+            <ResetClusterButton billingProjectId={this.workspaceClusterBillingProjectId()}/>}
         </div>
       </div>
       {googleBucketModalOpen && <Modal>

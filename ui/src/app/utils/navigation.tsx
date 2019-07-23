@@ -2,7 +2,7 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConfigResponse, Profile} from 'generated';
-import {CdrVersion, Cohort, ConceptSet} from 'generated/fetch';
+import {Cohort, ConceptSet} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
