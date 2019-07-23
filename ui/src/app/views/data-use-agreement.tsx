@@ -338,7 +338,8 @@ export const DataUseAgreement = withUserProfile()(
     }
 
     render() {
-      const {name, initialName, initialWork, initialSanctions, submitting} = this.state;
+      const {name, initialName, initialWork, initialSanctions, showSanctionModal,
+        submitting} = this.state;
       const errors = validate({name, initialName, initialWork, initialSanctions}, {
         name: {
           presence: {allowEmpty: false}
@@ -394,7 +395,7 @@ export const DataUseAgreement = withUserProfile()(
             Conduct</a>.
           </div>
           <div>
-            {this.state.showSanctionModal &&
+            {showSanctionModal &&
           <SanctionModal onClose={() => this.setState({showSanctionModal: false})}></SanctionModal>}
           </div>
           <DuaTextInput style={{marginTop: '0.5rem'}}
