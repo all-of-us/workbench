@@ -15,7 +15,7 @@ const styles = reactStyles({
     width: '35%',
     marginTop: '.25rem',
     zIndex: 100,
-    border: '1px solid #979797',
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
     borderRadius: '5px',
     backgroundColor: colors.white,
   },
@@ -32,7 +32,7 @@ const styles = reactStyles({
   },
   boxHover: {
     background: 'rgb(234, 243, 250)',
-    color: '#262262',
+    color: colors.primary,
     paddingTop: '0.2rem',
     paddingLeft: '0.2rem',
   },
@@ -74,7 +74,7 @@ function fifo(fn) {
   };
 }
 
-export interface SearchInputState {
+interface SearchInputState {
   matches: Array<string>;
   hover: Array<boolean>;
   state: number;
@@ -84,9 +84,9 @@ export interface SearchInputProps {
   enabled: boolean;
   placeholder: string;
   value: string;
-  onSearch: Function; // Returns a promise
+  onSearch: (keyword: string) => Promise<Array<string>>;
   tooltip: string;
-  onChange: Function; // Accepts the new input as a parameter
+  onChange: (newInput: string) => void;
 }
 
 export class SearchInput extends React.Component<SearchInputProps, SearchInputState> {
