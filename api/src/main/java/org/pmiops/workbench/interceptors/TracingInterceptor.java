@@ -35,7 +35,7 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
     try {
       StackdriverTraceExporter.createAndRegister(StackdriverTraceConfiguration.builder().build());
     } catch (IOException e) {
-      log.log(Level.WARNING, "Failed to setup tracing");
+      log.log(Level.WARNING, "Failed to setup tracing", e);
     }
   }
 
@@ -67,6 +67,6 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
       Object handler,
       ModelAndView modelAndView)
       throws Exception {
-    ((Scope)request.getAttribute(TRACE_ATTRIBUTE_KEY)).close();
+    ((Scope) request.getAttribute(TRACE_ATTRIBUTE_KEY)).close();
   }
 }
