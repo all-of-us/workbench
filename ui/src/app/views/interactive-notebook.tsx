@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {ClrIcon} from 'app/components/icons';
-import {SpinnerOverlay} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
@@ -15,6 +15,7 @@ import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConfirmPlaygroundModeModal} from 'app/views/confirm-playground-mode-modal';
+import {NotebookInUseModal} from 'app/views/notebook-in-use-modal';
 import {ClusterStatus} from 'generated/fetch';
 
 
@@ -73,9 +74,12 @@ interface Props {
 
 interface State {
   clusterStatus: ClusterStatus;
-  userRequestedExecutableNotebook: boolean;
+  editLoading: boolean;
   html: string;
+  lastLockedBy: string;
+  showInUseModal: boolean;
   showPlaygroundModeModal: boolean;
+  userRequestedExecutableNotebook: boolean;
 }
 
 export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace())(
@@ -84,10 +88,13 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     constructor(props) {
       super(props);
       this.state = {
-        userRequestedExecutableNotebook: false,
         clusterStatus: ClusterStatus.Unknown,
+        editLoading: false,
         html: '',
-        showPlaygroundModeModal: false
+        lastLockedBy: '',
+        showInUseModal: false,
+        showPlaygroundModeModal: false,
+        userRequestedExecutableNotebook: false,
       };
     }
 
@@ -127,8 +134,21 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
 
     private startEditMode() {
       if (this.canWrite()) {
-        this.setState({userRequestedExecutableNotebook: true});
-        this.runCluster(() => { this.navigateEditMode(); });
+        this.setState({editLoading: true});
+        workspacesApi().getNotebookLockingMetadata(this.props.urlParams.ns,
+          this.props.urlParams.wsid, this.props.urlParams.nbName).then(resp => {
+            console.log(resp);
+            if (resp.lastLockedBy === null) {
+              this.setState({editLoading: false, userRequestedExecutableNotebook: true});
+              this.runCluster(() => { this.navigateEditMode(); });
+            } else {
+              this.setState({
+                editLoading: false,
+                showInUseModal: true,
+                lastLockedBy: resp.lastLockedBy
+              });
+            }
+        });
       }
     }
 
@@ -169,13 +189,21 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     render() {
+      const {
+        editLoading,
+        html,
+        lastLockedBy,
+        showInUseModal,
+        showPlaygroundModeModal,
+        userRequestedExecutableNotebook
+      } = this.state;
       return (
         <div>
           <div style={styles.navBar}>
             <div style={{...styles.navBarItem, ...styles.active}}>
               Preview (Read-Only)
             </div>
-            {this.state.userRequestedExecutableNotebook ? (
+            {userRequestedExecutableNotebook ? (
               <div style={{...styles.navBarItem}}>
                 <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
                 Preparing your Jupyter environment. This may take up to 10 minutes.
@@ -188,7 +216,8 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
                   <EditComponentReact enableHoverEffect={false}
                                       disabled={!this.canWrite()}
                                       style={styles.navBarIcon}/>
-                  Edit
+                  Edit {editLoading && <Spinner
+                    style={{marginLeft: '0.3rem', height: '19px', width: '19px'}} />}
                 </div>
                 <div style={Object.assign({}, styles.navBarItem,
                   this.canWrite() ? styles.clickable : styles.disabled)}
@@ -202,11 +231,11 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
             }
           </div>
           <div style={styles.previewDiv}>
-            {this.state.html ?
-              (<iframe style={styles.previewFrame} srcDoc={this.state.html}/>) :
+            {html ?
+              (<iframe style={styles.previewFrame} srcDoc={html}/>) :
               (<SpinnerOverlay/>)}
           </div>
-          {this.state.showPlaygroundModeModal &&
+          {showPlaygroundModeModal &&
             <ConfirmPlaygroundModeModal
               onCancel={() => {
                 this.setState({showPlaygroundModeModal: false}); }}
@@ -214,6 +243,12 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
                 this.setState({showPlaygroundModeModal: false});
                 this.startPlaygroundMode();
               }}/>}
+          {showInUseModal &&
+          <NotebookInUseModal
+            onCancel={() => {
+              this.setState({showInUseModal: false}); }}
+            email={lastLockedBy}>
+          </NotebookInUseModal>}
         </div>
       );
     }
