@@ -34,7 +34,8 @@ const styles = reactStyles({
     borderRight: '1px solid ' + colorWithWhiteness(colors.dark, .75),
     backgroundColor: 'rgba(38,34,98,0.05)',
     alignItems: 'center',
-    padding: '0 20px'
+    padding: '0 20px',
+    textTransform: 'uppercase'
   },
   active: {
     backgroundColor: 'rgba(38,34,98,0.2)'
@@ -74,9 +75,9 @@ interface Props {
 
 interface State {
   clusterStatus: ClusterStatus;
-  editLoading: boolean;
   html: string;
   lastLockedBy: string;
+  lockExpirationTime: number;
   showInUseModal: boolean;
   showPlaygroundModeModal: boolean;
   userRequestedExecutableNotebook: boolean;
@@ -89,9 +90,9 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       super(props);
       this.state = {
         clusterStatus: ClusterStatus.Unknown,
-        editLoading: false,
         html: '',
         lastLockedBy: '',
+        lockExpirationTime: 0,
         showInUseModal: false,
         showPlaygroundModeModal: false,
         userRequestedExecutableNotebook: false,
@@ -104,6 +105,13 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         .then(html => {
           this.setState({html: html.html});
         });
+      workspacesApi().getNotebookLockingMetadata(this.props.urlParams.ns,
+        this.props.urlParams.wsid, this.props.urlParams.nbName).then((resp) => {
+        this.setState({
+          lastLockedBy: resp.lastLockedBy,
+          lockExpirationTime: resp.lockExpirationTime
+        });
+      })
     }
 
     private runCluster(onClusterReady: Function): void {
@@ -135,23 +143,18 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     private startEditMode() {
       const time = new Date().getTime();
       if (this.canWrite()) {
-        this.setState({editLoading: true});
-        workspacesApi().getNotebookLockingMetadata(this.props.urlParams.ns,
-          this.props.urlParams.wsid, this.props.urlParams.nbName).then(resp => {
-            if (resp.lastLockedBy === null || time - resp.lockExpirationTime >= 0
-              || resp.lastLockedBy === userProfileStore.getValue().profile.username) {
-              this.setState({editLoading: false, userRequestedExecutableNotebook: true});
-              this.runCluster(() => { this.navigateEditMode(); });
-            } else {
-              this.setState({
-                editLoading: false,
-                showInUseModal: true,
-                lastLockedBy: resp.lastLockedBy
-              });
-            }
+        if (!this.notebookInUse) {
+          this.setState({userRequestedExecutableNotebook: true});
+          this.runCluster(() => { this.navigateEditMode(); });
+        } else {
+          this.setState({
+            showInUseModal: true
           });
+        }
       }
     }
+
+
 
     private startPlaygroundMode() {
       if (this.canWrite()) {
@@ -198,9 +201,14 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         });
     }
 
+    private get notebookInUse() {
+      const {lastLockedBy, lockExpirationTime} = this.state;
+      return lastLockedBy !== null && lockExpirationTime - new Date().getTime() >= 0
+        && lastLockedBy !== userProfileStore.getValue().profile.username;
+    }
+
     render() {
       const {
-        editLoading,
         html,
         lastLockedBy,
         showInUseModal,
@@ -214,7 +222,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
               Preview (Read-Only)
             </div>
             {userRequestedExecutableNotebook ? (
-              <div style={{...styles.navBarItem}}>
+              <div style={{...styles.navBarItem, textTransform: 'none'}}>
                 <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
                 Preparing your Jupyter environment. This may take up to 10 minutes.
               </div>) : (
@@ -226,8 +234,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
                   <EditComponentReact enableHoverEffect={false}
                                       disabled={!this.canWrite()}
                                       style={styles.navBarIcon}/>
-                  Edit {editLoading && <Spinner
-                    style={{marginLeft: '0.3rem', height: '19px', width: '19px'}} />}
+                  Edit {this.notebookInUse && '(In Use)'}
                 </div>
                 <div style={Object.assign({}, styles.navBarItem,
                   this.canWrite() ? styles.clickable : styles.disabled)}
