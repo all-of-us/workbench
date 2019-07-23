@@ -21,14 +21,20 @@ const styles = reactStyles({
   }
 });
 
+export interface State {
+  contentLoaded: boolean;
+  fetchingWorkspaceError: boolean;
+  reviewError: boolean;
+  reviewedWorkspace: Workspace;
+  workspaces: Workspace[];
+}
+
 /**
  * Review Workspaces. Users with the REVIEW_RESEARCH_PURPOSE permission use this
  * to view other users' workspaces for which a review has been requested, and approve/reject them.
  */
 export const AdminReviewWorkspace = withUserProfile()(class extends React.Component<
-  {profileState: {profile: Profile, reload: Function, updateCache: Function}},
-  {contentLoaded: boolean, workspaces: Workspace[], fetchingWorkspaceError: boolean,
-    reviewedWorkspace: Workspace, reviewError: boolean}> {
+  {profileState: {profile: Profile, reload: Function, updateCache: Function}}, State> {
 
   constructor(props) {
     super(props);
