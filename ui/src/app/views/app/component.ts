@@ -92,10 +92,6 @@ export class AppComponent implements OnInit {
     });
 
     this.setGTagManager();
-    // tcell uses local storage - don't load if not supported
-    if (this.cookiesEnabled) {
-      this.setTCellAgent();
-    }
   }
 
   getLeafRoute(route = this.activatedRoute) {
@@ -147,16 +143,6 @@ export class AppComponent implements OnInit {
       'gtag(\'set\', \'user_agent\', \'' + window.navigator.userAgent.slice(0, 100) + '\');' +
       'gtag(\'config\', \'' + environment.gaId + '\', {\'custom_map\': ' +
       '{\'' + environment.gaUserAgentDimension + '\': \'user_agent\'}});';
-    const head = this.doc.getElementsByTagName('head')[0];
-    head.appendChild(s);
-  }
-
-  private setTCellAgent(): void {
-    const s = this.doc.createElement('script');
-    s.type = 'text/javascript';
-    s.src = 'https://jsagent.tcell.io/tcellagent.min.js';
-    s.setAttribute('tcellappid', environment.tcellappid);
-    s.setAttribute('tcellapikey', environment.tcellapikey);
     const head = this.doc.getElementsByTagName('head')[0];
     head.appendChild(s);
   }

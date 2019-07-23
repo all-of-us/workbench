@@ -1,9 +1,8 @@
 import {
-  DataAccessLevel,
-  FileDetail, ShareWorkspaceRequest,
+  DataAccessLevel, FileDetail, ResearchPurposeReviewRequest, ShareWorkspaceRequest,
   UserRole,
   Workspace,
-  WorkspaceAccessLevel,
+  WorkspaceAccessLevel, WorkspaceListResponse,
   WorkspaceResponseListResponse,
   WorkspacesApi,
   WorkspaceUserRolesResponse
@@ -206,6 +205,21 @@ export class WorkspacesApiStub extends WorkspacesApi {
           };
         })
       });
+    });
+  }
+
+  getWorkspacesForReview(options?: any): Promise<WorkspaceListResponse> {
+    return new Promise<WorkspaceListResponse>(resolve => {
+      resolve({
+        items: this.workspaces
+      });
+    });
+  }
+
+  reviewWorkspace(workspaceNamespace: string, workspaceId: string,
+    review?: ResearchPurposeReviewRequest): Promise<EmptyResponse> {
+    return new Promise<EmptyResponse>(resolve => {
+      resolve({});
     });
   }
 

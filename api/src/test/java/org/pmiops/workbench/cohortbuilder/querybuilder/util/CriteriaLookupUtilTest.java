@@ -125,6 +125,7 @@ public class CriteriaLookupUtilTest {
     assertEquals(
         ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)),
         lookupUtil.buildCriteriaLookupMap(searchRequest));
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
@@ -211,7 +212,7 @@ public class CriteriaLookupUtilTest {
             .group(false)
             .standard(false)
             .ancestorData(false)
-            .conceptId(1586135L);
+            .conceptId(5L);
     searchRequest =
         new SearchRequest()
             .addIncludesItem(

@@ -34,12 +34,6 @@ export interface Environment {
   publicUiUrl: string;
   // The Shibboleth URL for linking eRA Commons accounts
   shibbolethUrl: string;
-  // The TCell API key. See RW-1682 for details.
-  // Example value: 'AQEBBAEkx4iE2KxNyI7Wx08EwU1ycTM7E4FMSmaibbMUQxNU6uQvuAJt7fyABAtFYSYfgEE'
-  tcellapikey: string;
-  // The TCell app ID. See RW-1682 for details.
-  // Example value: 'AoUNonProd-WZFW2'
-  tcellappid: string;
   // The url for Moodle integration
   // Example value: https://aoudev.nnlm.gov
   trainingUrl: string;
