@@ -58,7 +58,7 @@ const IndentedOl = (props) => {
 
 const IndentedLi = (props) => {
   return <li style={{marginTop: '0.5rem', ...props.style}}>{props.children}</li>;
-}
+};
 
 const coreValuesUrl = 'https://allofus.nih.gov/about/about-all-us-research-program';
 
