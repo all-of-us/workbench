@@ -24,6 +24,7 @@ export default {
     notebook: '#8BC990'
   },
   white: '#fff',
+  black: '#000',
   workspacePermissionsHighlights: {
     'OWNER': '#4996A2',
     'READER': '#8F8E8F',

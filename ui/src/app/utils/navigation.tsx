@@ -2,7 +2,7 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConfigResponse, Profile} from 'generated';
-import {Cohort, ConceptSet} from 'generated/fetch';
+import {CdrVersion, Cohort, ConceptSet} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
@@ -18,6 +18,7 @@ export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const serverConfigStore = new BehaviorSubject<ConfigResponse>(undefined);
+export const cdrVersionStore = new BehaviorSubject<any>(undefined);
 export const userProfileStore =
   new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
     profile: {} as Profile,
