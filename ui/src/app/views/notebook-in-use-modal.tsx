@@ -1,8 +1,8 @@
-import * as React from 'react';
-import colors from 'app/styles/colors';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Button} from 'app/components/buttons';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
+import colors from 'app/styles/colors';
+import * as React from 'react';
 
 
 export interface Props {

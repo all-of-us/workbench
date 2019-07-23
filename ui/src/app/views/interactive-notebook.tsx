@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {ClrIcon} from 'app/components/icons';
-import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
@@ -107,11 +107,11 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         });
       workspacesApi().getNotebookLockingMetadata(this.props.urlParams.ns,
         this.props.urlParams.wsid, this.props.urlParams.nbName).then((resp) => {
-        this.setState({
-          lastLockedBy: resp.lastLockedBy,
-          lockExpirationTime: resp.lockExpirationTime
+          this.setState({
+            lastLockedBy: resp.lastLockedBy,
+            lockExpirationTime: resp.lockExpirationTime
+          });
         });
-      })
     }
 
     private runCluster(onClusterReady: Function): void {
@@ -141,7 +141,6 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     private startEditMode() {
-      const time = new Date().getTime();
       if (this.canWrite()) {
         if (!this.notebookInUse) {
           this.setState({userRequestedExecutableNotebook: true});
