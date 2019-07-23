@@ -71,5 +71,14 @@ else
     exit 1
 fi
 
+echo "Making dataset linking tables"
+if ./generate-cdr/make-bq-dataset-linking.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
+then
+    echo "dataset linking tables generated"
+else
+    echo "FAILED To generate dataset linking tables"
+    exit 1
+fi
+
 echo " Finished make-bq-denormalized-tables"
 
