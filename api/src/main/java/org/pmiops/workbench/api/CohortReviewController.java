@@ -392,6 +392,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   @Override
+  public ResponseEntity<EmptyResponse> deleteCohortReview(
+      String workspaceNamespace, String workspaceId, Long cohortReviewId) {
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
   public ResponseEntity<EmptyResponse> deleteParticipantCohortAnnotation(
       String workspaceNamespace,
       String workspaceId,
@@ -677,6 +683,17 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               .type(bigQueryService.getString(row, rm.get("type")))
               .vocabulary(bigQueryService.getString(row, rm.get("vocabulary"))));
     }
+    return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<org.pmiops.workbench.model.CohortReview> updateCohortReview(
+      String workspaceNamespace,
+      String workspaceId,
+      Long cohortReviewId,
+      org.pmiops.workbench.model.CohortReview cohortReview) {
+    org.pmiops.workbench.model.CohortReview response =
+        new org.pmiops.workbench.model.CohortReview();
     return ResponseEntity.ok(response);
   }
 
