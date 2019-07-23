@@ -12,12 +12,12 @@ import {
 import * as fp from 'lodash/fp';
 
 import {CopyNotebookRequest, EmptyResponse} from 'generated';
+import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
   static DEFAULT_WORKSPACE_NAME = 'defaultWorkspace';
   static DEFAULT_WORKSPACE_ID = '1';
-  static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
   static DEFAULT_WORKSPACE_PERMISSION = WorkspaceAccessLevel.OWNER;
 }
 
@@ -26,7 +26,7 @@ export const workspaceStubs = [
     name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
     id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
     namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-    cdrVersionId: WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     creationTime: new Date().getTime(),
     lastModifiedTime: new Date().getTime(),
     researchPurpose: {

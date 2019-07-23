@@ -1,6 +1,6 @@
 import {mount} from 'enzyme';
-import * as React from 'react';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 import {WorkspaceAbout} from './workspace-about';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
@@ -9,10 +9,11 @@ import {ClusterApi, ProfileApi, WorkspaceAccessLevel, WorkspacesApi} from 'gener
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {cdrVersionStore, currentWorkspaceStore, serverConfigStore, userProfileStore} from "app/utils/navigation";
-import {workspaceStubs, WorkspaceStubVariables, userRolesStub} from "../../testing/stubs/workspaces-api-stub";
-import {waitOneTickAndUpdate} from "../../testing/react-test-helpers";
-import {ClusterApiStub} from "../../testing/stubs/cluster-api-stub";
+import {cdrVersionStore, currentWorkspaceStore, serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {userRolesStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
+import {cdrVersions, CdrVersionsStubVariables} from '../../testing/stubs/cdr-versions-api-stub';
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -51,10 +52,7 @@ describe('WorkspaceAbout', () => {
       useBillingProjectBuffer: true,
       enableEraCommons: true,
     });
-    cdrVersionStore.next([{
-      cdrVersionId: WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
-      name: WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION
-    }]);
+    cdrVersionStore.next(cdrVersions);
   });
 
   it('should render', () => {
@@ -93,7 +91,7 @@ describe('WorkspaceAbout', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="cdrVersion"]').text())
-      .toContain(WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
+      .toContain(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
   });
 
   it('should display workspace metadata', async () => {
