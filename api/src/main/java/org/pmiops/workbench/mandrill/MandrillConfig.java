@@ -13,7 +13,7 @@ public class MandrillConfig {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient mandrillApiClient(WorkbenchConfig workbenchConfig) {
-    return new ApiClient();
+    return new MandrillApiClientTracer();
   }
 
   @Bean

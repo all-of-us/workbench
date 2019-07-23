@@ -35,7 +35,8 @@
     "publicApiKeyForErrorReports": "AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4",
     "projectId": "all-of-us-workbench-test",
     "shortName": "Test",
-    "oauthClientId": "602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com"
+    "oauthClientId": "602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com",
+    "traceAllRequests": true
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-workbench-test.appspot.com/login",
