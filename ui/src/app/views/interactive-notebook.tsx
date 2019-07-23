@@ -11,7 +11,7 @@ import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients'
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
+import {navigate, navigateByUrl, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConfirmPlaygroundModeModal} from 'app/views/confirm-playground-mode-modal';
@@ -133,12 +133,13 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     private startEditMode() {
+      const time = new Date().getTime();
       if (this.canWrite()) {
         this.setState({editLoading: true});
         workspacesApi().getNotebookLockingMetadata(this.props.urlParams.ns,
           this.props.urlParams.wsid, this.props.urlParams.nbName).then(resp => {
-            console.log(resp);
-            if (resp.lastLockedBy === null) {
+            if (resp.lastLockedBy === null || time - resp.lockExpirationTime >= 0
+              || resp.lastLockedBy === userProfileStore.getValue().profile.username) {
               this.setState({editLoading: false, userRequestedExecutableNotebook: true});
               this.runCluster(() => { this.navigateEditMode(); });
             } else {
@@ -148,7 +149,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
                 lastLockedBy: resp.lastLockedBy
               });
             }
-        });
+          });
       }
     }
 
@@ -186,6 +187,15 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
 
     private canWrite() {
       return WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel);
+    }
+
+    private cloneNotebook() {
+      const {ns, wsid, nbName} = this.props.urlParams;
+      workspacesApi().cloneNotebook(
+        ns, wsid, nbName).then((notebook) => {
+          navigateByUrl(
+            `/workspaces/${ns}/${wsid}/notebooks/${encodeURIComponent(notebook.name)}`);
+        });
     }
 
     render() {
@@ -245,9 +255,11 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
               }}/>}
           {showInUseModal &&
           <NotebookInUseModal
+            email={lastLockedBy}
             onCancel={() => {
               this.setState({showInUseModal: false}); }}
-            email={lastLockedBy}>
+            onCopy={() => {this.cloneNotebook(); }}
+            onPlaygroundMode={() => {this.startPlaygroundMode(); }}>
           </NotebookInUseModal>}
         </div>
       );
