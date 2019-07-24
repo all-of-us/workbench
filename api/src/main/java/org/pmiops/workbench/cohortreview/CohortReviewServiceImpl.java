@@ -125,6 +125,11 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
+  public void deleteCohortReview(CohortReview cohortReview) {
+    cohortReviewDao.delete(cohortReview);
+  }
+
+  @Override
   public List<CohortReview> getRequiredWithCohortReviews(String ns, String firecloudName) {
     return cohortReviewDao.findByFirecloudNameAndActiveStatus(
         ns,

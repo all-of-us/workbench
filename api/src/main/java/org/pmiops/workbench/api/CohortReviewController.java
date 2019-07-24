@@ -153,6 +153,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                   .creationTime(cohortReview.getCreationTime().toString())
                   .cohortDefinition(cohortReview.getCohortDefinition())
                   .cohortName(cohortReview.getCohortName())
+                  .description(cohortReview.getDescription())
                   .matchedParticipantCount(cohortReview.getMatchedParticipantCount())
                   .reviewedCount(cohortReview.getReviewedCount())
                   .reviewStatus(cohortReview.getReviewStatusEnum())
@@ -179,8 +180,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                   .cohortId(cohortReview.getCohortId())
                   .cdrVersionId(cohortReview.getCdrVersionId())
                   .creationTime(cohortReview.getCreationTime().toString())
+                  .lastModifiedTime(cohortReview.getLastModifiedTime().getTime())
                   .cohortDefinition(cohortReview.getCohortDefinition())
                   .cohortName(cohortReview.getCohortName())
+                  .description(cohortReview.getDescription())
                   .matchedParticipantCount(cohortReview.getMatchedParticipantCount())
                   .reviewedCount(cohortReview.getReviewedCount())
                   .reviewStatus(cohortReview.getReviewStatusEnum())
@@ -310,7 +313,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       cohortReview =
           initializeCohortReview(cdrVersionId, cohort)
               .reviewStatusEnum(ReviewStatus.NONE)
-              .reviewSize(0L);
+              .reviewSize(0L)
+              .cohortDefinition(getCohortDefinition(cohort))
+              .cohortName(cohort.getName())
+              .description(cohort.getDescription());
       cohortReviewService.saveCohortReview(cohortReview);
     }
     if (cohortReview.getReviewSize() > 0) {
@@ -338,9 +344,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     cohortReview
         .reviewSize(participantCohortStatuses.size())
-        .reviewStatusEnum(ReviewStatus.CREATED)
-        .cohortDefinition(getCohortDefinition(cohort))
-        .cohortName(cohort.getName());
+        .reviewStatusEnum(ReviewStatus.CREATED);
 
     // when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
     cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
@@ -401,6 +405,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteCohortReview(
       String workspaceNamespace, String workspaceId, Long cohortReviewId) {
+    cohortReviewService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
+    org.pmiops.workbench.db.model.CohortReview dbCohortReview =
+        cohortReviewService.findCohortReview(workspaceNamespace, workspaceId, cohortReviewId);
+    cohortReviewService.deleteCohortReview(dbCohortReview);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -714,6 +724,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     if (cohortReview.getCohortName() != null) {
       dbCohortReview.setCohortName(cohortReview.getCohortName());
     }
+    if (cohortReview.getDescription() != null) {
+      dbCohortReview.setDescription(cohortReview.getDescription());
+    }
+    dbCohortReview.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     try {
       cohortReviewService.saveCohortReview(dbCohortReview);
     } catch (OptimisticLockException e) {

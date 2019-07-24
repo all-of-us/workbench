@@ -10,5 +10,10 @@
         <constraints nullable="false"/>
       </column>
     </addColumn>
+    <addColumn tableName="cohort_review">
+      <column name="description" type="clob">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
   </changeSet>
 </databaseChangeLog>

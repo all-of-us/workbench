@@ -59,6 +59,13 @@ public interface CohortReviewService {
   CohortReview findCohortReview(String ns, String firecloudName, Long cohortReviewId);
 
   /**
+   * Delete the specified cohort review.
+   *
+   * @param cohortReview
+   */
+  void deleteCohortReview(CohortReview cohortReview);
+
+  /**
    * Find the {@link CohortReview} for the specified ns and firecloudName.
    *
    * @param ns

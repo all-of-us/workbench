@@ -25,6 +25,7 @@ public class CohortReview {
   private Timestamp creationTime;
   private String cohortDefinition;
   private String cohortName;
+  private String description;
   private Timestamp lastModifiedTime;
   private long matchedParticipantCount;
   private long reviewSize;
@@ -101,6 +102,20 @@ public class CohortReview {
 
   public CohortReview cohortName(String cohortName) {
     this.cohortName = cohortName;
+    return this;
+  }
+
+  @Column(name = "description")
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public CohortReview description(String description) {
+    this.description = description;
     return this;
   }
 
@@ -238,6 +253,7 @@ public class CohortReview {
         && Objects.equals(creationTime, that.creationTime)
         && Objects.equals(cohortDefinition, that.cohortDefinition)
         && Objects.equals(cohortName, that.cohortName)
+        && Objects.equals(description, that.description)
         && Objects.equals(lastModifiedTime, that.lastModifiedTime)
         && Objects.equals(reviewStatus, that.reviewStatus);
   }
@@ -251,6 +267,7 @@ public class CohortReview {
         creationTime,
         cohortDefinition,
         cohortName,
+        description,
         lastModifiedTime,
         matchedParticipantCount,
         reviewSize,
@@ -268,6 +285,7 @@ public class CohortReview {
         .append("creationTime", creationTime)
         .append("cohortDefinition", cohortDefinition)
         .append("cohortName", cohortName)
+        .append("description", description)
         .append("lastModifiedTime", lastModifiedTime)
         .append("matchedParticipantCount", matchedParticipantCount)
         .append("reviewSize", reviewSize)

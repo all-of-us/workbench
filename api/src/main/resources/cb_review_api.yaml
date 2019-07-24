@@ -474,9 +474,15 @@ definitions:
           modify a changed resource.
       creationTime:
         type: string
+      lastModifiedTime:
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
       cohortDefinition:
         type: string
       cohortName:
+        type: string
+      description:
         type: string
       matchedParticipantCount:
         type: integer
