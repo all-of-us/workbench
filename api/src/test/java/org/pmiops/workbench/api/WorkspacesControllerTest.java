@@ -2343,6 +2343,12 @@ public class WorkspacesControllerTest {
         "user@aou",
         "a759e5aef091fd22bbf40bf8ee7cfde4988c668541c18633bd79ab84b274d622"
       },
+      // catches an edge case where the hash has a leading 0
+      {
+        "fc-5ac6bde3-f225-44ca-ad4d-92eed68df7db",
+        "brubenst2@fake-research-aou.org",
+        "060c0b2ef2385804b7b69a4b4477dd9661be35db270c940525c2282d081aef56"
+      }
     };
 
     for (final String[] test : knownTestData) {
