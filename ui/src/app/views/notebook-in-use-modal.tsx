@@ -46,7 +46,10 @@ export class NotebookInUseModal extends React.Component<Props, State> {
         </Button>
         <Button type='secondary'
                 style={{width: '8rem', margin: '0 10px'}}
-                onClick={() => { this.setState({copyLoading: true}); this.props.onCopy(); }}>
+                onClick={() => {
+                  this.setState({copyLoading: true});
+                  this.props.onCopy();
+                }}>
           Make a copy {this.state.copyLoading && <Spinner
           style={{marginLeft: '0.3rem', height: '21px', width: '21px'}} />}
         </Button>

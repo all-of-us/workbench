@@ -193,16 +193,14 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
 
     private cloneNotebook() {
       const {ns, wsid, nbName} = this.props.urlParams;
-      workspacesApi().cloneNotebook(
-        ns, wsid, nbName).then((notebook) => {
-          navigateByUrl(
-            `/workspaces/${ns}/${wsid}/notebooks/${encodeURIComponent(notebook.name)}`);
-        });
+      workspacesApi().cloneNotebook(ns, wsid, nbName).then((notebook) => {
+        navigate(['workspaces', ns, wsid, 'notebooks', encodeURIComponent(notebook.name)]);
+      });
     }
 
     private get notebookInUse() {
       const {lastLockedBy, lockExpirationTime} = this.state;
-      return lastLockedBy !== null && lockExpirationTime - new Date().getTime() >= 0
+      return lastLockedBy !== null && new Date().getTime()  < lockExpirationTime
         && lastLockedBy !== userProfileStore.getValue().profile.username;
     }
 
