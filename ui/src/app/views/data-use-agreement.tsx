@@ -271,10 +271,6 @@ const SanctionModal = (props) => {
                 violation.
               </IndentedLi>
               <IndentedLi>
-                Determine whether any action by the investigator is required to remedy the
-                violation.
-              </IndentedLi>
-              <IndentedLi>
                 Revoke and/or deny access of the violator to all non-public (Registered and
                 Controlled tier) <i>All of Us</i> data.
               </IndentedLi>
@@ -295,7 +291,7 @@ const SanctionModal = (props) => {
       </label>
     </ModalBody>
     <ModalFooter>
-      <Button type='primary' onClick={props.onClose}>CLOSE</Button>
+      <Button type='primary' onClick={props.onClose}>Close</Button>
     </ModalFooter>
   </Modal>;
 };
