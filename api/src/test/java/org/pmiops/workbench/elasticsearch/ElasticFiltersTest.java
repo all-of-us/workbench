@@ -36,7 +36,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,7 +81,6 @@ public class ElasticFiltersTest {
   private SearchParameter leafParam2;
 
   @Before
-  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   public void setUp() {
     // Generate a simple test criteria tree
     // 1
@@ -400,7 +398,7 @@ public class ElasticFiltersTest {
     Attribute attr = new Attribute().name(AttrName.CAT).operator(Operator.IN).addOperandsItem("1");
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -409,10 +407,12 @@ public class ElasticFiltersTest {
                                 .addSearchParametersItem(
                                     new SearchParameter()
                                         .domain(DomainType.SURVEY.toString())
-                                        .type(TreeType.PPI.toString())
-                                        .subtype(TreeSubType.BASICS.toString())
+                                        .type(CriteriaType.PPI.toString())
+                                        .subtype(CriteriaSubType.BASICS.toString())
                                         .conceptId(777L)
-                                        .group(true)
+                                        .group(false)
+                                        .ancestorData(false)
+                                        .standard(false)
                                         .addAttributesItem(attr)))));
     assertThat(resp)
         .isEqualTo(
