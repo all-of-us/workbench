@@ -36,7 +36,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,7 +81,6 @@ public class ElasticFiltersTest {
   private SearchParameter leafParam2;
 
   @Before
-  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   public void setUp() {
     // Generate a simple test criteria tree
     // 1
@@ -393,6 +391,35 @@ public class ElasticFiltersTest {
             singleNestedQuery(
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("7771")),
                 QueryBuilders.rangeQuery("events.value_as_number").gte(1.0F).lte(1.0F)));
+  }
+
+  @Test
+  public void testPPIAnswerQueryCat() {
+    Attribute attr = new Attribute().name(AttrName.CAT).operator(Operator.IN).addOperandsItem("1");
+    QueryBuilder resp =
+        ElasticFilters.fromCohortSearch(
+            cbCriteriaDao,
+            new SearchRequest()
+                .addIncludesItem(
+                    new SearchGroup()
+                        .addItemsItem(
+                            new SearchGroupItem()
+                                .addSearchParametersItem(
+                                    new SearchParameter()
+                                        .domain(DomainType.SURVEY.toString())
+                                        .type(CriteriaType.PPI.toString())
+                                        .subtype(CriteriaSubType.BASICS.toString())
+                                        .conceptId(777L)
+                                        .group(false)
+                                        .ancestorData(false)
+                                        .standard(false)
+                                        .addAttributesItem(attr)))));
+    assertThat(resp)
+        .isEqualTo(
+            singleNestedQuery(
+                QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777")),
+                QueryBuilders.termsQuery(
+                    "events.value_as_source_concept_id", ImmutableList.of("1"))));
   }
 
   @Test
