@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import java.sql.Date;
@@ -19,8 +20,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
@@ -35,6 +39,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AllEvents;
 import org.pmiops.workbench.model.CohortChartData;
@@ -102,6 +107,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private Provider<User> userProvider;
   private final Clock clock;
   private Provider<WorkbenchConfig> configProvider;
+  private static final Logger log = Logger.getLogger(CohortReviewController.class.getName());
 
   /**
    * Converter function from backend representation (used with Hibernate) to client representation
@@ -169,6 +175,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             public org.pmiops.workbench.model.CohortReview apply(CohortReview cohortReview) {
               return new org.pmiops.workbench.model.CohortReview()
                   .cohortReviewId(cohortReview.getCohortReviewId())
+                  .etag(Etags.fromVersion(cohortReview.getVersion()))
                   .cohortId(cohortReview.getCohortId())
                   .cdrVersionId(cohortReview.getCdrVersionId())
                   .creationTime(cohortReview.getCreationTime().toString())
@@ -692,9 +699,28 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       String workspaceId,
       Long cohortReviewId,
       org.pmiops.workbench.model.CohortReview cohortReview) {
-    org.pmiops.workbench.model.CohortReview response =
-        new org.pmiops.workbench.model.CohortReview();
-    return ResponseEntity.ok(response);
+    // This also enforces registered auth domain.
+    cohortReviewService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    CohortReview dbCohortReview =
+        cohortReviewService.findCohortReview(workspaceNamespace, workspaceId, cohortReviewId);
+    if (Strings.isNullOrEmpty(cohortReview.getEtag())) {
+      throw new BadRequestException("missing required update field 'etag'");
+    }
+    int version = Etags.toVersion(cohortReview.getEtag());
+    if (dbCohortReview.getVersion() != version) {
+      throw new ConflictException("Attempted to modify outdated cohort review version");
+    }
+    if (cohortReview.getCohortName() != null) {
+      dbCohortReview.setCohortName(cohortReview.getCohortName());
+    }
+    try {
+      cohortReviewService.saveCohortReview(dbCohortReview);
+    } catch (OptimisticLockException e) {
+      log.log(Level.WARNING, "version conflict for cohort review update", e);
+      throw new ConflictException("Failed due to concurrent cohort review modification");
+    }
+    return ResponseEntity.ok(TO_CLIENT_COHORTREVIEW.apply(dbCohortReview));
   }
 
   @Override

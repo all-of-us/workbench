@@ -220,7 +220,9 @@ public class CohortReviewControllerTest {
 
     workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
-    workspace.setName("name");
+    workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
+    workspace.setName(WORKSPACE_NAME);
+    workspace.setFirecloudName(WORKSPACE_NAME);
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
@@ -491,6 +493,29 @@ public class CohortReviewControllerTest {
               + badWorkspaceName,
           nfe.getMessage());
     }
+  }
+
+  @Test
+  public void updateCohortReview() throws Exception {
+    when(workspaceService.enforceWorkspaceAccessLevel(
+            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
+        .thenReturn(WorkspaceAccessLevel.WRITER);
+
+    org.pmiops.workbench.model.CohortReview requestCohortReview =
+        new org.pmiops.workbench.model.CohortReview()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .etag(Etags.fromVersion(cohortReview.getVersion()));
+    requestCohortReview.setCohortName("blahblah");
+    org.pmiops.workbench.model.CohortReview dbCohortReview =
+        cohortReviewController
+            .updateCohortReview(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_NAME,
+                requestCohortReview.getCohortReviewId(),
+                requestCohortReview)
+            .getBody();
+
+    assertThat(dbCohortReview.getCohortName()).isEqualTo(requestCohortReview.getCohortName());
   }
 
   @Test

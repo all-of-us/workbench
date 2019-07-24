@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.ReviewStatus;
 
@@ -18,6 +19,7 @@ import org.pmiops.workbench.model.ReviewStatus;
 public class CohortReview {
 
   private long cohortReviewId;
+  private int version;
   private long cohortId;
   private long cdrVersionId;
   private Timestamp creationTime;
@@ -42,6 +44,21 @@ public class CohortReview {
 
   public CohortReview cohortReviewId(long cohortReviewId) {
     this.cohortReviewId = cohortReviewId;
+    return this;
+  }
+
+  @Version
+  @Column(name = "version")
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) {
+    this.version = version;
+  }
+
+  public CohortReview version(int version) {
+    this.version = version;
     return this;
   }
 
@@ -205,22 +222,35 @@ public class CohortReview {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     CohortReview that = (CohortReview) o;
-    return cohortId == that.cohortId
+    return version == that.version
+        && cohortId == that.cohortId
         && cdrVersionId == that.cdrVersionId
         && matchedParticipantCount == that.matchedParticipantCount
         && reviewSize == that.reviewSize
         && reviewedCount == that.reviewedCount
+        && Objects.equals(creationTime, that.creationTime)
+        && Objects.equals(cohortDefinition, that.cohortDefinition)
+        && Objects.equals(cohortName, that.cohortName)
         && Objects.equals(lastModifiedTime, that.lastModifiedTime)
-        && reviewStatus == that.reviewStatus;
+        && Objects.equals(reviewStatus, that.reviewStatus);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
+        version,
+        cohortId,
         cdrVersionId,
+        creationTime,
+        cohortDefinition,
+        cohortName,
         lastModifiedTime,
         matchedParticipantCount,
         reviewSize,
@@ -232,9 +262,12 @@ public class CohortReview {
   public String toString() {
     return new ToStringBuilder(this)
         .append("cohortReviewId", cohortReviewId)
+        .append("version", version)
         .append("cohortId", cohortId)
         .append("cdrVersionId", cdrVersionId)
         .append("creationTime", creationTime)
+        .append("cohortDefinition", cohortDefinition)
+        .append("cohortName", cohortName)
         .append("lastModifiedTime", lastModifiedTime)
         .append("matchedParticipantCount", matchedParticipantCount)
         .append("reviewSize", reviewSize)
