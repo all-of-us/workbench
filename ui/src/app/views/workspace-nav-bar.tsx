@@ -56,7 +56,7 @@ const tabs = [
     {name: 'Cohorts', link: 'cohorts'},
     {name: 'Concepts', link: 'concepts'}]),
   {name: environment.enableDatasetBuilder ? 'Analysis' : 'Notebooks', link: 'notebooks'},
-  {name: 'About', link: ''},
+  {name: 'About', link: 'about'},
 ];
 
 const navSeparator = <div style={styles.separator}/>;

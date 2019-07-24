@@ -1,20 +1,20 @@
-import {Component} from '@angular/core';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Button, Clickable} from 'app/components/buttons';
+import {Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {TwoColPaddedTable} from 'app/components/tables';
 import {EditComponentReact} from 'app/icons/edit';
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {sliceByHalfLength} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
-import {Authority, Profile, SpecificPopulationEnum} from 'generated/fetch';
-import {ResearchPurposeDescription, ResearchPurposeItems, specificPopulations} from './workspace-edit';
+import {
+  ResearchPurposeDescription,
+  ResearchPurposeItems,
+  specificPopulations} from 'app/views/workspace-edit';
+import {SpecificPopulationEnum} from 'generated/fetch';
 
 const styles = reactStyles({
   mainHeader: {
@@ -30,14 +30,13 @@ const styles = reactStyles({
 });
 
 
-export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withUserProfile())(
+export const ResearchPurpose = withCurrentWorkspace()(
   class extends React.Component<
-    {profileState: { profile: Profile, reload: Function }, workspace: WorkspaceData},
-    {publishing: boolean, workspacePermissions: WorkspacePermissions}> {
+    {workspace: WorkspaceData},
+    {workspacePermissions: WorkspacePermissions}> {
     constructor(props) {
       super(props);
       this.state = {
-        publishing: false,
         workspacePermissions: new WorkspacePermissions(props.workspace)
       };
     }
@@ -77,29 +76,12 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withUserProfile()
       }
     }
 
-    async publishUnpublishWorkspace(publish: boolean) {
-      this.setState({publishing: true});
-      try {
-        if (publish) {
-          await workspacesApi()
-            .publishWorkspace(this.props.workspace.namespace, this.props.workspace.id);
-        } else {
-          await workspacesApi()
-            .unpublishWorkspace(this.props.workspace.namespace, this.props.workspace.id);
-        }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        this.setState({publishing: false});
-      }
-    }
-
     render() {
-      const {workspace, profileState: {profile}} = this.props;
-      const {publishing, workspacePermissions} = this.state;
+      const {workspace} = this.props;
+      const {workspacePermissions} = this.state;
       const selectedResearchPurposeItems = this.getSelectedResearchPurposeItems();
       const rpItemsHalfLen = sliceByHalfLength(selectedResearchPurposeItems);
-      return <FadeBox style={{margin: '1rem', width: '98%'}}>
+      return <FadeBox>
         <div style={styles.mainHeader}>Research Purpose
           <Clickable disabled={!workspacePermissions.canWrite}
                      data-test-id='edit-workspace'
@@ -129,25 +111,7 @@ export const ResearchPurpose = fp.flow(withCurrentWorkspace(), withUserProfile()
                              contentRight={this.getSelectedPopulationsSlice(false)}/>
         </div>
         }
-        {profile.authorities.includes(Authority.FEATUREDWORKSPACEADMIN) &&
-          <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-              <Button disabled={publishing} type='secondary'
-                onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
-              <Button onClick={() => this.publishUnpublishWorkspace(true)}
-                disabled={publishing} style={{marginLeft: '0.5rem'}}>Publish</Button>
-          </div>}
       </FadeBox>;
     }
   }
 );
-
-@Component({
-  selector: 'app-workspace-about',
-  template: '<div #root></div>'
-})
-export class WorkspaceAboutComponent extends ReactWrapperBase {
-
-  constructor() {
-    super(ResearchPurpose, []);
-  }
-}
