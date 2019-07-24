@@ -151,6 +151,8 @@ public class WorkspacesControllerTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
+  private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
+  private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
 
   private static final Concept CLIENT_CONCEPT_1 =
       new Concept()
@@ -2386,9 +2388,9 @@ public class WorkspacesControllerTest {
 
     final Map<String, String> gcsMetadata =
         new ImmutableMap.Builder<String, String>()
-            .put("lockExpirationTime", lockExpirationTime.toString())
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
-                "lastLockedBy",
+                LAST_LOCKING_USER_KEY,
                 WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
@@ -2428,9 +2430,9 @@ public class WorkspacesControllerTest {
 
     final Map<String, String> gcsMetadata =
         new ImmutableMap.Builder<String, String>()
-            .put("lockExpirationTime", lockExpirationTime.toString())
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
-                "lastLockedBy",
+                LAST_LOCKING_USER_KEY,
                 WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
@@ -2452,9 +2454,9 @@ public class WorkspacesControllerTest {
 
     final Map<String, String> gcsMetadata =
         new ImmutableMap.Builder<String, String>()
-            .put("lockExpirationTime", lockExpirationTime.toString())
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
-                "lastLockedBy",
+                LAST_LOCKING_USER_KEY,
                 WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
@@ -2476,9 +2478,9 @@ public class WorkspacesControllerTest {
 
     final Map<String, String> gcsMetadata =
         new ImmutableMap.Builder<String, String>()
-            .put("lockExpirationTime", lockExpirationTime.toString())
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             // store directly in plaintext, to show that this does not work
-            .put("lastLockedBy", lastLockedUser)
+            .put(LAST_LOCKING_USER_KEY, lastLockedUser)
             .put("extraMetadata", "is not a problem")
             .build();
 
