@@ -16,7 +16,10 @@ import {
   Concept,
   ConceptSet,
   CreateConceptSetRequest,
+  Domain,
   DomainCount,
+  SurveyQuestionsResponse,
+  Surveys,
   UpdateConceptSetRequest
 } from 'generated/fetch';
 import {validate} from 'validate.js';
@@ -32,26 +35,31 @@ const styles = reactStyles({
   }
 });
 
+interface Props {
+  workspace: WorkspaceData;
+  selectedDomain?: DomainCount;
+  selectedConcepts?: Concept[];
+  selectedSurvey?: Array<SurveyQuestionsResponse>;
+  onSave: Function;
+  onClose: Function;
+  surveyName?: string;
+}
+
+interface State {
+  conceptSets: ConceptSet[];
+  errorSaving: boolean;
+  addingToExistingSet: boolean;
+  loading: boolean;
+  nameTouched: boolean;
+  newSetDescription: string;
+  name: string;
+  saving: boolean;
+  selectedSet: ConceptSet;
+  selectedConceptsInDomain: Concept[];
+}
 
 export const ConceptAddModal = withCurrentWorkspace()
-(class extends React.Component<{
-  workspace: WorkspaceData,
-  selectedDomain: DomainCount,
-  selectedConcepts: Concept[],
-  onSave: Function,
-  onClose: Function,
-}, {
-  conceptSets: ConceptSet[],
-  errorSaving: boolean,
-  addingToExistingSet: boolean,
-  loading: boolean,
-  nameTouched: boolean,
-  newSetDescription: string,
-  name: string,
-  saving: boolean,
-  selectedSet: ConceptSet,
-  selectedConceptsInDomain: Concept[]
-}> {
+(class extends React.Component<Props, State> {
 
   constructor(props) {
     super(props);
@@ -65,9 +73,9 @@ export const ConceptAddModal = withCurrentWorkspace()
       name: '',
       saving: false,
       selectedSet: null,
-      selectedConceptsInDomain: props.selectedConcepts
+      selectedConceptsInDomain: props.selectedConcepts ? props.selectedConcepts
           .filter((concept: Concept) =>
-              concept.domainId === fp.capitalize(props.selectedDomain.domain))
+              concept.domainId === fp.capitalize(props.selectedDomain.domain)) : null
     };
   }
 
@@ -77,14 +85,20 @@ export const ConceptAddModal = withCurrentWorkspace()
 
   async getExistingConceptSets() {
     try {
-      const {workspace: {namespace, id}} = this.props;
-      const conceptSets = await conceptSetsApi().getConceptSetsInWorkspace(namespace, id);
-      const conceptSetsInDomain = conceptSets.items
-          .filter((conceptset) => conceptset.domain === this.props.selectedDomain.domain);
+      const {workspace: {namespace, id}, selectedDomain, surveyName} = this.props;
+      let conceptSetResponse;
+      if (this.isSurvey()) {
+        conceptSetResponse = await conceptSetsApi().getSurveyConceptSetsInWorkspace(namespace, id,
+          surveyName);
+      } else {
+        conceptSetResponse = await conceptSetsApi().getConceptSetsInWorkspace(namespace, id);
+      }
+      const conceptSetsInDomain = conceptSetResponse.items
+          .filter((conceptset) => conceptset.domain === selectedDomain.domain);
 
       this.setState({
         conceptSets: conceptSetsInDomain,
-        addingToExistingSet: (conceptSetsInDomain.length > 0),
+        addingToExistingSet: conceptSetsInDomain.length > 0,
         loading: false,
       });
       if (conceptSetsInDomain) {
@@ -95,39 +109,71 @@ export const ConceptAddModal = withCurrentWorkspace()
     }
   }
 
+  isSurvey() {
+    return this.props.selectedDomain.domain === Domain.OBSERVATION;
+  }
+
   async saveConcepts() {
-    const {workspace: {namespace, id}} = this.props;
+    const {workspace: {namespace, id}, selectedSurvey, surveyName} = this.props;
     const {onSave, selectedDomain} = this.props;
-    const {selectedSet, addingToExistingSet, newSetDescription,
-      name, selectedConceptsInDomain} = this.state;
+    const {
+      selectedSet, addingToExistingSet, newSetDescription,
+      name, selectedConceptsInDomain
+    } = this.state;
     this.setState({saving: true});
-    const conceptIds = fp.map(selected => selected.conceptId, selectedConceptsInDomain);
+    let conceptIds = fp.map(selected => selected.conceptId, selectedConceptsInDomain);
+    let survey = Surveys.THEBASICS;
+    if (this.isSurvey()) {
+      conceptIds = selectedSurvey.map((surveys) => surveys.conceptId);
+
+      switch (surveyName) {
+        case 'Lifestyle':
+          survey = Surveys.LIFESTYLE;
+          break;
+        case 'Overall Health':
+          survey = Surveys.OVERALLHEALTH;
+          break;
+        case 'The Basics':
+          survey = Surveys.THEBASICS;
+          break;
+        default: {
+          console.error('Survey name not found');
+          return;
+        }
+      }
+    }
     if (addingToExistingSet) {
       const updateConceptSetReq: UpdateConceptSetRequest = {
         etag: selectedSet.etag,
         addedIds: conceptIds
       };
       try {
-        const conceptSet = await conceptSetsApi().updateConceptSetConcepts(
-          namespace, id, selectedSet.id, updateConceptSetReq);
+        const conceptSet = await conceptSetsApi().updateConceptSetConcepts(namespace, id,
+          selectedSet.id, updateConceptSetReq);
         this.setState({saving: false});
         onSave(conceptSet);
       } catch (error) {
         console.error(error);
       }
     } else {
-      const conceptSet: ConceptSet = {
+      let conceptSet: ConceptSet = {
         name: name,
         description: newSetDescription,
         domain: selectedDomain.domain
       };
+      if (this.isSurvey()) {
+        conceptSet = {
+          ...conceptSet,
+          survey: survey
+        };
+      }
       const request: CreateConceptSetRequest = {
         conceptSet: conceptSet,
         addedIds: conceptIds
       };
       try {
         const createdConceptSet =
-          await conceptSetsApi().createConceptSet(namespace, id, request);
+            await conceptSetsApi().createConceptSet(namespace, id, request);
         this.setState({saving: false});
         onSave(createdConceptSet);
       } catch (error) {
@@ -137,11 +183,19 @@ export const ConceptAddModal = withCurrentWorkspace()
     }
   }
 
+  get Title() {
+    const {selectedDomain, selectedSurvey, surveyName} = this.props;
+    const {selectedConceptsInDomain} = this.state;
+
+    return !this.isSurvey() ? 'Add ' + selectedConceptsInDomain.length + ' Concepts to ' +
+      selectedDomain.name  + ' Concept Set' : 'Add ' + selectedSurvey.length +
+        ' Survey to\n      ' + surveyName + ' Concept Set';
+  }
 
   render() {
-    const {selectedDomain, onClose} = this.props;
+    const {selectedDomain, surveyName, onClose} = this.props;
     const {conceptSets, loading, nameTouched, saving, addingToExistingSet,
-      newSetDescription, name, errorSaving, selectedConceptsInDomain} = this.state;
+      newSetDescription, name, errorSaving} = this.state;
     const errors = validate({name}, {
       name: {
         presence: {allowEmpty: false},
@@ -153,9 +207,7 @@ export const ConceptAddModal = withCurrentWorkspace()
     });
 
     return <Modal>
-      <ModalTitle data-test-id='add-concept-title'>
-        Add {selectedConceptsInDomain.length} Concepts to
-        {' '}{selectedDomain.name} Concept Set</ModalTitle>
+      <ModalTitle data-test-id='add-concept-title'>{this.Title}</ModalTitle>
       {loading ?
           <div style={{display: 'flex', justifyContent: 'center'}}>
             <Spinner style={{alignContent: 'center'}}/>
@@ -164,7 +216,9 @@ export const ConceptAddModal = withCurrentWorkspace()
         <ModalBody>
           <div style={{display: 'flex', flexDirection: 'row'}}>
             <TooltipTrigger content={
-              <div>No concept sets in domain '{selectedDomain.name}'</div>}
+              <div>No concept sets in
+                {this.isSurvey() ? ` survey ${surveyName}` : ` domain ${selectedDomain.name}`}
+              </div>}
                             disabled={conceptSets.length > 0}>
               <div>
                 <RadioButton value={addingToExistingSet}

@@ -17,7 +17,6 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {ConceptAddModal} from 'app/views/concept-add-modal';
 import {ConceptNavigationBar} from 'app/views/concept-navigation-bar';
-import {ConceptSurveyAddModal} from 'app/views/concept-survey-add-modal';
 import {ConceptTable} from 'app/views/concept-table';
 import {SlidingFabReact} from 'app/views/sliding-fab';
 import {environment} from 'environments/environment';
@@ -549,10 +548,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
                            onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
                            onClose={() => this.setState({conceptAddModalOpen: false})}/>}
         {surveyAddModalOpen &&
-        <ConceptSurveyAddModal selectedSurvey={selectedSurveyQuestions}
-                               onClose={() => this.setState({surveyAddModalOpen: false})}
-                               onSave={() => this.setState({surveyAddModalOpen: false})}
-                               surveyName={selectedSurvey}/>}
+            <ConceptAddModal selectedDomain={{domain: Domain.OBSERVATION}}
+                             onClose={() => this.setState({surveyAddModalOpen: false})}
+                             onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
+                             selectedSurvey={selectedSurveyQuestions} surveyName={selectedSurvey}/>
+        }
       </FadeBox>;
     }
   }
