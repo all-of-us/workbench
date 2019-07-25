@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {ResetClusterButton, Props} from './reset-cluster-button';
+import {Props, ResetClusterButton} from './reset-cluster-button';
 
 import {clusterApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';

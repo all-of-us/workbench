@@ -25,7 +25,7 @@ const styles = {
   },
 };
 
-interface Props {
+export interface Props {
   billingProjectId: string;
 }
 
