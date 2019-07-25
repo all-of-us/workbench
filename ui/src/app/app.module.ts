@@ -5,7 +5,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouteReuseStrategy} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
-import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
+import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
@@ -21,35 +21,35 @@ import {StatusCheckService} from './services/status-check.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
-import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace';
-import {AdminUserComponent} from './views/admin-user';
-import {AppComponent, overriddenUrlKey} from './views/app/component';
-import {BreadcrumbComponent} from './views/breadcrumb';
-import {BugReportComponent} from './views/bug-report';
-import {CohortActionsComponent} from './views/cohort-actions';
-import {CohortListComponent} from './views/cohort-list';
-import {ConceptHomepageComponent} from './views/concept-homepage';
-import {ConceptSetActionsComponent} from './views/concept-set-actions';
-import {ConceptSetDetailsComponent} from './views/concept-set-details';
-import {ConceptSetListComponent} from './views/concept-set-list';
-import {DataUseAgreementComponent} from './views/data-use-agreement';
-import {ErrorHandlerComponent} from './views/error-handler/component';
-import {HomepageComponent} from './views/homepage';
-import {InitialErrorComponent} from './views/initial-error/component';
-import {NotebookListComponent} from './views/notebook-list';
-import {NotebookRedirectComponent} from './views/notebook-redirect/component';
-import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
-import {ProfilePageComponent} from './views/profile-page';
-import {RoutingSpinnerComponent} from './views/routing-spinner/component';
-import {SignInComponent} from './views/sign-in';
-import {SignedInComponent} from './views/signed-in/component';
-import {StigmatizationPageComponent} from './views/stigmatization-page';
-import {WorkspaceAboutComponent} from './views/workspace-about';
-import {WorkspaceEditComponent} from './views/workspace-edit';
-import {WorkspaceLibraryComponent} from './views/workspace-library';
-import {WorkspaceListComponent} from './views/workspace-list';
-import {WorkspaceNavBarComponent} from './views/workspace-nav-bar';
-import {WorkspaceShareComponent} from './views/workspace-share';
+import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
+import {AdminUserComponent} from './pages/admin/admin-user';
+import {AppComponent, overriddenUrlKey} from './pages/app/component';
+import {BreadcrumbComponent} from './components/breadcrumb';
+import {BugReportComponent} from './widgets/bug-report';
+import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
+import {CohortListComponent} from './pages/data/cohort/cohort-list';
+import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
+import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
+import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
+import {ConceptSetListComponent} from './pages/data/concept/concept-set-list';
+import {DataUseAgreementComponent} from './pages/profile/data-use-agreement';
+import {ErrorHandlerComponent} from './pages/error-handler/component';
+import {HomepageComponent} from './pages/homepage/homepage';
+import {InitialErrorComponent} from './pages/initial-error/component';
+import {NotebookListComponent} from './pages/analysis/notebook-list';
+import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect/component';
+import {PageTemplateSignedOutComponent} from './pages/login/page-template-signed-out/component';
+import {ProfilePageComponent} from './pages/profile/profile-page';
+import {RoutingSpinnerComponent} from './pages/routing-spinner/component';
+import {SignInComponent} from './pages/login/sign-in';
+import {SignedInComponent} from './pages/signed-in/component';
+import {StigmatizationPageComponent} from './pages/workspace/stigmatization-page';
+import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
+import {WorkspaceEditComponent} from './pages/workspace/workspace-edit';
+import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
+import {WorkspaceListComponent} from './pages/workspace/workspace-list';
+import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
+import {WorkspaceShareComponent} from './pages/workspace/workspace-share';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
@@ -65,13 +65,13 @@ import {
 
 import {Configuration as FetchConfiguration} from 'generated/fetch';
 
-import {DataPageComponent} from 'app/views/data-page';
-import {DataSetPageComponent} from 'app/views/dataset-page';
+import {DataPageComponent} from 'app/pages/data/data-page';
+import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
-import {InteractiveNotebookComponent} from './views/interactive-notebook';
+import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
