@@ -126,7 +126,7 @@ public final class ElasticFilters {
           b.filter(QueryBuilders.termsQuery(conceptField, leafConceptIds));
         }
         for (Attribute attr : param.getAttributes()) {
-          b.filter(attributeToQuery(attr));
+          b.filter(attributeToQuery(attr, DomainType.SURVEY.toString().equals(param.getDomain())));
         }
         for (QueryBuilder f : modFilters) {
           b.filter(f);
@@ -152,11 +152,13 @@ public final class ElasticFilters {
     return filter;
   }
 
-  private static QueryBuilder attributeToQuery(Attribute attr) {
+  private static QueryBuilder attributeToQuery(Attribute attr, boolean isSourceConceptId) {
     // Attributes with a name of CAT map to the value_as_concept_id column
     if (AttrName.CAT.equals(attr.getName())) {
       // Currently the UI only uses the In operator for CAT which fits the terms query
-      return QueryBuilders.termsQuery("events.value_as_concept_id", attr.getOperands());
+      String name =
+          isSourceConceptId ? "events.value_as_source_concept_id" : "events.value_as_concept_id";
+      return QueryBuilders.termsQuery(name, attr.getOperands());
     }
     Object left = null, right = null;
     RangeQueryBuilder rq;

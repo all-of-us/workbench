@@ -724,7 +724,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         cloudStorageService.getMetadata(bucketName, "notebooks/" + notebookName);
 
     if (metadata != null) {
-      String lockExpirationTime = metadata.get("lockExpirationTime");
+      String lockExpirationTime = metadata.get("lockExpiresAt");
       if (lockExpirationTime != null) {
         response.lockExpirationTime(Long.valueOf(lockExpirationTime));
       }

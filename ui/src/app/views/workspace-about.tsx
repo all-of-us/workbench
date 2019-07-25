@@ -16,8 +16,8 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUrlParams, withUserProfile} from 'app/utils';
 import {ResearchPurpose} from 'app/views/research-purpose';
 import {ResetClusterButton} from 'app/views/reset-cluster-button';
-import {CdrVersion, Cohort, Profile, UserRole, WorkspaceAccessLevel} from 'generated/fetch';
-import {WorkspaceShare} from './workspace-share';
+import {WorkspaceShare} from 'app/views/workspace-share';
+import {Authority, CdrVersion, Profile, UserRole, WorkspaceAccessLevel} from 'generated/fetch';
 
 
 interface WorkspaceState {
@@ -25,12 +25,10 @@ interface WorkspaceState {
   cdrVersion: CdrVersion;
   useBillingProjectBuffer: boolean;
   freeTierBillingProject: string;
-  cohortsLoading: boolean;
-  cohortsError: boolean;
-  cohortList: Cohort[];
   workspace: WorkspaceData;
   workspaceUserRoles: UserRole[];
   googleBucketModalOpen: boolean;
+  publishing: boolean;
 }
 
 const styles = reactStyles({
@@ -50,7 +48,7 @@ const styles = reactStyles({
   infoBox: {
     backgroundColor: colorWithWhiteness(colors.primary, 0.75), height: '2rem', width: '6rem',
     borderRadius: '5px', padding: '0.4rem', marginRight: '0.5rem', marginBottom: '0.5rem',
-    color: colors.black, lineHeight: '14px'
+    color: colors.primary, lineHeight: '14px'
   },
   infoBoxHeader: {
     textTransform: 'uppercase', fontSize: '0.4rem'
@@ -98,12 +96,10 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
       cdrVersion: undefined,
       useBillingProjectBuffer: undefined,
       freeTierBillingProject: undefined,
-      cohortsLoading: true,
-      cohortsError: false,
-      cohortList: [],
       workspace: undefined,
       workspaceUserRoles: [],
-      googleBucketModalOpen: false
+      googleBucketModalOpen: false,
+      publishing: false
     };
   }
 
@@ -181,18 +177,44 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
     if (!useBillingProjectBuffer) {
       return freeTierBillingProject;
     }
-
     if ([WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.OWNER].includes(workspace.accessLevel)) {
       return workspace.namespace;
     }
     return null;
   }
 
+  async publishUnpublishWorkspace(publish: boolean) {
+    this.setState({publishing: true});
+    try {
+      if (publish) {
+        await workspacesApi()
+          .publishWorkspace(this.state.workspace.namespace, this.state.workspace.id);
+      } else {
+        await workspacesApi()
+          .unpublishWorkspace(this.state.workspace.namespace, this.state.workspace.id);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.setState({publishing: false});
+    }
+  }
+
   render() {
     const {profileState: {profile}} = this.props;
-    const {cdrVersion, workspace, workspaceUserRoles, googleBucketModalOpen, sharing} = this.state;
+    const {cdrVersion, workspace, workspaceUserRoles, googleBucketModalOpen,
+      sharing, publishing} = this.state;
     return <div style={styles.mainPage}>
-      <ResearchPurpose data-test-id='researchPurpose'/>
+      <div style={{display: 'flex', flexDirection: 'column', margin: '1rem', width: '98%'}}>
+        <ResearchPurpose data-test-id='researchPurpose'/>
+        {profile.authorities.includes(Authority.FEATUREDWORKSPACEADMIN) &&
+        <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+            <Button disabled={publishing} type='secondary'
+                    onClick={() => this.publishUnpublishWorkspace(false)}>Unpublish</Button>
+            <Button onClick={() => this.publishUnpublishWorkspace(true)}
+                    disabled={publishing} style={{marginLeft: '0.5rem'}}>Publish</Button>
+        </div>}
+      </div>
       <div style={styles.rightSidebar}>
         <div style={styles.shareHeader}>
           <h3 style={{marginTop: 0}}>Collaborators:</h3>

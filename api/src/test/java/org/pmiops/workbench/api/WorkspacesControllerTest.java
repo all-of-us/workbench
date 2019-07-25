@@ -151,6 +151,8 @@ public class WorkspacesControllerTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
+  private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
+  private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
 
   private static final Concept CLIENT_CONCEPT_1 =
       new Concept()
@@ -2343,6 +2345,12 @@ public class WorkspacesControllerTest {
         "user@aou",
         "a759e5aef091fd22bbf40bf8ee7cfde4988c668541c18633bd79ab84b274d622"
       },
+      // catches an edge case where the hash has a leading 0
+      {
+        "fc-5ac6bde3-f225-44ca-ad4d-92eed68df7db",
+        "brubenst2@fake-research-aou.org",
+        "060c0b2ef2385804b7b69a4b4477dd9661be35db270c940525c2282d081aef56"
+      }
     };
 
     for (final String[] test : knownTestData) {
@@ -2386,9 +2394,9 @@ public class WorkspacesControllerTest {
 
     final Map<String, String> gcsMetadata =
         new ImmutableMap.Builder<String, String>()
-            .put("lockExpirationTime", lockExpirationTime.toString())
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
-                "lastLockedBy",
+                LAST_LOCKING_USER_KEY,
                 WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
@@ -2428,9 +2436,9 @@ public class WorkspacesControllerTest {
 
     final Map<String, String> gcsMetadata =
         new ImmutableMap.Builder<String, String>()
-            .put("lockExpirationTime", lockExpirationTime.toString())
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
-                "lastLockedBy",
+                LAST_LOCKING_USER_KEY,
                 WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
@@ -2452,9 +2460,9 @@ public class WorkspacesControllerTest {
 
     final Map<String, String> gcsMetadata =
         new ImmutableMap.Builder<String, String>()
-            .put("lockExpirationTime", lockExpirationTime.toString())
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             .put(
-                "lastLockedBy",
+                LAST_LOCKING_USER_KEY,
                 WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
             .put("extraMetadata", "is not a problem")
             .build();
@@ -2476,9 +2484,9 @@ public class WorkspacesControllerTest {
 
     final Map<String, String> gcsMetadata =
         new ImmutableMap.Builder<String, String>()
-            .put("lockExpirationTime", lockExpirationTime.toString())
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
             // store directly in plaintext, to show that this does not work
-            .put("lastLockedBy", lastLockedUser)
+            .put(LAST_LOCKING_USER_KEY, lastLockedUser)
             .put("extraMetadata", "is not a problem")
             .build();
 

@@ -5,6 +5,7 @@ import {
   styles as headerStyles
 } from 'app/components/headers';
 import {TextInput} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
@@ -15,7 +16,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
-
 const styles = reactStyles({
   dataUseAgreementPage: {
     paddingTop: '2rem',
@@ -25,7 +25,19 @@ const styles = reactStyles({
     height: '100%',
     color: colors.primary,
   },
-  h2: {...headerStyles.h2, lineHeight: '24px', fontWeight: 600, fontSize: '16px'}
+  h2: {...headerStyles.h2, lineHeight: '24px', fontWeight: 600, fontSize: '16px'},
+  sanctionModalTitle: {
+    fontFamily: 'Montserrat',
+    fontSize: 16,
+    fontWeight: 600,
+    lineHeight: '19px'
+  },
+  modalLabel: {
+    fontFamily: 'Montserrat',
+    fontSize: 14,
+    lineHeight: '24px',
+    color: colors.primary
+  }
 });
 
 const SecondHeader = (props) => {
@@ -44,8 +56,11 @@ const IndentedOl = (props) => {
   return <ol style={{...indentedListStyles, ...props.style}}>{props.children}</ol>;
 };
 
-const coreValuesUrl =
-  'https://docs.google.com/document/d/1UG3soAONYE0prmhMgleBIoO8fl3Gh5THIPLeoJzaTmc/edit';
+const IndentedLi = (props) => {
+  return <li style={{marginTop: '0.5rem', ...props.style}}>{props.children}</li>;
+};
+
+const coreValuesUrl = 'https://allofus.nih.gov/about/about-all-us-research-program';
 
 const dataUseAgreementVersion = 1;
 
@@ -82,28 +97,28 @@ const DataUseAgreementText = () => {
       </li>
       <li>respect the privacy of research participants at all times.
         <IndentedUl>
-          <li style={{margin: '0.5rem 0'}}>
+          <IndentedLi style={{margin: '0.5rem 0'}}>
             I <strong>will <strong>NOT</strong> use</strong> or disclose any
             information that directly identifies one or more participants.
             <br/>
             If I become aware of any information that directly identifies one or more
             participants, I will notify the <i>All of Us</i> Research Program immediately
             using the automatic notification system.
-          </li>
-          <li style={{margin: '0.5rem 0'}}>
+          </IndentedLi>
+          <IndentedLi style={{margin: '0.5rem 0'}}>
             I <strong>will <strong>NOT</strong> attempt</strong> to re-identify research
             participants or their relatives.
             <br/>
             If I unintentionally re-identify participants through the process of my work, I will
             contact the <i>All of Us</i> Research Program immediately using the automatic
             notification system.
-          </li>
-          <li style={{margin: '0.5rem 0'}}>
+          </IndentedLi>
+          <IndentedLi style={{margin: '0.5rem 0'}}>
             If I become aware of any uses or disclosures of <i>All of Us</i> Research Program data
             that could endanger the security or privacy of research participants, I will contact
             the <i>All of Us</i> Research Program immediately using the automatic
             notification system.
-          </li>
+          </IndentedLi>
         </IndentedUl>
       </li>
       <li>provide a meaningful and accurate description of my research purpose every time I create
@@ -233,21 +248,74 @@ const InitialsAgreement = (props) => {
   </div>;
 };
 
-const sanctionsDocUrl =
-  'https://docs.google.com/document/d/1O9PLBggXMpL5ri930sV-uDQ55J3Et9Ry31gdyrN7dVA/edit#';
+const SanctionModal = (props) => {
+  return <Modal width = {750}>
+    <ModalTitle style={styles.sanctionModalTitle}>
+      All of Us Research Program - Sanctions on Violations of the Code of Conduct
+    </ModalTitle>
+    <ModalBody>
+      <label style={styles.modalLabel}>
+        The Resource Access Board (RAB) of the <i>All of Us</i> Research Program determines whether
+        an investigator has violated the Code of Conduct outlined in the Data Use Agreement
+        signed by each user. The RAB notifies the All of Us Research Program office of the
+        violation.
+        <IndentedUl>
+          <li>
+            <label>The <i>All of Us</i> Research Program office and/or the All of Us IRB may
+            implement the following sanctions if it is determined that an investigator has violated
+            the Code of Conduct:
+            </label>
+            <IndentedUl>
+              <IndentedLi>
+                Determine whether any action by the investigator is required to remedy the
+                violation.
+              </IndentedLi>
+              <IndentedLi>
+                Revoke and/or deny access of the violator to all non-public (Registered and
+                Controlled tier) <i>All of Us</i> data.
+              </IndentedLi>
+              <IndentedLi>
+                Post the name and affiliation of the violator on a public <i>All of Us</i>
+                Research Program webpage.
+              </IndentedLi>
+              <IndentedLi>
+                Revoke extant NIH funding and/or prohibit future funding, either permanently or for
+                an explicit period of time
+              </IndentedLi>
+              <IndentedLi>
+                Prosecute the violator for breach of a contract with the federal government
+              </IndentedLi>
+            </IndentedUl>
+          </li>
+        </IndentedUl>
+      </label>
+    </ModalBody>
+    <ModalFooter>
+      <Button type='primary' onClick={props.onClose}>Close</Button>
+    </ModalFooter>
+  </Modal>;
+};
+
+
+interface Props {
+  profileState: {
+    profile: Profile,
+    reload: Function,
+    updateCache: Function
+  };
+}
+
+interface State {
+  name: string;
+  initialName: string;
+  initialWork: string;
+  initialSanctions: string;
+  showSanctionModal: boolean;
+  submitting: boolean;
+}
 
 export const DataUseAgreement = withUserProfile()(
-  class extends React.Component<{
-    profileState: {
-      profile: Profile, reload: Function, updateCache: Function
-    }
-  }, {
-    name: string,
-    initialName: string,
-    initialWork: string,
-    initialSanctions: string,
-    submitting: boolean
-  }> {
+  class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
       this.state = {
@@ -255,6 +323,7 @@ export const DataUseAgreement = withUserProfile()(
         initialName: '',
         initialWork: '',
         initialSanctions: '',
+        showSanctionModal: false,
         submitting: false
       };
     }
@@ -267,8 +336,14 @@ export const DataUseAgreement = withUserProfile()(
       });
     }
 
+    updateSanction(event) {
+      event.preventDefault();
+      this.setState({showSanctionModal: true});
+    }
+
     render() {
-      const {name, initialName, initialWork, initialSanctions, submitting} = this.state;
+      const {name, initialName, initialWork, initialSanctions, showSanctionModal,
+        submitting} = this.state;
       const errors = validate({name, initialName, initialWork, initialSanctions}, {
         name: {
           presence: {allowEmpty: false}
@@ -319,9 +394,13 @@ export const DataUseAgreement = withUserProfile()(
           <div style={{marginTop: '0.5rem', fontWeight: 600}}>
             I acknowledge that failure to comply with the terms of this agreement may result in
             termination of my <i>All of Us</i> Research Program account and/or other sanctions per
-            the <a href={sanctionsDocUrl}>
+            the <a href='#' onClick={(e) => {this.updateSanction(e); }}>
             <i>All of Us</i> Research Program policy on Sanctions for Violation of Code of
             Conduct</a>.
+          </div>
+          <div>
+            {showSanctionModal &&
+          <SanctionModal onClose={() => this.setState({showSanctionModal: false})}></SanctionModal>}
           </div>
           <DuaTextInput style={{marginTop: '0.5rem'}}
                         disabled value={this.props.profileState.profile.username}/>
@@ -336,8 +415,7 @@ export const DataUseAgreement = withUserProfile()(
               onClick={() => this.submitDataUseAgreement()}>Submit</Button>
           </TooltipTrigger>
         </div>
-      </div>;
-    }
+      </div>; }
   });
 
 @Component({

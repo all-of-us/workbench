@@ -90,7 +90,7 @@ const routes: Routes = [
             runGuardsAndResolvers: 'always',
             children: [
               {
-                path: '',
+                path: 'about',
                 component: WorkspaceAboutComponent,
                 data: {
                   title: 'View Workspace Details',
