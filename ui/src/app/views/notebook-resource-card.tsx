@@ -15,7 +15,7 @@ import {formatRecentResourceDisplayDate} from "app/utils";
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resourceCard: RecentResource; // Destructure this into used parameters only
-  onNotebookUpdate: Function;
+  onUpdate: Function;
 }
 
 interface State {
@@ -115,7 +115,7 @@ export const NotebookResourceCard = fp.flow(
         {
           name: resourceCard.notebook.name,
           newName: this.fullNotebookName(newName)
-        }).then(() => this.props.onNotebookUpdate())
+        }).then(() => this.props.onUpdate())
         .catch(error => console.error(error))
         .finally(() => {
           this.setState({showRenameModal: false});
@@ -130,7 +130,7 @@ export const NotebookResourceCard = fp.flow(
         this.props.resourceCard.workspaceFirecloudName,
         this.props.resourceCard.notebook.name)
         .then(() => {
-          this.props.onNotebookUpdate();
+          this.props.onUpdate();
         })
         .catch(() => {
           this.props.showErrorModal('Duplicating Notebook Error',
@@ -147,7 +147,7 @@ export const NotebookResourceCard = fp.flow(
         this.props.resourceCard.workspaceFirecloudName,
         this.props.resourceCard.notebook.name)
         .then(() => {
-          this.props.onNotebookUpdate();
+          this.props.onUpdate();
         });
     }
 
@@ -159,7 +159,7 @@ export const NotebookResourceCard = fp.flow(
           fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
           fromNotebook={this.props.resourceCard.notebook}
           onClose={() => this.setState({showCopyNotebookModal: false})}
-          onCopy={() => this.props.onNotebookUpdate()}/>
+          onCopy={() => this.props.onUpdate()}/>
         }
 
         {this.state.showRenameModal &&

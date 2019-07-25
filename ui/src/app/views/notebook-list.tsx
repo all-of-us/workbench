@@ -95,7 +95,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
           {notebooks.map(notebook => {
             return <NotebookResourceCard
               resourceCard={convertToResource(notebook, namespace, id, al, ResourceType.NOTEBOOK)}
-              onNotebookUpdate={() => this.loadNotebooks()}
+              onUpdate={() => this.loadNotebooks()}
             />;
           })}
         </div>
