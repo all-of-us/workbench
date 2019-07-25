@@ -12,7 +12,6 @@ import {ReminderComponent} from 'app/icons/reminder';
 import {queryParamsStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebookRedirectComponent} from 'app/views/notebook-redirect/component';
-import {TopBoxComponent} from 'app/views/top-box/component';
 import {environment} from 'environments/environment';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
@@ -89,7 +88,6 @@ describe('NotebookRedirectComponent', () => {
         NotebookComponent,
         NotebookRedirectComponent,
         ReminderComponent,
-        TopBoxComponent
       ],
       imports: [
         BrowserAnimationsModule,
@@ -356,7 +354,6 @@ describe('NotebookRedirectComponent', () => {
         NotebookComponent,
         NotebookRedirectComponent,
         ReminderComponent,
-        TopBoxComponent
       ],
       imports: [
         BrowserAnimationsModule,
