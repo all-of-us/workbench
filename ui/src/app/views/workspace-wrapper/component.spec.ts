@@ -15,7 +15,7 @@ import {BugReportComponent} from 'app/views/bug-report';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar';
 import {WorkspaceShareComponent} from 'app/views/workspace-share';
-import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
+import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/workspace-wrapper';
 
 import {UserService, WorkspaceAccessLevel} from 'generated';
 import {WorkspaceAccessLevel as FetchWorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
