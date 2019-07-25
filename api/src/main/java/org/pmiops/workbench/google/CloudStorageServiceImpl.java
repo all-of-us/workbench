@@ -13,12 +13,14 @@ import com.google.common.collect.ImmutableSet;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -71,14 +73,25 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   private String readToString(String bucketName, String objectPath) {
+    return new String(getBlob(bucketName, objectPath).getContent()).trim();
+  }
+
+  // wrapper for storage.get() which throws NotFoundException instead of NullPointerException
+  private Blob getBlob(String bucketName, String objectPath) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
-    return new String(storage.get(bucketName, objectPath).getContent()).trim();
+    Blob result = storage.get(bucketName, objectPath);
+    if (result == null) {
+      throw new NotFoundException(String.format("Bucket %s, Object %s", bucketName, objectPath));
+    }
+    return result;
   }
 
   @Override
   public void copyBlob(BlobId from, BlobId to) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
-    CopyWriter w = storage.copy(CopyRequest.newBuilder().setSource(from).setTarget(to).build());
+    // Clears user-defined metadata, e.g. locking information on notebooks.
+    BlobInfo toInfo = BlobInfo.newBuilder(to).build();
+    CopyWriter w = storage.copy(CopyRequest.newBuilder().setSource(from).setTarget(toInfo).build());
     while (!w.isDone()) {
       w.copyChunk();
     }
@@ -127,8 +140,13 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public JSONObject getFileAsJson(String bucketName, String fileName) throws IOException {
+  public JSONObject getFileAsJson(String bucketName, String fileName) {
     return new JSONObject(readToString(bucketName, fileName));
+  }
+
+  @Override
+  public Map<String, String> getMetadata(String bucketName, String objectPath) {
+    return getBlob(bucketName, objectPath).getMetadata();
   }
 
   @Override

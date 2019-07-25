@@ -1,4 +1,5 @@
 import {styles as cardStyles} from 'app/components/card';
+import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {IconComponent} from 'app/icons/icon';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -117,24 +118,22 @@ const computeStyle = ({style = {}, hover = {}, disabledStyle = {}}, {disabled}) 
 
 // Set data test id = '' in the child to prevent it from propegating to all children
 export const Clickable = ({as = 'div', disabled = false, onClick = null, ...props}) => {
-  // Don't propagate test IDs to the rendered child component.
-  delete props['data-test-id'];
   return <Interactive
-    as={as} {...props}
+    // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+    as={as} {...fp.omit(['data-test-id'], props)}
     onClick={(...args) => onClick && !disabled && onClick(...args)}
   />;
 };
 
 export const Button = ({type = 'primary', style = {}, disabled = false, ...props}) => {
-  // Don't propagate test IDs to the rendered child component.
-  delete props['data-test-id'];
   return <Clickable
-    disabled={disabled} {...props}
+    // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+    disabled={disabled} {...fp.omit(['data-test-id'], props)}
     {...fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})}
   />;
 };
 
-export const MenuItem = ({tooltip = '', disabled = false, children, ...props}) => {
+export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
       // data-test-id is the text within the MenuItem, with whitespace removed
@@ -151,6 +150,7 @@ export const MenuItem = ({tooltip = '', disabled = false, children, ...props}) =
       hover={!disabled ? {backgroundColor: colorWithWhiteness(colors.accent, 0.92)} : undefined}
       {...props}
     >
+      <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>
       {children}
     </Clickable>
   </TooltipTrigger>;

@@ -308,6 +308,7 @@ dependencies {
 
   compile project(":common-api")
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
+  compile 'com.google.http-client:google-http-client-apache:1.28.0'
   compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0'
   compile 'mysql:mysql-connector-java:8.0.11'
   compile 'com.google.cloud.sql:mysql-socket-factory:1.0.10'
@@ -337,10 +338,14 @@ dependencies {
   compile 'com.google.cloud:google-cloud-storage:1.51.0'
   compile 'com.google.code.gson:gson:2.8.5'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
+  compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1'
   compile 'com.squareup.okhttp:okhttp:2.7.5'
   compile 'com.squareup.okhttp:logging-interceptor:2.7.5'
   compile 'joda-time:joda-time:2.10'
   compile 'javax.inject:javax.inject:1'
+  compile 'io.opencensus:opencensus-api:0.23.0'
+  compile 'io.opencensus:opencensus-exporter-trace-stackdriver:0.23.0'
+  compile 'io.opencensus:opencensus-impl:0.23.0'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
   compile 'com.google.guava:guava:26.0-jre'

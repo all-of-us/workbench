@@ -34,7 +34,8 @@
     "publicApiKeyForErrorReports": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
     "projectId": "all-of-us-rw-stable",
     "shortName": "Stable",
-    "oauthClientId": "56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com"
+    "oauthClientId": "56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com",
+    "traceAllRequests": false
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-stable.appspot.com/login",
@@ -47,7 +48,7 @@
   "elasticsearch": {
     "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
     "enableBasicAuth": true,
-    "enableElasticsearchBackend": true
+    "enableElasticsearchBackend": false
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",
@@ -66,6 +67,7 @@
   "featureFlags": {
     "enableLeoWelder": false,
     "useBillingProjectBuffer": true,
-    "unsafeAllowDeleteUser": false
+    "unsafeAllowDeleteUser": false,
+    "enableVpcFlowLogs": false
   }
 }

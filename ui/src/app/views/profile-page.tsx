@@ -41,7 +41,7 @@ const styles = reactStyles({
     resize: 'both'
   },
   box: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 8,
     padding: 21
   }
@@ -173,7 +173,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
           <div style={{
             paddingLeft: '0.5rem', marginBottom: 20,
             height: '1.5rem',
-            color: '#000'
+            color: colors.primary
           }}>
             {profile && profile.username}
           </div>

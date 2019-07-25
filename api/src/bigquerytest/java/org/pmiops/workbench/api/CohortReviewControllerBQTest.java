@@ -6,10 +6,12 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.Gson;
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +144,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Mock private Provider<WorkbenchConfig> configProvider;
 
   private Cohort cohort;
+  private CohortReview review;
 
   @TestConfiguration
   @Import({
@@ -603,10 +606,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     cohort.setCriteria(gson.toJson(SearchRequests.males()));
     cohortDao.save(cohort);
 
-    CohortReview review =
+    review =
         new CohortReview()
             .cdrVersionId(cdrVersion.getCdrVersionId())
             .matchedParticipantCount(212)
+            .creationTime(new Timestamp(new Date().getTime()))
             .cohortId(cohort.getCohortId());
     cohortReviewDao.save(review);
 
@@ -638,6 +642,26 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   public void tearDown() {
     workspaceDao.delete(workspace.getWorkspaceId());
     cdrVersionDao.delete(cdrVersion.getCdrVersionId());
+  }
+
+  @Test
+  public void getCohortReviewsInWorkspace() throws Exception {
+    stubMockFirecloudGetWorkspace();
+    org.pmiops.workbench.model.CohortReview expectedReview =
+        new org.pmiops.workbench.model.CohortReview()
+            .cohortReviewId(review.getCohortReviewId())
+            .reviewSize(review.getReviewSize())
+            .reviewStatus(review.getReviewStatusEnum())
+            .cdrVersionId(review.getCdrVersionId())
+            .cohortDefinition(review.getCohortDefinition())
+            .cohortName(review.getCohortName())
+            .cohortId(review.getCohortId())
+            .creationTime(review.getCreationTime().toString())
+            .matchedParticipantCount(review.getMatchedParticipantCount())
+            .reviewedCount(review.getReviewedCount());
+    assertEquals(
+        expectedReview,
+        controller.getCohortReviewsInWorkspace(NAMESPACE, NAME).getBody().getItems().get(0));
   }
 
   @Test

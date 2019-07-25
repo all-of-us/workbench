@@ -26,19 +26,20 @@ public class WorkbenchConfig {
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
     WorkbenchConfig config = new WorkbenchConfig();
-    config.firecloud = new FireCloudConfig();
+    config.access = new AccessConfig();
+    config.admin = new AdminConfig();
     config.auth = new AuthConfig();
     config.auth.serviceAccountApiUsers = new ArrayList();
     config.cdr = new CdrConfig();
+    config.cohortbuilder = new CohortBuilderConfig();
+    config.elasticsearch = new ElasticsearchConfig();
+    config.featureFlags = new FeatureFlagsConfig();
+    config.firecloud = new FireCloudConfig();
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
-    config.server = new ServerConfig();
-    config.admin = new AdminConfig();
     config.mandrill = new MandrillConfig();
-    config.elasticsearch = new ElasticsearchConfig();
     config.moodle = new MoodleConfig();
-    config.access = new AccessConfig();
-    config.cohortbuilder = new CohortBuilderConfig();
+    config.server = new ServerConfig();
     return config;
   }
 
@@ -86,6 +87,9 @@ public class WorkbenchConfig {
     public String projectId;
     public String shortName;
     public String oauthClientId;
+    // Controls whether all api requests are traced and sent to Stackdriver tracing, or
+    // whether we only trace at the default frequency.
+    public boolean traceAllRequests;
   }
 
   public static class AdminConfig {
@@ -133,5 +137,8 @@ public class WorkbenchConfig {
     // Allows a user to delete their own account. This is used for testing purposes so that
     // We can clean up after ourselves. This should never go to prod.
     public boolean unsafeAllowDeleteUser;
+    // Whether or not AoU should request Terra to create GCP projects with high-security VPC
+    // functionality and VPC flow logs enabled.
+    public boolean enableVpcFlowLogs;
   }
 }

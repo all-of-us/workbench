@@ -6,12 +6,13 @@ import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TwoColPaddedTable} from 'app/components/tables';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
-import {currentWorkspaceStore, navigate, userProfileStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {CdrVersion, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -194,7 +195,6 @@ export const specificPopulations = [
 
 
 const styles = reactStyles({
-
   header: {
     fontWeight: 600,
     lineHeight: '24px',
@@ -259,9 +259,8 @@ const styles = reactStyles({
   },
   checkboxRow: {
     display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
-  }
+  },
 });
-
 
 export const WorkspaceEditSection = (props) => {
   return <div key={props.header} style={{marginBottom: '0.5rem'}}>
@@ -322,6 +321,17 @@ export const LabeledCheckBox = (props) => {
 
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Duplicate = 3 }
 
+function getDiseaseNames(keyword) {
+  const baseurl = serverConfigStore.getValue().firecloudURL;
+  const url = baseurl + '/duos/autocomplete/' + keyword;
+  return fetch(encodeURI(url)).then((response) => {
+    return response.json();
+  }).then((matches) => {
+    const labeledMatches = fp.filter((elt) => elt.hasOwnProperty('label'))(matches);
+    const diseases = fp.map((elt) => elt['label'])(labeledMatches);
+    return diseases;
+  });
+}
 
 export interface WorkspaceEditProps {
   routeConfigData: any;
@@ -343,7 +353,6 @@ export interface WorkspaceEditState {
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
-
     constructor(props: WorkspaceEditProps) {
       super(props);
       this.state = {
@@ -381,7 +390,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         cloneUserRole: false,
         loading: false,
         showUnderservedPopulationDetails: false,
-        showStigmatizationDetails: false
+        showStigmatizationDetails: false,
       };
     }
 
@@ -408,6 +417,22 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         }
       }
       this.setCdrVersions();
+    }
+
+    makeDiseaseInput() {
+      return (
+        <SearchInput
+          enabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}
+          placeholder='Name of Disease'
+          value={this.state.workspace.researchPurpose.diseaseOfFocus}
+          onSearch={getDiseaseNames}
+          tooltip='You must select disease focused research to enter a disease of focus'
+          onChange={(disease) => this.setState(fp.set([
+            'workspace',
+            'researchPurpose',
+            'diseaseOfFocus'
+          ], disease))}/>
+      );
     }
 
     async setCdrVersions() {
@@ -635,22 +660,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     value={this.state.workspace.researchPurpose[rp.shortName]}
                     onChange={v => this.updateResearchPurpose(rp.shortName, v)}
                     children={rp.shortName === 'diseaseFocusedResearch' ?
-                      <TooltipTrigger
-                        content='You must select disease focused research to enter
-                          a disease of focus'
-                        disabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}>
-                        <TextInput value={this.state.workspace.researchPurpose.diseaseOfFocus}
-                          style={{
-                            width: 'calc(50% - 2rem)',
-                            border: '1px solid #9a9a9',
-                            borderRadius: '5px'
-                          }}
-                          placeholder='Name of Disease' onChange={v =>
-                          this.setState(
-                            fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], v))}
-                          disabled={!this.state.workspace.researchPurpose.diseaseFocusedResearch}/>
-                      </TooltipTrigger> : undefined}/>
-              )}
+                      this.makeDiseaseInput() : undefined} />)}
             </div>
             <div style={{display: 'flex', flexDirection: 'column', flex: '1 1 0'}}>
               {ResearchPurposeItems.slice(sliceByHalfLength(ResearchPurposeItems))
@@ -705,17 +715,17 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </div>}
           <div style={{marginTop: '0.5rem'}}>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
-              onChange={v => this.updateResearchPurpose('population', true)}
-              checked={this.state.workspace.researchPurpose.population}/>
-            <label style={styles.text}>Yes, I am interested in the focused study of specific
-            population(s), either on their own or in comparison to other groups.</label>
+                         onChange={v => this.updateResearchPurpose('population', false)}
+                         checked={!this.state.workspace.researchPurpose.population}/>
+            <label style={styles.text}>No, I am not interested in focusing on
+              specific population(s) in my research.</label>
           </div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
-              onChange={v => this.updateResearchPurpose('population', false)}
-              checked={!this.state.workspace.researchPurpose.population}/>
-            <label style={styles.text}>No, I am not interested in focusing on
-              specific population(s) in my research.</label>
+                         onChange={v => this.updateResearchPurpose('population', true)}
+                         checked={this.state.workspace.researchPurpose.population}/>
+            <label style={styles.text}>Yes, I am interested in the focused study of specific
+              population(s), either on their own or in comparison to other groups.</label>
           </div>
           <div style={{...styles.text, marginLeft: '2rem'}}>
             <strong>If "Yes": </strong> Please specify the demographic category or categories of the

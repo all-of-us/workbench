@@ -136,7 +136,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
           <h3 style={styles.conceptSetsHeader}>Concept Set Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
             The concept set
-            <a style={{color: '#5DAEE1', margin: '0 4px'}}
+            <a style={{color: colors.accent, margin: '0 4px'}}
                onClick={() => this.navigateTo('conceptSet')}>
               {conceptSet.name}
             </a>

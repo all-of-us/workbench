@@ -4,10 +4,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -29,6 +29,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -105,6 +106,7 @@ import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.PageFilterType;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
@@ -156,6 +158,8 @@ public class WorkspacesControllerTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
+  private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
+  private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
 
   private static final Concept CLIENT_CONCEPT_1 =
       new Concept()
@@ -402,13 +406,16 @@ public class WorkspacesControllerTest {
   }
 
   private void stubFcUpdateWorkspaceACL() {
-    when(fireCloudService.updateWorkspaceACL(
-            anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class)))
+    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyList()))
         .thenReturn(new WorkspaceACLUpdateResponseList());
   }
 
   private void stubFcGetWorkspaceACL() {
-    when(fireCloudService.getWorkspaceAcl(anyString(), anyString())).thenReturn(fcWorkspaceAcl);
+    stubFcGetWorkspaceACL(fcWorkspaceAcl);
+  }
+
+  private void stubFcGetWorkspaceACL(WorkspaceACL acl) {
+    when(fireCloudService.getWorkspaceAcl(anyString(), anyString())).thenReturn(acl);
   }
 
   private void stubFcGetGroup() {
@@ -2325,5 +2332,199 @@ public class WorkspacesControllerTest {
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(0);
+  }
+
+  @Test
+  public void notebookLockingEmailHashTest() {
+    final String[][] knownTestData = {
+      {
+        "fc-bucket-id-1",
+        "user@aou",
+        "dc5acd54f734a2e2350f2adcb0a25a4d1978b45013b76d6bc0a2d37d035292fe"
+      },
+      {
+        "fc-bucket-id-1",
+        "another-user@aou",
+        "bc90f9f740702e5e0408f2ea13fed9457a7ee9c01117820f5c541067064468c3"
+      },
+      {
+        "fc-bucket-id-2",
+        "user@aou",
+        "a759e5aef091fd22bbf40bf8ee7cfde4988c668541c18633bd79ab84b274d622"
+      },
+      // catches an edge case where the hash has a leading 0
+      {
+        "fc-5ac6bde3-f225-44ca-ad4d-92eed68df7db",
+        "brubenst2@fake-research-aou.org",
+        "060c0b2ef2385804b7b69a4b4477dd9661be35db270c940525c2282d081aef56"
+      }
+    };
+
+    for (final String[] test : knownTestData) {
+      final String bucket = test[0];
+      final String email = test[1];
+      final String hash = test[2];
+
+      assertThat(WorkspacesController.notebookLockingEmailHash(bucket, email)).isEqualTo(hash);
+    }
+  }
+
+  private void assertNotebookLockingMetadata(
+      Map<String, String> gcsMetadata,
+      NotebookLockingMetadataResponse expectedResponse,
+      WorkspaceACL acl) {
+
+    final String testWorkspaceNamespace = "test-ns";
+    final String testWorkspaceName = "test-ws";
+    final String testNotebook = "test-notebook.ipynb";
+
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
+        createFcWorkspace(testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
+    fcWorkspace.setBucketName(BUCKET_NAME);
+    stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
+    stubFcGetWorkspaceACL(acl);
+
+    final String testNotebookPath = "notebooks/" + testNotebook;
+    doReturn(gcsMetadata).when(cloudStorageService).getMetadata(BUCKET_NAME, testNotebookPath);
+
+    assertThat(
+            workspacesController
+                .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
+                .getBody())
+        .isEqualTo(expectedResponse);
+  }
+
+  @Test
+  public void testNotebookLockingMetadata() {
+    final String lastLockedUser = LOGGED_IN_USER_EMAIL;
+    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
+
+    final Map<String, String> gcsMetadata =
+        new ImmutableMap.Builder<String, String>()
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
+            .put(
+                LAST_LOCKING_USER_KEY,
+                WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
+            .put("extraMetadata", "is not a problem")
+            .build();
+
+    // I can see that I have locked it myself, and when
+
+    final NotebookLockingMetadataResponse expectedResponse =
+        new NotebookLockingMetadataResponse()
+            .lockExpirationTime(lockExpirationTime)
+            .lastLockedBy(lastLockedUser);
+
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
+  public void testNotebookLockingMetadataKnownUser() {
+    final String readerOnMyWorkspace = "some-reader@fake-research-aou.org";
+
+    WorkspaceACL workspaceACL =
+        createWorkspaceACL(
+            new JSONObject()
+                .put(
+                    currentUser.getEmail(),
+                    new JSONObject()
+                        .put("accessLevel", "OWNER")
+                        .put("canCompute", true)
+                        .put("canShare", true))
+                .put(
+                    readerOnMyWorkspace,
+                    new JSONObject()
+                        .put("accessLevel", "READER")
+                        .put("canCompute", true)
+                        .put("canShare", true)));
+
+    final String lastLockedUser = readerOnMyWorkspace;
+    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
+
+    final Map<String, String> gcsMetadata =
+        new ImmutableMap.Builder<String, String>()
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
+            .put(
+                LAST_LOCKING_USER_KEY,
+                WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
+            .put("extraMetadata", "is not a problem")
+            .build();
+
+    // I'm the owner so I can see readers on my workspace
+
+    final NotebookLockingMetadataResponse expectedResponse =
+        new NotebookLockingMetadataResponse()
+            .lockExpirationTime(lockExpirationTime)
+            .lastLockedBy(readerOnMyWorkspace);
+
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, workspaceACL);
+  }
+
+  @Test
+  public void testNotebookLockingMetadataUnknownUser() {
+    final String lastLockedUser = "a-stranger@fake-research-aou.org";
+    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
+
+    final Map<String, String> gcsMetadata =
+        new ImmutableMap.Builder<String, String>()
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
+            .put(
+                LAST_LOCKING_USER_KEY,
+                WorkspacesController.notebookLockingEmailHash(BUCKET_NAME, lastLockedUser))
+            .put("extraMetadata", "is not a problem")
+            .build();
+
+    // This user is not listed in the Workspace ACL so I don't know them
+
+    final NotebookLockingMetadataResponse expectedResponse =
+        new NotebookLockingMetadataResponse()
+            .lockExpirationTime(lockExpirationTime)
+            .lastLockedBy("UNKNOWN");
+
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
+  public void testNotebookLockingMetadataPlaintextUser() {
+    final String lastLockedUser = LOGGED_IN_USER_EMAIL;
+    final Long lockExpirationTime = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
+
+    final Map<String, String> gcsMetadata =
+        new ImmutableMap.Builder<String, String>()
+            .put(LOCK_EXPIRE_TIME_KEY, lockExpirationTime.toString())
+            // store directly in plaintext, to show that this does not work
+            .put(LAST_LOCKING_USER_KEY, lastLockedUser)
+            .put("extraMetadata", "is not a problem")
+            .build();
+
+    // in case of accidentally storing the user email in plaintext
+    // it can't be retrieved by this endpoint
+
+    final NotebookLockingMetadataResponse expectedResponse =
+        new NotebookLockingMetadataResponse()
+            .lockExpirationTime(lockExpirationTime)
+            .lastLockedBy("UNKNOWN");
+
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
+  public void testNotebookLockingNullMetadata() {
+    final Map<String, String> gcsMetadata = null;
+
+    // This file has no metadata so the response is empty
+
+    final NotebookLockingMetadataResponse expectedResponse = new NotebookLockingMetadataResponse();
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
+  public void testNotebookLockingEmptyMetadata() {
+    final Map<String, String> gcsMetadata = new HashMap<>();
+
+    // This file has no metadata so the response is empty
+
+    final NotebookLockingMetadataResponse expectedResponse = new NotebookLockingMetadataResponse();
+    assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
   }
 }

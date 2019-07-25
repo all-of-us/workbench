@@ -39,7 +39,7 @@ const styles = reactStyles({
   dropdownHeader: {
     fontSize: 12,
     lineHeight: '30px',
-    color: '#262262',
+    color: colors.primary,
     fontWeight: 600,
     paddingLeft: 12,
     width: 160
@@ -56,7 +56,7 @@ const tabs = [
     {name: 'Cohorts', link: 'cohorts'},
     {name: 'Concepts', link: 'concepts'}]),
   {name: environment.enableDatasetBuilder ? 'Analysis' : 'Notebooks', link: 'notebooks'},
-  {name: 'About', link: ''},
+  {name: 'About', link: 'about'},
 ];
 
 const navSeparator = <div style={styles.separator}/>;
@@ -103,10 +103,12 @@ export const WorkspaceNavBarReact = fp.flow(
         <React.Fragment>
           <div style={styles.dropdownHeader}>Workspace Actions</div>
           <MenuItem
+            icon='copy'
             onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}>
             Duplicate
           </MenuItem>
           <MenuItem
+            icon='pencil'
             tooltip={isNotOwner && 'Requires owner permission'}
             disabled={isNotOwner}
             onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'edit'])}
@@ -114,12 +116,14 @@ export const WorkspaceNavBarReact = fp.flow(
             Edit
           </MenuItem>
           <MenuItem
+            icon='share'
             tooltip={isNotOwner && 'Requires owner permission'}
             disabled={isNotOwner}
             onClick={() => shareFunction()}>
             Share
           </MenuItem>
           <MenuItem
+            icon='trash'
             tooltip={isNotOwner && 'Requires owner permission'}
             disabled={isNotOwner}
             onClick={() => deleteFunction()}>

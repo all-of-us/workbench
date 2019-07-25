@@ -18,6 +18,7 @@ public class CommonStorageEnums {
           .put(Domain.OBSERVATION, (short) 5)
           .put(Domain.PROCEDURE, (short) 6)
           .put(Domain.VISIT, (short) 7)
+          .put(Domain.PERSON, (short) 8)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
@@ -31,6 +32,7 @@ public class CommonStorageEnums {
           .put(Domain.OBSERVATION, "Observation")
           .put(Domain.PROCEDURE, "Procedure")
           .put(Domain.VISIT, "Visit")
+          .put(Domain.PERSON, "Person")
           .build();
 
   public static Domain domainFromStorage(Short domain) {

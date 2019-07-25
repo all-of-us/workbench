@@ -224,6 +224,9 @@ export class ListAttributesPageComponent implements OnInit {
     if (this.isPM || !this.form.valid) {
       return this.form.valid;
     }
+    if (this.attrs.EXISTS) {
+      return true;
+    }
     let valid = false;
     this.attrs.NUM.forEach(num => {
       if (num.operator) {

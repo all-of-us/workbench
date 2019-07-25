@@ -30,7 +30,8 @@ export class ProfileStubVariables {
     complianceTrainingCompletionTime: null,
     complianceTrainingBypassTime: null,
     eraCommonsCompletionTime: null,
-    eraCommonsBypassTime: null
+    eraCommonsBypassTime: null,
+    authorities: []
   };
 }
 
@@ -111,4 +112,14 @@ export class ProfileApiStub extends ProfileApi {
       resolve({});
     });
   }
+
+  public submitDataUseAgreement(dataUseAgreementVersion: number) {
+    this.profile.dataUseAgreementSignedVersion = dataUseAgreementVersion;
+    return Promise.resolve(this.profile);
+  }
+
+  public getUser(userId: number): Promise<Profile> {
+    return Promise.resolve(this.profile);
+  }
+
 }

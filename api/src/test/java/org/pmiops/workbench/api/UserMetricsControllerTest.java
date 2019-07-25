@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.anyListOf;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -140,7 +140,7 @@ public class UserMetricsControllerTest {
             workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName()))
         .thenReturn(workspaceResponse2);
 
-    when(cloudStorageService.blobsExist(anyListOf(BlobId.class)))
+    when(cloudStorageService.blobsExist(anyList()))
         .then(
             (i) -> {
               List<BlobId> ids = i.getArgument(0);
@@ -236,7 +236,7 @@ public class UserMetricsControllerTest {
     resource2.setNotebookName("gs://bkt/notebooks/not-found.ipynb");
     when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
         .thenReturn(ImmutableList.of(resource1, resource2));
-    when(cloudStorageService.blobsExist(anyListOf(BlobId.class)))
+    when(cloudStorageService.blobsExist(anyList()))
         .thenReturn(ImmutableSet.of(BlobId.of("bkt", "notebooks/notebook.ipynb")));
 
     RecentResourceResponse recentResources =
