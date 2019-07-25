@@ -3,7 +3,7 @@ import {
   Header,
   SmallHeader
 } from 'app/components/headers';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {
   AccountCreationResendModal,
   AccountCreationUpdateModal
@@ -21,7 +21,7 @@ const styles = {
     backgroundColor: 'transparent',
   },
   borderStyle: {
-    border: '1px solid ' + colors.primary,
+    border: `1px solid ${colors.primary}`,
     color: colors.primary,
     borderRadius: '8px',
     marginLeft: '2.3rem',
@@ -59,7 +59,7 @@ export class AccountCreationSuccess
           Congratulations!
         </BolderHeader>
         <div>
-          <SmallHeader style={{colors: colorWithWhiteness(colors.dark, -1)}}>
+          <SmallHeader style={{colors: colors.primary}}>
             Your All of Us research account has been created!
           </SmallHeader>
         </div>
@@ -79,12 +79,12 @@ export class AccountCreationSuccess
           </Header>
         </div>
         <div>
-          <SmallHeader style={{colors: colorWithWhiteness(colors.dark, -1)}}>
+          <SmallHeader style={{colors: colors.primary}}>
             Check your contact email for instructions on getting started.
           </SmallHeader>
         </div>
         <div>
-          <SmallHeader style={{colors: colorWithWhiteness(colors.dark, -1)}}>
+          <SmallHeader style={{colors: colors.primary}}>
             Your contact email is: {this.state.contactEmail}
           </SmallHeader>
         </div>
