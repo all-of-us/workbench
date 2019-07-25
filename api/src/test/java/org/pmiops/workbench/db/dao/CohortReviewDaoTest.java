@@ -9,7 +9,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -38,7 +40,11 @@ public class CohortReviewDaoTest {
   @Before
   public void setUp() throws Exception {
     Cohort cohort = new Cohort();
-    cohort.setWorkspaceId(workspaceDao.save(new Workspace()).getWorkspaceId());
+    Workspace workspace = new Workspace();
+    workspace.setWorkspaceNamespace("namespace");
+    workspace.setFirecloudName("firecloudName");
+    workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    cohort.setWorkspaceId(workspaceDao.save(workspace).getWorkspaceId());
     cohortId = cohortDao.save(cohort).getCohortId();
   }
 
@@ -88,6 +94,22 @@ public class CohortReviewDaoTest {
         cohortReview,
         cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
             cohortReview.getCohortId(), cohortReview.getCdrVersionId()));
+  }
+
+  @Test
+  public void findByFirecloudNameAndActiveStatus() throws Exception {
+    CohortReview cohortReview = createCohortReview();
+
+    cohortReviewDao.save(cohortReview);
+
+    assertEquals(
+        cohortReview,
+        cohortReviewDao
+            .findByFirecloudNameAndActiveStatus(
+                "namespace",
+                "firecloudName",
+                StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE))
+            .get(0));
   }
 
   private CohortReview createCohortReview() {

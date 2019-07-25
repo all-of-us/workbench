@@ -3,19 +3,22 @@ import * as React from 'react';
 
 import {AlertClose, AlertDanger, AlertWarning} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
-import {ResourceCardBase} from 'app/components/card';
-import {baseStyles} from 'app/components/card';
+import {baseStyles, ResourceCardBase} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
-import { Profile } from 'generated/fetch';
+import {AccessModule, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   registrationPage: {
-    display: 'flex', flexDirection: 'column', paddingTop: '3%', paddingLeft: '3%'
+    display: 'flex', flexDirection: 'column', paddingTop: '3%', paddingLeft: '3%',
+    // Assign relative positioning so the spinner's absolute positioning anchors
+    // it within the registration box.
+    position: 'relative',
   },
   mainHeader: {
     color: colors.white, fontSize: 28, fontWeight: 400,
@@ -77,6 +80,7 @@ async function redirectToTraining() {
 
 interface RegistrationTask {
   key: string;
+  completionPropsKey: string;
   title: string;
   description: string;
   buttonText: string;
@@ -93,6 +97,7 @@ interface RegistrationTask {
 export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   {
     key: 'twoFactorAuth',
+    completionPropsKey: 'twoFactorAuthCompleted',
     title: 'Turn on Google 2-Step Verification',
     description: 'Add an extra layer of security to your account by providing your ' +
       'phone number in addition to your password to verify your identity upon login.',
@@ -105,6 +110,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     onClick: redirectToGoogleSecurity
   }, {
     key: 'complianceTraining',
+    completionPropsKey: 'trainingCompleted',
     title: 'Complete Online Training',
     description: 'Complete mandatory compliance training courses on how data should be used ' +
       'and handled.',
@@ -116,6 +122,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     onClick: redirectToTraining
   }, {
     key: 'eraCommons',
+    completionPropsKey: 'eraCommonsLinked',
     title: 'Login to eRA Commons',
     description: 'Link to your eRA Commons account to the workbench to gain full access to data ' +
       'and tools.',
@@ -127,6 +134,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     onClick: redirectToNiH
   }, {
     key: 'dataUseAgreement',
+    completionPropsKey: 'dataUseAgreementCompleted',
     title: 'Data Use Agreement',
     description: 'Sign our data use agreement consenting to the All of Us data use policy.',
     buttonText: 'View & Sign',
@@ -160,7 +168,8 @@ export interface RegistrationDashboardProps {
 interface State {
   showRefreshButton: boolean;
   trainingWarningOpen: boolean;
-  taskCompletionMap: Map<number, boolean>;
+  bypassActionComplete: boolean;
+  bypassInProgress: boolean;
 }
 
 export class RegistrationDashboard extends React.Component<RegistrationDashboardProps, State> {
@@ -169,35 +178,39 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     super(props);
     this.state = {
       trainingWarningOpen: !props.firstVisitTraining,
-      taskCompletionMap: new Map<number, boolean>(),
-      showRefreshButton: false
+      showRefreshButton: false,
+      bypassActionComplete: false,
+      bypassInProgress: false,
     };
-    this.state.taskCompletionMap.set(0, props.twoFactorAuthCompleted);
-    this.state.taskCompletionMap.set(1, props.trainingCompleted);
-    this.state.taskCompletionMap.set(2, props.eraCommonsLinked);
-    this.state.taskCompletionMap.set(3, props.dataUseAgreementCompleted);
   }
 
   componentDidMount() {
     this.setState({showRefreshButton: false});
   }
 
+  get taskCompletionList(): Array<boolean> {
+    return getRegistrationTasks().map((config) => {
+      return this.props[config.completionPropsKey] as boolean;
+    });
+  }
+
+  allTasksCompleted(): boolean {
+    return this.taskCompletionList.every(v => v);
+  }
+
   isEnabled(i: number): boolean {
-    const {taskCompletionMap} = this.state;
+    const taskCompletionList = this.taskCompletionList;
+
     if (i === 0) {
-      return !taskCompletionMap.get(i);
+      return !taskCompletionList[i];
     } else {
-      return !taskCompletionMap.get(i) &&
+      return !taskCompletionList[i] &&
       fp.filter(index => this.isEnabled(index), fp.range(0, i)).length === 0;
     }
   }
 
   showRefreshFlow(isRefreshable: boolean): boolean {
     return isRefreshable && this.state.showRefreshButton;
-  }
-
-  allTasksCompleted(): boolean {
-    return Array.from(this.state.taskCompletionMap.values()).reduce((acc, val) => acc && val);
   }
 
   onCardClick(card) {
@@ -213,24 +226,71 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     }
   }
 
+  async setAllModulesBypassState(isBypassed: boolean) {
+    this.setState({bypassInProgress: true});
+
+    // TypeScript enum iteration is nonfunctional
+    // so just copy the whole list
+    const modules = [
+      AccessModule.COMPLIANCETRAINING,
+      AccessModule.ERACOMMONS,
+      AccessModule.TWOFACTORAUTH,
+      AccessModule.DATAUSEAGREEMENT,
+      AccessModule.BETAACCESS
+    ];
+
+    for (const module of modules) {
+      await profileApi().unsafeSelfBypassAccessRequirement({
+        moduleName: module,
+        isBypassed: isBypassed
+      });
+    }
+
+    this.setState({bypassInProgress: false, bypassActionComplete: true});
+  }
+
   render() {
-    const {taskCompletionMap, trainingWarningOpen} = this.state;
+    const {bypassActionComplete, bypassInProgress, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
+    const canUnsafeSelfBypass = serverConfigStore.getValue().unsafeAllowSelfBypass;
+
+    const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
+
     return <div style={styles.registrationPage}
                 data-test-id='registration-dashboard'>
+      {bypassInProgress && <SpinnerOverlay />}
       <div style={styles.mainHeader}>Researcher Workbench</div>
       <div style={{...styles.mainHeader, fontSize: '18px', marginBottom: '1rem'}}>
         <ClrIcon shape='warning-standard' class='is-solid'
                  style={{color: colors.white, marginRight: '0.3rem'}}/>
         In order to get access to data and tools please complete the following steps:
       </div>
-      {!betaAccessGranted && <div data-test-id='beta-access-warning'
-                                  style={{...baseStyles.card, ...styles.warningModal}}>
-        <ClrIcon shape='warning-standard' class='is-solid'
-                 style={styles.warningIcon}/>
-        You have not been granted beta access. Please contact support@researchallofus.org.
-      </div>}
-
+      {canUnsafeSelfBypass &&
+        <div data-test-id='self-bypass'
+             style={{...baseStyles.card, ...styles.warningModal}}>
+          {bypassActionComplete &&
+            <span>Bypass action is complete. Reload the page to continue.</span>}
+          {!bypassActionComplete && <span>
+            [Test environment] Self-service bypass is enabled:&nbsp;
+            {anyBypassActionsRemaining &&
+              <Button style={{marginLeft: '0.5rem'}}
+                      onClick={() => this.setAllModulesBypassState(true)}
+                      disabled={bypassInProgress}>Bypass all</Button>}
+            {!anyBypassActionsRemaining &&
+              <Button style={{marginLeft: '0.5rem'}}
+                      onClick={() => this.setAllModulesBypassState(false)}
+                      disabled={bypassInProgress}>Un-bypass all</Button>}
+          </span>
+          }
+        </div>
+      }
+      {!betaAccessGranted &&
+        <div data-test-id='beta-access-warning'
+             style={{...baseStyles.card, ...styles.warningModal}}>
+          <ClrIcon shape='warning-standard' class='is-solid'
+                   style={styles.warningIcon}/>
+          You have not been granted beta access. Please contact support@researchallofus.org.
+        </div>}
       <div style={{display: 'flex', flexDirection: 'row'}}>
         {getRegistrationTasks().map((card, i) => {
           return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
@@ -243,7 +303,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
             </div>
             {!this.allTasksCompleted() &&
             <div style={styles.cardDescription}>{card.description}</div>}
-            {taskCompletionMap.get(i) ?
+            {this.taskCompletionList[i] ?
               <Button disabled={true} data-test-id='completed-button'
                       style={{backgroundColor: colors.success,
                         width: 'max-content',

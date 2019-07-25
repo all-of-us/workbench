@@ -34,8 +34,6 @@ public class CBCriteriaDaoTest {
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
 
-  @Autowired private ConceptDao conceptDao;
-
   @Autowired private JdbcTemplate jdbcTemplate;
 
   @Test

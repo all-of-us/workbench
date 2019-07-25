@@ -1,6 +1,8 @@
+import * as Color from 'color';
 import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
+import colors from 'app/styles/colors';
 import {withStyle} from 'app/utils/index';
 import {SpinnerOverlay} from './spinners';
 
@@ -12,13 +14,13 @@ const styles = {
   },
 
   overlay: {
-    backgroundColor: 'rgba(49, 49, 49, 0.85)', padding: '1rem', display: 'flex',
+    backgroundColor: Color(colors.dark).alpha(0.85).toString, padding: '1rem', display: 'flex',
     position: 'fixed', left: 0, right: 0, top: 0, bottom: 0, overflowY: 'auto'
   },
 
   modalTitle: {
     fontSize: '20px',
-    color: '#302973',
+    color: colors.primary,
     fontWeight: 600,
     marginBottom: '1rem'
   },
@@ -35,15 +37,6 @@ const styles = {
     display: 'flex' as 'flex',
     justifyContent: 'flex-end' as 'flex-end',
     marginTop: '1rem'
-  },
-
-  modalInput: {
-    fontWeight: 400,
-    width: '100%',
-    borderRadius: '5px',
-    height: '1.5rem',
-    border: '1px solid #9a9a9a',
-    padding: '.25rem'
   }
 };
 
@@ -63,4 +56,3 @@ export const Modal = ({width = 450, loading = false, ...props}) => {
 export const ModalTitle = withStyle(styles.modalTitle)('div');
 export const ModalBody = withStyle(styles.modalBody)('div');
 export const ModalFooter = withStyle(styles.modalFooter)('div');
-export const ModalInput = withStyle(styles.modalInput)('input');

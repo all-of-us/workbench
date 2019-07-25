@@ -112,7 +112,7 @@
             <span *ngIf="count === null"> -- </span>
           </div>
         </div>
-        <div class="col-lg-3 button-padding" *ngIf="!disabled">
+        <div class="col-lg-3 button-padding" *ngIf="!loading && isValid">
           <button class="btn add-button" type="submit"> ADD THIS</button>
         </div>
       </div>

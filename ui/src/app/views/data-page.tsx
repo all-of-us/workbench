@@ -17,7 +17,7 @@ import {
 } from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ResourceCard} from 'app/views/resource-card';
-import {RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
+import {Domain, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {
   cardButtonArea: {
@@ -124,6 +124,10 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
         dataSetApi().getDataSetsInWorkspace(namespace, id)
       ]);
+      // Show all concept set except the Dummy demographics Concept set created to be used only
+      // in dataset
+      conceptSets.items = conceptSets.items
+          .filter(conceptSet => conceptSet.domain !== Domain.PERSON);
       this.setState({
         existingCohortName: cohorts.items.map(cohort => cohort.name),
         existingConceptSetName: conceptSets.items.map(conceptSet => conceptSet.name),

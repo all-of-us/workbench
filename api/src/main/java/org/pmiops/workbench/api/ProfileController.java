@@ -509,8 +509,8 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> submitDataUseAgreement() {
-    User user = userService.submitDataUseAgreement();
+  public ResponseEntity<Profile> submitDataUseAgreement(Integer dataUseAgreementSignedVersion) {
+    User user = userService.submitDataUseAgreement(dataUseAgreementSignedVersion);
     return getProfileResponse(saveUserWithConflictHandling(user));
   }
 
@@ -712,6 +712,13 @@ public class ProfileController implements ProfileApiDelegate {
     }
     response.setProfileList(responseList);
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<Profile> getUser(Long userId) {
+    User user = userDao.findUserByUserId(userId);
+    return ResponseEntity.ok(profileService.getProfile(user));
   }
 
   @Override

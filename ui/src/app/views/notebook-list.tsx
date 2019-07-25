@@ -7,10 +7,11 @@ import {FadeBox} from 'app/components/containers';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {NewNotebookModal} from 'app/views/new-notebook-modal';
 import {ResourceCard} from 'app/views/resource-card';
@@ -20,7 +21,7 @@ import {NotebookResourceCard} from './notebook-resource-card';
 
 const styles = {
   heading: {
-    color: '#2F2E7E',
+    color: colors.primary,
     fontSize: 20, fontWeight: 600, lineHeight: '24px'
   }
 };

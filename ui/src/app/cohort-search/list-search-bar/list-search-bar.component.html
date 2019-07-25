@@ -17,7 +17,6 @@
       <em>No results based on your search</em>
     </button>
   </div>
-  <div *ngIf="ingredientList.length" class="match-container">Ingredients in this brand: {{ingredientList.join(', ')}} </div>
   <div *ngIf="options.length" class="dropdown-menu" [class.overflow]="showOverflow">
     <app-list-option-info
       *ngFor="let option of options; let i = index"

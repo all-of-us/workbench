@@ -11,10 +11,11 @@ import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients'
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
+import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ConfirmPlaygroundModeModal} from 'app/views/confirm-playground-mode-modal';
+import {NotebookInUseModal} from 'app/views/notebook-in-use-modal';
 import {ClusterStatus} from 'generated/fetch';
 
 
@@ -33,7 +34,8 @@ const styles = reactStyles({
     borderRight: '1px solid ' + colorWithWhiteness(colors.dark, .75),
     backgroundColor: 'rgba(38,34,98,0.05)',
     alignItems: 'center',
-    padding: '0 20px'
+    padding: '0 20px',
+    textTransform: 'uppercase'
   },
   active: {
     backgroundColor: 'rgba(38,34,98,0.2)'
@@ -51,9 +53,14 @@ const styles = reactStyles({
     marginLeft: 0,
     marginRight: '5px'
   },
+  previewDiv: {
+    width: '100%',
+    border: 0
+  },
   previewFrame: {
     width: '100%',
-    height: 800,
+    height: 'calc(100% - 40px)',
+    position: 'absolute',
     border: 0
   },
   rotate: {
@@ -68,9 +75,12 @@ interface Props {
 
 interface State {
   clusterStatus: ClusterStatus;
-  userRequestedExecutableNotebook: boolean;
   html: string;
+  lastLockedBy: string;
+  lockExpirationTime: number;
+  showInUseModal: boolean;
   showPlaygroundModeModal: boolean;
+  userRequestedExecutableNotebook: boolean;
 }
 
 export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace())(
@@ -79,10 +89,13 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     constructor(props) {
       super(props);
       this.state = {
-        userRequestedExecutableNotebook: false,
         clusterStatus: ClusterStatus.Unknown,
         html: '',
-        showPlaygroundModeModal: false
+        lastLockedBy: '',
+        lockExpirationTime: 0,
+        showInUseModal: false,
+        showPlaygroundModeModal: false,
+        userRequestedExecutableNotebook: false,
       };
     }
 
@@ -91,6 +104,13 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         this.props.urlParams.wsid, this.props.urlParams.nbName)
         .then(html => {
           this.setState({html: html.html});
+        });
+      workspacesApi().getNotebookLockingMetadata(this.props.urlParams.ns,
+        this.props.urlParams.wsid, this.props.urlParams.nbName).then((resp) => {
+          this.setState({
+            lastLockedBy: resp.lastLockedBy,
+            lockExpirationTime: resp.lockExpirationTime
+          });
         });
     }
 
@@ -122,10 +142,18 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
 
     private startEditMode() {
       if (this.canWrite()) {
-        this.setState({userRequestedExecutableNotebook: true});
-        this.runCluster(() => { this.navigateEditMode(); });
+        if (!this.notebookInUse) {
+          this.setState({userRequestedExecutableNotebook: true});
+          this.runCluster(() => { this.navigateEditMode(); });
+        } else {
+          this.setState({
+            showInUseModal: true
+          });
+        }
       }
     }
+
+
 
     private startPlaygroundMode() {
       if (this.canWrite()) {
@@ -163,16 +191,36 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       return WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel);
     }
 
+    private cloneNotebook() {
+      const {ns, wsid, nbName} = this.props.urlParams;
+      workspacesApi().cloneNotebook(ns, wsid, nbName).then((notebook) => {
+        navigate(['workspaces', ns, wsid, 'notebooks', encodeURIComponent(notebook.name)]);
+      });
+    }
+
+    private get notebookInUse() {
+      const {lastLockedBy, lockExpirationTime} = this.state;
+      return lastLockedBy !== null && new Date().getTime()  < lockExpirationTime
+        && lastLockedBy !== userProfileStore.getValue().profile.username;
+    }
+
     render() {
+      const {
+        html,
+        lastLockedBy,
+        showInUseModal,
+        showPlaygroundModeModal,
+        userRequestedExecutableNotebook
+      } = this.state;
       return (
         <div>
           <div style={styles.navBar}>
             <div style={{...styles.navBarItem, ...styles.active}}>
               Preview (Read-Only)
             </div>
-            {this.state.userRequestedExecutableNotebook ? (
-              <div style={{...styles.navBarItem}}>
-                <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}></ClrIcon>
+            {userRequestedExecutableNotebook ? (
+              <div style={{...styles.navBarItem, textTransform: 'none'}}>
+                <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
                 Preparing your Jupyter environment. This may take up to 10 minutes.
               </div>) : (
               <div style={{display: 'flex'}}>
@@ -183,7 +231,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
                   <EditComponentReact enableHoverEffect={false}
                                       disabled={!this.canWrite()}
                                       style={styles.navBarIcon}/>
-                  Edit
+                  Edit {this.notebookInUse && '(In Use)'}
                 </div>
                 <div style={Object.assign({}, styles.navBarItem,
                   this.canWrite() ? styles.clickable : styles.disabled)}
@@ -196,12 +244,12 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
               </div>)
             }
           </div>
-          <div style={styles.previewFrame}>
-            {this.state.html ?
-              (<iframe style={styles.previewFrame} srcDoc={this.state.html}></iframe>) :
+          <div style={styles.previewDiv}>
+            {html ?
+              (<iframe style={styles.previewFrame} srcDoc={html}/>) :
               (<SpinnerOverlay/>)}
           </div>
-          {this.state.showPlaygroundModeModal &&
+          {showPlaygroundModeModal &&
             <ConfirmPlaygroundModeModal
               onCancel={() => {
                 this.setState({showPlaygroundModeModal: false}); }}
@@ -209,6 +257,14 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
                 this.setState({showPlaygroundModeModal: false});
                 this.startPlaygroundMode();
               }}/>}
+          {showInUseModal &&
+          <NotebookInUseModal
+            email={lastLockedBy}
+            onCancel={() => {
+              this.setState({showInUseModal: false}); }}
+            onCopy={() => {this.cloneNotebook(); }}
+            onPlaygroundMode={() => {this.startPlaygroundMode(); }}>
+          </NotebookInUseModal>}
         </div>
       );
     }

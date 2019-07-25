@@ -21,9 +21,8 @@ import {StatusCheckService} from './services/status-check.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
-import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
-import {AdminUserBypassComponent} from './views/admin-user-bypass';
-import {AdminUserComponent} from './views/admin-user/component';
+import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace';
+import {AdminUserComponent} from './views/admin-user';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb';
 import {BugReportComponent} from './views/bug-report';
@@ -59,7 +58,6 @@ import {WorkspaceLibraryComponent} from './views/workspace-library';
 import {WorkspaceListComponent} from './views/workspace-list';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar';
 import {WorkspaceShareComponent} from './views/workspace-share';
-import {WorkspaceComponent} from './views/workspace/component';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
@@ -136,7 +134,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   ],
   declarations: [
     AdminReviewWorkspaceComponent,
-    AdminUserBypassComponent,
     AdminUserComponent,
     AppComponent,
     BreadcrumbComponent,
@@ -170,7 +167,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ToolTipComponent,
     TopBoxComponent,
     WorkspaceAboutComponent,
-    WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceLibraryComponent,
     WorkspaceListComponent,

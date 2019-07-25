@@ -1,11 +1,10 @@
-import {Component, Input} from '@angular/core';
 import {Button, IconButton} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {AccessModule, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -117,23 +116,10 @@ export class AdminUserBypass extends React.Component<
         </div>}>
       <Button type='secondaryLight' data-test-id='bypass-popup'>
         <ClrIcon shape={open ? 'caret down' : 'caret right'} size={19}
-                 style={{color: '#0077b7', marginRight: '1px', cursor: 'pointer'}}/>
+                 style={{color: colors.accent, marginRight: '1px', cursor: 'pointer'}}/>
         Bypass
       </Button>
     </PopupTrigger>;
   }
 
-}
-
-
-@Component({
-  selector: 'app-admin-user-bypass',
-  template: '<div #root></div>',
-})
-export class AdminUserBypassComponent extends ReactWrapperBase {
-  @Input('profile') profile: Profile;
-
-  constructor() {
-    super(AdminUserBypass, ['profile']);
-  }
 }

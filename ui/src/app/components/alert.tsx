@@ -2,6 +2,7 @@ import {reactStyles, withStyle} from 'app/utils';
 
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as React from 'react';
 
 export const styles = reactStyles({
@@ -16,19 +17,19 @@ export const styles = reactStyles({
     width: 'auto',
     borderRadius: '.125rem',
     marginTop: '.25rem',
-    background: '#e1f1f6',
-    color: '#565656',
-    border: '1px solid #49afd9'
+    background: colors.light,
+    color: colors.dark,
+    border: `1px solid ${colors.secondary}`
   },
 
   danger: {
-    background: '#f5dbd9',
-    color: '#565656',
-    border: '1px solid #ebafa6'
+    background: colorWithWhiteness(colors.danger, 0.8),
+    color: colors.dark,
+    border: `1px solid ${colorWithWhiteness(colors.danger, 0.6)}`
   },
   warning: {
-    background: '#FFFCEB',
-    color: '#E28327',
+    background: colors.warning,
+    color: colors.white,
     border: 'none',
     padding: '.2rem'
   }

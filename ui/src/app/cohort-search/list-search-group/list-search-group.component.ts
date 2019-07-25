@@ -114,17 +114,17 @@ export class ListSearchGroupComponent implements AfterViewInit, OnInit {
   update = () => {
     // timeout prevents Angular 'value changed after checked' error
     setTimeout(() => {
-      if (this.activeItems) {
-        // prevent multiple total count calls when initializing multiple groups simultaneously
-        // (on cohort edit or clone)
-        const init = initExisting.getValue();
-        if (!init || (init && this.index === 0)) {
-          this.updateRequest();
-          if (init) {
-            this.preventInputCalculate = true;
-            initExisting.next(false);
-          }
+      // prevent multiple total count calls when initializing multiple groups simultaneously
+      // (on cohort edit or clone)
+      const init = initExisting.getValue();
+      if (!init || (init && this.index === 0)) {
+        this.updateRequest();
+        if (init) {
+          this.preventInputCalculate = true;
+          initExisting.next(false);
         }
+      }
+      if (this.activeItems && (!this.temporal || !this.temporalError)) {
         this.loading = true;
         this.error = false;
         this.getGroupCount();

@@ -256,11 +256,19 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    final List<Criteria> criteriaList =
-        criteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
-    criteriaResponse.setItems(
-        criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
-    return ResponseEntity.ok(criteriaResponse);
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      final List<CBCriteria> criteriaList =
+          cbCriteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
+      criteriaResponse.setItems(
+          criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
+      return ResponseEntity.ok(criteriaResponse);
+    } else {
+      final List<Criteria> criteriaList =
+          criteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
+      criteriaResponse.setItems(
+          criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+      return ResponseEntity.ok(criteriaResponse);
+    }
   }
 
   @Override

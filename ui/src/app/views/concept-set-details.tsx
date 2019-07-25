@@ -57,17 +57,23 @@ const ConceptSetMenu: React.FunctionComponent<{
     content={ <React.Fragment>
       <TooltipTrigger content={<div>Requires Write Permission</div>}
                       disabled={canEdit}>
-        <MenuItem onClick={() => onEdit} disabled={!canEdit}>Edit</MenuItem>
+        <MenuItem icon='pencil'
+                  onClick={() => onEdit}
+                  disabled={!canEdit}>
+          Edit
+        </MenuItem>
       </TooltipTrigger>
       <TooltipTrigger content={<div>Requires Owner Permission</div>}
                       disabled={canDelete}>
-        <MenuItem onClick={onDelete} disabled={!canDelete}>Delete</MenuItem>
+        <MenuItem icon='trash' onClick={onDelete} disabled={!canDelete}>
+          Delete
+        </MenuItem>
       </TooltipTrigger>
     </React.Fragment>}
   >
     <Clickable  data-test-id='workspace-menu'>
       <ClrIcon shape='ellipsis-vertical' size={21}
-               style={{color: '#216FB4', marginLeft: -9,
+               style={{color: colors.accent, marginLeft: -9,
                  cursor: 'pointer'}}/>
     </Clickable>
   </PopupTrigger>;
