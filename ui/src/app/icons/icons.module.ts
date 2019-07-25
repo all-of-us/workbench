@@ -1,6 +1,5 @@
 import {NgModule} from '@angular/core';
 
-import {EditComponent} from 'app/icons/edit';
 import {ExpandComponent} from 'app/icons/expand/component';
 import {NotebookComponent} from 'app/icons/notebook/component';
 import {ReminderComponent} from 'app/icons/reminder';
@@ -12,7 +11,6 @@ import {TrashComponent} from 'app/icons/trash/component';
   imports: [],
   declarations: [
     TrashComponent,
-    EditComponent,
     ExpandComponent,
     NotebookComponent,
     ReminderComponent,
@@ -21,7 +19,6 @@ import {TrashComponent} from 'app/icons/trash/component';
   ],
   exports: [
     TrashComponent,
-    EditComponent,
     ExpandComponent,
     NotebookComponent,
     ReminderComponent,

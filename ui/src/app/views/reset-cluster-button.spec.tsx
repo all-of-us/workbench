@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {ResetClusterButton, ResetClusterButtonProps} from './reset-cluster-button';
+import {Props, ResetClusterButton} from './reset-cluster-button';
 
 import {clusterApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -11,7 +11,7 @@ import {ClusterApi} from 'generated/fetch/api';
 
 
 describe('ResetClusterButton', () => {
-  let props: ResetClusterButtonProps;
+  let props: Props;
 
   const component = () => {
     return mount(<ResetClusterButton {...props}/>);

@@ -1,11 +1,10 @@
 import * as React from 'react';
 
-import {Component, Input} from '@angular/core';
 
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 
 const styles = reactStyles({
   slidingButton: {
@@ -94,18 +93,3 @@ export class SlidingFabReact extends React.Component<Props, State> {
   }
 }
 
-@Component({
-  selector: 'app-sliding-fab',
-  styleUrls: [],
-  template: '<div #root></div>',
-})
-export class SlidingFabComponent extends ReactWrapperBase {
-  @Input('submitFunction') submitFunction: Function;
-  @Input('iconShape') iconShape: string;
-  @Input('expanded') expanded: string;
-  @Input('disable') disable: boolean;
-
-  constructor() {
-    super(SlidingFabReact, ['submitFunction', 'expanded', 'disable', 'iconShape']);
-  }
-}

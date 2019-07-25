@@ -1,11 +1,9 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {clusterApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase} from 'app/utils';
 
 import {
   Cluster,
@@ -27,7 +25,7 @@ const styles = {
   },
 };
 
-interface Props {
+export interface Props {
   billingProjectId: string;
 }
 
@@ -38,7 +36,7 @@ interface State {
   clusterDeletionFailure: boolean;
 }
 
-class ResetClusterButton extends React.Component<Props, State> {
+export class ResetClusterButton extends React.Component<Props, State> {
 
   private pollClusterTimer: NodeJS.Timer;
 
@@ -148,20 +146,3 @@ class ResetClusterButton extends React.Component<Props, State> {
   }
 }
 
-@Component({
-  selector: 'app-react-cluster-button',
-  template: '<div #root></div>'
-})
-class ResetClusterButtonComponent extends ReactWrapperBase {
-  @Input() billingProjectId: string;
-
-  constructor() {
-    super(ResetClusterButton, ['billingProjectId']);
-  }
-}
-
-export {
-  Props as ResetClusterButtonProps,
-  ResetClusterButton,
-  ResetClusterButtonComponent
-};

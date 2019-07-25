@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {withContentRect} from 'react-measure';
@@ -7,7 +6,6 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {Scroll} from 'app/icons/scroll';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
 
-import {ReactWrapperBase} from 'app/utils';
 import {ResourceCard} from 'app/views/resource-card';
 import {RecentResource} from 'generated/fetch';
 
@@ -97,15 +95,3 @@ export const RecentWork = (fp.flow as any)(
     </div>;
   }
 });
-
-@Component({
-  selector: 'app-recent-work',
-  template: '<div #root></div>',
-})
-export class RecentWorkComponent extends ReactWrapperBase {
-  @Input('dark') dark: boolean;
-  @Input('cardMarginTop') cardMarginTop: string;
-  constructor() {
-    super(RecentWork, ['dark', 'cardMarginTop']);
-  }
-}

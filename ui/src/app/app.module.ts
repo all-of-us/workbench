@@ -28,30 +28,22 @@ import {BreadcrumbComponent} from './views/breadcrumb';
 import {BugReportComponent} from './views/bug-report';
 import {CohortActionsComponent} from './views/cohort-actions';
 import {CohortListComponent} from './views/cohort-list';
-import {ConceptAddModalComponent} from './views/concept-add-modal';
 import {ConceptHomepageComponent} from './views/concept-homepage';
 import {ConceptSetActionsComponent} from './views/concept-set-actions';
 import {ConceptSetDetailsComponent} from './views/concept-set-details';
 import {ConceptSetListComponent} from './views/concept-set-list';
-import {ConceptTableComponent} from './views/concept-table';
 import {DataUseAgreementComponent} from './views/data-use-agreement';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage';
 import {InitialErrorComponent} from './views/initial-error/component';
-import {NewNotebookModalComponent} from './views/new-notebook-modal';
 import {NotebookListComponent} from './views/notebook-list';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfilePageComponent} from './views/profile-page';
-import {QuickTourModalComponent} from './views/quick-tour-modal';
-import {RecentWorkComponent} from './views/recent-work';
-import {ResetClusterButtonComponent} from './views/reset-cluster-button';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SignInComponent} from './views/sign-in';
 import {SignedInComponent} from './views/signed-in/component';
-import {SlidingFabComponent} from './views/sliding-fab';
 import {StigmatizationPageComponent} from './views/stigmatization-page';
-import {TopBoxComponent} from './views/top-box/component';
 import {WorkspaceAboutComponent} from './views/workspace-about';
 import {WorkspaceEditComponent} from './views/workspace-edit';
 import {WorkspaceLibraryComponent} from './views/workspace-library';
@@ -80,7 +72,6 @@ import {
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
 import {InteractiveNotebookComponent} from './views/interactive-notebook';
-import {ToolTipComponent} from './views/tooltip/component';
 
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
@@ -140,32 +131,24 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     BugReportComponent,
     CohortActionsComponent,
     CohortListComponent,
-    ConceptAddModalComponent,
     ConceptSetActionsComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,
-    ConceptTableComponent,
     ConceptSetListComponent,
     DataPageComponent,
     DataSetPageComponent,
     DataUseAgreementComponent,
     ErrorHandlerComponent,
     InitialErrorComponent,
-    NewNotebookModalComponent,
     InteractiveNotebookComponent,
     NotebookListComponent,
     NotebookRedirectComponent,
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
-    QuickTourModalComponent,
-    RecentWorkComponent,
     RoutingSpinnerComponent,
     SignedInComponent,
     SignInComponent,
-    SlidingFabComponent,
     StigmatizationPageComponent,
-    ToolTipComponent,
-    TopBoxComponent,
     WorkspaceAboutComponent,
     WorkspaceEditComponent,
     WorkspaceLibraryComponent,
@@ -174,7 +157,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     WorkspaceShareComponent,
     WorkspaceWrapperComponent,
     HomepageComponent,
-    ResetClusterButtonComponent,
   ],
   providers: [
     {

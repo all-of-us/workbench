@@ -2,8 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {DataAccessLevel, ProfileApi} from 'generated/fetch';
-import {Profile} from 'generated';
+import {DataAccessLevel, Profile, ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
 
@@ -40,7 +39,7 @@ describe('HomepageComponent', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
+      userProfileStore.next({profile: newProfile, reload, updateCache});
     });
 
     userProfileStore.next({profile, reload, updateCache: () => {}});
@@ -72,7 +71,7 @@ describe('HomepageComponent', () => {
       ...profile,
       pageVisits: [{page: 'homepage'}],
     };
-    userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
+    userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
   });
@@ -88,8 +87,8 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
-    serverConfigStore.next({...serverConfigStore.getValue(), enforceRegistered: true})
-    userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
+    serverConfigStore.next({...serverConfigStore.getValue(), enforceRegistered: true});
+    userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="registration-dashboard"]').length).toBeGreaterThanOrEqual(1);
@@ -100,8 +99,8 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
-    serverConfigStore.next({...serverConfigStore.getValue(), enforceRegistered: true})
-    userProfileStore.next({profile: newProfile as unknown as Profile, reload, updateCache});
+    serverConfigStore.next({...serverConfigStore.getValue(), enforceRegistered: true});
+    userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();

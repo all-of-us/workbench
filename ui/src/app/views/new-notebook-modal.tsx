@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
@@ -8,7 +7,7 @@ import {RadioButton, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase, summarizeErrors} from 'app/utils';
+import {summarizeErrors} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 
@@ -93,16 +92,3 @@ export class NewNotebookModal extends React.Component<
   }
 }
 
-@Component({
-  selector: 'app-new-notebook-modal',
-  template: '<div #root></div>',
-})
-export class NewNotebookModalComponent extends ReactWrapperBase {
-  @Input() workspace;
-  @Input() existingNotebooks;
-  @Input() onClose;
-
-  constructor() {
-    super(NewNotebookModal, ['workspace', 'existingNotebooks', 'onClose']);
-  }
-}

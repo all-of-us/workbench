@@ -1,10 +1,9 @@
-import {Component, Input} from '@angular/core';
 import {Clickable, Link} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {ReactWrapperBase, toggleIncludes} from 'app/utils';
+import {toggleIncludes} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {Concept} from 'generated/fetch/api';
 import * as fp from 'lodash/fp';
@@ -276,20 +275,3 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 }
 
-@Component({
-  selector: 'app-concept-table',
-  template: '<div #root></div>'
-})
-export class ConceptTableComponent extends ReactWrapperBase {
-  @Input() concepts: Object[];
-  @Input() onSelectConcepts;
-  @Input() loading = false;
-  @Input() placeholderValue = '';
-  @Input() searchTerm;
-  @Input() selectedConcepts: Array<any> = [];
-
-  constructor() {
-    super(ConceptTable, ['concepts', 'loading', 'placeholderValue', 'onSelectConcepts',
-      'searchTerm', 'selectedConcepts']);
-  }
-}

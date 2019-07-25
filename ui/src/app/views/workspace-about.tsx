@@ -177,7 +177,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
     if (!useBillingProjectBuffer) {
       return freeTierBillingProject;
     }
-
     if ([WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.OWNER].includes(workspace.accessLevel)) {
       return workspace.namespace;
     }

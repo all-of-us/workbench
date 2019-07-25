@@ -10,7 +10,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import {AppComponent} from 'app/views/app/component';
 import {PageTemplateSignedOutComponent} from 'app/views/page-template-signed-out/component';
 
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
 import {AuthDomainService, CohortsService, ProfileService} from 'generated';
 
@@ -33,7 +33,7 @@ describe('AppComponent', () => {
         { provide: SignInService, useValue: {} },
         { provide: CohortsService, useValue: {} },
         { provide: ServerConfigService, useValue: {} },
-        { provide: ProfileService, useValue: new ProfileServiceStub() }
+        { provide: ProfileService, useValue: new ProfileApiStub() }
       ] }).compileComponents();
   }));
 
