@@ -12,9 +12,11 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -26,10 +28,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
@@ -48,6 +52,7 @@ import org.pmiops.workbench.model.DataSetPreviewList;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -149,6 +154,7 @@ public class DataSetController implements DataSetApiDelegate {
                 })
             .collect(Collectors.toList());
     try {
+      handleDemographicConceptSet(dataSetRequest, wId, now);
       org.pmiops.workbench.db.model.DataSet savedDataSet =
           dataSetService.saveDataSet(
               dataSetRequest.getName(),
@@ -182,7 +188,13 @@ public class DataSetController implements DataSetApiDelegate {
           }
           result.setConceptSets(
               StreamSupport.stream(
-                      conceptSetDao.findAll(dataSet.getConceptSetId()).spliterator(), false)
+                      conceptSetDao
+                          .findAll(
+                              dataSet.getConceptSetId().stream()
+                                  .filter((concept) -> concept != null)
+                                  .collect(Collectors.toList()))
+                          .spliterator(),
+                      false)
                   .map(conceptSet -> toClientConceptSet(conceptSet))
                   .collect(Collectors.toList()));
           result.setCohorts(
@@ -518,6 +530,8 @@ public class DataSetController implements DataSetApiDelegate {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    long wId = workspaceService.get(workspaceNamespace, workspaceId).getWorkspaceId();
+    handleDemographicConceptSet(request, wId, now);
     dbDataSet.setLastModifiedTime(now);
     dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
     dbDataSet.setCohortSetId(request.getCohortIds());
@@ -545,6 +559,33 @@ public class DataSetController implements DataSetApiDelegate {
     }
 
     return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dbDataSet));
+  }
+
+  // If the dataSet has concept set of Domain Person, check if such a concept set exist in workspace
+  // if not create a dummy Concept set with name Demographics and Domain PERSON.
+  private void handleDemographicConceptSet(
+      DataSetRequest request, long workspaceId, Timestamp now) {
+    if (request.getConceptSetIds().size() > 0 && request.getConceptSetIds().contains(-1l)) {
+      request.getConceptSetIds().remove(-1l);
+      // -1 Represent Demographics concepts set, Check for GENDER OR RACE OR ETHNICITY DOMAIN
+      // concept
+      // and add it as a dummy concept under the Demographics concept set
+      List<Concept> genderRaceConcept = conceptDao.findGenderRaceEthnicityFromConcept();
+      if (genderRaceConcept.size() > 0) {
+        org.pmiops.workbench.db.model.ConceptSet demographicsCS =
+            new org.pmiops.workbench.db.model.ConceptSet();
+        demographicsCS.setName("Demographics");
+        demographicsCS.setDomain(CommonStorageEnums.domainToStorage(Domain.PERSON));
+        demographicsCS.setCreationTime(now);
+        demographicsCS.setLastModifiedTime(now);
+        demographicsCS.setWorkspaceId(workspaceId);
+        Set<Long> conceptIdsSet = new HashSet<Long>();
+        conceptIdsSet.add(genderRaceConcept.get(0).getConceptId());
+        demographicsCS.setConceptIds(conceptIdsSet);
+        demographicsCS = conceptSetDao.save(demographicsCS);
+        request.getConceptSetIds().add(demographicsCS.getConceptSetId());
+      }
+    }
   }
 
   @Override
