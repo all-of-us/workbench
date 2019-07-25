@@ -1042,17 +1042,16 @@ def bulk_clone_workspaces(cmd_name, *args)
   ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
 
-#  op.add_typed_option(
- #     "--n [processN]",
- #     Integer,
- #     ->(opts, v) { opts.processN = v},
- #     "Number of workspaces to clone")
-
   op.add_typed_option(
-      "--user [user]",
-      String,
-      ->(opts, v) { opts.user = v },
-      "Target user owner of workspaces")
+      "--n [processN]",
+      Integer,
+      ->(opts, v) { opts.processN = v},
+      "Number of workspaces to clone")
+
+  op.add_option(
+      "--dry-run",
+      ->(opts, _) { opts.dry = "true"},
+      "Do a dry run. No committed changes")
 
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -1062,7 +1061,7 @@ def bulk_clone_workspaces(cmd_name, *args)
     common = Common.new
     common.run_inline %W{
       gradle bulkCloneWorkspaces
-     -PappArgs=['#{op.opts.user}']}
+     -PappArgs=['#{op.opts.processN}','#{op.opts.dry}']}
   end
 end
 

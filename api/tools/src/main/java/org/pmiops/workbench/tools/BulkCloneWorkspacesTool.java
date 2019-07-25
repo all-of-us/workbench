@@ -1,15 +1,15 @@
 package org.pmiops.workbench.tools;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.appengine.repackaged.com.google.common.base.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
@@ -24,13 +24,11 @@ import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspacesController;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,7 +41,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootApplication
 @EnableConfigurationProperties
@@ -53,8 +51,8 @@ public class BulkCloneWorkspacesTool {
 
   private ProfileApi profileApi;
   private NihApi nihApi;
-  private WorkspacesApi workspacesApi;
   private StaticNotebooksApi staticNotebooksApi;
+  private WorkspacesApi workspacesApi;
 
   private User providedUser;
 
@@ -71,40 +69,23 @@ public class BulkCloneWorkspacesTool {
   }
 
   @Bean
-  @Primary
-  @Qualifier("workspacesApi")
-  @Scope("prototype")
-  WorkspacesApi workspacesApi(Provider<WorkbenchConfig> configProvider) throws IOException {
-//    ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
-//    GoogleCredential credential =
-//        GoogleCredential.getApplicationDefault().createScoped(Arrays.asList(BILLING_SCOPES));
-//    credential.refreshToken();
-//    apiClient.setAccessToken(credential.getAccessToken());
-//    WorkspacesApi api = new WorkspacesApi();
-//    api.setApiClient(apiClient);
-//    return api;
-    return workspacesApi;
-  }
-
-  @Bean
   @Scope("prototype")
   StaticNotebooksApi staticNotebooksApi() {
     return staticNotebooksApi;
   }
 
   @Bean
+  @Primary
+  @Qualifier("workspacesApi")
   @Scope("prototype")
-  User user() { return providedUser; }
+  WorkspacesApi workspacesApi() {
+    return workspacesApi;
+  }
 
   @Bean
   @Primary
   @Qualifier("workspaceAclsApi")
-  WorkspacesApi newApiClient(Provider<WorkbenchConfig> configProvider) throws IOException {
-    ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
-    GoogleCredential credential =
-        GoogleCredential.getApplicationDefault().createScoped(Arrays.asList(BILLING_SCOPES));
-    credential.refreshToken();
-    apiClient.setAccessToken(credential.getAccessToken());
+  WorkspacesApi workspaceAclsApi(@Qualifier("saApiClient") ApiClient apiClient) {
     WorkspacesApi api = new WorkspacesApi();
     api.setApiClient(apiClient);
     return api;
@@ -112,12 +93,7 @@ public class BulkCloneWorkspacesTool {
 
   @Bean
   @Primary
-  BillingApi billingApi(Provider<WorkbenchConfig> configProvider) throws IOException {
-    ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
-    GoogleCredential credential =
-        GoogleCredential.getApplicationDefault().createScoped(Arrays.asList(BILLING_SCOPES));
-    credential.refreshToken();
-    apiClient.setAccessToken(credential.getAccessToken());
+  BillingApi billingApi(@Qualifier("saApiClient") ApiClient apiClient) {
     BillingApi api = new BillingApi();
     api.setApiClient(apiClient);
     return api;
@@ -125,15 +101,25 @@ public class BulkCloneWorkspacesTool {
 
   @Bean
   @Primary
-  GroupsApi groupsApi(Provider<WorkbenchConfig> configProvider) throws IOException {
+  GroupsApi groupsApi(@Qualifier("saApiClient") ApiClient apiClient) {
+    GroupsApi api = new GroupsApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean
+  @Scope("prototype")
+  User user() { return providedUser; }
+
+  @Bean
+  @Qualifier("saApiClient")
+  ApiClient saApiClient(Provider<WorkbenchConfig> configProvider) throws IOException {
     ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
     GoogleCredential credential =
         GoogleCredential.getApplicationDefault().createScoped(Arrays.asList(BILLING_SCOPES));
     credential.refreshToken();
     apiClient.setAccessToken(credential.getAccessToken());
-    GroupsApi api = new GroupsApi();
-    api.setApiClient(apiClient);
-    return api;
+    return apiClient;
   }
 
   private static final String[] BILLING_SCOPES =
@@ -146,51 +132,46 @@ public class BulkCloneWorkspacesTool {
   private void initializeApis() {
     profileApi = new ProfileApi();
     nihApi = new NihApi();
-    workspacesApi = new WorkspacesApi();
     staticNotebooksApi = new StaticNotebooksApi();
+    workspacesApi = new WorkspacesApi();
   }
 
   private void impersonateUser(ApiClient apiClient) {
     profileApi.setApiClient(apiClient);
     nihApi.setApiClient(apiClient);
-    workspacesApi.setApiClient(apiClient);
     staticNotebooksApi.setApiClient(apiClient);
+    workspacesApi.setApiClient(apiClient);
   }
 
   @Bean
   public CommandLineRunner run(WorkspaceDao workspaceDao,
-      WorkspaceService workspaceService,
       WorkspacesController workspacesController,
+      WorkspaceService workspaceService,
       FireCloudService fireCloudService,
-      UserService userService,
-      DirectoryService directoryService,
       UserDao userDao,
+      BillingProjectBufferService billingProjectBufferService,
+      @Qualifier("saApiClient") ApiClient saApiClient,
       @Qualifier("workspaceAclsApi") WorkspacesApi saWorkspaceApi) {
     return (args) -> {
       padding();
       initializeApis();
       System.out.println("Apis initialized");
 
-      if (args.length != 1) {
-        throw new IllegalArgumentException("Expected 2 args (user). Got " + Arrays.asList(args));
+      int numToProcess = Integer.parseInt(args[0]);
+
+      boolean dryRun = false;
+      if (args.length > 1 && args[1].equals("true")) {
+        dryRun = true;
       }
 
-//      int numToProcess = Integer.parseInt(args[0]);
-      String targetUser = args[0];
+      List<WorkspaceResponse> processed = new ArrayList<>();
+      List<Pair<WorkspaceResponse, String>> failedWorkspaces = new ArrayList<>();
 
-      List<CloneWorkspaceResponse> processedWorkspaces = new ArrayList<>();
-      List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> skippedWorkspaces = new ArrayList<>();
-      List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> failedWorkspaces = new ArrayList<>();
-
-      for (org.pmiops.workbench.firecloud.model.WorkspaceResponse workspaceResponse : saWorkspaceApi.listWorkspaces()) {
-        if (!workspaceResponse.getWorkspace().getCreatedBy().equals(targetUser)) {
-          continue;
-        }
-
+      for (WorkspaceResponse workspaceResponse : saWorkspaceApi.listWorkspaces()) {
         Workspace dbWorkspace = workspaceDao.findByFirecloudUuid(workspaceResponse.getWorkspace().getWorkspaceId());
 
         if (dbWorkspace == null) {
-          System.out.println("Found workspace in FC but not recorded in AoU : " + workspaceResponse.getWorkspace());
+          // System.out.println("Found workspace in FC but not recorded in AoU " + shorthand(workspaceResponse.getWorkspace()));
           continue;
         }
 
@@ -199,22 +180,25 @@ public class BulkCloneWorkspacesTool {
           continue;
         }
 
-        if (workspaceResponse.getAccessLevel().equals(WorkspaceAccessLevel.NO_ACCESS)) {
-          System.out.println("Found NO ACCESS workspace (" + workspaceResponse.getWorkspace().getNamespace() +
-              "  : " + workspaceResponse.getWorkspace().getWorkspaceId() + ")");
-          skippedWorkspaces.add(workspaceResponse);
+        if (workspaceResponse.getAccessLevel().equals("NO ACCESS")) {
+          System.out
+              .println("Found NO ACCESS workspace " + shorthand(workspaceResponse.getWorkspace()));
+          failedWorkspaces.add(Pair.of(workspaceResponse, "NO ACCESS"));
           continue;
+        }
+
+        while (billingProjectBufferService.availableProportion() < .25) {
+          System.out.println("Less than 25% of the buffer is available (" + billingProjectBufferService.availableProportion()*100 + "%)... Sleeping for 30 seconds");
+          Thread.sleep(30000);
         }
 
         try {
           System.out.println("About to clone " + shorthand(dbWorkspace));
 
-          providedUser = userDao.findUserByEmail(dbWorkspace.getCreator().getEmail());
-          impersonateUser(fireCloudService.getApiClientWithImpersonation(providedUser.getEmail()));
-
-          WorkspaceResponse apiWorkspace = workspacesController.getWorkspace(
+          workspacesApi.setApiClient(saApiClient);
+          org.pmiops.workbench.model.WorkspaceResponse apiWorkspace = workspaceService.getWorkspace(
               dbWorkspace.getWorkspaceNamespace(),
-              dbWorkspace.getFirecloudName()).getBody();
+              dbWorkspace.getFirecloudName());
 
           org.pmiops.workbench.model.Workspace toWorkspace = new org.pmiops.workbench.model.Workspace();
           toWorkspace.setNamespace(dbWorkspace.getWorkspaceNamespace());
@@ -226,31 +210,44 @@ public class BulkCloneWorkspacesTool {
           request.setWorkspace(toWorkspace);
           request.setIncludeUserRoles(true);
 
-          System.out.println("Sending clone request");
-          CloneWorkspaceResponse cloneResponse = workspacesController.cloneWorkspace(dbWorkspace.getWorkspaceNamespace(),
-              dbWorkspace.getFirecloudName(), request).getBody();
-          System.out.println("Successful Clone into " + shorthand(cloneResponse.getWorkspace()));
+          providedUser = userDao.findUserByEmail(apiWorkspace.getWorkspace().getCreator());
+          impersonateUser(fireCloudService.getApiClientWithImpersonation(apiWorkspace.getWorkspace().getCreator()));
 
-          dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.MIGRATED);
-          workspaceDao.save(dbWorkspace);
+          if (!dryRun) {
+            System.out.println("Sending clone request");
+            System.out.println(request);
 
-          processedWorkspaces.add(cloneResponse);
-        } catch (WorkbenchException e) {
+            CloneWorkspaceResponse cloneResponse = workspacesController
+                .cloneWorkspace(dbWorkspace.getWorkspaceNamespace(),
+                    dbWorkspace.getFirecloudName(), request).getBody();
+            System.out.println("Successful Clone into " + shorthand(cloneResponse.getWorkspace()));
+
+            dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.MIGRATED);
+            workspaceDao.save(dbWorkspace);
+          }
+
+          processed.add(workspaceResponse);
+        } catch (Exception e) {
           System.out.println("Failed on " + shorthand(dbWorkspace));
-          failedWorkspaces.add(workspaceResponse);
+          System.out.println(workspaceResponse);
+          e.printStackTrace();
+          failedWorkspaces.add(Pair.of(workspaceResponse, e.getMessage()));
         }
 
+        if (processed.size() + failedWorkspaces.size() == numToProcess) {
+          break;
+        }
       }
 
       padding();
-      System.out.println("Processed Workspaces : " + processedWorkspaces.size());
-      System.out.println("Skipped Workspaces : " + skippedWorkspaces.size());
-      for (org.pmiops.workbench.firecloud.model.WorkspaceResponse workspaceResponse : skippedWorkspaces) {
+      System.out.println("Processed Workspaces : " + processed.size());
+      for (WorkspaceResponse workspaceResponse : processed) {
         System.out.println(shorthand(workspaceResponse.getWorkspace()));
       }
       System.out.println("Failed Workspaces : " + failedWorkspaces.size());
-      for (org.pmiops.workbench.firecloud.model.WorkspaceResponse workspaceResponse : failedWorkspaces) {
-        System.out.println(shorthand(workspaceResponse.getWorkspace()));
+      for (Pair<WorkspaceResponse, String> failedWorkspace : failedWorkspaces) {
+        System.out.println(shorthand(failedWorkspace.first.getWorkspace()));
+        System.out.println(failedWorkspace.second);
       }
       padding();
     };

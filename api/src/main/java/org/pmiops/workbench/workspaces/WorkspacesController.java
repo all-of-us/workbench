@@ -1,7 +1,11 @@
 package org.pmiops.workbench.workspaces;
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.StorageException;
+import com.google.cloud.storage.StorageOptions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.sql.Timestamp;
@@ -308,29 +312,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
-        workspaceService.getRequired(workspaceNamespace, workspaceId);
-
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
-
-    WorkspaceResponse response = new WorkspaceResponse();
-
-    // This enforces access controls.
-    fcResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
-    fcWorkspace = fcResponse.getWorkspace();
-
-    if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
-      // We don't expose PROJECT_OWNER in our API; just use OWNER.
-      response.setAccessLevel(WorkspaceAccessLevel.OWNER);
-    } else {
-      response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
-      if (response.getAccessLevel() == null) {
-        throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
-      }
-    }
-    response.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(workspaceService.getWorkspace(workspaceNamespace, workspaceId));
   }
 
   @Override
@@ -380,6 +362,28 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+  }
+
+  private void copyBlobWithRetries(String bucketName, Blob b, int retryPeriodSeconds) {
+    final int SLEEP_INTERVAL_SECONDS = 5;
+
+    try {
+      cloudStorageService.copyBlob(
+          b.getBlobId(), BlobId.of(bucketName, b.getName()));
+    } catch (StorageException e) {
+      if (retryPeriodSeconds == 0) {
+        throw e;
+      }
+
+      try {
+        Thread.sleep(SLEEP_INTERVAL_SECONDS * 1000);
+      } catch (InterruptedException ex) {
+        ex.printStackTrace();
+      }
+
+      copyBlobWithRetries(bucketName, b, retryPeriodSeconds - SLEEP_INTERVAL_SECONDS);
+      throw e;
+    }
   }
 
   @Override
@@ -449,8 +453,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 toFcWorkspaceId.getWorkspaceNamespace(), toFcWorkspaceId.getWorkspaceName())
             .getWorkspace();
 
-    System.out.println(toFcWorkspace);
-
     // In the future, we may want to allow callers to specify whether notebooks
     // should be cloned at all (by default, yes), else they are currently stuck
     // if someone accidentally adds a large notebook or if there are too many to
@@ -466,8 +468,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                     + "remove this notebook, reduce its size, or contact the workspace owner",
                 fromWorkspaceNamespace, fromWorkspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
       }
-      cloudStorageService.copyBlob(
-          b.getBlobId(), BlobId.of(toFcWorkspace.getBucketName(), b.getName()));
+
+      copyBlobWithRetries(toFcWorkspace.getBucketName(), b, 60);
     }
 
     // The final step in the process is to clone the AoU representation of the
@@ -523,6 +525,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
 
       System.out.println(fromAclsMap);
+
       Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
       for (Map.Entry<String, WorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
         if (!entry.getKey().equals(user.getEmail())) {
@@ -532,8 +535,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
+
       System.out.println(clonedRoles);
-      System.out.println(getRegisteredUserDomainEmail());
+
       savedWorkspace =
           workspaceService.updateWorkspaceAcls(
               savedWorkspace, clonedRoles, getRegisteredUserDomainEmail());

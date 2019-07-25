@@ -140,6 +140,34 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .collect(Collectors.toList());
   }
 
+  @Transactional
+  @Override
+  public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
+    org.pmiops.workbench.db.model.Workspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
+
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
+
+    WorkspaceResponse response = new WorkspaceResponse();
+
+    // This enforces access controls.
+    fcResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+    fcWorkspace = fcResponse.getWorkspace();
+
+    if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+      // We don't expose PROJECT_OWNER in our API; just use OWNER.
+      response.setAccessLevel(WorkspaceAccessLevel.OWNER);
+    } else {
+      response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
+      if (response.getAccessLevel() == null) {
+        throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
+      }
+    }
+    response.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+
+    return response;
+  }
+
   @Override
   public List<WorkspaceResponse> getWorkspaces() {
     return getWorkspacesAndPublicWorkspaces().stream()
