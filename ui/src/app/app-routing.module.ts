@@ -23,11 +23,11 @@ import {ProfilePageComponent} from './views/profile-page';
 import {SignInComponent} from './views/sign-in';
 import {SignedInComponent} from './views/signed-in/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page';
+import {WorkspaceAboutComponent} from './views/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit';
 import {WorkspaceLibraryComponent} from './views/workspace-library';
 import {WorkspaceListComponent} from './views/workspace-list';
 import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
-import {WorkspaceComponent} from './views/workspace/component';
 
 import {environment} from 'environments/environment';
 import {BreadcrumbType, NavStore} from './utils/navigation';
@@ -90,8 +90,8 @@ const routes: Routes = [
             runGuardsAndResolvers: 'always',
             children: [
               {
-                path: '',
-                component: WorkspaceComponent,
+                path: 'about',
+                component: WorkspaceAboutComponent,
                 data: {
                   title: 'View Workspace Details',
                   breadcrumb: BreadcrumbType.Workspace

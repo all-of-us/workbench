@@ -58,7 +58,6 @@ import {WorkspaceLibraryComponent} from './views/workspace-library';
 import {WorkspaceListComponent} from './views/workspace-list';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar';
 import {WorkspaceShareComponent} from './views/workspace-share';
-import {WorkspaceComponent} from './views/workspace/component';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
@@ -168,7 +167,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ToolTipComponent,
     TopBoxComponent,
     WorkspaceAboutComponent,
-    WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceLibraryComponent,
     WorkspaceListComponent,

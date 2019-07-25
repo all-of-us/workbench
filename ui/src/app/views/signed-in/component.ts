@@ -6,8 +6,9 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
+import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 import {hasRegisteredAccess} from 'app/utils';
-import {routeConfigDataStore} from 'app/utils/navigation';
+import {cdrVersionStore, routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget, openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Authority} from 'generated';
@@ -98,6 +99,10 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.minimizeChrome = minimizeChrome;
     }));
+
+    cdrVersionsApi().getCdrVersions().then(resp => {
+      cdrVersionStore.next(resp.items);
+    });
   }
 
   ngAfterViewInit() {

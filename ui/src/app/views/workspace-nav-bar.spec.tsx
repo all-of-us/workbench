@@ -25,7 +25,7 @@ describe('WorkspaceNavBarComponent', () => {
   });
 
   it('should highlight the active tab', () => {
-    props = {tabPath: ''};
+    props = {tabPath: 'about'};
     const wrapper = component();
     expect(wrapper.find({'data-test-id': 'About', 'aria-selected': true}).exists()).toBeTruthy();
   });
