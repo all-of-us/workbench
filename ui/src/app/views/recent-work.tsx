@@ -10,14 +10,14 @@ import {userMetricsApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase} from 'app/utils';
 import {ResourceCard} from 'app/views/resource-card';
 import {RecentResource} from 'generated/fetch';
+import {NotebookResourceCard} from "app/views/notebook-resource-card";
 
 export const RecentWork = (fp.flow as any)(
   withContentRect('client'),
 )(class extends React.Component<{
   measureRef: React.Ref<any>,
   contentRect: {client: {width: number}},
-  dark: boolean,
-  cardMarginTop: string
+  dark: boolean
 }, {
   loading: boolean,
   offset: number,
@@ -26,9 +26,6 @@ export const RecentWork = (fp.flow as any)(
   existingConceptName: string[],
   existingNotebookName: string[]
 }> {
-  public static defaultProps = {
-    cardMarginTop: '1rem'
-  };
 
   constructor(props) {
     super(props);
@@ -68,19 +65,28 @@ export const RecentWork = (fp.flow as any)(
     return [];
   }
 
+  createResourceCard(resource: RecentResource) {
+    if (resource.notebook) {
+      return <NotebookResourceCard resourceCard={resource}
+                                   onUpdate={() => this.loadResources()}/>
+    } else {
+      <ResourceCard resourceCard={resource}
+                    onDuplicateResource={(duplicating) => this.setState({loading: duplicating})}
+                    onUpdate={() => this.loadResources()}
+                    existingNameList={this.getExistingNameList(resource)}
+      />
+    }
+  }
+
   render() {
-    const {contentRect, measureRef, cardMarginTop} = this.props;
+    const {contentRect, measureRef} = this.props;
     const {offset, resources, loading} = this.state;
     const limit = (contentRect.client.width - 24) / 224;
     return <div ref={measureRef} style={{display: 'flex', position: 'relative', minHeight: 247}}>
       <div style={{display: 'flex', position: 'relative', alignItems: 'center',
-        marginLeft: '-1rem', paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
+        marginTop: '-1rem', marginLeft: '-1rem', paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
         {resources.slice(offset, offset + limit).map((resource, i) => {
-          return <ResourceCard key={i} marginTop={cardMarginTop}
-            onDuplicateResource={(duplicating) => this.setState({loading: duplicating})}
-            resourceCard={resource} onUpdate={() => this.loadResources()}
-            existingNameList={this.getExistingNameList(resource)}
-          />;
+          return <div key={i}> {this.createResourceCard(resource)} </div>
         })}
         {offset > 0 && <Scroll
           dir='left'
@@ -104,8 +110,8 @@ export const RecentWork = (fp.flow as any)(
 })
 export class RecentWorkComponent extends ReactWrapperBase {
   @Input('dark') dark: boolean;
-  @Input('cardMarginTop') cardMarginTop: string;
+
   constructor() {
-    super(RecentWork, ['dark', 'cardMarginTop']);
+    super(RecentWork, ['dark']);
   }
 }

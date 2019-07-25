@@ -14,7 +14,6 @@ import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {NewNotebookModal} from 'app/views/new-notebook-modal';
-import {ResourceCard} from 'app/views/resource-card';
 
 import {FileDetail, WorkspaceAccessLevel} from 'generated/fetch';
 import {NotebookResourceCard} from './notebook-resource-card';

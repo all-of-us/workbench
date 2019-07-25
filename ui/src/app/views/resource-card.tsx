@@ -71,16 +71,12 @@ const resourceTypeStyles = reactStyles({
   conceptSet: {
     backgroundColor: colors.resourceCardHighlights.conceptSet
   },
-  notebook: {
-    backgroundColor: colors.resourceCardHighlights.notebook
-  },
   dataSet: {
     backgroundColor: colors.resourceCardHighlights.dataSet
   }
 });
 
 export interface Props {
-  marginTop: string;
   resourceCard: RecentResource;
   onDuplicateResource: Function;
   onUpdate: Function;
@@ -94,15 +90,11 @@ export interface State {
   exportingDataSet: boolean;
   invalidResourceError: boolean;
   renaming: boolean;
-  showCopyNotebookModal: boolean;
   showErrorModal: boolean;
   dataSetByResourceIdList: Array<DataSet>;
 }
 
 export class ResourceCard extends React.Component<Props, State> {
-  public static defaultProps = {
-    marginTop: '1rem'
-  };
 
   constructor(props: Props) {
     super(props);
@@ -111,12 +103,10 @@ export class ResourceCard extends React.Component<Props, State> {
       errorModalTitle: 'Error Title',
       errorModalBody: 'Error Body',
       exportingDataSet: false,
-      invalidResourceError: !(props.resourceCard.notebook ||
-        props.resourceCard.cohort ||
+      invalidResourceError: !(props.resourceCard.cohort ||
         props.resourceCard.conceptSet ||
         props.resourceCard.dataSet),
       renaming: false,
-      showCopyNotebookModal: false,
       showErrorModal: false,
       dataSetByResourceIdList: []
     };
@@ -131,9 +121,7 @@ export class ResourceCard extends React.Component<Props, State> {
   }
 
   get resourceType(): ResourceType {
-    if (this.props.resourceCard.notebook) {
-      return ResourceType.NOTEBOOK;
-    } else if (this.props.resourceCard.cohort) {
+    if (this.props.resourceCard.cohort) {
       return ResourceType.COHORT;
     } else if (this.props.resourceCard.conceptSet) {
       return ResourceType.CONCEPT_SET;
@@ -152,10 +140,6 @@ export class ResourceCard extends React.Component<Props, State> {
     return this.resourceType === ResourceType.CONCEPT_SET;
   }
 
-  get isNotebook(): boolean {
-    return this.resourceType === ResourceType.NOTEBOOK;
-  }
-
   get isDataSet(): boolean {
     return this.resourceType === ResourceType.DATA_SET;
   }
@@ -169,15 +153,8 @@ export class ResourceCard extends React.Component<Props, State> {
       || this.props.resourceCard.permission === 'WRITER';
   }
 
-  get notebookReadOnly(): boolean {
-    return this.isNotebook
-      && this.props.resourceCard.permission === 'READER';
-  }
-
   get displayName(): string {
-    if (this.isNotebook) {
-      return this.props.resourceCard.notebook.name.replace(/\.ipynb$/, '');
-    } else if (this.isCohort) {
+    if (this.isCohort) {
       return this.props.resourceCard.cohort.name;
     } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.name;
@@ -232,15 +209,7 @@ export class ResourceCard extends React.Component<Props, State> {
     this.setState({renaming: true});
   }
 
-  renameNotebook(): void {
-    this.setState({renaming: true});
-  }
-
   cancelRename(): void {
-    this.setState({renaming: false});
-  }
-
-  cancelRenameDataSet(): void {
     this.setState({renaming: false});
   }
 
@@ -255,20 +224,6 @@ export class ResourceCard extends React.Component<Props, State> {
   cloneResource(): void {
     this.props.onDuplicateResource(true);
     switch (this.resourceType) {
-      case ResourceType.NOTEBOOK: {
-        workspacesApi().cloneNotebook(
-          this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName,
-          this.props.resourceCard.notebook.name)
-          .then(() => {
-            this.props.onUpdate();
-          }).catch(e => {
-            this.props.onDuplicateResource(false);
-            this.showErrorModal('Duplicating Notebook Error',
-              'Notebook with the same name already exists.');
-          });
-        break;
-      }
       case ResourceType.COHORT: {
         cohortsApi().duplicateCohort(
           this.props.resourceCard.workspaceNamespace,
@@ -284,15 +239,6 @@ export class ResourceCard extends React.Component<Props, State> {
           this.showErrorModal('Duplicating Cohort Error',
             'Cohort with the same name already exists.');
         });
-        break;
-      }
-    }
-  }
-
-  copyResource(): void {
-    switch (this.resourceType) {
-      case ResourceType.NOTEBOOK: {
-        this.setState({ showCopyNotebookModal: true });
         break;
       }
     }
@@ -317,17 +263,6 @@ export class ResourceCard extends React.Component<Props, State> {
 
   async receiveDelete() {
     switch (this.resourceType) {
-      case ResourceType.NOTEBOOK: {
-        workspacesApi().deleteNotebook(
-          this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName,
-          this.props.resourceCard.notebook.name)
-          .then(() => {
-            this.closeConfirmDelete();
-            this.props.onUpdate();
-          });
-        break;
-      }
       case ResourceType.COHORT: {
         const dataSetByResourceIdList = await
             this.getDataSetByResourceId(this.props.resourceCard.cohort.id);
@@ -374,10 +309,6 @@ export class ResourceCard extends React.Component<Props, State> {
         break;
       }
     }
-  }
-
-  fullNotebookName(name) {
-    return !name || /^.+\.ipynb$/.test(name) ? name : `${name}.ipynb`;
   }
 
   receiveRename(name, description): void {
@@ -438,24 +369,6 @@ export class ResourceCard extends React.Component<Props, State> {
     }
   }
 
-  async receiveNotebookRename(newName) {
-    const {resourceCard} = this.props;
-    try {
-      await workspacesApi().renameNotebook(
-        resourceCard.workspaceNamespace,
-        resourceCard.workspaceFirecloudName,
-        {
-          name: resourceCard.notebook.name,
-          newName: this.fullNotebookName(newName)
-        });
-    } catch (error) {
-      console.error(error); // TODO: better error handling
-    } finally {
-      this.setState({renaming: false});
-      this.props.onUpdate();
-    }
-  }
-
   reviewCohort(): void {
     const {workspaceNamespace, workspaceFirecloudName, cohort} = this.props.resourceCard;
     navigateByUrl(`/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/cohorts/`
@@ -463,7 +376,7 @@ export class ResourceCard extends React.Component<Props, State> {
   }
 
   getResourceUrl(jupyterLab = false): string {
-    const {workspaceNamespace, workspaceFirecloudName, conceptSet, notebook, dataSet, cohort} =
+    const {workspaceNamespace, workspaceFirecloudName, conceptSet, dataSet, cohort} =
       this.props.resourceCard;
     const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
 
@@ -473,18 +386,6 @@ export class ResourceCard extends React.Component<Props, State> {
       }
       case ResourceType.CONCEPT_SET: {
         return `${workspacePrefix}/concepts/sets/${conceptSet.id}`;
-      }
-      case ResourceType.NOTEBOOK: {
-        const queryParams = new URLSearchParams([
-          ['playgroundMode', 'false'],
-          ['jupyterLabMode', String(jupyterLab)]
-        ]);
-
-        if (this.notebookReadOnly) {
-          queryParams.set('jupyterLabMode', 'true');
-        }
-
-        return `${workspacePrefix}/notebooks/preview/${encodeURIComponent(notebook.name)}`;
       }
       case ResourceType.DATA_SET: {
         return `${workspacePrefix}/data/data-sets/${dataSet.id}`;
@@ -530,7 +431,6 @@ export class ResourceCard extends React.Component<Props, State> {
   }
 
   render() {
-    const marginTop = this.props.marginTop;
     return <React.Fragment>
       {this.state.invalidResourceError &&
         <TextModal
@@ -544,31 +444,21 @@ export class ResourceCard extends React.Component<Props, State> {
           body={this.state.errorModalBody}
           onConfirm={() => this.setState({showErrorModal: false})}/>
       }
-      {this.state.showCopyNotebookModal &&
-        <CopyNotebookModal
-          fromWorkspaceNamespace={this.props.resourceCard.workspaceNamespace}
-          fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
-          fromNotebook={this.props.resourceCard.notebook}
-          onClose={() => this.setState({ showCopyNotebookModal: false })}
-          onCopy={() => this.props.onUpdate() }/>
-      }
-      <ResourceCardBase style={{...styles.card, marginTop: marginTop}}
+      <ResourceCardBase style={styles.card}
                         data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
             <ResourceCardMenu disabled={this.actionsDisabled}
                               resourceType={this.resourceType}
                               onCloneResource={() => this.cloneResource()}
-                              onCopyResource={() => this.copyResource()}
                               onDeleteResource={() => this.openConfirmDelete()}
-                              onRenameNotebook={() => this.renameNotebook()}
                               onRenameCohort={() => this.renameCohort()}
                               onRenameDataSet={() => this.renameDataSet()}
                               onEdit={() => this.edit()}
                               onExportDataSet={() => this.exportDataSet()}
                               onReviewCohort={() => this.reviewCohort()}
                               onOpenJupyterLabNotebook={() => this.openResource(true)}/>
-            <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>
+            <Clickable disabled={this.actionsDisabled}>
               <a style={styles.cardName}
                    data-test-id='card-name'
                  href={this.getResourceUrl()}
@@ -605,14 +495,6 @@ export class ResourceCard extends React.Component<Props, State> {
           oldDescription={this.props.resourceCard.conceptSet.description}
           oldName={this.props.resourceCard.conceptSet.name}
           existingNames={this.props.existingNameList}/>}
-      {this.state.renaming && this.isNotebook &&
-       <RenameModal onRename={(newName) => this.receiveNotebookRename(newName)}
-          type='Notebook' onCancel={() => this.cancelRename()}
-          hideDescription={true}
-          oldName={this.props.resourceCard.notebook.name}
-          existingNames={this.props.existingNameList}
-          nameFormat={(name) => this.fullNotebookName(name)}/>
-      }
       {this.state.confirmDeleting &&
       <ConfirmDeleteModal resourceName={this.displayName}
                           resourceType={this.resourceType}

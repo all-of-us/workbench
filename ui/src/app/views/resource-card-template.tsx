@@ -53,11 +53,8 @@ const styles = reactStyles({
   }
 });
 
-const defaultProps = {
-  marginTop: '1rem'
-};
-
 export interface Action {
+  icon: string;
   displayName: string;
   onClick: () => void;
 }
@@ -86,8 +83,8 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
     return <React.Fragment>
 
 
-      <ResourceCardBase style={{...styles.card, marginTop: defaultProps.marginTop}}
-                               data-test-id='card'>
+      <ResourceCardBase style={styles.card}
+                        data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
             <PopupTrigger
@@ -97,9 +94,11 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
               content={
                 <React.Fragment>
                   {this.props.actions.map(action => {
-                    return <MenuItem onClick={() => action.onClick()}>
+                    return (<MenuItem
+                      icon={action.icon}
+                      onClick={() => action.onClick()}>
                       {action.displayName}
-                    </MenuItem>;
+                    </MenuItem>);
                   })}
                 </React.Fragment>
               }

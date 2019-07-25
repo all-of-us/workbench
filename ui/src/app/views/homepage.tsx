@@ -336,7 +336,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                         <div style={{color: colors.white, height: '1.9rem'}}>
                           <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
                         </div>
-                        <RecentWork dark={true} cardMarginTop='0'/>
+                        <RecentWork dark={true}/>
                       </div>
                     </div>
                   </div>)

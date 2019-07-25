@@ -54,39 +54,34 @@ export const NotebookResourceCard = fp.flow(
         || this.props.resourceCard.permission === 'WRITER';
     }
 
-    get displayDate(): string {
-      if (!this.props.resourceCard.modifiedTime) {
-        return '';
-      }
-
-      const date = new Date(this.props.resourceCard.modifiedTime);
-      // datetime formatting to slice off weekday from readable date string
-      return date.toDateString().split(' ').slice(1).join(' ');
-    }
-
     get actions(): Action[] {
       return [
         {
+          icon: 'pencil',
           displayName: 'Rename',
           onClick: () => {
             this.setState({showRenameModal: true});
           },
         },
         {
+          icon: 'copy',
           displayName: 'Duplicate',
           onClick: () => this.duplicateNotebook(),
         },
         {
+          icon: 'copy',
           displayName: 'Copy to another Workspace',
           onClick: () => this.setState({showCopyNotebookModal: true}),
         },
         {
+          icon: 'trash',
           displayName: 'Delete',
           onClick: () => {
             this.props.showConfirmDeleteModal(this.displayName, this.resourceType, () => this.deleteNotebook());
           },
         },
         {
+          icon: 'grid-view',
           displayName: 'Open in Jupyter Lab',
           onClick: () => navigateByUrl(this.resourceUrl(true)),
         }];
@@ -112,7 +107,7 @@ export const NotebookResourceCard = fp.flow(
       return `${workspacePrefix}/notebooks/preview/${encodeURIComponent(notebook.name)}`;
     }
 
-    receiveNotebookRename(newName) {
+    renameNotebook(newName) {
       const {resourceCard} = this.props;
       return workspacesApi().renameNotebook(
         resourceCard.workspaceNamespace,
@@ -169,7 +164,7 @@ export const NotebookResourceCard = fp.flow(
 
         {this.state.showRenameModal &&
         <RenameModal type={this.resourceType}
-                     onRename={(newName) => this.receiveNotebookRename(newName)}
+                     onRename={(newName) => this.renameNotebook(newName)}
                      onCancel={() => this.setState({showRenameModal: false})}
                      hideDescription={true}
                      oldName={this.props.resourceCard.notebook.name}
