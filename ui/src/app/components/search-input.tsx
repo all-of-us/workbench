@@ -89,7 +89,20 @@ export interface SearchInputProps {
   onChange: (newInput: string) => void;
 }
 
-export class SearchInput extends React.Component<SearchInputProps, SearchInputState> {
+export class SearchInput extends React.Component<any, SearchInputState> {
+  static defaultProps = {
+    enabled: true,
+    placeholder: '',
+    value: '',
+    onSearch: (keyword: String) => {
+      return new Promise((accept, reject) => {
+        accept([]);
+      });
+    },
+    tooltip: '',
+    onChange: (newInput: string) => {},
+  };
+
   // Forward declarations
   _searchTermChangedEvent: Function;
   _onSearch: Function;
@@ -128,6 +141,7 @@ export class SearchInput extends React.Component<SearchInputProps, SearchInputSt
       return;
     }
     this._onSearch(keyword).then((matches) => {
+      matches = matches || [];
       this.setState({
         matches: matches,
         state: matches.length > 0 ?
@@ -194,7 +208,8 @@ export class SearchInput extends React.Component<SearchInputProps, SearchInputSt
       <div style={{position: 'relative'}}>
         <TooltipTrigger
           content={this.props.tooltip}
-          disabled={this.props.enabled}>
+          disabled={this.props.enabled}
+          data-test-id='search-input'>
           <TextInput
             value={this.props.value}
             style={inputStyle}
@@ -205,11 +220,12 @@ export class SearchInput extends React.Component<SearchInputProps, SearchInputSt
             disabled={!this.props.enabled}/>
         </TooltipTrigger>
         {this._suggest() &&
-          <div data-test-id='drop-down'
+          <div data-test-id='search-input-drop-down'
             style={{...styles.dropdownMenu, ...styles.open, minWidth: '90%'}}>
             {this.state.matches.map((match, j) => {
               return (
-                <div key={j} style={this.state.hover[j] ? styles.boxHover : styles.box}
+                <div data-test-id={`search-input-dropdown-element-${j}`}
+                     key={j} style={this.state.hover[j] ? styles.boxHover : styles.box}
                   onMouseOver={this._onMouseOver.bind(this, j)}
                   onMouseOut={this._onMouseOut.bind(this, j)}
                   onMouseDown={this._onMouseDown.bind(this, match)}>
