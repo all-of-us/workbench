@@ -42,6 +42,7 @@ export const ConceptAddModal = withCurrentWorkspace()
   onClose: Function,
 }, {
   conceptSets: ConceptSet[],
+  errorMessage: string,
   errorSaving: boolean,
   addingToExistingSet: boolean,
   loading: boolean,
@@ -57,6 +58,7 @@ export const ConceptAddModal = withCurrentWorkspace()
     super(props);
     this.state = {
       conceptSets: [],
+      errorMessage: null,
       errorSaving: false,
       addingToExistingSet: true,
       loading: true,
@@ -102,6 +104,16 @@ export const ConceptAddModal = withCurrentWorkspace()
       name, selectedConceptsInDomain} = this.state;
     this.setState({saving: true});
     const conceptIds = fp.map(selected => selected.conceptId, selectedConceptsInDomain);
+
+    // This is added temporary until users can create concept sets of Domain PERSON,
+    // in the meantime there will be default Demogrpahics Concept Set on DATA SET PAGE
+
+    if (name === 'Demographics') {
+      this.setState({
+        errorMessage: 'Name Demographics cannot be used for creating a concept set',
+        saving: false});
+      return;
+    }
     if (addingToExistingSet) {
       const updateConceptSetReq: UpdateConceptSetRequest = {
         etag: selectedSet.etag,
@@ -141,7 +153,7 @@ export const ConceptAddModal = withCurrentWorkspace()
   render() {
     const {selectedDomain, onClose} = this.props;
     const {conceptSets, loading, nameTouched, saving, addingToExistingSet,
-      newSetDescription, name, errorSaving, selectedConceptsInDomain} = this.state;
+      newSetDescription, name, errorMessage, errorSaving, selectedConceptsInDomain} = this.state;
     const errors = validate({name}, {
       name: {
         presence: {allowEmpty: false},
@@ -215,6 +227,7 @@ export const ConceptAddModal = withCurrentWorkspace()
           </ModalBody>)}
         {errorSaving &&
           <AlertDanger>Error saving concepts to set; please try again!</AlertDanger>}
+        {errorMessage && <AlertDanger>{errorMessage}</AlertDanger>}
         <ModalFooter>
           <Button type='secondary' onClick={onClose}>Cancel</Button>
           <Button style={{marginLeft: '0.5rem'}}

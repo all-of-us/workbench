@@ -52,7 +52,7 @@ public class NotebooksServiceImplTest {
   @Autowired private CloudStorageService cloudStorageService;
 
   @Test
-  public void testGetReadOnlyHtml_basicContent() throws Exception {
+  public void testGetReadOnlyHtml_basicContent() {
     when(firecloudService.getWorkspace(any(), any()))
         .thenReturn(new WorkspaceResponse().workspace(new Workspace().bucketName("bkt")));
     when(cloudStorageService.getFileAsJson(any(), any())).thenReturn(new JSONObject());
@@ -65,7 +65,7 @@ public class NotebooksServiceImplTest {
   }
 
   @Test
-  public void testGetReadOnlyHtml_scriptSanitization() throws Exception {
+  public void testGetReadOnlyHtml_scriptSanitization() {
     when(firecloudService.getWorkspace(any(), any()))
         .thenReturn(new WorkspaceResponse().workspace(new Workspace().bucketName("bkt")));
     when(cloudStorageService.getFileAsJson(any(), any())).thenReturn(new JSONObject());
@@ -78,7 +78,7 @@ public class NotebooksServiceImplTest {
   }
 
   @Test
-  public void testGetReadOnlyHtml_styleSanitization() throws Exception {
+  public void testGetReadOnlyHtml_styleSanitization() {
     when(firecloudService.getWorkspace(any(), any()))
         .thenReturn(new WorkspaceResponse().workspace(new Workspace().bucketName("bkt")));
     when(cloudStorageService.getFileAsJson(any(), any())).thenReturn(new JSONObject());

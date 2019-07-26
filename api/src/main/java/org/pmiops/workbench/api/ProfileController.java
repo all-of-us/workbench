@@ -716,6 +716,13 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<Profile> getUser(Long userId) {
+    User user = userDao.findUserByUserId(userId);
+    return ResponseEntity.ok(profileService.getProfile(user));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(
       Long userId, AccessBypassRequest request) {
     updateBypass(userId, request);

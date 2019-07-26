@@ -10,6 +10,7 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 
 import {
+  setupModals,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -17,11 +18,14 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
 import {BreadcrumbComponent} from 'app/views/breadcrumb';
 import {BugReportComponent} from 'app/views/bug-report';
 import {RoutingSpinnerComponent} from 'app/views/routing-spinner/component';
 import {SignedInComponent} from 'app/views/signed-in/component';
+import {CdrVersionsApi} from 'generated/fetch';
+import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 
 describe('SignedInComponent', () => {
   let fixture: ComponentFixture<SignedInComponent>;
@@ -52,8 +56,13 @@ describe('SignedInComponent', () => {
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(SignedInComponent);
       tick();
+      setupModals(fixture);
     });
   }));
+
+  beforeEach(() => {
+    registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
+  });
 
   it('should render', fakeAsync(() => {
     updateAndTick(fixture);

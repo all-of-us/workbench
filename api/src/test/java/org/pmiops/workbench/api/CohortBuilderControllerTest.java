@@ -96,7 +96,7 @@ public class CohortBuilderControllerTest {
     when(configProvider.get()).thenReturn(testConfig);
 
     ElasticSearchService elasticSearchService =
-        new ElasticSearchService(criteriaDao, cloudStorageService, configProvider);
+        new ElasticSearchService(cbCriteriaDao, cloudStorageService, configProvider);
 
     controller =
         new CohortBuilderController(

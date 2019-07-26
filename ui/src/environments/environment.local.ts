@@ -6,8 +6,6 @@ export const environment: Environment = {
   shouldShowDisplayTag: true,
   allOfUsApiUrl: 'http://localhost:8081',
   clientId: testEnvironmentBase.clientId,
-  tcellappid: 'AoUNonProd-WZFW2',
-  tcellapikey: 'AQEBBAEkx4iE2KxNyI7Wx08EwU1ycTM7E4FMSmaibbMUQxNU6uQvuAJt7fyABAtFYSYfgEE',
   trainingUrl: 'https://aoudev.nnlm.gov',
   leoApiUrl: 'https://leonardo.dsde-dev.broadinstitute.org',
   publicUiUrl: 'http://localhost:4201',

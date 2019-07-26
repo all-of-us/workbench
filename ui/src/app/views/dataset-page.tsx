@@ -284,6 +284,16 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         const [conceptSets, cohorts] = await Promise.all([
           conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
           cohortsApi().getCohortsInWorkspace(namespace, id)]);
+        // Check if dummy concept set Demographics already exist in workspace. If not add
+        // concept set : name Demographics and Domain Person to the concept set list.
+        const demographicCSIndex = fp.findIndex(['name', 'Demographics'], conceptSets.items);
+        if (demographicCSIndex === -1) {
+          conceptSets.items.push({
+            id: -1,
+            name: 'Demographics',
+            domain: Domain.PERSON
+          });
+        }
         this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
           loadingResources: false});
         return Promise.resolve();

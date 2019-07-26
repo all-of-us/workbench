@@ -890,6 +890,26 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
+  /v1/admin/users/{userId}:
+    get:
+      tags:
+        - profile
+      description: >
+        Returns a user's profile for review.  Requires ACCESS_CONTROL_ADMIN authority.
+      parameters:
+        - $ref: '#/parameters/userId'
+      operationId: getUser
+      responses:
+        200:
+          description: A user's profile
+          schema:
+            $ref: "#/definitions/Profile"
+        403:
+          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+
   /v1/admin/users/list:
     get:
       tags:
@@ -1282,6 +1302,31 @@ paths:
           description: HTML Read Only version of the notebook
           schema:
             $ref: '#/definitions/ReadOnlyNotebookResponse'
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/lockingMetadata:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    get:
+      tags:
+        - workspaces
+      summary: Get the locking metadata for a notebook
+      description: |
+        Get the locking metadata for a notebook, if available.  If the notebook is not locked
+        (e.g. at first creation) this may be empty.  Additionally, the caller of this endpoint
+        may not have the appropriate permissions to determine who is locking this notebook.
+        When this is the case, the lastLockedBy field is set to UNKNOWN.
+      operationId: "getNotebookLockingMetadata"
+      parameters:
+        - in: path
+          name: notebookName
+          required: true
+          type: string
+      responses:
+        200:
+          description: The locking metadata fields for the notebook
+          schema:
+            $ref: '#/definitions/NotebookLockingMetadataResponse'
 
   # Cohort Reviews #######################################################################
 
@@ -1970,6 +2015,9 @@ definitions:
       enableDataUseAgreement:
         type: boolean
         description: Feature flag for enabling data use agreement
+      unsafeAllowSelfBypass:
+        type: boolean
+        description: Enable a user to bypass themself
       enableEraCommons:
         type: boolean
         description: Feature flag for enabling eRA commons
@@ -3422,3 +3470,12 @@ definitions:
       notebookName:
         type: string
 
+  NotebookLockingMetadataResponse:
+    type: object
+    properties:
+      lastLockedBy:
+        type: string
+      lockExpirationTime:
+        description: The time when the lock will expire, in ms from the Unix epoch
+        type: integer
+        format: int64

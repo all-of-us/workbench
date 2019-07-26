@@ -7,7 +7,7 @@
     "clusterMaxAgeDays": 7,
     "clusterIdleMaxAgeDays": 3,
     "debugEndpoints": false,
-    "enforceRegistered": false,
+    "enforceRegistered": true,
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-test",
     "billingRetryCount": 2,
@@ -35,7 +35,8 @@
     "publicApiKeyForErrorReports": "",
     "projectId": "all-of-us-workbench-test",
     "shortName": "Local",
-    "oauthClientId": "602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com"
+    "oauthClientId": "602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com",
+    "traceAllRequests": true
   },
   "admin": {
     "loginUrl": "http:\/\/localhost:4200/login",
@@ -65,7 +66,7 @@
     "enableListSearch": true
   },
   "featureFlags": {
-    "enableLeoWelder": false,
+    "enableLeoWelder": true,
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true
