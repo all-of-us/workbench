@@ -12,8 +12,6 @@ handlers:
     Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
     X-XSS-Protection: 1
     X-Content-Type-Options: "nosniff"
-    # Reevaluate after deployment and remove "-Report-Only" if possible.
-    Content-Security-Policy-Report-Only: default-src 'self'
 - url: /.*
   static_files: dist/index.html
   upload: dist/index.html
@@ -22,8 +20,6 @@ handlers:
     Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
     X-XSS-Protection: 1
     X-Content-Type-Options: "nosniff"
-    # Reevaluate after deployment and remove "-Report-Only" if possible.
-    Content-Security-Policy-Report-Only: default-src 'self'
 
 # If a file (relative path under ui/) matches this regex, do not upload it.
 # Skip everything not starting with "dist".
