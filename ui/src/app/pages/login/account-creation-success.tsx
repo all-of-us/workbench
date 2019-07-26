@@ -59,7 +59,7 @@ export class AccountCreationSuccess
           Congratulations!
         </BolderHeader>
         <div>
-          <SmallHeader style={{colors: colors.primary}}>
+          <SmallHeader style={{color: colors.primary}}>
             Your All of Us research account has been created!
           </SmallHeader>
         </div>
@@ -79,12 +79,12 @@ export class AccountCreationSuccess
           </Header>
         </div>
         <div>
-          <SmallHeader style={{colors: colors.primary}}>
+          <SmallHeader style={{color: colors.primary}}>
             Check your contact email for instructions on getting started.
           </SmallHeader>
         </div>
         <div>
-          <SmallHeader style={{colors: colors.primary}}>
+          <SmallHeader style={{color: colors.primary}}>
             Your contact email is: {this.state.contactEmail}
           </SmallHeader>
         </div>
