@@ -40,6 +40,7 @@ import {
   DomainValuePair,
   DomainValuesResponse,
   ErrorResponse,
+  Surveys,
   ValueSet,
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
@@ -309,10 +310,10 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         .map((conceptSet: ConceptSet) => conceptSet.domain));
     }
 
-    async getValuesList(domains: Domain[]): Promise<ValueSet[]> {
+    async getValuesList(domains: Domain[], survey?: Surveys): Promise<ValueSet[]> {
       const {namespace, id} = this.props.workspace;
       const valueSets = fp.zipWith((domain: Domain, valueSet: DomainValuesResponse) =>
-          ({domain: domain, values: valueSet}),
+          ({domain: domain, values: valueSet, survey: survey}),
         domains,
         await Promise.all(domains.map((domain) =>
           conceptsApi().getValuesFromDomain(namespace, id, domain.toString()))));
@@ -340,11 +341,20 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           selectedValues: updatedSelectedValues});
         if (newDomains.length > 0) {
           this.setState({valuesLoading: true});
-          this.getValuesList(newDomains)
-            .then(newValueSets => this.setState({
-              valueSets: updatedValueSets.concat(newValueSets),
-              valuesLoading: false
-            }));
+          const cSet = resource as ConceptSet;
+          if (cSet.survey != null ) {
+            this.getValuesList(newDomains, cSet.survey)
+                .then(newValueSets => this.setState({
+                  valueSets: updatedValueSets.concat(newValueSets),
+                  valuesLoading: false
+                }));
+          } else {
+            this.getValuesList(newDomains)
+                .then(newValueSets => this.setState({
+                  valueSets: updatedValueSets.concat(newValueSets),
+                  valuesLoading: false
+                }));
+          }
         } else {
           this.setState({valueSets: updatedValueSets});
         }
@@ -617,7 +627,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                     {valueSets.map(valueSet =>
                       <div key={valueSet.domain}>
                         <Subheader>
-                          {fp.capitalize(valueSet.domain.toString())}
+                          {valueSet.survey ? 'Survey' : fp.capitalize(valueSet.domain.toString())}
                         </Subheader>
                         {valueSet.values.items.map(domainValue =>
                           <ValueListItem data-test-id='value-list-items'
@@ -696,7 +706,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                               justifyContent: 'center',
                               lineHeight: '32px',
                             }}>
-                       {previewRow.domain}
+                       {previewRow.domain === 'OBSERVATION' ? 'SURVEY' : previewRow.domain}
                      </Clickable>
                   )}
                 </div>
