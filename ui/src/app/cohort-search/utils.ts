@@ -276,7 +276,7 @@ export function parseCohortDefinition(json: string) {
       grp.items = grp.items.map(item => {
         item.searchParameters = item.searchParameters.map(sp => {
           const {parameterId, name, domain, type, subtype, group, attributes, conceptId,
-            ancestorData, standard} = sp;
+            ancestorData, standard, value} = sp;
           return {
             parameterId,
             name,
@@ -285,6 +285,7 @@ export function parseCohortDefinition(json: string) {
             subtype,
             group,
             conceptId,
+            code: value || '',
             attributes,
             hasAttributes: attributes && attributes.length > 0,
             hasAncestorData: ancestorData,

@@ -87,6 +87,9 @@ public class WorkbenchConfig {
     public String projectId;
     public String shortName;
     public String oauthClientId;
+    // Controls whether all api requests are traced and sent to Stackdriver tracing, or
+    // whether we only trace at the default frequency.
+    public boolean traceAllRequests;
   }
 
   public static class AdminConfig {

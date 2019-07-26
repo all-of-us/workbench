@@ -5,33 +5,33 @@ import {DataSetGuard} from './guards/dataset-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
-import {DataPageComponent} from 'app/views/data-page';
-import {DataUseAgreementComponent} from 'app/views/data-use-agreement';
-import {DataSetPageComponent} from 'app/views/dataset-page';
-import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
-import {AdminUserComponent} from './views/admin-user';
-import {CohortActionsComponent} from './views/cohort-actions';
-import {CohortListComponent} from './views/cohort-list';
-import {ConceptHomepageComponent} from './views/concept-homepage';
-import {ConceptSetActionsComponent} from './views/concept-set-actions';
-import {ConceptSetDetailsComponent} from './views/concept-set-details';
-import {ConceptSetListComponent} from './views/concept-set-list';
-import {HomepageComponent} from './views/homepage';
-import {NotebookListComponent} from './views/notebook-list';
-import {NotebookRedirectComponent} from './views/notebook-redirect/component';
-import {ProfilePageComponent} from './views/profile-page';
-import {SignInComponent} from './views/sign-in';
-import {SignedInComponent} from './views/signed-in/component';
-import {StigmatizationPageComponent} from './views/stigmatization-page';
-import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit';
-import {WorkspaceLibraryComponent} from './views/workspace-library';
-import {WorkspaceListComponent} from './views/workspace-list';
-import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
-import {WorkspaceComponent} from './views/workspace/component';
+import {DataPageComponent} from 'app/pages/data/data-page';
+import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
+import {DataUseAgreementComponent} from 'app/pages/profile/data-use-agreement';
+import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
+import {AdminUserComponent} from './pages/admin/admin-user';
+import {NotebookListComponent} from './pages/analysis/notebook-list';
+import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect/component';
+import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
+import {CohortListComponent} from './pages/data/cohort/cohort-list';
+import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
+import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
+import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
+import {ConceptSetListComponent} from './pages/data/concept/concept-set-list';
+import {HomepageComponent} from './pages/homepage/homepage';
+import {SignInComponent} from './pages/login/sign-in';
+import {ProfilePageComponent} from './pages/profile/profile-page';
+import {SignedInComponent} from './pages/signed-in/component';
+import {StigmatizationPageComponent} from './pages/workspace/stigmatization-page';
+import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
+import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
+import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
+import {WorkspaceListComponent} from './pages/workspace/workspace-list';
+import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
+import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
 import {BreadcrumbType, NavStore} from './utils/navigation';
-import {InteractiveNotebookComponent} from './views/interactive-notebook';
 
 
 declare let gtag: Function;
@@ -90,8 +90,8 @@ const routes: Routes = [
             runGuardsAndResolvers: 'always',
             children: [
               {
-                path: '',
-                component: WorkspaceComponent,
+                path: 'about',
+                component: WorkspaceAboutComponent,
                 data: {
                   title: 'View Workspace Details',
                   breadcrumb: BreadcrumbType.Workspace

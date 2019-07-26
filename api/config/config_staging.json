@@ -34,7 +34,8 @@
     "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
     "projectId": "all-of-us-rw-staging",
     "shortName": "Staging",
-    "oauthClientId": "657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com"
+    "oauthClientId": "657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com",
+    "traceAllRequests": false
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-staging.appspot.com/login",

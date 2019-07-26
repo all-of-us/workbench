@@ -30,7 +30,8 @@ export class ProfileStubVariables {
     complianceTrainingCompletionTime: null,
     complianceTrainingBypassTime: null,
     eraCommonsCompletionTime: null,
-    eraCommonsBypassTime: null
+    eraCommonsBypassTime: null,
+    authorities: []
   };
 }
 

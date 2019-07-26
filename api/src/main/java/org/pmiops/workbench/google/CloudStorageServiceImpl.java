@@ -89,7 +89,9 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   @Override
   public void copyBlob(BlobId from, BlobId to) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
-    CopyWriter w = storage.copy(CopyRequest.newBuilder().setSource(from).setTarget(to).build());
+    // Clears user-defined metadata, e.g. locking information on notebooks.
+    BlobInfo toInfo = BlobInfo.newBuilder(to).build();
+    CopyWriter w = storage.copy(CopyRequest.newBuilder().setSource(from).setTarget(toInfo).build());
     while (!w.isDone()) {
       w.copyChunk();
     }

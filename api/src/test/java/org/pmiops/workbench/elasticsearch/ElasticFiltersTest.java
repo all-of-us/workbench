@@ -10,13 +10,17 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.cdr.dao.CriteriaDao;
-import org.pmiops.workbench.cdr.model.Criteria;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.CriteriaSubType;
+import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
@@ -24,13 +28,12 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.TreeSubType;
-import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -45,27 +48,34 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ElasticFiltersTest {
 
-  @Autowired private CriteriaDao criteriaDao;
+  @Autowired private CBCriteriaDao cbCriteriaDao;
+  @Autowired private JdbcTemplate jdbcTemplate;
 
-  private static Criteria icd9Criteria() {
-    return new Criteria()
-        .type(TreeType.ICD9.toString())
-        .subtype(TreeSubType.CM.toString())
-        .attribute(Boolean.FALSE);
+  private static CBCriteria icd9Criteria() {
+    return new CBCriteria()
+        .domainId(DomainType.CONDITION.toString())
+        .type(CriteriaType.ICD9CM.toString())
+        .attribute(Boolean.FALSE)
+        .standard(false)
+        .synonyms("[CONDITION_rank1]");
   }
 
-  private static Criteria drugCriteria() {
-    return new Criteria()
-        .type(TreeType.DRUG.toString())
-        .subtype(TreeSubType.ATC.toString())
-        .attribute(Boolean.FALSE);
+  private static CBCriteria drugCriteria() {
+    return new CBCriteria()
+        .domainId(DomainType.DRUG.toString())
+        .type(CriteriaType.ATC.toString())
+        .attribute(Boolean.FALSE)
+        .standard(true);
   }
 
-  private static Criteria basicsCriteria() {
-    return new Criteria()
-        .type(TreeType.PPI.toString())
-        .subtype(TreeSubType.BASICS.toString())
-        .attribute(Boolean.FALSE);
+  private static CBCriteria basicsCriteria() {
+    return new CBCriteria()
+        .domainId(DomainType.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.BASICS.toString())
+        .attribute(Boolean.FALSE)
+        .standard(false)
+        .synonyms("+[SURVEY_rank1]");
   }
 
   private SearchParameter leafParam2;
@@ -75,145 +85,130 @@ public class ElasticFiltersTest {
     // Generate a simple test criteria tree
     // 1
     // | - 2
-    // | - 3 - 4
-    criteriaDao.save(
+    // | - 3
+    CBCriteria icd9Parent =
+        icd9Criteria().code("001").conceptId("771").group(true).selectable(false).parentId(0);
+    saveCriteriaWithPath("", icd9Parent);
+
+    CBCriteria icd9Child1 =
         icd9Criteria()
-            .id(1)
-            .code("001")
-            .conceptId("771")
-            .group(true)
-            .selectable(false)
-            .parentId(0)
-            .path(""));
-    criteriaDao.save(
-        icd9Criteria()
-            .id(2)
             .code("001.002")
             .conceptId("772")
             .group(false)
             .selectable(true)
-            .parentId(1)
-            .path("1"));
-    criteriaDao.save(
+            .parentId(icd9Parent.getId());
+    saveCriteriaWithPath(icd9Parent.getPath(), icd9Child1);
+    CBCriteria icd9Child2 =
         icd9Criteria()
-            .id(3)
             .code("001.003")
             .conceptId("773")
             .group(true)
             .selectable(true)
-            .parentId(1)
-            .path("1"));
-    criteriaDao.save(
-        icd9Criteria()
-            .id(4)
-            .code("001.003.004")
-            .conceptId("774")
-            .group(false)
-            .selectable(true)
-            .parentId(3)
-            .path("1.3"));
+            .parentId(icd9Parent.getId());
+    saveCriteriaWithPath(icd9Parent.getPath(), icd9Child2);
 
     // Singleton SNOMED code.
-    criteriaDao.save(
-        new Criteria()
-            .id(5)
+    cbCriteriaDao.save(
+        new CBCriteria()
             .code("005")
             .conceptId("775")
-            .domainId("Condition")
-            .type(TreeType.SNOMED.toString())
-            .subtype(TreeSubType.CM.toString())
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.SNOMED.toString())
             .attribute(Boolean.FALSE)
             .group(false)
             .selectable(true)
             .parentId(0)
             .path(""));
 
-    // Four node PPI tree, survey, question, 2 answers.
-    criteriaDao.save(
-        basicsCriteria().id(6).code("006").group(true).selectable(true).parentId(0).path(""));
-    criteriaDao.save(
+    // Four node PPI tree, survey, question, 1 answer.
+    CBCriteria survey = basicsCriteria().code("006").group(true).selectable(true).parentId(0);
+    saveCriteriaWithPath("", survey);
+
+    CBCriteria question =
         basicsCriteria()
-            .id(7)
             .code("007")
             .conceptId("777")
             .group(true)
             .selectable(true)
-            .parentId(6)
-            .path("6"));
-    criteriaDao.save(
+            .parentId(survey.getId());
+    saveCriteriaWithPath(survey.getPath(), question);
+
+    CBCriteria answer =
         basicsCriteria()
-            .id(8)
             .code("008")
             // Concept ID matches the question.
-            .conceptId("777")
+            .conceptId("7771")
             .group(false)
             .selectable(true)
-            .parentId(7)
-            .path("6.7"));
-    criteriaDao.save(
-        basicsCriteria()
-            .id(9)
-            .code("009")
-            // Concept ID matches the question.
-            .conceptId("777")
-            .group(false)
-            .selectable(true)
-            .parentId(7)
-            .path("6.7"));
+            .parentId(question.getId());
+    saveCriteriaWithPath(question.getPath(), answer);
 
     // drug tree
-    criteriaDao.save(
+    // Use jdbcTemplate to create/insert data into the ancestor table
+    // The codebase currently doesn't have a need to implement a DAO for this table
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (19069022, 21600009)");
+    CBCriteria drugParent =
+        drugCriteria().code("A").conceptId("21600001").group(true).selectable(false).parentId(0);
+    saveCriteriaWithPath("", drugParent);
+    CBCriteria drug1 =
         drugCriteria()
-            .id(10)
-            .code("A")
-            .conceptId("21600001")
-            .group(true)
-            .selectable(false)
-            .parentId(0)
-            .path(""));
-    criteriaDao.save(
-        drugCriteria()
-            .id(11)
             .code("A01")
             .conceptId("21600002")
             .group(true)
             .selectable(true)
-            .parentId(10)
-            .path("10"));
-    criteriaDao.save(
+            .parentId(drugParent.getId());
+    saveCriteriaWithPath(drugParent.getPath(), drug1);
+    CBCriteria drug2 =
         drugCriteria()
-            .id(12)
             .code("A01A")
             .conceptId("21600003")
             .group(true)
             .selectable(true)
-            .parentId(11)
-            .path("10.11"));
-    criteriaDao.save(
+            .parentId(drug1.getId());
+    saveCriteriaWithPath(drug1.getPath(), drug2);
+    CBCriteria drug3 =
         drugCriteria()
-            .id(13)
             .code("A01AA")
             .conceptId("21600004")
             .group(true)
             .selectable(true)
-            .parentId(12)
-            .path("10.11.12"));
-    criteriaDao.save(
+            .parentId(drug2.getId());
+    saveCriteriaWithPath(drug2.getPath(), drug3);
+    CBCriteria drug4 =
         drugCriteria()
-            .id(14)
             .code("9873")
             .conceptId("19069022")
             .group(false)
             .selectable(true)
-            .parentId(13)
-            .path("10.11.12.13"));
+            .type(CriteriaType.RXNORM.toString())
+            .parentId(drug3.getId());
+    saveCriteriaWithPath(drug3.getPath(), drug4);
 
     leafParam2 =
         new SearchParameter()
             .conceptId(772L)
-            .type(TreeType.ICD9.toString())
-            .subtype(TreeSubType.CM.toString())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .ancestorData(false)
+            .standard(false)
             .group(false);
+  }
+
+  @After
+  public void tearDown() {
+    // jdbcTemplate is used to create/insert data into the criteria ancestor table. The codebase
+    // currently doesn't have a need to implement a DAO for this table. The @DirtiesContext
+    // annotation seems to only recognized Hibernate persisted entities and their related tables.
+    // So the following tear down method needs to drop to table to keep from colliding with
+    // other test classes that also use this approach to create the cb_criteria_ancestor table. Not
+    // implementing this drop causes subsequent test suite runs to fail with a
+    // BadSqlGrammarException: StatementCallback; bad SQL grammar [create table
+    // cb_criteria_ancestor(ancestor_id integer, descendant_id integer)]; nested exception is
+    // org.h2.jdbc.JdbcSQLException: Table "CB_CRITERIA_ANCESTOR" already exists
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   private static final QueryBuilder singleNestedQuery(QueryBuilder... inners) {
@@ -257,7 +252,7 @@ public class ElasticFiltersTest {
   public void testLeafQuery() {
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -272,7 +267,7 @@ public class ElasticFiltersTest {
   public void testParentConceptQuery() {
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -281,20 +276,23 @@ public class ElasticFiltersTest {
                                 .addSearchParametersItem(
                                     new SearchParameter()
                                         .conceptId(21600002L)
-                                        .type(TreeType.DRUG.toString())
-                                        .subtype(TreeSubType.ATC.toString())
+                                        .domain(DomainType.DRUG.toString())
+                                        .type(CriteriaType.ATC.toString())
+                                        .ancestorData(true)
+                                        .standard(true)
                                         .group(true)))));
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                QueryBuilders.termsQuery("events.concept_id", ImmutableList.of("19069022"))));
+                QueryBuilders.termsQuery(
+                    "events.concept_id", ImmutableList.of("21600002", "21600009"))));
   }
 
   @Test
-  public void testParentCodeQuery() {
+  public void testICD9Query() {
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -303,21 +301,24 @@ public class ElasticFiltersTest {
                                 .addSearchParametersItem(
                                     new SearchParameter()
                                         .value("001")
-                                        .type(TreeType.ICD9.toString())
-                                        .subtype(TreeSubType.CM.toString())
-                                        .group(true)))));
+                                        .conceptId(771L)
+                                        .domain(DomainType.CONDITION.toString())
+                                        .type(CriteriaType.ICD9CM.toString())
+                                        .group(true)
+                                        .ancestorData(false)
+                                        .standard(false)))));
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
                 QueryBuilders.termsQuery(
-                    "events.source_concept_id", ImmutableList.of("772", "774"))));
+                    "events.source_concept_id", ImmutableList.of("771", "772", "773"))));
   }
 
   @Test
   public void testPPISurveyQuery() {
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -325,20 +326,23 @@ public class ElasticFiltersTest {
                             new SearchGroupItem()
                                 .addSearchParametersItem(
                                     new SearchParameter()
-                                        .type(TreeType.PPI.toString())
-                                        .subtype(TreeSubType.BASICS.toString())
+                                        .domain(DomainType.SURVEY.toString())
+                                        .type(CriteriaType.PPI.toString())
+                                        .subtype(CriteriaSubType.BASICS.toString())
+                                        .ancestorData(false)
+                                        .standard(false)
                                         .group(true)))));
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777"))));
+                QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("7771"))));
   }
 
   @Test
   public void testPPIQuestionQuery() {
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -346,14 +350,18 @@ public class ElasticFiltersTest {
                             new SearchGroupItem()
                                 .addSearchParametersItem(
                                     new SearchParameter()
-                                        .type(TreeType.PPI.toString())
-                                        .subtype(TreeSubType.BASICS.toString())
+                                        .domain(DomainType.SURVEY.toString())
+                                        .type(CriteriaType.PPI.toString())
+                                        .subtype(CriteriaSubType.BASICS.toString())
                                         .conceptId(777L)
+                                        .ancestorData(false)
+                                        .standard(false)
                                         .group(true)))));
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777"))));
+                QueryBuilders.termsQuery(
+                    "events.source_concept_id", ImmutableList.of("7771", "777"))));
   }
 
   @Test
@@ -362,7 +370,7 @@ public class ElasticFiltersTest {
         new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).addOperandsItem("1");
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -370,23 +378,55 @@ public class ElasticFiltersTest {
                             new SearchGroupItem()
                                 .addSearchParametersItem(
                                     new SearchParameter()
-                                        .type(TreeType.PPI.toString())
-                                        .subtype(TreeSubType.BASICS.toString())
+                                        .domain(DomainType.SURVEY.toString())
+                                        .type(CriteriaType.PPI.toString())
+                                        .subtype(CriteriaSubType.BASICS.toString())
+                                        .conceptId(7771L)
+                                        .group(false)
+                                        .ancestorData(false)
+                                        .standard(false)
+                                        .addAttributesItem(attr)))));
+    assertThat(resp)
+        .isEqualTo(
+            singleNestedQuery(
+                QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("7771")),
+                QueryBuilders.rangeQuery("events.value_as_number").gte(1.0F).lte(1.0F)));
+  }
+
+  @Test
+  public void testPPIAnswerQueryCat() {
+    Attribute attr = new Attribute().name(AttrName.CAT).operator(Operator.IN).addOperandsItem("1");
+    QueryBuilder resp =
+        ElasticFilters.fromCohortSearch(
+            cbCriteriaDao,
+            new SearchRequest()
+                .addIncludesItem(
+                    new SearchGroup()
+                        .addItemsItem(
+                            new SearchGroupItem()
+                                .addSearchParametersItem(
+                                    new SearchParameter()
+                                        .domain(DomainType.SURVEY.toString())
+                                        .type(CriteriaType.PPI.toString())
+                                        .subtype(CriteriaSubType.BASICS.toString())
                                         .conceptId(777L)
-                                        .group(true)
+                                        .group(false)
+                                        .ancestorData(false)
+                                        .standard(false)
                                         .addAttributesItem(attr)))));
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
                 QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777")),
-                QueryBuilders.rangeQuery("events.value_as_number").gte(1.0F).lte(1.0F)));
+                QueryBuilders.termsQuery(
+                    "events.value_as_source_concept_id", ImmutableList.of("1"))));
   }
 
   @Test
   public void testAgeAtEventModifierQuery() {
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -409,7 +449,7 @@ public class ElasticFiltersTest {
   public void testDateModifierQuery() {
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -433,7 +473,7 @@ public class ElasticFiltersTest {
   public void testVisitsModifierQuery() {
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -456,7 +496,7 @@ public class ElasticFiltersTest {
   public void testNumOfOccurrencesModifierQuery() {
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -480,12 +520,14 @@ public class ElasticFiltersTest {
     SearchParameter heightAnyParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.PM.toString())
-            .subtype(TreeSubType.HEIGHT.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(false);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -507,13 +549,15 @@ public class ElasticFiltersTest {
     SearchParameter heightParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.PM.toString())
-            .subtype(TreeSubType.HEIGHT.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(false)
             .addAttributesItem(attr);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -538,13 +582,15 @@ public class ElasticFiltersTest {
     SearchParameter weightParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.PM.toString())
-            .subtype(TreeSubType.HEIGHT.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
+            .standard(false)
+            .ancestorData(false)
             .group(false)
             .addAttributesItem(attr);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -562,12 +608,14 @@ public class ElasticFiltersTest {
     SearchParameter genderParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.GEN.toString())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.GENDER.toString())
+            .standard(true)
+            .ancestorData(false)
             .group(false);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -584,12 +632,14 @@ public class ElasticFiltersTest {
     SearchParameter genderParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.GEN.toString())
-            .group(false);
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.GENDER.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addExcludesItem(
                     new SearchGroup()
@@ -606,12 +656,14 @@ public class ElasticFiltersTest {
     SearchParameter genderParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.GEN.toString())
-            .group(false);
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.GENDER.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -631,12 +683,14 @@ public class ElasticFiltersTest {
     SearchParameter raceParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.RACE.toString())
-            .group(false);
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.RACE.toString())
+            .group(false)
+            .ancestorData(false)
+            .standard(true);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -653,13 +707,14 @@ public class ElasticFiltersTest {
     SearchParameter ethParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.ETH.toString())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.ETHNICITY.toString())
             .group(false)
-            .conceptId(Long.parseLong(conceptId));
+            .ancestorData(false)
+            .standard(true);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -679,13 +734,15 @@ public class ElasticFiltersTest {
     SearchParameter pregParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.PM.toString())
-            .subtype(TreeSubType.PREG.toString())
+            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .type(CriteriaType.PPI.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(false)
             .attributes(Arrays.asList(attr));
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -710,13 +767,15 @@ public class ElasticFiltersTest {
     SearchParameter measParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.MEAS.toString())
-            .subtype(TreeSubType.LAB.toString())
+            .domain(DomainType.MEASUREMENT.toString())
+            .type(CriteriaType.LOINC.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .attributes(Arrays.asList(attr));
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -735,11 +794,14 @@ public class ElasticFiltersTest {
     SearchParameter visitParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.VISIT.toString())
+            .domain(DomainType.VISIT.toString())
+            .type(CriteriaType.VISIT.toString())
+            .ancestorData(false)
+            .standard(true)
             .group(false);
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -757,9 +819,11 @@ public class ElasticFiltersTest {
     Object right = now.minusYears(20).toLocalDate();
     SearchParameter ethParam =
         new SearchParameter()
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.AGE.toString())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.AGE.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .addAttributesItem(
                 new Attribute()
                     .name(AttrName.AGE)
@@ -767,7 +831,7 @@ public class ElasticFiltersTest {
                     .operands(Arrays.asList("20", "34")));
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -782,15 +846,17 @@ public class ElasticFiltersTest {
   }
 
   @Test
-  public void testAgeAndVisitQuery() {
+  public void testAgeAndEthnicityQuery() {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
     Object left = now.minusYears(34).minusYears(1).toLocalDate();
     Object right = now.minusYears(20).toLocalDate();
     SearchParameter ageParam =
         new SearchParameter()
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.AGE.toString())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.AGE.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .addAttributesItem(
                 new Attribute()
                     .name(AttrName.AGE)
@@ -800,13 +866,15 @@ public class ElasticFiltersTest {
     SearchParameter ethParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
-            .type(TreeType.DEMO.toString())
-            .subtype(TreeSubType.ETH.toString())
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.ETHNICITY.toString())
             .group(false)
+            .ancestorData(false)
+            .standard(true)
             .conceptId(Long.parseLong(conceptId));
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
-            criteriaDao,
+            cbCriteriaDao,
             new SearchRequest()
                 .addIncludesItem(
                     new SearchGroup()
@@ -818,5 +886,12 @@ public class ElasticFiltersTest {
             nonNestedQuery(
                 QueryBuilders.rangeQuery("birth_datetime").gt(left).lte(right).format("yyyy-MM-dd"),
                 QueryBuilders.termsQuery("ethnicity_concept_id", ImmutableList.of(conceptId))));
+  }
+
+  private void saveCriteriaWithPath(String path, CBCriteria criteria) {
+    cbCriteriaDao.save(criteria);
+    String pathEnd = String.valueOf(criteria.getId());
+    criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);
+    cbCriteriaDao.save(criteria);
   }
 }

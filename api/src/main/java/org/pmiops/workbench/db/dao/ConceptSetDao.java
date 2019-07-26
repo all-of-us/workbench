@@ -23,6 +23,7 @@ public interface ConceptSetDao extends CrudRepository<ConceptSet, Long> {
           .put(Domain.OBSERVATION, "observation")
           .put(Domain.PROCEDURE, "procedure_occurrence")
           .put(Domain.VISIT, "visit_occurrence")
+          .put(Domain.SURVEY, "observation")
           .build();
 
   List<ConceptSet> findByWorkspaceId(long workspaceId);
