@@ -11,10 +11,10 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 
+import {BugReportComponent} from 'app/components/bug-report';
 import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
 import {WorkspaceNavBarComponent} from 'app/pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from 'app/pages/workspace/workspace-share';
-import {BugReportComponent} from 'app/components/bug-report';
 import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
 
 import {UserService, WorkspaceAccessLevel} from 'generated';

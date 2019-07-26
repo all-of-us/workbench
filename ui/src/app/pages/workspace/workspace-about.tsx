@@ -14,10 +14,10 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {ResetClusterButton} from 'app/pages/analysis/reset-cluster-button';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
+import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUrlParams, withUserProfile} from 'app/utils';
 import {Authority, CdrVersion, Profile, UserRole, WorkspaceAccessLevel} from 'generated/fetch';
-import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 
 
 interface WorkspaceState {

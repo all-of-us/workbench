@@ -13,6 +13,7 @@ import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
+import {ConceptTable} from 'app/pages/data/concept/concept-table';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -26,7 +27,6 @@ import {ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {Concept, ConceptSet} from 'generated/fetch';
-import {ConceptTable} from 'app/pages/data/concept/concept-table';
 
 const styles = reactStyles({
   conceptSetHeader: {

@@ -5,12 +5,12 @@ import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 import {authDomainApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {
   Profile,
 } from 'generated/fetch';
-import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 
 const styles = reactStyles({
   colStyle: {

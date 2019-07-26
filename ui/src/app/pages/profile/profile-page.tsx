@@ -10,13 +10,13 @@ import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import { getRegistrationTasksMap } from 'app/pages/homepage/registration-dashboard';
+import { ProfileRegistrationStepStatus } from 'app/pages/profile/profile-registration-step-status';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
-import { ProfileRegistrationStepStatus } from 'app/pages/profile/profile-registration-step-status';
 
 
 

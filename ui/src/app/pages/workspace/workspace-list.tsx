@@ -5,6 +5,7 @@ import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navi
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
 import {AlertDanger} from 'app/components/alert';
+import {BugReportModal} from 'app/components/bug-report';
 import {
   Button,
   CardButton,
@@ -20,6 +21,7 @@ import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -28,14 +30,12 @@ import {
   ReactWrapperBase,
   withUserProfile
 } from 'app/utils';
-import {BugReportModal} from 'app/components/bug-report';
 import {
   BillingProjectStatus,
   ErrorResponse,
   Profile, UserRole,
 } from 'generated/fetch';
 import * as React from 'react';
-import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 
 const styles = reactStyles({
   fadeBox: {

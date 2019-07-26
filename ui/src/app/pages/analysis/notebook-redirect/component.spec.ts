@@ -9,9 +9,9 @@ import {Observable} from 'rxjs/Observable';
 
 import {NotebookComponent} from 'app/icons/notebook/component';
 import {ReminderComponent} from 'app/icons/reminder';
+import {NotebookRedirectComponent} from 'app/pages/analysis/notebook-redirect/component';
 import {queryParamsStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
-import {NotebookRedirectComponent} from 'app/pages/analysis/notebook-redirect/component';
 import {environment} from 'environments/environment';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';

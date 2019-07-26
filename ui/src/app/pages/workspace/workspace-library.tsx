@@ -6,13 +6,13 @@ import {Clickable} from 'app/components/buttons';
 import {Header} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
+import {WorkspaceCard} from 'app/pages/workspace/workspace-list';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {featuredWorkspacesConfigApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {ErrorResponse, Profile} from 'generated/fetch';
-import {WorkspaceCard} from 'app/pages/workspace/workspace-list';
 
 const styles = reactStyles({
   navPanel: {

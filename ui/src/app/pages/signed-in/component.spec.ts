@@ -21,9 +21,9 @@ import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
 import {BreadcrumbComponent} from 'app/components/breadcrumb';
+import {BugReportComponent} from 'app/components/bug-report';
 import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
 import {SignedInComponent} from 'app/pages/signed-in/component';
-import {BugReportComponent} from 'app/components/bug-report';
 import {CdrVersionsApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 

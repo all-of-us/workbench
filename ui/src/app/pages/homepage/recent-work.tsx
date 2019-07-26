@@ -7,7 +7,6 @@ import {Scroll} from 'app/icons/scroll';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
 
 import {ResourceCard} from 'app/components/resource-card';
-import {ReactWrapperBase} from 'app/utils';
 import {RecentResource} from 'generated/fetch';
 
 export const RecentWork = (fp.flow as any)(

@@ -11,6 +11,9 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
+import {ConceptNavigationBar} from 'app/pages/data/concept/concept-navigation-bar';
+import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
+import {ConceptTable} from 'app/pages/data/concept/concept-table';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -29,9 +32,6 @@ import {
   SurveyQuestionsResponse,
   VocabularyCount,
 } from 'generated/fetch';
-import {ConceptNavigationBar} from 'app/pages/data/concept/concept-navigation-bar';
-import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
-import {ConceptTable} from 'app/pages/data/concept/concept-table';
 import {SurveyDetails} from './survey-details';
 
 const styles = reactStyles({
