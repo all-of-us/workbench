@@ -19,6 +19,14 @@ const styles = {
     outlineColor: 'transparent',
     color: colors.accent,
     backgroundColor: 'transparent',
+  },
+  borderStyle: {
+    border: `1px solid ${colors.primary}`,
+    color: colors.primary,
+    borderRadius: '8px',
+    marginLeft: '2.3rem',
+    padding: '0.5rem',
+    width: '19rem'
   }
 };
 
@@ -48,15 +56,15 @@ export class AccountCreationSuccess
     return <React.Fragment>
       <div style={{padding: '3rem 3rem 0 3rem', marginLeft: '-0.5rem', marginRight: '-0.5'}}>
         <BolderHeader>
-          CONGRATULATIONS!
+          Congratulations!
         </BolderHeader>
         <div>
-          <SmallHeader>
+          <SmallHeader style={{color: colors.primary}}>
             Your All of Us research account has been created!
           </SmallHeader>
         </div>
         <div>
-          <Header style={{fontWeight: 400}}>
+          <Header style={{fontWeight: 400, textColor: colors.primary}}>
             Your new account
           </Header>
         </div>
@@ -71,12 +79,12 @@ export class AccountCreationSuccess
           </Header>
         </div>
         <div>
-          <SmallHeader>
+          <SmallHeader style={{color: colors.primary}}>
             Check your contact email for instructions on getting started.
           </SmallHeader>
         </div>
         <div>
-          <SmallHeader>
+          <SmallHeader style={{color: colors.primary}}>
             Your contact email is: {this.state.contactEmail}
           </SmallHeader>
         </div>
@@ -105,6 +113,12 @@ export class AccountCreationSuccess
           }}
           onClose={() => this.setState({updateModal: false})}
       />}
+      <div style={{paddingTop: '1.5rem'}}>
+        <div style={styles.borderStyle}>
+          Please note: For full access to the Research Workbench data and tools, you'll be required
+          to complete the necessary registration steps
+        </div>
+      </div>
     </React.Fragment>;
   }
 }
