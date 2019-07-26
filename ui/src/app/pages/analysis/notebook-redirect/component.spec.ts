@@ -13,7 +13,6 @@ import {queryParamsStore, serverConfigStore, urlParamsStore} from 'app/utils/nav
 import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebookRedirectComponent} from 'app/pages/analysis/notebook-redirect/component';
 import {environment} from 'environments/environment';
-import {NotebookRedirectComponent} from 'app/pages/analysis/notebook-redirect/component';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
 import {LeoClusterServiceStub} from 'testing/stubs/leo-cluster-service-stub';

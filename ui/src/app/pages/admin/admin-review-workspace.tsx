@@ -7,7 +7,7 @@ import {Button} from 'app/components/buttons';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
-import {BugReportModal} from 'app/widgets/bug-report';
+import {BugReportModal} from 'app/components/bug-report';
 import {Profile, Workspace} from 'generated/fetch';
 
 const styles = reactStyles({

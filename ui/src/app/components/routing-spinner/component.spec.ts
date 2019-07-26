@@ -11,7 +11,7 @@ import {
 
 import {ServerConfigService} from 'app/services/server-config.service';
 
-import {RoutingSpinnerComponent} from 'app/pages/routing-spinner/component';
+import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
 
 describe('RoutingSpinnerComponent', () => {
   let fixture: ComponentFixture<RoutingSpinnerComponent>;

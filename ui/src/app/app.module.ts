@@ -25,7 +25,7 @@ import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspac
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
 import {BreadcrumbComponent} from './components/breadcrumb';
-import {BugReportComponent} from './widgets/bug-report';
+import {BugReportComponent} from './components/bug-report';
 import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
 import {CohortListComponent} from './pages/data/cohort/cohort-list';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
@@ -33,14 +33,14 @@ import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actio
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
 import {ConceptSetListComponent} from './pages/data/concept/concept-set-list';
 import {DataUseAgreementComponent} from './pages/profile/data-use-agreement';
-import {ErrorHandlerComponent} from './pages/error-handler/component';
+import {ErrorHandlerComponent} from './components/error-handler/component';
 import {HomepageComponent} from './pages/homepage/homepage';
 import {InitialErrorComponent} from './pages/initial-error/component';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect/component';
 import {PageTemplateSignedOutComponent} from './pages/login/page-template-signed-out/component';
 import {ProfilePageComponent} from './pages/profile/profile-page';
-import {RoutingSpinnerComponent} from './pages/routing-spinner/component';
+import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {SignInComponent} from './pages/login/sign-in';
 import {SignedInComponent} from './pages/signed-in/component';
 import {StigmatizationPageComponent} from './pages/workspace/stigmatization-page';

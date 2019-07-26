@@ -14,7 +14,7 @@ import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
 import {WorkspaceNavBarComponent} from 'app/pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from 'app/pages/workspace/workspace-share';
-import {BugReportComponent} from 'app/widgets/bug-report';
+import {BugReportComponent} from 'app/components/bug-report';
 import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
 
 import {UserService, WorkspaceAccessLevel} from 'generated';

@@ -15,7 +15,7 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {StatusCheckService} from 'app/services/status-check.service';
 
 
-import {ErrorHandlerComponent} from 'app/pages/error-handler/component';
+import {ErrorHandlerComponent} from 'app/components/error-handler/component';
 
 describe('ErrorHandlerComponent', () => {
   let fixture: ComponentFixture<ErrorHandlerComponent>;

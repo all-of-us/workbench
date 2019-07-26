@@ -28,7 +28,7 @@ import {
   ReactWrapperBase,
   withUserProfile
 } from 'app/utils';
-import {BugReportModal} from 'app/widgets/bug-report';
+import {BugReportModal} from 'app/components/bug-report';
 import {
   BillingProjectStatus,
   ErrorResponse,
