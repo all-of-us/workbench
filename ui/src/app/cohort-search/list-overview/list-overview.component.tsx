@@ -4,6 +4,7 @@ import {GenderChart} from 'app/cohort-search/gender-chart/gender-chart.component
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {mapRequest} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
+import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {ClrIcon} from 'app/components/icons';
 import {TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -19,7 +20,6 @@ import {
   navigateByUrl,
   urlParamsStore
 } from 'app/utils/navigation';
-import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal';
 import {Cohort, TemporalTime} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import {Menu} from 'primereact/menu';
