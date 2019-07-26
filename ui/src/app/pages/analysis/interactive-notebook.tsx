@@ -204,6 +204,25 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         && lastLockedBy !== userProfileStore.getValue().profile.username;
     }
 
+    private renderNotebookText() {
+      switch (this.state.clusterStatus) {
+        case ClusterStatus.Starting:
+        case ClusterStatus.Stopping:
+        case ClusterStatus.Stopped:
+          return 'Resuming your Jupyter environment. This may take up to 1 minute.';
+        case ClusterStatus.Deleting:
+        case ClusterStatus.Creating:
+        case ClusterStatus.Deleted:
+          return 'Preparing your Jupyter environment. This may take up to 10 minutes.';
+        case ClusterStatus.Error:
+          return 'Error creating your jupyter environment. Please try clicking' +
+            ' the reset notebook server on Workspace About Page.';
+        default:
+          return 'Connecting to the notebook server';
+
+      }
+    }
+
     render() {
       const {
         html,
@@ -221,7 +240,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
             {userRequestedExecutableNotebook ? (
               <div style={{...styles.navBarItem, textTransform: 'none'}}>
                 <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
-                Preparing your Jupyter environment. This may take up to 10 minutes.
+                {this.renderNotebookText()}
               </div>) : (
               <div style={{display: 'flex'}}>
                 <div style={
