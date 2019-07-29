@@ -4,7 +4,6 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
 import {navigateByUrl} from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActions';
 import {Action, ResourceCardTemplate} from 'app/views/resource-card-template';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/views/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/views/with-error-modal';
@@ -13,8 +12,8 @@ import {RecentResource} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
 
-interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
-  resourceCard: RecentResource; // Destructure this into used parameters only
+interface Props extends WorkspaceResourceProps, WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
+  resourceCard: RecentResource;
   onUpdate: Function;
 }
 
@@ -180,7 +179,7 @@ export const NotebookResourceCard = fp.flow(
         displayName={this.displayName}
         description={''}
         displayDate={formatRecentResourceDisplayDate(this.props.resourceCard.modifiedTime)}
-        footerText={ResourceType.NOTEBOOK}
+        footerText={this.resourceType}
         footerColor={colors.resourceCardHighlights.notebook}
       />
     </React.Fragment>;

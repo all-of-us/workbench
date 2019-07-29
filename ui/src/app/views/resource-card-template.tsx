@@ -78,7 +78,6 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
     super(props);
   }
 
-  // TODO eric: marginTOp this is a modified value
   render() {
     return <React.Fragment>
 
