@@ -195,17 +195,13 @@ export const AttributesPage = withCurrentWorkspace() (
                 }
               }
             });
-            setTimeout(() => this.setState({form, loading: false}), 1000);
+            this.setState({form, loading: false});
           });
       } else {
         options.unshift({label: 'Any', value: AttrName[AttrName.ANY]});
         form.NUM = node.subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
-          : [{
-            name: node.subtype,
-            operator: AttrName.ANY,
-            operands: []
-          }];
+          : [{name: node.subtype, operator: AttrName.ANY, operands: []}];
         this.setState({form, options, count: node.count, loading: false});
       }
     }
@@ -230,6 +226,7 @@ export const AttributesPage = withCurrentWorkspace() (
       const {form} = this.state;
       form.NUM[index].operator = value;
       if (this.isBP) {
+        // for blood pressure, either both operators have to be 'ANY' OR neither can be 'ANY'
         const other = index === 0 ? 1 : 0;
         if (value === AttrName[AttrName.ANY]) {
           form.NUM[other].operator = AttrName[AttrName.ANY];
@@ -329,7 +326,6 @@ export const AttributesPage = withCurrentWorkspace() (
       if (form.EXISTS) {
         name = node.name + ' (Any)';
       } else {
-        name = this.paramName;
         form.NUM.filter(at => at.operator).forEach(({operator, operands, conceptId}) => {
           const attr = {name: AttrName.NUM, operator, operands};
           if (node.subtype === CriteriaSubType.BP) {
@@ -353,9 +349,8 @@ export const AttributesPage = withCurrentWorkspace() (
           }, []);
           attrs.push({name: AttrName.CAT, operator: Operator.IN, operands: catOperands});
         }
-        name += (this.isPM && attrs[0] && attrs[0].name !== AttrName.ANY
-          ? PM_UNITS[node.subtype]
-          : '') + ')';
+        name = this.paramName +
+          (this.isPM && attrs[0].name !== AttrName.ANY ? PM_UNITS[node.subtype] : '') + ')';
       }
       return {
         ...node,
@@ -368,7 +363,7 @@ export const AttributesPage = withCurrentWorkspace() (
     get paramName() {
       const {node} = this.props;
       const {form} = this.state;
-      const vals = [];
+      const selectionDisplay = [];
       let name = '';
       form.NUM.filter(at => at.operator).forEach((attr, i) => {
         if (attr.operator === AttrName.ANY) {
@@ -388,10 +383,10 @@ export const AttributesPage = withCurrentWorkspace() (
         }
       });
       if (name !== '') {
-        vals.push(name);
+        selectionDisplay.push(name);
       }
-      form.CAT.filter(ca => ca.checked).forEach(attr => vals.push(attr.conceptName));
-      return node.name + ' (' + vals.join(', ');
+      form.CAT.filter(ca => ca.checked).forEach(attr => selectionDisplay.push(attr.conceptName));
+      return node.name + ' (' + selectionDisplay.join(', ');
     }
 
     requestPreview() {
