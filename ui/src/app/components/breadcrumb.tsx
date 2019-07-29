@@ -38,7 +38,7 @@ export const getTrail = (type: BreadcrumbType, data): {label: string, url: strin
     case BreadcrumbType.Workspace:
       return [
         ...getTrail(BreadcrumbType.Workspaces, data),
-        {label: workspace ? workspace.name : '...', url: prefix}
+        {label: workspace ? workspace.name : '...', url: `${prefix}/data`}
       ];
     case BreadcrumbType.WorkspaceEdit:
       return [
