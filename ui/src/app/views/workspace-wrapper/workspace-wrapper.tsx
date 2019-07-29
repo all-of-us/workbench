@@ -1,10 +1,10 @@
 import {Component} from '@angular/core';
 import * as React from 'react';
 
-import {ReactWrapperBase} from 'app/utils';
+import {ReactWrapperBase, withUrlParams} from 'app/utils';
 import {WorkspaceNavBarReact} from 'app/views/workspace-nav-bar';
 
-export const WorkspaceWrapper = class extends React.Component<{},
+export const WorkspaceWrapper = withUrlParams()(class extends React.Component<{urlParams: any},
   {displayNavBar: boolean}> {
   constructor(props) {
     super(props);
@@ -14,6 +14,11 @@ export const WorkspaceWrapper = class extends React.Component<{},
   }
 
   componentDidMount() {
+    this.getWorkspace();
+  }
+
+  async getWorkspace() {
+    const {urlParams: {ns, wsid}} = this.props;
 
   }
 
@@ -27,7 +32,7 @@ export const WorkspaceWrapper = class extends React.Component<{},
       {displayNavBar && <WorkspaceNavBarReact/>}
     </React.Fragment>;
   }
-};
+)};
 
 @Component({
   template: '<div #root></div>'
