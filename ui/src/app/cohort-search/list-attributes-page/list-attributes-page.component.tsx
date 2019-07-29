@@ -298,7 +298,9 @@ export const AttributesPage = withCurrentWorkspace() (
       const {node: {conceptId, id}} = this.props;
       const {form} = this.state;
       const code = form.EXISTS ? 'Any' : form.NUM.reduce((acc, attr) => {
-        acc += optionUtil[attr.operator].code;
+        if (attr.operator) {
+          acc += optionUtil[attr.operator].code;
+        }
         return acc;
       }, '');
       return `param${(conceptId || id) + code}`;
@@ -318,7 +320,7 @@ export const AttributesPage = withCurrentWorkspace() (
         name = node.name + ' (Any)';
       } else {
         name = this.paramName;
-        form.NUM.forEach(({operator, operands, conceptId}) => {
+        form.NUM.filter(at => at.operator).forEach(({operator, operands, conceptId}) => {
           const attr = {name: AttrName.NUM, operator, operands};
           if (node.subtype === CriteriaSubType.BP) {
             attr['conceptId'] = conceptId;
@@ -335,7 +337,7 @@ export const AttributesPage = withCurrentWorkspace() (
         if (form.CAT.some(at => at.checked)) {
           const catOperands = form.CAT.reduce((checked, current) => {
             if (current.checked) {
-              checked.push(current.valueAsConceptId);
+              checked.push(current.valueAsConceptId.toString());
             }
             return checked;
           }, []);
@@ -356,8 +358,9 @@ export const AttributesPage = withCurrentWorkspace() (
     get paramName() {
       const {node} = this.props;
       const {form} = this.state;
-      let name = node.name + ' (';
-      form.NUM.forEach((attr, i) => {
+      const vals = [];
+      let name = '';
+      form.NUM.filter(at => at.operator).forEach((attr, i) => {
         if (attr.operator === AttrName.ANY) {
           if (i === 0) {
             name += 'Any';
@@ -369,11 +372,16 @@ export const AttributesPage = withCurrentWorkspace() (
           if (node.subtype === CriteriaSubType.BP) {
             name += attr.name + ' ';
           }
-          name += optionUtil[attr.operator].display
-            + attr.operands.join('-');
+          name += optionUtil[attr.operator].display + attr.operands
+            .map(op => parseInt(op, 10).toLocaleString())
+            .join('-');
         }
       });
-      return name;
+      if (name !== '') {
+        vals.push(name);
+      }
+      form.CAT.filter(ca => ca.checked).forEach(attr => vals.push(attr.conceptName));
+      return node.name + ' (' + vals.join(', ');
     }
 
     requestPreview() {
