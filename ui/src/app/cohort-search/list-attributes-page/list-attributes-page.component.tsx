@@ -275,16 +275,16 @@ export const AttributesPage = withCurrentWorkspace() (
               formValid = false;
             }
         }
-        if (attr.operands.includes(NaN)) {
+        const operands = attr.operands.map(op => parseInt(op, 10));
+        if (operands.includes(NaN)) {
           formValid = false;
           acc.add('Form can only accept valid numbers');
         }
-        if (this.isPM && attr.operands.some(op => parseInt(op, 10) < 0)) {
+        if (this.isPM && operands.some(op => op < 0)) {
           formValid = false;
           acc.add('Form cannot accept negative values');
         }
-        if (this.isMeasurement && attr.operands
-          .some(op => parseInt(op, 10) < attr.MIN || parseInt(op, 10) > attr.MAX)) {
+        if (this.isMeasurement && operands.some(op => op < attr.MIN || op > attr.MAX)) {
           formValid = false;
           acc.add(`Values must be between ${attr.MIN} and ${attr.MAX}`);
         }
