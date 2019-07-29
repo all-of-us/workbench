@@ -1,5 +1,5 @@
+import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import * as React from 'react';
-import {ConfirmDeleteModal} from "app/views/confirm-delete-modal";
 
 interface State {
   show: boolean;
@@ -9,7 +9,9 @@ interface State {
 }
 
 export interface WithConfirmDeleteModalProps {
-  showConfirmDeleteModal: (displayName: string, resourceType: string, receiveDelete: () => Promise<void>) => void;
+  showConfirmDeleteModal: (displayName: string,
+                           resourceType: string,
+                           receiveDelete: () => Promise<void>) => void;
 }
 
 export const withConfirmDeleteModal = () => {
@@ -27,7 +29,7 @@ export const withConfirmDeleteModal = () => {
         };
       }
 
-      showConfirmDeleteModal(displayName: string, resourceType: string, receiveDelete: () => Promise<void>) {
+      showConfirmDeleteModal(displayName, resourceType, receiveDelete) {
         this.setState({
           show: true,
           displayName: displayName,
@@ -49,10 +51,10 @@ export const withConfirmDeleteModal = () => {
             closeFunction={() => this.close()} />
           }
 
-          <WrappedComponent showConfirmDeleteModal={(displayName, resourceType, receiveDelete) => {
-            this.showConfirmDeleteModal(displayName, resourceType, receiveDelete)}}
+          <WrappedComponent showConfirmDeleteModal={(displayName, resourceType, receiveDelete) =>
+            this.showConfirmDeleteModal(displayName, resourceType, receiveDelete)}
                             {...this.props} />
-        </React.Fragment>
+        </React.Fragment>;
       }
     };
   };

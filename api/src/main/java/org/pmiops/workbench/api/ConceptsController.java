@@ -309,10 +309,10 @@ public class ConceptsController implements ConceptsApiDelegate {
       String workspaceNamespace, String workspaceId, String domainValue) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DomainValuesResponse response = new DomainValuesResponse();
+
     Domain domain = Domain.valueOf(domainValue);
     FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
-
-    DomainValuesResponse response = new DomainValuesResponse();
     response.setItems(
         fieldList.stream()
             .map(field -> new DomainValue().value(field.getName()))

@@ -10,12 +10,16 @@ handlers:
   secure: always
   http_headers:
     Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
+    X-XSS-Protection: 1
+    X-Content-Type-Options: "nosniff"
 - url: /.*
   static_files: dist/index.html
   upload: dist/index.html
   secure: always
   http_headers:
     Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
+    X-XSS-Protection: 1
+    X-Content-Type-Options: "nosniff"
 
 # If a file (relative path under ui/) matches this regex, do not upload it.
 # Skip everything not starting with "dist".

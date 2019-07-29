@@ -1,5 +1,5 @@
+import {SpinnerOverlay} from 'app/components/spinners';
 import * as React from 'react';
-import {SpinnerOverlay} from "app/components/spinners";
 
 interface State {
   show: boolean;
@@ -36,7 +36,7 @@ export const withSpinnerOverlay = () => {
           <WrappedComponent showSpinner={this.showSpinner}
                             hideSpinner={this.hideSpinner}
                             {...this.props} />
-        </React.Fragment>
+        </React.Fragment>;
       }
     };
   };

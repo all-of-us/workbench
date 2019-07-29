@@ -1,9 +1,0 @@
-<clr-tooltip id="toolTip">
-  <clr-icon #infoIcon clrTooltipTrigger
-            shape="info-standard" class="is-solid info-icon"
-            (mouseenter)="findPosition()"></clr-icon>
-  <clr-tooltip-content clrPosition={{direction}}
-                       clrSize="lg" *clrIfOpen>
-    <ng-content></ng-content>
-  </clr-tooltip-content>
-</clr-tooltip>

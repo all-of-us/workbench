@@ -336,14 +336,18 @@ public class DataSetServiceImpl implements DataSetService {
   @VisibleForTesting
   public ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> valueSetList, Domain d) {
     List<String> values =
-        valueSetList.stream().map(valueSet -> valueSet.getValue()).collect(Collectors.toList());
+        valueSetList.stream()
+            .map(valueSet -> valueSet.getValue().toUpperCase())
+            .collect(Collectors.toList());
     values.add(0, "CORE_TABLE_FOR_DOMAIN");
+
     String domainAsName = d.toString().charAt(0) + d.toString().substring(1).toLowerCase();
 
     String valuesQuery =
-        "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
-    Map<String, QueryParameterValue> valuesQueryParams = new HashMap<>();
+        "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
+            + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
 
+    Map<String, QueryParameterValue> valuesQueryParams = new HashMap<>();
     valuesQueryParams.put("pDomain", QueryParameterValue.string(domainAsName));
     valuesQueryParams.put(
         "pValuesList", QueryParameterValue.array(values.toArray(new String[0]), String.class));

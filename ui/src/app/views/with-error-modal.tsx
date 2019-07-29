@@ -1,5 +1,5 @@
+import {TextModal} from 'app/components/text-modal';
 import * as React from 'react';
-import {TextModal} from "app/components/text-modal";
 
 interface State {
   show: boolean;
@@ -41,7 +41,7 @@ export const withErrorModal = () => {
           }
           <WrappedComponent showErrorModal={(tile, body) => this.showErrorModal(tile, body)}
                             {...this.props} />
-        </React.Fragment>
+        </React.Fragment>;
       }
     };
   };

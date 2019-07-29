@@ -75,7 +75,7 @@ interface Props {
 export class ResourceCardTemplate extends React.Component<Props, {}> {
 
   constructor(props: Props) {
-    super(props)
+    super(props);
   }
 
   // TODO eric: marginTOp this is a modified value
