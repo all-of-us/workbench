@@ -381,10 +381,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw e;
       }
 
+      log.info("Service Account does not have access to bucket " + bucketName + ". Retrying for another " + retryPeriodSeconds + " seconds.");
       try {
         Thread.sleep(SLEEP_INTERVAL_SECONDS * 1000);
       } catch (InterruptedException ex) {
-        ex.printStackTrace();
+        e.printStackTrace();
       }
 
       copyBlobWithRetries(bucketName, b, retryPeriodSeconds - SLEEP_INTERVAL_SECONDS);
@@ -475,7 +476,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 fromWorkspaceNamespace, fromWorkspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
       }
 
-      copyBlobWithRetries(toFcWorkspace.getBucketName(), b, 60);
+      copyBlobWithRetries(toFcWorkspace.getBucketName(), b, 60*7);
     }
 
     // The final step in the process is to clone the AoU representation of the
