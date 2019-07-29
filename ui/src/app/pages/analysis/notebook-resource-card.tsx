@@ -1,13 +1,13 @@
 import {RenameModal} from 'app/components/rename-modal';
+import {Action, ResourceCardTemplate} from 'app/components/resource-card-template';
+import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
+import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
+import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CopyNotebookModal} from 'app/pages/analysis/copy-notebook-modal';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
 import {navigateByUrl} from 'app/utils/navigation';
-import {Action, ResourceCardTemplate} from 'app/components/resource-card-template';
-import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
-import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
-import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {RecentResource} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
