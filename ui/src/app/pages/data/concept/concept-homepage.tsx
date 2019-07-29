@@ -407,7 +407,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     afterConceptsSaved(conceptSet: ConceptSet) {
       const {namespace, id} = this.props.workspace;
-      NavStore.navigate(['workspaces', namespace, id,
+      NavStore.navigate(['workspaces', namespace, id, 'data',
         'concepts', 'sets', conceptSet.id, 'actions']);
     }
 

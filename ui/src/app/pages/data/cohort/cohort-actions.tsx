@@ -101,7 +101,7 @@ const CohortActions = withCurrentWorkspace()(
               currentCohortStore.next(c);
               this.setState({cohort: c, cohortLoading: false});
             } else {
-              navigate(['workspaces', namespace, id, 'cohorts']);
+              navigate(['workspaces', namespace, id, 'data', 'cohorts']);
             }
           });
         }
@@ -114,10 +114,10 @@ const CohortActions = withCurrentWorkspace()(
       let url = `/workspaces/${namespace}/${id}/`;
       switch (action) {
         case 'cohort':
-          url += `cohorts/build?cohortId=${cohort.id}`;
+          url += `data/cohorts/build?cohortId=${cohort.id}`;
           break;
         case 'review':
-          url += `cohorts/${cohort.id}/review`;
+          url += `data/cohorts/${cohort.id}/review`;
           break;
         case 'notebook':
           url += 'notebooks';

@@ -101,7 +101,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
           if (cs) {
             this.setState({conceptSet: cs, conceptSetLoading: false});
           } else {
-            navigate(['workspaces', namespace, id, 'concepts']);
+            navigate(['workspaces', namespace, id, 'data', 'concepts']);
           }
         });
       }
@@ -113,10 +113,10 @@ export const ConceptSetActions = withCurrentWorkspace()(
       let url = `/workspaces/${namespace}/${id}/`;
       switch (action) {
         case 'conceptSet':
-          url += `concepts/sets/${conceptSet.id}`;
+          url += `data/concepts/sets/${conceptSet.id}`;
           break;
         case 'newConceptSet':
-          url += `concepts`;
+          url += `data/concepts`;
           break;
         case 'notebook':
           url += `notebooks`;

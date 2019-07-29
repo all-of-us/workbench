@@ -61,28 +61,40 @@ export const getTrail = (type: BreadcrumbType, data): {label: string, url: strin
       ];
     case BreadcrumbType.ConceptSet:
       return [
-        ...getTrail(BreadcrumbType.Workspace, data),
-        {label: conceptSet ? conceptSet.name : '...', url: `${prefix}/concepts/sets/${csid}`}
+        ...getTrail(BreadcrumbType.Data, data),
+        {label: conceptSet ? conceptSet.name : '...', url: `${prefix}/data/concepts/sets/${csid}`}
       ];
     case BreadcrumbType.Cohort:
       return [
-        ...getTrail(BreadcrumbType.Workspace, data),
-        {label: cohort ? cohort.name : '...', url: `${prefix}/cohorts/${cid}/review/participants`}
+        ...getTrail(BreadcrumbType.Data, data),
+        {label: cohort ? cohort.name : '...',
+          url: `${prefix}/data/cohorts/${cid}/review/participants`}
       ];
     case BreadcrumbType.Participant:
       return [
         ...getTrail(BreadcrumbType.Cohort, data),
-        {label: `Participant ${pid}`, url: `${prefix}/cohorts/${cid}/review/participants/${pid}`}
+        {label: `Participant ${pid}`,
+          url: `${prefix}/data/cohorts/${cid}/review/participants/${pid}`}
       ];
     case BreadcrumbType.CohortAdd:
       return [
-        ...getTrail(BreadcrumbType.Workspace, data),
-        {label: 'Build Cohort Criteria', url: `${prefix}/cohorts/build`}
+        ...getTrail(BreadcrumbType.Data, data),
+        {label: 'Build Cohort Criteria', url: `${prefix}/data/cohorts/build`}
+      ];
+    case BreadcrumbType.SearchConcepts:
+      return [
+        ...getTrail(BreadcrumbType.Data, data),
+        {label: 'Search Concepts', url: `${prefix}/data/concepts`}
       ];
     case BreadcrumbType.Dataset:
       return [
-        ...getTrail(BreadcrumbType.Workspace, data),
+        ...getTrail(BreadcrumbType.Data, data),
         {label: 'Dataset', url: `${prefix}/data/datasets`}
+      ];
+    case BreadcrumbType.Data:
+      return [
+        ...getTrail(BreadcrumbType.Workspaces, data),
+        {label: workspace ? workspace.name : '...', url: `${prefix}/data`}
       ];
     default: return [];
   }
