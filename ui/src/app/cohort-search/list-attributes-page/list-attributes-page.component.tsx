@@ -8,7 +8,7 @@ import {mapParameter, stripHtml} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
-import {Spinner} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -62,14 +62,22 @@ const styles = reactStyles({
     height: '1.6rem',
     verticalAlign: 'middle',
   },
+  categorical: {
+    width: '25%',
+    float: 'left',
+    marginBottom: '0.25rem'
+  },
   badge: {
     background: colors.primary,
     color: colors.white,
     fontSize: '10px',
     height: '0.625rem',
     padding: '0 4px',
+    marginRight: '0.5rem',
     borderRadius: '10px',
-    display: 'inline-flex'
+    display: 'inline-flex',
+    verticalAlign: 'middle',
+    alignItems: 'center',
   },
   buttonContainer: {
     flex: '0 0 25%',
@@ -134,6 +142,7 @@ interface Props {
 }
 
 interface State {
+  calculating: boolean;
   count: number;
   countError: boolean;
   form: any;
@@ -145,10 +154,11 @@ export const AttributesPage = withCurrentWorkspace() (
     constructor(props: Props) {
       super(props);
       this.state = {
+        calculating: false,
         count: null,
         countError: false,
         form: {EXISTS: false, NUM: [], CAT: []},
-        loading: false,
+        loading: true,
         options: [
           {label: 'Equals', value: Operator.EQUAL},
           {label: 'Greater than or Equal to', value: Operator.GREATERTHANOREQUALTO},
@@ -185,7 +195,7 @@ export const AttributesPage = withCurrentWorkspace() (
                 }
               }
             });
-            this.setState({form});
+            setTimeout(() => this.setState({form, loading: false}), 1000);
           });
       } else {
         options.unshift({label: 'Any', value: AttrName[AttrName.ANY]});
@@ -196,7 +206,7 @@ export const AttributesPage = withCurrentWorkspace() (
             operator: AttrName.ANY,
             operands: []
           }];
-        this.setState({form, options, count: node.count});
+        this.setState({form, options, count: node.count, loading: false});
       }
     }
 
@@ -385,7 +395,7 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     requestPreview() {
-      this.setState({count: null, loading: true, countError: false});
+      this.setState({count: null, calculating: true, countError: false});
       const param = this.paramWithAttributes;
       const cdrVersionId = +(currentWorkspaceStore.getValue().cdrVersionId);
       const request = {
@@ -400,9 +410,9 @@ export const AttributesPage = withCurrentWorkspace() (
         }]
       };
       cohortBuilderApi().countParticipants(cdrVersionId, request).then(response => {
-        this.setState({count: response, loading: false});
+        this.setState({count: response, calculating: false});
       }, () => {
-        this.setState({loading: false, countError: true});
+        this.setState({calculating: false, countError: true});
       });
     }
 
@@ -440,11 +450,11 @@ export const AttributesPage = withCurrentWorkspace() (
 
     render() {
       const {node} = this.props;
-      const {count, countError, form, loading, options} = this.state;
+      const {calculating, count, countError, form, loading, options} = this.state;
       const {formValid, formErrors} = this.validateForm();
-      const disabled = loading || form.EXISTS || !formValid
+      const disabled = calculating || form.EXISTS || !formValid
         || form.NUM.every(attr => attr.operator === 'ANY');
-      return <div style={{margin: '0.5rem 0 1.5rem'}}>
+      return (loading ? <SpinnerOverlay/> : <div style={{margin: '0.5rem 0 1.5rem'}}>
         {countError && <div style={styles.error}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
                    shape='exclamation-triangle' size='22'/>
@@ -491,12 +501,13 @@ export const AttributesPage = withCurrentWorkspace() (
           {form.CAT.length > 0 && <React.Fragment>
             <div style={styles.orCircle}>OR</div>
             <div style={styles.label}>Categorical Values</div>
-            <div>
-              {form.CAT.map((attr, a) => <React.Fragment>
-                <CheckBox key={a} checked={attr.checked}
+            <div style={{marginLeft: '0.5rem'}}>
+              {form.CAT.map((attr, a) => <div key={a} style={styles.categorical}>
+                <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
                   onChange={(v) => this.checkboxChange(v, a)} />
-                {attr.conceptName} <span style={styles.badge}> {attr.estCount}</span>
-              </React.Fragment>)}
+                {attr.conceptName}&nbsp;
+                <span style={styles.badge}> {parseInt(attr.estCount, 10).toLocaleString()}</span>
+              </div>)}
             </div>
           </React.Fragment>}
         </React.Fragment>}
@@ -510,7 +521,7 @@ export const AttributesPage = withCurrentWorkspace() (
                   background: colorWithWhiteness(colors.primary, .2)
                 }}
                 onClick={() => this.requestPreview()}>
-                {loading && <Spinner size={16} style={styles.spinner}/>}
+                {calculating && <Spinner size={16} style={styles.spinner}/>}
                 Calculate
               </Button>
             </div>
@@ -521,14 +532,14 @@ export const AttributesPage = withCurrentWorkspace() (
                 {count === null ? <span> -- </span> : <span> {count.toLocaleString()}</span>}
               </div>
             </div>
-            {!loading && formValid && <div style={styles.buttonContainer}>
+            {!calculating && formValid && <div style={styles.buttonContainer}>
               <Button type='link'
                 style={{...styles.button, color: colorWithWhiteness(colors.primary, .2)}}
                 onClick={() => this.addAttrs()}> ADD THIS</Button>
             </div>}
           </div>
         </div>
-      </div>;
+      </div>);
     }
   }
 );
