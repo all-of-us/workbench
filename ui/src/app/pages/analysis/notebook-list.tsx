@@ -16,7 +16,7 @@ import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 
-import {NotebookResourceCard} from 'app/views/notebook-resource-card';
+import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {FileDetail, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {

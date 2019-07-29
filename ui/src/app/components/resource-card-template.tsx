@@ -92,8 +92,9 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
               closeOnClick
               content={
                 <React.Fragment>
-                  {this.props.actions.map(action => {
+                  {this.props.actions.map((action, i) => {
                     return (<MenuItem
+                      key={i}
                       icon={action.icon}
                       onClick={() => action.onClick()}>
                       {action.displayName}
