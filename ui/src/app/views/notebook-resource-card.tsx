@@ -12,7 +12,7 @@ import {RecentResource} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
 
-interface Props extends WorkspaceResourceProps, WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
+interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resourceCard: RecentResource;
   onUpdate: Function;
 }
