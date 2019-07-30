@@ -65,7 +65,7 @@ export const RecentWork = (fp.flow as any)(
 
   createResourceCard(resource: RecentResource) {
     if (resource.notebook) {
-      return <NotebookResourceCard resourceCard={resource}
+      return <NotebookResourceCard resource={resource}
                                    onUpdate={() => this.loadResources()}/>;
     } else {
       return <ResourceCard resourceCard={resource}

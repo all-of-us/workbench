@@ -14,7 +14,7 @@ describe('NotebookResourceCard', () => {
       permission: WorkspaceAccessLevel.WRITER
     };
 
-    return mount(<NotebookResourceCard resourceCard={props} onUpdate={() => {}}/>);
+    return mount(<NotebookResourceCard resource={props} onUpdate={() => {}}/>);
   };
 
   it('should render', () => {

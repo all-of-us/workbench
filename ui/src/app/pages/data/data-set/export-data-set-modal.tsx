@@ -11,8 +11,8 @@ import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {summarizeErrors} from 'app/utils';
 
 
+import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import {DataSet, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
-import {appendNotebookFileSuffix} from "app/pages/analysis/util";
 
 interface Props {
   closeFunction: Function;

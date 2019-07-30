@@ -7,10 +7,10 @@ import { Modal, ModalBody, ModalFooter, ModalTitle } from 'app/components/modals
 import { FileDetail, Workspace } from 'generated/fetch';
 
 import { Spinner } from 'app/components/spinners';
+import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { navigate } from 'app/utils/navigation';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
-import {appendNotebookFileSuffix, dropNotebookFileSuffix} from "app/pages/analysis/util";
 
 enum RequestState { UNSENT, ERROR, SUCCESS }
 

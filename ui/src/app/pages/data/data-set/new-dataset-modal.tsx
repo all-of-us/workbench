@@ -17,6 +17,7 @@ import {
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
 import {
@@ -26,7 +27,6 @@ import {
   FileDetail,
   KernelTypeEnum
 } from 'generated/fetch';
-import {appendNotebookFileSuffix} from "app/pages/analysis/util";
 
 interface Props {
   closeFunction: Function;

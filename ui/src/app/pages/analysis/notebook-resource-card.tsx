@@ -4,13 +4,13 @@ import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/component
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {CopyNotebookModal} from 'app/pages/analysis/copy-notebook-modal';
+import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
 import {RecentResource} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
-import {dropNotebookFileSuffix} from "app/pages/analysis/util";
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: RecentResource;

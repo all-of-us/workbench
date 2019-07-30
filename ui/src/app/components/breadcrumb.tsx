@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import {
   ReactWrapperBase,
@@ -12,7 +13,6 @@ import {
   withUrlParams
 } from 'app/utils';
 import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
-import {dropNotebookFileSuffix} from "app/pages/analysis/util";
 
 const styles = {
   firstLink: {

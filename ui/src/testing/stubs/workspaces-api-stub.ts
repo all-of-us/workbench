@@ -10,9 +10,9 @@ import {
 
 import * as fp from 'lodash/fp';
 
+import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {CopyNotebookRequest, EmptyResponse} from 'generated';
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
-import {appendNotebookFileSuffix, dropNotebookFileSuffix} from "app/pages/analysis/util";
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';

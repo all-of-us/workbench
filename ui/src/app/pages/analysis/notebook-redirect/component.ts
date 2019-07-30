@@ -15,6 +15,7 @@ import {
 import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
 
+import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {
   Cluster,
   ClusterService,
@@ -25,7 +26,6 @@ import {
   JupyterService,
   NotebooksService,
 } from 'notebooks-generated';
-import {appendNotebookFileSuffix, dropNotebookFileSuffix} from "app/pages/analysis/util";
 
 enum Progress {
   Unknown,
