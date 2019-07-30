@@ -89,13 +89,13 @@ export interface SearchInputProps {
   onChange: (newInput: string) => void;
 }
 
-export class SearchInput extends React.Component<any, SearchInputState> {
+export class SearchInput extends React.Component<SearchInputProps, SearchInputState> {
   static defaultProps = {
     enabled: true,
     placeholder: '',
     value: '',
     onSearch: (keyword: String) => {
-      return new Promise((accept, reject) => {
+      return new Promise<Array<string>>((accept, reject) => {
         accept([]);
       });
     },
@@ -224,7 +224,7 @@ export class SearchInput extends React.Component<any, SearchInputState> {
             style={{...styles.dropdownMenu, ...styles.open, minWidth: '90%'}}>
             {this.state.matches.map((match, j) => {
               return (
-                <div data-test-id={`search-input-dropdown-element-${j}`}
+                <div data-test-id={`search-input-drop-down-element-${j}`}
                      key={j} style={this.state.hover[j] ? styles.boxHover : styles.box}
                   onMouseOver={this._onMouseOver.bind(this, j)}
                   onMouseOut={this._onMouseOut.bind(this, j)}

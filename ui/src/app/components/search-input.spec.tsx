@@ -32,8 +32,8 @@ test('no dropdown is displayed on user input by default', async() => {
 });
 
 test('dropdown is displayed when results are available', async() => {
-  function onSearch() {
-    return new Promise((accept, reject) => {
+  function onSearch(keyword: string) {
+    return new Promise<Array<string>>((accept, reject) => {
       accept(['bar']);
     });
   }
@@ -52,8 +52,8 @@ test('dropdown is displayed when results are available', async() => {
 });
 
 test('selecting a result from the dropdown closes the dropdown', async() => {
-  function onSearch() {
-    return new Promise((accept, reject) => {
+  function onSearch(keyword: string) {
+    return new Promise<Array<string>>((accept, reject) => {
       accept(['bar']);
     });
   }
@@ -67,7 +67,7 @@ test('selecting a result from the dropdown closes the dropdown', async() => {
       accept();
     }, DROPDOWN_DELAY_MS);
   }).then(async() => {
-    const match = input.find('[data-test-id="search-input-dropdown-element-0"]');
+    const match = input.find('[data-test-id="search-input-drop-down-element-0"]');
     expect(match.exists()).toBeTruthy();
     match.simulate('mousedown');
     input.find('input').simulate('blur');
