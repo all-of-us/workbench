@@ -237,17 +237,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   // this maybe overkill, but should handle all situations
   setNotebookNames(): void {
     const {nbName} = urlParamsStore.getValue();
-    this.notebookName =
-      decodeURIComponent(nbName);
-    if (nbName.endsWith('.ipynb')) {
-      this.fullNotebookName =
-        decodeURIComponent(nbName);
-      this.notebookName = dropNotebookFileSuffix(this.fullNotebookName);
-    } else {
-      this.notebookName =
-        decodeURIComponent(nbName);
-      this.fullNotebookName = appendNotebookFileSuffix(this.notebookName);
-    }
+    this.notebookName = dropNotebookFileSuffix(decodeURIComponent(nbName));
+    this.fullNotebookName = appendNotebookFileSuffix(this.notebookName);
   }
 
   private clusterRetryDelay(errs: Observable<Error>) {
