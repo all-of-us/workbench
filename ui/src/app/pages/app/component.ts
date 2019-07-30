@@ -1,4 +1,3 @@
-import {DOCUMENT} from '@angular/common';
 import {Component, Inject, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {
@@ -17,6 +16,8 @@ import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
 
+declare let gtag: Function;
+
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 
 @Component({
@@ -33,7 +34,6 @@ export class AppComponent implements OnInit {
   private baseTitle: string;
 
   constructor(
-    @Inject(DOCUMENT) private doc: any,
     private activatedRoute: ActivatedRoute,
     private serverConfigService: ServerConfigService,
     private router: Router,
@@ -121,30 +121,15 @@ export class AppComponent implements OnInit {
    * the global gtag function.
    */
   private setGTagManager() {
-    const s = this.doc.createElement('script');
-    s.type = 'text/javascript';
-    s.innerHTML =
-      '(function(w,d,s,l,i){' +
-        'w[l]=w[l]||[];' +
-        'var f=d.getElementsByTagName(s)[0];' +
-        'var j=d.createElement(s);' +
-        'var dl=l!=\'dataLayer\'?\'&l=\'+l:\'\';' +
-        'j.async=true;' +
-        'j.src=\'https://www.googletagmanager.com/gtag/js?id=\'+i+dl;' +
-        'f.parentNode.insertBefore(j,f);' +
-      '})' +
-      '(window, document, \'script\', \'dataLayer\', \'' + environment.gaId + '\');' +
-      'window.dataLayer = window.dataLayer || [];' +
-      'function gtag(){dataLayer.push(arguments);}' +
-      'gtag(\'js\', new Date());' +
-      // There is some interpolation issues here that cause some useragents to be too long
-      // limit is 150. Slicing to 100 pretty much guarantees that even with the encoding
-      // it comes in under this limit -US 2/27/18
-      'gtag(\'set\', \'user_agent\', \'' + window.navigator.userAgent.slice(0, 100) + '\');' +
-      'gtag(\'config\', \'' + environment.gaId + '\', {\'custom_map\': ' +
-      '{\'' + environment.gaUserAgentDimension + '\': \'user_agent\'}});';
-    const head = this.doc.getElementsByTagName('head')[0];
-    head.appendChild(s);
+    gtag('config', environment.gaId, {
+      custom_map: {
+        [environment.gaUserAgentDimension]: 'user_agent'
+      }
+    });
+    // There is some interpolation issues here that cause some useragents to be too long
+    // limit is 150. Slicing to 100 pretty much guarantees that even with the encoding
+    // it comes in under this limit -US 2/27/18
+    gtag('set', 'user_agent', window.navigator.userAgent.slice(0, 100));
   }
 
   private checkBrowserSupport() {
