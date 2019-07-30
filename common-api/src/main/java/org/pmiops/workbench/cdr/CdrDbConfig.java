@@ -66,11 +66,6 @@ public class CdrDbConfig {
       String dbPassword = cdrPoolConfig.getPassword();
       String originalDbUrl = cdrPoolConfig.getUrl();
 
-      log.error("!!!CDR CONfIG!!!");
-      log.error(dbUser);
-      log.error(dbPassword);
-      log.error(originalDbUrl);
-
       // Build a map of CDR version ID -> DataSource for use later, based on all the entries in the
       // cdr_version table. Note that if new CDR versions are inserted, we need to restart the
       // server in order for it to be used.
@@ -157,14 +152,14 @@ public class CdrDbConfig {
     }
   }
 
-//  @Bean("cdrDataSource")
-//  public DataSource cdrDataSource(CdrDataSource cdrDataSource) {
-//    return cdrDataSource;
-//  }
+  @Bean("cdrDataSource")
+  public DataSource cdrDataSource(CdrDataSource cdrDataSource) {
+    return cdrDataSource;
+  }
 
   @Bean(name = "cdrEntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean getCdrEntityManagerFactory(
-      EntityManagerFactoryBuilder builder, CdrDataSource dataSource) {
+      EntityManagerFactoryBuilder builder, @Qualifier("cdrDataSource") DataSource dataSource) {
     return builder
         .dataSource(dataSource)
         .packages("org.pmiops.workbench.cdr")
@@ -179,7 +174,7 @@ public class CdrDbConfig {
   }
 
   @Bean(name = "cdrPoolConfiguration")
-  @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+//  @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   @ConfigurationProperties(prefix = "cdr.datasource")
   public PoolConfiguration poolConfig() {
     return new PoolProperties();

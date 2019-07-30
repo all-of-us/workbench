@@ -540,7 +540,7 @@ def commandLineSpringProperties = [
   'spring.datasource.username': System.getenv("WORKBENCH_DB_USER"),
   'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD"),
 
-  'cdr.datasource.url': "jdbc:mysql://localhost:3307/workbench?useSSL=false",
+  'cdr.datasource.url': "jdbc:mysql://${db_host}:${db_port}/workbench?useSSL=false",
   'cdr.datasource.username': System.getenv("WORKBENCH_DB_USER"),
   'cdr.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
 ]
@@ -613,9 +613,8 @@ task updateCdrVersions(type: JavaExec) {
 }
 
 task bulkCloneWorkspaces(type: JavaExec) {
-  println commandLineSpringProperties
-
   classpath sourceSets.tools.runtimeClasspath
+
   main = "org.pmiops.workbench.tools.BulkCloneWorkspacesTool"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {

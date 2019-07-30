@@ -113,16 +113,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         getFirecloudWorkspaces();
     List<Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
-//    System.out.println("Firecloud response size : " + fcWorkspaces.size());
-//    System.out.println("Filtered DB responses : " + dbWorkspaces.size());
-//
-//    for (Workspace workspace : dbWorkspaces) {
-//      org.pmiops.workbench.firecloud.model.WorkspaceResponse workspaceResponse = fcWorkspaces.get(workspace.getFirecloudUuid());
-//      System.out.println(workspaceResponse);
-//
-//      fireCloudService.getWorkspace(workspaceResponse.getWorkspace().getNamespace(), workspaceResponse.getWorkspace().getName());
-//    }
-
     return dbWorkspaces.stream()
         .filter(
             dbWorkspace ->
@@ -143,7 +133,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Transactional
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
+    Workspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;

@@ -14,7 +14,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -27,7 +26,6 @@ import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -41,7 +39,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootApplication
 @EnableConfigurationProperties
@@ -143,6 +140,21 @@ public class BulkCloneWorkspacesTool {
     workspacesApi.setApiClient(apiClient);
   }
 
+  private CloneWorkspaceRequest createCloneRequest(
+      org.pmiops.workbench.model.WorkspaceResponse fromWorkspace) {
+    org.pmiops.workbench.model.Workspace toWorkspace = new org.pmiops.workbench.model.Workspace();
+    toWorkspace.setNamespace(fromWorkspace.getWorkspace().getNamespace());
+    toWorkspace.setName(fromWorkspace.getWorkspace().getName());
+    toWorkspace.setResearchPurpose(fromWorkspace.getWorkspace().getResearchPurpose());
+    toWorkspace.setCdrVersionId(fromWorkspace.getWorkspace().getCdrVersionId());
+
+    CloneWorkspaceRequest request = new CloneWorkspaceRequest();
+    request.setWorkspace(toWorkspace);
+    request.setIncludeUserRoles(true);
+
+    return request;
+  }
+
   @Bean
   public CommandLineRunner run(WorkspaceDao workspaceDao,
       WorkspacesController workspacesController,
@@ -170,52 +182,51 @@ public class BulkCloneWorkspacesTool {
       for (WorkspaceResponse workspaceResponse : saWorkspaceApi.listWorkspaces()) {
         Workspace dbWorkspace = workspaceDao.findByFirecloudUuid(workspaceResponse.getWorkspace().getWorkspaceId());
 
+        // Workspace that exists in FC but not in AoU
         if (dbWorkspace == null) {
-          // System.out.println("Found workspace in FC but not recorded in AoU " + shorthand(workspaceResponse.getWorkspace()));
           continue;
         }
 
-        if (dbWorkspace.getWorkspaceActiveStatusEnum().equals(WorkspaceActiveStatus.DELETED) ||
-            !dbWorkspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
+        // Skip over inactive workspaces and workspaces that are already on the
+        if (dbWorkspace.getWorkspaceActiveStatusEnum().equals(WorkspaceActiveStatus.DELETED)) {
+          continue;
+        }
+
+        // Only process workspaces that need migration
+        if (!dbWorkspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
           continue;
         }
 
         if (workspaceResponse.getAccessLevel().equals("NO ACCESS")) {
-          System.out
-              .println("Found NO ACCESS workspace " + shorthand(workspaceResponse.getWorkspace()));
+          System.out.println(
+              "Found a workspace that the SA account cannot access : " + shorthand(workspaceResponse.getWorkspace()));
           failedWorkspaces.add(Pair.of(workspaceResponse, "NO ACCESS"));
           continue;
         }
 
-        while (billingProjectBufferService.availableProportion() < .25) {
-          System.out.println("Less than 25% of the buffer is available (" + billingProjectBufferService.availableProportion()*100 + "%)... Sleeping for 30 seconds");
-          Thread.sleep(30000);
+        final double bufferThresholdPercentage = 25;
+        final int sleepIntervalSeconds = 30;
+        while (billingProjectBufferService.availableProportion() < bufferThresholdPercentage / 100) {
+          System.out.println("Less than " + bufferThresholdPercentage + "% of the buffer is available ("
+              + billingProjectBufferService.availableProportion()*100 + "%)... Sleeping for " + sleepIntervalSeconds + " seconds");
+          Thread.sleep(sleepIntervalSeconds * 1000);
         }
 
         try {
           System.out.println("About to clone " + shorthand(dbWorkspace));
 
-          workspacesApi.setApiClient(saApiClient);
+          providedUser = userDao.findUserByEmail(dbWorkspace.getCreator().getEmail());
+          impersonateUser(fireCloudService.getApiClientWithImpersonation(providedUser.getEmail()));
+
+          System.out.println("Impersonated " + providedUser.getEmail());
+
           org.pmiops.workbench.model.WorkspaceResponse apiWorkspace = workspaceService.getWorkspace(
               dbWorkspace.getWorkspaceNamespace(),
               dbWorkspace.getFirecloudName());
-
-          org.pmiops.workbench.model.Workspace toWorkspace = new org.pmiops.workbench.model.Workspace();
-          toWorkspace.setNamespace(dbWorkspace.getWorkspaceNamespace());
-          toWorkspace.setName(dbWorkspace.getName());
-          toWorkspace.setResearchPurpose(apiWorkspace.getWorkspace().getResearchPurpose());
-          toWorkspace.setCdrVersionId(apiWorkspace.getWorkspace().getCdrVersionId());
-
-          CloneWorkspaceRequest request = new CloneWorkspaceRequest();
-          request.setWorkspace(toWorkspace);
-          request.setIncludeUserRoles(true);
-
-          providedUser = userDao.findUserByEmail(apiWorkspace.getWorkspace().getCreator());
-          impersonateUser(fireCloudService.getApiClientWithImpersonation(apiWorkspace.getWorkspace().getCreator()));
+          CloneWorkspaceRequest request = createCloneRequest(apiWorkspace);
 
           if (!dryRun) {
             System.out.println("Sending clone request");
-            System.out.println(request);
 
             CloneWorkspaceResponse cloneResponse = workspacesController
                 .cloneWorkspace(dbWorkspace.getWorkspaceNamespace(),
@@ -230,7 +241,6 @@ public class BulkCloneWorkspacesTool {
         } catch (Exception e) {
           System.out.println("Failed on " + shorthand(dbWorkspace));
           System.out.println(workspaceResponse);
-          e.printStackTrace();
           failedWorkspaces.add(Pair.of(workspaceResponse, e.getMessage()));
         }
 

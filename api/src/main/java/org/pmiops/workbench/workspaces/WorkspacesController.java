@@ -1,11 +1,8 @@
 package org.pmiops.workbench.workspaces;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.StorageException;
-import com.google.cloud.storage.StorageOptions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
@@ -42,7 +39,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
@@ -389,7 +385,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
 
       copyBlobWithRetries(bucketName, b, retryPeriodSeconds - SLEEP_INTERVAL_SECONDS);
-      throw e;
     }
   }
 
@@ -476,7 +471,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 fromWorkspaceNamespace, fromWorkspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
       }
 
-      copyBlobWithRetries(toFcWorkspace.getBucketName(), b, 60*7);
+      copyBlobWithRetries(toFcWorkspace.getBucketName(), b, 60);
     }
 
     // The final step in the process is to clone the AoU representation of the
@@ -531,8 +526,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspaceService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
 
-      System.out.println(fromAclsMap);
-
       Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
       for (Map.Entry<String, WorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
         if (!entry.getKey().equals(user.getEmail())) {
@@ -542,8 +535,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-
-      System.out.println(clonedRoles);
 
       savedWorkspace =
           workspaceService.updateWorkspaceAcls(
