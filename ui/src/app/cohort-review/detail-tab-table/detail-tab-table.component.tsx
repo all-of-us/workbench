@@ -690,11 +690,11 @@ export const DetailTabTable = withCurrentWorkspace()(
           </span>
           {hasCheckboxFilter && this.checkboxFilter(col.name)}
           {hasTextFilter && this.textFilter(col.name)}
-          {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
-          {(desc && !isExpanderNeeded) &&
-          <i className='pi pi-arrow-down' style={styles.sortIcon} />}
+          {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon}
+            onClick={() => this.columnSort(col.name)} />}
+          {(desc && !isExpanderNeeded) && <i className='pi pi-arrow-down' style={styles.sortIcon}
+            onClick={() => this.columnSort(col.name)} />}
         </React.Fragment>;
-
         return <Column
           expander={isExpanderNeeded}
           style={styles.tableBody}
@@ -706,7 +706,6 @@ export const DetailTabTable = withCurrentWorkspace()(
           sortable
           body={overlayTemplate}/>;
       });
-
       return <div style={styles.container}>
         <style>{datatableStyles + css}</style>
         <DataTable
