@@ -13,7 +13,7 @@ import * as React from 'react';
 import {dropNotebookFileSuffix} from "app/pages/analysis/util";
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
-  resourceCard: RecentResource;
+  resource: RecentResource;
   onUpdate: Function;
 }
 
@@ -41,20 +41,20 @@ export const NotebookResourceCard = fp.flow(
   }
 
   get displayName(): string {
-    return dropNotebookFileSuffix(this.props.resourceCard.notebook.name);
+    return dropNotebookFileSuffix(this.props.resource.notebook.name);
   }
 
   get resourceUrl(): string {
     const {workspaceNamespace, workspaceFirecloudName, notebook} =
-      this.props.resourceCard;
+      this.props.resource;
 
     return `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}
     /notebooks/preview/${encodeURIComponent(notebook.name)}`;
   }
 
   get writePermission(): boolean {
-    return this.props.resourceCard.permission === 'OWNER'
-      || this.props.resourceCard.permission === 'WRITER';
+    return this.props.resource.permission === 'OWNER'
+      || this.props.resource.permission === 'WRITER';
   }
 
   get actions(): Action[] {
@@ -93,12 +93,12 @@ export const NotebookResourceCard = fp.flow(
 
 
   renameNotebook(newName) {
-    const {resourceCard} = this.props;
+    const {resource} = this.props;
     return workspacesApi().renameNotebook(
-      resourceCard.workspaceNamespace,
-      resourceCard.workspaceFirecloudName,
+      resource.workspaceNamespace,
+      resource.workspaceFirecloudName,
       {
-        name: resourceCard.notebook.name,
+        name: resource.notebook.name,
         newName: this.fullNotebookName(newName)
       }).then(() => this.props.onUpdate())
       .catch(error => console.error(error))
@@ -111,9 +111,9 @@ export const NotebookResourceCard = fp.flow(
     this.props.showSpinner();
 
     return workspacesApi().cloneNotebook(
-      this.props.resourceCard.workspaceNamespace,
-      this.props.resourceCard.workspaceFirecloudName,
-      this.props.resourceCard.notebook.name)
+      this.props.resource.workspaceNamespace,
+      this.props.resource.workspaceFirecloudName,
+      this.props.resource.notebook.name)
       .then(() => {
         this.props.onUpdate();
       })
@@ -128,9 +128,9 @@ export const NotebookResourceCard = fp.flow(
 
   deleteNotebook() {
     return workspacesApi().deleteNotebook(
-      this.props.resourceCard.workspaceNamespace,
-      this.props.resourceCard.workspaceFirecloudName,
-      this.props.resourceCard.notebook.name)
+      this.props.resource.workspaceNamespace,
+      this.props.resource.workspaceFirecloudName,
+      this.props.resource.notebook.name)
       .then(() => {
         this.props.onUpdate();
       });
@@ -140,9 +140,9 @@ export const NotebookResourceCard = fp.flow(
     return <React.Fragment>
       {this.state.showCopyNotebookModal &&
       <CopyNotebookModal
-        fromWorkspaceNamespace={this.props.resourceCard.workspaceNamespace}
-        fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
-        fromNotebook={this.props.resourceCard.notebook}
+        fromWorkspaceNamespace={this.props.resource.workspaceNamespace}
+        fromWorkspaceName={this.props.resource.workspaceFirecloudName}
+        fromNotebook={this.props.resource.notebook}
         onClose={() => this.setState({showCopyNotebookModal: false})}
         onCopy={() => this.props.onUpdate()}/>
       }
@@ -152,7 +152,7 @@ export const NotebookResourceCard = fp.flow(
                    onRename={(newName) => this.renameNotebook(newName)}
                    onCancel={() => this.setState({showRenameModal: false})}
                    hideDescription={true}
-                   oldName={this.props.resourceCard.notebook.name}
+                   oldName={this.props.resource.notebook.name}
                    nameFormat={(name) => this.fullNotebookName(name)}/>
       }
 
@@ -163,7 +163,7 @@ export const NotebookResourceCard = fp.flow(
         resourceUrl={this.resourceUrl}
         displayName={this.displayName}
         description={''}
-        displayDate={formatRecentResourceDisplayDate(this.props.resourceCard.modifiedTime)}
+        displayDate={formatRecentResourceDisplayDate(this.props.resource.modifiedTime)}
         footerText={this.resourceType}
         footerColor={colors.resourceCardHighlights.notebook}
       />
