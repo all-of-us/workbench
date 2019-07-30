@@ -45,8 +45,12 @@ export const NotebookResourceCard = fp.flow(
     return dropNotebookFileSuffix(this.props.resourceCard.notebook.name);
   }
 
-  get readOnly(): boolean {
-    return this.props.resourceCard.permission === 'READER';
+  get resourceUrl(): string {
+    const {workspaceNamespace, workspaceFirecloudName, notebook} =
+      this.props.resourceCard;
+
+    return `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}
+    /notebooks/preview/${encodeURIComponent(notebook.name)}`;
   }
 
   get writePermission(): boolean {
@@ -80,11 +84,6 @@ export const NotebookResourceCard = fp.flow(
           this.props.showConfirmDeleteModal(this.displayName,
             this.resourceType, () => this.deleteNotebook());
         },
-      },
-      {
-        icon: 'grid-view',
-        displayName: 'Open in Jupyter Lab',
-        onClick: () => navigateByUrl(this.resourceUrl(true)),
       }];
   }
 
@@ -92,21 +91,7 @@ export const NotebookResourceCard = fp.flow(
     return !name || /^.+\.ipynb$/.test(name) ? name : `${name}.ipynb`;
   }
 
-  resourceUrl(jupyterLab = false): string {
-    const {workspaceNamespace, workspaceFirecloudName, notebook} =
-      this.props.resourceCard;
-    const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
 
-    const queryParams = new URLSearchParams([
-      ['playgroundMode', 'false'],
-      ['jupyterLabMode', String(jupyterLab)]
-    ]);
-
-    if (this.readOnly) {
-      queryParams.set('jupyterLabMode', 'true');
-    }
-    return `${workspacePrefix}/notebooks/preview/${encodeURIComponent(notebook.name)}`;
-  }
 
   renameNotebook(newName) {
     const {resourceCard} = this.props;
@@ -176,7 +161,7 @@ export const NotebookResourceCard = fp.flow(
         actions={this.actions}
         actionsDisabled={!this.writePermission}
         disabled={false} // Notebook Cards are always at least readable
-        resourceUrl={this.resourceUrl()}
+        resourceUrl={this.resourceUrl}
         displayName={this.displayName}
         description={''}
         displayDate={formatRecentResourceDisplayDate(this.props.resourceCard.modifiedTime)}
