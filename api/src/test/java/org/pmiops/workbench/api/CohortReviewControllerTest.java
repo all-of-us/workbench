@@ -33,11 +33,6 @@ import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
-import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
-import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
@@ -45,6 +40,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -64,6 +60,7 @@ import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
@@ -96,7 +93,8 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
+@ComponentScan(
+    basePackages = {"org.pmiops.workbench.cohortbuilder", "org.pmiops.workbench.cohortreview"})
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CohortReviewControllerTest {
@@ -142,7 +140,11 @@ public class CohortReviewControllerTest {
 
   @Autowired private BigQueryService bigQueryService;
 
+  @Autowired private UserDao userDao;
+
   @Mock private Provider<WorkbenchConfig> configProvider;
+
+  @Mock private Provider<User> userProvider;
 
   private enum TestDemo {
     ASIAN("Asian", 8515),
@@ -169,22 +171,12 @@ public class CohortReviewControllerTest {
   }
 
   @TestConfiguration
-  @Import({
-    CdrVersionService.class,
-    CohortReviewController.class,
-    CohortReviewServiceImpl.class,
-    CohortQueryBuilder.class,
-    SearchGroupItemQueryBuilder.class,
-    ReviewQueryBuilder.class,
-    QueryBuilderFactory.class,
-    SearchGroupItemQueryBuilder.class
-  })
+  @Import({CdrVersionService.class, CohortReviewController.class})
   @MockBean({
     BigQueryService.class,
     FireCloudService.class,
     UserRecentResourceService.class,
-    WorkspaceService.class,
-    User.class
+    WorkspaceService.class
   })
   static class Configuration {
     @Bean
@@ -218,6 +210,15 @@ public class CohortReviewControllerTest {
 
   @Before
   public void setUp() {
+    User user = new User();
+    user.setEmail("bob@gmail.com");
+    user.setUserId(123L);
+    user.setDisabled(false);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+    user = userDao.save(user);
+    when(userProvider.get()).thenReturn(user);
+    cohortReviewController.setUserProvider(userProvider);
+
     cdrVersion = new CdrVersion();
     cdrVersion.setBigqueryDataset("dataSetId");
     cdrVersion.setBigqueryProject("projectId");

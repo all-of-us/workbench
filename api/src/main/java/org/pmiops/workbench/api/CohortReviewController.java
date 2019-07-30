@@ -310,13 +310,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     try {
       cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
     } catch (NotFoundException nfe) {
-      cohortReview =
-          initializeCohortReview(cdrVersionId, cohort)
-              .reviewStatusEnum(ReviewStatus.NONE)
-              .reviewSize(0L)
-              .cohortDefinition(getCohortDefinition(cohort))
-              .cohortName(cohort.getName())
-              .description(cohort.getDescription());
+      cohortReview = initializeCohortReview(cdrVersionId, cohort, userProvider.get());
       cohortReviewService.saveCohortReview(cohortReview);
     }
     if (cohortReview.getReviewSize() > 0) {
@@ -600,7 +594,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     try {
       cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
     } catch (NotFoundException nfe) {
-      cohortReview = initializeCohortReview(cdrVersionId, cohort);
+      cohortReview = initializeCohortReview(cdrVersionId, cohort, userProvider.get());
     }
 
     PageRequest pageRequest = createPageRequest(request);
@@ -779,7 +773,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     cohortReviewService.saveParticipantCohortStatus(participantCohortStatus);
     lookupGenderRaceEthnicityValues(Arrays.asList(participantCohortStatus));
 
-    cohortReview.lastModifiedTime(new Timestamp(System.currentTimeMillis()));
+    cohortReview.lastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     cohortReview.incrementReviewedCount();
     cohortReviewService.saveCohortReview(cohortReview);
 
@@ -805,8 +799,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    *
    * @param cdrVersionId
    * @param cohort
+   * @param creator
    */
-  private CohortReview initializeCohortReview(Long cdrVersionId, Cohort cohort) {
+  private CohortReview initializeCohortReview(Long cdrVersionId, Cohort cohort, User creator) {
     SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
     TableResult result =
@@ -819,7 +814,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     List<FieldValue> row = result.iterateAll().iterator().next();
     long cohortCount = bigQueryService.getLong(row, rm.get("count"));
 
-    return createNewCohortReview(cohort.getCohortId(), cdrVersionId, cohortCount);
+    return createNewCohortReview(cohort, cdrVersionId, cohortCount, creator);
   }
 
   /**
@@ -876,20 +871,27 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   /**
    * Helper method that constructs a {@link CohortReview} with the specified ids and count.
    *
-   * @param cohortId
+   * @param cohort
    * @param cdrVersionId
    * @param cohortCount
+   * @param creator
    * @return
    */
-  private CohortReview createNewCohortReview(Long cohortId, Long cdrVersionId, long cohortCount) {
-    CohortReview cohortReview = new CohortReview();
-    cohortReview.setCohortId(cohortId);
-    cohortReview.setCdrVersionId(cdrVersionId);
-    cohortReview.matchedParticipantCount(cohortCount);
-    cohortReview.setCreationTime(new Timestamp(System.currentTimeMillis()));
-    cohortReview.reviewedCount(0L);
-    cohortReview.reviewStatusEnum(ReviewStatus.NONE);
-    return cohortReview;
+  private CohortReview createNewCohortReview(
+      Cohort cohort, Long cdrVersionId, Long cohortCount, User creator) {
+    return new CohortReview()
+        .cohortId(cohort.getCohortId())
+        .cohortDefinition(getCohortDefinition(cohort))
+        .cohortName(cohort.getName())
+        .description(cohort.getDescription())
+        .cdrVersionId(cdrVersionId)
+        .matchedParticipantCount(cohortCount)
+        .creationTime(new Timestamp(clock.instant().toEpochMilli()))
+        .lastModifiedTime(new Timestamp(clock.instant().toEpochMilli()))
+        .reviewedCount(0L)
+        .reviewSize(0L)
+        .reviewStatusEnum(ReviewStatus.NONE)
+        .creator(creator);
   }
 
   /**

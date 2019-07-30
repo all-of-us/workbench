@@ -7,7 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -31,6 +33,7 @@ public class CohortReview {
   private long reviewSize;
   private long reviewedCount;
   private Short reviewStatus;
+  private User creator;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -233,6 +236,21 @@ public class CohortReview {
 
   public CohortReview reviewStatusEnum(ReviewStatus reviewStatus) {
     return this.reviewStatus(StorageEnums.reviewStatusToStorage(reviewStatus));
+  }
+
+  @ManyToOne
+  @JoinColumn(name = "creator_id")
+  public User getCreator() {
+    return creator;
+  }
+
+  public void setCreator(User creator) {
+    this.creator = creator;
+  }
+
+  public CohortReview creator(User creator) {
+    this.creator = creator;
+    return this;
   }
 
   @Override
