@@ -10,6 +10,7 @@ import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { navigate } from 'app/utils/navigation';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
+import {appendNotebookFileSuffix, dropNotebookFileSuffix} from "app/pages/analysis/util";
 
 enum RequestState { UNSENT, ERROR, SUCCESS }
 
@@ -40,28 +41,12 @@ class CopyNotebookModal extends React.Component<Props, State> {
 
     this.state = {
       writeableWorkspaces: [],
-      newName: this.dropFileSuffix(props.fromNotebook.name),
+      newName: dropNotebookFileSuffix(props.fromNotebook.name),
       destination: null,
       requestState: RequestState.UNSENT,
       errorMsg: '',
       loading: true
     };
-  }
-
-  dropFileSuffix(filename: string) {
-    if (filename.endsWith('.ipynb')) {
-      filename = filename.substring(0, filename.length - 6);
-    }
-
-    return filename;
-  }
-
-  appendFileSuffix(filename: string) {
-    if (!filename.endsWith('.ipynb')) {
-      filename = filename + '.ipynb';
-    }
-
-    return filename;
   }
 
   componentDidMount() {
@@ -86,7 +71,7 @@ class CopyNotebookModal extends React.Component<Props, State> {
       {
         toWorkspaceName: this.state.destination.id,
         toWorkspaceNamespace: this.state.destination.namespace,
-        newName: this.appendFileSuffix(this.state.newName)
+        newName: appendNotebookFileSuffix(this.state.newName)
       }
       ).then((response) => {
         this.setState({ requestState: RequestState.SUCCESS, loading: false });

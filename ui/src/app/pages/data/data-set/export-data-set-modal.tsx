@@ -12,6 +12,7 @@ import {summarizeErrors} from 'app/utils';
 
 
 import {DataSet, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
+import {appendNotebookFileSuffix} from "app/pages/analysis/util";
 
 interface Props {
   closeFunction: Function;
@@ -127,7 +128,7 @@ class ExportDataSetModal extends React.Component<
       });
     // Open notebook in a new tab and close the modal
     const notebookUrl = '/workspaces/' + workspaceNamespace + '/' + workspaceFirecloudName +
-        '/notebooks/' + encodeURIComponent(this.state.notebookName) + '.ipynb';
+        '/notebooks/' + appendNotebookFileSuffix(encodeURIComponent(this.state.notebookName));
     window.open(notebookUrl);
     this.props.closeFunction();
   }

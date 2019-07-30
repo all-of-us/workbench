@@ -12,6 +12,7 @@ import {
   withUrlParams
 } from 'app/utils';
 import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {dropNotebookFileSuffix} from "app/pages/analysis/util";
 
 const styles = {
   firstLink: {
@@ -55,7 +56,7 @@ export const getTrail = (type: BreadcrumbType, data): {label: string, url: strin
         ...getTrail(BreadcrumbType.Workspace, data),
         {label: 'Notebooks', url: `${prefix}/notebooks`},
         {
-          label: nbName && decodeURIComponent(nbName).replace(/\.ipynb$/, ''),
+          label: nbName && dropNotebookFileSuffix(decodeURIComponent(nbName)),
           url: `${prefix}/notebooks/${nbName}`
         }
       ];

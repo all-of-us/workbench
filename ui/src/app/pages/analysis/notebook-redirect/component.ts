@@ -25,6 +25,7 @@ import {
   JupyterService,
   NotebooksService,
 } from 'notebooks-generated';
+import {appendNotebookFileSuffix, dropNotebookFileSuffix} from "app/pages/analysis/util";
 
 enum Progress {
   Unknown,
@@ -241,11 +242,11 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     if (nbName.endsWith('.ipynb')) {
       this.fullNotebookName =
         decodeURIComponent(nbName);
-      this.notebookName = this.fullNotebookName.replace('.ipynb$', '');
+      this.notebookName = dropNotebookFileSuffix(this.fullNotebookName);
     } else {
       this.notebookName =
         decodeURIComponent(nbName);
-      this.fullNotebookName = this.notebookName + '.ipynb';
+      this.fullNotebookName = appendNotebookFileSuffix(this.notebookName);
     }
   }
 
@@ -291,7 +292,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       const workspaceDir = localDir.replace(/^workspaces\//, '');
       return this.jupyterService.putContents(
         this.cluster.clusterNamespace, this.cluster.clusterName,
-        workspaceDir, this.notebookName + '.ipynb', {
+        workspaceDir, appendNotebookFileSuffix(this.notebookName), {
           'type': 'file',
           'format': 'text',
           'content': JSON.stringify(fileContent)

@@ -12,6 +12,7 @@ import * as fp from 'lodash/fp';
 
 import {CopyNotebookRequest, EmptyResponse} from 'generated';
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
+import {appendNotebookFileSuffix, dropNotebookFileSuffix} from "app/pages/analysis/util";
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
@@ -112,9 +113,9 @@ export class WorkspacesApiStub extends WorkspacesApi {
   }
 
   cloneNotebook(workspaceNamespace: string, workspaceId: string,
-    notebookName: String): Promise<any> {
+    notebookName: string): Promise<any> {
     return new Promise<any>(resolve => {
-      const cloneName = notebookName.replace('.ipynb', '') + ' Clone.ipynb';
+      const cloneName = appendNotebookFileSuffix(dropNotebookFileSuffix(notebookName) + ' Clone');
       this.notebookList.push({
         'name': cloneName,
         'path': 'gs://bucket/notebooks/' + cloneName,

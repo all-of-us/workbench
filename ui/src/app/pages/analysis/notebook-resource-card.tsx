@@ -11,6 +11,7 @@ import {navigateByUrl} from 'app/utils/navigation';
 import {RecentResource} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
+import {dropNotebookFileSuffix} from "app/pages/analysis/util";
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resourceCard: RecentResource;
@@ -41,7 +42,7 @@ export const NotebookResourceCard = fp.flow(
   }
 
   get displayName(): string {
-    return this.props.resourceCard.notebook.name.replace(/\.ipynb$/, '');
+    return dropNotebookFileSuffix(this.props.resourceCard.notebook.name);
   }
 
   get readOnly(): boolean {
