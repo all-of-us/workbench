@@ -620,20 +620,21 @@ export const DetailTabTable = withCurrentWorkspace()(
       let valueArray;
       return <React.Fragment>
         <div style={styles.headerStyle}>{rowData[`${vocab}Name`]}</div>
-      <TabView className='unitTab'>
-        {unitKey.map((k, i) => {
-          const name = k === 'null' ? 'No Unit' : k;
-          { valueArray = unitsObj[k].map(v => {
-            return {
-              values: parseInt(v.value, 10),
-              date: v.itemDate,
-            };
-          }); }
-          return <TabPanel header={name} key={i}>
-            <ReviewDomainChartsComponent unitData={valueArray} />
-          </TabPanel>;
-        })}
-      </TabView>
+        <div style={{width: '22rem', margin: '0 0 -1.65rem 12.5rem'}}>Units:</div>
+        <TabView className='unitTab'>
+          {unitKey.map((k, i) => {
+            const name = (k === 'null' ? 'No Unit' : k);
+            { valueArray = unitsObj[k].map(v => {
+              return {
+                values: parseInt(v.value, 10),
+                date: v.itemDate,
+              };
+            }); }
+            return <TabPanel header={name} key={i}>
+              <ReviewDomainChartsComponent unitData={valueArray} />
+            </TabPanel>;
+          })}
+        </TabView>
       </React.Fragment>;
     }
 
