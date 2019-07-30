@@ -22,19 +22,19 @@ export const withSpinnerOverlay = () => {
         };
       }
 
-      showSpinner() {
+      show() {
         this.setState({show: true});
       }
 
-      hideSpinner() {
+      hide() {
         this.setState({show: false});
       }
 
       render() {
         return <React.Fragment>
           {this.state.show && <SpinnerOverlay/>}
-          <WrappedComponent showSpinner={this.showSpinner}
-                            hideSpinner={this.hideSpinner}
+          <WrappedComponent showSpinner={this.show}
+                            hideSpinner={this.hide}
                             {...this.props} />
         </React.Fragment>;
       }

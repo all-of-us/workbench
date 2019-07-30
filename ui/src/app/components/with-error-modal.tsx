@@ -25,7 +25,7 @@ export const withErrorModal = () => {
         };
       }
 
-      showErrorModal(title: string, body: string) {
+      show(title: string, body: string) {
         this.setState({
           show: true,
           title: title,
@@ -39,7 +39,7 @@ export const withErrorModal = () => {
                                          body={this.state.body}
                                          onConfirm={() => this.setState({show: false})}/>
           }
-          <WrappedComponent showErrorModal={(tile, body) => this.showErrorModal(tile, body)}
+          <WrappedComponent showErrorModal={(tile, body) => this.show(tile, body)}
                             {...this.props} />
         </React.Fragment>;
       }

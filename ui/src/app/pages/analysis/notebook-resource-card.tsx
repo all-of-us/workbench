@@ -7,7 +7,6 @@ import {CopyNotebookModal} from 'app/pages/analysis/copy-notebook-modal';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
-import {navigateByUrl} from 'app/utils/navigation';
 import {RecentResource} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
