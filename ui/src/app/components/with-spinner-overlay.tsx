@@ -33,8 +33,8 @@ export const withSpinnerOverlay = () => {
       render() {
         return <React.Fragment>
           {this.state.show && <SpinnerOverlay/>}
-          <WrappedComponent showSpinner={this.show}
-                            hideSpinner={this.hide}
+          <WrappedComponent showSpinner={() => this.show()}
+                            hideSpinner={() => this.hide()}
                             {...this.props} />
         </React.Fragment>;
       }
