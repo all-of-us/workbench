@@ -67,12 +67,6 @@ describe('ResourceCardComponent', () => {
     expect(lastModifiedDate(wrapper)).toBeTruthy();
   });
 
-  it('should render a notebook if the resource is a notebook', () => {
-    const wrapper = component(ResourceCardWrapper.notebookCard);
-    expect(wrapper.find('[data-test-id="card-type"]').text()).toBe('Notebook');
-    expect(lastModifiedDate(wrapper)).toBeTruthy();
-  });
-
   // Note: this spec is not testing the Popup menus on resource cards due to an issue using
   //    PopupTrigger in the test suite.
 });

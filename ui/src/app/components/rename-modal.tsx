@@ -26,7 +26,7 @@ const styles = reactStyles({
 
 interface Props {
   hideDescription?: boolean;
-  existingNames: string[];
+  existingNames?: string[];
   oldDescription?: string;
   oldName: string;
   onCancel: Function;

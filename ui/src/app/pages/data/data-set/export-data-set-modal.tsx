@@ -11,6 +11,7 @@ import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {summarizeErrors} from 'app/utils';
 
 
+import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import {DataSet, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
 
 interface Props {
@@ -127,7 +128,7 @@ class ExportDataSetModal extends React.Component<
       });
     // Open notebook in a new tab and close the modal
     const notebookUrl = '/workspaces/' + workspaceNamespace + '/' + workspaceFirecloudName +
-        '/notebooks/' + encodeURIComponent(this.state.notebookName) + '.ipynb';
+        '/notebooks/' + appendNotebookFileSuffix(encodeURIComponent(this.state.notebookName));
     window.open(notebookUrl);
     this.props.closeFunction();
   }
