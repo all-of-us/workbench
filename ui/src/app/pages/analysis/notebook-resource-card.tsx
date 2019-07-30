@@ -48,8 +48,8 @@ export const NotebookResourceCard = fp.flow(
     const {workspaceNamespace, workspaceFirecloudName, notebook} =
       this.props.resource;
 
-    return `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}
-    /notebooks/preview/${encodeURIComponent(notebook.name)}`;
+    return `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
+    `/notebooks/preview/${encodeURIComponent(notebook.name)}`;
   }
 
   get writePermission(): boolean {
@@ -89,8 +89,6 @@ export const NotebookResourceCard = fp.flow(
   fullNotebookName(name) {
     return !name || /^.+\.ipynb$/.test(name) ? name : `${name}.ipynb`;
   }
-
-
 
   renameNotebook(newName) {
     const {resource} = this.props;
