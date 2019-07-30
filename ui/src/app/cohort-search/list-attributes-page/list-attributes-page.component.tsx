@@ -157,7 +157,7 @@ export const AttributesPage = withCurrentWorkspace() (
         calculating: false,
         count: null,
         countError: false,
-        form: {EXISTS: false, NUM: [], CAT: []},
+        form: {exists: false, num: [], cat: []},
         loading: true,
         options: [
           {label: 'Equals', value: Operator.EQUAL},
@@ -177,21 +177,21 @@ export const AttributesPage = withCurrentWorkspace() (
           .then(resp => {
             resp.items.forEach(attr => {
               if (attr.type === AttrName[AttrName.NUM]) {
-                if (!form.NUM.length) {
-                  form.NUM.push({
+                if (!form.num.length) {
+                  form.num.push({
                     name: AttrName.NUM,
                     operator: null,
                     operands: [],
                     conceptId: node.conceptId,
-                    [attr.conceptName]: attr.estCount
+                    [attr.conceptName]: parseInt(attr.estCount, 10)
                   });
                 } else {
-                  form.NUM[0][attr.conceptName] = attr.estCount;
+                  form.num[0][attr.conceptName] = parseInt(attr.estCount, 10);
                 }
               } else {
                 if (parseInt(attr.estCount, 10) > 0) {
                   attr['checked'] = false;
-                  form.CAT.push(attr);
+                  form.cat.push(attr);
                 }
               }
             });
@@ -199,7 +199,7 @@ export const AttributesPage = withCurrentWorkspace() (
           });
       } else {
         options.unshift({label: 'Any', value: AttrName[AttrName.ANY]});
-        form.NUM = node.subtype === CriteriaSubType[CriteriaSubType.BP]
+        form.num = node.subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{name: node.subtype, operator: AttrName.ANY, operands: []}];
         this.setState({form, options, count: node.count, loading: false});
@@ -210,13 +210,13 @@ export const AttributesPage = withCurrentWorkspace() (
       const {form} = this.state;
       let {node: {count}} = this.props;
       if (checked) {
-        form.EXISTS = true;
-        form.NUM = form.NUM.map(attr =>
+        form.exists = true;
+        form.num = form.num.map(attr =>
           ({...attr, operator: this.isPM ? AttrName.ANY : null, operands: []}));
-        form.CAT = form.CAT.map(attr => ({...attr, checked: false}));
+        form.cat = form.cat.map(attr => ({...attr, checked: false}));
       } else {
         count = null;
-        form.EXISTS = false;
+        form.exists = false;
       }
       this.setState({form, count});
     }
@@ -224,20 +224,21 @@ export const AttributesPage = withCurrentWorkspace() (
     selectChange(index: number, value: string) {
       const {node} = this.props;
       const {form} = this.state;
-      form.NUM[index].operator = value;
+      form.num[index].operator = value;
       if (this.isBP) {
         // for blood pressure, either both operators have to be 'ANY' OR neither can be 'ANY'
         const other = index === 0 ? 1 : 0;
         if (value === AttrName[AttrName.ANY]) {
-          form.NUM[other].operator = AttrName[AttrName.ANY];
-          form.NUM[other].operands = form.NUM[index].operands = [];
-        } else if (form.NUM[other].operator === AttrName[AttrName.ANY]) {
-          form.NUM[other].operator = value;
+          form.num[other].operator = AttrName[AttrName.ANY];
+          form.num[other].operands = form.num[index].operands = [];
+        } else if (form.num[other].operator === AttrName[AttrName.ANY]) {
+          form.num[other].operator = value;
         }
       } else if (value === AttrName[AttrName.ANY]) {
-        form.NUM[index].operands = [];
+        form.num[index].operands = [];
       } else if (value !== Operator[Operator.BETWEEN]) {
-        form.NUM[index].operands.splice(1);
+        // delete second operand if it exists
+        form.num[index].operands.splice(1);
       }
       const count = value === AttrName[AttrName.ANY] ? node.count : null;
       this.setState({form, count});
@@ -245,44 +246,44 @@ export const AttributesPage = withCurrentWorkspace() (
 
     inputChange(input: string, index: number, operand: number) {
       const {form} = this.state;
-      let value = input;
-      if (value && value.length > 10) {
-        value = value.slice(0, 10);
+      if (input && input.length > 10) {
+        input = input.slice(0, 10);
       }
-      form.NUM[index].operands[operand] = value;
+      form.num[index].operands[operand] = input;
       this.setState({form, count: null});
     }
 
     checkboxChange(checked: boolean, index: number) {
       const {form} = this.state;
-      form.CAT[index].checked = checked;
+      form.cat[index].checked = checked;
       this.setState({form});
     }
 
     validateForm() {
       const {form} = this.state;
       let formErrors = new Set(), formValid = true;
-      if (form.EXISTS) {
+      if (form.exists) {
         return {formValid, formErrors};
       }
-      formErrors = form.NUM.reduce((acc, attr) => {
-        switch (attr.operator) {
+      formErrors = form.num.reduce((acc, attr) => {
+        const {MIN, MAX, operator} = attr;
+        const operands = attr.operands.map(op => parseInt(op, 10));
+        switch (operator) {
           case null:
             formValid = false;
             return acc;
           case 'ANY':
             return acc;
           case Operator.BETWEEN:
-            if (attr.operands.length < 2) {
+            if (operands.length < 2) {
               formValid = false;
             }
             break;
           default:
-            if (attr.operands.length === 0) {
+            if (operands.length === 0) {
               formValid = false;
             }
         }
-        const operands = attr.operands.map(op => parseInt(op, 10));
         if (operands.includes(NaN)) {
           formValid = false;
           acc.add('Form can only accept valid numbers');
@@ -291,20 +292,20 @@ export const AttributesPage = withCurrentWorkspace() (
           formValid = false;
           acc.add('Form cannot accept negative values');
         }
-        if (this.isMeasurement && operands.some(op => op < attr.MIN || op > attr.MAX)) {
+        if (this.isMeasurement && operands.some(op => op < MIN || op > MAX)) {
           formValid = false;
-          acc.add(`Values must be between ${attr.MIN} and ${attr.MAX}`);
+          acc.add(`Values must be between ${MIN.toLocaleString()} and ${MAX.toLocaleString()}`);
         }
         return acc;
       }, formErrors);
-      formValid = formValid || (this.isMeasurement && form.CAT.some(attr => attr.checked));
-      return {formValid, formErrors};
+      formValid = formValid || (this.isMeasurement && form.cat.some(attr => attr.checked));
+      return {formErrors, formValid};
     }
 
     get paramId() {
       const {node: {conceptId, id}} = this.props;
       const {form} = this.state;
-      const code = form.EXISTS ? 'Any' : form.NUM.reduce((acc, attr) => {
+      const code = form.exists ? 'Any' : form.num.reduce((acc, attr) => {
         if (attr.operator) {
           acc += optionUtil[attr.operator].code;
         }
@@ -323,10 +324,10 @@ export const AttributesPage = withCurrentWorkspace() (
       const {form} = this.state;
       let name;
       const attrs = [];
-      if (form.EXISTS) {
+      if (form.exists) {
         name = node.name + ' (Any)';
       } else {
-        form.NUM.filter(at => at.operator).forEach(({operator, operands, conceptId}) => {
+        form.num.filter(at => at.operator).forEach(({operator, operands, conceptId}) => {
           const attr = {name: AttrName.NUM, operator, operands};
           if (node.subtype === CriteriaSubType.BP) {
             attr['conceptId'] = conceptId;
@@ -340,8 +341,8 @@ export const AttributesPage = withCurrentWorkspace() (
             attrs.push(attr);
           }
         });
-        if (form.CAT.some(at => at.checked)) {
-          const catOperands = form.CAT.reduce((checked, current) => {
+        if (form.cat.some(at => at.checked)) {
+          const catOperands = form.cat.reduce((checked, current) => {
             if (current.checked) {
               checked.push(current.valueAsConceptId.toString());
             }
@@ -352,12 +353,7 @@ export const AttributesPage = withCurrentWorkspace() (
         name = this.paramName +
           (this.isPM && attrs[0].name !== AttrName.ANY ? PM_UNITS[node.subtype] : '') + ')';
       }
-      return {
-        ...node,
-        parameterId: this.paramId,
-        name: name,
-        attributes: attrs
-      };
+      return {...node, parameterId: this.paramId, name: name, attributes: attrs};
     }
 
     get paramName() {
@@ -365,7 +361,7 @@ export const AttributesPage = withCurrentWorkspace() (
       const {form} = this.state;
       const selectionDisplay = [];
       let name = '';
-      form.NUM.filter(at => at.operator).forEach((attr, i) => {
+      form.num.filter(at => at.operator).forEach((attr, i) => {
         if (attr.operator === AttrName.ANY) {
           if (i === 0) {
             name += 'Any';
@@ -385,7 +381,7 @@ export const AttributesPage = withCurrentWorkspace() (
       if (name !== '') {
         selectionDisplay.push(name);
       }
-      form.CAT.filter(ca => ca.checked).forEach(attr => selectionDisplay.push(attr.conceptName));
+      form.cat.filter(ca => ca.checked).forEach(attr => selectionDisplay.push(attr.conceptName));
       return node.name + ' (' + selectionDisplay.join(', ');
     }
 
@@ -446,13 +442,13 @@ export const AttributesPage = withCurrentWorkspace() (
     render() {
       const {node} = this.props;
       const {calculating, count, countError, form, loading, options} = this.state;
-      const {formValid, formErrors} = this.validateForm();
-      const disabled = calculating || form.EXISTS || !formValid
-        || form.NUM.every(attr => attr.operator === 'ANY');
+      const {formErrors, formValid} = this.validateForm();
+      const disabled = calculating || form.exists || !formValid
+        || form.num.every(attr => attr.operator === 'ANY');
       return (loading ? <SpinnerOverlay/> : <div style={{margin: '0.5rem 0 1.5rem'}}>
         {countError && <div style={styles.error}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-                   shape='exclamation-triangle' size='22'/>
+            shape='exclamation-triangle' size='22'/>
           Sorry, the request cannot be completed.
         </div>}
         {!!formErrors.size && <div style={styles.errors}>
@@ -464,26 +460,28 @@ export const AttributesPage = withCurrentWorkspace() (
           <div style={styles.label}>{this.displayName}</div>
           <CheckBox style={{marginLeft: '0.5rem'}}
             onChange={(v) => this.toggleCheckbox(v)}/> Any value (lab exists)
-          {!form.EXISTS && form.NUM.length > 0 && <div style={styles.orCircle}>OR</div>}
+          {!form.exists && form.num.length > 0 && <div style={styles.orCircle}>OR</div>}
         </div>}
-        {!form.EXISTS && <React.Fragment>
-          {form.NUM.map((attr, a) => <div key={a}>
+        {!form.exists && <React.Fragment>
+          {form.num.map((attr, a) => <div key={a}>
             {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
             {this.isBP && <div style={styles.label}>{attr.name}</div>}
             <div style={styles.container}>
               <div style={styles.dropdown}>
-                <Dropdown style={{width: '100%'}}value={attr.operator} options={options}
+                <Dropdown style={{width: '100%'}} value={attr.operator} options={options}
                   placeholder='Select Operator' onChange={(e) => this.selectChange(a, e.value)}/>
               </div>
               {![null, 'ANY'].includes(attr.operator) && <div>
-                <input style={styles.number} type='number' min={attr.MIN} max={attr.MAX}
+                <input style={styles.number} type='number' value={attr.operands[0]}
+                  min={attr.MIN} max={attr.MAX}
                   onChange={(e) => this.inputChange(e.target.value, a, 0)}/>
                 {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
               </div>}
               {attr.operator === Operator.BETWEEN && <React.Fragment>
                 <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
                 <div>
-                  <input style={styles.number} type='number' min={attr.MIN} max={attr.MAX}
+                  <input style={styles.number} type='number' value={attr.operands[1]}
+                    min={attr.MIN} max={attr.MAX}
                     onChange={(e) => this.inputChange(e.target.value, a, 1)}/>
                   {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
                 </div>
@@ -493,11 +491,11 @@ export const AttributesPage = withCurrentWorkspace() (
               }
             </div>
           </div>)}
-          {form.CAT.length > 0 && <React.Fragment>
+          {form.cat.length > 0 && <React.Fragment>
             <div style={styles.orCircle}>OR</div>
             <div style={styles.label}>Categorical Values</div>
             <div style={{marginLeft: '0.5rem'}}>
-              {form.CAT.map((attr, a) => <div key={a} style={styles.categorical}>
+              {form.cat.map((attr, a) => <div key={a} style={styles.categorical}>
                 <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
                   onChange={(v) => this.checkboxChange(v, a)} />
                 {attr.conceptName}&nbsp;
@@ -524,7 +522,7 @@ export const AttributesPage = withCurrentWorkspace() (
               <div style={{fontWeight: 'bold'}}>Results</div>
               <div>
                 Number Participants:
-                {count === null ? <span> -- </span> : <span> {count.toLocaleString()}</span>}
+                <span> {count === null ? '--' : count.toLocaleString()} </span>
               </div>
             </div>
             {!calculating && formValid && <div style={styles.buttonContainer}>
