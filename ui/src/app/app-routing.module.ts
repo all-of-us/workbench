@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
-import {DataSetGuard} from './guards/dataset-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
@@ -145,8 +144,6 @@ const routes: Routes = [
               },
               {
                 path: 'data',
-                canActivate: [DataSetGuard],
-                canActivateChild: [DataSetGuard],
                 children: [
                   {
                     path: '',
@@ -266,7 +263,6 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
-    DataSetGuard,
     RegistrationGuard,
     SignInGuard,
   ]

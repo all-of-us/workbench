@@ -11,7 +11,6 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
-import {ConceptNavigationBar} from 'app/pages/data/concept/concept-navigation-bar';
 import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
@@ -20,7 +19,6 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {NavStore, queryParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
-import {environment} from 'environments/environment';
 import {
   Concept,
   ConceptSet,
@@ -469,11 +467,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
         conceptsToAdd, currentSearchString, conceptsSavedText, selectedSurvey, surveyAddModalOpen,
         selectedSurveyQuestions} =
           this.state;
-      const {workspace} = this.props;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
-        {environment.enableDatasetBuilder ?
-          <Header style={{fontSize: '20px', marginTop: 0, fontWeight: 600}}>Concept Sets</Header> :
-          <ConceptNavigationBar showConcepts={true} ns={workspace.namespace} wsId={workspace.id}/>}
+        <Header style={{fontSize: '20px', marginTop: 0, fontWeight: 600}}>Concept Sets</Header>
         <div style={{marginBottom: '6%', marginTop: '1.5%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
             <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',

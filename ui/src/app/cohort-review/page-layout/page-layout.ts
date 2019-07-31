@@ -35,7 +35,7 @@ export class PageLayout implements OnInit, OnDestroy {
       cohortReviewStore.next(review);
       this.reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
       if (this.reviewPresent) {
-        navigate(['workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);
+        navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
       }
     });
     cohortsApi().getCohort(ns, wsid, cid).then(cohort => {
@@ -71,7 +71,7 @@ export class PageLayout implements OnInit, OnDestroy {
 
   returnToCohorts() {
     const {ns, wsid} = urlParamsStore.getValue();
-    navigate(['workspaces', ns, wsid, 'cohorts']);
+    navigate(['workspaces', ns, wsid, 'data', 'cohorts']);
   }
 
   get ableToReview() {
