@@ -9,7 +9,8 @@ import org.springframework.web.method.HandlerMethod;
 public class InterceptorUtils {
 
   private static Map<String, String> implMap = ImmutableMap.of(
-      "org.pmiops.workbench.api.WorkspacesApiController", "org.pmiops.workbench.workspaces.WorkspacesController"
+      "org.pmiops.workbench.api.WorkspacesApiController", "org.pmiops.workbench.workspaces.WorkspacesController",
+      "org.pmiops.workbench.api.BillingApiController", "org.pmiops.workbench.billing.BillingController"
   );
 
   private InterceptorUtils() {}
