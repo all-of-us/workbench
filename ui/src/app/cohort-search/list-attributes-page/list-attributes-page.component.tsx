@@ -236,7 +236,8 @@ export const AttributesPage = withCurrentWorkspace() (
         }
       } else if (value === AttrName[AttrName.ANY]) {
         form.num[index].operands = [];
-      } else if (value !== Operator[Operator.BETWEEN]) {
+      }
+      if (value !== Operator[Operator.BETWEEN]) {
         // delete second operand if it exists
         form.num[index].operands.splice(1);
       }
@@ -261,7 +262,7 @@ export const AttributesPage = withCurrentWorkspace() (
 
     validateForm() {
       const {form} = this.state;
-      let formErrors = new Set(), formValid = true;
+      let formErrors = new Set(), formValid = true, operatorSelected = true;
       if (form.exists) {
         return {formValid, formErrors};
       }
@@ -270,7 +271,7 @@ export const AttributesPage = withCurrentWorkspace() (
         const operands = attr.operands.map(op => parseInt(op, 10));
         switch (operator) {
           case null:
-            formValid = false;
+            operatorSelected = false;
             return acc;
           case 'ANY':
             return acc;
@@ -298,7 +299,8 @@ export const AttributesPage = withCurrentWorkspace() (
         }
         return acc;
       }, formErrors);
-      formValid = formValid || (this.isMeasurement && form.cat.some(attr => attr.checked));
+      formValid = formValid ||
+        (this.isMeasurement && !operatorSelected && form.cat.some(attr => attr.checked));
       return {formErrors, formValid};
     }
 
