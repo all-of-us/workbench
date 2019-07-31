@@ -191,9 +191,9 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         // This will contain the Jupyter-local path to the localized notebook.
         if (!this.creating) {
           this.incrementProgress(Progress.Copying);
-          localizeObs = this.localizeNotebooks([this.notebookName],
+          localizeObs = this.localizeNotebooks([this.fullNotebookName],
             this.playground)
-            .map(localDir => `${localDir}/${this.notebookName}`);
+            .map(localDir => `${localDir}/${this.fullNotebookName}`);
         } else {
           this.incrementProgress(Progress.Creating);
           localizeObs = this.newNotebook();
