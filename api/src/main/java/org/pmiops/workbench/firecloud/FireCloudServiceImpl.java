@@ -212,6 +212,11 @@ public class FireCloudServiceImpl implements FireCloudService {
             .highSecurityNetwork(enableVpcFlowLogs)
             .enableFlowLogs(enableVpcFlowLogs);
 
+    boolean enableVpcSecurityPerimeter = configProvider.get().featureFlags.enableVpcSecurityPerimeter;
+    if (enableVpcSecurityPerimeter) {
+      request.servicePerimeter(configProvider.get().firecloud.vpcSecurityPerimeterName);
+    }
+
     BillingApi billingApi = billingApiProvider.get();
     retryHandler.run(
         (context) -> {

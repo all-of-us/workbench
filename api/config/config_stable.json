@@ -11,7 +11,8 @@
     "registeredDomainName": "all-of-us-registered-stable",
     "billingRetryCount": 2,
     "billingProjectBufferCapacity": 10,
-    "xAppIdValue": "stable-AoU-RW"
+    "xAppIdValue": "stable-AoU-RW",
+    "vpcSecurityPerimeterName": ""
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -68,6 +69,7 @@
     "enableLeoWelder": true,
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": false,
-    "enableVpcFlowLogs": true
+    "enableVpcFlowLogs": true,
+    "enableVpcSecurityPerimeter": false
   }
 }
