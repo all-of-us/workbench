@@ -172,7 +172,6 @@ public class CdrDbConfig {
   }
 
   @Bean(name = "cdrPoolConfiguration")
-  //  @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   @ConfigurationProperties(prefix = "cdr.datasource")
   public PoolConfiguration poolConfig() {
     return new PoolProperties();
