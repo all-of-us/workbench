@@ -1,10 +1,16 @@
 package org.pmiops.workbench.interceptors;
 
+import com.google.common.collect.ImmutableMap;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.regex.Pattern;
 import org.springframework.web.method.HandlerMethod;
 
 public class InterceptorUtils {
+
+  private static Map<String, String> implMap = ImmutableMap.of(
+      "org.pmiops.workbench.api.WorkspacesApiController", "org.pmiops.workbench.workspaces.WorkspacesController"
+  );
 
   private InterceptorUtils() {}
 
@@ -16,7 +22,14 @@ public class InterceptorUtils {
     Pattern apiControllerPattern = Pattern.compile("(.*\\.[^.]+)Api(Controller)");
     Method apiControllerMethod = handlerMethod.getMethod();
     String apiControllerName = apiControllerMethod.getDeclaringClass().getName();
-    String controllerName = apiControllerPattern.matcher(apiControllerName).replaceAll("$1$2");
+
+    String controllerName;
+    if (implMap.containsKey(apiControllerName)) {
+      controllerName = implMap.get(apiControllerName);
+    } else {
+      controllerName = apiControllerPattern.matcher(apiControllerName).replaceAll("$1$2");
+    }
+
     Class<?> controllerClass;
     try {
       controllerClass = Class.forName(controllerName);
