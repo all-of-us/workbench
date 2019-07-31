@@ -15,6 +15,7 @@ import {
 import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
 
+import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {
   Cluster,
   ClusterService,
@@ -236,17 +237,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   // this maybe overkill, but should handle all situations
   setNotebookNames(): void {
     const {nbName} = urlParamsStore.getValue();
-    this.notebookName =
-      decodeURIComponent(nbName);
-    if (nbName.endsWith('.ipynb')) {
-      this.fullNotebookName =
-        decodeURIComponent(nbName);
-      this.notebookName = this.fullNotebookName.replace('.ipynb$', '');
-    } else {
-      this.notebookName =
-        decodeURIComponent(nbName);
-      this.fullNotebookName = this.notebookName + '.ipynb';
-    }
+    this.notebookName = dropNotebookFileSuffix(decodeURIComponent(nbName));
+    this.fullNotebookName = appendNotebookFileSuffix(this.notebookName);
   }
 
   private clusterRetryDelay(errs: Observable<Error>) {
@@ -291,7 +283,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       const workspaceDir = localDir.replace(/^workspaces\//, '');
       return this.jupyterService.putContents(
         this.cluster.clusterNamespace, this.cluster.clusterName,
-        workspaceDir, this.notebookName + '.ipynb', {
+        workspaceDir, appendNotebookFileSuffix(this.notebookName), {
           'type': 'file',
           'format': 'text',
           'content': JSON.stringify(fileContent)

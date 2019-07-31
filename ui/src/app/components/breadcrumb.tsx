@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import {
   ReactWrapperBase,
@@ -55,7 +56,7 @@ export const getTrail = (type: BreadcrumbType, data): {label: string, url: strin
         ...getTrail(BreadcrumbType.Workspace, data),
         {label: 'Notebooks', url: `${prefix}/notebooks`},
         {
-          label: nbName && decodeURIComponent(nbName).replace(/\.ipynb$/, ''),
+          label: nbName && dropNotebookFileSuffix(decodeURIComponent(nbName)),
           url: `${prefix}/notebooks/${nbName}`
         }
       ];

@@ -17,6 +17,7 @@ import {
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
 import {
@@ -160,7 +161,7 @@ class NewDataSetModal extends React.Component<Props, State> {
           });
         // Open notebook in a new tab and return back to the Data tab
         const notebookUrl = '/workspaces/' + workspaceNamespace + '/' + workspaceId +
-            '/notebooks/' + encodeURIComponent(this.state.notebookName) + '.ipynb';
+            '/notebooks/' + appendNotebookFileSuffix(encodeURIComponent(this.state.notebookName));
         window.open(notebookUrl);
       }
       window.history.back();

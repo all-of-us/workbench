@@ -8,7 +8,6 @@ import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 
-import {ResourceCard} from 'app/components/resource-card';
 import {NewNotebookModal} from 'app/pages/analysis/new-notebook-modal';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -16,6 +15,8 @@ import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
+
+import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {FileDetail, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {
@@ -93,11 +94,8 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
         </TooltipTrigger>
         <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
           {notebooks.map(notebook => {
-            return <ResourceCard key={notebook.path}
-              onDuplicateResource={(duplicating) =>
-                this.setState({loading: duplicating})
-              }
-              resourceCard={convertToResource(notebook, namespace, id, al, ResourceType.NOTEBOOK)}
+            return <NotebookResourceCard
+              resource={convertToResource(notebook, namespace, id, al, ResourceType.NOTEBOOK)}
               onUpdate={() => this.loadNotebooks()}
             />;
           })}
