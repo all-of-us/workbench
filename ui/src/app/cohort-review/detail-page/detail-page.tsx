@@ -27,14 +27,13 @@ const styles = reactStyles({
     height: '100%',
     backgroundColor: '#E2E2EA',
     display: 'flex',
-    marginRight: '-0.6rem',
   },
   sidebarHandle: {
     backgroundColor: '#728FA3',
     padding: '0.6rem',
     position: 'absolute',
-    marginLeft: '-2.3rem',
-    borderRadius: '0.2rem',
+    borderRadius: '0.2rem 0 0 0.2rem',
+    marginLeft: '-2.4rem',
     top: '3rem',
     cursor: 'pointer'
   },
@@ -56,10 +55,10 @@ const styles = reactStyles({
     color: colors.primary,
   },
   sidebarContentOpen: {
-    width: '385px',
+    width: '370px',
     borderLeft: '1rem solid #728FA3',
     paddingLeft: '0.5rem',
-    paddingLight: '1rem',
+    paddingRight: '0.5rem',
   },
   sidebarHandleOpen: {
     marginLeft: '0.25rem',
