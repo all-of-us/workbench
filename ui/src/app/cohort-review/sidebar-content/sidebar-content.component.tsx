@@ -10,7 +10,7 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, DatePicker, NumberInput, Select, TextArea} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {AnnotationType, CohortAnnotationDefinition, CohortStatus, ParticipantCohortAnnotation, WorkspaceAccessLevel} from 'generated/fetch';
@@ -22,15 +22,15 @@ const styles = {
     color: colors.primary,
   },
   error: {
-    color: '#F7981C',
+    color: colors.warning,
     marginTop: '-3px',
   },
   success: {
-    color: '#7CC79B',
+    color: colors.success,
     marginTop: '-3px',
   },
   message: {
-    color: '#000000',
+    color: colorWithWhiteness(colors.dark, -1),
     fontSize: '13px',
     fontWeight: 400
   }
