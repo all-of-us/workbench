@@ -29,6 +29,7 @@ interface WorkspaceState {
   workspaceUserRoles: UserRole[];
   googleBucketModalOpen: boolean;
   publishing: boolean;
+  loadingWorkspaceUserRoles: boolean;
 }
 
 const styles = reactStyles({
@@ -99,7 +100,8 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
       workspace: undefined,
       workspaceUserRoles: [],
       googleBucketModalOpen: false,
-      publishing: false
+      publishing: false,
+      loadingWorkspaceUserRoles: true
     };
   }
 
@@ -133,9 +135,12 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
 
   async loadUserRoles() {
     const {workspace} = this.state;
+    this.setState({loadingWorkspaceUserRoles: true});
     workspacesApi().getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id).then(
       resp => {
-        this.setState({workspaceUserRoles: fp.sortBy('familyName', resp.items)});
+        this.setState({
+          workspaceUserRoles: fp.sortBy('familyName', resp.items),
+          loadingWorkspaceUserRoles: false});
       }
     ).catch(error => {
       console.error(error);
@@ -200,10 +205,16 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
     }
   }
 
+  async onShare() {
+    this.setState({sharing: false, loadingWorkspaceUserRoles: true});
+    await this.reloadWorkspace(currentWorkspaceStore.getValue());
+    this.loadUserRoles();
+  }
+
   render() {
     const {profileState: {profile}} = this.props;
     const {cdrVersion, workspace, workspaceUserRoles, googleBucketModalOpen,
-      sharing, publishing} = this.state;
+      sharing, publishing, loadingWorkspaceUserRoles} = this.state;
     return <div style={styles.mainPage}>
       <div style={{display: 'flex', flexDirection: 'column', margin: '1rem', width: '98%'}}>
         <ResearchPurpose data-test-id='researchPurpose'/>
@@ -226,7 +237,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
                   data-test-id='workspaceShareButton'
                   onClick={() => this.setState({sharing: true})}>Share</Button>
         </div>
-        {workspaceUserRoles.length > 0 ?
+        {(!loadingWorkspaceUserRoles && workspaceUserRoles.length > 0) ?
           <React.Fragment>
             {workspaceUserRoles.map((user, i) =>
               <div key={i} data-test-id={'workspaceUser-' + i}>
@@ -283,7 +294,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
       {sharing && <WorkspaceShare workspace={workspace}
                                   accessLevel={workspace.accessLevel}
                                   userEmail={profile.username}
-                                  onClose={() => this.setState({sharing: false})}
+                                  onClose={() => this.onShare()}
                                   userRoles={workspaceUserRoles}
                                   data-test-id='workspaceShareModal'/>}
     </div>;
