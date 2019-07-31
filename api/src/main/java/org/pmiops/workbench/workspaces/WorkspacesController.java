@@ -69,6 +69,7 @@ import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -370,14 +371,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     final int SLEEP_INTERVAL_SECONDS = 5;
 
     try {
-      cloudStorageService.copyBlob(
-          b.getBlobId(), BlobId.of(bucketName, b.getName()));
+      cloudStorageService.copyBlob(b.getBlobId(), BlobId.of(bucketName, b.getName()));
     } catch (StorageException e) {
       if (retryPeriodSeconds == 0) {
         throw e;
       }
 
-      log.info("Service Account does not have access to bucket " + bucketName + ". Retrying for another " + retryPeriodSeconds + " seconds.");
+      log.info(
+          "Service Account does not have access to bucket "
+              + bucketName
+              + ". Retrying for another "
+              + retryPeriodSeconds
+              + " seconds.");
       try {
         Thread.sleep(SLEEP_INTERVAL_SECONDS * 1000);
       } catch (InterruptedException ex) {

@@ -17,13 +17,11 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -174,7 +172,7 @@ public class CdrDbConfig {
   }
 
   @Bean(name = "cdrPoolConfiguration")
-//  @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+  //  @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   @ConfigurationProperties(prefix = "cdr.datasource")
   public PoolConfiguration poolConfig() {
     return new PoolProperties();

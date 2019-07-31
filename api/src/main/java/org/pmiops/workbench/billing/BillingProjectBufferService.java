@@ -145,7 +145,8 @@ public class BillingProjectBufferService {
   }
 
   public double availableProportion() {
-    return (double) billingProjectBufferEntryDao.numberOfAvailableEntries() / getBufferMaxCapacity();
+    return (double) billingProjectBufferEntryDao.numberOfAvailableEntries()
+        / getBufferMaxCapacity();
   }
 
   private BillingProjectBufferEntry consumeBufferEntryForAssignment() {
