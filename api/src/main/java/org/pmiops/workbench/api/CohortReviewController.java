@@ -402,7 +402,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     cohortReviewService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    org.pmiops.workbench.db.model.CohortReview dbCohortReview =
+    CohortReview dbCohortReview =
         cohortReviewService.findCohortReview(workspaceNamespace, workspaceId, cohortReviewId);
     cohortReviewService.deleteCohortReview(dbCohortReview);
     return ResponseEntity.ok(new EmptyResponse());

@@ -202,7 +202,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Before
   public void setUp() {
 
-    org.pmiops.workbench.db.model.User user = new org.pmiops.workbench.db.model.User();
+    User user = new User();
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
     user.setDisabled(false);
