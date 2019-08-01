@@ -310,6 +310,7 @@ workflows:
       - api-build-test
       - ui-build-test
       - api-bigquery-test
+      - api-integration-test
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
