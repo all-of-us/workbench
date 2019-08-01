@@ -11,6 +11,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.cdr.CdrDbConfig;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -68,7 +69,8 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
   WorkspacesController.class,
   BillingProjectBufferService.class,
   NotebooksServiceImpl.class,
-  UserRecentResourceServiceImpl.class
+  UserRecentResourceServiceImpl.class,
+  CdrDbConfig.class
 })
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")
