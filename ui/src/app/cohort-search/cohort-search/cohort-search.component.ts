@@ -7,7 +7,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
-import {environment} from 'environments/environment';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
@@ -45,7 +44,6 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   includeSize: number;
   tempLength = {};
   private subscription;
-  listSearch = environment.enableCBListSearch;
   loading = false;
   count: number;
   error = false;
@@ -74,29 +72,18 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
             this.loading = false;
             currentCohortStore.next(cohort);
             if (cohort.criteria) {
-              if (!this.listSearch) {
-                this.actions.loadFromJSON(cohort.criteria);
-                this.actions.runAllRequests();
-              } else {
-                initExisting.next(true);
-                searchRequestStore.next(parseCohortDefinition(cohort.criteria));
-              }
+              initExisting.next(true);
+              searchRequestStore.next(parseCohortDefinition(cohort.criteria));
             }
           });
       }
     });
 
-    if (this.listSearch) {
-      searchRequestStore.subscribe(sr => {
-        this.includeSize = sr.includes.length;
-        this.criteria = sr;
-        this.overview = sr.includes.length || sr.excludes.length;
-      });
-    } else {
-      this.subscription.add(
-        this.includeGroups$.subscribe(groups => this.includeSize = groups.size + 1)
-      );
-    }
+    searchRequestStore.subscribe(sr => {
+      this.includeSize = sr.includes.length;
+      this.criteria = sr;
+      this.overview = sr.includes.length || sr.excludes.length;
+    });
     this.updateWrapperDimensions();
   }
 
