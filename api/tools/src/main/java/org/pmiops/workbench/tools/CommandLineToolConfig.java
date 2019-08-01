@@ -11,7 +11,6 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
-import org.pmiops.workbench.cdr.CdrDbConfig;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -58,7 +57,6 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
   BigQueryConfig.class,
   CacheSpringConfiguration.class,
   WorkbenchDbConfig.class,
-  CdrDbConfig.class,
   CohortCloningService.class,
   CohortFactoryImpl.class,
   ConceptService.class,
