@@ -391,7 +391,7 @@ export const ListOverview = withCurrentWorkspace()(
               onChange={(v) => this.setState({description: v})}/>
           </ModalBody>
           <ModalFooter>
-            <Button style={{color: colors.white}} type='link' onClick={() => this.setState({
+            <Button style={{color: colors.primary}} type='link' onClick={() => this.setState({
               saveModalOpen: false, name: undefined, description: undefined, saveError: false,
               nameTouched: false
             })} disabled={saving}>Cancel</Button>

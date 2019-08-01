@@ -3,6 +3,7 @@ import {getChartObj} from 'app/cohort-search/utils';
 import {ReactWrapperBase} from 'app/utils';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 highCharts.setOptions({
@@ -89,18 +90,27 @@ export class GenderChart extends React.Component<Props, State> {
 
   getSeries() {
     const {data} = this.props;
-    return data
-      .map(datum => datum.update('gender', code => this.codeMap[code]))
-      .groupBy(datum => datum.get('gender', 'Unknown'))
-      .map((group, gender) => ({
-        y: group.reduce((acc, item) => acc + item.get('count'), 0),
-        name: gender,
-        color: this.defaults[gender].color
-      }))
-      .mergeWith((old, _) => old, this.defaults)
-      .sort((a, b) => a.name > b.name ? 1 : -1)
-      .valueSeq()
-      .toArray();
+    // TODO remove toJS() and commented code once the combo chart has been updated for vanilla js
+    // TODO check that adding ES2017 to tsconfig is okay or find a workaround for Object.values
+    return Object.values(data.toJS().map(datum => {
+      datum.gender = this.codeMap[datum.gender];
+      return datum;
+    }).reduce((acc, it) => {
+      acc[it.gender].y += it.count;
+      return acc;
+    }, this.defaults)).sort((a, b) => a['name'] > b['name'] ? 1 : -1);
+    // return data
+    //   .map(datum => datum.update('gender', code => this.codeMap[code]))
+    //   .groupBy(datum => datum.get('gender', 'Unknown'))
+    //   .map((group, gender) => ({
+    //     y: group.reduce((acc, item) => acc + item.get('count'), 0),
+    //     name: gender,
+    //     color: this.defaults[gender].color
+    //   }))
+    //   .mergeWith((old, _) => old, this.defaults)
+    //   .sort((a, b) => a.name > b.name ? 1 : -1)
+    //   .valueSeq()
+    //   .toArray();
   }
 
   render() {
