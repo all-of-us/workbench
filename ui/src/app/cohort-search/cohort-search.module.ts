@@ -1,4 +1,3 @@
-import {NgReduxModule} from '@angular-redux/store';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
@@ -30,7 +29,6 @@ import {SearchGroupSelectComponent} from './search-group-select/search-group-sel
 import {BreadcrumbType} from 'app/utils/navigation';
 
 /* Other Objects */
-import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
 import {SafeHtmlPipe} from './safe-html.pipe';
 
 
@@ -52,7 +50,6 @@ const routes: Routes = [{
     RouterModule.forChild(routes),
     // 3rd Party
     ClarityModule,
-    NgReduxModule,
     NgxPopperModule,
     NouisliderModule,
     // Ours
@@ -79,12 +76,5 @@ const routes: Routes = [{
     SafeHtmlPipe,
     SearchGroupSelectComponent,
   ],
-  providers: [
-    CohortSearchActions,
-    CohortSearchEpics,
-    ConfigureStore,
-  ]
 })
-export class CohortSearchModule {
-  constructor(store: ConfigureStore) {}
-}
+export class CohortSearchModule {}
