@@ -140,7 +140,7 @@ public class CommandLineToolConfig {
    */
   @Bean
   @Lazy
-  @Primary
+//  @Primary
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
     Config config = configDao.findOne(Config.MAIN_CONFIG_ID);
     Gson gson = new Gson();
