@@ -110,6 +110,26 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
+  public CohortReview findCohortReview(String ns, String firecloudName, Long cohortReviewId) {
+    CohortReview cohortReview =
+        cohortReviewDao.findByNamespaceAndFirecloudNameAndCohortReviewId(
+            ns, firecloudName, cohortReviewId);
+
+    if (cohortReview == null) {
+      throw new NotFoundException(
+          String.format(
+              "Not Found: Cohort Review does not exist for namespace: %s, firecloudName: %s and cohortReviewId: %d",
+              ns, firecloudName, cohortReviewId));
+    }
+    return cohortReview;
+  }
+
+  @Override
+  public void deleteCohortReview(CohortReview cohortReview) {
+    cohortReviewDao.delete(cohortReview);
+  }
+
+  @Override
   public List<CohortReview> getRequiredWithCohortReviews(String ns, String firecloudName) {
     return cohortReviewDao.findByFirecloudNameAndActiveStatus(
         ns,

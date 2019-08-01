@@ -97,6 +97,7 @@
   <include file="changelog/db.changelog-87-add-survey-concept-set.xml"/>
   <include file="changelog/db.changelog-88-published-workspaces.xml"/>
   <include file="changelog/db.changelog-89-add-data-use-agreement-signed-version.xml"/>
+  <include file="changelog/db.changelog-90-review-version.xml"/>
 
   <!--
   Note: to update the DB locally, do the following:

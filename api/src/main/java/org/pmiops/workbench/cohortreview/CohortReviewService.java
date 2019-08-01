@@ -49,13 +49,30 @@ public interface CohortReviewService {
   CohortReview findCohortReview(Long cohortId, Long cdrVersionId);
 
   /**
-   * Find the {@link CohortReview} for the specified workspaceNamespace and workspaceId.
+   * Find the {@link CohortReview} for the specified ns, firecloudName and cohortReviewId
    *
-   * @param workspaceNamespace
-   * @param workspaceId
+   * @param ns
+   * @param firecloudName
+   * @param cohortReviewId
    * @return
    */
-  List<CohortReview> getRequiredWithCohortReviews(String workspaceNamespace, String workspaceId);
+  CohortReview findCohortReview(String ns, String firecloudName, Long cohortReviewId);
+
+  /**
+   * Delete the specified cohort review.
+   *
+   * @param cohortReview
+   */
+  void deleteCohortReview(CohortReview cohortReview);
+
+  /**
+   * Find the {@link CohortReview} for the specified ns and firecloudName.
+   *
+   * @param ns
+   * @param firecloudName
+   * @return
+   */
+  List<CohortReview> getRequiredWithCohortReviews(String ns, String firecloudName);
 
   /**
    * Save the specified {@link CohortReview}.
