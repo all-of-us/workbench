@@ -2,6 +2,7 @@ package org.pmiops.workbench.tools;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.appengine.repackaged.com.google.common.base.Pair;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,8 +10,10 @@ import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.Config;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
@@ -38,6 +41,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -235,9 +239,8 @@ public class BulkCloneWorkspacesTool {
           Thread.sleep(sleepIntervalSeconds * 1000);
         }
 
-        providedUser = userDao.findUserByEmail(dbWorkspace.getCreator().getEmail());
-
-        if (providedUser.getDisabled() || !checkUserExistsInGoogle(directoryService, providedUser.getEmail())) {
+        providedUser = userDao.findUserByEmail(workspaceResponse.getWorkspace().getCreatedBy());
+        if (providedUser == null || providedUser.getDisabled() || !checkUserExistsInGoogle(directoryService, providedUser.getEmail())) {
           continue;
         }
 

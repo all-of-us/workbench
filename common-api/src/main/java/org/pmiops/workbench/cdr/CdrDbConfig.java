@@ -56,10 +56,8 @@ public class CdrDbConfig {
     public CdrDataSource(
         CdrVersionDao cdrVersionDao,
         @Qualifier("poolConfiguration") PoolConfiguration basePoolConfig,
-        @Qualifier("cdrPoolConfiguration") PoolConfiguration cdrPoolConfig,
-        @Qualifier("configCache") LoadingCache<String, Object> configCache)
+        @Qualifier("cdrPoolConfiguration") PoolConfiguration cdrPoolConfig)
         throws ExecutionException {
-      WorkbenchConfig workbenchConfig = CacheSpringConfiguration.lookupWorkbenchConfig(configCache);
       String dbUser = cdrPoolConfig.getUsername();
       String dbPassword = cdrPoolConfig.getPassword();
       String originalDbUrl = cdrPoolConfig.getUrl();
