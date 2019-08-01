@@ -1,7 +1,6 @@
 import {AfterViewInit, Component, Input} from '@angular/core';
 
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
-import {CohortSearchActions} from 'app/cohort-search/redux';
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {generateId} from 'app/cohort-search/utils';
 
@@ -22,8 +21,6 @@ export class SearchGroupSelectComponent implements AfterViewInit {
 
   demoOpen = false;
   demoMenuHover = false;
-
-  constructor(private actions: CohortSearchActions) {}
 
   ngAfterViewInit(): void {
     /* Open nested menu on hover */
