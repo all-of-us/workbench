@@ -12,7 +12,7 @@
     "billingRetryCount": 2,
     "billingProjectBufferCapacity": 10,
     "xAppIdValue": "stable-AoU-RW",
-    "vpcSecurityPerimeterName": ""
+    "vpcServicePerimeterName": ""
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -70,6 +70,6 @@
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
-    "enableVpcSecurityPerimeter": false
+    "enableVpcServicePerimeter": false
   }
 }

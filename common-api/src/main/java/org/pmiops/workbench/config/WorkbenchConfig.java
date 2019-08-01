@@ -58,9 +58,9 @@ public class WorkbenchConfig {
     // This value specifies the information we hand to Terra as our AppId header.
     // It is primarily used for metrics gathering information.
     public String xAppIdValue;
-    // The name of the VPC security perimeter to create our Terra GCP projects inside,
+    // The name of the VPC service perimeter to create our Terra GCP projects inside,
     // if enabled.
-    public String vpcSecurityPerimeterName;
+    public String vpcServicePerimeterName;
   }
 
   public static class AuthConfig {
@@ -145,6 +145,6 @@ public class WorkbenchConfig {
     public boolean enableVpcFlowLogs;
     // Whether or not AoU should request Terra to create GCP projects inside a VPC
     // security perimeter.
-    public boolean enableVpcSecurityPerimeter;
+    public boolean enableVpcServicePerimeter;
   }
 }
