@@ -14,7 +14,9 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiClient;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.BillingApi;
@@ -24,6 +26,7 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -39,6 +42,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.security.access.method.P;
 
 @SpringBootApplication
 @EnableConfigurationProperties
@@ -157,6 +161,15 @@ public class BulkCloneWorkspacesTool {
     return request;
   }
 
+  private boolean checkUserExistsInGoogle(DirectoryService directoryService, String email) {
+    try {
+      return directoryService.getUser(email) != null;
+    } catch (Exception e) {
+      System.out.println("Skipping " + email + " because user is deleted in either AoU or Google");
+      return false;
+    }
+  }
+
   @Bean
   public CommandLineRunner run(
       WorkspaceDao workspaceDao,
@@ -165,7 +178,7 @@ public class BulkCloneWorkspacesTool {
       FireCloudService fireCloudService,
       UserDao userDao,
       BillingProjectBufferService billingProjectBufferService,
-      @Qualifier("saApiClient") ApiClient saApiClient,
+      DirectoryService directoryService,
       @Qualifier("workspaceAclsApi") WorkspacesApi saWorkspaceApi) {
     return (args) -> {
       padding();
@@ -224,13 +237,18 @@ public class BulkCloneWorkspacesTool {
           Thread.sleep(sleepIntervalSeconds * 1000);
         }
 
+        providedUser = userDao.findUserByEmail(dbWorkspace.getCreator().getEmail());
+
+        if (providedUser.getDisabled() || !checkUserExistsInGoogle(directoryService, providedUser.getEmail())) {
+          continue;
+        }
+
+        impersonateUser(fireCloudService.getApiClientWithImpersonation(providedUser.getEmail()));
+        System.out.println("Impersonated " + providedUser.getEmail());
+
+
         try {
           System.out.println("About to clone " + shorthand(dbWorkspace));
-
-          providedUser = userDao.findUserByEmail(dbWorkspace.getCreator().getEmail());
-          impersonateUser(fireCloudService.getApiClientWithImpersonation(providedUser.getEmail()));
-
-          System.out.println("Impersonated " + providedUser.getEmail());
 
           org.pmiops.workbench.model.WorkspaceResponse apiWorkspace =
               workspaceService.getWorkspace(
@@ -257,7 +275,14 @@ public class BulkCloneWorkspacesTool {
         } catch (Exception e) {
           System.out.println("Failed on " + shorthand(dbWorkspace));
           System.out.println(workspaceResponse);
-          failedWorkspaces.add(Pair.of(workspaceResponse, e.getMessage()));
+          e.printStackTrace();
+
+          if (e instanceof NotFoundException) {
+            System.out.println(providedUser.getDataAccessLevelEnum());
+            failedWorkspaces.add(Pair.of(workspaceResponse, "Resource not found. User has Data Access Level of " + providedUser.getDataAccessLevelEnum()));
+          } else {
+            failedWorkspaces.add(Pair.of(workspaceResponse, e.getMessage()));
+          }
         }
 
         if (processed.size() + failedWorkspaces.size() == numToProcess) {
