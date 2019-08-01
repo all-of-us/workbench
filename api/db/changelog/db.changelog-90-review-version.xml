@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="freemabd" id="changelog-90-review-version">
+    <addColumn tableName="cohort_review">
+      <column name="version" type="smallint" defaultValue="1">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+    <addColumn tableName="cohort_review">
+      <column name="description" type="clob">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+    <addColumn tableName="cohort_review">
+      <column name="creator_id" type="bigint">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+
+    <addForeignKeyConstraint baseColumnNames="creator_id"
+      baseTableName="cohort_review"
+      constraintName="fk_review_creator_id"
+      onDelete="SET NULL"
+      referencedColumnNames="user_id"
+      referencedTableName="user"/>
+
+    <sql>
+      UPDATE cohort_review cr, cohort c
+      SET cr.creator_id = c.creator_id
+      WHERE cr.cohort_id = c.cohort_id
+      AND cr.creator_id is null
+    </sql>
+  </changeSet>
+</databaseChangeLog>
