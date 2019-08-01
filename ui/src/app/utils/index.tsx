@@ -337,7 +337,7 @@ export function displayDate(time: Number): string {
 
 // Remove this when we complete RW-3065
 export function formatRecentResourceDisplayDate(time: string): string {
-  if (time) {
+  if (!time) {
     return '';
   }
 

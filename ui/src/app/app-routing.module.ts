@@ -13,7 +13,6 @@ import {AdminUserComponent} from './pages/admin/admin-user';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect/component';
 import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
-import {CohortListComponent} from './pages/data/cohort/cohort-list';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
@@ -144,14 +143,6 @@ const routes: Routes = [
               }, {
                 path: 'cohorts',
                 children: [
-                  {
-                    path: '',
-                    component: CohortListComponent,
-                    data: {
-                      title: 'View Cohorts',
-                      breadcrumb: BreadcrumbType.Workspace
-                    },
-                  },
                   {
                     path: ':cid/actions',
                     component: CohortActionsComponent,

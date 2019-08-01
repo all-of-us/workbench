@@ -18,6 +18,8 @@ import {
 } from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Domain, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
+import {NotebookResourceCard} from "app/pages/analysis/notebook-resource-card";
+import {CohortResourceCard} from "app/pages/analysis/cohort-resource-card";
 
 const styles = {
   cardButtonArea: {
@@ -163,6 +165,23 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
     return [];
   }
 
+  createResourceCard(resource: RecentResource) {
+    if (resource.notebook) {
+      return <NotebookResourceCard resource={resource}
+                                   onUpdate={() => this.loadResources()}/>;
+    } else if (resource.cohort) {
+      return <CohortResourceCard resource={resource}
+                                 existingNameList={this.getExistingNameList(resource)}
+                                 onUpdate={() => this.loadResources()}/>;
+    } else {
+      return <ResourceCard resourceCard={resource}
+                           onDuplicateResource={(duplicating) => this.setState({isLoading: duplicating})}
+                           onUpdate={() => this.loadResources()}
+                           existingNameList={this.getExistingNameList(resource)}
+      />;
+    }
+  }
+
   render() {
     const {accessLevel, namespace, id} = this.props.workspace;
     const {activeTab, isLoading, resourceList} = this.state;
@@ -279,15 +298,9 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           padding: '0 0.5rem'
         }}>
           {filteredList.map((resource: RecentResource, index: number) => {
-            return <ResourceCard key={index}
-                                 resourceCard={resource}
-                                 onDuplicateResource={(duplicating) => this.setState({
-                                   isLoading: duplicating
-                                 })}
-                                 onUpdate={() => this.loadResources()}
-                                 existingNameList={this.getExistingNameList(resource)}
-            />;
+            return <div key={index}> {this.createResourceCard(resource)} </div>;
           })}
+
           {isLoading && <SpinnerOverlay></SpinnerOverlay>}
         </div>
       </FadeBox>

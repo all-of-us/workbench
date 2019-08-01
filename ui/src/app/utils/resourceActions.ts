@@ -6,6 +6,10 @@ import {
   RecentResource,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import {NotebookResourceCard} from "app/pages/analysis/notebook-resource-card";
+import {CohortResourceCard} from "app/pages/analysis/cohort-resource-card";
+import {ResourceCard} from "app/components/resource-card";
+import * as React from "react";
 
 export enum ResourceType {
     NOTEBOOK = 'notebook',

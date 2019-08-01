@@ -8,13 +8,12 @@ import {switchCase} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 
 export const ResourceCardMenu: React.FunctionComponent<{
-  disabled: boolean, resourceType: ResourceType, onRenameCohort?: Function,
-  onCloneResource?: Function, onDeleteResource?: Function, onEdit?: Function,
-  onExportDataSet: Function, onReviewCohort?: Function, onRenameDataSet?: Function
+  disabled: boolean, resourceType: ResourceType, onDeleteResource?: Function,
+  onEdit?: Function, onExportDataSet: Function,onRenameDataSet?: Function
 }> = ({
-        disabled, resourceType, onRenameCohort = () => {}, onCloneResource = () => {},
-        onDeleteResource = () => {}, onEdit = () => {}, onExportDataSet = () => {},
-        onReviewCohort = () => {}, onRenameDataSet = () => {}
+        disabled, resourceType, onDeleteResource = () => {},
+        onEdit = () => {}, onExportDataSet = () => {},
+        onRenameDataSet = () => {}
       }) => {
   return <PopupTrigger
     data-test-id='resource-card-menu'
@@ -22,15 +21,6 @@ export const ResourceCardMenu: React.FunctionComponent<{
     closeOnClick
     content={
       switchCase(resourceType,
-        ['cohort', () => {
-          return <React.Fragment>
-            <MenuItem icon='note' onClick={onRenameCohort}>Rename</MenuItem>
-            <MenuItem icon='copy' onClick={onCloneResource}>Duplicate</MenuItem>
-            <MenuItem icon='pencil' onClick={onEdit}>Edit</MenuItem>
-            <MenuItem icon='grid-view' onClick={onReviewCohort}>Review</MenuItem>
-            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
-          </React.Fragment>;
-        }],
         ['conceptSet', () => {
           return <React.Fragment>
             <MenuItem icon='pencil' onClick={onEdit}>Rename</MenuItem>
