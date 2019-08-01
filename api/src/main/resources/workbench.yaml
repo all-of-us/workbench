@@ -2924,6 +2924,10 @@ definitions:
         description: >
           Domain corresponding to an OMOP table.
         $ref: "#/definitions/Domain"
+      survey:
+        description: >
+          Survey corresponding to an OMOP table.
+        $ref: "#/definitions/Surveys"
       values:
         $ref: "#/definitions/DomainValuesResponse"
 

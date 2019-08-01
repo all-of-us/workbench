@@ -49,7 +49,7 @@ const styles = reactStyles({
     fontWeight: 600,
   },
   columnBody: {
-    background: '#ffffff',
+    background: colors.white,
     padding: '0.5rem 0.5rem 0.3rem',
     verticalAlign: 'top',
     textAlign: 'left',
@@ -59,7 +59,7 @@ const styles = reactStyles({
     lineHeight: '0.6rem',
   },
   graphColumnBody: {
-    background: '#ffffff',
+    background: colors.white,
     padding: '5px',
     verticalAlign: 'top',
     textAlign: 'left',
@@ -87,7 +87,7 @@ const styles = reactStyles({
   caretIcon: {
     fontSize: '0.6rem',
     paddingLeft: '0.4rem',
-    color: '#0086C1',
+    color: colors.accent,
     cursor: 'pointer',
   },
   filterBorder: {
@@ -110,10 +110,15 @@ const styles = reactStyles({
     paddingTop: '0.5rem',
     textAlign: 'center',
   },
+  unitsLabel: {
+    width: '22rem',
+    margin: '0 0 -1.65rem 12.5rem',
+    color: colors.accent,
+  },
   textSearch: {
     width: '85%',
     borderRadius: '4px',
-    backgroundColor: '#dae6ed',
+    backgroundColor: colors.light,
     marginLeft: '5px'
   },
   textInput: {
@@ -143,7 +148,7 @@ const styles = reactStyles({
     marginLeft: '-80px',
     bottom: '14px',
     left: '100%',
-    background: '#ffffff',
+    background: colors.white,
     color: colors.accent,
     boxSizing: 'content-box',
     float: 'right',
@@ -155,12 +160,11 @@ const styles = reactStyles({
   },
   error: {
     width: '50%',
-    background: '#F7981C',
-    color: '#ffffff',
+    background: colors.warning,
+    color: colors.white,
     fontSize: '12px',
     fontWeight: 500,
     textAlign: 'left',
-    border: '1px solid #ebafa6',
     borderRadius: '5px',
     marginTop: '0.25rem',
     padding: '8px',
@@ -620,20 +624,21 @@ export const DetailTabTable = withCurrentWorkspace()(
       let valueArray;
       return <React.Fragment>
         <div style={styles.headerStyle}>{rowData[`${vocab}Name`]}</div>
-      <TabView className='unitTab'>
-        {unitKey.map((k, i) => {
-          const name = k === 'null' ? 'No Unit' : k;
-          { valueArray = unitsObj[k].map(v => {
-            return {
-              values: parseInt(v.value, 10),
-              date: v.itemDate,
-            };
-          }); }
-          return <TabPanel header={name} key={i}>
-            <ReviewDomainChartsComponent unitData={valueArray} />
-          </TabPanel>;
-        })}
-      </TabView>
+        <div style={styles.unitsLabel}>Units:</div>
+        <TabView className='unitTab'>
+          {unitKey.map((k, i) => {
+            const name = (k === 'null' ? 'No Unit' : k);
+            { valueArray = unitsObj[k].map(v => {
+              return {
+                values: parseInt(v.value, 10),
+                date: v.itemDate,
+              };
+            }); }
+            return <TabPanel header={name} key={i}>
+              <ReviewDomainChartsComponent unitData={valueArray} />
+            </TabPanel>;
+          })}
+        </TabView>
       </React.Fragment>;
     }
 
@@ -690,11 +695,11 @@ export const DetailTabTable = withCurrentWorkspace()(
           </span>
           {hasCheckboxFilter && this.checkboxFilter(col.name)}
           {hasTextFilter && this.textFilter(col.name)}
-          {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
-          {(desc && !isExpanderNeeded) &&
-          <i className='pi pi-arrow-down' style={styles.sortIcon} />}
+          {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon}
+            onClick={() => this.columnSort(col.name)} />}
+          {(desc && !isExpanderNeeded) && <i className='pi pi-arrow-down' style={styles.sortIcon}
+            onClick={() => this.columnSort(col.name)} />}
         </React.Fragment>;
-
         return <Column
           expander={isExpanderNeeded}
           style={styles.tableBody}
@@ -706,7 +711,6 @@ export const DetailTabTable = withCurrentWorkspace()(
           sortable
           body={overlayTemplate}/>;
       });
-
       return <div style={styles.container}>
         <style>{datatableStyles + css}</style>
         <DataTable
