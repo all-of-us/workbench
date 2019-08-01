@@ -305,15 +305,15 @@ public class BulkCloneWorkspacesTool {
   }
 
   private String shorthand(Workspace workspace) {
-    return "(" + workspace.getWorkspaceNamespace() + " : " + workspace.getFirecloudName() + ")";
+    return "(" + workspace.getCreator().getEmail() + " : " + workspace.getWorkspaceNamespace() + " : " + workspace.getFirecloudName() + ")";
   }
 
   private String shorthand(org.pmiops.workbench.model.Workspace workspace) {
-    return "(" + workspace.getNamespace() + " : " + workspace.getId() + ")";
+    return "(" + workspace.getCreator() + " : " + workspace.getNamespace() + " : " + workspace.getId() + ")";
   }
 
   private String shorthand(org.pmiops.workbench.firecloud.model.Workspace workspace) {
-    return "(" + workspace.getNamespace() + " : " + workspace.getName() + ")";
+    return "(" + workspace.getCreatedBy() + " : " + workspace.getNamespace() + " : " + workspace.getName() + ")";
   }
 
   private void padding() {
