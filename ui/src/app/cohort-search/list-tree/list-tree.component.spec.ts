@@ -2,7 +2,6 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
-import {CodeDropdownComponent} from 'app/cohort-search/code-dropdown/code-dropdown.component';
 import {ListNodeInfoComponent} from 'app/cohort-search/list-node-info/list-node-info.component';
 import {ListNodeComponent} from 'app/cohort-search/list-node/list-node.component';
 import {ListOptionInfoComponent} from 'app/cohort-search/list-option-info/list-option-info.component';
@@ -23,7 +22,6 @@ describe('ListTreeComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        CodeDropdownComponent,
         ListNodeComponent,
         ListNodeInfoComponent,
         ListOptionInfoComponent,

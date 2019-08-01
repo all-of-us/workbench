@@ -22,10 +22,11 @@ import {ListSelectionInfoComponent} from 'app/cohort-search/list-selection-info/
 import {ListTreeComponent} from 'app/cohort-search/list-tree/list-tree.component';
 import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {SearchGroupSelectComponent} from 'app/cohort-search/search-group-select/search-group-select.component';
+import {wizardStore} from 'app/cohort-search/search-state.service';
 import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
-import {CohortBuilderService, CohortsService} from 'generated';
+import {CohortBuilderService, CohortsService, DomainType} from 'generated';
 import {CohortBuilderApi, CohortsApi} from 'generated/fetch';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
@@ -92,6 +93,10 @@ describe('CohortSearchComponent', () => {
     currentWorkspaceStore.next({
       ...workspaceDataStub,
       cdrVersionId: '1',
+    });
+    wizardStore.next({
+      domain: DomainType.MEASUREMENT,
+      item: {modifiers: [], searchParameters: []}
     });
   }));
 
