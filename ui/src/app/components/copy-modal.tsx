@@ -7,19 +7,22 @@ import { Modal, ModalBody, ModalFooter, ModalTitle } from 'app/components/modals
 import { FileDetail, Workspace } from 'generated/fetch';
 
 import { Spinner } from 'app/components/spinners';
-import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { navigate } from 'app/utils/navigation';
+import {ResourceType} from 'app/utils/resourceActionsReact';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 enum RequestState { UNSENT, ERROR, SUCCESS }
 
 export interface Props {
+  destinationTab: string
   fromWorkspaceNamespace: string;
   fromWorkspaceName: string;
-  fromNotebook: FileDetail;
+  fromResourceName: string;
   onClose: Function;
   onCopy: Function;
+  resourceType: ResourceType;
+  saveFunction: (CopyRequest) => Promise<any>;
 }
 
 interface State {
@@ -35,13 +38,13 @@ const boldStyle = {
   fontWeight: 600
 };
 
-class CopyNotebookModal extends React.Component<Props, State> {
+class CopyModal extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
     this.state = {
       writeableWorkspaces: [],
-      newName: dropNotebookFileSuffix(props.fromNotebook.name),
+      newName: props.fromResourceName,
       destination: null,
       requestState: RequestState.UNSENT,
       errorMsg: '',
@@ -63,57 +66,50 @@ class CopyNotebookModal extends React.Component<Props, State> {
 
   save() {
     this.setState({ loading: true });
+    const {saveFunction, resourceType} = this.props;
 
-    workspacesApi().copyNotebook(
-      this.props.fromWorkspaceNamespace,
-      this.props.fromWorkspaceName,
-      this.props.fromNotebook.name,
-      {
-        toWorkspaceName: this.state.destination.id,
-        toWorkspaceNamespace: this.state.destination.namespace,
-        newName: appendNotebookFileSuffix(this.state.newName)
-      }
-      ).then((response) => {
-        this.setState({ requestState: RequestState.SUCCESS, loading: false });
-        this.props.onCopy(response);
-      }).catch((response) => {
-        const errorMsg = response.status === 400 ?
-          'Notebook with the same name already exists in the targeted workspace.' :
-          'An error occurred while copying. Please try again.';
+    saveFunction.then((response) => {
+      this.setState({ requestState: RequestState.SUCCESS, loading: false });
+      this.props.onCopy(response);
+    }).catch((response) => {
+      const errorMsg = response.status === 400 ?
+        `${resourceType} with the same name already exists in the targeted workspace.` :
+        'An error occurred while copying. Please try again.';
 
-        this.setState({
-          errorMsg: errorMsg,
-          requestState: RequestState.ERROR,
-          loading: false
-        });
+      this.setState({
+        errorMsg: errorMsg,
+        requestState: RequestState.ERROR,
+        loading: false
       });
+    });
   }
 
   goToDestinationWorkspace() {
     navigate(
-      ['workspaces', this.state.destination.namespace, this.state.destination.id, 'notebooks']
+      [
+        'workspaces',
+        this.state.destination.namespace,
+        this.state.destination.id,
+        this.props.destinationTab
+      ]
     );
-  }
-
-  getWorkspaceUrl(workspace: Workspace) {
-    return ['workspaces', workspace.namespace, workspace.id, 'notebooks'].join('/');
   }
 
   render() {
     return (
       <Modal onRequestClose={this.props.onClose}>
         <ModalTitle>Copy to Workspace</ModalTitle>
-          { this.state.loading ?
-            <ModalBody style={{ textAlign: 'center' }}><Spinner /></ModalBody> :
-            <ModalBody>
-                {(this.state.requestState === RequestState.UNSENT ||
-                  this.state.requestState === RequestState.ERROR) && this.renderFormBody()}
-                {this.state.requestState === RequestState.SUCCESS && this.renderSuccessBody()}
-            </ModalBody>
+        { this.state.loading ?
+          <ModalBody style={{ textAlign: 'center' }}><Spinner /></ModalBody> :
+          <ModalBody>
+            {(this.state.requestState === RequestState.UNSENT ||
+            this.state.requestState === RequestState.ERROR) && this.renderFormBody()}
+            {this.state.requestState === RequestState.SUCCESS && this.renderSuccessBody()}
+          </ModalBody>
         }
         <ModalFooter>
           <Button type='secondary' onClick={this.props.onClose}>
-              {this.getCloseButtonText()}
+            {this.getCloseButtonText()}
           </Button>
           {this.renderActionButton()}
         </ModalFooter>
@@ -135,16 +131,16 @@ class CopyNotebookModal extends React.Component<Props, State> {
       this.state.requestState === RequestState.ERROR) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
-          disabled={this.state.destination === null || this.state.loading}
-          onClick={() => this.save()}
-          data-test-id='copy-notebook-button'>
+                disabled={this.state.destination === null || this.state.loading}
+                onClick={() => this.save()}
+                data-test-id='copy-button'>
           Copy Notebook
         </Button>
       );
     } else if (this.state.requestState === RequestState.SUCCESS) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
-          onClick={() => this.goToDestinationWorkspace()}>
+                onClick={() => this.goToDestinationWorkspace()}>
           Go to Copied Notebook
         </Button>
       );
@@ -156,40 +152,36 @@ class CopyNotebookModal extends React.Component<Props, State> {
       <div>
         <div style={headerStyles.formLabel}>Destination *</div>
         <Select
-            value={this.state.destination}
-            options={this.state.writeableWorkspaces.map(workspace => ({
-              'value': workspace,
-              'label': workspace.name
-            }))}
-            onChange={(value) => { this.setState({ destination: value }); }} />
+          value={this.state.destination}
+          options={this.state.writeableWorkspaces.map(workspace => ({
+            'value': workspace,
+            'label': workspace.name
+          }))}
+          onChange={(value) => { this.setState({ destination: value }); }} />
         <div style={headerStyles.formLabel}>Name *</div>
         <TextInput
-            autoFocus
-            value={this.state.newName}
-            onChange={v => this.setState({ newName: v })}
+          autoFocus
+          value={this.state.newName}
+          onChange={v => this.setState({ newName: v })}
         />
         {this.state.requestState === RequestState.ERROR &&
-          <ValidationError> {this.state.errorMsg} </ValidationError>}
+        <ValidationError> {this.state.errorMsg} </ValidationError>}
       </div>
     );
-  }
-
-  renderErrorBody() {
-    return <div style={headerStyles.formLabel}>{this.state.errorMsg}</div>;
   }
 
   renderSuccessBody() {
     return (
       <div> Successfully copied
-      <b style={boldStyle}> {this.props.fromNotebook.name} </b> to
-      <b style={boldStyle}> {this.state.destination.name} </b>.
-      Do you want to view the copied notebook?</div>
+        <b style={boldStyle}> {this.props.fromResourceName} </b> to
+        <b style={boldStyle}> {this.state.destination.name} </b>.
+        Do you want to view the copied notebook?</div>
     );
   }
 }
 
 export {
-  CopyNotebookModal,
-  Props as CopyNotebookModalProps,
-  State as CopyNotebookModalState,
+  CopyModal,
+  Props as CopyModalProps,
+  State as CopyModalState,
 };

@@ -8,6 +8,7 @@ import org.pmiops.workbench.model.FileDetail;
 public interface NotebooksService {
 
   String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
+  String NOTEBOOK_EXTENSION = ".ipynb";
   Pattern NOTEBOOK_PATTERN =
       Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 

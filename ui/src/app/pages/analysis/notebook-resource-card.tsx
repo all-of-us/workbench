@@ -1,16 +1,18 @@
+import {CopyModal} from 'app/components/copy-modal';
 import {RenameModal} from 'app/components/rename-modal';
 import {Action, ResourceCardTemplate} from 'app/components/resource-card-template';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {CopyNotebookModal} from 'app/pages/analysis/copy-notebook-modal';
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
+import {ResourceType} from 'app/utils/resourceActionsReact';
 import {RecentResource} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
+import {Workspace} from "../../../generated/fetch/api";
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: RecentResource;
@@ -134,15 +136,31 @@ export const NotebookResourceCard = fp.flow(
       });
   }
 
+  copyNotebook(destination: Workspace, newName: string) {
+    return workspacesApi().copyNotebook(
+      this.props.resource.workspaceNamespace,
+      this.props.resource.workspaceFirecloudName,
+      dropNotebookFileSuffix(this.props.resource.notebook.name),
+      {
+        toWorkspaceName: destination.id,
+        toWorkspaceNamespace: destination.namespace,
+        newName: newName
+      }
+    );
+  }
+
   render() {
     return <React.Fragment>
       {this.state.showCopyNotebookModal &&
-      <CopyNotebookModal
+      <CopyModal
+        destinationTab='notebooks'
         fromWorkspaceNamespace={this.props.resource.workspaceNamespace}
         fromWorkspaceName={this.props.resource.workspaceFirecloudName}
-        fromNotebook={this.props.resource.notebook}
+        fromResourceName={dropNotebookFileSuffix(this.props.resource.notebook.name)}
+        resourceType={ResourceType.NOTEBOOK}
         onClose={() => this.setState({showCopyNotebookModal: false})}
-        onCopy={() => this.props.onUpdate()}/>
+        onCopy={() => this.props.onUpdate()}
+        saveFunction={(destination: Workspace, newName: string) => this.copyNotebook(destination, newName}/>
       }
 
       {this.state.showRenameModal &&

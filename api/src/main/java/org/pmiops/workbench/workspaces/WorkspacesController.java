@@ -56,7 +56,7 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
-import org.pmiops.workbench.model.CopyNotebookRequest;
+import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
@@ -90,6 +90,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final int MAX_FC_CREATION_ATTEMPT_VALUES = 6;
   // If we later decide to tune this value, consider moving to the WorkbenchConfig.
   private static final int MAX_NOTEBOOK_SIZE_MB = 100;
+  private static final String NOTEBOOK_EXTENSION = NotebooksService.NOTEBOOK_EXTENSION;
   // "directory" for notebooks, within the workspace cloud storage bucket.
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY =
       NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY;
@@ -648,17 +649,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String fromWorkspaceNamespace,
       String fromWorkspaceId,
       String fromNotebookName,
-      CopyNotebookRequest copyNotebookRequest) {
+      CopyRequest copyRequest) {
     FileDetail fileDetail;
     try {
       fileDetail =
           notebooksService.copyNotebook(
               fromWorkspaceNamespace,
               fromWorkspaceId,
-              fromNotebookName,
-              copyNotebookRequest.getToWorkspaceNamespace(),
-              copyNotebookRequest.getToWorkspaceName(),
-              copyNotebookRequest.getNewName());
+              fromNotebookName.concat(NOTEBOOK_EXTENSION),
+              copyRequest.getToWorkspaceNamespace(),
+              copyRequest.getToWorkspaceName(),
+              copyRequest.getNewName().concat(NOTEBOOK_EXTENSION));
     } catch (BlobAlreadyExistsException e) {
       throw new BadRequestException("File already exists at copy destination");
     }

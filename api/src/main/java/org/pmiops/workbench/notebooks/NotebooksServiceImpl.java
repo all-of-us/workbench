@@ -180,14 +180,14 @@ public class NotebooksServiceImpl implements NotebooksService {
   }
 
   private String withNotebookExtension(String notebookName) {
-    return notebookName.endsWith(".ipynb") ? notebookName : notebookName.concat(".ipynb");
+    return notebookName.endsWith(NOTEBOOK_EXTENSION) ? notebookName : notebookName.concat(NOTEBOOK_EXTENSION);
   }
 
   @Override
   public void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents) {
     cloudStorageService.writeFile(
         bucketName,
-        "notebooks/" + notebookName + ".ipynb",
+        "notebooks/" + notebookName + NOTEBOOK_EXTENSION,
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
   }
 

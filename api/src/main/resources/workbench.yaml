@@ -1256,7 +1256,7 @@ paths:
           name: copyNotebookRequest
           required: true
           schema:
-            $ref: '#/definitions/CopyNotebookRequest'
+            $ref: '#/definitions/CopyRequest'
       responses:
         200:
           description: Successful copy
@@ -1703,6 +1703,31 @@ paths:
           description: The updated concept set.
           schema:
             $ref: "#/definitions/ConceptSet"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/copy:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - in: path
+        name: notebookName
+        required: true
+        type: string
+    post:
+      tags:
+        - workspaces
+      description: Copy specified notebook in path to specified workspace in body
+      operationId: "copyNotebook"
+      parameters:
+        - in: body
+          name: copyNotebookRequest
+          required: true
+          schema:
+            $ref: '#/definitions/CopyRequest'
+      responses:
+        200:
+          description: Successful copy
+          schema:
+            $ref: "#/definitions/FileDetail"
 
   # Concepts ###############################################################################
 
@@ -2253,7 +2278,7 @@ definitions:
         items:
           $ref: "#/definitions/UserRole"
 
-  CopyNotebookRequest:
+  CopyRequest:
     type: object
     required:
       - toWorkspaceName

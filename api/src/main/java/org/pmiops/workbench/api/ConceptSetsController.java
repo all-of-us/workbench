@@ -28,6 +28,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetListResponse;
+import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -356,6 +357,14 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new ConflictException("Failed due to concurrent concept set modification");
     }
     return ResponseEntity.ok(toClientConceptSet(dbConceptSet));
+  }
+
+  @Override
+  public ResponseEntity<ConceptSet> copyConceptSet(String fromWorkspaceNamespace,
+                                                   String fromWorkspaceId,
+                                                   String fromNotebookName,
+                                                   CopyRequest copyRequest) {
+
   }
 
   private org.pmiops.workbench.db.model.ConceptSet getDbConceptSet(
