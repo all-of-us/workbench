@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {groupSelectionsStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {listAttributeDisplay, listNameDisplay, listTypeDisplay} from 'app/cohort-search/utils';
+import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
 import {DomainType} from 'generated/fetch';
 
 @Component({
@@ -30,9 +30,9 @@ export class SelectionInfoComponent {
     wizardStore.next(wizard);
   }
 
-  get _type()     { return listTypeDisplay(this.parameter); }
-  get name()      { return listNameDisplay(this.parameter); }
-  get attribute() { return listAttributeDisplay(this.parameter); }
+  get _type()     { return typeDisplay(this.parameter); }
+  get name()      { return nameDisplay(this.parameter); }
+  get attribute() { return attributeDisplay(this.parameter); }
   get showType() {
     return this.parameter.domainId !== DomainType.PHYSICALMEASUREMENT
       && this.parameter.domainId !== DomainType.DRUG

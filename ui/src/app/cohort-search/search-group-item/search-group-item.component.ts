@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {initExisting, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {domainToTitle, listAttributeDisplay, listNameDisplay, listTypeDisplay, mapGroupItem} from 'app/cohort-search/utils';
+import {domainToTitle, attributeDisplay, nameDisplay, typeDisplay, mapGroupItem} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
@@ -78,15 +78,15 @@ export class SearchGroupItemComponent implements OnInit {
   get codes() {
     const _type = this.item.type;
     const formatter = (param) => {
-      let funcs = [listTypeDisplay, listAttributeDisplay];
+      let funcs = [typeDisplay, attributeDisplay];
       if (_type === DomainType.PERSON) {
-        funcs = [listTypeDisplay, listNameDisplay, listAttributeDisplay];
+        funcs = [typeDisplay, nameDisplay, attributeDisplay];
       } else if (_type === DomainType.PHYSICALMEASUREMENT
         || _type === DomainType.VISIT
         || _type === DomainType.DRUG
         || _type === DomainType.MEASUREMENT
         || _type === DomainType.SURVEY) {
-        funcs = [listNameDisplay];
+        funcs = [nameDisplay];
       }
       return funcs.map(f => f(param)).join(' ').trim();
     };

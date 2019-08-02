@@ -1,4 +1,4 @@
-import {TreeSubType, TreeType} from 'generated';
+import {TreeType} from 'generated';
 import {
   CriteriaType,
   DomainType,
@@ -9,27 +9,9 @@ import {
   TemporalMention,
   TemporalTime
 } from 'generated/fetch';
-import {List} from 'immutable';
-import {DOMAIN_TYPES} from './constant';
 import {idsInUse} from './search-state.service';
 
 export function typeDisplay(parameter): string {
-  const subtype = parameter.get('subtype', '');
-  const _type = parameter.get('type', '');
-  if (_type.match(/^DEMO.*/i)) {
-    return {
-      'GEN': 'Gender',
-      'RACE': 'Race',
-      'ETH': 'Ethnicity',
-      'AGE': 'Age',
-      'DEC': 'Deceased'
-    }[subtype] || '';
-  } else if (!_type.match(/^SNOMED.*/i)) {
-    return parameter.get('code', '');
-  }
-}
-
-export function listTypeDisplay(parameter): string {
   const {domainId, type} = parameter;
   if (domainId === DomainType.PERSON) {
     return {
@@ -47,16 +29,6 @@ export function listTypeDisplay(parameter): string {
 }
 
 export function nameDisplay(parameter): string {
-  const subtype = parameter.get('subtype', '');
-  const _type = parameter.get('type', '');
-  if (_type.match(/^DEMO.*/i) && subtype.match(/AGE|DEC/i)) {
-    return '';
-  } else {
-    return stripHtml(parameter.get('name', ''));
-  }
-}
-
-export function listNameDisplay(parameter): string {
   if (parameter.type === CriteriaType.AGE || parameter.type === CriteriaType.DECEASED) {
     return '';
   } else {
@@ -65,29 +37,6 @@ export function listNameDisplay(parameter): string {
 }
 
 export function attributeDisplay(parameter): string {
-  const attrs = parameter.get('attributes', '');
-  const kind = `${parameter.get('type', '')}${parameter.get('subtype', '')}`;
-  if (kind.match(/^DEMO.*AGE/i)) {
-    const display = [];
-    attrs.forEach(attr => {
-      const op = {
-        'BETWEEN': 'In Range',
-        'EQUAL': 'Equal To',
-        'GREATER_THAN': 'Greater Than',
-        'LESS_THAN': 'Less Than',
-        'GREATER_THAN_OR_EQUAL_TO': 'Greater Than or Equal To',
-        'LESS_THAN_OR_EQUAL_TO': 'Less Than or Equal To',
-      }[attr.get('operator')];
-      const args = attr.get('operands', List()).join(', ');
-      display.push(`${op} ${args}`);
-    });
-    return display.join(' ');
-  } else {
-    return '';
-  }
-}
-
-export function listAttributeDisplay(parameter): string {
   if (parameter.type === CriteriaType.AGE) {
     const attrs = parameter.attributes;
     const display = [];
@@ -144,25 +93,25 @@ export function domainToTitle(domain: any): string {
 
 export function typeToTitle(_type: string): string {
   switch (_type) {
-    case TreeType[TreeType.DEMO]:
+    case DomainType[DomainType.PERSON]:
       _type = 'Demographics';
       break;
-    case TreeType[TreeType.MEAS]:
+    case DomainType[DomainType.MEASUREMENT]:
       _type = 'Measurements';
       break;
-    case TreeType[TreeType.PM]:
+    case DomainType[DomainType.PHYSICALMEASUREMENT]:
       _type = 'Physical Measurements';
       break;
-    case TreeType[TreeType.VISIT]:
+    case DomainType[DomainType.VISIT]:
       _type = 'Visit';
       break;
-    case TreeType[TreeType.DRUG]:
+    case DomainType[DomainType.DRUG]:
       _type = 'Drugs';
       break;
-    case TreeType[TreeType.CONDITION]:
+    case DomainType[DomainType.CONDITION]:
       _type = 'Conditions';
       break;
-    case TreeType[TreeType.PROCEDURE]:
+    case DomainType[DomainType.PROCEDURE]:
       _type = 'Procedures';
       break;
     case DomainType[DomainType.LAB]:
@@ -170,28 +119,6 @@ export function typeToTitle(_type: string): string {
       break;
   }
   return _type;
-}
-
-export function subtypeToTitle(subtype: string): string {
-  let title;
-  switch (subtype) {
-    case TreeSubType[TreeSubType.AGE]:
-      title = 'Current Age/Deceased';
-      break;
-    case TreeSubType[TreeSubType.DEC]:
-      title = 'Deceased';
-      break;
-    case TreeSubType[TreeSubType.ETH]:
-      title = 'Ethnicity';
-      break;
-    case TreeSubType[TreeSubType.GEN]:
-      title = 'Gender';
-      break;
-    case TreeSubType[TreeSubType.RACE]:
-      title = 'Race';
-      break;
-  }
-  return title;
 }
 
 export function highlightMatches(
@@ -227,11 +154,6 @@ export function highlightMatches(
 
 export function stripHtml(string: string) {
   return string.replace(/<(.|\n)*?>/g, '');
-}
-
-export function getCodeOptions(itemType: string) {
-  const item = DOMAIN_TYPES.find(domain => TreeType[domain.type] === itemType);
-  return (item && item['codes']) ? item['codes'] : false;
 }
 
 export function getChartObj(chartObj: any) {

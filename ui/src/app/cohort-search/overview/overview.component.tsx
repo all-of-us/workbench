@@ -345,28 +345,30 @@ export const ListOverview = withCurrentWorkspace()(
             <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
             Sorry, the request cannot be completed.
           </div>}
-          {!this.definitionErrors && !loading && !!chartData && <div style={styles.cardContainer}>
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                Results by Gender
+          {!!total && !this.definitionErrors && !loading && !!chartData &&
+            <div style={styles.cardContainer}>
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  Results by Gender
+                </div>
+                <div style={{padding: '0.5rem 0.75rem'}}>
+                  {!!chartData.length && <GenderChart data={chartData} />}
+                </div>
               </div>
-              <div style={{padding: '0.5rem 0.75rem'}}>
-                {!!chartData.length && <GenderChart data={chartData} />}
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  Results By Gender, Age Range, and Race
+                  <ClrIcon shape='sort-by'
+                    className={stackChart ? 'is-info' : ''}
+                    onClick={() => this.toggleChartMode()} />
+                </div>
+                <div style={{padding: '0.5rem 0.75rem'}}>
+                  {!!chartData.length &&
+                    <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
+                </div>
               </div>
             </div>
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                Results By Gender, Age Range, and Race
-                <ClrIcon shape='sort-by'
-                  className={stackChart ? 'is-info' : ''}
-                  onClick={() => this.toggleChartMode()} />
-              </div>
-              <div style={{padding: '0.5rem 0.75rem'}}>
-                {!!chartData.length &&
-                  <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
-              </div>
-            </div>
-          </div>}
+          }
         </div>
         {saveModalOpen && <Modal>
           <ModalTitle style={invalid ? {marginBottom: 0} : {}}>Save Cohort as</ModalTitle>
