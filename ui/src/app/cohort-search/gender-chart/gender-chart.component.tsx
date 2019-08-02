@@ -3,7 +3,6 @@ import {getChartObj} from 'app/cohort-search/utils';
 import {ReactWrapperBase} from 'app/utils';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 highCharts.setOptions({
@@ -22,18 +21,6 @@ interface State {
 }
 
 export class GenderChart extends React.Component<Props, State> {
-  readonly codeMap = {
-    'M': 'Male',
-    'F': 'Female',
-    'No matching concept': 'Unknown'
-  };
-
-  readonly defaults = {
-    Male: {y: 0, name: 'Male', color: '#7aa3e5'},
-    Female: {y: 0, name: 'Female', color: '#a8385d'},
-    Unknown: {y: 0, name: 'Unknown', color: '#a27ea8'},
-  };
-
   constructor(props: Props) {
     super(props);
     this.state = {options: null};
@@ -90,27 +77,23 @@ export class GenderChart extends React.Component<Props, State> {
 
   getSeries() {
     const {data} = this.props;
-    // TODO remove toJS() and commented code once the combo chart has been updated for vanilla js
-    // TODO check that adding ES2017 to tsconfig is okay or find a workaround for Object.values
-    return Object.values(data.toJS().map(datum => {
-      datum.gender = this.codeMap[datum.gender];
-      return datum;
-    }).reduce((acc, it) => {
-      acc[it.gender].y += it.count;
+    const genderCodes = {
+      'M': 'Male',
+      'F': 'Female',
+      'No matching concept': 'Unknown'
+    };
+    const defaults = [
+      {y: 0, name: 'Male', color: '#7aa3e5'},
+      {y: 0, name: 'Female', color: '#a8385d'},
+      {y: 0, name: 'Unknown', color: '#a27ea8'},
+    ];
+    return data.reduce((acc, datum) => {
+      const index = acc.findIndex(d => d.name === genderCodes[datum.gender]);
+      if (index > -1) {
+        acc[index].y += datum.count;
+      }
       return acc;
-    }, this.defaults)).sort((a, b) => a['name'] > b['name'] ? 1 : -1);
-    // return data
-    //   .map(datum => datum.update('gender', code => this.codeMap[code]))
-    //   .groupBy(datum => datum.get('gender', 'Unknown'))
-    //   .map((group, gender) => ({
-    //     y: group.reduce((acc, item) => acc + item.get('count'), 0),
-    //     name: gender,
-    //     color: this.defaults[gender].color
-    //   }))
-    //   .mergeWith((old, _) => old, this.defaults)
-    //   .sort((a, b) => a.name > b.name ? 1 : -1)
-    //   .valueSeq()
-    //   .toArray();
+    }, defaults).sort((a, b) => a['name'] > b['name'] ? 1 : -1);
   }
 
   render() {

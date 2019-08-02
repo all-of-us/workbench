@@ -13,15 +13,8 @@ import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {
-  currentCohortStore,
-  currentWorkspaceStore,
-  navigate,
-  navigateByUrl,
-  urlParamsStore
-} from 'app/utils/navigation';
+import {currentCohortStore, currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {Cohort, TemporalTime} from 'generated/fetch';
-import {fromJS} from 'immutable';
 import {Menu} from 'primereact/menu';
 import * as React from 'react';
 
@@ -174,9 +167,8 @@ export const ListOverview = withCurrentWorkspace()(
         const request = mapRequest(searchRequest);
         cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
           if (localCheck === this.state.apiCallCheck) {
-            // TODO remove immutable conversion and modify charts to use vanilla javascript
             this.setState({
-              chartData: fromJS(response.items),
+              chartData: response.items,
               total: response.items.reduce((sum, data) => sum + data.count, 0),
               loading: false
             });
@@ -359,7 +351,7 @@ export const ListOverview = withCurrentWorkspace()(
                 Results by Gender
               </div>
               <div style={{padding: '0.5rem 0.75rem'}}>
-                {chartData.size && <GenderChart data={chartData} />}
+                {!!chartData.length && <GenderChart data={chartData} />}
               </div>
             </div>
             <div style={styles.card}>
@@ -370,7 +362,7 @@ export const ListOverview = withCurrentWorkspace()(
                   onClick={() => this.toggleChartMode()} />
               </div>
               <div style={{padding: '0.5rem 0.75rem'}}>
-                {chartData.size &&
+                {!!chartData.length &&
                   <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
               </div>
             </div>
