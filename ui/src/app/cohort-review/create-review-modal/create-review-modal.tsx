@@ -77,7 +77,7 @@ export const CreateReviewModal = withCurrentWorkspace()(
 
     cancelReview() {
       const {workspace: {id, namespace}} = this.props;
-      navigate(['workspaces', namespace, id, 'cohorts']);
+      navigate(['workspaces', namespace, id, 'data', 'cohorts']);
     }
 
     createReview() {
@@ -90,7 +90,8 @@ export const CreateReviewModal = withCurrentWorkspace()(
         .then(_ => {
           this.setState({creating: false});
           this.props.created(true);
-          navigate(['workspaces', namespace, id, 'cohorts', cohort.id, 'review', 'participants']);
+          navigate(
+            ['workspaces', namespace, id, 'data', 'cohorts', cohort.id, 'review', 'participants']);
         });
     }
 

@@ -190,7 +190,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           `Write permission required to create cohorts`} side='top'>
             <CardButton style={styles.resourceTypeButton} disabled={!writePermission}
                         onClick={() => {
-                          navigate(['workspaces', namespace, id,  'cohorts', 'build']);
+                          navigate(['workspaces', namespace, id, 'data', 'cohorts', 'build']);
                         }}>
               <div style={styles.cardHeader}>
                 <h2 style={styles.cardHeaderText(!writePermission)}>Cohorts</h2>
@@ -206,7 +206,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
             <CardButton style={styles.resourceTypeButton}
                         disabled={!writePermission}
                         onClick={() => {
-                          navigate(['workspaces', namespace, id,  'concepts']);
+                          navigate(['workspaces', namespace, id, 'data', 'concepts']);
                         }}>
               <div style={styles.cardHeader}>
                 <h2 style={styles.cardHeaderText(!writePermission)}>Concept Sets</h2>

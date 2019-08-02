@@ -245,7 +245,7 @@ export const DetailHeader = withCurrentWorkspace()(
 
     backToTable() {
       const {ns, wsid, cid} = urlParamsStore.getValue();
-      navigate(['/workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);
+      navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
     }
 
     previous = () => {
@@ -300,7 +300,7 @@ export const DetailHeader = withCurrentWorkspace()(
 
     navigateById = (id: number): void => {
       const {ns, wsid, cid} = urlParamsStore.getValue();
-      navigate(['/workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants', id]);
+      navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants', id]);
     }
 
     getRequestFilters = () => {
