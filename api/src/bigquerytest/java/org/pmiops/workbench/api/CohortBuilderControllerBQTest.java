@@ -24,7 +24,6 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
-import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
@@ -89,8 +88,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CdrVersionDao cdrVersionDao;
 
-  @Autowired private CriteriaDao criteriaDao;
-
   @Autowired private CBCriteriaDao cbCriteriaDao;
 
   @Autowired private CdrVersionService cdrVersionService;
@@ -134,7 +131,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new CohortBuilderController(
             bigQueryService,
             cohortQueryBuilder,
-            criteriaDao,
             cbCriteriaDao,
             criteriaAttributeDao,
             cbCriteriaAttributeDao,
