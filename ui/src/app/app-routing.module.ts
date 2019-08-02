@@ -27,7 +27,7 @@ import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
 import {WorkspaceListComponent} from './pages/workspace/workspace-list';
-import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
+import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper';
 
 import {environment} from 'environments/environment';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';

@@ -20,7 +20,7 @@ import {
     '../../../styles/headers.css'],
   templateUrl: './component.html',
 })
-export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
+export class WorkspaceWrapperComponentOld implements OnInit, OnDestroy {
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
 
