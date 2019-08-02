@@ -12,20 +12,7 @@
   <include file="changelog-data/db.changelog-2.xml"/>
   <include file="changelog-data/db.changelog-3.xml"/>
   <include file="changelog-data/db.changelog-4.xml"/>
+  <include file="changelog-data/db.changelog-5.xml"/>
   <include file="changelog-data/db.changelog-6.xml"/>
-  <include file="changelog-data/db.changelog-8.xml"/>
-  <include file="changelog-data/db.changelog-9.xml"/>
-  <include file="changelog-data/db.changelog-10.xml"/>
-  <include file="changelog-data/db.changelog-12.xml"/>
-  <include file="changelog-data/db.changelog-14.xml"/>
-  <include file="changelog-data/db.changelog-15.xml"/>
-  <include file="changelog-data/db.changelog-17.xml"/>
-  <include file="changelog-data/db.changelog-18.xml"/>
-  <include file="changelog-data/db.changelog-19.xml"/>
-  <include file="changelog-data/db.changelog-20.xml"/>
-  <include file="changelog-data/db.changelog-22.xml"/>
-  <include file="changelog-data/db.changelog-23.xml"/>
-  <include file="changelog-data/db.changelog-24.xml"/>
-  <include file="changelog-data/db.changelog-26.xml"/>
-  <include file="changelog-data/db.changelog-27.xml"/>
+  <include file="changelog-data/db.changelog-7.xml"/>
 </databaseChangeLog>
