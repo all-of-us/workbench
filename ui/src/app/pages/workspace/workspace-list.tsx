@@ -18,6 +18,7 @@ import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
 import {ListPageHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
+import {Select} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
@@ -315,13 +316,15 @@ export const WorkspaceList = withUserProfile()
     clearTimeout(this.timer);
   }
 
-  async reloadWorkspaces() {
+  async reloadWorkspaces(filter) {
+    filter = filter ? filter : (() => true);
     this.setState({workspacesLoading: true});
     try {
-      const workspacesReceived = await workspacesApi().getWorkspaces();
-      workspacesReceived.items.sort(
+      const workspacesReceived = (await workspacesApi().getWorkspaces())
+        .items.filter(response => filter(response.accessLevel));
+      workspacesReceived.sort(
         (a, b) => a.workspace.name.localeCompare(b.workspace.name));
-      this.setState({workspaceList: workspacesReceived.items
+      this.setState({workspaceList: workspacesReceived
           .map(w => new WorkspacePermissions(w))});
       this.setState({workspacesLoading: false});
     } catch (e) {
@@ -341,7 +344,6 @@ export const WorkspaceList = withUserProfile()
     }
   }
 
-
   render() {
     const {profileState: {profile}} = this.props;
     const {
@@ -354,10 +356,26 @@ export const WorkspaceList = withUserProfile()
     const canCreateWorkspaces = billingProjectInitialized ||
       serverConfigStore.getValue().useBillingProjectBuffer;
 
+    // Maps each "Filter by" dropdown element to a set of access levels to display.
+    const options = [
+      { label: 'Owner',  value: ['OWNER'] },
+      { label: 'Writer', value: ['OWNER', 'WRITER'] },
+      { label: 'Reader', value: ['OWNER', 'READER'] },
+      { label: 'All',    value: ['OWNER', 'READER', 'WRITER'] },
+    ];
+
     return <React.Fragment>
       <FadeBox style={styles.fadeBox}>
         <div style={{padding: '0 1rem'}}>
           <ListPageHeader>Workspaces</ListPageHeader>
+          <div style={{marginTop: '0.5em', display: 'flex', flexDirection: 'row'}}>
+            <h5 style={{margin: '0', padding: '0.5em 0.75em 0 0'}}>Filter by</h5>
+            <Select options={options}
+              defaultValue={options[options.length - 1]}
+              onChange={(levels) => {
+                this.reloadWorkspaces(level => levels.includes(level));
+              }}/>
+          </div>
           {errorText && <AlertDanger>
             <ClrIcon shape='exclamation-circle'/>
             {errorText}
