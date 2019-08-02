@@ -1,4 +1,3 @@
-import {TreeType} from 'generated';
 import {
   CriteriaType,
   DomainType,
