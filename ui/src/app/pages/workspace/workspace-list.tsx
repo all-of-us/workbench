@@ -18,7 +18,6 @@ import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
 import {ListPageHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
-import {Select} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
@@ -37,6 +36,7 @@ import {
   Profile, UserRole,
 } from 'generated/fetch';
 import * as React from 'react';
+import RSelect from 'react-select';
 
 const styles = reactStyles({
   fadeBox: {
@@ -303,7 +303,7 @@ export const WorkspaceList = withUserProfile()
 
   componentDidMount() {
     this.checkBillingProjectStatus();
-    this.reloadWorkspaces();
+    this.reloadWorkspaces(null);
   }
 
   componentDidUpdate() {
@@ -357,23 +357,24 @@ export const WorkspaceList = withUserProfile()
       serverConfigStore.getValue().useBillingProjectBuffer;
 
     // Maps each "Filter by" dropdown element to a set of access levels to display.
-    const options = [
+    const filters = [
       { label: 'Owner',  value: ['OWNER'] },
       { label: 'Writer', value: ['OWNER', 'WRITER'] },
       { label: 'Reader', value: ['OWNER', 'READER'] },
       { label: 'All',    value: ['OWNER', 'READER', 'WRITER'] },
     ];
+    const defaultFilter = filters.find(f => f.label === 'All');
 
     return <React.Fragment>
       <FadeBox style={styles.fadeBox}>
         <div style={{padding: '0 1rem'}}>
           <ListPageHeader>Workspaces</ListPageHeader>
           <div style={{marginTop: '0.5em', display: 'flex', flexDirection: 'row'}}>
-            <h5 style={{margin: '0', padding: '0.5em 0.75em 0 0'}}>Filter by</h5>
-            <Select options={options}
-              defaultValue={options[options.length - 1]}
+            <div style={{margin: '0', padding: '0.5em 0.75em 0 0'}}>Filter by</div>
+            <RSelect options={filters}
+              defaultValue={defaultFilter}
               onChange={(levels) => {
-                this.reloadWorkspaces(level => levels.includes(level));
+                this.reloadWorkspaces(level => levels.value.includes(level));
               }}/>
           </div>
           {errorText && <AlertDanger>
@@ -394,7 +395,7 @@ export const WorkspaceList = withUserProfile()
                   return <WorkspaceCard key={wp.workspace.name}
                                         wp={wp}
                                         userEmail={profile.username}
-                                        reload={() => this.reloadWorkspaces()}/>;
+                                        reload={() => this.reloadWorkspaces(null)}/>;
                 })}
               </div>)}
           </div>
