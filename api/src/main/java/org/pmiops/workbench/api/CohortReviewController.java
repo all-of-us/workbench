@@ -327,10 +327,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         bigQueryService.executeQuery(
             bigQueryService.filterBigQueryConfig(
                 cohortQueryBuilder.buildRandomParticipantQuery(
-                    new ParticipantCriteria(
-                        searchRequest, configProvider.get().cohortbuilder.enableListSearch),
-                    request.getSize(),
-                    0L)));
+                    new ParticipantCriteria(searchRequest), request.getSize(), 0L)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     List<ParticipantCohortStatus> participantCohortStatuses =
@@ -467,8 +464,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         bigQueryService.executeQuery(
             bigQueryService.filterBigQueryConfig(
                 cohortQueryBuilder.buildDomainChartInfoCounterQuery(
-                    new ParticipantCriteria(
-                        searchRequest, configProvider.get().cohortbuilder.enableListSearch),
+                    new ParticipantCriteria(searchRequest),
                     DomainType.fromValue(domain),
                     chartLimit)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -807,9 +803,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     TableResult result =
         bigQueryService.executeQuery(
             bigQueryService.filterBigQueryConfig(
-                cohortQueryBuilder.buildParticipantCounterQuery(
-                    new ParticipantCriteria(
-                        request, configProvider.get().cohortbuilder.enableListSearch))));
+                cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request))));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
     List<FieldValue> row = result.iterateAll().iterator().next();
     long cohortCount = bigQueryService.getLong(row, rm.get("count"));

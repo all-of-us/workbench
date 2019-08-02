@@ -152,20 +152,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    if (configProvider.get().cohortbuilder.enableListSearch) {
-      validateDomainAndType(domain, type);
-      String matchExp = modifyTermMatch(term);
-      List<CBCriteria> criteriaList =
-          cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(
-              domain, type, standard, matchExp, new PageRequest(0, resultLimit.intValue()));
-      if (criteriaList.isEmpty()) {
-        criteriaList =
-            cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
-                domain, type, standard, term, new PageRequest(0, resultLimit.intValue()));
-      }
-      criteriaResponse.setItems(
-          criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
+    validateDomainAndType(domain, type);
+    String matchExp = modifyTermMatch(term);
+    List<CBCriteria> criteriaList =
+        cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(
+            domain, type, standard, matchExp, new PageRequest(0, resultLimit.intValue()));
+    if (criteriaList.isEmpty()) {
+      criteriaList =
+          cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
+              domain, type, standard, term, new PageRequest(0, resultLimit.intValue()));
     }
+    criteriaResponse.setItems(
+        criteriaList.stream().map(TO_CLIENT_CBCRITERIA).collect(Collectors.toList()));
 
     return ResponseEntity.ok(criteriaResponse);
   }
@@ -214,9 +212,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
     QueryJobConfiguration qjc =
         bigQueryService.filterBigQueryConfig(
-            cohortQueryBuilder.buildParticipantCounterQuery(
-                new ParticipantCriteria(
-                    request, configProvider.get().cohortbuilder.enableListSearch)));
+            cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request)));
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
     List<FieldValue> row = result.iterateAll().iterator().next();
@@ -311,9 +307,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
     QueryJobConfiguration qjc =
         bigQueryService.filterBigQueryConfig(
-            cohortQueryBuilder.buildDemoChartInfoCounterQuery(
-                new ParticipantCriteria(
-                    request, configProvider.get().cohortbuilder.enableListSearch)));
+            cohortQueryBuilder.buildDemoChartInfoCounterQuery(new ParticipantCriteria(request)));
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 

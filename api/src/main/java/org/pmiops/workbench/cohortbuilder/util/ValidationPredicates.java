@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cohortbuilder.querybuilder.util;
+package org.pmiops.workbench.cohortbuilder.util;
 
 import com.google.common.collect.ListMultimap;
 import java.text.ParseException;

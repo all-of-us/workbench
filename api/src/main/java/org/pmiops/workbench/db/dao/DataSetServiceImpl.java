@@ -175,8 +175,7 @@ public class DataSetServiceImpl implements DataSetService {
                       new Gson().fromJson(cohortDefinition, SearchRequest.class);
                   QueryJobConfiguration participantIdQuery =
                       cohortQueryBuilder.buildParticipantIdQuery(
-                          new ParticipantCriteria(
-                              searchRequest, configProvider.get().cohortbuilder.enableListSearch));
+                          new ParticipantCriteria(searchRequest));
                   QueryJobConfiguration participantQueryConfig =
                       bigQueryService.filterBigQueryConfig(participantIdQuery);
                   AtomicReference<String> participantQuery =

@@ -218,10 +218,7 @@ public class CohortMaterializationService {
       } else {
         participantIdsToExclude = ImmutableSet.of();
       }
-      return new ParticipantCriteria(
-          searchRequest,
-          participantIdsToExclude,
-          configProvider.get().cohortbuilder.enableListSearch);
+      return new ParticipantCriteria(searchRequest, participantIdsToExclude);
     } else {
       Set<Long> participantIds = getParticipantIdsWithStatus(cohortReview, statusFilter);
       return new ParticipantCriteria(participantIds);

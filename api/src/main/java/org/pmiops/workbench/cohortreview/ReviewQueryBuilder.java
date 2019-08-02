@@ -4,7 +4,6 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.HashMap;
 import java.util.Map;
-import org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.PageRequest;
 import org.springframework.stereotype.Service;
@@ -16,6 +15,7 @@ public class ReviewQueryBuilder {
   private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
   private static final String NAMED_DOMAIN_PARAM = "domain";
   private static final String NAMED_LIMIT_PARAM = "limit";
+  private static final String REVIEW_TABLE = "person_all_events";
 
   private static final String BASE_SQL_TEMPLATE =
       "select person_id as personId,\n"
@@ -167,8 +167,7 @@ public class ReviewQueryBuilder {
 
   public QueryJobConfiguration buildChartDataQuery(
       Long participantId, DomainType domain, Integer limit) {
-    String tableName = QueryBuilderConstants.REVIEW_TABLE;
-    String finalSql = String.format(CHART_DATA_TEMPLATE, tableName, tableName);
+    String finalSql = String.format(CHART_DATA_TEMPLATE, REVIEW_TABLE, REVIEW_TABLE);
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
     params.put(NAMED_DOMAIN_PARAM, QueryParameterValue.string(domain.name()));
