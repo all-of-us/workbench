@@ -51,7 +51,7 @@ const styles = reactStyles({
 
 const tabs = [
   {name: 'Data', link: 'data'},
-  {'Analysis' : 'Notebooks', link: 'notebooks'},
+  {name: 'Analysis', link: 'notebooks'},
   {name: 'About', link: 'about'},
 ];
 
