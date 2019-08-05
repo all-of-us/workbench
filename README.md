@@ -2,6 +2,8 @@
 
 [![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workflows/workbench)
 
+:)
+
 ## Setup for Development
 
 System requirements:
