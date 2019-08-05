@@ -9,10 +9,9 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActionsReact';
-import {RecentResource} from 'generated/fetch';
+import {CopyRequest, RecentResource} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
-import {Workspace} from "../../../generated/fetch/api";
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: RecentResource;
@@ -136,16 +135,12 @@ export const NotebookResourceCard = fp.flow(
       });
   }
 
-  copyNotebook(destination: Workspace, newName: string) {
+  copyNotebook(copyRequest: CopyRequest) {
     return workspacesApi().copyNotebook(
       this.props.resource.workspaceNamespace,
       this.props.resource.workspaceFirecloudName,
       dropNotebookFileSuffix(this.props.resource.notebook.name),
-      {
-        toWorkspaceName: destination.id,
-        toWorkspaceNamespace: destination.namespace,
-        newName: newName
-      }
+      copyRequest
     );
   }
 
@@ -160,7 +155,7 @@ export const NotebookResourceCard = fp.flow(
         resourceType={ResourceType.NOTEBOOK}
         onClose={() => this.setState({showCopyNotebookModal: false})}
         onCopy={() => this.props.onUpdate()}
-        saveFunction={(destination: Workspace, newName: string) => this.copyNotebook(destination, newName}/>
+        saveFunction={(copyRequest: CopyRequest) => this.copyNotebook(copyRequest)}/>
       }
 
       {this.state.showRenameModal &&

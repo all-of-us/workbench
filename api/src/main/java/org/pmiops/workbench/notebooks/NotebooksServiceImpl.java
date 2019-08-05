@@ -180,7 +180,9 @@ public class NotebooksServiceImpl implements NotebooksService {
   }
 
   private String withNotebookExtension(String notebookName) {
-    return notebookName.endsWith(NOTEBOOK_EXTENSION) ? notebookName : notebookName.concat(NOTEBOOK_EXTENSION);
+    return notebookName.endsWith(NOTEBOOK_EXTENSION)
+        ? notebookName
+        : notebookName.concat(NOTEBOOK_EXTENSION);
   }
 
   @Override

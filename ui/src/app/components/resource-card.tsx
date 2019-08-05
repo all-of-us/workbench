@@ -11,8 +11,9 @@ import {navigate, navigateAndPreventDefaultIfNoKeysPressed, navigateByUrl} from 
 import {ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
+import {CopyModal} from 'app/components/copy-modal';
 import {ExportDataSetModal} from 'app/pages/data/data-set/export-data-set-modal';
-import {DataSet, RecentResource} from 'generated/fetch';
+import {CopyRequest, DataSet, RecentResource} from 'generated/fetch';
 
 import {Modal, ModalBody, ModalTitle} from 'app/components/modals';
 import {RenameModal} from 'app/components/rename-modal';
@@ -92,6 +93,7 @@ export interface Props {
 
 export interface State {
   confirmDeleting: boolean;
+  copyingConceptSet: boolean;
   errorModalBody: string;
   errorModalTitle: string;
   exportingDataSet: boolean;
@@ -107,6 +109,7 @@ export class ResourceCard extends React.Component<Props, State> {
     super(props);
     this.state = {
       confirmDeleting: false,
+      copyingConceptSet: false,
       errorModalTitle: 'Error Title',
       errorModalBody: 'Error Body',
       exportingDataSet: false,
@@ -479,6 +482,12 @@ export class ResourceCard extends React.Component<Props, State> {
 
   }
 
+  async copyConceptSet(copyRequest: CopyRequest) {
+    return conceptSetsApi().copyConceptSet(this.props.resourceCard.workspaceNamespace,
+      this.props.resourceCard.workspaceFirecloudName,
+      this.props.resourceCard.conceptSet.id.toString(), copyRequest);
+  }
+
   render() {
     return <React.Fragment>
       {this.state.invalidResourceError &&
@@ -500,6 +509,7 @@ export class ResourceCard extends React.Component<Props, State> {
             <ResourceCardMenu disabled={this.actionsDisabled}
                               resourceType={this.resourceType}
                               onCloneResource={() => this.cloneResource()}
+                              onCopyConceptSet={() => this.setState({copyingConceptSet: true})}
                               onDeleteResource={() => this.openConfirmDelete()}
                               onRenameResource={() => this.renameResource()}
                               onEdit={() => this.edit()}
@@ -569,6 +579,16 @@ export class ResourceCard extends React.Component<Props, State> {
           oldDescription ={this.props.resourceCard.dataSet.description}
           oldName={this.props.resourceCard.dataSet.name}
           existingNames={this.props.existingNameList}/>
+      }
+      {this.state.copyingConceptSet && <CopyModal
+        destinationTab='data'
+        fromWorkspaceNamespace={this.props.resourceCard.workspaceNamespace}
+        fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
+        fromResourceName={this.props.resourceCard.conceptSet.name}
+        resourceType={this.resourceType}
+        onClose={() => this.setState({copyingConceptSet: false})}
+        onCopy={() => this.props.onUpdate()}
+        saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
       }
       {this.state.dataSetByResourceIdList.length > 0 && <Modal>
         <ModalTitle>WARNING</ModalTitle>

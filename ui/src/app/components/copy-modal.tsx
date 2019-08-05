@@ -4,18 +4,18 @@ import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
 import { Select, TextInput, ValidationError } from 'app/components/inputs';
 import { Modal, ModalBody, ModalFooter, ModalTitle } from 'app/components/modals';
-import { FileDetail, Workspace } from 'generated/fetch';
+import { Workspace } from 'generated/fetch';
 
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { navigate } from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActionsReact';
+import {ResourceType, ResourceTypeDisplayNames} from 'app/utils/resourceActionsReact';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 enum RequestState { UNSENT, ERROR, SUCCESS }
 
 export interface Props {
-  destinationTab: string
+  destinationTab: string;
   fromWorkspaceNamespace: string;
   fromWorkspaceName: string;
   fromResourceName: string;
@@ -68,12 +68,17 @@ class CopyModal extends React.Component<Props, State> {
     this.setState({ loading: true });
     const {saveFunction, resourceType} = this.props;
 
-    saveFunction.then((response) => {
+    saveFunction({
+      toWorkspaceName: this.state.destination.id,
+      toWorkspaceNamespace: this.state.destination.namespace,
+      newName: this.state.newName
+    }).then((response) => {
       this.setState({ requestState: RequestState.SUCCESS, loading: false });
       this.props.onCopy(response);
     }).catch((response) => {
       const errorMsg = response.status === 400 ?
-        `${resourceType} with the same name already exists in the targeted workspace.` :
+        `${ResourceTypeDisplayNames.get(resourceType)} with the same ` +
+        `name already exists in the targeted workspace.` :
         'An error occurred while copying. Please try again.';
 
       this.setState({
@@ -127,6 +132,7 @@ class CopyModal extends React.Component<Props, State> {
   }
 
   renderActionButton() {
+    const {resourceType} = this.props;
     if (this.state.requestState === RequestState.UNSENT ||
       this.state.requestState === RequestState.ERROR) {
       return (
@@ -134,14 +140,14 @@ class CopyModal extends React.Component<Props, State> {
                 disabled={this.state.destination === null || this.state.loading}
                 onClick={() => this.save()}
                 data-test-id='copy-button'>
-          Copy Notebook
+          Copy {ResourceTypeDisplayNames.get(resourceType)}
         </Button>
       );
     } else if (this.state.requestState === RequestState.SUCCESS) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
                 onClick={() => this.goToDestinationWorkspace()}>
-          Go to Copied Notebook
+          Go to Copied {ResourceTypeDisplayNames.get(resourceType)}
         </Button>
       );
     }
@@ -171,11 +177,12 @@ class CopyModal extends React.Component<Props, State> {
   }
 
   renderSuccessBody() {
+    const {fromResourceName, resourceType} = this.props;
     return (
       <div> Successfully copied
-        <b style={boldStyle}> {this.props.fromResourceName} </b> to
+        <b style={boldStyle}> {fromResourceName} </b> to
         <b style={boldStyle}> {this.state.destination.name} </b>.
-        Do you want to view the copied notebook?</div>
+        Do you want to view the copied {ResourceTypeDisplayNames.get(resourceType)}?</div>
     );
   }
 }
