@@ -3,7 +3,10 @@
   margin-bottom: 1rem;
   position: relative;
 }
-
+.cohort-name {
+  color: #262262;
+  font-size: 16px;
+}
 .root-spinner {
   left: 50%;
   top: 50%;

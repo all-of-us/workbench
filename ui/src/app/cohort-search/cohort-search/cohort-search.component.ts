@@ -34,6 +34,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   overview = false;
   criteria = {includes: [], excludes: []};
   triggerUpdate = 0;
+  cohort: any;
 
   ngOnInit() {
     this.subscription = Observable.combineLatest(
@@ -47,6 +48,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
         cohortsApi().getCohort(workspace.namespace, workspace.id, cohortId)
           .then(cohort => {
             this.loading = false;
+            this.cohort = cohort;
             currentCohortStore.next(cohort);
             if (cohort.criteria) {
               initExisting.next(true);
