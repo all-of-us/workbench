@@ -67,6 +67,9 @@ const resourceTypeStyles = reactStyles({
   cohort: {
     backgroundColor: colors.resourceCardHighlights.cohort
   },
+  cohortReview: {
+    backgroundColor: colors.resourceCardHighlights.cohortReview
+  },
   conceptSet: {
     backgroundColor: colors.resourceCardHighlights.conceptSet
   },
@@ -138,6 +141,10 @@ export class ResourceCard extends React.Component<Props, State> {
     return this.resourceType === ResourceType.COHORT;
   }
 
+  get isCohortReview(): boolean {
+    return this.resourceType === ResourceType.COHORT_REVIEW;
+  }
+
   get isConceptSet(): boolean {
     return this.resourceType === ResourceType.CONCEPT_SET;
   }
@@ -158,6 +165,8 @@ export class ResourceCard extends React.Component<Props, State> {
   get displayName(): string {
     if (this.isCohort) {
       return this.props.resourceCard.cohort.name;
+    } else if (this.isCohortReview) {
+      return this.props.resourceCard.cohortReview.cohortName;
     } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.name;
     } else if (this.isDataSet) {
@@ -177,6 +186,8 @@ export class ResourceCard extends React.Component<Props, State> {
   get description(): string {
     if (this.isCohort) {
       return this.props.resourceCard.cohort.description;
+    } else if (this.isCohortReview) {
+      return this.props.resourceCard.cohortReview.description;
     } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.description;
     } else if (this.isDataSet) {
@@ -378,13 +389,16 @@ export class ResourceCard extends React.Component<Props, State> {
   }
 
   getResourceUrl(jupyterLab = false): string {
-    const {workspaceNamespace, workspaceFirecloudName, conceptSet, dataSet, cohort} =
+    const {workspaceNamespace, workspaceFirecloudName, conceptSet, dataSet, cohort, cohortReview} =
       this.props.resourceCard;
     const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
 
     switch (this.resourceType) {
       case ResourceType.COHORT: {
         return `${workspacePrefix}/data/cohorts/build?cohortId=${cohort.id}`;
+      }
+      case ResourceType.COHORT_REVIEW: {
+        return `${workspacePrefix}/data/cohorts/${cohortReview.cohortId}/review`;
       }
       case ResourceType.CONCEPT_SET: {
         return `${workspacePrefix}/data/concepts/sets/${conceptSet.id}`;
