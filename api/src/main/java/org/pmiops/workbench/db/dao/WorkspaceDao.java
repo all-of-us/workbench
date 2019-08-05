@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
  * <p>Use of @Query is discouraged; if desired, define aliases in WorkspaceService.
  */
 public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
+
   Workspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
       String workspaceNamespace, String firecloudName, short activeStatus);
 

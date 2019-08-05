@@ -16,8 +16,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.CdrVersionContext;
-import org.pmiops.workbench.db.dao.CohortCloningService;
-import org.pmiops.workbench.db.dao.ConceptSetService;
+import org.pmiops.workbench.cohorts.CohortCloningService;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
@@ -25,6 +25,7 @@ import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -101,10 +102,34 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Workspace get(String ns, String firecloudName) {
-    return workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+    Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
         ns,
         firecloudName,
         StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+
+    if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.MIGRATED)) {
+      return workspace;
+    } {
+      return null;
+    }
+  }
+
+  @Override
+  public List<WorkspaceResponse> getWorkspaces() {
+    return getWorkspacesAndPublicWorkspaces().stream()
+        .filter(
+            workspaceResponse ->
+                !(workspaceResponse.getAccessLevel() != WorkspaceAccessLevel.OWNER
+                    && workspaceResponse.getAccessLevel() != WorkspaceAccessLevel.WRITER
+                    && workspaceResponse.getWorkspace().getPublished()))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<WorkspaceResponse> getPublishedWorkspaces() {
+    return getWorkspacesAndPublicWorkspaces().stream()
+        .filter(workspaceResponse -> workspaceResponse.getWorkspace().getPublished())
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -130,22 +155,32 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .collect(Collectors.toList());
   }
 
+  @Transactional
   @Override
-  public List<WorkspaceResponse> getWorkspaces() {
-    return getWorkspacesAndPublicWorkspaces().stream()
-        .filter(
-            workspaceResponse ->
-                !(workspaceResponse.getAccessLevel() != WorkspaceAccessLevel.OWNER
-                    && workspaceResponse.getAccessLevel() != WorkspaceAccessLevel.WRITER
-                    && workspaceResponse.getWorkspace().getPublished()))
-        .collect(Collectors.toList());
-  }
+  public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
+    Workspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
 
-  @Override
-  public List<WorkspaceResponse> getPublishedWorkspaces() {
-    return getWorkspacesAndPublicWorkspaces().stream()
-        .filter(workspaceResponse -> workspaceResponse.getWorkspace().getPublished())
-        .collect(Collectors.toList());
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
+
+    WorkspaceResponse response = new WorkspaceResponse();
+
+    // This enforces access controls.
+    fcResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+    fcWorkspace = fcResponse.getWorkspace();
+
+    if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+      // We don't expose PROJECT_OWNER in our API; just use OWNER.
+      response.setAccessLevel(WorkspaceAccessLevel.OWNER);
+    } else {
+      response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
+      if (response.getAccessLevel() == null) {
+        throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
+      }
+    }
+    response.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+
+    return response;
   }
 
   private Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse>

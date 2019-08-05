@@ -1,6 +1,11 @@
-package org.pmiops.workbench.db.dao;
+package org.pmiops.workbench.cohorts;
 
 import org.pmiops.workbench.cohorts.CohortFactory;
+import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
+import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.Workspace;

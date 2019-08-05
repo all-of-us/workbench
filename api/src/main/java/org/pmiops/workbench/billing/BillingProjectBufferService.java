@@ -144,6 +144,11 @@ public class BillingProjectBufferService {
     return entry;
   }
 
+  public double availableProportion() {
+    return (double) billingProjectBufferEntryDao.numberOfAvailableEntries()
+        / getBufferMaxCapacity();
+  }
+
   private BillingProjectBufferEntry consumeBufferEntryForAssignment() {
     // Each call to acquire the lock will timeout in 1s if it is currently held
     while (billingProjectBufferEntryDao.acquireAssigningLock() != 1) {}
