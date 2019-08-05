@@ -16,7 +16,8 @@ public class StorageEnumsTest {
         continue;
       }
 
-      Class enumClass = (Class) ((ParameterizedType) f.getAnnotatedType().getType()).getActualTypeArguments()[0];
+      Class enumClass =
+          (Class) ((ParameterizedType) f.getAnnotatedType().getType()).getActualTypeArguments()[0];
 
       Method enumConvertMethod = null;
       for (Method m : StorageEnums.class.getDeclaredMethods()) {
@@ -28,7 +29,8 @@ public class StorageEnumsTest {
       Method finalEnumConversionMethod = enumConvertMethod;
       for (Object e : enumClass.getEnumConstants()) {
         assertThat(finalEnumConversionMethod.invoke(null, e))
-            .named(enumClass.getName() + ":" + e.toString()).isNotNull();
+            .named(enumClass.getName() + ":" + e.toString())
+            .isNotNull();
       }
     }
   }
