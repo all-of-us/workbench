@@ -2317,7 +2317,7 @@ definitions:
   WorkspaceActiveStatus:
     type: string
     description: Status of workspace
-    enum: [ACTIVE, DELETED, INACTIVE]
+    enum: [ACTIVE, DELETED, PENDING_DELETION_POST_1PPW_MIGRATION]
 
   ResearchPurpose:
     type: object

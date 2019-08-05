@@ -349,6 +349,7 @@ dependencies {
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
   compile 'com.google.guava:guava:26.0-jre'
+  compile 'com.github.rholder:guava-retrying:2.0.0'
   compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
 
   // Elasticsearch client

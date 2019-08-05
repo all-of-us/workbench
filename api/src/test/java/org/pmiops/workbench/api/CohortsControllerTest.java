@@ -136,8 +136,7 @@ public class CohortsControllerTest {
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
       makeConcept(CLIENT_CONCEPT_2);
 
-  @Autowired
-  WorkspacesController workspacesController;
+  @Autowired WorkspacesController workspacesController;
   @Autowired CohortsController cohortsController;
   @Autowired ConceptSetsController conceptSetsController;
 

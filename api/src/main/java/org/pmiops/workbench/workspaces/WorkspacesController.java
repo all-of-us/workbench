@@ -1,5 +1,10 @@
 package org.pmiops.workbench.workspaces;
 
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
@@ -17,6 +22,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -40,6 +48,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
@@ -85,6 +94,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY =
       NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY;
   private static final Pattern NOTEBOOK_PATTERN = NotebooksService.NOTEBOOK_PATTERN;
+
+  private Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
+      .retryIfExceptionOfType(StorageException.class)
+      .withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
+      .withStopStrategy(StopStrategies.stopAfterAttempt(12))
+      .build();
 
   private final BillingProjectBufferService billingProjectBufferService;
   private final WorkspaceService workspaceService;
@@ -448,7 +463,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                     + "remove this notebook, reduce its size, or contact the workspace owner",
                 fromWorkspaceNamespace, fromWorkspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
       }
-      copyBlobWithRetries(toFcWorkspace.getBucketName(), b, 60);
+
+      try {
+        retryer.call(() -> copyBlob(toFcWorkspace.getBucketName(), b));
+      } catch (RetryException | ExecutionException e) {
+        log.log(Level.SEVERE, "Could not copy notebooks into new workspace's bucket " + toFcWorkspace.getBucketName());
+        throw new WorkbenchException(e);
+      }
     }
 
     // The final step in the process is to clone the AoU representation of the
@@ -522,29 +543,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   // A retry period is needed because the permission to copy files into the cloned workspace is not granted transactionally
-  private void copyBlobWithRetries(String bucketName, Blob b, int retryPeriodSeconds) {
-    final int SLEEP_INTERVAL_SECONDS = 5;
-
+  private Boolean copyBlob(String bucketName, Blob b) {
     try {
       cloudStorageService.copyBlob(b.getBlobId(), BlobId.of(bucketName, b.getName()));
+      return true;
     } catch (StorageException e) {
-      if (retryPeriodSeconds <= 0) {
-        throw e;
-      }
-
-      log.info(
+      log.warning(
           "Service Account does not have access to bucket "
-              + bucketName
-              + ". Retrying for another "
-              + retryPeriodSeconds
-              + " seconds.");
-      try {
-        Thread.sleep(SLEEP_INTERVAL_SECONDS * 1000);
-      } catch (InterruptedException ex) {
-        e.printStackTrace();
-      }
-
-      copyBlobWithRetries(bucketName, b, retryPeriodSeconds - SLEEP_INTERVAL_SECONDS);
+              + bucketName);
+      throw e;
     }
   }
 
