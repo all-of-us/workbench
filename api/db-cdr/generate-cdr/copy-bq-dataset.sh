@@ -12,9 +12,9 @@
 export SOURCE_DATASET=$1  # project1:dataset1
 export DEST_DATASET=$2  # project2:dataset2
 
-for f in `bq ls -n 1000 $SOURCE_DATASET | grep TABLE | awk '{print $1}'`
+for f in $(bq ls -n 1000 $SOURCE_DATASET | grep TABLE | awk '{print $1}')
 do
-  export CP_COMMAND="bq cp -f $SOURCE_DATASET.$f $DEST_DATASET.$f"
+  CP_COMMAND="bq cp -f $SOURCE_DATASET.$f $DEST_DATASET.$f"
   echo $CP_COMMAND
-  echo `$CP_COMMAND`
+  echo $($CP_COMMAND)
 done
