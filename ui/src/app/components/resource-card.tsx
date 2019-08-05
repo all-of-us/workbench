@@ -122,6 +122,8 @@ export class ResourceCard extends React.Component<Props, State> {
   get resourceType(): ResourceType {
     if (this.props.resourceCard.cohort) {
       return ResourceType.COHORT;
+    } else if (this.props.resourceCard.cohortReview) {
+      return ResourceType.COHORT_REVIEW;
     } else if (this.props.resourceCard.conceptSet) {
       return ResourceType.CONCEPT_SET;
     } else if (this.props.resourceCard.dataSet) {
