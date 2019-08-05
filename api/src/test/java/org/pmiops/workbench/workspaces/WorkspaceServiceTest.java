@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -85,11 +86,11 @@ public class WorkspaceServiceTest {
   private org.pmiops.workbench.db.model.Workspace mockDbWorkspace(
       String name, String firecloudUuid, WorkspaceActiveStatus activeStatus) {
     org.pmiops.workbench.db.model.Workspace workspace =
-        mock(org.pmiops.workbench.db.model.Workspace.class);
+        spy(org.pmiops.workbench.db.model.Workspace.class);
     doReturn(mock(Timestamp.class)).when(workspace).getLastModifiedTime();
     doReturn(mock(Timestamp.class)).when(workspace).getCreationTime();
     doReturn(name).when(workspace).getName();
-    doReturn(activeStatus).when(workspace).getWorkspaceActiveStatusEnum();
+    workspace.setWorkspaceActiveStatusEnum(activeStatus);
     doReturn(mock(FirecloudWorkspaceId.class)).when(workspace).getFirecloudWorkspaceId();
     doReturn(firecloudUuid).when(workspace).getFirecloudUuid();
     return workspace;
