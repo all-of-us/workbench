@@ -16,7 +16,12 @@ import {DataSet, RecentResource} from 'generated/fetch';
 
 import {Modal, ModalBody, ModalTitle} from 'app/components/modals';
 import {RenameModal} from 'app/components/rename-modal';
-import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {
+  cohortReviewApi,
+  cohortsApi,
+  conceptSetsApi,
+  dataSetApi
+} from 'app/services/swagger-fetch-clients';
 
 const styles = reactStyles({
   card: {
@@ -218,7 +223,7 @@ export class ResourceCard extends React.Component<Props, State> {
     }
   }
 
-  renameCohort(): void {
+  renameResource(): void {
     this.setState({renaming: true});
   }
 
@@ -293,6 +298,23 @@ export class ResourceCard extends React.Component<Props, State> {
           });
         break;
       }
+      case ResourceType.COHORT_REVIEW: {
+        const dataSetByResourceIdList = await
+            this.getDataSetByResourceId(this.props.resourceCard.cohortReview.cohortReviewId);
+        if (dataSetByResourceIdList && dataSetByResourceIdList.length > 0) {
+          this.setState({dataSetByResourceIdList: dataSetByResourceIdList});
+          return;
+        }
+        cohortReviewApi().deleteCohortReview(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.cohortReview.cohortReviewId)
+          .then(() => {
+            this.closeConfirmDelete();
+            this.props.onUpdate();
+          });
+        break;
+      }
       case ResourceType.CONCEPT_SET: {
         const dataSetByResourceIdList = await
             this.getDataSetByResourceId(this.props.resourceCard.conceptSet.id);
@@ -335,6 +357,21 @@ export class ResourceCard extends React.Component<Props, State> {
         this.props.resourceCard.workspaceNamespace,
         this.props.resourceCard.workspaceFirecloudName,
         this.props.resourceCard.cohort.id,
+        request
+      ).then(() => {
+        this.cancelRename();
+        this.props.onUpdate();
+      });
+    } else if (this.isCohortReview) {
+      const request = {
+        ...this.props.resourceCard.cohortReview,
+        cohortName: name,
+        description: description
+      };
+      cohortReviewApi().updateCohortReview(
+        this.props.resourceCard.workspaceNamespace,
+        this.props.resourceCard.workspaceFirecloudName,
+        this.props.resourceCard.cohortReview.cohortReviewId,
         request
       ).then(() => {
         this.cancelRename();
@@ -417,10 +454,6 @@ export class ResourceCard extends React.Component<Props, State> {
     this.setState({exportingDataSet: true});
   }
 
-  renameDataSet(): void {
-    this.setState({renaming: true});
-  }
-
   async markDataSetDirty() {
     let id = 0;
     switch (this.resourceType) {
@@ -468,8 +501,7 @@ export class ResourceCard extends React.Component<Props, State> {
                               resourceType={this.resourceType}
                               onCloneResource={() => this.cloneResource()}
                               onDeleteResource={() => this.openConfirmDelete()}
-                              onRenameCohort={() => this.renameCohort()}
-                              onRenameDataSet={() => this.renameDataSet()}
+                              onRenameResource={() => this.renameResource()}
                               onEdit={() => this.edit()}
                               onExportDataSet={() => this.exportDataSet()}
                               onReviewCohort={() => this.reviewCohort()}/>
@@ -500,6 +532,15 @@ export class ResourceCard extends React.Component<Props, State> {
           onCancel={() => this.cancelRename()}
           oldDescription={this.props.resourceCard.cohort.description}
           oldName={this.props.resourceCard.cohort.name}
+          existingNames={this.props.existingNameList}/>
+      }
+      {this.state.renaming && this.isCohortReview &&
+        <RenameModal
+          onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
+          type='Cohort Review'
+          onCancel={() => this.cancelRename()}
+          oldDescription={this.props.resourceCard.cohortReview.description}
+          oldName={this.props.resourceCard.cohortReview.cohortName}
           existingNames={this.props.existingNameList}/>
       }
       {this.state.renaming && this.isConceptSet &&
