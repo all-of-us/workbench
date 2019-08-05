@@ -5,9 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
@@ -20,7 +18,6 @@ import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.Workspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
-import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.springframework.boot.CommandLineRunner;
@@ -128,7 +125,6 @@ public class BackfillBillingProjectUsers {
         continue;
       }
 
-      List<WorkspaceACLUpdate> updates = new ArrayList<>();
       Map<String, WorkspaceAccessEntry> acl =
           extractAclResponse(workspacesApi.getWorkspaceAcl(w.getNamespace(), w.getName()));
       for (String user : acl.keySet()) {
