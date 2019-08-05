@@ -9,6 +9,7 @@ import static org.mockito.Mockito.spy;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -130,5 +131,13 @@ public class WorkspaceServiceTest {
 
     addMockedWorkspace("deleted", WorkspaceAccessLevel.OWNER, WorkspaceActiveStatus.DELETED);
     assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
+  }
+
+  @Test
+  public void activeStatus() {
+    EnumSet.allOf(WorkspaceActiveStatus.class)
+        .forEach(status -> assertThat(
+            mockDbWorkspace("1", "1", status).getWorkspaceActiveStatusEnum()
+        ).isEqualTo(status));
   }
 }
