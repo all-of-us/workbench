@@ -71,7 +71,7 @@ public class CriteriaLookupUtilTest {
   }
 
   @Test
-  public void buildCriteriaLookupMapDrugCriteria() throws Exception {
+  public void buildCriteriaLookupMapDrugCriteria_ATC() throws Exception {
     CBCriteria drugNode1 =
         new CBCriteria()
             .parentId(99999)
@@ -117,6 +117,55 @@ public class CriteriaLookupUtilTest {
             .group(true)
             .ancestorData(true)
             .conceptId(21600002L);
+    SearchRequest searchRequest =
+        new SearchRequest()
+            .addIncludesItem(
+                new SearchGroup()
+                    .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
+    assertEquals(
+        ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)),
+        lookupUtil.buildCriteriaLookupMap(searchRequest));
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
+  }
+
+  @Test
+  public void buildCriteriaLookupMapDrugCriteria_RXNORM() throws Exception {
+    CBCriteria drugNode1 =
+        new CBCriteria()
+            .parentId(99999)
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .conceptId("21600002")
+            .group(true)
+            .selectable(true);
+    saveCriteriaWithPath("0", drugNode1);
+    CBCriteria drugNode2 =
+        new CBCriteria()
+            .parentId(drugNode1.getId())
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.RXNORM.toString())
+            .conceptId("19069022")
+            .group(false)
+            .selectable(true);
+    saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
+
+    // Use jdbcTemplate to create/insert data into the ancestor table
+    // The codebase currently doesn't have a need to implement a DAO for this table
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (19069022, 19069022)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (19069022, 1666666)");
+
+    List<Long> childConceptIds = Arrays.asList(1666666L);
+    SearchParameter searchParameter =
+        new SearchParameter()
+            .domain(DomainType.DRUG.toString())
+            .type(CriteriaType.RXNORM.toString())
+            .group(true)
+            .ancestorData(true)
+            .conceptId(19069022L);
     SearchRequest searchRequest =
         new SearchRequest()
             .addIncludesItem(
