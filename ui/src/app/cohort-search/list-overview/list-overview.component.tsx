@@ -233,7 +233,7 @@ export const ListOverview = withCurrentWorkspace()(
       const cid = cohort.id;
       cohortsApi().updateCohort(ns, wsid, cid, cohort).then(() => {
         this.setState({saving: false});
-        navigate(['workspaces', ns, wsid, 'cohorts', cid, 'actions']);
+        navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'actions']);
       }, (error) => {
         console.error(error);
         this.setState({saving: false, saveError: true});
@@ -246,7 +246,7 @@ export const ListOverview = withCurrentWorkspace()(
       const {name, description} = this.state;
       const cohort = {name, description, criteria: this.criteria, type: COHORT_TYPE};
       cohortsApi().createCohort(ns, wsid, cohort).then((c) => {
-        navigate(['workspaces', ns, wsid, 'cohorts', c.id, 'actions']);
+        navigate(['workspaces', ns, wsid, 'data', 'cohorts', c.id, 'actions']);
       }, (error) => {
         if (error.status === 400) {
           this.setState({saving: false, showConflictError: true});
@@ -260,7 +260,7 @@ export const ListOverview = withCurrentWorkspace()(
       const {ns, wsid} = urlParamsStore.getValue();
       const {cohort} = this.state;
       cohortsApi().deleteCohort(ns, wsid, cohort.id).then(() => {
-        navigate(['workspaces', ns, wsid, 'cohorts']);
+        navigate(['workspaces', ns, wsid, 'data', 'cohorts']);
       }, (error) => {
         console.log(error);
       });
@@ -279,7 +279,7 @@ export const ListOverview = withCurrentWorkspace()(
           url += 'notebooks';
           break;
         case 'review':
-          url += `cohorts/${cohort.id}/review`;
+          url += `data/cohorts/${cohort.id}/review`;
           break;
       }
       navigateByUrl(url);

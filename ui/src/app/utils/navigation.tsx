@@ -78,5 +78,7 @@ export enum BreadcrumbType {
   Cohort = 'Cohort',
   Participant = 'Participant',
   CohortAdd = 'CohortAdd',
+  SearchConcepts = 'SearchConcepts',
   Dataset = 'Dataset',
+  Data = 'Data',
 }

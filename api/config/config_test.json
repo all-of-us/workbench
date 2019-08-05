@@ -12,7 +12,8 @@
     "registeredDomainName": "all-of-us-registered-test",
     "billingRetryCount": 2,
     "billingProjectBufferCapacity": 10,
-    "xAppIdValue": "test-AoU-RW"
+    "xAppIdValue": "test-AoU-RW",
+    "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test"
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -69,6 +70,7 @@
     "enableLeoWelder": true,
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": true,
-    "enableVpcFlowLogs": true
+    "enableVpcFlowLogs": true,
+    "enableVpcServicePerimeter": true
   }
 }

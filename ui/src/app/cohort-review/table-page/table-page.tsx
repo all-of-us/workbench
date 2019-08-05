@@ -436,7 +436,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
       } else {
         const {id, namespace} = this.props.workspace;
         const {cid} = urlParamsStore.getValue();
-        navigateByUrl(`/workspaces/${namespace}/${id}/cohorts/build?cohortId=${cid}`);
+        navigateByUrl(`/workspaces/${namespace}/${id}/data/cohorts/build?cohortId=${cid}`);
       }
     }
 
@@ -447,6 +447,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
         'workspaces',
         namespace,
         id,
+        'data',
         'cohorts',
         cid,
         'review',

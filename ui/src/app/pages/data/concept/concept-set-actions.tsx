@@ -8,7 +8,6 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {environment} from 'environments/environment';
 import {ConceptSet} from 'generated/fetch';
 import * as React from 'react';
 
@@ -101,7 +100,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
           if (cs) {
             this.setState({conceptSet: cs, conceptSetLoading: false});
           } else {
-            navigate(['workspaces', namespace, id, 'concepts']);
+            navigate(['workspaces', namespace, id, 'data', 'concepts']);
           }
         });
       }
@@ -113,10 +112,10 @@ export const ConceptSetActions = withCurrentWorkspace()(
       let url = `/workspaces/${namespace}/${id}/`;
       switch (action) {
         case 'conceptSet':
-          url += `concepts/sets/${conceptSet.id}`;
+          url += `data/concepts/sets/${conceptSet.id}`;
           break;
         case 'newConceptSet':
-          url += `concepts`;
+          url += `data/concepts`;
           break;
         case 'notebook':
           url += `notebooks`;
@@ -145,8 +144,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
           <h3 style={{...styles.conceptSetsHeader, marginTop: '1.5rem'}}>What Next?</h3>
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
-              const disabled = card.action === 'notebook' ||
-                (card.action === 'dataSet' && !environment.enableDatasetBuilder);
+              const disabled = card.action === 'notebook' || card.action === 'dataSet';
               return <ActionCardBase key={i} style={styles.card}>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                   <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>

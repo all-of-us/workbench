@@ -77,7 +77,7 @@ export class OverviewComponent implements OnInit {
     const cid = this.cohort.id;
     cohortsApi().updateCohort(ns, wsid, cid, this.cohort).then(() => {
       this.saving = false;
-      navigate(['workspaces', ns, wsid, 'cohorts', cid, 'actions']);
+      navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'actions']);
     }, (error) => {
       if (error.status === 400) {
         console.log(error);
@@ -93,7 +93,7 @@ export class OverviewComponent implements OnInit {
     const description = this.cohortForm.get('description').value;
     const cohort = <Cohort>{name, description, criteria: this.criteria, type: COHORT_TYPE};
     cohortsApi().createCohort(ns, wsid, cohort).then((c) => {
-      navigate(['workspaces', ns, wsid, 'cohorts', c.id, 'actions']);
+      navigate(['workspaces', ns, wsid, 'data', 'cohorts', c.id, 'actions']);
     }, (error) => {
       this.saving = false;
       if (error.status === 400) {
@@ -105,7 +105,7 @@ export class OverviewComponent implements OnInit {
   delete = () => {
     const {ns, wsid} = urlParamsStore.getValue();
     cohortsApi().deleteCohort(ns, wsid, this.cohort.id).then(() => {
-      navigate(['workspaces', ns, wsid, 'cohorts']);
+      navigate(['workspaces', ns, wsid, 'data', 'cohorts']);
     }, (error) => {
       console.log(error);
     });
@@ -123,7 +123,7 @@ export class OverviewComponent implements OnInit {
         url += 'notebooks';
         break;
       case 'review':
-        url += `cohorts/${this.cohort.id}/review`;
+        url += `data/cohorts/${this.cohort.id}/review`;
         break;
     }
     navigateByUrl(url);

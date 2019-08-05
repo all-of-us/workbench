@@ -186,7 +186,7 @@ export class ResourceCard extends React.Component<Props, State> {
       case ResourceType.COHORT: {
         const url =
           '/workspaces/' + this.props.resourceCard.workspaceNamespace + '/' +
-          this.props.resourceCard.workspaceFirecloudName + '/cohorts/build?cohortId=';
+          this.props.resourceCard.workspaceFirecloudName + '/data/cohorts/build?cohortId=';
         navigateByUrl(url + this.props.resourceCard.cohort.id);
         this.props.onUpdate();
         break;
@@ -370,7 +370,7 @@ export class ResourceCard extends React.Component<Props, State> {
 
   reviewCohort(): void {
     const {workspaceNamespace, workspaceFirecloudName, cohort} = this.props.resourceCard;
-    navigateByUrl(`/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/cohorts/`
+    navigateByUrl(`/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/data/cohorts/`
       + `${cohort.id}/review`);
   }
 
@@ -381,10 +381,10 @@ export class ResourceCard extends React.Component<Props, State> {
 
     switch (this.resourceType) {
       case ResourceType.COHORT: {
-        return `${workspacePrefix}/cohorts/build?cohortId=${cohort.id}`;
+        return `${workspacePrefix}/data/cohorts/build?cohortId=${cohort.id}`;
       }
       case ResourceType.CONCEPT_SET: {
-        return `${workspacePrefix}/concepts/sets/${conceptSet.id}`;
+        return `${workspacePrefix}/data/concepts/sets/${conceptSet.id}`;
       }
       case ResourceType.DATA_SET: {
         return `${workspacePrefix}/data/data-sets/${dataSet.id}`;

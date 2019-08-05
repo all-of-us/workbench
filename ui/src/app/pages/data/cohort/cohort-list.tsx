@@ -91,7 +91,7 @@ export const CohortList = withCurrentWorkspace()(
 
     navigateToCohortBuilder() {
       const {namespace, id} = this.props.workspace;
-      navigate(['workspaces', namespace, id, 'cohorts', 'build']);
+      navigate(['workspaces', namespace, id, 'data', 'cohorts', 'build']);
     }
 
     render() {
