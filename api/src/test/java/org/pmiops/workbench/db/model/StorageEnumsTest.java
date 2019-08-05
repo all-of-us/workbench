@@ -19,18 +19,25 @@ public class StorageEnumsTest {
       Class enumClass =
           (Class) ((ParameterizedType) f.getAnnotatedType().getType()).getActualTypeArguments()[0];
 
-      Method enumConvertMethod = null;
+      Method enumToShort = null;
+      Method shortToEnum = null;
       for (Method m : StorageEnums.class.getDeclaredMethods()) {
         if (m.getParameterTypes()[0].equals(enumClass)) {
-          enumConvertMethod = m;
+          enumToShort = m;
+        }
+
+        if (m.getReturnType().equals(enumClass)) {
+          shortToEnum = m;
         }
       }
 
-      Method finalEnumConversionMethod = enumConvertMethod;
       for (Object e : enumClass.getEnumConstants()) {
-        assertThat(finalEnumConversionMethod.invoke(null, e))
+        Short shortVal = (Short) enumToShort.invoke(null, e);
+
+        assertThat(shortVal)
             .named(enumClass.getName() + ":" + e.toString())
             .isNotNull();
+        assertThat(shortToEnum.invoke(null, shortVal)).isEqualTo(e);
       }
     }
   }
