@@ -25,7 +25,6 @@ import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -102,16 +101,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Workspace get(String ns, String firecloudName) {
-    Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+    return workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
         ns,
         firecloudName,
         StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-
-    if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.MIGRATED)) {
-      return workspace;
-    } {
-      return null;
-    }
   }
 
   @Override
