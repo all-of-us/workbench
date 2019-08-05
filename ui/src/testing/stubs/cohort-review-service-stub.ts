@@ -1,7 +1,7 @@
 import {
   CohortChartDataListResponse,
   CohortReview,
-  CohortReviewApi,
+  CohortReviewApi, CohortReviewListResponse,
   CohortStatus,
   DomainType,
   EmptyResponse,
@@ -143,5 +143,8 @@ export class CohortReviewServiceStub extends CohortReviewApi {
   }
   getVocabularies(): Promise<VocabularyListResponse> {
     return new Promise<VocabularyListResponse>(resolve => resolve({items: []}));
+  }
+  getCohortReviewsInWorkspace(): Promise<CohortReviewListResponse> {
+    return new Promise<CohortReviewListResponse>(resolve => resolve({items: []}));
   }
 }
