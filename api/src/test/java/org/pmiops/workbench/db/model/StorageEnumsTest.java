@@ -34,9 +34,7 @@ public class StorageEnumsTest {
       for (Object e : enumClass.getEnumConstants()) {
         Short shortVal = (Short) enumToShort.invoke(null, e);
 
-        assertThat(shortVal)
-            .named(enumClass.getName() + ":" + e.toString())
-            .isNotNull();
+        assertThat(shortVal).named(enumClass.getName() + ":" + e.toString()).isNotNull();
         assertThat(shortToEnum.invoke(null, shortVal)).isEqualTo(e);
       }
     }
