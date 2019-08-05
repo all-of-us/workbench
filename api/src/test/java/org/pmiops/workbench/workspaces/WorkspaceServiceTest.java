@@ -47,7 +47,7 @@ public class WorkspaceServiceTest {
   private WorkspaceService workspaceService;
 
   private List<WorkspaceResponse> workspaceResponses = new ArrayList<>();
-  private List<org.pmiops.workbench.db.model.Workspace> workspaces =  new ArrayList<>();
+  private List<org.pmiops.workbench.db.model.Workspace> workspaces = new ArrayList<>();
 
   @Before
   public void setUp() {
@@ -95,14 +95,16 @@ public class WorkspaceServiceTest {
     return workspace;
   }
 
-  private void addMockedWorkspace(String workspaceId, WorkspaceAccessLevel accessLevel, WorkspaceActiveStatus activeStatus) {
+  private void addMockedWorkspace(
+      String workspaceId, WorkspaceAccessLevel accessLevel, WorkspaceActiveStatus activeStatus) {
     WorkspaceResponse workspaceResponse = mockFirecloudWorkspaceResponse(workspaceId, accessLevel);
     workspaceResponses.add(workspaceResponse);
 
-    workspaces.add(mockDbWorkspace(
-        workspaceResponse.getWorkspace().getWorkspaceId(),
-        workspaceResponse.getWorkspace().getWorkspaceId(),
-        activeStatus));
+    workspaces.add(
+        mockDbWorkspace(
+            workspaceResponse.getWorkspace().getWorkspaceId(),
+            workspaceResponse.getWorkspace().getWorkspaceId(),
+            activeStatus));
   }
 
   @Test
@@ -114,7 +116,10 @@ public class WorkspaceServiceTest {
   public void getWorkspaces_skipPending() {
     int currentWorkspacesSize = workspaceService.getWorkspaces().size();
 
-    addMockedWorkspace("inactive", WorkspaceAccessLevel.OWNER, WorkspaceActiveStatus.PENDING_DELETION_POST_1PPW_MIGRATION);
+    addMockedWorkspace(
+        "inactive",
+        WorkspaceAccessLevel.OWNER,
+        WorkspaceActiveStatus.PENDING_DELETION_POST_1PPW_MIGRATION);
     assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
   }
 

@@ -95,11 +95,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY;
   private static final Pattern NOTEBOOK_PATTERN = NotebooksService.NOTEBOOK_PATTERN;
 
-  private Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
-      .retryIfExceptionOfType(StorageException.class)
-      .withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
-      .withStopStrategy(StopStrategies.stopAfterAttempt(12))
-      .build();
+  private Retryer<Boolean> retryer =
+      RetryerBuilder.<Boolean>newBuilder()
+          .retryIfExceptionOfType(StorageException.class)
+          .withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
+          .withStopStrategy(StopStrategies.stopAfterAttempt(12))
+          .build();
 
   private final BillingProjectBufferService billingProjectBufferService;
   private final WorkspaceService workspaceService;
@@ -467,7 +468,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       try {
         retryer.call(() -> copyBlob(toFcWorkspace.getBucketName(), b));
       } catch (RetryException | ExecutionException e) {
-        log.log(Level.SEVERE, "Could not copy notebooks into new workspace's bucket " + toFcWorkspace.getBucketName());
+        log.log(
+            Level.SEVERE,
+            "Could not copy notebooks into new workspace's bucket "
+                + toFcWorkspace.getBucketName());
         throw new WorkbenchException(e);
       }
     }
@@ -542,15 +546,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .workspace(workspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
   }
 
-  // A retry period is needed because the permission to copy files into the cloned workspace is not granted transactionally
+  // A retry period is needed because the permission to copy files into the cloned workspace is not
+  // granted transactionally
   private Boolean copyBlob(String bucketName, Blob b) {
     try {
       cloudStorageService.copyBlob(b.getBlobId(), BlobId.of(bucketName, b.getName()));
       return true;
     } catch (StorageException e) {
-      log.warning(
-          "Service Account does not have access to bucket "
-              + bucketName);
+      log.warning("Service Account does not have access to bucket " + bucketName);
       throw e;
     }
   }
