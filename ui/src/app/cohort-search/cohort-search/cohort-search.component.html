@@ -5,7 +5,7 @@
         <div class="col-xs-12" style="height: 1.5rem">
           <span *ngIf="cohort" class="cohort-name">{{cohort.name}}</span>
         </div>
-        <div class="col-xl-6 col-lg-12" id="list-include-groups" style="margin-top: 1.5rem">
+        <div class="col-xl-6 col-lg-12" id="list-include-groups">
           <app-list-search-group-list
             [role]="'includes'"
             [groups]="criteria.includes"
@@ -13,7 +13,7 @@
           </app-list-search-group-list>
         </div>
 
-        <div class="col-xl-6 col-lg-12" id="list-exclude-groups" style="margin-top: 1.5rem">
+        <div class="col-xl-6 col-lg-12" id="list-exclude-groups">
           <app-list-search-group-list
             *ngIf="includeSize > 0"
             [role]="'excludes'"
