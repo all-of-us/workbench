@@ -521,6 +521,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .workspace(workspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
   }
 
+  // A retry period is needed because the permission to copy files into the cloned workspace is not granted transactionally
   private void copyBlobWithRetries(String bucketName, Blob b, int retryPeriodSeconds) {
     final int SLEEP_INTERVAL_SECONDS = 5;
 
@@ -543,7 +544,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         e.printStackTrace();
       }
 
-      // A retry period is needed because the permission to copy files into the cloned workspace is not granted transactionally
       copyBlobWithRetries(bucketName, b, retryPeriodSeconds - SLEEP_INTERVAL_SECONDS);
     }
   }
