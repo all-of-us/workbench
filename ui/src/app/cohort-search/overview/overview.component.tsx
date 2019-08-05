@@ -13,15 +13,8 @@ import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {
-  currentCohortStore,
-  currentWorkspaceStore,
-  navigate,
-  navigateByUrl,
-  urlParamsStore
-} from 'app/utils/navigation';
+import {currentCohortStore, currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {Cohort, TemporalTime} from 'generated/fetch';
-import {fromJS} from 'immutable';
 import {Menu} from 'primereact/menu';
 import * as React from 'react';
 
@@ -174,9 +167,8 @@ export const ListOverview = withCurrentWorkspace()(
         const request = mapRequest(searchRequest);
         cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
           if (localCheck === this.state.apiCallCheck) {
-            // TODO remove immutable conversion and modify charts to use vanilla javascript
             this.setState({
-              chartData: fromJS(response.items),
+              chartData: response.items,
               total: response.items.reduce((sum, data) => sum + data.count, 0),
               loading: false
             });
@@ -353,28 +345,30 @@ export const ListOverview = withCurrentWorkspace()(
             <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
             Sorry, the request cannot be completed.
           </div>}
-          {!this.definitionErrors && !loading && !!chartData && <div style={styles.cardContainer}>
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                Results by Gender
+          {!!total && !this.definitionErrors && !loading && !!chartData &&
+            <div style={styles.cardContainer}>
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  Results by Gender
+                </div>
+                <div style={{padding: '0.5rem 0.75rem'}}>
+                  {!!chartData.length && <GenderChart data={chartData} />}
+                </div>
               </div>
-              <div style={{padding: '0.5rem 0.75rem'}}>
-                {chartData.size && <GenderChart data={chartData} />}
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  Results By Gender, Age Range, and Race
+                  <ClrIcon shape='sort-by'
+                    className={stackChart ? 'is-info' : ''}
+                    onClick={() => this.toggleChartMode()} />
+                </div>
+                <div style={{padding: '0.5rem 0.75rem'}}>
+                  {!!chartData.length &&
+                    <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
+                </div>
               </div>
             </div>
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                Results By Gender, Age Range, and Race
-                <ClrIcon shape='sort-by'
-                  className={stackChart ? 'is-info' : ''}
-                  onClick={() => this.toggleChartMode()} />
-              </div>
-              <div style={{padding: '0.5rem 0.75rem'}}>
-                {chartData.size &&
-                  <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
-              </div>
-            </div>
-          </div>}
+          }
         </div>
         {saveModalOpen && <Modal>
           <ModalTitle style={invalid ? {marginBottom: 0} : {}}>Save Cohort as</ModalTitle>
@@ -391,7 +385,7 @@ export const ListOverview = withCurrentWorkspace()(
               onChange={(v) => this.setState({description: v})}/>
           </ModalBody>
           <ModalFooter>
-            <Button style={{color: colors.white}} type='link' onClick={() => this.setState({
+            <Button style={{color: colors.primary}} type='link' onClick={() => this.setState({
               saveModalOpen: false, name: undefined, description: undefined, saveError: false,
               nameTouched: false
             })} disabled={saving}>Cancel</Button>
@@ -414,7 +408,7 @@ export const ListOverview = withCurrentWorkspace()(
   selector: 'app-list-overview',
   template: '<div #root></div>',
 })
-export class ListOverviewComponent extends ReactWrapperBase {
+export class OverviewComponent extends ReactWrapperBase {
   @Input('searchRequest') searchRequest: Props['searchRequest'];
   @Input('update') update: Props['update'];
 

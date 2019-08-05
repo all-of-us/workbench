@@ -15,5 +15,4 @@ export const environment: Environment = {
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   enableJupyterLab: true,
-  enableCBListSearch: true,
 };

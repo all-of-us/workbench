@@ -1,9 +1,8 @@
-<clr-tree-node *ngIf="!secondLevel">
+<clr-tree-node>
   <div [id]="nodeId" class="clr-treenode-link container" (click)="toggleExpanded()">
-    <crit-node-info [node]="node"></crit-node-info>
+    <crit-list-node-info [node]="node"></crit-list-node-info>
   </div>
-
-  <ng-template *ngIf="node.get('group') && !fullTree"
+  <ng-template *ngIf="node.group && !wizard.fullTree"
     [(clrIfExpanded)]="expanded"
     (clrIfExpandedChange)="loadChildren($event)">
     <ng-container [clrLoading]="loading">
@@ -12,34 +11,21 @@
           <div class="alert-items">
             <div class="alert-item static">
               <div class="alert-icon-wrapper">
-                <clr-icon class="alert-icon" shape="exclamation-triangle"></clr-icon>
+                <clr-icon class="alert-icon is-solid" shape="exclamation-triangle"></clr-icon>
               </div>
               <span class="alert-text">
-                A problem occurred and we were not able to retrieve the requested data
+                Sorry, the request cannot be completed.
               </span>
             </div>
           </div>
         </div>
-        <crit-node *ngFor="let item of children" [node]="item"></crit-node>
+        <crit-list-node *ngFor="let item of children" [node]="item" [wizard]="wizard"></crit-list-node>
       </div>
     </ng-container>
   </ng-template>
-
-  <!-- Loads the entire tree instead of loading children when the parent node is expanded -->
-  <ng-template *ngIf="node.get('group') && fullTree"
-    [clrIfExpanded]="expanded">
-    <ng-container>
-      <div class="node-list">
-        <crit-node *ngFor="let item of node.get('children')" [node]="item"></crit-node>
-      </div>
-    </ng-container>
+  <ng-template *ngIf="node.group && wizard.fullTree" [(clrIfExpanded)]="expanded">
+    <div class="node-list">
+      <crit-list-node *ngFor="let item of node.children" [node]="item" [wizard]="wizard"></crit-list-node>
+    </div>
   </ng-template>
 </clr-tree-node>
-
-<!-- Skip first level of the tree and go straight to the second level -->
-<div *ngIf="secondLevel">
-  <crit-node *ngFor="let item of children" [node]="item"></crit-node>
-  <div *ngIf="loading" class="spinner root-spinner">
-    Loading...
-  </div>
-</div>

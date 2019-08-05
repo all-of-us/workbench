@@ -541,7 +541,7 @@ export const ListModifierPage = withCurrentWorkspace()(
   selector: 'crit-list-modifier-page',
   template: '<div #root></div>'
 })
-export class ListModifierPageComponent extends ReactWrapperBase {
+export class ModifierPageComponent extends ReactWrapperBase {
   @Input('disabled') disabled: Props['disabled'];
   @Input('wizard') wizard: Props['wizard'];
 

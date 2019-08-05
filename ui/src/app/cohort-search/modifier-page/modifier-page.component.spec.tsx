@@ -1,7 +1,7 @@
 import {shallow} from 'enzyme';
 
 import * as React from 'react';
-import {ListModifierPage} from './list-modifier-page.component';
+import {ListModifierPage} from './modifier-page.component';
 
 
 describe('ListModifierPage', () => {

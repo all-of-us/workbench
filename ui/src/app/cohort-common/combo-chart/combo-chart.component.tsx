@@ -84,22 +84,26 @@ export class ComboChart extends React.Component<Props, State> {
 
   getCategories() {
     const {data} = this.props;
-    return data
-      .map(datum => datum.update('gender', code => this.codeMap[code]))
-      .groupBy(datum => `${datum.get('gender', 'Unknown')} ${datum.get('ageRange', 'Unknown')}`)
-      .keySeq()
-      .toArray();
+    return data.reduce((acc, datum) => {
+      const key = `${this.codeMap[datum.gender]} ${datum.ageRange || 'Unknown'}`;
+      if (!acc.includes(key)) {
+        acc.push(key);
+      }
+      return acc;
+    }, []);
   }
 
   getSeries() {
     const {data} = this.props;
-    return data
-      .map(datum => datum.update('gender', code => this.codeMap[code]))
-      .groupBy(datum => datum.get('race', 'Unknown'))
-      .map((group, race) => ({name: race, data: group.map(item => item.get('count'))}))
-      .sort((a, b) => a.name < b.name ? 1 : -1)
-      .valueSeq()
-      .toJS();
+    return data.reduce((acc, datum) => {
+      const index = acc.findIndex(d => d.name === datum.race);
+      if (index === -1) {
+        acc.push({name: datum.race, data: [datum.count]});
+      } else {
+        acc[index].data.push(datum.count);
+      }
+      return acc;
+    }, []).sort((a, b) => a['name'] < b['name'] ? 1 : -1);
   }
 
   render() {
