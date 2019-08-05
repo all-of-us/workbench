@@ -100,7 +100,7 @@ import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
-import org.pmiops.workbench.model.CopyNotebookRequest;
+import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -2059,8 +2059,8 @@ public class WorkspacesControllerTest {
     String newNotebookName = "new";
     String expectedNotebookName = newNotebookName + ".ipynb";
 
-    CopyNotebookRequest copyNotebookRequest =
-        new CopyNotebookRequest()
+    CopyRequest copyNotebookRequest =
+        new CopyRequest()
             .toWorkspaceName(toWorkspace.getName())
             .toWorkspaceNamespace(toWorkspace.getNamespace())
             .newName(newNotebookName);
@@ -2091,8 +2091,8 @@ public class WorkspacesControllerTest {
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new.ipynb";
 
-    CopyNotebookRequest copyNotebookRequest =
-        new CopyNotebookRequest()
+    CopyRequest copyNotebookRequest =
+        new CopyRequest()
             .toWorkspaceName(toWorkspace.getName())
             .toWorkspaceNamespace(toWorkspace.getNamespace())
             .newName(newNotebookName);
@@ -2124,8 +2124,8 @@ public class WorkspacesControllerTest {
         WorkspaceAccessLevel.READER);
     String newNotebookName = "new";
 
-    CopyNotebookRequest copyNotebookRequest =
-        new CopyNotebookRequest()
+    CopyRequest copyNotebookRequest =
+        new CopyRequest()
             .toWorkspaceName(toWorkspace.getName())
             .toWorkspaceNamespace(toWorkspace.getNamespace())
             .newName(newNotebookName);
@@ -2157,8 +2157,8 @@ public class WorkspacesControllerTest {
         WorkspaceAccessLevel.WRITER);
     String newNotebookName = "new";
 
-    CopyNotebookRequest copyNotebookRequest =
-        new CopyNotebookRequest()
+    CopyRequest copyNotebookRequest =
+        new CopyRequest()
             .toWorkspaceName(toWorkspace.getName())
             .toWorkspaceNamespace(toWorkspace.getNamespace())
             .newName(newNotebookName);
@@ -2180,8 +2180,8 @@ public class WorkspacesControllerTest {
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
     String newNotebookName = "new.ipynb";
 
-    CopyNotebookRequest copyNotebookRequest =
-        new CopyNotebookRequest()
+    CopyRequest copyNotebookRequest =
+        new CopyRequest()
             .toWorkspaceName(toWorkspace.getName())
             .toWorkspaceNamespace(toWorkspace.getNamespace())
             .newName(newNotebookName);
