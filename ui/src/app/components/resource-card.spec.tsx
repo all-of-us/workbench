@@ -2,9 +2,10 @@ import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 
 import { WorkspaceAccessLevel } from 'generated';
-import {ResourceCard} from './resource-card';
+import {cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
+import {ResourceCard} from './resource-card';
 
 const ResourceCardWrapper = {
   cohortCard: {
@@ -13,6 +14,14 @@ const ResourceCardWrapper = {
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
     cohort: new CohortsApiStub().cohorts[0],
+    modifiedTime: new Date().toISOString()
+  },
+  cohortReviewCard: {
+    workspaceId: 1,
+    workspaceNamespace: 'defaultNamespace',
+    workspaceFirecloudName: 'defaultFirecloudName',
+    permission: 'OWNER',
+    cohortReview: cohortReviewStubs[0],
     modifiedTime: new Date().toISOString()
   },
   conceptSetCard: {
@@ -58,6 +67,12 @@ describe('ResourceCardComponent', () => {
   it('should render a cohort if resource is cohort', () => {
     const wrapper = component(ResourceCardWrapper.cohortCard);
     expect(wrapper.find('[data-test-id="card-type"]').text()).toBe('Cohort');
+    expect(lastModifiedDate(wrapper)).toBeTruthy();
+  });
+
+  it('should render a cohort review if resource is cohort review', () => {
+    const wrapper = component(ResourceCardWrapper.cohortReviewCard);
+    expect(wrapper.find('[data-test-id="card-type"]').text()).toBe('Cohort Review');
     expect(lastModifiedDate(wrapper)).toBeTruthy();
   });
 
