@@ -4,7 +4,6 @@
 .classpath
 .project
 .externalToolBuilders
-.vscode
 .settings
 cron-emulator.log
 /api/?/
