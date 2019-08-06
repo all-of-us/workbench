@@ -1,7 +1,13 @@
-package org.pmiops.workbench.api;
+package org.pmiops.workbench.workspaces;
 
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.StorageException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
@@ -16,18 +22,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.api.WorkspacesApiDelegate;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
-import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
@@ -39,8 +47,8 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
@@ -68,8 +76,6 @@ import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -89,13 +95,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY;
   private static final Pattern NOTEBOOK_PATTERN = NotebooksService.NOTEBOOK_PATTERN;
 
+  private Retryer<Boolean> retryer =
+      RetryerBuilder.<Boolean>newBuilder()
+          .retryIfExceptionOfType(StorageException.class)
+          .withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
+          .withStopStrategy(StopStrategies.stopAfterAttempt(12))
+          .build();
+
   private final BillingProjectBufferService billingProjectBufferService;
   private final WorkspaceService workspaceService;
   private final WorkspaceMapper workspaceMapper;
   private final CdrVersionDao cdrVersionDao;
-  private final CohortDao cohortDao;
-  private final CohortFactory cohortFactory;
-  private final ConceptSetDao conceptSetDao;
   private final UserDao userDao;
   private Provider<User> userProvider;
   private final FireCloudService fireCloudService;
@@ -106,14 +116,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
-  WorkspacesController(
+  public WorkspacesController(
       BillingProjectBufferService billingProjectBufferService,
       WorkspaceService workspaceService,
       WorkspaceMapper workspaceMapper,
       CdrVersionDao cdrVersionDao,
-      CohortDao cohortDao,
-      CohortFactory cohortFactory,
-      ConceptSetDao conceptSetDao,
       UserDao userDao,
       Provider<User> userProvider,
       FireCloudService fireCloudService,
@@ -126,9 +133,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.workspaceMapper = workspaceMapper;
     this.cdrVersionDao = cdrVersionDao;
-    this.cohortDao = cohortDao;
-    this.cohortFactory = cohortFactory;
-    this.conceptSetDao = conceptSetDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
@@ -326,29 +330,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
-        workspaceService.getRequired(workspaceNamespace, workspaceId);
-
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
-
-    WorkspaceResponse response = new WorkspaceResponse();
-
-    // This enforces access controls.
-    fcResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
-    fcWorkspace = fcResponse.getWorkspace();
-
-    if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
-      // We don't expose PROJECT_OWNER in our API; just use OWNER.
-      response.setAccessLevel(WorkspaceAccessLevel.OWNER);
-    } else {
-      response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
-      if (response.getAccessLevel() == null) {
-        throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
-      }
-    }
-    response.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(workspaceService.getWorkspace(workspaceNamespace, workspaceId));
   }
 
   @Override
@@ -482,8 +464,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                     + "remove this notebook, reduce its size, or contact the workspace owner",
                 fromWorkspaceNamespace, fromWorkspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
       }
-      cloudStorageService.copyBlob(
-          b.getBlobId(), BlobId.of(toFcWorkspace.getBucketName(), b.getName()));
+
+      try {
+        retryer.call(() -> copyBlob(toFcWorkspace.getBucketName(), b));
+      } catch (RetryException | ExecutionException e) {
+        log.log(
+            Level.SEVERE,
+            "Could not copy notebooks into new workspace's bucket "
+                + toFcWorkspace.getBucketName());
+        throw new WorkbenchException(e);
+      }
     }
 
     // The final step in the process is to clone the AoU representation of the
@@ -491,8 +481,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Firecloud workspaces / buckets, but a user should not be able to see
     // half-way cloned workspaces via AoU - so it will just appear as a
     // transient failure.
-    org.pmiops.workbench.db.model.Workspace toDbWorkspace =
-        workspaceMapper.toDbWorkspace(body.getWorkspace());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         new org.pmiops.workbench.db.model.Workspace();
 
@@ -506,7 +494,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setVersion(1);
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
 
-    dbWorkspace.setName(toDbWorkspace.getName());
+    dbWorkspace.setName(body.getWorkspace().getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
     workspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
@@ -556,6 +544,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
             .workspace(workspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
+  }
+
+  // A retry period is needed because the permission to copy files into the cloned workspace is not
+  // granted transactionally
+  private Boolean copyBlob(String bucketName, Blob b) {
+    try {
+      cloudStorageService.copyBlob(b.getBlobId(), BlobId.of(bucketName, b.getName()));
+      return true;
+    } catch (StorageException e) {
+      log.warning("Service Account does not have access to bucket " + bucketName);
+      throw e;
+    }
   }
 
   @Override

@@ -24,9 +24,9 @@ import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.DomainVocabularyInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DomainVocabularyInfo.DomainVocabularyInfoId;
+import org.pmiops.workbench.cohorts.CohortCloningService;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortCloningService;
-import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Workspace;
@@ -848,7 +848,7 @@ public class ConceptsControllerTest {
             new DomainValue().value("FIELD_ONE"), new DomainValue().value("FIELD_TWO"));
   }
 
-  static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
+  public static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
     org.pmiops.workbench.cdr.model.Concept result = new org.pmiops.workbench.cdr.model.Concept();
     result.setConceptId(concept.getConceptId());
     result.setConceptName(concept.getConceptName());
