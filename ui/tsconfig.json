@@ -14,17 +14,12 @@
     "typeRoots": [
       "node_modules/@types"
     ],
-    "jsx": "react",
     "lib": [
       "es2016",
       "es2018.promise",
       "dom"
     ],
     "module": "es2015",
-    "baseUrl": "./",
-    "paths": {
-      "app/*": ["./src/app/*"],
-      "generated/*": ["./src/generated/*"]
-    }
+    "baseUrl": "./"
   }
 }
