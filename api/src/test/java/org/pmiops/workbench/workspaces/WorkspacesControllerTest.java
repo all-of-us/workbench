@@ -1333,8 +1333,8 @@ public class WorkspacesControllerTest {
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName("bucket2");
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
-    String f1 = "notebooks/f1".concat(NotebooksService.NOTEBOOK_EXTENSION);
-    String f2 = "notebooks/f2 with spaces".concat(NotebooksService.NOTEBOOK_EXTENSION);
+    String f1 = NotebooksService.withNotebookExtension("notebooks/f1");
+    String f2 = NotebooksService.withNotebookExtension("notebooks/f2 with spaces");
     String f3 = "notebooks/f3.vcf";
     // Note: mockBlob cannot be inlined into thenReturn() due to Mockito nuances.
     List<Blob> blobs =
@@ -1596,7 +1596,7 @@ public class WorkspacesControllerTest {
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName("bucket2");
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
-    Blob bigNotebook = mockBlob(BUCKET_NAME, "notebooks/nb".concat(NotebooksService.NOTEBOOK_EXTENSION));
+    Blob bigNotebook = mockBlob(BUCKET_NAME, NotebooksService.withNotebookExtension("notebooks/nb"));
     when(bigNotebook.getSize()).thenReturn(5_000_000_000L); // 5 GB.
     when(cloudStorageService.getBlobList(BUCKET_NAME, "notebooks"))
         .thenReturn(ImmutableList.of(bigNotebook));
@@ -1941,9 +1941,9 @@ public class WorkspacesControllerTest {
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     Blob mockBlob3 = mock(Blob.class);
-    when(mockBlob1.getName()).thenReturn("notebooks/mockFile".concat(NotebooksService.NOTEBOOK_EXTENSION));
+    when(mockBlob1.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/mockFile"));
     when(mockBlob2.getName()).thenReturn("notebooks/mockFile.text");
-    when(mockBlob3.getName()).thenReturn("notebooks/two words".concat(NotebooksService.NOTEBOOK_EXTENSION));
+    when(mockBlob3.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/two words"));
     when(cloudStorageService.getBlobList("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
 
@@ -1952,7 +1952,7 @@ public class WorkspacesControllerTest {
         workspacesController.getNoteBookList("project", "workspace").getBody().stream()
             .map(details -> details.getName())
             .collect(Collectors.toList());
-    assertEquals(gotNames, ImmutableList.of("mockFile".concat(NotebooksService.NOTEBOOK_EXTENSION), "two words".concat(NotebooksService.NOTEBOOK_EXTENSION)));
+    assertEquals(gotNames, ImmutableList.of(NotebooksService.withNotebookExtension("mockFile"), NotebooksService.withNotebookExtension("two words")));
   }
 
   @Test
@@ -1964,8 +1964,8 @@ public class WorkspacesControllerTest {
                     new org.pmiops.workbench.firecloud.model.Workspace().bucketName("bucket")));
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
-    when(mockBlob1.getName()).thenReturn("notebooks/extra/nope".concat(NotebooksService.NOTEBOOK_EXTENSION));
-    when(mockBlob2.getName()).thenReturn("notebooks/foo".concat(NotebooksService.NOTEBOOK_EXTENSION));
+    when(mockBlob1.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
+    when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
     when(cloudStorageService.getBlobList("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
 
@@ -1973,7 +1973,7 @@ public class WorkspacesControllerTest {
         workspacesController.getNoteBookList("project", "workspace").getBody().stream()
             .map(details -> details.getName())
             .collect(Collectors.toList());
-    assertEquals(gotNames, ImmutableList.of("foo".concat(NotebooksService.NOTEBOOK_EXTENSION)));
+    assertEquals(gotNames, ImmutableList.of(NotebooksService.withNotebookExtension("foo")));
   }
 
   @Test
@@ -2005,15 +2005,15 @@ public class WorkspacesControllerTest {
   public void testRenameNotebookInWorkspace() throws Exception {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    String nb1 = "notebooks/nb1".concat(NotebooksService.NOTEBOOK_EXTENSION);
-    String newName = "nb2".concat(NotebooksService.NOTEBOOK_EXTENSION);
-    String newPath = "notebooks/nb2".concat(NotebooksService.NOTEBOOK_EXTENSION);
+    String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
+    String newName = NotebooksService.withNotebookExtension("nb2");
+    String newPath = NotebooksService.withNotebookExtension("notebooks/nb2");
     String fullPath = "gs://workspace-bucket/" + newPath;
     String origFullPath = "gs://workspace-bucket/" + nb1;
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
     NotebookRename rename = new NotebookRename();
-    rename.setName("nb1".concat(NotebooksService.NOTEBOOK_EXTENSION));
+    rename.setName(NotebooksService.withNotebookExtension("nb1"));
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService)
@@ -2029,15 +2029,15 @@ public class WorkspacesControllerTest {
   public void testRenameNotebookWoExtension() throws Exception {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    String nb1 = "notebooks/nb1".concat(NotebooksService.NOTEBOOK_EXTENSION);
+    String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
     String newName = "nb2";
-    String newPath = "notebooks/nb2".concat(NotebooksService.NOTEBOOK_EXTENSION);
+    String newPath = NotebooksService.withNotebookExtension("notebooks/nb2");
     String fullPath = "gs://workspace-bucket/" + newPath;
     String origFullPath = "gs://workspace-bucket/" + nb1;
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
     NotebookRename rename = new NotebookRename();
-    rename.setName("nb1".concat(NotebooksService.NOTEBOOK_EXTENSION));
+    rename.setName(NotebooksService.withNotebookExtension("nb1"));
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService)
@@ -2074,7 +2074,7 @@ public class WorkspacesControllerTest {
 
     verify(cloudStorageService)
         .copyBlob(
-            BlobId.of(BUCKET_NAME, "notebooks/" + fromNotebookName),
+            BlobId.of(BUCKET_NAME, "notebooks/" + NotebooksService.withNotebookExtension(fromNotebookName)),
             BlobId.of(BUCKET_NAME, "notebooks/" + expectedNotebookName));
 
     verify(userRecentResourceService)
@@ -2090,7 +2090,7 @@ public class WorkspacesControllerTest {
 
     Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
-    String newNotebookName = "new".concat(NotebooksService.NOTEBOOK_EXTENSION);
+    String newNotebookName = NotebooksService.withNotebookExtension("new");
 
     CopyRequest copyNotebookRequest =
         new CopyRequest()
@@ -2106,7 +2106,7 @@ public class WorkspacesControllerTest {
 
     verify(cloudStorageService)
         .copyBlob(
-            BlobId.of(BUCKET_NAME, "notebooks/" + fromNotebookName),
+            BlobId.of(BUCKET_NAME, "notebooks/" + NotebooksService.withNotebookExtension(fromNotebookName)),
             BlobId.of(BUCKET_NAME, "notebooks/" + newNotebookName));
   }
 
@@ -2171,7 +2171,7 @@ public class WorkspacesControllerTest {
         copyNotebookRequest);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = ConflictException.class)
   public void copyNotebook_alreadyExists() {
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
@@ -2179,7 +2179,7 @@ public class WorkspacesControllerTest {
 
     Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
     toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
-    String newNotebookName = "new".concat(NotebooksService.NOTEBOOK_EXTENSION);
+    String newNotebookName = NotebooksService.withNotebookExtension("new");
 
     CopyRequest copyNotebookRequest =
         new CopyRequest()
@@ -2204,12 +2204,12 @@ public class WorkspacesControllerTest {
   public void testCloneNotebook() throws Exception {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    String nb1 = "notebooks/nb1".concat(NotebooksService.NOTEBOOK_EXTENSION);
-    String newPath = "notebooks/Duplicate of nb1".concat(NotebooksService.NOTEBOOK_EXTENSION);
+    String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
+    String newPath = NotebooksService.withNotebookExtension("notebooks/Duplicate of nb1");
     String fullPath = "gs://workspace-bucket/" + newPath;
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
-    workspacesController.cloneNotebook(workspace.getNamespace(), workspace.getId(), "nb1".concat(NotebooksService.NOTEBOOK_EXTENSION));
+    workspacesController.cloneNotebook(workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
     verify(cloudStorageService)
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(userRecentResourceService)
@@ -2220,11 +2220,11 @@ public class WorkspacesControllerTest {
   public void testDeleteNotebook() throws Exception {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    String nb1 = "notebooks/nb1".concat(NotebooksService.NOTEBOOK_EXTENSION);
+    String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
     String fullPath = "gs://workspace-bucket/" + nb1;
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
-    workspacesController.deleteNotebook(workspace.getNamespace(), workspace.getId(), "nb1".concat(NotebooksService.NOTEBOOK_EXTENSION));
+    workspacesController.deleteNotebook(workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
     verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
@@ -2373,7 +2373,7 @@ public class WorkspacesControllerTest {
 
     final String testWorkspaceNamespace = "test-ns";
     final String testWorkspaceName = "test-ws";
-    final String testNotebook = "test-notebook".concat(NotebooksService.NOTEBOOK_EXTENSION);
+    final String testNotebook = NotebooksService.withNotebookExtension("test-notebook");
 
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
         createFcWorkspace(testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);

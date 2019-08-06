@@ -53,16 +53,12 @@ describe('CopyNotebookModal', () => {
       resourceType: ResourceType.NOTEBOOK,
       onClose: () => {},
       onCopy: () => {},
-      saveFunction: (destination: Workspace, newName: string) => {
+      saveFunction: (copyRequest) => {
         return workspacesApi().copyNotebook(
           this.props.resource.workspaceNamespace,
           this.props.resource.workspaceFirecloudName,
           dropNotebookFileSuffix(this.props.resource.notebook.name),
-          {
-            toWorkspaceName: destination.id,
-            toWorkspaceNamespace: destination.namespace,
-            newName: newName
-          }
+          copyRequest
         );
       }
     };

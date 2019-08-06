@@ -12,6 +12,12 @@ public interface NotebooksService {
   Pattern NOTEBOOK_PATTERN =
       Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 
+  static String withNotebookExtension(String notebookName) {
+    return notebookName.endsWith(NOTEBOOK_EXTENSION)
+        ? notebookName
+        : notebookName.concat(NOTEBOOK_EXTENSION);
+  }
+
   List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName);
 
   FileDetail copyNotebook(
