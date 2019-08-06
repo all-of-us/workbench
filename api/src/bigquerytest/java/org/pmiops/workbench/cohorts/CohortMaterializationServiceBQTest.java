@@ -32,9 +32,7 @@ import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.util.DemoQueryBuilder;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.ConceptCacheConfiguration;
@@ -71,13 +69,10 @@ import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({
-  DemoQueryBuilder.class,
-  QueryBuilderFactory.class,
   BigQueryService.class,
   CohortQueryBuilder.class,
   CohortQueryBuilder.class,
   FieldSetQueryBuilder.class,
-  QueryBuilderFactory.class,
   TestJpaConfig.class,
   ConceptCacheConfiguration.class,
   TestBigQueryCdrSchemaConfig.class,
@@ -194,7 +189,8 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
         "observation",
         "vocabulary",
         "criteria",
-        "search_all_domains");
+        "search_all_domains",
+        "search_person");
   }
 
   @Override

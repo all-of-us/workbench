@@ -236,8 +236,10 @@ public class CohortReviewControllerTest {
     cohort = new Cohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort.setCriteria(
-        "{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"CONDITION\",\"searchParameters\":[{\"parameterId\":\"param25164\","
-            + "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"CM\",\"group\":true,\"domainId\":\"\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
+        "{\"includes\":[{\"id\":\"includes_kl4uky6kh\",\"items\":[{\"id\":\"items_58myrn9iz\",\"type\":\"CONDITION\",\"searchParameters\":[{"
+            + "\"parameterId\":\"param1567486C34\",\"name\":\"Malignant neoplasm of bronchus and lung\",\"domain\":\"CONDITION\",\"type\": "
+            + "\"ICD10CM\",\"group\":true,\"attributes\":[],\"ancestorData\":false,\"standard\":false,\"conceptId\":1567486,\"value\":\"C34\"}],"
+            + "\"modifiers\":[]}],\"temporal\":false}],\"excludes\":[]}");
     cohortDao.save(cohort);
 
     cohortWithoutReview = new Cohort();
@@ -245,8 +247,10 @@ public class CohortReviewControllerTest {
     cohortWithoutReview.setName("test");
     cohortWithoutReview.setDescription("test desc");
     cohortWithoutReview.setCriteria(
-        "{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"CONDITION\",\"searchParameters\":[{\"parameterId\":\"param25164\","
-            + "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"CM\",\"group\":false,\"domainId\":\"Condition\",\"conceptId\":\"1\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
+        "{\"includes\":[{\"id\":\"includes_kl4uky6kh\",\"items\":[{\"id\":\"items_58myrn9iz\",\"type\":\"CONDITION\",\"searchParameters\":[{"
+            + "\"parameterId\":\"param1567486C34\",\"name\":\"Malignant neoplasm of bronchus and lung\",\"domain\":\"CONDITION\",\"type\": "
+            + "\"ICD10CM\",\"group\":true,\"attributes\":[],\"ancestorData\":false,\"standard\":false,\"conceptId\":1567486,\"value\":\"C34\"}],"
+            + "\"modifiers\":[]}],\"temporal\":false}],\"excludes\":[]}");
     cohortDao.save(cohortWithoutReview);
 
     Timestamp today = new Timestamp(new Date().getTime());

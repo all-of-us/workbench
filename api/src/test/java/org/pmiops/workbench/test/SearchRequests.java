@@ -1,6 +1,8 @@
 package org.pmiops.workbench.test;
 
 import java.util.Arrays;
+import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -26,21 +28,33 @@ public class SearchRequests {
   private SearchRequests() {}
 
   public static SearchRequest genderRequest(long... conceptIds) {
-    SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(DEMO_TYPE);
+    SearchGroupItem searchGroupItem =
+        new SearchGroupItem().id("id1").type(DomainType.PERSON.toString());
     for (long conceptId : conceptIds) {
       SearchParameter parameter =
-          new SearchParameter().type(DEMO_DOMAIN).subtype(GENDER_SUBTYPE).conceptId(conceptId);
+          new SearchParameter()
+              .domain(DomainType.PERSON.toString())
+              .type(CriteriaType.GENDER.toString())
+              .conceptId(conceptId)
+              .group(false)
+              .standard(true)
+              .ancestorData(false);
       searchGroupItem.addSearchParametersItem(parameter);
     }
     return searchRequest(searchGroupItem);
   }
 
-  public static SearchRequest codesRequest(
-      String groupType, String type, String subtype, String... codes) {
+  public static SearchRequest codesRequest(String groupType, String type, String... codes) {
     SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(groupType);
     for (String code : codes) {
       SearchParameter parameter =
-          new SearchParameter().type(type).subtype(subtype).group(true).value(code);
+          new SearchParameter()
+              .domain(groupType)
+              .type(type)
+              .group(true)
+              .value(code)
+              .standard(false)
+              .ancestorData(false);
       searchGroupItem.addSearchParametersItem(parameter);
     }
     return searchRequest(searchGroupItem);
@@ -52,19 +66,25 @@ public class SearchRequests {
             .type(TreeType.ICD9.name())
             .subtype(TreeSubType.CM.name())
             .group(false)
-            .conceptId(1L);
+            .conceptId(1L)
+            .standard(false)
+            .ancestorData(false);
     SearchParameter icd10 =
         new SearchParameter()
             .type(TreeType.ICD10.name())
             .subtype(TreeSubType.CM.name())
             .group(false)
-            .conceptId(9L);
+            .conceptId(9L)
+            .standard(false)
+            .ancestorData(false);
     SearchParameter snomed =
         new SearchParameter()
             .type(TreeType.SNOMED.name())
             .subtype(TreeSubType.CM.name())
             .group(false)
-            .conceptId(4L);
+            .conceptId(4L)
+            .standard(false)
+            .ancestorData(false);
 
     SearchGroupItem icd9SGI =
         new SearchGroupItem()
@@ -96,6 +116,7 @@ public class SearchRequests {
   private static SearchRequest searchRequest(SearchGroupItem searchGroupItem) {
     SearchGroup searchGroup = new SearchGroup();
     searchGroup.setId("id2");
+    searchGroup.setTemporal(false);
     searchGroup.addItemsItem(searchGroupItem);
 
     SearchRequest request = new SearchRequest();
@@ -105,7 +126,8 @@ public class SearchRequests {
   }
 
   public static SearchRequest icd9Codes() {
-    return codesRequest(SEARCHGROUP_ITEM_TYPE, ICD9_TYPE, ICD9_SUBTYPE, ICD9_GROUP_CODE);
+    return codesRequest(
+        DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), ICD9_GROUP_CODE);
   }
 
   public static SearchRequest males() {

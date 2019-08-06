@@ -24,7 +24,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
@@ -163,8 +162,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ReviewQueryBuilder.class,
     CohortCloningService.class,
     CohortQueryBuilder.class,
-    SearchGroupItemQueryBuilder.class,
-    QueryBuilderFactory.class
+    SearchGroupItemQueryBuilder.class
   })
   @MockBean({
     FireCloudService.class,
