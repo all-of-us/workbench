@@ -130,6 +130,11 @@ public class BackfillBillingProjectUsers {
       Map<String, WorkspaceAccessEntry> acl =
           extractAclResponse(workspacesApi.getWorkspaceAcl(w.getNamespace(), w.getName()));
       for (String user : acl.keySet()) {
+        if (user.equals(w.getCreatedBy())) {
+          // Skip the common case, creators should already be billing project users. Any edge cases
+          // where this is not true will be fixed by the 1PPW migration (RW-2705).
+          continue;
+        }
         WorkspaceAccessEntry entry = acl.get(user);
         if (!"OWNER".equals(entry.getAccessLevel())) {
           // Only owners should be granted billing project user.
