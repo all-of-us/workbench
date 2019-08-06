@@ -42,11 +42,13 @@ public class ConceptSet {
     setDescription(cs.getDescription());
     setName(cs.getName());
     setDomain(cs.getDomain());
+    setSurvey(cs.getSurvey());
     setCreator(cs.getCreator());
     setWorkspaceId(cs.getWorkspaceId());
     setCreationTime(cs.getCreationTime());
     setLastModifiedTime(cs.getLastModifiedTime());
     setParticipantCount(cs.getParticipantCount());
+    setConceptIds(new HashSet<>(cs.getConceptIds()));
   }
 
   @Id

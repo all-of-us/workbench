@@ -661,7 +661,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               copyRequest.getToWorkspaceName(),
               copyRequest.getNewName().concat(NOTEBOOK_EXTENSION));
     } catch (BlobAlreadyExistsException e) {
-      throw new BadRequestException("File already exists at copy destination");
+      throw new ConflictException("File already exists at copy destination");
     }
 
     return ResponseEntity.ok(fileDetail);

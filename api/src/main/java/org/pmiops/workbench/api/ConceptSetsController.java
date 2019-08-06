@@ -47,6 +47,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   private static final int MAX_CONCEPTS_PER_SET = 1000;
   private static final String CONCEPT_CLASS_ID_QUESTION = "Question";
+  private static final int INITIAL_VERSION = 1;
 
   private final WorkspaceService workspaceService;
   private final ConceptSetDao conceptSetDao;
@@ -146,7 +147,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.setWorkspaceId(workspace.getWorkspaceId());
     dbConceptSet.setCreationTime(now);
     dbConceptSet.setLastModifiedTime(now);
-    dbConceptSet.setVersion(1);
+    dbConceptSet.setVersion(INITIAL_VERSION);
     dbConceptSet.setParticipantCount(0);
     if (request.getAddedIds() != null && !request.getAddedIds().isEmpty()) {
       addConceptsToSet(dbConceptSet, request.getAddedIds());
@@ -384,20 +385,18 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     }
     org.pmiops.workbench.db.model.ConceptSet conceptSet =
         conceptSetDao.findOne(Long.valueOf(fromConceptSetId));
+    if (conceptSet == null) {
+      throw new NotFoundException(String.format("Concept set %s does not exist", generateConceptSetPathFromWorkspaceAndIdentifier(fromWorkspaceNamespace, fromWorkspaceId, fromConceptSetId)));
+    }
     org.pmiops.workbench.db.model.ConceptSet newConceptSet =
-        new org.pmiops.workbench.db.model.ConceptSet();
-    newConceptSet.setDomainEnum(conceptSet.getDomainEnum());
-    newConceptSet.setSurveysEnum(conceptSet.getSurveysEnum());
+        new org.pmiops.workbench.db.model.ConceptSet(conceptSet);
 
-    newConceptSet.setDescription(conceptSet.getDescription());
     newConceptSet.setName(copyRequest.getNewName());
     newConceptSet.setCreator(userProvider.get());
     newConceptSet.setWorkspaceId(toWorkspace.getWorkspaceId());
     newConceptSet.setCreationTime(now);
     newConceptSet.setLastModifiedTime(now);
-    newConceptSet.setVersion(1);
-    newConceptSet.setParticipantCount(conceptSet.getParticipantCount());
-    newConceptSet.setConceptIds(new HashSet<>(conceptSet.getConceptIds()));
+    newConceptSet.setVersion(INITIAL_VERSION);
 
     try {
       newConceptSet = conceptSetDao.save(newConceptSet);
@@ -407,14 +406,21 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
           newConceptSet.getConceptSetId(),
           now);
     } catch (DataIntegrityViolationException e) {
-      throw new BadRequestException(
+      throw new ConflictException(
           String.format(
-              "Concept set \"/%s/%s/%s\" already exists.",
-              toWorkspace.getWorkspaceNamespace(),
-              toWorkspace.getFirecloudName(),
-              newConceptSet.getName()));
+              "Concept set %s already exists.",
+              generateConceptSetPathFromWorkspaceAndIdentifier(
+                  toWorkspace.getWorkspaceNamespace(),
+                  toWorkspace.getFirecloudName(),
+                  newConceptSet.getName())));
     }
     return ResponseEntity.ok(toClientConceptSet(newConceptSet));
+  }
+
+  private String generateConceptSetPathFromWorkspaceAndIdentifier(String workspaceNamespace, String workspaceFirecloudName, String identifier) {
+    return String.format("\"/%s/%s/%s\"", workspaceNamespace,
+        workspaceFirecloudName,
+        identifier);
   }
 
   private org.pmiops.workbench.db.model.ConceptSet getDbConceptSet(

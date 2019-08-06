@@ -189,7 +189,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents) {
     cloudStorageService.writeFile(
         bucketName,
-        "notebooks/" + notebookName + NOTEBOOK_EXTENSION,
+        "notebooks/" + withNotebookExtension(notebookName),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
   }
 

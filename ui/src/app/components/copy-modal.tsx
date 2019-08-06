@@ -76,10 +76,13 @@ class CopyModal extends React.Component<Props, State> {
       this.setState({ requestState: RequestState.SUCCESS, loading: false });
       this.props.onCopy(response);
     }).catch((response) => {
-      const errorMsg = response.status === 400 ?
+      const errorMsg = response.status === 409 ?
         `${ResourceTypeDisplayNames.get(resourceType)} with the same ` +
         `name already exists in the targeted workspace.` :
-        'An error occurred while copying. Please try again.';
+        response.status === 404 ?
+          `${ResourceTypeDisplayNames.get(resourceType)} not found in the ` +
+            `original workspace.` :
+          'An error occurred while copying. Please try again.';
 
       this.setState({
         errorMsg: errorMsg,
