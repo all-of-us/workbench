@@ -3,7 +3,7 @@ package org.pmiops.workbench.cohorts;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.workspaces.Workspace;
 
 public interface CohortFactory {
 

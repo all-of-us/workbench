@@ -17,7 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.workspaces.Workspace;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;

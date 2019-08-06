@@ -2,7 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.Collection;
 import java.util.List;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.workspaces.Workspace;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.db.model;
+package org.pmiops.workbench.workspaces;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -20,6 +20,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DataSet;
+import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
