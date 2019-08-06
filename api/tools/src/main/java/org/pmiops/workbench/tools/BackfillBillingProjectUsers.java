@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -33,6 +34,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class BackfillBillingProjectUsers {
+
   private static Option fcBaseUrlOpt =
       Option.builder()
           .longOpt("fc-base-url")
@@ -139,7 +141,11 @@ public class BackfillBillingProjectUsers {
                 "granting billing project user on '%s' to '%s' (%s)",
                 w.getNamespace(), user, entry.getAccessLevel()));
         if (!dryRun) {
-          billingApi.addUserToBillingProject(w.getNamespace(), "user", user);
+          try {
+            billingApi.addUserToBillingProject(w.getNamespace(), "user", user);
+          } catch (ApiException e) {
+            log.log(Level.WARNING, "failed to add user to project", e);
+          }
         }
         userUpgrades++;
       }
