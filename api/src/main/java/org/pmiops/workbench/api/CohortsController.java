@@ -24,7 +24,7 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.workspaces.Workspace;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;

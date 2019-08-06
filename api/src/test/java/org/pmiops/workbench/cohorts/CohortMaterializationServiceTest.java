@@ -31,13 +31,13 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.workspaces.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.workspaces.Workspace;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.CdrQuery;
 import org.pmiops.workbench.model.CohortAnnotationsRequest;
@@ -54,6 +54,7 @@ import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.CdrJpaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -72,6 +73,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
+@EntityScan
 @Import({
   LiquibaseAutoConfiguration.class,
   FieldSetQueryBuilder.class,

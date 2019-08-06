@@ -27,9 +27,9 @@ import org.pmiops.workbench.cdr.model.DomainVocabularyInfo.DomainVocabularyInfoI
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.workspaces.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.workspaces.Workspace;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;

@@ -19,11 +19,11 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -296,6 +296,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       Workspace workspace,
       Map<String, WorkspaceAccessLevel> updatedAclsMap,
       String registeredUsersGroup) {
+    workspaceDao.save(workspace);
+
     // userRoleMap is a map of the new permissions for ALL users on the ws
     Map<String, WorkspaceAccessEntry> aclsMap =
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
@@ -387,7 +389,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     for (ConceptSet conceptSet : conceptSetService.getConceptSets(from)) {
       conceptSetService.cloneConceptSetAndConceptIds(conceptSet, to, cdrVersionChanged);
     }
-    return saved;
+
+    return workspaceDao.save(saved);
   }
 
   @Override

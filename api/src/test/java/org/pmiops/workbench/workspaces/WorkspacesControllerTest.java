@@ -76,7 +76,6 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -1198,6 +1197,7 @@ public class WorkspacesControllerTest {
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
     cdrVersion2.setCdrDbName("");
+    cdrVersion2.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
@@ -1393,6 +1393,7 @@ public class WorkspacesControllerTest {
     CdrVersion cdrVersion2 = new CdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
+    cdrVersion2.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
     String cdrVersionId2 = Long.toString(cdrVersion2.getCdrVersionId());
 

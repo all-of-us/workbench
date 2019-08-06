@@ -6,7 +6,7 @@ import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.workspaces.Workspace;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.PageRequest;

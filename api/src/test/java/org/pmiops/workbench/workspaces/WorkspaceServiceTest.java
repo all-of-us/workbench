@@ -19,8 +19,7 @@ import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.workspaces.Workspace.FirecloudWorkspaceId;
+import org.pmiops.workbench.db.model.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.Workspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -49,7 +48,7 @@ public class WorkspaceServiceTest {
   private WorkspaceService workspaceService;
 
   private List<WorkspaceResponse> workspaceResponses = new ArrayList<>();
-  private List<org.pmiops.workbench.workspaces.Workspace> workspaces = new ArrayList<>();
+  private List<org.pmiops.workbench.db.model.Workspace> workspaces = new ArrayList<>();
 
   @Before
   public void setUp() {
@@ -84,10 +83,10 @@ public class WorkspaceServiceTest {
     return workspaceResponse;
   }
 
-  private org.pmiops.workbench.workspaces.Workspace mockDbWorkspace(
+  private org.pmiops.workbench.db.model.Workspace mockDbWorkspace(
       String name, String firecloudUuid, WorkspaceActiveStatus activeStatus) {
-    org.pmiops.workbench.workspaces.Workspace workspace =
-        spy(org.pmiops.workbench.workspaces.Workspace.class);
+    org.pmiops.workbench.db.model.Workspace workspace =
+        spy(org.pmiops.workbench.db.model.Workspace.class);
     doReturn(mock(Timestamp.class)).when(workspace).getLastModifiedTime();
     doReturn(mock(Timestamp.class)).when(workspace).getCreationTime();
     doReturn(name).when(workspace).getName();

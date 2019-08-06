@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import org.pmiops.workbench.api.Etags;
-import org.pmiops.workbench.workspaces.Workspace.FirecloudWorkspaceId;
+import org.pmiops.workbench.db.model.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
@@ -23,7 +23,7 @@ public class WorkspaceMapper {
     }
   }
 
-  public Workspace toApiWorkspace(org.pmiops.workbench.workspaces.Workspace workspace) {
+  public Workspace toApiWorkspace(org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
 
@@ -49,7 +49,7 @@ public class WorkspaceMapper {
   }
 
   public Workspace toApiWorkspace(
-      org.pmiops.workbench.workspaces.Workspace workspace,
+      org.pmiops.workbench.db.model.Workspace workspace,
       org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     if (workspace.getPopulation()) {
@@ -78,8 +78,8 @@ public class WorkspaceMapper {
     return result;
   }
 
-  public org.pmiops.workbench.workspaces.Workspace toDbWorkspace(Workspace workspace) {
-    org.pmiops.workbench.workspaces.Workspace result = new org.pmiops.workbench.workspaces.Workspace();
+  public org.pmiops.workbench.db.model.Workspace toDbWorkspace(Workspace workspace) {
+    org.pmiops.workbench.db.model.Workspace result = new org.pmiops.workbench.db.model.Workspace();
 
     if (workspace.getDataAccessLevel() != null) {
       result.setDataAccessLevelEnum(workspace.getDataAccessLevel());
@@ -114,7 +114,7 @@ public class WorkspaceMapper {
    * user-editable research purpose detail fields.
    */
   public static void setResearchPurposeDetails(
-      org.pmiops.workbench.workspaces.Workspace dbWorkspace, ResearchPurpose purpose) {
+      org.pmiops.workbench.db.model.Workspace dbWorkspace, ResearchPurpose purpose) {
     dbWorkspace.setDiseaseFocusedResearch(purpose.getDiseaseFocusedResearch());
     dbWorkspace.setDiseaseOfFocus(purpose.getDiseaseOfFocus());
     dbWorkspace.setMethodsDevelopment(purpose.getMethodsDevelopment());
@@ -139,7 +139,7 @@ public class WorkspaceMapper {
   }
 
   private final ResearchPurpose createResearchPurpose(
-      org.pmiops.workbench.workspaces.Workspace workspace) {
+      org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose =
         new ResearchPurpose()
             .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())

@@ -13,7 +13,9 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @TestConfiguration
-@EnableJpaRepositories(basePackages = {"org.pmiops.workbench.cdr", "org.pmiops.workbench.db"})
+@EnableJpaRepositories(basePackages = {"org.pmiops.workbench.cdr",
+    "org.pmiops.workbench.db",
+    "org.pmiops.workbench.workspaces"})
 @EnableTransactionManagement
 public class TestJpaConfig {
 

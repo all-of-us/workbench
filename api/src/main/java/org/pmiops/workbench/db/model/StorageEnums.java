@@ -3,7 +3,6 @@ package org.pmiops.workbench.db.model;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
-import org.pmiops.workbench.workspaces.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;

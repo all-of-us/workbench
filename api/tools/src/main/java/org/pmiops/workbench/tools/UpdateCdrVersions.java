@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.workspaces.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

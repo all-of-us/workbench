@@ -10,8 +10,9 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.workspaces.Workspace;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.workspaces.WorkspaceDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -30,7 +31,8 @@ public class CohortReviewDaoTest {
 
   private static long CDR_VERSION_ID = 1;
 
-  @Autowired WorkspaceDao workspaceDao;
+  @Autowired
+  WorkspaceDao workspaceDao;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewDao cohortReviewDao;
   @Autowired JdbcTemplate jdbcTemplate;

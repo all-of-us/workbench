@@ -1,11 +1,12 @@
-package org.pmiops.workbench.db.dao;
+package org.pmiops.workbench.workspaces;
 
 import java.util.Collection;
 import java.util.List;
-import org.pmiops.workbench.workspaces.Workspace;
+import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 /**
  * Declaration of automatic query methods for Workspaces. The methods declared here are
@@ -13,6 +14,7 @@ import org.springframework.data.repository.query.Param;
  *
  * <p>Use of @Query is discouraged; if desired, define aliases in WorkspaceService.
  */
+@Repository
 public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
 
   Workspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(

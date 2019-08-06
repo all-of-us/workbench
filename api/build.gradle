@@ -171,7 +171,8 @@ configurations {
 
 project.ext.GAE_VERSION = '1.9.64'
 
-buildscript {    // Configuration for building
+buildscript {
+  ext.kotlin_version = '1.3.41'    // Configuration for building
   repositories {
     jcenter()    // Bintray's repository - a fast Maven Central mirror & more
     maven {
@@ -185,12 +186,15 @@ buildscript {    // Configuration for building
     classpath 'io.swagger:swagger-codegen:2.2.3'
     classpath 'org.owasp:dependency-check-gradle:5.1.0'
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    classpath "org.jetbrains.kotlin:kotlin-noarg:$kotlin_version"
   }
 }
 
 ext['hibernate.version'] = '5.2.10.Final'
 
 apply plugin: 'java'
+apply plugin: 'kotlin'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'war'
@@ -199,6 +203,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'org.hidetake.swagger.generator'
 apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'com.diffplug.gradle.spotless'
+apply plugin: 'kotlin-jpa'
 
 spotless {
   java {
@@ -384,6 +389,7 @@ dependencies {
   generatedCompile 'com.google.code.gson:gson:2.8.5'
   generatedCompile 'joda-time:joda-time:2.10'
   generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
 }
 
@@ -606,5 +612,15 @@ task updateCdrVersions(type: JavaExec) {
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
+  }
+}
+compileKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+}
+compileTestKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
   }
 }
