@@ -296,8 +296,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       Workspace workspace,
       Map<String, WorkspaceAccessLevel> updatedAclsMap,
       String registeredUsersGroup) {
-    workspaceDao.save(workspace);
-
     // userRoleMap is a map of the new permissions for ALL users on the ws
     Map<String, WorkspaceAccessEntry> aclsMap =
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
@@ -390,7 +388,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       conceptSetService.cloneConceptSetAndConceptIds(conceptSet, to, cdrVersionChanged);
     }
 
-    return workspaceDao.save(saved);
+    return saved;
   }
 
   @Override
