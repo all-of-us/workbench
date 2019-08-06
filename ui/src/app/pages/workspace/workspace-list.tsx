@@ -359,8 +359,8 @@ export const WorkspaceList = withUserProfile()
     // Maps each "Filter by" dropdown element to a set of access levels to display.
     const filters = [
       { label: 'Owner',  value: ['OWNER'] },
-      { label: 'Writer', value: ['OWNER', 'WRITER'] },
-      { label: 'Reader', value: ['OWNER', 'READER'] },
+      { label: 'Writer', value: ['WRITER'] },
+      { label: 'Reader', value: ['READER'] },
       { label: 'All',    value: ['OWNER', 'READER', 'WRITER'] },
     ];
     const defaultFilter = filters.find(f => f.label === 'All');
