@@ -86,7 +86,7 @@ public class NotebooksConfig {
   }
 
   private ApiClient buildApiClient(WorkbenchConfig workbenchConfig) {
-    return new NotebooksApiClientTracer()
+    return new ApiClient()
         .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
         .setDebugging(workbenchConfig.firecloud.debugEndpoints)
         .addDefaultHeader(

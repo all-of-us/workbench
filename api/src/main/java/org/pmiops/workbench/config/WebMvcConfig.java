@@ -14,7 +14,6 @@ import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.pmiops.workbench.interceptors.CronInterceptor;
 import org.pmiops.workbench.interceptors.SecurityHeadersInterceptor;
-import org.pmiops.workbench.interceptors.TracingInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -45,8 +44,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Autowired private CronInterceptor cronInterceptor;
 
   @Autowired private SecurityHeadersInterceptor securityHeadersInterceptor;
-
-  @Autowired private TracingInterceptor tracingInterceptor;
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -120,7 +117,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(corsInterceptor);
     registry.addInterceptor(authInterceptor);
-    registry.addInterceptor(tracingInterceptor);
     registry.addInterceptor(cronInterceptor);
     registry.addInterceptor(clearCdrVersionInterceptor);
     registry.addInterceptor(securityHeadersInterceptor);

@@ -35,8 +35,7 @@
     "publicApiKeyForErrorReports": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
     "projectId": "all-of-us-rw-stable",
     "shortName": "Stable",
-    "oauthClientId": "56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com",
-    "traceAllRequests": false
+    "oauthClientId": "56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-stable.appspot.com/login",
