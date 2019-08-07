@@ -165,6 +165,26 @@ export const Homepage = withUserProfile()(class extends React.Component<
     profileApi().updatePageVisits({ page: this.pageId});
   }
 
+  async syncCompliance() {
+    const complianceStatus = profileApi().syncComplianceTrainingStatus().then(result => {
+      this.setState({
+        trainingCompleted: getRegistrationTasksMap()['complianceTraining'].isComplete(result)
+      });
+    }).catch(err => {
+      this.setState({trainingCompleted: false});
+      console.error('error fetching moodle training status');
+    });
+    const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus().then(result => {
+      this.setState({
+        twoFactorAuthCompleted: getRegistrationTasksMap()['twoFactorAuth'].isComplete(result)
+      });
+    }).catch(err => {
+      this.setState({twoFactorAuthCompleted: false});
+      console.error('error fetching two factor auth status');
+    });
+    return Promise.all([complianceStatus, twoFactorAuthStatus]);
+  }
+
   async callProfile() {
     const {profileState: {profile, reload}} = this.props;
 
@@ -194,27 +214,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
         dataUseAgreementCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
           (() => getRegistrationTasksMap()['dataUseAgreement'].isComplete(profile))() : true)
       });
-
-      try {
-        const result = await profileApi().syncComplianceTrainingStatus();
-        this.setState({
-          trainingCompleted: getRegistrationTasksMap()['complianceTraining'].isComplete(result)
-        });
-      } catch (ex) {
-        this.setState({trainingCompleted: false});
-        console.error('error fetching moodle training status');
-      }
-
-      try {
-        const result = await profileApi().syncTwoFactorAuthStatus();
-        this.setState({
-          twoFactorAuthCompleted: getRegistrationTasksMap()['twoFactorAuth'].isComplete(result)
-        });
-      } catch (ex) {
-        this.setState({twoFactorAuthCompleted: false});
-        console.error('error fetching two factor auth status');
-      }
-
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
@@ -228,6 +227,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
               accessTasksLoaded: true
             });
           } else {
+            await this.syncCompliance();
             this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
           }
         } catch (ex) {
