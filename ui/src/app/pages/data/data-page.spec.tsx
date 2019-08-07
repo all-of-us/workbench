@@ -8,7 +8,8 @@ import {DataPage} from 'app/pages/data/data-page';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {ResourceCard} from 'app/components/resource-card';
-import {CohortsApi, ConceptsApi, ConceptSetsApi, DataSetApi, WorkspacesApi} from 'generated/fetch';
+import {CohortReviewApi, CohortsApi, ConceptsApi, ConceptSetsApi, DataSetApi, WorkspacesApi} from 'generated/fetch';
+import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
@@ -19,6 +20,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 describe('DataPage', () => {
   beforeEach(() => {
+    registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ConceptsApi, new ConceptsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
@@ -43,6 +45,7 @@ describe('DataPage', () => {
     const resourceCardsExpected =
       ConceptSetsApiStub.stubConceptSets().length +
       exampleCohortStubs.length +
+      cohortReviewStubs.length +
       DataSetApiStub.stubDataSets().length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
@@ -55,6 +58,16 @@ describe('DataPage', () => {
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="view-only-cohorts"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find(ResourceCard).length).toBe(resourceCardsExpected);
+  });
+
+  it('should show only cohort reviews when selected', async() => {
+    const wrapper = mount(<DataPage />);
+    const resourceCardsExpected = cohortReviewStubs.length;
+    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="view-only-cohort-reviews"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find(ResourceCard).length).toBe(resourceCardsExpected);
   });

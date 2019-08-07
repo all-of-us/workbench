@@ -8,13 +8,13 @@ import {switchCase} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 
 export const ResourceCardMenu: React.FunctionComponent<{
-  disabled: boolean, resourceType: ResourceType, onRenameCohort?: Function,
+  disabled: boolean, resourceType: ResourceType, onRenameResource?: Function,
   onCloneResource?: Function, onDeleteResource?: Function, onEdit?: Function,
-  onExportDataSet: Function, onReviewCohort?: Function, onRenameDataSet?: Function
+  onExportDataSet: Function, onReviewCohort?: Function,
 }> = ({
-        disabled, resourceType, onRenameCohort = () => {}, onCloneResource = () => {},
+        disabled, resourceType, onRenameResource = () => {}, onCloneResource = () => {},
         onDeleteResource = () => {}, onEdit = () => {}, onExportDataSet = () => {},
-        onReviewCohort = () => {}, onRenameDataSet = () => {}
+        onReviewCohort = () => {}
       }) => {
   return <PopupTrigger
     data-test-id='resource-card-menu'
@@ -24,10 +24,16 @@ export const ResourceCardMenu: React.FunctionComponent<{
       switchCase(resourceType,
         ['cohort', () => {
           return <React.Fragment>
-            <MenuItem icon='note' onClick={onRenameCohort}>Rename</MenuItem>
+            <MenuItem icon='note' onClick={onRenameResource}>Rename</MenuItem>
             <MenuItem icon='copy' onClick={onCloneResource}>Duplicate</MenuItem>
             <MenuItem icon='pencil' onClick={onEdit}>Edit</MenuItem>
             <MenuItem icon='grid-view' onClick={onReviewCohort}>Review</MenuItem>
+            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
+          </React.Fragment>;
+        }],
+        ['cohortReview', () => {
+          return <React.Fragment>
+            <MenuItem icon='note' onClick={onRenameResource}>Rename</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
           </React.Fragment>;
         }],
@@ -39,7 +45,7 @@ export const ResourceCardMenu: React.FunctionComponent<{
         }],
         ['dataSet', () => {
           return <React.Fragment>
-            <MenuItem icon='pencil' onClick={onRenameDataSet}>Rename Data Set</MenuItem>
+            <MenuItem icon='pencil' onClick={onRenameResource}>Rename Data Set</MenuItem>
             <MenuItem icon='pencil' onClick={onEdit}>Edit</MenuItem>
             <MenuItem icon='clipboard' onClick={onExportDataSet}>Export to Notebook</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>

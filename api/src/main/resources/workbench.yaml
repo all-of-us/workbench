@@ -3496,6 +3496,8 @@ definitions:
         type: string
       cohort:
         $ref: "#/definitions/Cohort"
+      cohortReview:
+        $ref: "#/definitions/CohortReview"
       notebook:
         $ref: '#/definitions/FileDetail'
       conceptSet:

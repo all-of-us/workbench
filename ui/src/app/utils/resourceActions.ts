@@ -1,5 +1,6 @@
 import {
   Cohort,
+  CohortReview,
   ConceptSet,
   DataSet,
   FileDetail,
@@ -10,12 +11,13 @@ import {
 export enum ResourceType {
     NOTEBOOK = 'notebook',
     COHORT = 'cohort',
+    COHORT_REVIEW = 'cohortReview',
     CONCEPT_SET = 'conceptSet',
     DATA_SET = 'dataSet',
     INVALID = 'invalid'
   }
 
-export function convertToResources(list: FileDetail[] | Cohort[] | ConceptSet[],
+export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[],
   workspaceNamespace: string, workspaceId: string,
   accessLevel: WorkspaceAccessLevel,
   resourceType: ResourceType): RecentResource[] {
@@ -27,7 +29,7 @@ export function convertToResources(list: FileDetail[] | Cohort[] | ConceptSet[],
   return resourceList;
 }
 
-export function convertToResource(resource: FileDetail | Cohort | ConceptSet,
+export function convertToResource(resource: FileDetail | Cohort | CohortReview | ConceptSet,
   workspaceNamespace: string, workspaceId: string,
   accessLevel: WorkspaceAccessLevel,
   resourceType: ResourceType): RecentResource {
@@ -47,6 +49,8 @@ export function convertToResource(resource: FileDetail | Cohort | ConceptSet,
     newResource.notebook = <FileDetail>resource;
   } else if (resourceType === ResourceType.COHORT) {
     newResource.cohort = <Cohort>resource;
+  } else if (resourceType === ResourceType.COHORT_REVIEW) {
+    newResource.cohortReview = <CohortReview>resource;
   } else if (resourceType === ResourceType.CONCEPT_SET) {
     newResource.conceptSet = <ConceptSet>resource;
   } else if (resourceType === ResourceType.DATA_SET) {
