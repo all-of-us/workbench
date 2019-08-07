@@ -1,15 +1,15 @@
 <div class="item">
   <!-- SELECT BTN -->
   <button
-          *ngIf="selectable"
-          type="button"
-          class="btn btn-sm btn-link selection-button"
-          [class.pm]="isPM"
-          [disabled]="isDisabled && !hasAttributes"
-          (click)="select($event)">
-    <clr-icon *ngIf="isDisabled && !hasAttributes" shape="check-circle" size="20" class="selection-icon"></clr-icon>
-    <clr-icon *ngIf="!isDisabled && !hasAttributes" shape="plus-circle" size="20" class="selection-icon"></clr-icon>
-    <clr-icon *ngIf="hasAttributes" shape="slider" dir="right" size="20" class="selection-icon-blue is-solid"></clr-icon>
+    *ngIf="selectable"
+    type="button"
+    class="btn btn-sm btn-link selection-button"
+    [class.pm]="isPM"
+    [disabled]="(isSelected && !hasAttributes) || isDisabled"
+    (click)="select($event)">
+    <clr-icon *ngIf="isSelected && !hasAttributes" shape="check-circle" size="20" class="selection-icon"></clr-icon>
+    <clr-icon *ngIf="!isSelected && !hasAttributes" shape="plus-circle" size="20" class="selection-icon" [class.not-selectable]="isDisabled"></clr-icon>
+    <clr-icon *ngIf="hasAttributes" shape="slider" dir="right" size="20" class="is-solid"></clr-icon>
   </button>
 
   <!-- CODE -->
@@ -19,17 +19,19 @@
 
   <!-- NAME -->
   <div #name
-    [popper]="popperName"
+    [popper]="node.name"
     [popperTrigger]="'hover'"
     [popperModifiers]="{preventOverflow: {boundariesElement: 'viewport'}}"
     [popperDisabled]="!isTruncated"
-    class="name text-muted"
-    [innerHTML]="displayName | safeHtml"></div>
+    class="name text-muted">
+    <span *ngIf="isPM" [innerHTML]="node.name | safeHtml"></span>
+    <span *ngIf="!isPM" [class.search-keyword]="matched">{{node.name}}</span>
+  </div>
 
   <!-- COUNT -->
   <div *ngIf="showCount" class="count">
     <span class="badge badge-info">
-      {{ node.get('count') | number }}
+      {{ node.count | number }}
     </span>
   </div>
 </div>

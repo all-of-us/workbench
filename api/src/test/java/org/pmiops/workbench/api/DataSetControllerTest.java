@@ -41,19 +41,19 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
@@ -90,6 +90,7 @@ import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
+import org.pmiops.workbench.workspaces.WorkspacesController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -114,6 +115,7 @@ public class DataSetControllerTest {
   private static final String COHORT_TWO_NAME = "cohort two";
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
   private static final String CONCEPT_SET_TWO_NAME = "concept set two";
+  private static final String CONCEPT_SET_SURVEY_NAME = "concept survey set";
   private static final String WORKSPACE_NAMESPACE = "ns";
   private static final String WORKSPACE_NAME = "name";
   private static final String WORKSPACE_BUCKET_NAME = "fc://bucket-hash";
@@ -126,6 +128,7 @@ public class DataSetControllerTest {
   private Long CONCEPT_SET_ONE_ID;
   private Long COHORT_TWO_ID;
   private Long CONCEPT_SET_TWO_ID;
+  private Long CONCEPT_SET_SURVEY_ID;
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
@@ -266,9 +269,6 @@ public class DataSetControllerTest {
             workspaceService,
             workspaceMapper,
             cdrVersionDao,
-            cohortDao,
-            cohortFactory,
-            conceptSetDao,
             userDao,
             userProvider,
             fireCloudService,
@@ -380,6 +380,42 @@ public class DataSetControllerTest {
             .getBody();
     CONCEPT_SET_ONE_ID = conceptSet.getId();
 
+    conceptList = new ArrayList<>();
+
+    conceptList.add(
+        new Concept()
+            .conceptId(456L)
+            .conceptName("a concept of type survey")
+            .standardConcept(true)
+            .conceptCode("conceptA")
+            .conceptClassId("classId")
+            .vocabularyId("V1")
+            .domainId("Observation")
+            .countValue(123L)
+            .prevalence(0.2F)
+            .conceptSynonyms(new ArrayList<String>()));
+
+    ConceptSet conceptSurveySet =
+        new ConceptSet()
+            .id(CONCEPT_SET_SURVEY_ID)
+            .name(CONCEPT_SET_SURVEY_NAME)
+            .domain(Domain.OBSERVATION)
+            .concepts(conceptList);
+
+    CreateConceptSetRequest conceptSetRequest1 =
+        new CreateConceptSetRequest()
+            .conceptSet(conceptSurveySet)
+            .addedIds(
+                conceptList.stream()
+                    .map(concept -> concept.getConceptId())
+                    .collect(Collectors.toList()));
+
+    conceptSurveySet =
+        conceptSetsController
+            .createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSetRequest1)
+            .getBody();
+    CONCEPT_SET_SURVEY_ID = conceptSurveySet.getId();
+
     ConceptSet conceptSetTwo =
         new ConceptSet()
             .id(CONCEPT_SET_TWO_ID)
@@ -440,8 +476,14 @@ public class DataSetControllerTest {
 
   private List<DomainValuePair> mockDomainValuePair() {
     List<DomainValuePair> domainValues = new ArrayList<>();
+    domainValues.add(new DomainValuePair().domain(Domain.CONDITION).value("PERSON_ID"));
+    return domainValues;
+  }
+
+  private List<DomainValuePair> mockSurveyDomainValuePair() {
+    List<DomainValuePair> domainValues = new ArrayList<>();
     DomainValuePair domainValuePair = new DomainValuePair();
-    domainValuePair.setDomain(Domain.CONDITION);
+    domainValuePair.setDomain(Domain.OBSERVATION);
     domainValuePair.setValue("PERSON_ID");
     domainValues.add(domainValuePair);
     return domainValues;
@@ -619,11 +661,10 @@ public class DataSetControllerTest {
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_TWO_ID);
-    List<DomainValuePair> domainValues = new ArrayList<>();
-    domainValues.addAll(mockDomainValuePair());
-
+    List<DomainValuePair> domainValues = mockDomainValuePair();
     DomainValuePair drugDomainValue = new DomainValuePair();
     drugDomainValue.setDomain(Domain.DRUG);
+    drugDomainValue.setValue("PERSON_ID");
     domainValues.add(drugDomainValue);
     dataSet.setValues(domainValues);
 
@@ -641,6 +682,29 @@ public class DataSetControllerTest {
     verify(bigQueryService, times(2)).executeQuery(any());
     assertThat(response.getCode()).contains("blah_condition_df");
     assertThat(response.getCode()).contains("blah_drug_df");
+  }
+
+  @Test
+  public void testGetQuerySurveyDomains() {
+    DataSetRequest dataSet = buildEmptyDataSet();
+    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
+    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_SURVEY_ID);
+    List<DomainValuePair> domainValues = mockSurveyDomainValuePair();
+    dataSet.setValues(domainValues);
+
+    ArrayList<String> tables = new ArrayList<>();
+    tables.add("FROM `" + TEST_CDR_TABLE + ".ds_survey`");
+
+    mockLinkingTableQuery(tables);
+
+    DataSetCodeResponse response =
+        dataSetController
+            .generateCode(
+                WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+            .getBody();
+    verify(bigQueryService, times(1)).executeQuery(any());
+    assertThat(response.getCode()).contains("blah_observation_df");
+    assertThat(response.getCode()).contains("ds_survey");
   }
 
   @Test

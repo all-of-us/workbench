@@ -14,6 +14,4 @@ export const environment: Environment = {
   trainingUrl: 'https://aoudev.nnlm.gov',
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   enableJupyterLab: false,
-  enableDatasetBuilder: true,
-  enableCBListSearch: true,
 };

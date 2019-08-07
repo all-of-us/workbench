@@ -1,56 +1,28 @@
 <div #wrapper class="cohort-search-wrapper">
-  <div *ngIf="!listSearch" class="row">
-    <div class="col-xl-4 col-lg-6" id="include-groups" style="margin-top: 1.5rem">
-      <app-search-group-list
-        [role]="'includes'"
-        [groups$]="includeGroups$"
-        [index]="0"
-        (tempLength)="getTempObj($event)">
-      </app-search-group-list>
-    </div>
+  <div class="row">
+    <div class="col-xl-8 col-lg-12">
+      <div class="row">
+        <div class="col-xs-12" style="height: 1.5rem">
+          <span *ngIf="cohort" class="cohort-name">{{cohort.name}}</span>
+        </div>
+        <div class="col-xl-6 col-lg-12" id="list-include-groups">
+          <app-list-search-group-list
+            [role]="'includes'"
+            [groups]="criteria.includes"
+            [updateRequest]="updateRequest">
+          </app-list-search-group-list>
+        </div>
 
-    <div class="col-xl-4 col-lg-6" id="exclude-groups" style="margin-top: 1.5rem">
-      <app-search-group-list
-        *ngIf="(initShowChart$ | async)"
-        [role]="'excludes'"
-        [groups$]="excludeGroups$"
-        [index]="includeSize">
-      </app-search-group-list>
+        <div class="col-xl-6 col-lg-12" id="list-exclude-groups">
+          <app-list-search-group-list
+            *ngIf="includeSize > 0"
+            [role]="'excludes'"
+            [groups]="criteria.excludes"
+            [updateRequest]="updateRequest">
+          </app-list-search-group-list>
+        </div>
+      </div>
     </div>
-
-    <div class="col-xl-4 col-lg-12" id="charts">
-      <app-overview
-        *ngIf="(initShowChart$ | async)"
-        [total$]="total$"
-        [chartData$]="chartData$"
-        [temporal] = "tempLength"
-        [isRequesting$]="isRequesting$">
-      </app-overview>
-    </div>
-    <div *ngIf="loading" class="spinner root-spinner">
-      Loading...
-    </div>
-  </div>
-
-  <!-- Components behind the enableCBListSearch feature flag -->
-  <div *ngIf="listSearch" class="row">
-    <div class="col-xl-4 col-lg-6" id="list-include-groups" style="margin-top: 1.5rem">
-      <app-list-search-group-list
-        [role]="'includes'"
-        [groups]="criteria.includes"
-        [updateRequest]="updateRequest">
-      </app-list-search-group-list>
-    </div>
-
-    <div class="col-xl-4 col-lg-6" id="list-exclude-groups" style="margin-top: 1.5rem">
-      <app-list-search-group-list
-        *ngIf="includeSize > 0"
-        [role]="'excludes'"
-        [groups]="criteria.excludes"
-        [updateRequest]="updateRequest">
-      </app-list-search-group-list>
-    </div>
-
     <div class="col-xl-4 col-lg-12" id="list-charts">
       <app-list-overview *ngIf="overview" [searchRequest]="criteria" [update]="triggerUpdate"></app-list-overview>
     </div>
@@ -59,5 +31,4 @@
     </div>
   </div>
 </div>
-<app-modal *ngIf="!listSearch"></app-modal>
-<app-list-modal *ngIf="listSearch"></app-list-modal>
+<app-list-modal></app-list-modal>

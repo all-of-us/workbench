@@ -1,4 +1,3 @@
-import {select} from '@angular-redux/store';
 import {
   Component,
   HostListener,
@@ -7,18 +6,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
-import {environment} from 'environments/environment';
-import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
-import {
-  chartData,
-  CohortSearchActions,
-  excludeGroups,
-  includeGroups,
-  isRequstingTotal,
-  totalCount,
-} from 'app/cohort-search/redux';
 import {idsInUse, initExisting, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {parseCohortDefinition} from 'app/cohort-search/utils';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
@@ -33,37 +22,24 @@ const ONE_REM = 24;  // value in pixels
   styleUrls: ['./cohort-search.component.css'],
 })
 export class CohortSearchComponent implements OnInit, OnDestroy {
-  @select(includeGroups) includeGroups$: Observable<List<any>>;
-  @select(excludeGroups) excludeGroups$: Observable<List<any>>;
-  @select(totalCount) total$: Observable<number>;
-  @select(chartData) chartData$: Observable<List<any>>;
-  @select(isRequstingTotal) isRequesting$: Observable<boolean>;
-  @select(s => s.get('initShowChart', true)) initShowChart$: Observable<boolean>;
 
   @ViewChild('wrapper') wrapper;
 
   includeSize: number;
   tempLength = {};
   private subscription;
-  listSearch = environment.enableCBListSearch;
   loading = false;
   count: number;
   error = false;
   overview = false;
   criteria = {includes: [], excludes: []};
-  chartData: any;
   triggerUpdate = 0;
-
-  constructor(private actions: CohortSearchActions) {}
+  cohort: any;
 
   ngOnInit() {
     this.subscription = Observable.combineLatest(
       queryParamsStore, currentWorkspaceStore
     ).subscribe(([params, workspace]) => {
-      /* EVERY time the route changes, reset the store first */
-      this.actions.resetStore();
-      this.actions.cdrVersionId = +(workspace.cdrVersionId);
-
       /* If a cohort id is given in the route, we initialize state with
        * it */
       const cohortId = params.cohortId;
@@ -72,36 +48,25 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
         cohortsApi().getCohort(workspace.namespace, workspace.id, cohortId)
           .then(cohort => {
             this.loading = false;
+            this.cohort = cohort;
             currentCohortStore.next(cohort);
             if (cohort.criteria) {
-              if (!this.listSearch) {
-                this.actions.loadFromJSON(cohort.criteria);
-                this.actions.runAllRequests();
-              } else {
-                initExisting.next(true);
-                searchRequestStore.next(parseCohortDefinition(cohort.criteria));
-              }
+              initExisting.next(true);
+              searchRequestStore.next(parseCohortDefinition(cohort.criteria));
             }
           });
       }
     });
 
-    if (this.listSearch) {
-      searchRequestStore.subscribe(sr => {
-        this.includeSize = sr.includes.length;
-        this.criteria = sr;
-        this.overview = sr.includes.length || sr.excludes.length;
-      });
-    } else {
-      this.subscription.add(
-        this.includeGroups$.subscribe(groups => this.includeSize = groups.size + 1)
-      );
-    }
+    searchRequestStore.subscribe(sr => {
+      this.includeSize = sr.includes.length;
+      this.criteria = sr;
+      this.overview = sr.includes.length || sr.excludes.length;
+    });
     this.updateWrapperDimensions();
   }
 
   ngOnDestroy() {
-    this.actions.clearStore();
     this.subscription.unsubscribe();
     idsInUse.next(new Set());
     currentCohortStore.next(undefined);

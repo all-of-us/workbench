@@ -1,5 +1,5 @@
 import {
-  FileDetail, ResearchPurposeReviewRequest, ShareWorkspaceRequest,
+  DataAccessLevel, FileDetail, ResearchPurposeReviewRequest, ShareWorkspaceRequest,
   UserRole,
   Workspace,
   WorkspaceAccessLevel, WorkspaceListResponse,
@@ -10,14 +10,14 @@ import {
 
 import * as fp from 'lodash/fp';
 
+import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {CopyNotebookRequest, EmptyResponse} from 'generated';
+import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
   static DEFAULT_WORKSPACE_NAME = 'defaultWorkspace';
   static DEFAULT_WORKSPACE_ID = '1';
-  static DEFAULT_WORKSPACE_DESCRIPTION = 'Stub workspace';
-  static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
   static DEFAULT_WORKSPACE_PERMISSION = WorkspaceAccessLevel.OWNER;
 }
 
@@ -26,7 +26,7 @@ export const workspaceStubs = [
     name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
     id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
     namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-    cdrVersionId: WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     creationTime: new Date().getTime(),
     lastModifiedTime: new Date().getTime(),
     researchPurpose: {
@@ -48,7 +48,8 @@ export const workspaceStubs = [
       socialBehavioral: false,
       reasonForAllOfUs: '',
     },
-    published: false
+    published: false,
+    dataAccessLevel: DataAccessLevel.Registered
   }
 ];
 
@@ -112,9 +113,9 @@ export class WorkspacesApiStub extends WorkspacesApi {
   }
 
   cloneNotebook(workspaceNamespace: string, workspaceId: string,
-    notebookName: String): Promise<any> {
+    notebookName: string): Promise<any> {
     return new Promise<any>(resolve => {
-      const cloneName = notebookName.replace('.ipynb', '') + ' Clone.ipynb';
+      const cloneName = appendNotebookFileSuffix(dropNotebookFileSuffix(notebookName) + ' Clone');
       this.notebookList.push({
         'name': cloneName,
         'path': 'gs://bucket/notebooks/' + cloneName,

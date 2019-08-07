@@ -14,7 +14,7 @@ const styles = {
   },
 
   overlay: {
-    backgroundColor: Color(colors.dark).alpha(0.85).toString, padding: '1rem', display: 'flex',
+    backgroundColor: Color(colors.dark).alpha(0.85), padding: '1rem', display: 'flex',
     position: 'fixed', left: 0, right: 0, top: 0, bottom: 0, overflowY: 'auto'
   },
 

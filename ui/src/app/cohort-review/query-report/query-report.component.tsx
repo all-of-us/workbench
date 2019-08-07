@@ -10,7 +10,6 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, SearchRequest} from 'generated/fetch';
-import {fromJS} from 'immutable';
 import * as moment from 'moment';
 import * as React from 'react';
 
@@ -351,7 +350,7 @@ export const QueryReport = withCurrentWorkspace()(
                     <div style={{...styles.col, flex: '0 0 66.66667%', maxWidth: '66.66667%'}}>
                       <div style={demoTitle}>Demographics</div>
                       <div style={styles.graphBorder}>
-                        {data && <ComboChart mode={'stacked'} data={fromJS(data)} />}
+                        {data && <ComboChart mode={'stacked'} data={data} />}
                         {loading && <SpinnerOverlay />}
                       </div>
                     </div>

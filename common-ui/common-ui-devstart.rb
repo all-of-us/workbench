@@ -41,7 +41,7 @@ def build(cmd_name, ui_name, args)
   options = BuildOptions.new.parse(cmd_name, args)
 
   common = Common.new
-  common.run_inline %W{yarn install --frozen-lockfile --verbose}
+  common.run_inline %W{yarn install --frozen-lockfile}
 
   # Just use --aot for "test", which catches many compilation issues. Go full
   # --prod (includes --aot) for other environments. Don't use full --prod in the

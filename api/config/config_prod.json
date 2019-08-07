@@ -11,7 +11,8 @@
     "registeredDomainName": "all-of-us-registered-prod",
     "billingRetryCount": 4,
     "billingProjectBufferCapacity": 20,
-    "xAppIdValue": "AoU-RW"
+    "xAppIdValue": "AoU-RW",
+    "vpcServicePerimeterName": ""
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -65,9 +66,10 @@
     "enableListSearch": true
   },
   "featureFlags": {
-    "enableLeoWelder": false,
+    "enableLeoWelder": true,
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": false,
-    "enableVpcFlowLogs": false
+    "enableVpcFlowLogs": true,
+    "enableVpcServicePerimeter": false
   }
 }

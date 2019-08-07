@@ -1,7 +1,5 @@
-import {Component, Input} from '@angular/core';
 
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {ReactWrapperBase} from 'app/utils';
 
 import * as React from 'react';
 
@@ -74,20 +72,3 @@ export class EditComponentReact extends React.Component<EditComponentProps, Edit
   }
 }
 
-@Component({
-  selector: 'app-edit-icon',
-  template: '<div #root></div>',
-})
-export class EditComponent extends ReactWrapperBase {
-
-  @Input('disabled')
-  disabled: EditComponentProps['disabled'];
-
-  @Input('style')
-  style: EditComponentProps['style'];
-
-  constructor() {
-    super(EditComponentReact, ['disabled', 'style']);
-  }
-
-}

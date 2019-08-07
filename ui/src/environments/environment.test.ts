@@ -6,6 +6,4 @@ export const environment: Environment = {
   displayTag: 'Test',
   debug: false,
   enableJupyterLab: true,
-  enableDatasetBuilder: true,
-  enableCBListSearch: true,
 };

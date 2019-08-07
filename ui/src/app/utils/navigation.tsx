@@ -1,8 +1,8 @@
 import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@angular/router';
 
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {ConfigResponse, Profile} from 'generated';
-import {Cohort, ConceptSet} from 'generated/fetch';
+import {ConfigResponse} from 'generated';
+import {Cohort, ConceptSet, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
@@ -18,6 +18,7 @@ export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const serverConfigStore = new BehaviorSubject<ConfigResponse>(undefined);
+export const cdrVersionStore = new BehaviorSubject<any>(undefined);
 export const userProfileStore =
   new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
     profile: {} as Profile,
@@ -77,5 +78,7 @@ export enum BreadcrumbType {
   Cohort = 'Cohort',
   Participant = 'Participant',
   CohortAdd = 'CohortAdd',
+  SearchConcepts = 'SearchConcepts',
   Dataset = 'Dataset',
+  Data = 'Data',
 }

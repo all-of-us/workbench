@@ -436,7 +436,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
       } else {
         const {id, namespace} = this.props.workspace;
         const {cid} = urlParamsStore.getValue();
-        navigateByUrl(`/workspaces/${namespace}/${id}/cohorts/build?cohortId=${cid}`);
+        navigateByUrl(`/workspaces/${namespace}/${id}/data/cohorts/build?cohortId=${cid}`);
       }
     }
 
@@ -447,6 +447,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
         'workspaces',
         namespace,
         id,
+        'data',
         'cohorts',
         cid,
         'review',
@@ -461,6 +462,10 @@ export const ParticipantsTable = withCurrentWorkspace()(
         this.setState({loading: true, error: false, page: event.page});
         setTimeout(() => this.getTableData());
       }
+    }
+
+    onSort = (event: any) => {
+      this.columnSort(event.sortField);
     }
 
     columnSort = (sortField: string) => {
@@ -598,8 +603,10 @@ export const ParticipantsTable = withCurrentWorkspace()(
             {col.name}
           </span>
           {col.field !== 'birthDate' && this.filterTemplate(col.field)}
-          {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
-          {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
+          {asc && <i className='pi pi-arrow-up' style={styles.sortIcon}
+            onClick={() => this.columnSort(col.field)} />}
+          {desc && <i className='pi pi-arrow-down' style={styles.sortIcon}
+            onClick={() => this.columnSort(col.field)} />}
         </React.Fragment>;
         return <Column
           style={styles.tableBody}
@@ -636,6 +643,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             first={start}
             sortField={sortField}
             sortOrder={sortOrder}
+            onSort={this.onSort}
             lazy
             paginator
             onPage={this.onPage}
