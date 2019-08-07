@@ -10,20 +10,12 @@ import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
-import org.pmiops.workbench.model.TreeSubType;
-import org.pmiops.workbench.model.TreeType;
 
 public class SearchRequests {
 
   private static final long MALE_CONCEPT_ID = 8507;
   private static final long FEMALE_CONCEPT_ID = 8532;
   private static final long WEIRD_CONCEPT_ID = 2;
-  private static final String DEMO_DOMAIN = "DEMO";
-  private static final String GENDER_SUBTYPE = "GEN";
-  private static final String DEMO_TYPE = TreeType.DEMO.name();
-  public static final String SEARCHGROUP_ITEM_TYPE = TreeType.CONDITION.name();
-  public static final String ICD9_TYPE = TreeType.ICD9.name();
-  public static final String ICD9_SUBTYPE = TreeSubType.CM.name();
   public static final String ICD9_GROUP_CODE = "001";
 
   private SearchRequests() {}
