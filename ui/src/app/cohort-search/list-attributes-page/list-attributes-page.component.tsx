@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {mapParameter, stripHtml} from 'app/cohort-search/utils';
+import {mapParameter, sanitizeNumericalInput, stripHtml} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
@@ -135,6 +135,12 @@ const optionUtil = {
   BETWEEN: {display: '', code: '04'},
 };
 
+interface AttributeForm {
+  exists: boolean; // Check if attribute values exist (Measurements only)
+  num: Array<any>; // Numerical attributes (Physical Measurements or Measurements)
+  cat: Array<any>; // Categorical attributes (Measurements only)
+}
+
 interface Props {
   node: any;
   close: Function;
@@ -145,7 +151,7 @@ interface State {
   calculating: boolean;
   count: number;
   countError: boolean;
-  form: any;
+  form: AttributeForm;
   loading: boolean;
   options: any;
 }
@@ -172,38 +178,44 @@ export const AttributesPage = withCurrentWorkspace() (
       const {node} = this.props;
       const{form, options} = this.state;
       if (this.isMeasurement) {
-        const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-        cohortBuilderApi().getCriteriaAttributeByConceptId(cdrid, node.conceptId)
-          .then(resp => {
-            resp.items.forEach(attr => {
-              if (attr.type === AttrName[AttrName.NUM]) {
-                if (!form.num.length) {
-                  form.num.push({
-                    name: AttrName.NUM,
-                    operator: null,
-                    operands: [],
-                    conceptId: node.conceptId,
-                    [attr.conceptName]: parseInt(attr.estCount, 10)
-                  });
-                } else {
-                  form.num[0][attr.conceptName] = parseInt(attr.estCount, 10);
-                }
-              } else {
-                if (parseInt(attr.estCount, 10) > 0) {
-                  attr['checked'] = false;
-                  form.cat.push(attr);
-                }
-              }
-            });
-            this.setState({form, loading: false});
-          });
+        this.getMeasurementAttributes();
       } else {
         options.unshift({label: 'Any', value: AttrName[AttrName.ANY]});
         form.num = node.subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
-          : [{name: node.subtype, operator: AttrName.ANY, operands: []}];
+          : [{name: node.subtype, operator: 'ANY', operands: []}];
         this.setState({form, options, count: node.count, loading: false});
       }
+    }
+
+    getMeasurementAttributes() {
+      const {node} = this.props;
+      const{form} = this.state;
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      cohortBuilderApi().getCriteriaAttributeByConceptId(+cdrVersionId, node.conceptId)
+      .then(resp => {
+        resp.items.forEach(attr => {
+          if (attr.type === AttrName[AttrName.NUM]) {
+            if (!form.num.length) {
+              form.num.push({
+                name: AttrName.NUM,
+                operator: null,
+                operands: [],
+                conceptId: node.conceptId,
+                [attr.conceptName]: parseInt(attr.estCount, 10)
+              });
+            } else {
+              form.num[0][attr.conceptName] = parseInt(attr.estCount, 10);
+            }
+          } else {
+            if (parseInt(attr.estCount, 10) > 0) {
+              attr['checked'] = false;
+              form.cat.push(attr);
+            }
+          }
+        });
+        this.setState({form, loading: false});
+      });
     }
 
     toggleCheckbox(checked: boolean) {
@@ -212,7 +224,7 @@ export const AttributesPage = withCurrentWorkspace() (
       if (checked) {
         form.exists = true;
         form.num = form.num.map(attr =>
-          ({...attr, operator: this.isPM ? AttrName.ANY : null, operands: []}));
+          ({...attr, operator: this.isPhysicalMeasurement ? 'ANY' : null, operands: []}));
         form.cat = form.cat.map(attr => ({...attr, checked: false}));
       } else {
         count = null;
@@ -221,36 +233,33 @@ export const AttributesPage = withCurrentWorkspace() (
       this.setState({form, count});
     }
 
-    selectChange(index: number, value: string) {
+    selectChange(attributeIndex: number, value: string) {
       const {node} = this.props;
       const {form} = this.state;
-      form.num[index].operator = value;
-      if (this.isBP) {
+      form.num[attributeIndex].operator = value;
+      if (this.isBloodPressure) {
         // for blood pressure, either both operators have to be 'ANY' OR neither can be 'ANY'
-        const other = index === 0 ? 1 : 0;
-        if (value === AttrName[AttrName.ANY]) {
-          form.num[other].operator = AttrName[AttrName.ANY];
-          form.num[other].operands = form.num[index].operands = [];
-        } else if (form.num[other].operator === AttrName[AttrName.ANY]) {
-          form.num[other].operator = value;
+        const otherAttribute = attributeIndex === 0 ? 1 : 0;
+        if (value === 'ANY') {
+          form.num[otherAttribute].operator = 'ANY';
+          form.num[otherAttribute].operands = form.num[attributeIndex].operands = [];
+        } else if (form.num[otherAttribute].operator === 'ANY') {
+          form.num[otherAttribute].operator = value;
         }
-      } else if (value === AttrName[AttrName.ANY]) {
-        form.num[index].operands = [];
+      } else if (value === 'ANY') {
+        form.num[attributeIndex].operands = [];
       }
       if (value !== Operator[Operator.BETWEEN]) {
         // delete second operand if it exists
-        form.num[index].operands.splice(1);
+        form.num[attributeIndex].operands.splice(1);
       }
-      const count = value === AttrName[AttrName.ANY] ? node.count : null;
+      const count = value === 'ANY' ? node.count : null;
       this.setState({form, count});
     }
 
-    inputChange(input: string, index: number, operand: number) {
+    inputChange(input: string, attributeIndex: number, operandIndex: number) {
       const {form} = this.state;
-      if (input && input.length > 10) {
-        input = input.slice(0, 10);
-      }
-      form.num[index].operands[operand] = input;
+      form.num[attributeIndex].operands[operandIndex] = sanitizeNumericalInput(input);
       this.setState({form, count: null});
     }
 
@@ -289,7 +298,7 @@ export const AttributesPage = withCurrentWorkspace() (
           formValid = false;
           acc.add('Form can only accept valid numbers');
         }
-        if (this.isPM && operands.some(op => op < 0)) {
+        if (this.isPhysicalMeasurement && operands.some(op => op < 0)) {
           formValid = false;
           acc.add('Form cannot accept negative values');
         }
@@ -334,12 +343,12 @@ export const AttributesPage = withCurrentWorkspace() (
           if (node.subtype === CriteriaSubType.BP) {
             attr['conceptId'] = conceptId;
           }
-          if (attr.operator === AttrName.ANY && node.subtype === CriteriaSubType.BP) {
+          if (attr.operator === 'ANY' && node.subtype === CriteriaSubType.BP) {
             attr.name = AttrName.ANY;
             attr.operands = [];
             delete attr.operator;
             attrs.push(attr);
-          } else if (attr.operator !== AttrName.ANY) {
+          } else if (attr.operator !== 'ANY') {
             attrs.push(attr);
           }
         });
@@ -352,8 +361,7 @@ export const AttributesPage = withCurrentWorkspace() (
           }, []);
           attrs.push({name: AttrName.CAT, operator: Operator.IN, operands: catOperands});
         }
-        name = this.paramName +
-          (this.isPM && attrs[0].name !== AttrName.ANY ? PM_UNITS[node.subtype] : '') + ')';
+        name = this.paramName;
       }
       return {...node, parameterId: this.paramId, name: name, attributes: attrs};
     }
@@ -364,7 +372,7 @@ export const AttributesPage = withCurrentWorkspace() (
       const selectionDisplay = [];
       let name = '';
       form.num.filter(at => at.operator).forEach((attr, i) => {
-        if (attr.operator === AttrName.ANY) {
+        if (attr.operator === 'ANY') {
           if (i === 0) {
             name += 'Any';
           }
@@ -384,7 +392,9 @@ export const AttributesPage = withCurrentWorkspace() (
         selectionDisplay.push(name);
       }
       form.cat.filter(ca => ca.checked).forEach(attr => selectionDisplay.push(attr.conceptName));
-      return node.name + ' (' + selectionDisplay.join(', ');
+      return node.name + ' (' + selectionDisplay.join(', ') +
+        (this.isPhysicalMeasurement && form.num[0].name !== AttrName.ANY
+          ? PM_UNITS[node.subtype] : '') + ')';
     }
 
     requestPreview() {
@@ -409,7 +419,7 @@ export const AttributesPage = withCurrentWorkspace() (
       });
     }
 
-    addAttrs() {
+    addParameterToSearchItem() {
       const param = this.paramWithAttributes;
       const wizard = wizardStore.getValue();
       let selections = selectionsStore.getValue();
@@ -433,11 +443,11 @@ export const AttributesPage = withCurrentWorkspace() (
       return this.props.node.domainId === DomainType.MEASUREMENT;
     }
 
-    get isPM() {
+    get isPhysicalMeasurement() {
       return this.props.node.domainId === DomainType.PHYSICALMEASUREMENT;
     }
 
-    get isBP() {
+    get isBloodPressure() {
       return this.props.node.subtype === CriteriaSubType.BP;
     }
 
@@ -447,94 +457,97 @@ export const AttributesPage = withCurrentWorkspace() (
       const {formErrors, formValid} = this.validateForm();
       const disabled = calculating || form.exists || !formValid
         || form.num.every(attr => attr.operator === 'ANY');
-      return (loading ? <SpinnerOverlay/> : <div style={{margin: '0.5rem 0 1.5rem'}}>
-        {countError && <div style={styles.error}>
-          <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-            shape='exclamation-triangle' size='22'/>
-          Sorry, the request cannot be completed.
-        </div>}
-        {!!formErrors.size && <div style={styles.errors}>
-          {Array.from(formErrors).map((err, e) => <div key={e} style={styles.errorItem}>
-            {err}
-          </div>)}
-        </div>}
-        {this.isMeasurement && <div>
-          <div style={styles.label}>{this.displayName}</div>
-          <CheckBox style={{marginLeft: '0.5rem'}}
-            onChange={(v) => this.toggleCheckbox(v)}/> Any value (lab exists)
-          {!form.exists && form.num.length > 0 && <div style={styles.orCircle}>OR</div>}
-        </div>}
-        {!form.exists && <React.Fragment>
-          {form.num.map((attr, a) => <div key={a}>
-            {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
-            {this.isBP && <div style={styles.label}>{attr.name}</div>}
-            <div style={styles.container}>
-              <div style={styles.dropdown}>
-                <Dropdown style={{width: '100%'}} value={attr.operator} options={options}
-                  placeholder='Select Operator' onChange={(e) => this.selectChange(a, e.value)}/>
-              </div>
-              {![null, 'ANY'].includes(attr.operator) && <div>
-                <input style={styles.number} type='number' value={attr.operands[0]}
-                  min={attr.MIN} max={attr.MAX}
-                  onChange={(e) => this.inputChange(e.target.value, a, 0)}/>
-                {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
-              </div>}
-              {attr.operator === Operator.BETWEEN && <React.Fragment>
-                <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
-                <div>
-                  <input style={styles.number} type='number' value={attr.operands[1]}
-                    min={attr.MIN} max={attr.MAX}
-                    onChange={(e) => this.inputChange(e.target.value, a, 1)}/>
-                  {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
+      return (loading ?
+        <SpinnerOverlay/> :
+        <div style={{margin: '0.5rem 0 1.5rem'}}>
+          {countError && <div style={styles.error}>
+            <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+              shape='exclamation-triangle' size='22'/>
+            Sorry, the request cannot be completed.
+          </div>}
+          {!!formErrors.size && <div style={styles.errors}>
+            {Array.from(formErrors).map((err, e) => <div key={e} style={styles.errorItem}>
+              {err}
+            </div>)}
+          </div>}
+          {this.isMeasurement && <div>
+            <div style={styles.label}>{this.displayName}</div>
+            <CheckBox style={{marginLeft: '0.5rem'}}
+              onChange={(v) => this.toggleCheckbox(v)}/> Any value (lab exists)
+            {!form.exists && form.num.length > 0 && <div style={styles.orCircle}>OR</div>}
+          </div>}
+          {!form.exists && <React.Fragment>
+            {form.num.map((attr, a) => <div key={a}>
+              {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
+              {this.isBloodPressure && <div style={styles.label}>{attr.name}</div>}
+              <div style={styles.container}>
+                <div style={styles.dropdown}>
+                  <Dropdown style={{width: '100%'}} value={attr.operator} options={options}
+                    placeholder='Select Operator' onChange={(e) => this.selectChange(a, e.value)}/>
                 </div>
-              </React.Fragment>}
-              {this.isMeasurement && attr.operator !== null &&
-                <span style={{paddingTop: '0.2rem'}}>&nbsp;Ranges: {attr.MIN} - {attr.MAX}</span>
-              }
-            </div>
-          </div>)}
-          {form.cat.length > 0 && <React.Fragment>
-            <div style={styles.orCircle}>OR</div>
-            <div style={styles.label}>Categorical Values</div>
-            <div style={{marginLeft: '0.5rem'}}>
-              {form.cat.map((attr, a) => <div key={a} style={styles.categorical}>
-                <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
-                  onChange={(v) => this.checkboxChange(v, a)} />
-                {attr.conceptName}&nbsp;
-                <span style={styles.badge}> {parseInt(attr.estCount, 10).toLocaleString()}</span>
-              </div>)}
-            </div>
-          </React.Fragment>}
-        </React.Fragment>}
-        <div style={styles.countPreview}>
-          <div style={styles.row}>
-            <div style={styles.buttonContainer}>
-              <Button type='primary' disabled={disabled}
-                style={{
-                  ...styles.button,
-                  ...(disabled ? {opacity: 0.4} : {}),
-                  background: colorWithWhiteness(colors.primary, .2)
-                }}
-                onClick={() => this.requestPreview()}>
-                {calculating && <Spinner size={16} style={styles.spinner}/>}
-                Calculate
-              </Button>
-            </div>
-            <div style={styles.resultsContainer}>
-              <div style={{fontWeight: 'bold'}}>Results</div>
-              <div>
-                Number Participants:
-                <span> {count === null ? '--' : count.toLocaleString()} </span>
+                {![null, 'ANY'].includes(attr.operator) && <div>
+                  <input style={styles.number} type='number' value={attr.operands[0]}
+                    min={attr.MIN} max={attr.MAX}
+                    onChange={(e) => this.inputChange(e.target.value, a, 0)}/>
+                  {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
+                </div>}
+                {attr.operator === Operator.BETWEEN && <React.Fragment>
+                  <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
+                  <div>
+                    <input style={styles.number} type='number' value={attr.operands[1]}
+                      min={attr.MIN} max={attr.MAX}
+                      onChange={(e) => this.inputChange(e.target.value, a, 1)}/>
+                    {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
+                  </div>
+                </React.Fragment>}
+                {this.isMeasurement && attr.operator !== null &&
+                  <span style={{paddingTop: '0.2rem'}}>&nbsp;Ranges: {attr.MIN} - {attr.MAX}</span>
+                }
               </div>
+            </div>)}
+            {form.cat.length > 0 && <React.Fragment>
+              <div style={styles.orCircle}>OR</div>
+              <div style={styles.label}>Categorical Values</div>
+              <div style={{marginLeft: '0.5rem'}}>
+                {form.cat.map((attr, a) => <div key={a} style={styles.categorical}>
+                  <CheckBox checked={attr.checked} style={{marginRight: '3px'}}
+                    onChange={(v) => this.checkboxChange(v, a)} />
+                  {attr.conceptName}&nbsp;
+                  <span style={styles.badge}> {parseInt(attr.estCount, 10).toLocaleString()}</span>
+                </div>)}
+              </div>
+            </React.Fragment>}
+          </React.Fragment>}
+          <div style={styles.countPreview}>
+            <div style={styles.row}>
+              <div style={styles.buttonContainer}>
+                <Button type='primary' disabled={disabled}
+                  style={{
+                    ...styles.button,
+                    ...(disabled ? {opacity: 0.4} : {}),
+                    background: colorWithWhiteness(colors.primary, .2)
+                  }}
+                  onClick={() => this.requestPreview()}>
+                  {calculating && <Spinner size={16} style={styles.spinner}/>}
+                  Calculate
+                </Button>
+              </div>
+              <div style={styles.resultsContainer}>
+                <div style={{fontWeight: 'bold'}}>Results</div>
+                <div>
+                  Number Participants:
+                  <span> {count === null ? '--' : count.toLocaleString()} </span>
+                </div>
+              </div>
+              {!calculating && formValid && <div style={styles.buttonContainer}>
+                <Button type='link'
+                  style={{...styles.button, color: colorWithWhiteness(colors.primary, .2)}}
+                  onClick={() => this.addParameterToSearchItem()}> ADD THIS</Button>
+              </div>}
             </div>
-            {!calculating && formValid && <div style={styles.buttonContainer}>
-              <Button type='link'
-                style={{...styles.button, color: colorWithWhiteness(colors.primary, .2)}}
-                onClick={() => this.addAttrs()}> ADD THIS</Button>
-            </div>}
           </div>
         </div>
-      </div>);
+      );
     }
   }
 );
