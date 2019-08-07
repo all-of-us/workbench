@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cohorts;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.bigquery.BigQuery;
@@ -10,7 +9,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,8 +110,6 @@ public class CohortMaterializationServiceTest {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.cdr = new CdrConfig();
       workbenchConfig.cdr.debugQueries = false;
-      workbenchConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
-      workbenchConfig.cohortbuilder.enableListSearch = false;
       return workbenchConfig;
     }
   }
@@ -176,21 +172,17 @@ public class CohortMaterializationServiceTest {
             "select person.person_id person_id\n"
                 + "from `project_id.data_set_id.person` person\n"
                 + "where\n"
-                + "person.person_id in (select criteria.person_id from (select distinct person_id, entry_date, concept_id\n"
-                + "from `project_id.data_set_id.search_all_domains`\n"
-                + "where is_standard = @p0\n"
-                + "and ((concept_id in unnest(@p1))\n"
-                + ")\n"
-                + ") criteria\n"
+                + "person.person_id in (select person_id\n"
+                + "from `project_id.data_set_id.person` p\n"
+                + "where\n"
+                + "p.gender_concept_id in unnest(@p0)\n"
                 + ")\n"
                 + "and person.person_id not in unnest(@person_id_blacklist)\n\n"
                 + "order by person.person_id\n");
     Map<String, Map<String, Object>> params = getParameters(cdrQuery);
-    Map<String, Object> standardParam = params.get("p0");
-    Map<String, Object> genderParam = params.get("p1");
+    Map<String, Object> genderParam = params.get("p0");
     Map<String, Object> personIdBlacklistParam = params.get("person_id_blacklist");
-    assertParameterINT64(standardParam, 1);
-    assertParameterArray(genderParam, 2, 8507, 8532);
+    assertParameterArray(genderParam, 8507, 8532, 2);
     assertParameterArray(personIdBlacklistParam, 2L);
   }
 
@@ -221,12 +213,10 @@ public class CohortMaterializationServiceTest {
                 + "measurement.measurement_id measurement_measurement_id\n"
                 + "from `project_id.data_set_id.measurement` measurement\n"
                 + "where\n"
-                + "measurement.person_id in (select criteria.person_id from (select distinct person_id, entry_date, concept_id\n"
-                + "from `project_id.data_set_id.search_all_domains`\n"
-                + "where is_standard = @p0\n"
-                + "and ((concept_id in unnest(@p1))\n"
-                + ")\n"
-                + ") criteria\n"
+                + "measurement.person_id in (select person_id\n"
+                + "from `project_id.data_set_id.person` p\n"
+                + "where\n"
+                + "p.gender_concept_id in unnest(@p0)\n"
                 + ")\n"
                 + "and measurement.person_id not in unnest(@person_id_blacklist)\n"
                 + "\n"
@@ -236,10 +226,8 @@ public class CohortMaterializationServiceTest {
                 + "inner_results.measurement_measurement_concept_id = measurement_concept.concept_id\n"
                 + "order by measurement_person_id, measurement_measurement_id");
     Map<String, Map<String, Object>> params = getParameters(cdrQuery);
-    Map<String, Object> standardParam = params.get("p0");
-    Map<String, Object> genderParam = params.get("p1");
+    Map<String, Object> genderParam = params.get("p0");
     Map<String, Object> personIdBlacklistParam = params.get("person_id_blacklist");
-    assertParameterINT64(standardParam, 1);
     assertParameterArray(genderParam, 8507, 8532, 2);
     assertParameterArray(personIdBlacklistParam, 2L);
   }
@@ -265,21 +253,10 @@ public class CohortMaterializationServiceTest {
     Object[] paramValues =
         (Object[]) ((Map<String, Object>) param.get("parameterValue")).get("arrayValues");
     assertThat(paramValues.length).isEqualTo(values.length);
-    List paramValueList = new ArrayList<>();
-    for (int i = 0; i < paramValues.length; i++) {
-      paramValueList.add(((Map<String, Object>) paramValues[i]).get("value"));
-    }
     for (int i = 0; i < values.length; i++) {
-      assertTrue(paramValueList.contains(String.valueOf(values[i])));
+      assertThat(((Map<String, Object>) paramValues[i]).get("value"))
+          .isEqualTo(String.valueOf(values[i]));
     }
-  }
-
-  private void assertParameterINT64(Map<String, Object> param, long value) {
-    Map<String, Object> parameterTypeMap = (Map<String, Object>) param.get("parameterType");
-    assertThat(parameterTypeMap.get("type")).isEqualTo("INT64");
-
-    assertThat(((Map<String, Object>) param.get("parameterValue")).get("value"))
-        .isEqualTo(String.valueOf(value));
   }
 
   @Test

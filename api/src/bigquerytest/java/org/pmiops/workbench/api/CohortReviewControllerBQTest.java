@@ -645,11 +645,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         new ParticipantCohortStatus().participantKey(key2);
     participantCohortStatusDao.save(participantCohortStatus2);
 
-    WorkbenchConfig testConfig = new WorkbenchConfig();
-    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
-    testConfig.cohortbuilder.enableListSearch = false;
-    when(configProvider.get()).thenReturn(testConfig);
-
     controller.setConfigProvider(configProvider);
   }
 

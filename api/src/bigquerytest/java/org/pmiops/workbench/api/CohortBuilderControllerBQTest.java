@@ -114,8 +114,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.elasticsearch = new WorkbenchConfig.ElasticsearchConfig();
     testConfig.elasticsearch.enableElasticsearchBackend = false;
-    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
-    testConfig.cohortbuilder.enableListSearch = true;
     when(configProvider.get()).thenReturn(testConfig);
 
     ElasticSearchService elasticSearchService =

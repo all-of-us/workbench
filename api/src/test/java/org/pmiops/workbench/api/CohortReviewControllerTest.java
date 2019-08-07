@@ -341,10 +341,6 @@ public class CohortReviewControllerTest {
                 stringAnnotationDefinition.getCohortAnnotationDefinitionId());
     participantCohortAnnotationDao.save(participantAnnotation);
 
-    WorkbenchConfig testConfig = new WorkbenchConfig();
-    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
-    testConfig.cohortbuilder.enableListSearch = false;
-    when(configProvider.get()).thenReturn(testConfig);
     cohortReviewController.setConfigProvider(configProvider);
   }
 

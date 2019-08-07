@@ -62,9 +62,6 @@
     "enableBetaAccess": true,
     "unsafeAllowSelfBypass": false
   },
-  "cohortbuilder": {
-    "enableListSearch": true
-  },
   "featureFlags": {
     "enableLeoWelder": true,
     "useBillingProjectBuffer": true,

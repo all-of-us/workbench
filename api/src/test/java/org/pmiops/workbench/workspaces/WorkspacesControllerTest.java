@@ -304,8 +304,6 @@ public class WorkspacesControllerTest {
     CLOCK.setInstant(NOW);
 
     WorkbenchConfig testConfig = new WorkbenchConfig();
-    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
-    testConfig.cohortbuilder.enableListSearch = false;
     testConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
     testConfig.firecloud.registeredDomainName = "allUsers";
     testConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();

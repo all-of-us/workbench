@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohorts;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -164,11 +163,6 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
         makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
 
     ConceptService conceptService = new ConceptService(entityManager, conceptDao);
-
-    WorkbenchConfig testConfig = new WorkbenchConfig();
-    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
-    testConfig.cohortbuilder.enableListSearch = false;
-    when(configProvider.get()).thenReturn(testConfig);
 
     this.cohortMaterializationService =
         new CohortMaterializationService(
