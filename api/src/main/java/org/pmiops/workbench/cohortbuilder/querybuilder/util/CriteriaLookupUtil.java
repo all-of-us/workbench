@@ -234,7 +234,7 @@ public final class CriteriaLookupUtil {
     for (SearchGroup sg : Iterables.concat(req.getIncludes(), req.getExcludes())) {
       for (SearchGroupItem sgi : sg.getItems()) {
         for (SearchParameter param : sgi.getSearchParameters()) {
-          if (!param.getGroup()) {
+          if (!param.getGroup() && !param.getAncestorData()) {
             continue;
           }
           CriteriaLookupUtil.FullTreeType treeKey =

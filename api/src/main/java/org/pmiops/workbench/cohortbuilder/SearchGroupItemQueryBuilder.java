@@ -453,7 +453,7 @@ public final class SearchGroupItemQueryBuilder {
       Map<SearchParameter, Set<Long>> criteriaLookup, List<SearchParameter> params) {
     Set<Long> out = Sets.newHashSet();
     for (SearchParameter param : params) {
-      if (param.getGroup()) {
+      if (param.getGroup() || param.getAncestorData()) {
         out.addAll(criteriaLookup.get(param));
       }
       if (param.getConceptId() != null) {
