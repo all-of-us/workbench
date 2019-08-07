@@ -13,6 +13,7 @@ import {CohortCommonModule} from 'app/cohort-common/module';
 import {CreateReviewModalComponent} from './create-review-modal/create-review-modal';
 import {DetailPageComponent} from './detail-page/detail-page';
 import {PageLayout} from './page-layout/page-layout';
+import {QueryReportComponent} from './query-report/query-report.component';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 import {TablePage} from './table-page/table-page';
 
@@ -39,6 +40,7 @@ import {TablePage} from './table-page/table-page';
     CreateReviewModalComponent,
     DetailPageComponent,
     PageLayout,
+    QueryReportComponent,
     TablePage,
   ],
   providers: [

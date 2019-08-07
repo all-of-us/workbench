@@ -456,6 +456,21 @@ export const ParticipantsTable = withCurrentWorkspace()(
       ]);
     }
 
+    showCohortDescription() {
+      const {id, namespace} = this.props.workspace;
+      const {cid} = urlParamsStore.getValue();
+      navigate([
+        'workspaces',
+        namespace,
+        id,
+        'data',
+        'cohorts',
+        cid,
+        'review',
+        'cohort-description'
+      ]);
+    }
+
     onPage = (event: any) => {
       const {page} = this.state;
       if (event.page !== page) {
@@ -630,7 +645,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             <Button
               style={{float: 'right', height: '1.3rem'}}
               disabled={!data}
-              onClick={() => this.setState({cohortDescription: true})}>
+              onClick={() => this.showCohortDescription()}>
               Cohort Description
             </Button>
           </h4>
