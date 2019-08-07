@@ -3,10 +3,10 @@ import {
   Criteria,
   CriteriaAttributeListResponse,
   CriteriaListResponse,
+  CriteriaType,
   DemoChartInfoListResponse,
-  ParticipantDemographics,
-  TreeSubType,
-  TreeType
+  DomainType,
+  ParticipantDemographics
 } from 'generated/fetch';
 
 export const cohortStub = {
@@ -18,15 +18,15 @@ export const cohortStub = {
 const criteriaStub = {
   id: 1,
   parentId: 0,
-  type: TreeType[TreeType.ICD9],
-  subtype: TreeSubType[TreeSubType.CM],
+  type: CriteriaType[CriteriaType.ICD9CM],
+  subtype: '',
   code: '123',
   name: 'Test',
   count: 1,
   group: false,
   selectable: true,
   conceptId: 123,
-  domainId: '',
+  domainId: DomainType[DomainType.CONDITION],
   hasAttributes: false,
   path: '0',
 };
