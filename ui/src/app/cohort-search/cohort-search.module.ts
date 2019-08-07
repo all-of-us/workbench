@@ -7,10 +7,10 @@ import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 
 /* Components */
+import {AttributesPageComponent} from './attributes-page/attributes-page.component';
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {DemographicsComponent} from './demographics/demographics.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
-import {ListAttributesPageComponent} from './list-attributes-page/list-attributes-page.component';
 import {ListSearchComponent} from './list-search/list-search.component';
 import {ModalComponent} from './modal/modal.component';
 import {ModifierPageComponent} from './modifier-page/modifier-page.component';
@@ -56,9 +56,9 @@ const routes: Routes = [{
     CohortCommonModule,
   ],
   declarations: [
+    AttributesPageComponent,
     CohortSearchComponent,
     GenderChartComponent,
-    ListAttributesPageComponent,
     DemographicsComponent,
     ModalComponent,
     ModifierPageComponent,

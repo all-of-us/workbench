@@ -553,10 +553,10 @@ export const AttributesPage = withCurrentWorkspace() (
 );
 
 @Component({
-  selector: 'crit-list-attributes-page',
+  selector: 'crit-attributes-page',
   template: '<div #root></div>'
 })
-export class ListAttributesPageComponent extends ReactWrapperBase {
+export class AttributesPageComponent extends ReactWrapperBase {
   @Input('node') node: Props['node'];
   @Input('close') close: Props['close'];
 

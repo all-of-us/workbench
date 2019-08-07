@@ -2,8 +2,8 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
+import {AttributesPageComponent} from 'app/cohort-search/attributes-page/attributes-page.component';
 import {DemographicsComponent} from 'app/cohort-search/demographics/demographics.component';
-import {ListAttributesPageComponent} from 'app/cohort-search/list-attributes-page/list-attributes-page.component';
 import {ListSearchComponent} from 'app/cohort-search/list-search/list-search.component';
 import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
@@ -31,7 +31,7 @@ describe('ModalComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        ListAttributesPageComponent,
+        AttributesPageComponent,
         DemographicsComponent,
         ModalComponent,
         ModifierPageComponent,

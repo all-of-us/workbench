@@ -1,7 +1,7 @@
 import {shallow} from 'enzyme';
 
 import * as React from 'react';
-import {AttributesPage} from './list-attributes-page.component';
+import {AttributesPage} from './attributes-page.component';
 
 
 describe('AttributesPage', () => {
