@@ -188,9 +188,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
         "condition_occurrence",
         "observation",
         "vocabulary",
-        "criteria",
-        "search_all_domains",
-        "search_person");
+        "search_all_domains");
   }
 
   @Override

@@ -2,6 +2,7 @@ package org.pmiops.workbench.test;
 
 import java.util.Arrays;
 import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
@@ -52,6 +53,7 @@ public class SearchRequests {
               .domain(groupType)
               .type(type)
               .group(true)
+              .conceptId(1L)
               .value(code)
               .standard(false)
               .ancestorData(false);
@@ -63,24 +65,24 @@ public class SearchRequests {
   public static SearchRequest temporalRequest() {
     SearchParameter icd9 =
         new SearchParameter()
-            .type(TreeType.ICD9.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
             .group(false)
             .conceptId(1L)
             .standard(false)
             .ancestorData(false);
     SearchParameter icd10 =
         new SearchParameter()
-            .type(TreeType.ICD10.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(Domain.CONDITION.toString())
+            .type(CriteriaType.ICD10CM.toString())
             .group(false)
             .conceptId(9L)
             .standard(false)
             .ancestorData(false);
     SearchParameter snomed =
         new SearchParameter()
-            .type(TreeType.SNOMED.name())
-            .subtype(TreeSubType.CM.name())
+            .domain(DomainType.CONDITION.toString())
+            .type(CriteriaType.SNOMED.name())
             .group(false)
             .conceptId(4L)
             .standard(false)
@@ -88,17 +90,17 @@ public class SearchRequests {
 
     SearchGroupItem icd9SGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(icd9)
             .temporalGroup(0);
     SearchGroupItem icd10SGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(icd10)
             .temporalGroup(1);
     SearchGroupItem snomedSGI =
         new SearchGroupItem()
-            .type(TreeType.CONDITION.name())
+            .type(DomainType.CONDITION.toString())
             .addSearchParametersItem(snomed)
             .temporalGroup(0);
 
