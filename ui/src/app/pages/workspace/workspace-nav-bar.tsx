@@ -66,7 +66,7 @@ export const WorkspaceNavBarReact = fp.flow(
   withUrlParams(),
 )(props => {
   const {
-    shareFunction, deleteFunction, workspace, tabPath,
+    shareFunction, deleteFunction, workspace, tabPath, onTabSelect,
     urlParams: {ns: namespace, wsid: id}
   } = props;
   const isNotOwner = !workspace || workspace.accessLevel !== WorkspaceAccessLevel.OWNER;
@@ -84,7 +84,10 @@ export const WorkspaceNavBarReact = fp.flow(
         aria-selected={selected}
         style={{...styles.tab, ...(selected ? styles.active : {})}}
         hover={{color: styles.active.color}}
-        onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
+        onClick={() => {
+          onTabSelect(link);
+          NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]));
+        }}
       >
         {name}
       </Clickable>
@@ -104,14 +107,20 @@ export const WorkspaceNavBarReact = fp.flow(
           <div style={styles.dropdownHeader}>Workspace Actions</div>
           <MenuItem
             icon='copy'
-            onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}>
+            onClick={() => {
+              onTabSelect('duplicate');
+              NavStore.navigate(['/workspaces', namespace, id, 'duplicate']);
+            }}>
             Duplicate
           </MenuItem>
           <MenuItem
             icon='pencil'
             tooltip={isNotOwner && 'Requires owner permission'}
             disabled={isNotOwner}
-            onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'edit'])}
+            onClick={() => {
+              onTabSelect('edit');
+              NavStore.navigate(['/workspaces', namespace, id, 'edit']);
+            }}
           >
             Edit
           </MenuItem>
