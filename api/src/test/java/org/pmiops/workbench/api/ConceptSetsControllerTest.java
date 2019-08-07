@@ -21,13 +21,11 @@ import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohorts.CohortCloningService;
-import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -173,10 +171,6 @@ public class ConceptSetsControllerTest {
   @Autowired CdrVersionDao cdrVersionDao;
 
   @Autowired ConceptDao conceptDao;
-
-  @Autowired CohortFactory cohortFactory;
-
-  @Autowired CohortDao cohortDao;
 
   @Autowired WorkspaceDao workspaceDao;
 
