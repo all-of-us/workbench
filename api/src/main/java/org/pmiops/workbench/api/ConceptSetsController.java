@@ -385,7 +385,11 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     org.pmiops.workbench.db.model.ConceptSet conceptSet =
         conceptSetDao.findOne(Long.valueOf(fromConceptSetId));
     if (conceptSet == null) {
-      throw new NotFoundException(String.format("Concept set %s does not exist", generateConceptSetPathFromWorkspaceAndIdentifier(fromWorkspaceNamespace, fromWorkspaceId, fromConceptSetId)));
+      throw new NotFoundException(
+          String.format(
+              "Concept set %s does not exist",
+              generateConceptSetPathFromWorkspaceAndIdentifier(
+                  fromWorkspaceNamespace, fromWorkspaceId, fromConceptSetId)));
     }
     org.pmiops.workbench.db.model.ConceptSet newConceptSet =
         new org.pmiops.workbench.db.model.ConceptSet(conceptSet);
@@ -416,10 +420,9 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     return ResponseEntity.ok(toClientConceptSet(newConceptSet));
   }
 
-  private String generateConceptSetPathFromWorkspaceAndIdentifier(String workspaceNamespace, String workspaceFirecloudName, String identifier) {
-    return String.format("\"/%s/%s/%s\"", workspaceNamespace,
-        workspaceFirecloudName,
-        identifier);
+  private String generateConceptSetPathFromWorkspaceAndIdentifier(
+      String workspaceNamespace, String workspaceFirecloudName, String identifier) {
+    return String.format("\"/%s/%s/%s\"", workspaceNamespace, workspaceFirecloudName, identifier);
   }
 
   private org.pmiops.workbench.db.model.ConceptSet getDbConceptSet(

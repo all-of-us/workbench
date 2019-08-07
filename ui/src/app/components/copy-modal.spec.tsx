@@ -42,22 +42,27 @@ describe('CopyNotebookModal', () => {
       id: 'the nose'
     }
   ];
+  const destinationTab = 'notebooks';
+  const fromWorkspaceNamespace = 'namespace';
+  const fromWorkspaceName = 'name';
+  const fromResourceName = 'notebook';
 
   beforeEach(() => {
     const apiStub = new WorkspacesApiStub(workspaces);
     registerApiClient(WorkspacesApi, apiStub);
     props = {
-      fromWorkspaceNamespace: 'namespace',
-      fromWorkspaceName: 'name',
-      fromResourceName: 'notebook',
+      destinationTab: destinationTab,
+      fromWorkspaceNamespace: fromWorkspaceNamespace,
+      fromWorkspaceName: fromWorkspaceName,
+      fromResourceName: fromResourceName,
       resourceType: ResourceType.NOTEBOOK,
       onClose: () => {},
       onCopy: () => {},
       saveFunction: (copyRequest) => {
         return workspacesApi().copyNotebook(
-          this.props.resource.workspaceNamespace,
-          this.props.resource.workspaceFirecloudName,
-          dropNotebookFileSuffix(this.props.resource.notebook.name),
+          fromWorkspaceNamespace,
+          fromWorkspaceName,
+          dropNotebookFileSuffix(fromResourceName),
           copyRequest
         );
       }
@@ -115,7 +120,7 @@ describe('CopyNotebookModal', () => {
       {
         toWorkspaceName: workspaces[2].id,
         toWorkspaceNamespace: workspaces[2].namespace,
-        newName: 'Freeblast.ipynb'
+        newName: 'Freeblast'
       }
     );
   });
