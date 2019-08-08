@@ -446,17 +446,20 @@ public class DataSetControllerTest {
                 .build());
     // This is not great, but due to the interaction of mocks and bigquery, it is
     // exceptionally hard to fix it so that it calls the real filterBitQueryConfig
-    // but _does not_ call the real methods in the rest of the bigQueryService
-    when(bigQueryService.filterBigQueryConfig(any())).thenAnswer(
-        (InvocationOnMock invocation) -> {
-          Object[] args = invocation.getArguments();
-          QueryJobConfiguration queryJobConfiguration = (QueryJobConfiguration) args[0];
+    // but _does not_ call the real methods in the rest of the bigQueryService.
+    // I tried .thenCallRealMethod() which ended up giving a null pointer from the mock,
+    // as opposed to calling through.
+    when(bigQueryService.filterBigQueryConfig(any()))
+        .thenAnswer(
+            (InvocationOnMock invocation) -> {
+              Object[] args = invocation.getArguments();
+              QueryJobConfiguration queryJobConfiguration = (QueryJobConfiguration) args[0];
 
-          String returnSql =
-              queryJobConfiguration.getQuery().replace("${projectId}", TEST_CDR_PROJECT_ID);
-          returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
-          return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
-        });
+              String returnSql =
+                  queryJobConfiguration.getQuery().replace("${projectId}", TEST_CDR_PROJECT_ID);
+              returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
+              return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
+            });
   }
 
   private DataSetRequest buildEmptyDataSet() {

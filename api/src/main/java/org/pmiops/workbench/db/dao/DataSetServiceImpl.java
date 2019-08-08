@@ -282,10 +282,11 @@ public class DataSetServiceImpl implements DataSetService {
 
       queryMap.put(query, cohortParameters);
       QueryJobConfiguration queryJobConfiguration =
-          bigQueryService.filterBigQueryConfig(QueryJobConfiguration.newBuilder(query)
-              .setNamedParameters(cohortParameters)
-              .setUseLegacySql(false)
-              .build());
+          bigQueryService.filterBigQueryConfig(
+              QueryJobConfiguration.newBuilder(query)
+                  .setNamedParameters(cohortParameters)
+                  .setUseLegacySql(false)
+                  .build());
       dataSetUtil.put(d.toString(), queryJobConfiguration);
     }
     return dataSetUtil;
