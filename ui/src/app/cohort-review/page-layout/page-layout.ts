@@ -1,4 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
 import {
   cohortReviewStore,
   filterStateStore,
@@ -21,6 +22,8 @@ export class PageLayout implements OnInit, OnDestroy {
   cohortLoaded = false;
   readonly = false;
 
+  constructor(private router: Router) {}
+
   ngOnInit() {
     const {ns, wsid, cid} = urlParamsStore.getValue();
     const {accessLevel, cdrVersionId} = currentWorkspaceStore.getValue();
@@ -34,7 +37,8 @@ export class PageLayout implements OnInit, OnDestroy {
     }).then(review => {
       cohortReviewStore.next(review);
       this.reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
-      if (this.reviewPresent) {
+      const currentRoute = this.router.url.split('/').pop();
+      if (this.reviewPresent && currentRoute === 'review') {
         navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
       }
     });

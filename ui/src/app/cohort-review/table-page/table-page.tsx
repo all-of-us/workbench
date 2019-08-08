@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 
-import {QueryReport} from 'app/cohort-review/query-report/query-report.component';
 import {
   cohortReviewStore,
   filterStateStore,
@@ -230,7 +229,6 @@ interface State {
   sortOrder: number;
   total: number;
   filters: any;
-  cohortDescription: boolean;
   error: boolean;
 }
 
@@ -247,7 +245,6 @@ export const ParticipantsTable = withCurrentWorkspace()(
         sortOrder: 1,
         total: null,
         filters: filterStateStore.getValue().participants,
-        cohortDescription: false,
         error: false,
       };
       this.filterInput = fp.debounce(300, () => {
@@ -430,14 +427,9 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     goBack() {
-      const {cohortDescription} = this.state;
-      if (cohortDescription) {
-        this.setState({cohortDescription: false});
-      } else {
-        const {id, namespace} = this.props.workspace;
-        const {cid} = urlParamsStore.getValue();
-        navigateByUrl(`/workspaces/${namespace}/${id}/data/cohorts/build?cohortId=${cid}`);
-      }
+      const {id, namespace} = this.props.workspace;
+      const {cid} = urlParamsStore.getValue();
+      navigateByUrl(`/workspaces/${namespace}/${id}/data/cohorts/build?cohortId=${cid}`);
     }
 
     onRowClick = (event: any) => {
@@ -594,7 +586,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {cohortDescription, loading, page, sortField, sortOrder, total} = this.state;
+      const {loading, page, sortField, sortOrder, total} = this.state;
       const data = loading ? null : this.state.data;
       const cohort = currentCohortStore.getValue();
       const start = page * rows;
@@ -633,7 +625,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
       });
       return <div>
         <style>{datatableStyles}</style>
-        {!cohortDescription && <React.Fragment>
+        <React.Fragment>
           <button
             style={styles.backBtn}
             type='button'
@@ -673,17 +665,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             footer={this.errorMessage()}>
             {columns}
           </DataTable>
-        </React.Fragment>}
-        {cohortDescription && <React.Fragment>
-          <button
-            style={styles.backBtn}
-            type='button'
-            onClick={() => this.goBack()}>
-            Back to review set
-          </button>
-          <h4 style={styles.title}>{cohort.name} Description</h4>
-          <QueryReport/>
-        </React.Fragment>}
+        </React.Fragment>
         {loading && <SpinnerOverlay />}
       </div>;
     }
