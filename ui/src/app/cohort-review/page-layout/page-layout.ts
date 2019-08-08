@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
+import {NavigationEnd, Router} from '@angular/router';
 import {
   cohortReviewStore,
   filterStateStore,
@@ -12,6 +12,7 @@ import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagge
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {PageFilterType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   templateUrl: './page-layout.html',
@@ -21,8 +22,16 @@ export class PageLayout implements OnInit, OnDestroy {
   reviewPresent: boolean;
   cohortLoaded = false;
   readonly = false;
+  subscription: Subscription;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    this.subscription = router.events.subscribe(event => {
+      if (event instanceof NavigationEnd && event.url.split('/').pop() === 'review') {
+        const {ns, wsid, cid} = urlParamsStore.getValue();
+        navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+      }
+    });
+  }
 
   ngOnInit() {
     const {ns, wsid, cid} = urlParamsStore.getValue();
@@ -37,10 +46,6 @@ export class PageLayout implements OnInit, OnDestroy {
     }).then(review => {
       cohortReviewStore.next(review);
       this.reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
-      const currentRoute = this.router.url.split('/').pop();
-      if (this.reviewPresent && currentRoute === 'review') {
-        navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
-      }
     });
     cohortsApi().getCohort(ns, wsid, cid).then(cohort => {
       // This effectively makes the 'current cohort' available to child components, by using
@@ -63,6 +68,7 @@ export class PageLayout implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.subscription.unsubscribe();
     currentCohortStore.next(undefined);
     multiOptions.next(null);
     vocabOptions.next(null);
