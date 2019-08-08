@@ -16,7 +16,6 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.gson.Gson;
 import java.io.FileReader;
@@ -36,6 +35,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -120,7 +120,9 @@ public class DataSetControllerTest {
   private static final String WORKSPACE_NAME = "name";
   private static final String WORKSPACE_BUCKET_NAME = "fc://bucket-hash";
   private static final String USER_EMAIL = "bob@gmail.com";
-  private static final String TEST_CDR_TABLE = "all-of-us-ehr-dev.synthetic_cdr20180606";
+  private static final String TEST_CDR_PROJECT_ID = "all-of-us-ehr-dev";
+  private static final String TEST_CDR_DATA_SET_ID = "synthetic_cdr20180606";
+  private static final String TEST_CDR_TABLE = TEST_CDR_PROJECT_ID + "." + TEST_CDR_DATA_SET_ID;
   private static final String NAMED_PARAMETER_NAME = "p1_706";
   private static final String NAMED_PARAMETER_VALUE = "ICD9";
 
@@ -442,13 +444,22 @@ public class DataSetControllerTest {
             QueryJobConfiguration.newBuilder(
                     "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
                 .build());
+    // This is not great, but due to the interaction of mocks and bigquery, it is
+    // exceptionally hard to fix it so that it calls the real filterBitQueryConfig
+    // but _does not_ call the real methods in the rest of the bigQueryService.
+    // I tried .thenCallRealMethod() which ended up giving a null pointer from the mock,
+    // as opposed to calling through.
     when(bigQueryService.filterBigQueryConfig(any()))
-        .thenReturn(
-            QueryJobConfiguration.newBuilder(
-                    "SELECT * FROM person_id from `" + TEST_CDR_TABLE + "` person")
-                .addNamedParameter(
-                    NAMED_PARAMETER_NAME, QueryParameterValue.string(NAMED_PARAMETER_VALUE))
-                .build());
+        .thenAnswer(
+            (InvocationOnMock invocation) -> {
+              Object[] args = invocation.getArguments();
+              QueryJobConfiguration queryJobConfiguration = (QueryJobConfiguration) args[0];
+
+              String returnSql =
+                  queryJobConfiguration.getQuery().replace("${projectId}", TEST_CDR_PROJECT_ID);
+              returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
+              return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
+            });
   }
 
   private DataSetRequest buildEmptyDataSet() {
@@ -569,23 +580,12 @@ public class DataSetControllerTest {
                 + "condition_source_concept_id IN (123)) \n"
                 + "AND (PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
-                + "` person))\"\"\"\n"
+                + ".person` person))\"\"\"\n"
                 + "\n"
                 + "blah_condition_query_config = {\n"
                 + "  'query': {\n"
                 + "  'parameterMode': 'NAMED',\n"
-                + "  'queryParameters': [\n"
-                + "      {\n"
-                + "        'name': \""
-                + NAMED_PARAMETER_NAME
-                + "_"
-                + COHORT_ONE_ID
-                + "\",\n"
-                + "        'parameterType': {'type': \"STRING\"},\n"
-                + "        'parameterValue': {'value': \""
-                + NAMED_PARAMETER_VALUE
-                + "\"}\n"
-                + "      }\n"
+                + "  'queryParameters': [\n\n"
                 + "    ]\n"
                 + "  }\n"
                 + "}\n"
@@ -628,23 +628,12 @@ public class DataSetControllerTest {
                 + "condition_source_concept_id IN (123)) \n"
                 + "AND (PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
-                + "` person))\"\n"
+                + ".person` person))\"\n"
                 + "\n"
                 + "blah_condition_query_config <- list(\n"
                 + "  query = list(\n"
                 + "    parameterMode = 'NAMED',\n"
-                + "    queryParameters = list(\n"
-                + "      list(\n"
-                + "        name = \""
-                + NAMED_PARAMETER_NAME
-                + "_"
-                + COHORT_ONE_ID
-                + "\",\n"
-                + "        parameterType = list(type = \"STRING\"),\n"
-                + "        parameterValue = list(value = \""
-                + NAMED_PARAMETER_VALUE
-                + "\")\n"
-                + "      )\n"
+                + "    queryParameters = list(\n\n"
                 + "    )\n"
                 + "  )\n"
                 + ")\n"
