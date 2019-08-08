@@ -36,7 +36,9 @@ public class ConceptSet {
   private int participantCount;
   private Set<Long> conceptIds = new HashSet<Long>();
 
-  public ConceptSet() {}
+  public ConceptSet() {
+    setVersion(1);
+  }
 
   public ConceptSet(ConceptSet cs) {
     setDescription(cs.getDescription());
@@ -44,6 +46,7 @@ public class ConceptSet {
     setDomain(cs.getDomain());
     setSurvey(cs.getSurvey());
     setCreator(cs.getCreator());
+    setVersion(1);
     setWorkspaceId(cs.getWorkspaceId());
     setCreationTime(cs.getCreationTime());
     setLastModifiedTime(cs.getLastModifiedTime());

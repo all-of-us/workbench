@@ -1715,7 +1715,7 @@ paths:
     post:
       tags:
         - conceptSets
-      description: Copy specified notebook in path to specified workspace in body
+      description: Copy specified concept set in path to specified workspace in body
       operationId: "copyConceptSet"
       parameters:
         - in: body

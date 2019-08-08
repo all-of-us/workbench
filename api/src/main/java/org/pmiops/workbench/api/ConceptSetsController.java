@@ -15,6 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -97,6 +98,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
                 throw new BadRequestException(
                     "Domain " + conceptSet.getDomain() + " is not allowed for concept sets");
               }
+              dbConceptSet.setVersion(Etags.toVersion(conceptSet.getEtag()));
               dbConceptSet.setDescription(conceptSet.getDescription());
               dbConceptSet.setName(conceptSet.getName());
               return dbConceptSet;
@@ -373,14 +375,15 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         workspaceService.get(
             copyRequest.getToWorkspaceNamespace(), copyRequest.getToWorkspaceName());
     Workspace fromWorkspace = workspaceService.get(fromWorkspaceNamespace, fromWorkspaceId);
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceService.enforceWorkspaceAccessLevel(
         toWorkspace.getWorkspaceNamespace(),
         toWorkspace.getFirecloudName(),
         WorkspaceAccessLevel.WRITER);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(toWorkspace.getCdrVersion());
     if (toWorkspace.getCdrVersion().getCdrVersionId()
         != fromWorkspace.getCdrVersion().getCdrVersionId()) {
       throw new BadRequestException(
-          "New workspace does not have the same CDR version as current workspace");
+          "Target workspace does not have the same CDR version as current workspace");
     }
     org.pmiops.workbench.db.model.ConceptSet conceptSet =
         conceptSetDao.findOne(Long.valueOf(fromConceptSetId));
@@ -388,8 +391,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new NotFoundException(
           String.format(
               "Concept set %s does not exist",
-              generateConceptSetPathFromWorkspaceAndIdentifier(
-                  fromWorkspaceNamespace, fromWorkspaceId, fromConceptSetId)));
+              createResourcePath(fromWorkspaceNamespace, fromWorkspaceId, fromConceptSetId)));
     }
     org.pmiops.workbench.db.model.ConceptSet newConceptSet =
         new org.pmiops.workbench.db.model.ConceptSet(conceptSet);
@@ -403,24 +405,24 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
     try {
       newConceptSet = conceptSetDao.save(newConceptSet);
-      userRecentResourceService.updateConceptSetEntry(
-          toWorkspace.getWorkspaceId(),
-          userProvider.get().getUserId(),
-          newConceptSet.getConceptSetId(),
-          now);
     } catch (DataIntegrityViolationException e) {
       throw new ConflictException(
           String.format(
               "Concept set %s already exists.",
-              generateConceptSetPathFromWorkspaceAndIdentifier(
+              createResourcePath(
                   toWorkspace.getWorkspaceNamespace(),
                   toWorkspace.getFirecloudName(),
                   newConceptSet.getName())));
     }
+    userRecentResourceService.updateConceptSetEntry(
+        toWorkspace.getWorkspaceId(),
+        userProvider.get().getUserId(),
+        newConceptSet.getConceptSetId(),
+        now);
     return ResponseEntity.ok(toClientConceptSet(newConceptSet));
   }
 
-  private String generateConceptSetPathFromWorkspaceAndIdentifier(
+  private String createResourcePath(
       String workspaceNamespace, String workspaceFirecloudName, String identifier) {
     return String.format("\"/%s/%s/%s\"", workspaceNamespace, workspaceFirecloudName, identifier);
   }

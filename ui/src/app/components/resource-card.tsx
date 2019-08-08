@@ -581,7 +581,6 @@ export class ResourceCard extends React.Component<Props, State> {
           existingNames={this.props.existingNameList}/>
       }
       {this.state.copyingConceptSet && <CopyModal
-        destinationTab='data'
         fromWorkspaceNamespace={this.props.resourceCard.workspaceNamespace}
         fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
         fromResourceName={this.props.resourceCard.conceptSet.name}

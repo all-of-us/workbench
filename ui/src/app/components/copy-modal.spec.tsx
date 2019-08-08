@@ -12,7 +12,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CopyModal, CopyModalProps, CopyModalState} from './copy-modal';
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 
-describe('CopyNotebookModal', () => {
+describe('CopyModal', () => {
   let props: CopyModalProps;
 
   const component = () => {

@@ -4,7 +4,7 @@ import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
 import { Select, TextInput, ValidationError } from 'app/components/inputs';
 import { Modal, ModalBody, ModalFooter, ModalTitle } from 'app/components/modals';
-import { Workspace } from 'generated/fetch';
+import {ConceptSet, FileDetail, Workspace} from 'generated/fetch';
 
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
@@ -14,15 +14,20 @@ import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 enum RequestState { UNSENT, ERROR, SUCCESS }
 
+const ResourceTypeHomeTabs = new Map()
+  .set(ResourceType.NOTEBOOK, 'notebooks')
+  .set(ResourceType.COHORT, 'data')
+  .set(ResourceType.CONCEPT_SET, 'data')
+  .set(ResourceType.DATA_SET, 'data');
+
 export interface Props {
-  destinationTab: string;
   fromWorkspaceNamespace: string;
   fromWorkspaceName: string;
   fromResourceName: string;
   onClose: Function;
   onCopy: Function;
   resourceType: ResourceType;
-  saveFunction: (CopyRequest) => Promise<any>;
+  saveFunction: (CopyRequest) => Promise<FileDetail | ConceptSet>;
 }
 
 interface State {
@@ -98,7 +103,7 @@ class CopyModal extends React.Component<Props, State> {
         'workspaces',
         this.state.destination.namespace,
         this.state.destination.id,
-        this.props.destinationTab
+        ResourceTypeHomeTabs.get(this.props.resourceType)
       ]
     );
   }

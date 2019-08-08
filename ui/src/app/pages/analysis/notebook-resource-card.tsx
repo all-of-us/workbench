@@ -148,7 +148,6 @@ export const NotebookResourceCard = fp.flow(
     return <React.Fragment>
       {this.state.showCopyNotebookModal &&
       <CopyModal
-        destinationTab='notebooks'
         fromWorkspaceNamespace={this.props.resource.workspaceNamespace}
         fromWorkspaceName={this.props.resource.workspaceFirecloudName}
         fromResourceName={dropNotebookFileSuffix(this.props.resource.notebook.name)}
