@@ -4,15 +4,17 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <!-- This file loads all data for local deployment/development. It should never be loaded
+    into any environment except local. Schema migrations for all cloud cdr tables(all
+    environments) are handled in db-cdr/changelog-schema. Currently local environment only has 1
+    cloud cdr: api/config/cdr_versions_local.json. With that being said we manage all data for
+    local deployment in 1 change log file.
+   -->
+
   <!-- Use a liquibase user with permissions to change the schema -->
   <preConditions>
     <runningAs username="liquibase"/>
   </preConditions>
   <include file="changelog-data/db.changelog-1.xml"/>
-  <include file="changelog-data/db.changelog-2.xml"/>
-  <include file="changelog-data/db.changelog-3.xml"/>
-  <include file="changelog-data/db.changelog-4.xml"/>
-  <include file="changelog-data/db.changelog-5.xml"/>
-  <include file="changelog-data/db.changelog-6.xml"/>
-  <include file="changelog-data/db.changelog-7.xml"/>
 </databaseChangeLog>
