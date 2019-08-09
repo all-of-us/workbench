@@ -2,20 +2,22 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 import Select from 'react-select';
 
+import {TextInput} from 'app/components/inputs';
+import {ResourceType} from 'app/utils/resourceActionsReact';
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
-import { CopyNotebookModal, CopyNotebookModalProps, CopyNotebookModalState } from './copy-notebook-modal';
-import { TextInput } from 'app/components/inputs';
+import {CopyModal, CopyModalProps, CopyModalState} from './copy-modal';
+import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 
-describe('CopyNotebookModal', () => {
-  let props: CopyNotebookModalProps;
+describe('CopyModal', () => {
+  let props: CopyModalProps;
 
   const component = () => {
-    return mount<CopyNotebookModal, CopyNotebookModalProps, CopyNotebookModalState>
-    (<CopyNotebookModal {...props}/>);
+    return mount<CopyModal, CopyModalProps, CopyModalState>
+    (<CopyModal {...props}/>);
   };
 
   const workspaces = [
@@ -40,22 +42,29 @@ describe('CopyNotebookModal', () => {
       id: 'the nose'
     }
   ];
+  const fromWorkspaceNamespace = 'namespace';
+  const fromWorkspaceName = 'name';
+  const fromResourceName = 'notebook';
 
   beforeEach(() => {
-    props = {
-      fromWorkspaceNamespace: "namespace",
-      fromWorkspaceName: "name",
-      fromNotebook: {
-        name: "notebook",
-        path: "path",
-        lastModifiedTime: null
-      },
-      onClose: () => {},
-      onCopy: () => {}
-    };
-
-    let apiStub = new WorkspacesApiStub(workspaces);
+    const apiStub = new WorkspacesApiStub(workspaces);
     registerApiClient(WorkspacesApi, apiStub);
+    props = {
+      fromWorkspaceNamespace: fromWorkspaceNamespace,
+      fromWorkspaceName: fromWorkspaceName,
+      fromResourceName: fromResourceName,
+      resourceType: ResourceType.NOTEBOOK,
+      onClose: () => {},
+      onCopy: () => {},
+      saveFunction: (copyRequest) => {
+        return workspacesApi().copyNotebook(
+          fromWorkspaceNamespace,
+          fromWorkspaceName,
+          dropNotebookFileSuffix(fromResourceName),
+          copyRequest
+        );
+      }
+    };
     apiStub.workspaceAccess.set(workspaces[0].id, WorkspaceAccessLevel.OWNER);
     apiStub.workspaceAccess.set(workspaces[1].id, WorkspaceAccessLevel.READER);
     apiStub.workspaceAccess.set(workspaces[2].id, WorkspaceAccessLevel.WRITER);
@@ -85,7 +94,7 @@ describe('CopyNotebookModal', () => {
     await waitOneTickAndUpdate(wrapper);
 
     // Open Select options. Simulating a click doesn't work for some reason
-    let select = wrapper.find(Select);
+    const select = wrapper.find(Select);
     select.instance().setState({menuIsOpen: true});
     wrapper.update();
 
@@ -100,16 +109,16 @@ describe('CopyNotebookModal', () => {
 
     const spy = jest.spyOn(workspacesApi(), 'copyNotebook');
     // Click copy button
-    wrapper.find('[data-test-id="copy-notebook-button"]').first().simulate('click');
+    wrapper.find('[data-test-id="copy-button"]').first().simulate('click');
 
     expect(spy).toHaveBeenCalledWith(
       props.fromWorkspaceNamespace,
       props.fromWorkspaceName,
-      props.fromNotebook.name,
+      props.fromResourceName,
       {
         toWorkspaceName: workspaces[2].id,
         toWorkspaceNamespace: workspaces[2].namespace,
-        newName: "Freeblast.ipynb"
+        newName: 'Freeblast'
       }
     );
   });
@@ -121,7 +130,7 @@ describe('CopyNotebookModal', () => {
     const spy = jest.spyOn(workspacesApi(), 'copyNotebook');
 
     // Click copy button
-    const copyButton = wrapper.find('[data-test-id="copy-notebook-button"]').first();
+    const copyButton = wrapper.find('[data-test-id="copy-button"]').first();
     copyButton.simulate('click');
 
     expect(copyButton.prop('disabled')).toBe(true);

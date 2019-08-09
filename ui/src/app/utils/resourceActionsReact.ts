@@ -17,6 +17,12 @@ export enum ResourceType {
   INVALID = 'invalid'
 }
 
+export const ResourceTypeDisplayNames = new Map()
+  .set(ResourceType.NOTEBOOK, 'notebook')
+  .set(ResourceType.COHORT, 'cohort')
+  .set(ResourceType.CONCEPT_SET, 'concept set')
+  .set(ResourceType.DATA_SET, 'data set');
+
 export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[]
   | DataSet[], workspaceNamespace: string, workspaceId: string,
   accessLevel: WorkspaceAccessLevel,

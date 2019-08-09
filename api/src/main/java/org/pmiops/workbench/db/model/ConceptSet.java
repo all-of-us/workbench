@@ -22,6 +22,7 @@ import org.pmiops.workbench.model.Surveys;
 @Entity
 @Table(name = "concept_set")
 public class ConceptSet {
+  private static final int INITIAL_VERSION = 1;
 
   private long conceptSetId;
   private int version;
@@ -34,19 +35,24 @@ public class ConceptSet {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private int participantCount;
-  private Set<Long> conceptIds = new HashSet<Long>();
+  private Set<Long> conceptIds = new HashSet<>();
 
-  public ConceptSet() {}
+  public ConceptSet() {
+    setVersion(ConceptSet.INITIAL_VERSION);
+  }
 
   public ConceptSet(ConceptSet cs) {
     setDescription(cs.getDescription());
     setName(cs.getName());
     setDomain(cs.getDomain());
+    setSurvey(cs.getSurvey());
     setCreator(cs.getCreator());
+    setVersion(ConceptSet.INITIAL_VERSION);
     setWorkspaceId(cs.getWorkspaceId());
     setCreationTime(cs.getCreationTime());
     setLastModifiedTime(cs.getLastModifiedTime());
     setParticipantCount(cs.getParticipantCount());
+    setConceptIds(new HashSet<>(cs.getConceptIds()));
   }
 
   @Id

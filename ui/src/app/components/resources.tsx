@@ -9,12 +9,12 @@ import {ResourceType} from 'app/utils/resourceActionsReact';
 
 export const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameResource?: Function,
-  onCloneResource?: Function, onDeleteResource?: Function, onEdit?: Function,
-  onExportDataSet: Function, onReviewCohort?: Function,
+  onCloneResource?: Function, onCopyConceptSet?: Function, onDeleteResource?: Function,
+  onEdit?: Function, onExportDataSet: Function, onReviewCohort?: Function,
 }> = ({
         disabled, resourceType, onRenameResource = () => {}, onCloneResource = () => {},
-        onDeleteResource = () => {}, onEdit = () => {}, onExportDataSet = () => {},
-        onReviewCohort = () => {}
+        onCopyConceptSet = () => {}, onDeleteResource = () => {}, onEdit = () => {},
+        onExportDataSet = () => {}, onReviewCohort = () => {}
       }) => {
   return <PopupTrigger
     data-test-id='resource-card-menu'
@@ -40,6 +40,7 @@ export const ResourceCardMenu: React.FunctionComponent<{
         ['conceptSet', () => {
           return <React.Fragment>
             <MenuItem icon='pencil' onClick={onEdit}>Rename</MenuItem>
+            <MenuItem icon='copy' onClick={onCopyConceptSet}>Copy to another workspace</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
           </React.Fragment>;
         }],

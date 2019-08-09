@@ -11,7 +11,7 @@ import {
 import * as fp from 'lodash/fp';
 
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from 'app/pages/analysis/util';
-import {CopyNotebookRequest, EmptyResponse} from 'generated';
+import {CopyRequest, EmptyResponse} from 'generated';
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 
 export class WorkspaceStubVariables {
@@ -126,7 +126,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   }
 
   copyNotebook(fromWorkspaceNamespace: string, fromWorkspaceId: string, fromNotebookName: String,
-    copyNotebookRequest: CopyNotebookRequest): Promise<any> {
+    copyRequest: CopyRequest): Promise<any> {
     return new Promise<any>(resolve => {
       resolve({});
     });

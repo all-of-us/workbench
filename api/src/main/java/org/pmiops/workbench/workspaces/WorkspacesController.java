@@ -56,7 +56,7 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
-import org.pmiops.workbench.model.CopyNotebookRequest;
+import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
@@ -648,19 +648,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String fromWorkspaceNamespace,
       String fromWorkspaceId,
       String fromNotebookName,
-      CopyNotebookRequest copyNotebookRequest) {
+      CopyRequest copyRequest) {
     FileDetail fileDetail;
     try {
       fileDetail =
           notebooksService.copyNotebook(
               fromWorkspaceNamespace,
               fromWorkspaceId,
-              fromNotebookName,
-              copyNotebookRequest.getToWorkspaceNamespace(),
-              copyNotebookRequest.getToWorkspaceName(),
-              copyNotebookRequest.getNewName());
+              NotebooksService.withNotebookExtension(fromNotebookName),
+              copyRequest.getToWorkspaceNamespace(),
+              copyRequest.getToWorkspaceName(),
+              NotebooksService.withNotebookExtension(copyRequest.getNewName()));
     } catch (BlobAlreadyExistsException e) {
-      throw new BadRequestException("File already exists at copy destination");
+      throw new ConflictException("File already exists at copy destination");
     }
 
     return ResponseEntity.ok(fileDetail);
