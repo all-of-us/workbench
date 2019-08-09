@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {NavigationEnd, Router} from '@angular/router';
+import {NavigationStart, Router} from '@angular/router';
 import {
   cohortReviewStore,
   filterStateStore,
@@ -26,9 +26,14 @@ export class PageLayout implements OnInit, OnDestroy {
 
   constructor(private router: Router) {
     this.subscription = router.events.subscribe(event => {
-      if (event instanceof NavigationEnd && event.url.split('/').pop() === 'review') {
-        const {ns, wsid, cid} = urlParamsStore.getValue();
-        navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+      if (event instanceof NavigationStart) {
+        const oldRoute = router.url.split('/').pop();
+        const newRoute = event.url.split('/').pop();
+        if (oldRoute === 'participants' && newRoute === 'review') {
+          console.log('back');
+          const {ns, wsid, cid} = urlParamsStore.getValue();
+          navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+        }
       }
     });
   }
@@ -46,6 +51,9 @@ export class PageLayout implements OnInit, OnDestroy {
     }).then(review => {
       cohortReviewStore.next(review);
       this.reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
+      if (this.reviewPresent && this.router.url.split('/').pop() === 'review') {
+        navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+      }
     });
     cohortsApi().getCohort(ns, wsid, cid).then(cohort => {
       // This effectively makes the 'current cohort' available to child components, by using
