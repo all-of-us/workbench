@@ -42,7 +42,6 @@ describe('CopyModal', () => {
       id: 'the nose'
     }
   ];
-  const destinationTab = 'notebooks';
   const fromWorkspaceNamespace = 'namespace';
   const fromWorkspaceName = 'name';
   const fromResourceName = 'notebook';
@@ -51,7 +50,6 @@ describe('CopyModal', () => {
     const apiStub = new WorkspacesApiStub(workspaces);
     registerApiClient(WorkspacesApi, apiStub);
     props = {
-      destinationTab: destinationTab,
       fromWorkspaceNamespace: fromWorkspaceNamespace,
       fromWorkspaceName: fromWorkspaceName,
       fromResourceName: fromResourceName,

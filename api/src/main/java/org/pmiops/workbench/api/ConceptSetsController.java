@@ -98,7 +98,9 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
                 throw new BadRequestException(
                     "Domain " + conceptSet.getDomain() + " is not allowed for concept sets");
               }
-              dbConceptSet.setVersion(Etags.toVersion(conceptSet.getEtag()));
+              if (conceptSet.getEtag() != null) {
+                dbConceptSet.setVersion(Etags.toVersion(conceptSet.getEtag()));
+              }
               dbConceptSet.setDescription(conceptSet.getDescription());
               dbConceptSet.setName(conceptSet.getName());
               return dbConceptSet;

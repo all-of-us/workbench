@@ -34,7 +34,7 @@ public class ConceptSet {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private int participantCount;
-  private Set<Long> conceptIds = new HashSet<Long>();
+  private Set<Long> conceptIds = new HashSet<>();
 
   public ConceptSet() {
     setVersion(1);
