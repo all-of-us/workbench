@@ -140,6 +140,29 @@ export const styles = reactStyles({
     width: '5rem',
     display: 'flex',
     alignItems: 'center'
+  },
+  previewLink: {
+    marginTop: '0.5rem',
+    height: '1.8rem',
+    width: '6.5rem',
+    color: colors.secondary
+  },
+  footer: {
+    display: 'block',
+    padding: '20px',
+    height: '60px',
+    width: '100%'
+  },
+  stickyFooter: {
+    backgroundColor: colors.white,
+    borderTop: `1px solid ${colors.light}`,
+    textAlign: 'right',
+    padding: '3px 10px 50px 20px',
+    position: 'fixed',
+    left: '0',
+    bottom: '0',
+    height: '60px',
+    width: '100%'
   }
 });
 
@@ -653,7 +676,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             <div style={styles.previewDataHeaderBox}>
               <div style={{display: 'flex', flexDirection: 'column'}}>
               <div style={{display: 'flex', alignItems: 'flex-end'}}>
-
                 <div style={styles.previewDataHeader}>
                   <div>
                     <CircleWithText text={4} width='23.78px' height='23.78px'
@@ -720,19 +742,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           </div>
         </FadeBox>
         <div>
-          <div style={{display: 'block',
-            padding: '20px',
-            height: '60px',
-            width: '100%'}} />
-          <div style={{ backgroundColor: colors.white,
-            borderTop: `1px solid ${colors.light}`,
-            textAlign: 'right',
-            padding: '3px 20px 50px 20px',
-            position: 'fixed',
-            left: '0',
-            bottom: '0',
-            height: '60px',
-            width: '100%'}}>
+          <div style={styles.footer} />
+          <div style={styles.stickyFooter}>
             <TooltipTrigger data-test-id='save-tooltip'
             content='Requires Owner or Writer permission' disabled={this.canWrite}>
             <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
