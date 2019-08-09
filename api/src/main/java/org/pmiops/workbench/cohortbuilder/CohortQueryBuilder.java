@@ -9,8 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cohortbuilder.querybuilder.util.CriteriaLookupUtil;
-import org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants;
+import org.pmiops.workbench.cohortbuilder.util.CriteriaLookupUtil;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CohortQueryBuilder {
+  private static final String REVIEW_TABLE = "person_all_events";
   private static final String COUNT_SQL_TEMPLATE =
       "select count(*) as count\n"
           + "from `${projectId}.${dataSetId}.${table}` ${table}\n"
@@ -51,9 +51,9 @@ public class CohortQueryBuilder {
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
       "select standard_name as name, standard_concept_id as conceptId, count(distinct person_id) as count\n"
           + "from `${projectId}.${dataSetId}."
-          + QueryBuilderConstants.REVIEW_TABLE
+          + REVIEW_TABLE
           + "` "
-          + QueryBuilderConstants.REVIEW_TABLE
+          + REVIEW_TABLE
           + "\n"
           + "where\n";
 
@@ -145,12 +145,10 @@ public class CohortQueryBuilder {
             .replace("${tableId}", "standard_concept_id")
             .replace("${domain}", domainType.name());
     StringBuilder queryBuilder =
-        new StringBuilder(
-            DOMAIN_CHART_INFO_SQL_TEMPLATE.replace(
-                "${mainTable}", QueryBuilderConstants.REVIEW_TABLE));
+        new StringBuilder(DOMAIN_CHART_INFO_SQL_TEMPLATE.replace("${mainTable}", REVIEW_TABLE));
     Map<String, QueryParameterValue> params = new HashMap<>();
-    addWhereClause(participantCriteria, QueryBuilderConstants.REVIEW_TABLE, queryBuilder, params);
-    queryBuilder.append(endSqlTemplate.replace("${mainTable}", QueryBuilderConstants.REVIEW_TABLE));
+    addWhereClause(participantCriteria, REVIEW_TABLE, queryBuilder, params);
+    queryBuilder.append(endSqlTemplate.replace("${mainTable}", REVIEW_TABLE));
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
         .setNamedParameters(params)
@@ -212,40 +210,22 @@ public class CohortQueryBuilder {
       }
 
       // produces a map of matching child concept ids.
-      boolean isEnableListSearch = participantCriteria.isEnableListSearch();
       Map<SearchParameter, Set<Long>> criteriaLookup = new HashMap<>();
-      if (isEnableListSearch) {
-        try {
-          criteriaLookup = new CriteriaLookupUtil(cbCriteriaDao).buildCriteriaLookupMap(request);
-        } catch (IllegalArgumentException ex) {
-          throw new BadRequestException("Bad Request: " + ex.getMessage());
-        }
+      try {
+        criteriaLookup = new CriteriaLookupUtil(cbCriteriaDao).buildCriteriaLookupMap(request);
+      } catch (IllegalArgumentException ex) {
+        throw new BadRequestException("Bad Request: " + ex.getMessage());
       }
 
       // build query for included search groups
       StringJoiner joiner =
-          buildQuery(
-              criteriaLookup, request.getIncludes(), mainTable, params, false, isEnableListSearch);
+          buildQuery(criteriaLookup, request.getIncludes(), mainTable, params, false);
 
       // if includes is empty then don't add the excludes clause
       if (joiner.toString().isEmpty()) {
-        joiner.merge(
-            buildQuery(
-                criteriaLookup,
-                request.getExcludes(),
-                mainTable,
-                params,
-                false,
-                isEnableListSearch));
+        joiner.merge(buildQuery(criteriaLookup, request.getExcludes(), mainTable, params, false));
       } else {
-        joiner.merge(
-            buildQuery(
-                criteriaLookup,
-                request.getExcludes(),
-                mainTable,
-                params,
-                true,
-                isEnableListSearch));
+        joiner.merge(buildQuery(criteriaLookup, request.getExcludes(), mainTable, params, true));
       }
       Set<Long> participantIdsToExclude = participantCriteria.getParticipantIdsToExclude();
       if (!participantIdsToExclude.isEmpty()) {
@@ -263,13 +243,11 @@ public class CohortQueryBuilder {
       List<SearchGroup> groups,
       String mainTable,
       Map<String, QueryParameterValue> params,
-      Boolean excludeSQL,
-      Boolean isEnableListSearch) {
+      Boolean excludeSQL) {
     StringJoiner joiner = new StringJoiner("and ");
     List<String> queryParts = new ArrayList<>();
     for (SearchGroup includeGroup : groups) {
-      SearchGroupItemQueryBuilder.buildQuery(
-          criteriaLookup, params, queryParts, includeGroup, isEnableListSearch);
+      SearchGroupItemQueryBuilder.buildQuery(criteriaLookup, params, queryParts, includeGroup);
 
       if (excludeSQL) {
         joiner.add(

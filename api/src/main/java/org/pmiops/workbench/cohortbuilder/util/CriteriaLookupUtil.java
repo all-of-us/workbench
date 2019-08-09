@@ -1,7 +1,7 @@
-package org.pmiops.workbench.cohortbuilder.querybuilder.util;
+package org.pmiops.workbench.cohortbuilder.util;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.isEmpty;
+import static org.pmiops.workbench.cohortbuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.isEmpty;
 
 import com.google.api.client.util.Sets;
 import com.google.common.collect.Iterables;

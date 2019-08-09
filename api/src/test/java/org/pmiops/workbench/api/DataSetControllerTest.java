@@ -234,8 +234,6 @@ public class DataSetControllerTest {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
       workbenchConfig.featureFlags.useBillingProjectBuffer = false;
-      workbenchConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
-      workbenchConfig.cohortbuilder.enableListSearch = true;
       return workbenchConfig;
     }
   }

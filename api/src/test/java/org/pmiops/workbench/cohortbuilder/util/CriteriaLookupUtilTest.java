@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cohortbuilder.querybuilder.util;
+package org.pmiops.workbench.cohortbuilder.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

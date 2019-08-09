@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cohortbuilder.querybuilder.util;
+package org.pmiops.workbench.cohortbuilder.util;
 
 import java.text.MessageFormat;
 import java.util.function.Predicate;

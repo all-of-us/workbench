@@ -24,7 +24,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
@@ -163,8 +162,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ReviewQueryBuilder.class,
     CohortCloningService.class,
     CohortQueryBuilder.class,
-    SearchGroupItemQueryBuilder.class,
-    QueryBuilderFactory.class
+    SearchGroupItemQueryBuilder.class
   })
   @MockBean({
     FireCloudService.class,
@@ -191,7 +189,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Override
   public List<String> getTableNames() {
     return Arrays.asList(
-        "person_all_events", "person", "search_person", "search_all_domains", "criteria", "death");
+        "person_all_events", "person", "search_person", "search_all_domains", "death");
   }
 
   @Override
@@ -647,11 +645,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         new ParticipantCohortStatus().participantKey(key2);
     participantCohortStatusDao.save(participantCohortStatus2);
 
-    WorkbenchConfig testConfig = new WorkbenchConfig();
-    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
-    testConfig.cohortbuilder.enableListSearch = false;
-    when(configProvider.get()).thenReturn(testConfig);
-
     controller.setConfigProvider(configProvider);
   }
 
@@ -689,9 +682,12 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     Cohort cohortWithoutReview = new Cohort();
     cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
-    cohortWithoutReview.setCriteria(
-        "{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"CONDITION\",\"searchParameters\":[{\"parameterId\":\"param25164\","
-            + "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"CM\",\"group\":false,\"domainId\":\"Condition\",\"conceptId\":\"1\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
+    String criteria =
+        "{\"includes\":[{\"id\":\"includes_kl4uky6kh\",\"items\":[{\"id\":\"items_58myrn9iz\",\"type\":\"CONDITION\",\"searchParameters\":[{"
+            + "\"parameterId\":\"param1567486C34\",\"name\":\"Malignant neoplasm of bronchus and lung\",\"domain\":\"CONDITION\",\"type\": "
+            + "\"ICD10CM\",\"group\":true,\"attributes\":[],\"ancestorData\":false,\"standard\":false,\"conceptId\":1,\"value\":\"C34\"}],"
+            + "\"modifiers\":[]}],\"temporal\":false}],\"excludes\":[]}";
+    cohortWithoutReview.setCriteria(criteria);
     cohortDao.save(cohortWithoutReview);
 
     org.pmiops.workbench.model.CohortReview cohortReview =
