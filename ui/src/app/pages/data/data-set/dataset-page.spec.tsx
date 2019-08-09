@@ -225,7 +225,7 @@ describe('DataSet', () => {
 
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
     const wrapper = mount(<DataSetPage />);
-    const wsPathPrefix = 'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id;
+    const pathPrefix = 'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id + '/data';
 
     // Mock out navigateByUrl
     const navSpy = jest.fn();
@@ -233,11 +233,11 @@ describe('DataSet', () => {
 
     // Check Cohorts "+" link
     wrapper.find({'data-test-id': 'cohorts-link'}).first().simulate('click');
-    expect(navSpy).toHaveBeenCalledWith(wsPathPrefix + '/cohorts');
+    expect(navSpy).toHaveBeenCalledWith(pathPrefix + '/cohorts');
 
     // Check Concept Sets "+" link
     wrapper.find({'data-test-id': 'concept-sets-link'}).first().simulate('click');
-    expect(navSpy).toHaveBeenCalledWith(wsPathPrefix + '/concepts');
+    expect(navSpy).toHaveBeenCalledWith(pathPrefix + '/concepts');
   });
 
   it(' dataSet should show tooltip and disable SAVE button if user has READER access', async() => {
