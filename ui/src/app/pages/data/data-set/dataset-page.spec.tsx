@@ -233,7 +233,7 @@ describe('DataSet', () => {
 
     // Check Cohorts "+" link
     wrapper.find({'data-test-id': 'cohorts-link'}).first().simulate('click');
-    expect(navSpy).toHaveBeenCalledWith(pathPrefix + '/cohorts');
+    expect(navSpy).toHaveBeenCalledWith(pathPrefix + '/cohorts/build');
 
     // Check Concept Sets "+" link
     wrapper.find({'data-test-id': 'concept-sets-link'}).first().simulate('click');
