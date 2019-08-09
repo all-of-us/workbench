@@ -334,7 +334,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     render() {
-      const {wizard: {domain}} = this.props;
+      const {wizard: {domain, isStandard}} = this.props;
       const {data, error, ingredients, loading, results, sourceMatch} = this.state;
       const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '3.75rem'}
         : styles.listContainer;
@@ -371,7 +371,14 @@ export const ListSearch = withCurrentWorkspace()(
             &nbsp;<Clickable style={styles.vocabLink}
               onClick={() => this.getResults(sourceMatch.code)}>
               Return to source code
-          </Clickable>.
+            </Clickable>.
+          </div>}
+          {isStandard !== undefined && <div style={{...styles.error, margin: '-0.5rem 0 0.5rem'}}>
+            <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+              shape='exclamation-triangle' size='22'/>
+              You have added a {isStandard ? 'standard' : 'source'} code. To add a
+              {isStandard ? ' source' : ' standard'} code to your cohort, add another "AND" group
+               once you've clicked the FINISH button below.
           </div>}
           {!!data.length && <table className='p-datatable' style={styles.table}>
             <thead className='p-datatable-thead'>
