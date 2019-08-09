@@ -46,15 +46,7 @@ const styles = reactStyles({
   }
 });
 
-// Commenting out the title for Export to a notebook as part of RW-3226/3224
-// since export to notebook is not yet here but will be coming soon
 const actionCards = [
-  // {
-  //   title: 'Export to a Notebook',
-  //   description: `Data can be exported to a cloud-based Jupyter notebook for analysis using R or
-  //     Python programming language.`,
-  //   action: 'notebook'
-  // },
   {
     title: 'Create a Data Set',
     description: `Here, you can build and preview a data set for one or more cohorts by
