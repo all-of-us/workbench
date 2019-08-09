@@ -184,7 +184,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         <div style={styles.cardButtonArea}>
           <TooltipTrigger content={!writePermission &&
           `Write permission required to create cohorts`} side='top'>
-            <CardButton style={{...styles.resourceTypeButton}} disabled={!writePermission}
+            <CardButton style={styles.resourceTypeButton} disabled={!writePermission}
                         onClick={() => {
                           navigate(['workspaces', namespace, id, 'data', 'cohorts', 'build']);
                         }}>
