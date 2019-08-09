@@ -719,7 +719,7 @@ where domain_id = 'SURVEY'
     and type = 'PPI'
 order by 1"
 
-echo "PPI SURVEYS - generate answer counts for all questions EXCEPT 1585747"
+echo "PPI SURVEYS - generate answer counts for all questions EXCEPT where question concept_id = 1585747"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 set x.est_count = y.cnt
@@ -746,7 +746,7 @@ where x.domain_id = 'SURVEY'
     and x.concept_id = y.concept_id
     and x.value = y.value"
 
-echo "PPI SURVEYS - generate answer counts for 1585747"
+echo "PPI SURVEYS - generate answer counts for question (concept_id = 1585747)"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 set x.est_count = y.cnt
@@ -2758,70 +2758,6 @@ from
 
 
 ################################################
-# SYNONYMS
-################################################
-echo "SYNONYMS - add synonym data to criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-set x.synonyms = y.synonyms
-from
-    (
-        select c.id,
-        case
-            when c.name is not null and string_agg(replace(cs.concept_synonym_name,'|','||'),'|') is null then c.name
-            else concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-        end as synonyms
-        from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
-        left join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs on c.concept_id = cs.concept_id
-        where domain_id not in ('SURVEY', 'PERSON')
-        group by c.id, c.name, c.code
-    ) y
-where x.id = y.id"
-
-echo "SYNONYMS - add demographics synonym data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-set x.synonyms = y.synonyms
-from
-    (
-        select id,
-        case
-            when type = 'AGE' and parent_id = 0 then 'Age'
-            when type = 'DECEASED' and parent_id = 0 then 'Deceased'
-            when type = 'GENDER' and parent_id = 0 then 'Gender'
-            when type = 'RACE' and parent_id = 0 then 'Race'
-            when type = 'ETHNICITY' and parent_id = 0 then 'Ethnicity'
-            when type = 'AGE' and parent_id != 0 then null
-        else name
-        end as synonyms
-        from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-        where domain_id = 'PERSON'
-    ) y
-where x.id = y.id"
-
-echo "SYNONYMS - add PPI synonym data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-set x.synonyms = x.name
-where domain_id in ('SURVEY')"
-
-# add [rank1] for all items. this is to deal with the poly-hierarchical issue in many trees
-echo "SYNONYMS - add [rank1]"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-set x.synonyms = CONCAT(x.synonyms, '|', y.rnk)
-from
-    (
-        select min(id) as id, CONCAT('[', LOWER(domain_id), '_rank1]') as rnk
-        from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-        where synonyms is not null
-            and (est_count != -1 OR (est_count = -1 AND type = 'BRAND'))
-        group by domain_id, is_standard, type, subtype, concept_id, name
-    ) y
-where x.id = y.id"
-
-
-################################################
 # CRITERIA ANCESTOR
 ################################################
 echo "CRITERIA_ANCESTOR - Drugs - add ingredients to drugs mapping"
@@ -2888,7 +2824,7 @@ echo "CRITERIA_ATTRIBUTES - Measurements - add categorical results"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     (id, concept_id, value_as_concept_Id, concept_name, type, est_count)
-select ROW_NUMBER() OVER(order by measurement_concept_id), *
+select ROW_NUMBER() OVER(order by measurement_concept_id) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`) as id, *
 from
     (
         select measurement_concept_id, value_as_concept_id, b.concept_name, 'CAT' as type, CAST(count(distinct person_id) as STRING)
@@ -2976,6 +2912,70 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET name = REGEXP_REPLACE(name, r'[\"]', '')
 WHERE REGEXP_CONTAINS(name, r'[\"]')"
+
+
+################################################
+# SYNONYMS
+################################################
+echo "SYNONYMS - add synonym data to criteria"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+set x.synonyms = y.synonyms
+from
+    (
+        select c.id,
+        case
+            when c.name is not null and string_agg(replace(cs.concept_synonym_name,'|','||'),'|') is null then c.name
+            else concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+        end as synonyms
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
+        left join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs on c.concept_id = cs.concept_id
+        where domain_id not in ('SURVEY', 'PERSON')
+        group by c.id, c.name, c.code
+    ) y
+where x.id = y.id"
+
+echo "SYNONYMS - add demographics synonym data"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+set x.synonyms = y.synonyms
+from
+    (
+        select id,
+        case
+            when type = 'AGE' and parent_id = 0 then 'Age'
+            when type = 'DECEASED' and parent_id = 0 then 'Deceased'
+            when type = 'GENDER' and parent_id = 0 then 'Gender'
+            when type = 'RACE' and parent_id = 0 then 'Race'
+            when type = 'ETHNICITY' and parent_id = 0 then 'Ethnicity'
+            when type = 'AGE' and parent_id != 0 then null
+        else name
+        end as synonyms
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        where domain_id = 'PERSON'
+    ) y
+where x.id = y.id"
+
+echo "SYNONYMS - add PPI synonym data"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+set x.synonyms = x.name
+where domain_id in ('SURVEY')"
+
+# add [rank1] for all items. this is to deal with the poly-hierarchical issue in many trees
+echo "SYNONYMS - add [rank1]"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+set x.synonyms = CONCAT(x.synonyms, '|', y.rnk)
+from
+    (
+        select min(id) as id, CONCAT('[', LOWER(domain_id), '_rank1]') as rnk
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+        where synonyms is not null
+            and (est_count != -1 OR (est_count = -1 AND type = 'BRAND'))
+        group by domain_id, is_standard, type, subtype, concept_id, name
+    ) y
+where x.id = y.id"
 
 
 ################################################
