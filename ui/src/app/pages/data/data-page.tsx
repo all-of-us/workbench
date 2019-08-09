@@ -71,24 +71,14 @@ enum Tabs {
 }
 
 const descriptions = {
-  data: `The Data Tab is the gateway to all Workbench tools and
-  All of Us Research data that will help you complete your research project.
-  Here, you can build a  cohorts of participants, select concept sets of
-  interest and build analysis-ready tables from the two called datasets.`,
-  datasets: `Datasets are analysis-ready tables that can be exported to
-  analysis tools such as Notebooks. Users can build and preview a dataset
-  for one or more cohorts by selecting the desired concept sets and values
-  for the cohorts. `,
-  cohorts: `A “Cohort” is a group of participants that researchers are
-  interested in. The cohort builder allows you to create and review cohorts
-  and annotate participants in a researcher’s study group.`,
-  conceptSets: `Concepts describe information in a patient’s medical record,
-  such as a condition, a  prescription they are taking or their vital signs.
-  Subject areas such as conditions, drugs, measurements etc. are called “domains”.
-  Users can search for and save collections of concepts from a particular domain
-  as a “Concept set” and then  use concept sets and cohorts to create a dataset,
-  which can be used for analysis.`
+  datasets: `A dataset is a table containing data about a Cohort that can
+  be exported for analysis. `,
+  cohorts: `A cohort is a group of participants based on specific criteria.`,
 };
+
+const cohortImg = '/assets/images/cohort-diagram.svg';
+
+const dataSetImg = '/assets/images/dataset-diagram.svg';
 
 export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
@@ -190,9 +180,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       }
     });
     return <React.Fragment>
-      <FadeBox style={{marginTop: '1rem'}}>
-        <h2 style={{marginTop: 0}}>Data</h2>
-        <div style={{color: colors.primary, fontSize: '14px'}}>{descriptions.data}</div>
+      <div style={{paddingLeft: '1.5rem'}}>
         <div style={styles.cardButtonArea}>
           <TooltipTrigger content={!writePermission &&
           `Write permission required to create cohorts`} side='top'>
@@ -207,21 +195,8 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <div style={styles.cardText}>
                 {descriptions.cohorts}
               </div>
-            </CardButton>
-          </TooltipTrigger>
-          <TooltipTrigger content={!writePermission &&
-          `Write permission required to create concept sets`} side='top'>
-            <CardButton style={styles.resourceTypeButton}
-                        disabled={!writePermission}
-                        onClick={() => {
-                          navigate(['workspaces', namespace, id, 'data', 'concepts']);
-                        }}>
-              <div style={styles.cardHeader}>
-                <h2 style={styles.cardHeaderText(!writePermission)}>Concept Sets</h2>
-                <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
-              </div>
-              <div style={styles.cardText}>
-                {descriptions.conceptSets}
+              <div style={{width: '100%', paddingTop: '1rem'}}>
+                <img src={cohortImg}/>
               </div>
             </CardButton>
           </TooltipTrigger>
@@ -240,10 +215,13 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <div style={styles.cardText}>
                 {descriptions.datasets}
               </div>
+              <div style={{width: '100%', paddingTop: '1.5rem'}}>
+                <img src={dataSetImg}/>
+              </div>
             </CardButton>
           </TooltipTrigger>
         </div>
-      </FadeBox>
+      </div>
       <FadeBox style={{marginTop: '1rem'}}>
         <div style={styles.tabContainer}>
           <h2 style={{margin: 0,
