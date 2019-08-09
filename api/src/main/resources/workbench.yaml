@@ -1345,6 +1345,47 @@ paths:
           schema:
             $ref: "#/definitions/CohortReviewListResponse"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews/{cohortReviewId}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - in: path
+        name: cohortReviewId
+        type: integer
+        format: int64
+        required: true
+        description: specifies which cohort review
+    patch:
+      tags:
+        - cohortReview
+      consumes:
+        - application/json
+      description: >
+        Modifies the cohort review with the specified ID; fields that are omitted
+        will not be modified
+      operationId: "updateCohortReview"
+      parameters:
+        - in: body
+          name: cohortReview
+          description: cohort review
+          schema:
+            $ref: "#/definitions/CohortReview"
+      responses:
+        200:
+          description: The updated cohort review
+          schema:
+            $ref: "#/definitions/CohortReview"
+    delete:
+      tags:
+        - cohortReview
+      description: Deletes the cohort review with the specified ID
+      operationId: "deleteCohortReview"
+      responses:
+        202:
+          description: ACCEPTED
+          schema:
+            $ref: '#/definitions/EmptyResponse'
+
   # Cohorts ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
@@ -2276,7 +2317,7 @@ definitions:
   WorkspaceActiveStatus:
     type: string
     description: Status of workspace
-    enum: [ACTIVE, DELETED]
+    enum: [ACTIVE, DELETED, PENDING_DELETION_POST_1PPW_MIGRATION]
 
   ResearchPurpose:
     type: object
@@ -3455,6 +3496,8 @@ definitions:
         type: string
       cohort:
         $ref: "#/definitions/Cohort"
+      cohortReview:
+        $ref: "#/definitions/CohortReview"
       notebook:
         $ref: '#/definitions/FileDetail'
       conceptSet:

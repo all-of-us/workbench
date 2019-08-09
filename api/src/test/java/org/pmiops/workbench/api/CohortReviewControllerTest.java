@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.inject.Provider;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,11 +33,6 @@ import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
-import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
-import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
@@ -46,6 +40,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -65,6 +60,8 @@ import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.PageFilterRequest;
@@ -86,13 +83,20 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
+@ComponentScan(
+    basePackages = {"org.pmiops.workbench.cohortbuilder", "org.pmiops.workbench.cohortreview"})
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CohortReviewControllerTest {
 
   private static final String WORKSPACE_NAMESPACE = "namespace";
@@ -136,7 +140,11 @@ public class CohortReviewControllerTest {
 
   @Autowired private BigQueryService bigQueryService;
 
+  @Autowired private UserDao userDao;
+
   @Mock private Provider<WorkbenchConfig> configProvider;
+
+  @Mock private Provider<User> userProvider;
 
   private enum TestDemo {
     ASIAN("Asian", 8515),
@@ -148,7 +156,7 @@ public class CohortReviewControllerTest {
     private final String name;
     private final long conceptId;
 
-    private TestDemo(String name, long conceptId) {
+    TestDemo(String name, long conceptId) {
       this.name = name;
       this.conceptId = conceptId;
     }
@@ -163,22 +171,12 @@ public class CohortReviewControllerTest {
   }
 
   @TestConfiguration
-  @Import({
-    CdrVersionService.class,
-    CohortReviewController.class,
-    CohortReviewServiceImpl.class,
-    CohortQueryBuilder.class,
-    SearchGroupItemQueryBuilder.class,
-    ReviewQueryBuilder.class,
-    QueryBuilderFactory.class,
-    SearchGroupItemQueryBuilder.class
-  })
+  @Import({CdrVersionService.class, CohortReviewController.class})
   @MockBean({
     BigQueryService.class,
     FireCloudService.class,
     UserRecentResourceService.class,
-    WorkspaceService.class,
-    User.class
+    WorkspaceService.class
   })
   static class Configuration {
     @Bean
@@ -212,6 +210,15 @@ public class CohortReviewControllerTest {
 
   @Before
   public void setUp() {
+    User user = new User();
+    user.setEmail("bob@gmail.com");
+    user.setUserId(123L);
+    user.setDisabled(false);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+    user = userDao.save(user);
+    when(userProvider.get()).thenReturn(user);
+    cohortReviewController.setUserProvider(userProvider);
+
     cdrVersion = new CdrVersion();
     cdrVersion.setBigqueryDataset("dataSetId");
     cdrVersion.setBigqueryProject("projectId");
@@ -220,7 +227,9 @@ public class CohortReviewControllerTest {
 
     workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
-    workspace.setName("name");
+    workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
+    workspace.setName(WORKSPACE_NAME);
+    workspace.setFirecloudName(WORKSPACE_NAME);
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
@@ -233,6 +242,8 @@ public class CohortReviewControllerTest {
 
     cohortWithoutReview = new Cohort();
     cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
+    cohortWithoutReview.setName("test");
+    cohortWithoutReview.setDescription("test desc");
     cohortWithoutReview.setCriteria(
         "{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"CONDITION\",\"searchParameters\":[{\"parameterId\":\"param25164\","
             + "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"CM\",\"group\":false,\"domainId\":\"Condition\",\"conceptId\":\"1\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
@@ -240,13 +251,12 @@ public class CohortReviewControllerTest {
 
     Timestamp today = new Timestamp(new Date().getTime());
     cohortReview =
-        cohortReviewDao
-            .save(
-                new CohortReview()
-                    .cohortId(cohort.getCohortId())
-                    .cdrVersionId(cdrVersion.getCdrVersionId()))
-            .reviewSize(2)
-            .creationTime(today);
+        cohortReviewDao.save(
+            new CohortReview()
+                .cohortId(cohort.getCohortId())
+                .cdrVersionId(cdrVersion.getCdrVersionId())
+                .reviewSize(2)
+                .creationTime(today));
 
     ParticipantCohortStatusKey key1 =
         new ParticipantCohortStatusKey()
@@ -337,23 +347,6 @@ public class CohortReviewControllerTest {
     cohortReviewController.setConfigProvider(configProvider);
   }
 
-  @After
-  public void tearDown() {
-    cohortAnnotationDefinitionDao.delete(stringAnnotationDefinition);
-    cohortAnnotationDefinitionDao.delete(enumAnnotationDefinition);
-    cohortAnnotationDefinitionDao.delete(dateAnnotationDefinition);
-    cohortAnnotationDefinitionDao.delete(booleanAnnotationDefinition);
-    cohortAnnotationDefinitionDao.delete(integerAnnotationDefinition);
-    participantCohortStatusDao.delete(participantCohortStatus1);
-    participantCohortStatusDao.delete(participantCohortStatus2);
-    cohortReviewDao.delete(cohortReview);
-    cohortDao.delete(cohort);
-    cohortDao.delete(cohortWithoutReview);
-    workspaceDao.delete(workspace);
-    cdrVersionDao.delete(cdrVersion);
-    participantCohortAnnotationDao.delete(participantAnnotation);
-  }
-
   @Test
   public void createCohortReviewLessThanMinSize() throws Exception {
     try {
@@ -434,6 +427,8 @@ public class CohortReviewControllerTest {
             .getBody();
 
     assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
+    assertThat(cohortReview.getCohortName()).isEqualTo(cohortWithoutReview.getName());
+    assertThat(cohortReview.getDescription()).isEqualTo(cohortWithoutReview.getDescription());
     assertThat(cohortReview.getReviewSize()).isEqualTo(1);
     assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
     assertThat(cohortReview.getParticipantCohortStatuses().get(0).getStatus())
@@ -491,6 +486,52 @@ public class CohortReviewControllerTest {
               + badWorkspaceName,
           nfe.getMessage());
     }
+  }
+
+  @Test
+  public void updateCohortReview() throws Exception {
+    when(workspaceService.enforceWorkspaceAccessLevel(
+            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
+        .thenReturn(WorkspaceAccessLevel.WRITER);
+
+    org.pmiops.workbench.model.CohortReview requestCohortReview =
+        new org.pmiops.workbench.model.CohortReview()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .etag(Etags.fromVersion(cohortReview.getVersion()));
+    requestCohortReview.setCohortName("blahblah");
+    requestCohortReview.setDescription("new desc");
+    org.pmiops.workbench.model.CohortReview responseCohortReview =
+        cohortReviewController
+            .updateCohortReview(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_NAME,
+                requestCohortReview.getCohortReviewId(),
+                requestCohortReview)
+            .getBody();
+
+    assertThat(responseCohortReview.getCohortName()).isEqualTo(requestCohortReview.getCohortName());
+    assertThat(responseCohortReview.getDescription())
+        .isEqualTo(requestCohortReview.getDescription());
+    assertThat(responseCohortReview.getLastModifiedTime()).isNotNull();
+  }
+
+  @Test
+  public void deleteCohortReview() throws Exception {
+    when(workspaceService.enforceWorkspaceAccessLevel(
+            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
+        .thenReturn(WorkspaceAccessLevel.WRITER);
+
+    org.pmiops.workbench.model.CohortReview requestCohortReview =
+        new org.pmiops.workbench.model.CohortReview()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .etag(Etags.fromVersion(cohortReview.getVersion()));
+    EmptyResponse emptyResponse =
+        cohortReviewController
+            .deleteCohortReview(
+                WORKSPACE_NAMESPACE, WORKSPACE_NAME, requestCohortReview.getCohortReviewId())
+            .getBody();
+
+    assertThat(emptyResponse).isNotNull();
   }
 
   @Test

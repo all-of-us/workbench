@@ -8,7 +8,6 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {environment} from 'environments/environment';
 import {Cohort} from 'generated/fetch';
 import * as React from 'react';
 
@@ -101,7 +100,7 @@ const CohortActions = withCurrentWorkspace()(
               currentCohortStore.next(c);
               this.setState({cohort: c, cohortLoading: false});
             } else {
-              navigate(['workspaces', namespace, id, 'cohorts']);
+              navigate(['workspaces', namespace, id, 'data', 'cohorts']);
             }
           });
         }
@@ -114,10 +113,10 @@ const CohortActions = withCurrentWorkspace()(
       let url = `/workspaces/${namespace}/${id}/`;
       switch (action) {
         case 'cohort':
-          url += `cohorts/build?cohortId=${cohort.id}`;
+          url += `data/cohorts/build?cohortId=${cohort.id}`;
           break;
         case 'review':
-          url += `cohorts/${cohort.id}/review`;
+          url += `data/cohorts/${cohort.id}/review`;
           break;
         case 'notebook':
           url += 'notebooks';
@@ -147,8 +146,7 @@ const CohortActions = withCurrentWorkspace()(
           <h3 style={{...styles.cohortsHeader, marginTop: '1.5rem'}}>What Next?</h3>
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
-              const disabled = card.action === 'notebook' ||
-                (card.action === 'dataSet' && !environment.enableDatasetBuilder);
+              const disabled = card.action === 'notebook' || card.action === 'dataSet';
               return <ActionCardBase key={i} style={styles.card}>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                   <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>

@@ -1,7 +1,7 @@
 import {
   CohortChartDataListResponse,
   CohortReview,
-  CohortReviewApi,
+  CohortReviewApi, CohortReviewListResponse,
   CohortStatus,
   DomainType,
   EmptyResponse,
@@ -33,7 +33,7 @@ const criteriaStub = {
   excludes: []
 };
 
-export const cohortReviewStub = {
+export const cohortReviewStubs = [{
   cohortReviewId: 1,
   cohortId: 1,
   cdrVersionId: 1,
@@ -50,7 +50,7 @@ export const cohortReviewStub = {
   pageSize: 1,
   sortOrder: '',
   sortColumn: '',
-};
+}];
 
 const participantAnnotationStub = {
   cohortAnnotationDefinitionId: 1,
@@ -100,7 +100,7 @@ export class CohortReviewServiceStub extends CohortReviewApi {
   }
 
   getParticipantCohortStatuses(): Promise<CohortReview> {
-    return new Promise<CohortReview>(resolve => resolve(cohortReviewStub));
+    return new Promise<CohortReview>(resolve => resolve(cohortReviewStubs[0]));
   }
 
   getParticipantData(): Promise<ParticipantDataListResponse> {
@@ -138,10 +138,13 @@ export class CohortReviewServiceStub extends CohortReviewApi {
   }
   createCohortReview() {
     return new Promise<CohortReview>(resolve => {
-      resolve(cohortReviewStub);
+      resolve(cohortReviewStubs[0]);
     });
   }
   getVocabularies(): Promise<VocabularyListResponse> {
     return new Promise<VocabularyListResponse>(resolve => resolve({items: []}));
+  }
+  getCohortReviewsInWorkspace(): Promise<CohortReviewListResponse> {
+    return new Promise<CohortReviewListResponse>(resolve => resolve({items: cohortReviewStubs}));
   }
 }

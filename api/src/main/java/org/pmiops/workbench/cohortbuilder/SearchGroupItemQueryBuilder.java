@@ -228,12 +228,6 @@ public final class SearchGroupItemQueryBuilder {
   private static String buildDemoSql(
       Map<String, QueryParameterValue> queryParams, SearchGroupItem searchGroupItem) {
     List<SearchParameter> parameters = searchGroupItem.getSearchParameters();
-    // The UI implementation of demographics only allows for 1 search parameter per search group
-    // item
-    if (parameters.size() != 1) {
-      throw new BadRequestException(
-          "Search unsupported for demographics with more/less than one search parameter.");
-    }
     SearchParameter param = parameters.get(0);
     switch (CriteriaType.valueOf(param.getType())) {
       case AGE:
@@ -459,7 +453,7 @@ public final class SearchGroupItemQueryBuilder {
       Map<SearchParameter, Set<Long>> criteriaLookup, List<SearchParameter> params) {
     Set<Long> out = Sets.newHashSet();
     for (SearchParameter param : params) {
-      if (param.getGroup()) {
+      if (param.getGroup() || param.getAncestorData()) {
         out.addAll(criteriaLookup.get(param));
       }
       if (param.getConceptId() != null) {

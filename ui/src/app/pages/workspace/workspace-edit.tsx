@@ -547,7 +547,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               accessLevel: ws.accessLevel
             }));
         }
-        navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+        navigate(['workspaces', workspace.namespace, workspace.id, 'about']);
       } catch (error) {
         console.log(error);
         this.setState({loading: false});

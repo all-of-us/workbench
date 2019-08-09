@@ -106,7 +106,7 @@ paths:
       - $ref: '#/parameters/cdrVersionId'
     post:
       tags:
-          - cohortReview
+        - cohortReview
       consumes:
         - application/json
       description:  >
@@ -269,8 +269,8 @@ paths:
       consumes:
         - application/json
       description:  >
-            Returns a collection of participant data for the specified params based off the PageFilterRequest. This endpoint
-            does pagination based on page, limit, order and column.
+        Returns a collection of participant data for the specified params based off the PageFilterRequest. This endpoint
+        does pagination based on page, limit, order and column.
       operationId: "getParticipantData"
       parameters:
         - in: body
@@ -466,11 +466,23 @@ definitions:
       cdrVersionId:
         type: integer
         format: int64
+      etag:
+        type: string
+        description: >
+          Entity tag for optimistic concurrency control. To be set during a
+          read-modify-write to ensure that the client has not attempted to
+          modify a changed resource.
       creationTime:
         type: string
+      lastModifiedTime:
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
       cohortDefinition:
         type: string
       cohortName:
+        type: string
+      description:
         type: string
       matchedParticipantCount:
         type: integer
@@ -736,7 +748,7 @@ definitions:
       items:
         type: "array"
         items:
-         $ref: "#/definitions/ParticipantData"
+          $ref: "#/definitions/ParticipantData"
       count:
         type: integer
         format: int64

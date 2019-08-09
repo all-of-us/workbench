@@ -880,6 +880,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .group(true)
             .ancestorData(true)
             .standard(true)
+            .selectable(true)
             .conceptId("21600932");
     saveCriteriaWithPath("0", drugCriteria1);
     CBCriteria drugCriteria2 =

@@ -11,7 +11,8 @@
     "registeredDomainName": "all-of-us-registered-staging",
     "billingRetryCount": 2,
     "billingProjectBufferCapacity": 10,
-    "xAppIdValue": "staging-AoU-RW"
+    "xAppIdValue": "staging-AoU-RW",
+    "vpcServicePerimeterName": ""
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -68,6 +69,7 @@
     "enableLeoWelder": true,
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": false,
-    "enableVpcFlowLogs": false
+    "enableVpcFlowLogs": true,
+    "enableVpcServicePerimeter": false
   }
 }

@@ -36,6 +36,7 @@ import {
   Profile, UserRole,
 } from 'generated/fetch';
 import * as React from 'react';
+import RSelect from 'react-select';
 
 const styles = reactStyles({
   fadeBox: {
@@ -302,7 +303,7 @@ export const WorkspaceList = withUserProfile()
 
   componentDidMount() {
     this.checkBillingProjectStatus();
-    this.reloadWorkspaces();
+    this.reloadWorkspaces(null);
   }
 
   componentDidUpdate() {
@@ -315,13 +316,15 @@ export const WorkspaceList = withUserProfile()
     clearTimeout(this.timer);
   }
 
-  async reloadWorkspaces() {
+  async reloadWorkspaces(filter) {
+    filter = filter ? filter : (() => true);
     this.setState({workspacesLoading: true});
     try {
-      const workspacesReceived = await workspacesApi().getWorkspaces();
-      workspacesReceived.items.sort(
+      const workspacesReceived = (await workspacesApi().getWorkspaces())
+        .items.filter(response => filter(response.accessLevel));
+      workspacesReceived.sort(
         (a, b) => a.workspace.name.localeCompare(b.workspace.name));
-      this.setState({workspaceList: workspacesReceived.items
+      this.setState({workspaceList: workspacesReceived
           .map(w => new WorkspacePermissions(w))});
       this.setState({workspacesLoading: false});
     } catch (e) {
@@ -341,7 +344,6 @@ export const WorkspaceList = withUserProfile()
     }
   }
 
-
   render() {
     const {profileState: {profile}} = this.props;
     const {
@@ -354,10 +356,27 @@ export const WorkspaceList = withUserProfile()
     const canCreateWorkspaces = billingProjectInitialized ||
       serverConfigStore.getValue().useBillingProjectBuffer;
 
+    // Maps each "Filter by" dropdown element to a set of access levels to display.
+    const filters = [
+      { label: 'Owner',  value: ['OWNER'] },
+      { label: 'Writer', value: ['WRITER'] },
+      { label: 'Reader', value: ['READER'] },
+      { label: 'All',    value: ['OWNER', 'READER', 'WRITER'] },
+    ];
+    const defaultFilter = filters.find(f => f.label === 'All');
+
     return <React.Fragment>
       <FadeBox style={styles.fadeBox}>
         <div style={{padding: '0 1rem'}}>
           <ListPageHeader>Workspaces</ListPageHeader>
+          <div style={{marginTop: '0.5em', display: 'flex', flexDirection: 'row'}}>
+            <div style={{margin: '0', padding: '0.5em 0.75em 0 0'}}>Filter by</div>
+            <RSelect options={filters}
+              defaultValue={defaultFilter}
+              onChange={(levels) => {
+                this.reloadWorkspaces(level => levels.value.includes(level));
+              }}/>
+          </div>
           {errorText && <AlertDanger>
             <ClrIcon shape='exclamation-circle'/>
             {errorText}
@@ -376,7 +395,7 @@ export const WorkspaceList = withUserProfile()
                   return <WorkspaceCard key={wp.workspace.name}
                                         wp={wp}
                                         userEmail={profile.username}
-                                        reload={() => this.reloadWorkspaces()}/>;
+                                        reload={() => this.reloadWorkspaces(null)}/>;
                 })}
               </div>)}
           </div>

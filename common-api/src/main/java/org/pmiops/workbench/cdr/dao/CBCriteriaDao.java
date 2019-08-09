@@ -46,17 +46,18 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
    */
   @Query(
       value =
-          "select ca.descendant_id as id,parent_id,domain_id,is_standard,type,subtype,ca.descendant_id as concept_id,code,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy,"
+          "select distinct ca.descendant_id as id,parent_id,domain_id,is_standard,type,subtype,ca.descendant_id as concept_id,code,name,value,est_count,is_group,is_selectable,has_attribute,has_hierarchy,"
               + "has_ancestor_data,path,synonyms "
               + "from cb_criteria_ancestor ca "
               + "   join (select a.* "
               + "           from cb_criteria a "
-              + "           join (select concat('%.', id, '%') as path, id "
+              + "           join (select concat('%.', id, '%') as path "
               + "                   from cb_criteria "
-              + "                  where concept_id in (:parentConceptIds) "
-              + "                    and domain_id = :domain "
+              + "                  where domain_id = :domain "
               + "                    and type = :type "
-              + "                    and is_group = :group) b "
+              + "                    and is_group = :group "
+              + "                    and is_selectable = 1 "
+              + "                    and concept_id in (:parentConceptIds)) b "
               + "             on (a.path like b.path) "
               + "          where domain_id = :domain "
               + "            and is_group = 0  "
@@ -68,7 +69,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
               + " has_ancestor_data,a.path,synonyms "
               + "  from cb_criteria a "
               + "  where domain_id = :domain "
-              + "   and type = :type"
+              + "   and type = 'ATC' "
               + "   and concept_id in (:parentConceptIds)",
       nativeQuery = true)
   List<CBCriteria> findCriteriaAncestors(

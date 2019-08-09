@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
-import {DataSetGuard} from './guards/dataset-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
@@ -13,11 +12,9 @@ import {AdminUserComponent} from './pages/admin/admin-user';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect/component';
 import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
-import {CohortListComponent} from './pages/data/cohort/cohort-list';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
-import {ConceptSetListComponent} from './pages/data/concept/concept-set-list';
 import {HomepageComponent} from './pages/homepage/homepage';
 import {SignInComponent} from './pages/login/sign-in';
 import {ProfilePageComponent} from './pages/profile/profile-page';
@@ -127,7 +124,8 @@ const routes: Routes = [
                     path: ':nbName',
                     component: NotebookRedirectComponent,
                     data: {
-                      pathElementForTitle: 'nbName',  // use the (urldecoded) captured value nbName
+                      // use the (urldecoded) captured value nbName
+                      pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
                       minimizeChrome: true
                     }
@@ -141,50 +139,9 @@ const routes: Routes = [
                     }
                   }
                 ]
-              }, {
-                path: 'cohorts',
-                children: [
-                  {
-                    path: '',
-                    component: CohortListComponent,
-                    data: {
-                      title: 'View Cohorts',
-                      breadcrumb: BreadcrumbType.Workspace
-                    },
-                  },
-                  {
-                    path: ':cid/actions',
-                    component: CohortActionsComponent,
-                    data: {
-                      title: 'Cohort Actions',
-                      breadcrumb: BreadcrumbType.Cohort
-                    },
-                  },
-                  {
-                    path: 'build',
-                    loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
-                  },
-                  {
-                    path: ':cid/review',
-                    loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
-                    data: {
-                      title: 'Cohort',
-                    },
-                  }
-                ]
-              },
-              {
-                path: 'concepts',
-                component: ConceptHomepageComponent,
-                data: {
-                  title: 'Search Concepts',
-                  breadcrumb: BreadcrumbType.Workspace
-                }
               },
               {
                 path: 'data',
-                canActivate: [DataSetGuard],
-                canActivateChild: [DataSetGuard],
                 children: [
                   {
                     path: '',
@@ -209,33 +166,57 @@ const routes: Routes = [
                       title: 'Edit Data Set',
                       breadcrumb: BreadcrumbType.Dataset
                     }
+                  }, {
+                    path: 'cohorts',
+                    children: [
+                      {
+                        path: ':cid/actions',
+                        component: CohortActionsComponent,
+                        data: {
+                          title: 'Cohort Actions',
+                          breadcrumb: BreadcrumbType.Cohort
+                        },
+                      },
+                      {
+                        path: 'build',
+                        loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
+                      },
+                      {
+                        path: ':cid/review',
+                        loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
+                        data: {
+                          title: 'Cohort',
+                        },
+                      }
+                    ]
+                  },
+                  {
+                    path: 'concepts',
+                    component: ConceptHomepageComponent,
+                    data: {
+                      title: 'Search Concepts',
+                      breadcrumb: BreadcrumbType.SearchConcepts
+                    }
+                  },
+                  {
+                    path: 'concepts/sets',
+                    children: [{
+                      path: ':csid',
+                      component: ConceptSetDetailsComponent,
+                      data: {
+                        title: 'Concept Set',
+                        breadcrumb: BreadcrumbType.ConceptSet
+                      },
+                    }, {
+                      path: ':csid/actions',
+                      component: ConceptSetActionsComponent,
+                      data: {
+                        title: 'Concept Set Actions',
+                        breadcrumb: BreadcrumbType.ConceptSet
+                      },
+                    }, ]
                   }
                 ]
-              },
-              {
-                path: 'concepts/sets',
-                children: [{
-                  path: '',
-                  component: ConceptSetListComponent,
-                  data: {
-                    title: 'View Concept Sets',
-                    breadcrumb: BreadcrumbType.Workspace
-                  }
-                }, {
-                  path: ':csid',
-                  component: ConceptSetDetailsComponent,
-                  data: {
-                    title: 'Concept Set',
-                    breadcrumb: BreadcrumbType.ConceptSet
-                  },
-                }, {
-                  path: ':csid/actions',
-                  component: ConceptSetActionsComponent,
-                  data: {
-                    title: 'Concept Set Actions',
-                    breadcrumb: BreadcrumbType.ConceptSet
-                  },
-                }, ]
               }]
           }]
       },
@@ -265,7 +246,6 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
-    DataSetGuard,
     RegistrationGuard,
     SignInGuard,
   ]

@@ -19,6 +19,7 @@ export default {
   accent: '#216FB4',
   resourceCardHighlights: {
     cohort: '#F8C954',
+    cohortReview: '#A8385D',
     conceptSet: '#A27BD7',
     dataSet: '#6CACE4',
     notebook: '#8BC990'

@@ -28,14 +28,15 @@ import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
+import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactory;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
-import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -43,6 +44,7 @@ import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -57,6 +59,7 @@ import org.pmiops.workbench.model.Condition;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.Drug;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Lab;
 import org.pmiops.workbench.model.Observation;
 import org.pmiops.workbench.model.PageFilterType;
@@ -141,7 +144,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private FireCloudService mockFireCloudService;
 
+  @Autowired private UserDao userDao;
+
   @Mock private Provider<WorkbenchConfig> configProvider;
+
+  @Mock private Provider<User> userProvider;
 
   private Cohort cohort;
   private CohortReview review;
@@ -194,6 +201,15 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
+
+    User user = new User();
+    user.setEmail("bob@gmail.com");
+    user.setUserId(123L);
+    user.setDisabled(false);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+    user = userDao.save(user);
+    when(userProvider.get()).thenReturn(user);
+    controller.setUserProvider(userProvider);
 
     expectedAllEvents1 =
         new AllEvents()
@@ -611,6 +627,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .cdrVersionId(cdrVersion.getCdrVersionId())
             .matchedParticipantCount(212)
             .creationTime(new Timestamp(new Date().getTime()))
+            .lastModifiedTime(new Timestamp(new Date().getTime()))
             .cohortId(cohort.getCohortId());
     cohortReviewDao.save(review);
 
@@ -657,8 +674,10 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .cohortName(review.getCohortName())
             .cohortId(review.getCohortId())
             .creationTime(review.getCreationTime().toString())
+            .lastModifiedTime(review.getLastModifiedTime().getTime())
             .matchedParticipantCount(review.getMatchedParticipantCount())
-            .reviewedCount(review.getReviewedCount());
+            .reviewedCount(review.getReviewedCount())
+            .etag(Etags.fromVersion(review.getVersion()));
     assertEquals(
         expectedReview,
         controller.getCohortReviewsInWorkspace(NAMESPACE, NAME).getBody().getItems().get(0));

@@ -47,12 +47,4 @@ export interface Environment {
   // See RW-1966 for details.
   // Exit criteria: remove flag for Athens release.
   enableJupyterLab: boolean;
-
-  // Whether users should be able to see the dataset builder.
-  // See RW-2169 for details
-  // Exit Criteria: remove flag for Bedford release.
-  enableDatasetBuilder: boolean;
-
-  // Whether users should be able to see the new UI for cohort builder search.
-  enableCBListSearch: boolean;
 }

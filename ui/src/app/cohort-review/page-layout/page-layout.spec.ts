@@ -11,7 +11,7 @@ import {CohortBuilderService} from 'generated';
 import {CohortBuilderApi, CohortReviewApi, CohortsApi, CriteriaListResponse} from 'generated/fetch';
 import {Observable} from 'rxjs/Observable';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
+import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {PageLayout} from './page-layout';
@@ -38,7 +38,7 @@ describe('PageLayout', () => {
     })
       .compileComponents();
     NavStore.navigate = jasmine.createSpy('navigate');
-    cohortReviewStore.next(cohortReviewStub);
+    cohortReviewStore.next(cohortReviewStubs[0]);
     currentWorkspaceStore.next(workspaceDataStub);
     urlParamsStore.next({
       ns: 'workspaceNamespace',

@@ -7,7 +7,6 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {withCurrentWorkspace, withUrlParams} from 'app/utils/index';
 import {NavStore} from 'app/utils/navigation';
-import {environment} from 'environments/environment';
 import {WorkspaceAccessLevel} from 'generated';
 
 import * as fp from 'lodash/fp';
@@ -51,11 +50,8 @@ const styles = reactStyles({
 });
 
 const tabs = [
-  ...(environment.enableDatasetBuilder ? [{name: 'Data', link: 'data'}] : []),
-  ...(environment.enableDatasetBuilder ? [] : [
-    {name: 'Cohorts', link: 'cohorts'},
-    {name: 'Concepts', link: 'concepts'}]),
-  {name: environment.enableDatasetBuilder ? 'Analysis' : 'Notebooks', link: 'notebooks'},
+  {name: 'Data', link: 'data'},
+  {name: 'Analysis', link: 'notebooks'},
   {name: 'About', link: 'about'},
 ];
 

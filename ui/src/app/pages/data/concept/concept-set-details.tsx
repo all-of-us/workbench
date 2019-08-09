@@ -162,7 +162,7 @@ export const ConceptSetDetails =
       const {urlParams: {ns, wsid, csid}} = this.props;
       try {
         await conceptSetsApi().deleteConceptSet(ns, wsid, csid);
-        navigate(['workspaces', ns, wsid, 'concepts', 'sets']);
+        navigate(['workspaces', ns, wsid, 'data', 'concepts', 'sets']);
       } catch (error) {
         console.log(error);
         this.setState({error: true,
@@ -187,7 +187,7 @@ export const ConceptSetDetails =
       const queryParams = conceptSet.survey ? '?survey=' +  conceptSet.survey :
           '?domain=' + conceptSet.domain;
       navigateByUrl('workspaces/' + workspace.namespace + '/' +
-          workspace.id + '/concepts' + queryParams);
+          workspace.id + '/data/concepts' + queryParams);
     }
 
     render() {
@@ -274,7 +274,7 @@ export const ConceptSetDetails =
           <Button type='secondaryLight' data-test-id='add-concepts'
                   style={{...styles.buttonBoxes, marginLeft: '0.5rem', maxWidth: '22%'}}
                   onClick={() => navigateByUrl('workspaces/' + ns + '/' +
-                    wsid + '/concepts' + conceptSet.survey ? ('?survey=' + conceptSet.survey) :
+                    wsid + '/data/concepts' + conceptSet.survey ? ('?survey=' + conceptSet.survey) :
                       ('?domain=' + conceptSet.domain))}>
             <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
           </Button>}
