@@ -2758,9 +2758,9 @@ from
 
 
 ################################################
-# CRITERIA ANCESTOR
+# CB_CRITERIA ANCESTOR
 ################################################
-echo "CRITERIA_ANCESTOR - Drugs - add ingredients to drugs mapping"
+echo "CB_CRITERIA_ANCESTOR - Drugs - add ingredients to drugs mapping"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\`
     (ancestor_id, descendant_id)
@@ -2783,10 +2783,10 @@ and descendant_concept_id in
 
 
 ################################################
-# CRITERIA ATTRIBUTES
+# CB_CRITERIA_ATTRIBUTE
 ################################################
 # this code filters out any labs where all results = 0
-echo "CRITERIA_ATTRIBUTES - Measurements - add numeric results"
+echo "CB_CRITERIA_ATTRIBUTE - Measurements - add numeric results"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     (id, concept_id, value_as_concept_id, concept_name, type, est_count)
@@ -2820,7 +2820,7 @@ from
 		having not (min(value_as_number) = 0 and max(value_as_number) = 0)
 	) a"
 
-echo "CRITERIA_ATTRIBUTES - Measurements - add categorical results"
+echo "CB_CRITERIA_ATTRIBUTE - Measurements - add categorical results"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     (id, concept_id, value_as_concept_Id, concept_name, type, est_count)
@@ -2841,8 +2841,8 @@ from
         group by 1,2,3
     ) a"
 
-# set has_attributes=1 for any criteria that has data in criteria_attribute
-echo "CRITERIA ATTRIBUTES - update has_attributes column for measurement criteria"
+# set has_attributes=1 for any criteria that has data in cb_criteria_attribute
+echo "CB_CRITERIA_ATTRIBUTE - update has_attributes column for measurement criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 set has_attribute = 1
@@ -2856,9 +2856,9 @@ where concept_id in
 
 
 ################################################
-# CRITERIA RELATIONSHIP
+# CB_CRITERIA_RELATIONSHIP
 ################################################
-echo "CRITERIA_RELATIONSHIP - Drugs - add drug/ingredient relationships"
+echo "CB_CRITERIA_RELATIONSHIP - Drugs - add drug/ingredient relationships"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
     (concept_id_1, concept_id_2)
@@ -2874,7 +2874,7 @@ where b.concept_class_id = 'Ingredient'
                 and type = 'BRAND'
         )"
 
-echo "CRITERIA_RELATIONSHIP - Source Concept -> Standard Concept Mapping"
+echo "CB_CRITERIA_RELATIONSHIP - Source Concept -> Standard Concept Mapping"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
     (concept_id_1, concept_id_2)
