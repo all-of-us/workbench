@@ -117,7 +117,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     est_count             STRING
 )"
 
-# table that holds the drug brands -> ingredients relationship mapping
+# table that holds the drug brands to ingredients relationship mapping
 echo "CREATE TABLES - cb_criteria_relationship"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
