@@ -6,6 +6,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, DomainType} from 'generated/fetch';
@@ -16,7 +17,7 @@ const styles = reactStyles({
     position: 'absolute',
     width: '95%',
     padding: '0.4rem 0',
-    background: '#ffffff',
+    background: colors.white,
     zIndex: 10,
   },
   searchBar: {
@@ -24,7 +25,7 @@ const styles = reactStyles({
     width: '100%',
     padding: '7px 14px',
     borderRadius: '5px',
-    backgroundColor: '#DFF0FA',
+    backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
   },
   searchInput: {
     width: '85%',
@@ -41,34 +42,34 @@ const styles = reactStyles({
   },
   attrIcon: {
     marginRight: '0.5rem',
-    color: '#216FB4',
+    color: colors.accent,
     cursor: 'pointer'
   },
   selectIcon: {
     margin: '2px 0.5rem 2px 2px',
-    color: 'rgb(98, 164, 32)',
+    color: colorWithWhiteness(colors.success, -0.5),
     cursor: 'pointer'
   },
   selectedIcon: {
     marginRight: '0.4rem',
-    color: 'rgb(98, 164, 32)',
+    color: colorWithWhiteness(colors.success, -0.5),
     opacity: 0.4,
     cursor: 'not-allowed'
   },
   disabledIcon: {
     marginRight: '0.4rem',
-    color: '#9a9a9a',
+    color: colorWithWhiteness(colors.dark, 0.5),
     opacity: 0.4,
     cursor: 'not-allowed',
     pointerEvents: 'none'
   },
   brandIcon: {
     marginRight: '0.4rem',
-    color: '#9a9a9a',
+    color: colorWithWhiteness(colors.dark, 0.5),
     cursor: 'pointer'
   },
   treeIcon: {
-    color: '#0086C1',
+    color: colors.accent,
     cursor: 'pointer',
     fontSize: '1.15rem'
   },
@@ -76,38 +77,38 @@ const styles = reactStyles({
     width: '99%',
     margin: '2.75rem 0 1rem',
     fontSize: '12px',
-    color: '#262262',
+    color: colors.primary,
   },
   vocabLink: {
     display: 'inline-block',
-    color: '#1E8FE1',
+    color: colors.accent,
   },
   table: {
     width: '100%',
     textAlign: 'left',
-    border: '1px solid #c8c8c8',
+    border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
     borderRadius: '3px',
     tableLayout: 'fixed',
   },
   columnHeader: {
     padding: '10px',
-    background: '#f4f4f4',
-    color: '#262262',
+    background: colorWithWhiteness(colors.dark, 0.93),
+    color: colors.primary,
     border: 0,
-    borderBottom: '1px solid #c8c8c8',
+    borderBottom: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
     fontWeight: 600,
     textAlign: 'left',
     verticalAlign: 'middle',
     lineHeight: '0.75rem'
   },
   columnBody: {
-    background: '#ffffff',
+    background: colors.white,
     padding: '0.4rem',
     verticalAlign: 'top',
     textAlign: 'left',
     border: 0,
-    borderBottom: '1px solid #c8c8c8',
-    color: '#262262',
+    borderBottom: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
+    color: colors.primary,
     lineHeight: '0.8rem',
   },
   selectDiv: {
@@ -126,8 +127,8 @@ const styles = reactStyles({
     width: '99%',
     marginTop: '2.75rem',
     padding: '0.25rem',
-    background: '#f7981c',
-    color: '#ffffff',
+    background: colors.warning,
+    color: colors.white,
     fontSize: '12px',
     borderRadius: '5px',
   }
