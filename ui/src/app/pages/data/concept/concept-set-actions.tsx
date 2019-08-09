@@ -46,18 +46,15 @@ const styles = reactStyles({
   }
 });
 
-const disabledButton = {
-  ...styles.cardButton,
-  cursor: 'not-allowed'
-};
-
+// Commenting out the title for Export to a notebook as part of RW-3226/3224
+// since export to notebook is not yet here but will be coming soon
 const actionCards = [
-  {
-    title: 'Export to a Notebook',
-    description: `Data can be exported to a cloud-based Jupyter notebook for analysis using R or
-       Python programming language.`,
-    action: 'notebook'
-  },
+  // {
+  //   title: 'Export to a Notebook',
+  //   description: `Data can be exported to a cloud-based Jupyter notebook for analysis using R or
+  //     Python programming language.`,
+  //   action: 'notebook'
+  // },
   {
     title: 'Create a Data Set',
     description: `Here, you can build and preview a data set for one or more cohorts by
@@ -144,7 +141,6 @@ export const ConceptSetActions = withCurrentWorkspace()(
           <h3 style={{...styles.conceptSetsHeader, marginTop: '1.5rem'}}>What Next?</h3>
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
-              const disabled = card.action === 'notebook' || card.action === 'dataSet';
               return <ActionCardBase key={i} style={styles.card}>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                   <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
@@ -155,8 +151,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
                 <div>
                   <Button
                     type='primary'
-                    style={disabled ? disabledButton : styles.cardButton}
-                    disabled={disabled}
+                    style={styles.cardButton}
                     onClick={() => this.navigateTo(card.action)}>
                     {card.title}
                   </Button>
