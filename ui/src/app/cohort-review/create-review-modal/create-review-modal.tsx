@@ -50,6 +50,7 @@ const styles = reactStyles({
 
 interface Props {
   created: Function;
+  canceled: Function;
   workspace: WorkspaceData;
 }
 
@@ -109,7 +110,7 @@ export const CreateReviewModal = withCurrentWorkspace()(
         }
       });
       const disabled = !numberOfParticipants || errors;
-      return <Modal onRequestClose={() => this.cancelReview()}>
+      return <Modal onRequestClose={() => this.props.canceled()}>
         <ModalTitle style={styles.title}>Create Review Set</ModalTitle>
         <ModalBody style={styles.body}>
           <div style={{marginBottom: '0.5rem'}}>
@@ -132,7 +133,7 @@ export const CreateReviewModal = withCurrentWorkspace()(
           <Button style={styles.cancel}
             type='link'
             disabled={creating}
-            onClick={() => this.cancelReview()}>
+            onClick={() => this.props.canceled()}>
             CANCEL
           </Button>
           <Button style={disabled ? styles.disabled : styles.create}
@@ -155,8 +156,9 @@ export const CreateReviewModal = withCurrentWorkspace()(
   template: '<div #root></div>'
 })
 export class CreateReviewModalComponent extends ReactWrapperBase {
+  @Input('canceled') canceled: Props['canceled'];
   @Input('created') created: Props['created'];
   constructor() {
-    super(CreateReviewModal, ['created']);
+    super(CreateReviewModal, ['canceled', 'created']);
   }
 }

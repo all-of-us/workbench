@@ -1,3 +1,4 @@
+import {Component} from '@angular/core';
 import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {CohortDefinition} from 'app/cohort-review/cohort-definition/cohort-definition.component';
 import {ParticipantsCharts} from 'app/cohort-review/participants-charts/participants-charts';
@@ -6,8 +7,8 @@ import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore} from 'app/utils/navigation';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {currentCohortStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, SearchRequest} from 'generated/fetch';
 import * as moment from 'moment';
@@ -32,6 +33,14 @@ const css = `
 `;
 
 const styles = reactStyles({
+  backBtn: {
+    padding: 0,
+    border: 0,
+    fontSize: '14px',
+    color: colors.accent,
+    background: 'transparent',
+    cursor: 'pointer',
+  },
   container: {
     width: '100%',
     marginLeft: 'auto',
@@ -234,12 +243,23 @@ export const QueryReport = withCurrentWorkspace()(
       }
     }
 
+    goBack() {
+      const {ns, wsid, cid} = urlParamsStore.getValue();
+      navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+    }
+
     render() {
       const {cdrName, data, groupedData, loading} = this.state;
       const totalCount = this.review.matchedParticipantCount;
       const created = moment(this.cohort.creationTime).format('YYYY-MM-DD');
       return <React.Fragment>
         <style>{css}</style>
+        <button
+          style={styles.backBtn}
+          type='button'
+          onClick={() => this.goBack()}>
+          Back to review set
+        </button>
         <div style={styles.reportBackground}>
           <div style={styles.container}>
             <div style={styles.row}>
@@ -371,3 +391,12 @@ export const QueryReport = withCurrentWorkspace()(
     }
   }
 );
+
+@Component ({
+  template: '<div #root></div>'
+})
+export class QueryReportComponent extends ReactWrapperBase {
+  constructor() {
+    super(QueryReport, []);
+  }
+}

@@ -3,6 +3,7 @@ import {RouterModule, Routes} from '@angular/router';
 
 import {DetailPageComponent} from 'app/cohort-review/detail-page/detail-page';
 import {PageLayout} from 'app/cohort-review/page-layout/page-layout';
+import {QueryReportComponent} from 'app/cohort-review/query-report/query-report.component';
 import {TablePage} from 'app/cohort-review/table-page/table-page';
 
 import {BreadcrumbType} from 'app/utils/navigation';
@@ -18,6 +19,12 @@ const routes: Routes = [{
   children: [{
     path: 'participants',
     component: TablePage,
+    data: {
+      breadcrumb: BreadcrumbType.Cohort
+    }
+  }, {
+    path: 'cohort-description',
+    component: QueryReportComponent,
     data: {
       breadcrumb: BreadcrumbType.Cohort
     }
