@@ -468,7 +468,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         selectedSurveyQuestions} =
           this.state;
       return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
-        <Header style={{fontSize: '20px', marginTop: 0, fontWeight: 600}}>Concept Sets</Header>
+        <Header style={{fontSize: '20px', marginTop: 0, fontWeight: 600}}>Search Concepts</Header>
         <div style={{marginBottom: '6%', marginTop: '1.5%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
             <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
