@@ -6,7 +6,7 @@
   <router-outlet></router-outlet>
 </div>
 
-<app-create-review-modal *ngIf="ableToReview" [created]="reviewCreated"></app-create-review-modal>
+<app-create-review-modal *ngIf="ableToReview" [canceled]="goBack" [created]="reviewCreated"></app-create-review-modal>
 <clr-modal [clrModalOpen]="unableToReview" [clrModalSize]="'md'" [clrModalClosable]="false">
   <div class="modal-title" style="color: #302973">
     Users with read-only access cannot create cohort reviews
@@ -16,7 +16,7 @@
       type="button"
       class="btn btn-primary"
       style="background: #302C71"
-      (click)="returnToCohorts()">
+      (click)="goBack()">
       Return to cohorts
     </button>
   </div>

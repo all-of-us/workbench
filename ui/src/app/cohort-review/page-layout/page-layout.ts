@@ -1,3 +1,4 @@
+import {Location} from '@angular/common';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {
@@ -24,15 +25,14 @@ export class PageLayout implements OnInit, OnDestroy {
   readonly = false;
   subscription: Subscription;
 
-  constructor(private router: Router) {
+  constructor(private location: Location, private router: Router) {
     this.subscription = router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         const oldRoute = router.url.split('/').pop();
         const newRoute = event.url.split('/').pop();
         if (oldRoute === 'participants' && newRoute === 'review') {
-          console.log('back');
-          const {ns, wsid, cid} = urlParamsStore.getValue();
-          navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+          // back button was pressed on 'participants' route, go back again to avoid blank page
+          location.back();
         }
       }
     });
@@ -87,9 +87,8 @@ export class PageLayout implements OnInit, OnDestroy {
     this.reviewPresent = true;
   }
 
-  returnToCohorts() {
-    const {ns, wsid} = urlParamsStore.getValue();
-    navigate(['workspaces', ns, wsid, 'data', 'cohorts']);
+  goBack = () => {
+    this.location.back();
   }
 
   get ableToReview() {
