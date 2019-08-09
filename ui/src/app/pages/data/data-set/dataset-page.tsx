@@ -532,9 +532,9 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
 
     render() {
       const {namespace, id} = this.props.workspace;
-      const wsPathPrefix = 'workspaces/' + namespace + '/' + id;
-      const cohortsPath = wsPathPrefix + '/cohorts';
-      const conceptSetsPath = wsPathPrefix + '/concepts';
+      const pathPrefix = 'workspaces/' + namespace + '/' + id + '/data';
+      const cohortsPath = pathPrefix + '/cohorts';
+      const conceptSetsPath = pathPrefix + '/concepts';
       const {
         dataSet,
         dataSetTouched,
