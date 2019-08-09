@@ -137,7 +137,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
           attributes.push({
             name: AttrName.CAT,
             operator: Operator.IN,
-            operands: [this.node.code]
+            operands: [this.node.value]
           });
         } else if (this.isPPI && !this.node.group) {
           if (this.node.conceptId === 1585747) {
