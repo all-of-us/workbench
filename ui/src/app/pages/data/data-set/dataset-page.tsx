@@ -553,10 +553,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       </DataTable>;
     }
 
-    get isRefreshPreviewDisabled() {
-      return this.disableSave() || this.state.previewList.length === 0;
-    }
-
     render() {
       const {namespace, id} = this.props.workspace;
       const pathPrefix = 'workspaces/' + namespace + '/' + id + '/data';
@@ -691,10 +687,13 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 </div>
               </div>
               </div>
-              <Clickable data-test-id='preview-button' style={{marginTop: '0.5rem',
-                height: '1.8rem', width: '6.5rem', color: colors.secondary}}
+              <Clickable data-test-id='preview-button' style={{
+                marginTop: '0.5rem',
+                cursor: this.disableSave() ? 'not-allowed' : 'pointer', height: '1.8rem',
+                width: '6.5rem', color: this.disableSave() ? colorWithWhiteness(colors.dark, 0.6) :
+                  colors.accent}} disabled={this.disableSave()}
                 onClick={() => this.getPreviewList()}>
-                View Preview Table
+                  View Preview Table
               </Clickable>
             </div>
             {previewDataLoading && <div style={styles.warningMessage}>
@@ -745,12 +744,12 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           <div style={styles.footer} />
           <div style={styles.stickyFooter}>
             <TooltipTrigger data-test-id='save-tooltip'
-            content='Requires Owner or Writer permission' disabled={this.canWrite}>
+              content='Requires Owner or Writer permission' disabled={this.canWrite}>
             <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
-            onClick ={() => this.setState({openSaveModal: true})}
-            disabled={this.disableSave() || !this.canWrite}>
-            {this.editing ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
-            'Update And Analyze' : 'Save And Analyze'}
+              onClick ={() => this.setState({openSaveModal: true})}
+              disabled={this.disableSave() || !this.canWrite}>
+                {this.editing ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
+                  'Update and Analyze' : 'Save and Analyze'}
             </Button>
             </TooltipTrigger>
           </div>

@@ -1,10 +1,10 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {Button} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
+import {DataSetPage} from 'app/pages/data/data-set/dataset-page';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
-import {DataSetPage} from 'app/pages/data/data-set/dataset-page';
 import {
   CohortsApi,
   ConceptsApi,
@@ -79,16 +79,19 @@ describe('DataSet', () => {
     expect(wrapper.find('[data-test-id="value-list-items"]').length).toBe(5);
   });
 
-  it('should enable save button once cohorts, concepts and values are selected',
+  it('should enable save button and preview button once cohorts, concepts and values are selected',
     async() => {
       const wrapper = mount(<DataSetPage />);
       await waitOneTickAndUpdate(wrapper);
       await waitOneTickAndUpdate(wrapper);
 
-      // Save Button should be disabled by default
+      // Preview Button and Save Button should be disabled by default
       const saveButton = wrapper.find(Button).find('[data-test-id="save-button"]')
         .first();
       expect(saveButton.prop('disabled')).toBeTruthy();
+      const previewButton = wrapper.find(Clickable).find('[data-test-id="preview-button"]')
+        .first();
+      expect(previewButton.prop('disabled')).toBeTruthy();
 
       // After all cohort concept and values are selected all the buttons will be enabled
 
@@ -108,6 +111,8 @@ describe('DataSet', () => {
       const buttons = wrapper.find(Button);
       expect(buttons.find('[data-test-id="save-button"]').first().prop('disabled'))
         .toBeFalsy();
+      expect(wrapper.find(Clickable).find('[data-test-id="preview-button"]').first()
+        .prop('disabled')).toBeFalsy();
     });
 
   it('should display preview data table once preview button is clicked', async() => {
@@ -141,7 +146,8 @@ describe('DataSet', () => {
     expect(spy).toHaveBeenCalledTimes(1);
 
   });
-  
+
+
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
     const wrapper = mount(<DataSetPage />);
     const pathPrefix = 'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id + '/data';
