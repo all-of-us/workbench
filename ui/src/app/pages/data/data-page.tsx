@@ -195,7 +195,9 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <div style={styles.cardText}>
                 {descriptions.cohorts}
               </div>
-              <div style={{width: '100%', paddingTop: '1rem'}}>
+              {/*Because the container can stretch based on window size, but the height
+              can't we set a max width to cap the height based on aspect ratio*/}
+              <div style={{width: '100%', maxWidth: '425px', paddingTop: '1rem'}}>
                 <img src={cohortImg}/>
               </div>
             </CardButton>
@@ -215,7 +217,9 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <div style={styles.cardText}>
                 {descriptions.datasets}
               </div>
-              <div style={{width: '100%', paddingTop: '1.5rem'}}>
+              {/*Because the container can stretch based on window size, but the height
+               can't we set a max width to cap the height based on aspect ratio*/}
+              <div style={{width: '100%', maxWidth: '425px', paddingTop: '1.5rem'}}>
                 <img src={dataSetImg}/>
               </div>
             </CardButton>
