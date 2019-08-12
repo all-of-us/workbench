@@ -8,6 +8,7 @@ import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
+import {encodeURIComponentStrict} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {CopyRequest, RecentResource} from 'generated/fetch';
 import * as fp from 'lodash';
@@ -50,7 +51,7 @@ export const NotebookResourceCard = fp.flow(
       this.props.resource;
 
     return `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
-    `/notebooks/preview/${encodeURIComponent(notebook.name)}`;
+    `/notebooks/preview/${encodeURIComponentStrict(notebook.name)}`;
   }
 
   get writePermission(): boolean {
