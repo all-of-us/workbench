@@ -54,7 +54,7 @@ const actionCards = [
     action: 'dataSet'
   },
   {
-    title: 'Create or update another Concept Set',
+    title: 'Create another Concept Set',
     description: `Here, you can create or update another concept set for the same or a
       different domain.`,
     action: 'newConceptSet'
