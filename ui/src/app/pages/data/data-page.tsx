@@ -195,8 +195,8 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <div style={styles.cardText}>
                 {descriptions.cohorts}
               </div>
-              <div style={{width: '100%', paddingTop: '1rem'}}>
-                <img src={cohortImg}/>
+              <div style={{width: '100%', maxWidth: '425px', paddingTop: '1rem'}}>
+                <img width='100%' height='100%' src={cohortImg}/>
               </div>
             </CardButton>
           </TooltipTrigger>
@@ -215,7 +215,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <div style={styles.cardText}>
                 {descriptions.datasets}
               </div>
-              <div style={{width: '100%', paddingTop: '1.5rem'}}>
+              <div style={{width: '100%', maxWidth: '425px', paddingTop: '1.5rem'}}>
                 <img src={dataSetImg}/>
               </div>
             </CardButton>
