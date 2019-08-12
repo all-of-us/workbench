@@ -196,7 +196,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
                 {descriptions.cohorts}
               </div>
               <div style={{width: '100%', maxWidth: '425px', paddingTop: '1rem'}}>
-                <img width='100%' height='100%' src={cohortImg}/>
+                <img src={cohortImg}/>
               </div>
             </CardButton>
           </TooltipTrigger>
