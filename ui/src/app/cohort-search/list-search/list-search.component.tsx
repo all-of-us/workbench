@@ -375,11 +375,13 @@ export const ListSearch = withCurrentWorkspace()(
             </Clickable>.
           </div>}
           {isStandard !== undefined && <div style={{...styles.error, margin: '-0.5rem 0 0.5rem'}}>
-            <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-              shape='exclamation-triangle' size='22'/>
-              You have added a {isStandard ? 'standard' : 'source'} code. To add a
-              {isStandard ? ' source' : ' standard'} code to your cohort, add another "AND" group
-               once you've clicked the FINISH button below.
+            <div style={{float: 'left', height: '1.5rem'}}>
+              <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+                shape='exclamation-triangle' size='22'/>
+            </div>
+            You have added a {isStandard ? 'standard' : 'source'} code. To add a
+            {isStandard ? ' source' : ' standard'} code to your cohort, add new criteria
+              once you've clicked the FINISH button below.
           </div>}
           {!!data.length && <table className='p-datatable' style={styles.table}>
             <thead className='p-datatable-thead'>
