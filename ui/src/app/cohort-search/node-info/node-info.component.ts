@@ -72,7 +72,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get paramId() {
-    return `param${this.node.conceptId && !this.isPPI ?
+    return `param${this.node.conceptId && !this.isSurvey ?
         (this.node.conceptId + this.node.value) : this.node.id}`;
   }
 
@@ -81,7 +81,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayCode() {
-    if ((this.isDrug && this.node.group) || this.isPM || this.isPPI || this.isSNOMED) {
+    if ((this.isDrug && this.node.group) || this.isPM || this.isSurvey || this.isSNOMED) {
       return '';
     }
     return this.node.code;
@@ -118,7 +118,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
           groupSelectionsStore.next(groups);
         }
         let modifiedName = this.node.name;
-        if (this.isPPI) {
+        if (this.isSurvey) {
           // get PPI question from store
           const question = ppiQuestions.getValue()[this.node.parentId];
           if (question) {
@@ -139,7 +139,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
             operator: Operator.IN,
             operands: [this.node.value]
           });
-        } else if (this.isPPI && !this.node.group) {
+        } else if (this.isSurvey && !this.node.group) {
           if (this.node.conceptId === 1585747) {
             attributes.push({
               name: AttrName.NUM,
@@ -189,7 +189,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.node.domainId === DomainType.DRUG;
   }
 
-  get isPPI() {
+  get isSurvey() {
     return this.node.domainId === DomainType.SURVEY;
   }
 
