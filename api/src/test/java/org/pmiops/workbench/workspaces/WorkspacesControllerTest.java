@@ -17,6 +17,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
+import static org.pmiops.workbench.model.SpecificPopulationEnum.AGE_GROUPS;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
@@ -65,6 +66,8 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortreview.CohortReviewMapper;
+import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -139,6 +142,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -213,8 +217,9 @@ public class WorkspacesControllerTest {
     NotebooksServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
-    WorkspaceMapper.class,
+    WorkspaceMapperImpl.class,
     CohortsController.class,
+    CohortReviewMapperImpl.class,
     CohortFactoryImpl.class,
     CohortCloningService.class,
     CohortReviewController.class,
@@ -222,7 +227,7 @@ public class WorkspacesControllerTest {
     CohortReviewServiceImpl.class,
     ReviewQueryBuilder.class,
     ConceptSetService.class,
-    ConceptSetsController.class
+    ConceptSetsController.class,
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -647,8 +652,9 @@ public class WorkspacesControllerTest {
     assertThat(researchPurpose.getApproved()).isTrue();
   }
 
+  @Transactional(propagation = Propagation.NEVER)
   @Test
-  public void testUpdateWorkspace() throws Exception {
+  public void testUpdateWorkspace() {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -660,6 +666,9 @@ public class WorkspacesControllerTest {
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
 
+    TestTransaction.end();
+    TestTransaction.start();
+
     ws.setName("updated-name2");
     updated =
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
@@ -670,6 +679,19 @@ public class WorkspacesControllerTest {
     assertThat(got).isEqualTo(ws);
   }
 
+  @Test
+  public void mappingPopulationDetails() {
+    Workspace ws = createWorkspace();
+    ws.getResearchPurpose().setPopulation(true);
+    ws.getResearchPurpose().setPopulationDetails(Collections.singletonList(AGE_GROUPS));
+    workspacesController.createWorkspace(ws);
+
+    org.pmiops.workbench.model.WorkspaceResponse wsr = workspacesController
+        .getWorkspace(ws.getNamespace(), ws.getId()).getBody();
+    assertThat(wsr.getWorkspace().getResearchPurpose().getPopulationDetails().get(0)).isEqualTo(AGE_GROUPS);
+  }
+
+  @Transactional
   @Test
   public void testUpdateWorkspaceResearchPurpose() throws Exception {
     Workspace ws = createWorkspace();

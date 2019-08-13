@@ -286,18 +286,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     setCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    org.pmiops.workbench.db.model.Workspace reqWorkspace = workspaceMapper.toDbWorkspace(workspace);
-    // TODO: enforce data access level authorization
-    dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
-    dbWorkspace.setName(reqWorkspace.getName());
-
     // Ignore incoming fields pertaining to review status; clients can only request a review.
-    workspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
-    if (reqWorkspace.getReviewRequested()) {
+    workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
+
+    // TODO: enforce data access level authorization
+    dbWorkspace.setDataAccessLevelEnum(workspace.getDataAccessLevel());
+    dbWorkspace.setName(workspace.getName());
+    if (workspace.getResearchPurpose().getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
     }
-    dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
+    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
 
     if (useBillingProjectBuffer) {
       dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
@@ -369,12 +368,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {
-      workspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+      workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, researchPurpose);
       if (researchPurpose.getReviewRequested()) {
-        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-        dbWorkspace.setTimeRequested(now);
+        dbWorkspace.setTimeRequested(new Timestamp(clock.instant().toEpochMilli()));
       }
-      dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
     }
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
@@ -496,12 +493,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setName(body.getWorkspace().getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
-    workspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+    workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
     }
-    dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
 
     // Clone CDR version from the source, by default.
     String reqCdrVersionId = body.getWorkspace().getCdrVersionId();
@@ -619,13 +615,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   // We can add pagination in the DAO by returning Slice<Workspace> if we want the method to return
   // pagination information (e.g. are there more workspaces to get), and Page<Workspace> if we
   // want the method to return both pagination information and a total count.
+  // TODO eric: test this
   @Override
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
     response.setItems(
-        workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
+        workspaces.stream().map(workspace ->
+            workspaceMapper.toApiWorkspace(workspace,
+                fireCloudService.getWorkspace(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()).getWorkspace()))
+            .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 

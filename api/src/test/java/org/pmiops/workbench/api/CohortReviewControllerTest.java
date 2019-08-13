@@ -1179,11 +1179,14 @@ public class CohortReviewControllerTest {
               .status(participantCohortStatus.getStatusEnum())
               .deceased(participantCohortStatus.getDeceased()));
     }
+
+    String creationTimeWithNanos = actualReview.getCreationTime().toString();
+
     return new org.pmiops.workbench.model.CohortReview()
         .cohortReviewId(actualReview.getCohortReviewId())
         .cohortId(actualReview.getCohortId())
         .cdrVersionId(actualReview.getCdrVersionId())
-        .creationTime(actualReview.getCreationTime().toString())
+        .creationTime(creationTimeWithNanos.substring(0, creationTimeWithNanos.lastIndexOf('.')))
         .matchedParticipantCount(actualReview.getMatchedParticipantCount())
         .reviewSize(actualReview.getReviewSize())
         .reviewedCount(actualReview.getReviewedCount())

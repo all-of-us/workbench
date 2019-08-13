@@ -197,7 +197,6 @@ public class ConceptSetsControllerTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
-    WorkspaceMapper.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     UserService.class,
@@ -214,7 +213,8 @@ public class ConceptSetsControllerTest {
     NotebooksService.class,
     UserRecentResourceService.class,
     ComplianceService.class,
-    DirectoryService.class
+    DirectoryService.class,
+    WorkspaceMapper.class,
   })
   static class Configuration {
     @Bean

@@ -20,6 +20,7 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.Workspace;
@@ -35,7 +36,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspaceServiceTest {
 
   @TestConfiguration
-  @Import({WorkspaceMapper.class})
+  @Import({WorkspaceMapperImpl.class})
   static class Configuration {}
 
   @Mock private CohortCloningService cohortCloningService;
@@ -69,18 +70,19 @@ public class WorkspaceServiceTest {
 
     workspaceResponses.clear();
     workspaces.clear();
-    addMockedWorkspace("reader", WorkspaceAccessLevel.READER, WorkspaceActiveStatus.ACTIVE);
-    addMockedWorkspace("writer", WorkspaceAccessLevel.WRITER, WorkspaceActiveStatus.ACTIVE);
-    addMockedWorkspace("owner", WorkspaceAccessLevel.OWNER, WorkspaceActiveStatus.ACTIVE);
+    addMockedWorkspace("reader", WorkspaceAccessLevel.READER.toString(), WorkspaceActiveStatus.ACTIVE);
+    addMockedWorkspace("writer", WorkspaceAccessLevel.WRITER.toString(), WorkspaceActiveStatus.ACTIVE);
+    addMockedWorkspace("owner", WorkspaceAccessLevel.OWNER.toString(), WorkspaceActiveStatus.ACTIVE);
+    addMockedWorkspace("project owner", "PROJECT_OWNER", WorkspaceActiveStatus.ACTIVE);
   }
 
   private WorkspaceResponse mockFirecloudWorkspaceResponse(
-      String workspaceId, WorkspaceAccessLevel accessLevel) {
+      String workspaceId, String accessLevel) {
     Workspace workspace = mock(Workspace.class);
     doReturn(workspaceId).when(workspace).getWorkspaceId();
     WorkspaceResponse workspaceResponse = mock(WorkspaceResponse.class);
     doReturn(workspace).when(workspaceResponse).getWorkspace();
-    doReturn(accessLevel.toString()).when(workspaceResponse).getAccessLevel();
+    doReturn(accessLevel).when(workspaceResponse).getAccessLevel();
     return workspaceResponse;
   }
 
@@ -92,13 +94,14 @@ public class WorkspaceServiceTest {
     doReturn(mock(Timestamp.class)).when(workspace).getCreationTime();
     doReturn(name).when(workspace).getName();
     workspace.setWorkspaceActiveStatusEnum(activeStatus);
+    doReturn(mock(CdrVersion.class)).when(workspace).getCdrVersion();
     doReturn(mock(FirecloudWorkspaceId.class)).when(workspace).getFirecloudWorkspaceId();
     doReturn(firecloudUuid).when(workspace).getFirecloudUuid();
     return workspace;
   }
 
   private void addMockedWorkspace(
-      String workspaceId, WorkspaceAccessLevel accessLevel, WorkspaceActiveStatus activeStatus) {
+      String workspaceId, String accessLevel, WorkspaceActiveStatus activeStatus) {
     WorkspaceResponse workspaceResponse = mockFirecloudWorkspaceResponse(workspaceId, accessLevel);
     workspaceResponses.add(workspaceResponse);
 
@@ -111,7 +114,7 @@ public class WorkspaceServiceTest {
 
   @Test
   public void getWorkspaces() {
-    assertThat(workspaceService.getWorkspaces()).hasSize(3);
+    assertThat(workspaceService.getWorkspaces()).hasSize(4);
   }
 
   @Test
@@ -120,7 +123,7 @@ public class WorkspaceServiceTest {
 
     addMockedWorkspace(
         "inactive",
-        WorkspaceAccessLevel.OWNER,
+        WorkspaceAccessLevel.OWNER.toString(),
         WorkspaceActiveStatus.PENDING_DELETION_POST_1PPW_MIGRATION);
     assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
   }
@@ -129,7 +132,7 @@ public class WorkspaceServiceTest {
   public void getWorkspaces_skipDeleted() {
     int currentWorkspacesSize = workspaceService.getWorkspaces().size();
 
-    addMockedWorkspace("deleted", WorkspaceAccessLevel.OWNER, WorkspaceActiveStatus.DELETED);
+    addMockedWorkspace("deleted", WorkspaceAccessLevel.OWNER.toString(), WorkspaceActiveStatus.DELETED);
     assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
   }
 

@@ -137,12 +137,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 dbWorkspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.ACTIVE)
         .map(
             dbWorkspace -> {
-              String fcWorkspaceAccessLevel =
-                  fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
+              org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace =
+                  fcWorkspaces.get(dbWorkspace.getFirecloudUuid());
+              String fcWorkspaceAccessLevel =fcWorkspace.getAccessLevel();
               WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
-              currentWorkspace.setAccessLevel(
-                  workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
+              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace.getWorkspace()));
+              currentWorkspace.setAccessLevel(workspaceMapper.fromFcAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;
             })
         .collect(Collectors.toList());
@@ -269,6 +269,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     saveWithLastModified(workspace, now);
   }
 
+  // TODO eric: this has no public users
   @Override
   public WorkspaceACLUpdate updateFirecloudAclsOnUser(
       WorkspaceAccessLevel updatedAccess, WorkspaceACLUpdate currentUpdate) {
@@ -452,7 +453,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {
-        userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
+        UserRole userRole = workspaceMapper.userToUserRole(user);
+        userRole.setRole(WorkspaceAccessLevel.fromValue(entry.getValue().getAccessLevel()));
+        userRoles.add(userRole);
       }
     }
     return userRoles.stream()

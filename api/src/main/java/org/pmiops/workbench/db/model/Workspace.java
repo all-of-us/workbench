@@ -357,11 +357,11 @@ public class Workspace {
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "specific_populations", joinColumns = @JoinColumn(name = "workspace_id"))
   @Column(name = "specific_population")
-  public Set<Short> getPopulationDetails() {
+  private Set<Short> getPopulationDetails() {
     return populationDetailsSet;
   }
 
-  public void setPopulationDetails(Set<Short> newPopulationDetailsSet) {
+  private void setPopulationDetails(Set<Short> newPopulationDetailsSet) {
     this.populationDetailsSet = newPopulationDetailsSet;
   }
 
@@ -377,10 +377,14 @@ public class Workspace {
   }
 
   public void setSpecificPopulationsEnum(Set<SpecificPopulationEnum> newPopulationDetails) {
-    setPopulationDetails(
-        newPopulationDetails.stream()
-            .map(StorageEnums::specificPopulationToStorage)
-            .collect(Collectors.toSet()));
+    if (newPopulationDetails == null) {
+      setPopulationDetails(null);
+    } else {
+      setPopulationDetails(
+          newPopulationDetails.stream()
+              .map(StorageEnums::specificPopulationToStorage)
+              .collect(Collectors.toSet()));
+    }
   }
 
   @Column(name = "rp_other_population_details")
