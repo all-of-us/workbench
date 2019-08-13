@@ -73,6 +73,7 @@ import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -171,7 +172,11 @@ public class CohortReviewControllerTest {
   }
 
   @TestConfiguration
-  @Import({CdrVersionService.class, CohortReviewController.class})
+  @Import({
+      CdrVersionService.class,
+      CohortReviewController.class,
+      CommonMappers.class
+  })
   @MockBean({
     BigQueryService.class,
     FireCloudService.class,
@@ -340,8 +345,6 @@ public class CohortReviewControllerTest {
             .cohortAnnotationDefinitionId(
                 stringAnnotationDefinition.getCohortAnnotationDefinitionId());
     participantCohortAnnotationDao.save(participantAnnotation);
-
-    cohortReviewController.setConfigProvider(configProvider);
   }
 
   @Test

@@ -129,6 +129,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.utils.CommonMappersImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -173,7 +174,7 @@ public class WorkspacesControllerTest {
           .domainId("Condition")
           .countValue(123L)
           .prevalence(0.2F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_2 =
       new Concept()
@@ -186,7 +187,7 @@ public class WorkspacesControllerTest {
           .domainId("Condition")
           .countValue(456L)
           .prevalence(0.3F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_3 =
       new Concept()
@@ -199,7 +200,7 @@ public class WorkspacesControllerTest {
           .domainId("Measurement")
           .countValue(256L)
           .prevalence(0.4F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
       makeConcept(CLIENT_CONCEPT_1);
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
@@ -219,6 +220,7 @@ public class WorkspacesControllerTest {
     WorkspaceServiceImpl.class,
     WorkspaceMapperImpl.class,
     CohortsController.class,
+    CommonMappersImpl.class,
     CohortReviewMapperImpl.class,
     CohortFactoryImpl.class,
     CohortCloningService.class,
@@ -316,7 +318,6 @@ public class WorkspacesControllerTest {
     testConfig.featureFlags.useBillingProjectBuffer = false;
     when(configProvider.get()).thenReturn(testConfig);
 
-    cohortReviewController.setConfigProvider(configProvider);
     workspacesController.setWorkbenchConfigProvider(configProvider);
     fcWorkspaceAcl = createWorkspaceACL();
 

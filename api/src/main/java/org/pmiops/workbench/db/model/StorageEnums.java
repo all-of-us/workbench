@@ -29,7 +29,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
  * else attempts to read this data may result in server errors.
  *
  * <p>This utility is workaround to the default behavior of Spring Data JPA, which allows you to
- * auto-convert storage of either ordinals or string values of a Java enum. Neither of these
+ * auto-map storage of either ordinals or string values of a Java enum. Neither of these
  * approaches is particularly robust as ordering changes or enum value renames may result in data
  * corruption.
  *
