@@ -4,12 +4,12 @@ import * as React from 'react';
 
 export interface EditComponentProps {
   disabled: boolean;
-  style: object;
+  style: React.CSSProperties;
   enableHoverEffect: boolean;
 }
 
 export interface EditComponentState {
-  style: object;
+  style: React.CSSProperties;
 }
 
 const defaultStyle = {

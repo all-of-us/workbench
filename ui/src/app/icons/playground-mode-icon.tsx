@@ -4,12 +4,12 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 
 export interface PlaygroundModeIconProps {
   disabled: boolean;
-  style: object;
+  style: React.CSSProperties;
   enableHoverEffect: boolean;
 }
 
 export interface PlaygroundModeIconState {
-  style: object;
+  style: React.CSSProperties;
 }
 
 const defaultStyle = {
