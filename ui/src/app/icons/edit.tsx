@@ -1,4 +1,3 @@
-
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 
 import * as React from 'react';
@@ -23,7 +22,7 @@ const defaultStyle = {
 
 const hoverStyle = {...defaultStyle, fill: colorWithWhiteness(colors.accent, 0.2)};
 
-const disabledStyle = {...defaultStyle, cursor: 'not-allowed',
+const disabledStyle = {cursor: 'not-allowed',
   fill: colorWithWhiteness(colors.dark, 0.6)};
 
 export class EditComponentReact extends React.Component<EditComponentProps, EditComponentState> {
