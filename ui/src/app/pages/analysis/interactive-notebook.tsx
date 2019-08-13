@@ -194,6 +194,11 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       return WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel);
     }
 
+    private get buttonStyleObj() {
+      return Object.assign({}, styles.navBarItem,
+        this.canWrite ? styles.clickable : styles.disabled);
+    }
+
     private cloneNotebook() {
       const {ns, wsid, nbName} = this.props.urlParams;
       workspacesApi().cloneNotebook(ns, wsid, nbName).then((notebook) => {
@@ -246,17 +251,14 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
                 {this.renderNotebookText()}
               </div>) : (
               <div style={{display: 'flex'}}>
-                <div style={
-                  Object.assign({}, styles.navBarItem,
-                    this.canWrite ? styles.clickable : styles.disabled)}
+                <div style={this.buttonStyleObj}
                      onClick={() => { this.startEditMode(); }}>
                   <EditComponentReact enableHoverEffect={false}
                                       disabled={!this.canWrite}
                                       style={styles.navBarIcon}/>
                   Edit {this.notebookInUse && '(In Use)'}
                 </div>
-                <div style={Object.assign({}, styles.navBarItem,
-                  this.canWrite ? styles.clickable : styles.disabled)}
+                <div style={this.buttonStyleObj}
                      onClick={() => { this.onPlaygroundModeClick(); }}>
                   <PlaygroundModeIcon enableHoverEffect={false} disabled={!this.canWrite}
                                       style={styles.navBarIcon}/>
