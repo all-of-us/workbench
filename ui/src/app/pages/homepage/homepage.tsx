@@ -172,7 +172,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       });
     }).catch(err => {
       this.setState({trainingCompleted: false});
-      console.error('error fetching moodle training status');
+      console.error('error fetching moodle training status:', err);
     });
     const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus().then(result => {
       this.setState({
@@ -180,7 +180,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       });
     }).catch(err => {
       this.setState({twoFactorAuthCompleted: false});
-      console.error('error fetching two factor auth status');
+      console.error('error fetching two factor auth status:', err);
     });
     return Promise.all([complianceStatus, twoFactorAuthStatus]);
   }
