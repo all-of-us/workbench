@@ -193,7 +193,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
         reload();
       }, 10000);
     } else {
-
       if (!profile.betaAccessRequestTime) {
         profileApi().requestBetaAccess();
       }
@@ -217,17 +216,20 @@ export const Homepage = withUserProfile()(class extends React.Component<
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
+      const hasRegisteredAccess = hasRegisteredAccessFetch(profile.dataAccessLevel);
+      if (!hasRegisteredAccess || workbenchAccessTasks == 1) {
+        await this.syncCompliance();
+      }
       if (workbenchAccessTasks) {
         this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
       } else {
         try {
           if (serverConfigStore.getValue().enforceRegistered) {
             this.setState({
-              accessTasksRemaining: !hasRegisteredAccessFetch(profile.dataAccessLevel),
+              accessTasksRemaining: !hasRegisteredAccess,
               accessTasksLoaded: true
             });
           } else {
-            await this.syncCompliance();
             this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
           }
         } catch (ex) {
@@ -235,9 +237,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
         }
       }
     }
-
-    this.setState(
-        {quickTour: this.state.firstVisit && this.state.accessTasksRemaining === false});
+    this.setState((state, props) => ({
+      quickTour: state.firstVisit && state.accessTasksRemaining === false
+    }));
   }
 
   checkBillingProjectStatus() {
