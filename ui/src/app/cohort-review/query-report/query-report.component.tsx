@@ -92,6 +92,7 @@ const styles = reactStyles({
   },
   graphBorder: {
     minHeight: '10rem',
+    marginLeft: '12.5rem',
     padding: '0.3rem',
   },
   groupHeader: {
