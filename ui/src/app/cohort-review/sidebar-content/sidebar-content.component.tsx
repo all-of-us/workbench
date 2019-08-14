@@ -284,7 +284,7 @@ export const SidebarContent = fp.flow(
 
   render() {
     const {
-      participant: {participantId, birthDate, gender, race, ethnicity, status},
+      participant: {participantId, birthDate, gender, race, ethnicity, deceased, status},
       annotations, setAnnotations, annotationDefinitions,
       openCreateDefinitionModal, openEditDefinitionsModal, workspace: {accessLevel}
     } = this.props;
@@ -297,6 +297,7 @@ export const SidebarContent = fp.flow(
       <div><span style={{fontWeight: 'bold'}}>Gender:</span> {gender}</div>
       <div><span style={{fontWeight: 'bold'}}>Race:</span> {race}</div>
       <div><span style={{fontWeight: 'bold'}}>Ethnicity:</span> {ethnicity}</div>
+      <div><span style={{fontWeight: 'bold'}}>Deceased:</span> {deceased ? 'Yes' : 'No'}</div>
 
       <div style={{display: 'flex', marginTop: '1rem'}}>
         <div style={styles.header}>Participant Status</div>
