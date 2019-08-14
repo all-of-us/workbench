@@ -1,10 +1,10 @@
 package org.pmiops.workbench.billing;
 
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNING;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
+import static org.pmiops.workbench.billing.BillingProjectBufferStatus.ASSIGNED;
+import static org.pmiops.workbench.billing.BillingProjectBufferStatus.ASSIGNING;
+import static org.pmiops.workbench.billing.BillingProjectBufferStatus.AVAILABLE;
+import static org.pmiops.workbench.billing.BillingProjectBufferStatus.CREATING;
+import static org.pmiops.workbench.billing.BillingProjectBufferStatus.ERROR;
 
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;

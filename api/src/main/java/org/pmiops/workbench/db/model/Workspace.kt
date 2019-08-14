@@ -20,7 +20,8 @@ import org.pmiops.workbench.model.DataAccessLevel
 import org.pmiops.workbench.model.SpecificPopulationEnum
 import org.pmiops.workbench.model.WorkspaceActiveStatus
 
-@Entity @Table(name = "workspace")
+@Entity
+@Table(name = "workspace")
 class Workspace {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

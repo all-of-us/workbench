@@ -80,6 +80,7 @@ public class ProfileController implements ProfileApiDelegate {
           .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
           .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
           .build();
+
   private static final Function<
           org.pmiops.workbench.firecloud.model.BillingProjectMembership, BillingProjectMembership>
       TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
