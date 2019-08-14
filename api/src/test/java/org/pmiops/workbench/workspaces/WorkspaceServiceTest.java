@@ -37,10 +37,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspaceServiceTest {
 
   @TestConfiguration
-  @Import({
-      WorkspaceMapperImpl.class,
-      CommonMappers.class
-  })
+  @Import({WorkspaceMapperImpl.class, CommonMappers.class})
   static class Configuration {}
 
   @Mock private CohortCloningService cohortCloningService;
@@ -74,14 +71,16 @@ public class WorkspaceServiceTest {
 
     workspaceResponses.clear();
     workspaces.clear();
-    addMockedWorkspace("reader", WorkspaceAccessLevel.READER.toString(), WorkspaceActiveStatus.ACTIVE);
-    addMockedWorkspace("writer", WorkspaceAccessLevel.WRITER.toString(), WorkspaceActiveStatus.ACTIVE);
-    addMockedWorkspace("owner", WorkspaceAccessLevel.OWNER.toString(), WorkspaceActiveStatus.ACTIVE);
+    addMockedWorkspace(
+        "reader", WorkspaceAccessLevel.READER.toString(), WorkspaceActiveStatus.ACTIVE);
+    addMockedWorkspace(
+        "writer", WorkspaceAccessLevel.WRITER.toString(), WorkspaceActiveStatus.ACTIVE);
+    addMockedWorkspace(
+        "owner", WorkspaceAccessLevel.OWNER.toString(), WorkspaceActiveStatus.ACTIVE);
     addMockedWorkspace("project owner", "PROJECT_OWNER", WorkspaceActiveStatus.ACTIVE);
   }
 
-  private WorkspaceResponse mockFirecloudWorkspaceResponse(
-      String workspaceId, String accessLevel) {
+  private WorkspaceResponse mockFirecloudWorkspaceResponse(String workspaceId, String accessLevel) {
     Workspace workspace = mock(Workspace.class);
     doReturn(workspaceId).when(workspace).getWorkspaceId();
     WorkspaceResponse workspaceResponse = mock(WorkspaceResponse.class);
@@ -136,7 +135,8 @@ public class WorkspaceServiceTest {
   public void getWorkspaces_skipDeleted() {
     int currentWorkspacesSize = workspaceService.getWorkspaces().size();
 
-    addMockedWorkspace("deleted", WorkspaceAccessLevel.OWNER.toString(), WorkspaceActiveStatus.DELETED);
+    addMockedWorkspace(
+        "deleted", WorkspaceAccessLevel.OWNER.toString(), WorkspaceActiveStatus.DELETED);
     assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
   }
 

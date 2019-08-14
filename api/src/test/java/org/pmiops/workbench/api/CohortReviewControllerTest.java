@@ -172,11 +172,7 @@ public class CohortReviewControllerTest {
   }
 
   @TestConfiguration
-  @Import({
-      CdrVersionService.class,
-      CohortReviewController.class,
-      CommonMappers.class
-  })
+  @Import({CdrVersionService.class, CohortReviewController.class, CommonMappers.class})
   @MockBean({
     BigQueryService.class,
     FireCloudService.class,

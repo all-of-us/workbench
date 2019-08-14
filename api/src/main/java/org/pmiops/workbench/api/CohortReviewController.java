@@ -18,8 +18,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -32,7 +30,6 @@ import org.pmiops.workbench.cohortreview.CohortReviewMapper;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -215,7 +212,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         cohortReviewMapper.toApiCohortReviewWithPaging(cohortReview, pageRequest);
 
     responseReview.setParticipantCohortStatuses(
-        paginatedPCS.stream().map(cohortReviewMapper::toApiParticipant).collect(Collectors.toList()));
+        paginatedPCS.stream()
+            .map(cohortReviewMapper::toApiParticipant)
+            .collect(Collectors.toList()));
     return ResponseEntity.ok(responseReview);
   }
 
@@ -351,7 +350,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     List<CohortReview> reviews =
         cohortReviewService.getRequiredWithCohortReviews(workspaceNamespace, workspaceId);
     CohortReviewListResponse response = new CohortReviewListResponse();
-    response.setItems(reviews.stream().map(cohortReviewMapper::toApiCohortReview).collect(Collectors.toList()));
+    response.setItems(
+        reviews.stream().map(cohortReviewMapper::toApiCohortReview).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
@@ -406,9 +406,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     ParticipantCohortAnnotationListResponse response =
         new ParticipantCohortAnnotationListResponse();
     response.setItems(
-        annotations.stream()
-            .map(cohortReviewMapper::toApi)
-            .collect(Collectors.toList()));
+        annotations.stream().map(cohortReviewMapper::toApi).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
@@ -477,7 +475,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         cohortReviewMapper.toApiCohortReviewWithPaging(cohortReview, pageRequest);
 
     responseReview.setParticipantCohortStatuses(
-        participantCohortStatuses.stream().map(cohortReviewMapper::toApiParticipant).collect(Collectors.toList()));
+        participantCohortStatuses.stream()
+            .map(cohortReviewMapper::toApiParticipant)
+            .collect(Collectors.toList()));
     responseReview.setQueryResultSize(queryResultSize);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 

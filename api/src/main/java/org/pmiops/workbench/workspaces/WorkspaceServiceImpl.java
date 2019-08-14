@@ -139,10 +139,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             dbWorkspace -> {
               org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace =
                   fcWorkspaces.get(dbWorkspace.getFirecloudUuid());
-              String fcWorkspaceAccessLevel =fcWorkspace.getAccessLevel();
+              String fcWorkspaceAccessLevel = fcWorkspace.getAccessLevel();
               WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace.getWorkspace()));
-              currentWorkspace.setAccessLevel(workspaceMapper.fromFcAccessLevel(fcWorkspaceAccessLevel));
+              currentWorkspace.setWorkspace(
+                  workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace.getWorkspace()));
+              currentWorkspace.setAccessLevel(
+                  workspaceMapper.fromFcAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;
             })
         .collect(Collectors.toList());

@@ -117,7 +117,8 @@ public class ParticipantCohortAnnotation {
     return this;
   }
 
-  // TODO eric: this seems wrong. Why are there two values called `annotationValueEnum`, why is one transient, and why is a variable name called Enum a string ??
+  // TODO eric: this seems wrong. Why are there two values called `annotationValueEnum`, why is one
+  // transient, and why is a variable name called Enum a string ??
   @Transient
   public String getAnnotationValueEnum() {
     return annotationValueEnum;

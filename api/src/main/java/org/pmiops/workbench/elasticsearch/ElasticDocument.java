@@ -144,9 +144,9 @@ public class ElasticDocument {
   }
 
   /**
-   * Recursively map BigQuery results into a format consumable by Elastic. BigQuery result
-   * columns must exactly match the target Elasticsearch schema, and the resulting documents are
-   * encoded as a nested "JSON" structure of type Map<String, Object>.
+   * Recursively map BigQuery results into a format consumable by Elastic. BigQuery result columns
+   * must exactly match the target Elasticsearch schema, and the resulting documents are encoded as
+   * a nested "JSON" structure of type Map<String, Object>.
    */
   @SuppressWarnings("unchecked")
   private static Map<String, Object> bqToElasticSchema(

@@ -32,5 +32,4 @@ public class CommonMappers {
   public String etag(int version) {
     return Etags.fromVersion(version);
   }
-
 }

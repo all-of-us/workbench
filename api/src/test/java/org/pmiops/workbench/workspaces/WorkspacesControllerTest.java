@@ -66,7 +66,6 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortreview.CohortReviewMapper;
 import org.pmiops.workbench.cohortreview.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
@@ -687,9 +686,10 @@ public class WorkspacesControllerTest {
     ws.getResearchPurpose().setPopulationDetails(Collections.singletonList(AGE_GROUPS));
     workspacesController.createWorkspace(ws);
 
-    org.pmiops.workbench.model.WorkspaceResponse wsr = workspacesController
-        .getWorkspace(ws.getNamespace(), ws.getId()).getBody();
-    assertThat(wsr.getWorkspace().getResearchPurpose().getPopulationDetails().get(0)).isEqualTo(AGE_GROUPS);
+    org.pmiops.workbench.model.WorkspaceResponse wsr =
+        workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody();
+    assertThat(wsr.getWorkspace().getResearchPurpose().getPopulationDetails().get(0))
+        .isEqualTo(AGE_GROUPS);
   }
 
   @Transactional

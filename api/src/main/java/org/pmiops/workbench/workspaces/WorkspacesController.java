@@ -622,9 +622,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
     response.setItems(
-        workspaces.stream().map(workspace ->
-            workspaceMapper.toApiWorkspace(workspace,
-                fireCloudService.getWorkspace(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()).getWorkspace()))
+        workspaces.stream()
+            .map(
+                workspace ->
+                    workspaceMapper.toApiWorkspace(
+                        workspace,
+                        fireCloudService
+                            .getWorkspace(
+                                workspace.getWorkspaceNamespace(), workspace.getFirecloudName())
+                            .getWorkspace()))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
