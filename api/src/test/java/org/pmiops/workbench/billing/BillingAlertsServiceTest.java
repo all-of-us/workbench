@@ -1,21 +1,22 @@
 package org.pmiops.workbench.billing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 
-import java.time.Clock;
+import com.google.cloud.bigquery.TableResult;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -23,29 +24,28 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import(LiquibaseAutoConfiguration.class)
 public class BillingAlertsServiceTest {
 
-  @TestConfiguration
-  @Import({
-      BillingAlertsService.class,
-      BigQueryService.class
-  })
-  static class Configuration {
-//    @Bean
-//    public Clock clock() {
-//      return CLOCK;
-//    }
-//
-//    @Bean
-//    @Scope("prototype")
-//    public WorkbenchConfig workbenchConfig() {
-//      return workbenchConfig;
-//    }
-  }
+  @Autowired BigQueryService bigQueryService;
 
   @Autowired
   BillingAlertsService billingAlertsService;
 
+  @TestConfiguration
+  @Import({
+      BillingAlertsService.class
+  })
+  @MockBean({BigQueryService.class})
+  static class Configuration { }
+
+  @Before
+  public void setUp() throws Exception {
+    InputStream inputStream = getClass()
+        .getClassLoader().getResourceAsStream("bigquery/get_billing_project_costs.ser");
+    TableResult tableResult = (TableResult) (new ObjectInputStream(inputStream)).readObject();
+    doReturn(tableResult).when(bigQueryService).executeQuery(any());
+  }
+
   @Test
   public void alertUsersExceedingFreeTierBilling() {
-    assertThat(billingAlertsService).isNotNull();
+    billingAlertsService.alertUsersExceedingFreeTierBilling();
   }
 }
