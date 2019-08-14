@@ -27,6 +27,7 @@ import org.pmiops.workbench.firecloud.model.Workspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.utils.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
@@ -36,7 +37,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspaceServiceTest {
 
   @TestConfiguration
-  @Import({WorkspaceMapperImpl.class})
+  @Import({
+      WorkspaceMapperImpl.class,
+      CommonMappers.class
+  })
   static class Configuration {}
 
   @Mock private CohortCloningService cohortCloningService;

@@ -41,6 +41,7 @@ import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.VocabularyCount;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.utils.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -218,8 +219,11 @@ public class ConceptsControllerTest {
           .standardConceptCount(1);
 
   @TestConfiguration
-  @Import({WorkspaceServiceImpl.class,
-  WorkspaceMapperImpl.class})
+  @Import({
+      WorkspaceServiceImpl.class,
+      WorkspaceMapperImpl.class,
+      CommonMappers.class
+  })
   @MockBean({
     BigQueryService.class,
     FireCloudService.class,

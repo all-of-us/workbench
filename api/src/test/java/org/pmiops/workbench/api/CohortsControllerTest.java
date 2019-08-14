@@ -70,6 +70,7 @@ import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.utils.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -164,6 +165,7 @@ public class CohortsControllerTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
+    CommonMappers.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     NotebooksServiceImpl.class,

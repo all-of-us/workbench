@@ -87,6 +87,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
+import org.pmiops.workbench.utils.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -197,6 +198,7 @@ public class DataSetControllerTest {
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
     UserService.class,
+    CommonMappers.class,
     WorkspacesController.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class
