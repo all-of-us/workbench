@@ -22,6 +22,7 @@ public class WorkbenchConfig {
   public AccessConfig access;
   public CohortBuilderConfig cohortbuilder;
   public FeatureFlagsConfig featureFlags;
+  public FreeCreditsConfig freeCredits;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -40,7 +41,12 @@ public class WorkbenchConfig {
     config.mandrill = new MandrillConfig();
     config.moodle = new MoodleConfig();
     config.server = new ServerConfig();
+    config.freeCredits = new FreeCreditsConfig();
     return config;
+  }
+
+  public static class FreeCreditsConfig {
+    public Double limit;
   }
 
   public static class FireCloudConfig {
