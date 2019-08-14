@@ -33,6 +33,10 @@ const styles = {
     color: colorWithWhiteness(colors.dark, -1),
     fontSize: '13px',
     fontWeight: 400
+  },
+  button: {
+    marginLeft: '1rem',
+    height: 'auto'
   }
 };
 
@@ -210,6 +214,7 @@ const AnnotationItem = fp.flow(
               this.save(value);
             }
           }}
+          placeholder='YYYY-MM-DD'
           disabled={disabled}
         />;
     }
@@ -321,12 +326,12 @@ export const SidebarContent = fp.flow(
       <div style={{display: 'flex', marginTop: '1rem'}}>
         <div style={styles.header}>Annotations</div>
         <Button
-          type='link' style={{marginLeft: '1rem', ...(disabled ? {cursor: 'not-allowed'} : {})}}
+          type='link' style={{...styles.button, ...(disabled ? {cursor: 'not-allowed'} : {})}}
           onClick={openCreateDefinitionModal} disabled={disabled}>
           <ClrIcon shape='plus-circle' size={21} />
         </Button>
         {!!annotationDefinitions.length && <Button
-          style={{marginLeft: '1rem', ...(disabled ? {cursor: 'not-allowed'} : {})}} type='link'
+          type='link' style={{...styles.button, ...(disabled ? {cursor: 'not-allowed'} : {})}}
           onClick={openEditDefinitionsModal} disabled={disabled}
         >Edit</Button>}
       </div>
