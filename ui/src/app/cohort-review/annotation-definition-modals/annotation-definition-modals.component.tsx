@@ -82,23 +82,17 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
       }
     });
     return <Modal loading={saving}>
-      <ModalTitle>Create a Cohort-wide Annotation</ModalTitle>
+      <ModalTitle>Create a Review Set-Wide Annotation</ModalTitle>
       <ModalBody>
-        <div style={headerStyles.formLabel}>Name:</div>
-        <TextInput
-          maxLength={255}
-          value={name}
-          onChange={v => this.setState({name: v})}
-        />
         <div style={{...headerStyles.formLabel, marginTop: '1rem'}}>Type:</div>
         <Select
           value={annotationType}
           options={[
-            {value: AnnotationType.STRING, label: 'Text'},
-            {value: AnnotationType.ENUM, label: 'Enumeration'},
+            {value: AnnotationType.STRING, label: 'Free Text'},
+            {value: AnnotationType.ENUM, label: 'Dropdown List'},
             {value: AnnotationType.DATE, label: 'Date'},
-            {value: AnnotationType.BOOLEAN, label: 'Boolean'},
-            {value: AnnotationType.INTEGER, label: 'Integer'},
+            {value: AnnotationType.BOOLEAN, label: 'True/False Checkbox'},
+            {value: AnnotationType.INTEGER, label: 'Numeric Field'},
           ]}
           onChange={v => this.setState({annotationType: v})}
         />
@@ -124,6 +118,12 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
             <ClrIcon shape='plus-circle' /> Add a value
           </Button>
         </React.Fragment>}
+        <div style={headerStyles.formLabel}>Name:</div>
+        <TextInput
+          maxLength={255}
+          value={name}
+          onChange={v => this.setState({name: v})}
+        />
       </ModalBody>
       <ModalFooter>
         <Button type='secondary' onClick={onCancel}>Cancel</Button>
@@ -204,7 +204,7 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
     const {onClose, annotationDefinitions} = this.props;
     const {editId, editValue, busy} = this.state;
     return <Modal loading={busy}>
-      <ModalTitle>Edit Cohort-wide Annotations</ModalTitle>
+      <ModalTitle>Edit or Delete a Review Set-Wide Annotation Field</ModalTitle>
       <ModalBody>
         {annotationDefinitions.map(({cohortAnnotationDefinitionId: id, columnName}) => {
           return <div key={id} style={styles.editRow}>
