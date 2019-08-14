@@ -1,4 +1,4 @@
-FROM koosiedemoer/netty-tcnative-alpine
+FROM jeanblanchard/java:jdk-8
 
 #
 # Java for Gradle
