@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM koosiedemoer/netty-tcnative-alpine
 
 #
 # Java for Gradle
@@ -19,7 +19,6 @@ RUN apk --no-cache add \
         python \
         py-crcmod \
         bash \
-        libc6-compat \
         openssh-client \
         git \
     && curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
