@@ -38,4 +38,9 @@ public interface UserDao extends CrudRepository<User, Long> {
       "SELECT user FROM User user WHERE user.dataAccessLevel IN :dals AND ( lower(user.email) LIKE lower(concat('%', :term, '%')) OR lower(user.familyName) LIKE lower(concat('%', :term, '%')) OR lower(user.givenName) LIKE lower(concat('%', :term, '%')) )")
   List<User> findUsersByDataAccessLevelsAndSearchString(
       @Param("dals") List<Short> dataAccessLevels, @Param("term") String term, Sort sort);
+
+  // This query can return more than 1 row but we can grab any one of them because the creator value should be the same for all results
+  @Query("SELECT user FROM User user INNER JOIN Workspace w ON user.userId = w.creator WHERE w.workspaceNamespace = :workspaceNamespace")
+  User findCreatorByWorkspaceNamespace(@Param("workspaceNamespace") String workspaceNamespace);
+
 }

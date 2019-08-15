@@ -1,7 +1,7 @@
 package org.pmiops.workbench.billing;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -18,7 +18,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -84,9 +83,10 @@ public class BillingAlertsServiceTest {
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
+    createWorkspace(user, "aou-test-f1-26");
 
     billingAlertsService.alertUsersExceedingFreeTierBilling();
-    verify(notificationService).alertUser(user);
+    verify(notificationService).alertUser(eq(user), any());
   }
 
   @Test
@@ -109,11 +109,15 @@ public class BillingAlertsServiceTest {
     createWorkspace(user, "aou-test-f1-47");
 
     billingAlertsService.alertUsersExceedingFreeTierBilling();
-    verify(notificationService).alertUser(user);
+    verify(notificationService).alertUser(eq(user), any());
   }
 
 
   // TODO: whitelist test
+
+  // TODO: active?
+
+  // TODO: handle null creator case
 
   private User createUser(String email) {
     User user = new User();
