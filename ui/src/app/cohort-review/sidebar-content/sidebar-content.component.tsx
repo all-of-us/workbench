@@ -251,6 +251,7 @@ export const SidebarContent = fp.flow(
     setParticipant: Function,
     annotations: ParticipantCohortAnnotation[],
     annotationDefinitions: CohortAnnotationDefinition[],
+    annotationDeleted: boolean,
     setAnnotations: Function,
     openCreateDefinitionModal: Function,
     openEditDefinitionsModal: Function,
@@ -290,7 +291,7 @@ export const SidebarContent = fp.flow(
   render() {
     const {
       participant: {participantId, birthDate, gender, race, ethnicity, deceased, status},
-      annotations, setAnnotations, annotationDefinitions,
+      annotations, setAnnotations, annotationDefinitions, annotationDeleted,
       openCreateDefinitionModal, openEditDefinitionsModal, workspace: {accessLevel}
     } = this.props;
     const {savingStatus} = this.state;
@@ -309,7 +310,7 @@ export const SidebarContent = fp.flow(
         {savingStatus && <Spinner width={16} height={16} style={{marginLeft: 'auto'}} />}
       </div>
       <div>Choose a Review Status for Participant {participantId}</div>
-      <div style={{...(disabled ? {cursor: 'not-allowed'} : {})}}>
+      <div style={{...(disabled ? {cursor: 'not-allowed'} : {}), marginBottom: '1rem'}}>
         <Select
           options={[
             {label: '--', value: CohortStatus.NOTREVIEWED},
@@ -322,8 +323,11 @@ export const SidebarContent = fp.flow(
           isDisabled={disabled}
         />
       </div>
-
-      <div style={{display: 'flex', marginTop: '1rem'}}>
+      {annotationDeleted && <div>
+        <ClrIcon style={styles.success} shape='check-circle' size='20' className='is-solid' />
+        <span style={styles.message}> Annotation Field Deleted</span>
+      </div>}
+      <div style={{display: 'flex'}}>
         <div style={styles.header}>Annotations</div>
         <Button
           type='link' style={{...styles.button, ...(disabled ? {cursor: 'not-allowed'} : {})}}

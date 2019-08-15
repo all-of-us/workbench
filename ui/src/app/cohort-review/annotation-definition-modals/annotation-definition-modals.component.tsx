@@ -171,11 +171,11 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
       setAnnotationDefinitions(
         fp.remove({cohortAnnotationDefinitionId: id}, annotationDefinitions)
       );
-      onClose();
+      onClose(true);
     } catch (error) {
       console.error(error);
       this.setState({deleteError: true});
-      setTimeout(() => this.setState({deleteError: false}), 3000);
+      setTimeout(() => this.setState({deleteError: false}), 5000);
     } finally {
       this.setState({busy: false, deleteId: undefined});
     }
@@ -206,7 +206,7 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
     } catch (error) {
       console.error(error);
       this.setState({renameError: true});
-      setTimeout(() => this.setState({renameError: false}), 3000);
+      setTimeout(() => this.setState({renameError: false}), 5000);
     } finally {
       this.setState({busy: false, editId: undefined});
     }
