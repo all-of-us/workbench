@@ -21,6 +21,7 @@ import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -37,6 +38,8 @@ import {
 } from 'generated/fetch';
 import * as React from 'react';
 import RSelect from 'react-select';
+
+const EVENT_CATEGORY = 'Workspace list';
 
 const styles = reactStyles({
   fadeBox: {
@@ -215,14 +218,23 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
           <div style={{display: 'flex', flexDirection: 'column'}}>
             <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
               <WorkspaceCardMenu wp={wp}
-                                 onDelete={() => {this.setState({confirmDeleting: true}); }}
-                                 onShare={() => this.handleShareAction()}
+                                 onDelete={() => {
+                                   triggerEvent(
+                                     EVENT_CATEGORY, 'delete', 'Card menu - click delete');
+                                   this.setState({confirmDeleting: true});
+                                 }}
+                                 onShare={() => {
+                                   triggerEvent(EVENT_CATEGORY, 'share', 'Card menu - click share');
+                                   this.handleShareAction();
+                                 }}
                                  disabled={false}/>
               <Clickable>
                 <div style={styles.workspaceName}
                      data-test-id='workspace-card-name'
-                     onClick={() => navigate(
-                         ['workspaces', wp.workspace.namespace, wp.workspace.id, 'data'])}>
+                     onClick={() => {
+                       triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
+                       navigate(['workspaces', wp.workspace.namespace, wp.workspace.id, 'data']);
+                     }}>
                   {wp.workspace.name}</div>
               </Clickable>
             </div>
