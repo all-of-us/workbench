@@ -1,10 +1,11 @@
-FROM jeanblanchard/java:jdk-8
+FROM ubuntu:18.04
 
 #
 # Java for Gradle
 #
 
-RUN apk --no-cache add openjdk8
+RUN apt-get update && \
+    apt-get install -y openjdk-8-jdk
 
 #
 # https://github.com/GoogleCloudPlatform/cloud-sdk-docker/blob/master/alpine/Dockerfile
@@ -14,11 +15,14 @@ ENV CLOUD_SDK_VERSION 215.0.0
 
 ENV PATH /google-cloud-sdk/bin:$PATH
 
-RUN apk --no-cache add \
+RUN apt-get install -y\
         curl \
         python \
-        py-crcmod \
+        gcc \
+        python-dev \
+        python-setuptools \
         bash \
+        libc6-i386 \
         openssh-client \
         git \
     && curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
@@ -35,10 +39,10 @@ RUN apk --no-cache add \
 
 RUN gcloud components install app-engine-java
 
-RUN apk --no-cache add gettext
+RUN apt-get install -y gettext
 
-RUN apk --no-cache add mysql
-RUN apk --no-cache add mysql-client
+RUN apt-get install -y mysql-server
+RUN apt-get install -y mysql-client
 RUN curl https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 \
   > /usr/local/bin/cloud_sql_proxy && chmod +x /usr/local/bin/cloud_sql_proxy
 
@@ -54,7 +58,7 @@ ENV GRADLE_USER_HOME /.gradle
 # It never makes sense for Gradle to run a daemon within a docker container.
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 
-RUN apk --no-cache add ruby ruby-json ruby-io-console
+RUN apt-get install -y ruby ruby-dev ruby-json
 
 RUN curl https://services.gradle.org/distributions/gradle-4.3.1-bin.zip -L > /tmp/gradle.zip
 WORKDIR /tmp
@@ -62,6 +66,11 @@ RUN unzip gradle.zip && rm gradle.zip \
   && mv gradle-* /gradle
 ENV PATH="$PATH:/gradle/bin"
 WORKDIR /
+
+# Make is necessary to utilize gem install
+RUN apt-get install -y make
+
+RUN gem install --no-document io-console
 
 RUN gem install --no-document googleauth
 
