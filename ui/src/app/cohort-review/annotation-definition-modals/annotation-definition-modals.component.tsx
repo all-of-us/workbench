@@ -9,9 +9,9 @@ import {Select, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, summarizeErrors, withUrlParams} from 'app/utils/index';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles, summarizeErrors, withUrlParams} from 'app/utils';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
-import colors from '../../styles/colors';
 
 const styles = reactStyles({
   editRow: {
@@ -20,6 +20,10 @@ const styles = reactStyles({
   },
   defName: {
     flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+  },
+  error: {
+    color: colors.warning,
+    marginTop: '-3px',
   }
 });
 
@@ -147,17 +151,19 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
     setAnnotationDefinitions: Function,
     urlParams: any
   },
-  {editId: number, editValue: string, busy: boolean, deleteId: number}
+  {editId: number, editValue: string, busy: boolean, deleteId: number, deleteError: boolean,
+    renameError: boolean}
 > {
   constructor(props) {
     super(props);
-    this.state = {editId: undefined, editValue: '', busy: false, deleteId: undefined};
+    this.state = {editId: undefined, editValue: '', busy: false, deleteId: undefined,
+      deleteError: false, renameError: false};
   }
 
   async delete(id) {
     try {
       const {
-        annotationDefinitions, setAnnotationDefinitions,
+        annotationDefinitions, onClose, setAnnotationDefinitions,
         urlParams: {ns, wsid, cid}
       } = this.props;
       this.setState({busy: true});
@@ -165,8 +171,11 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
       setAnnotationDefinitions(
         fp.remove({cohortAnnotationDefinitionId: id}, annotationDefinitions)
       );
+      onClose();
     } catch (error) {
       console.error(error);
+      this.setState({deleteError: true});
+      setTimeout(() => this.setState({deleteError: false}), 3000);
     } finally {
       this.setState({busy: false, deleteId: undefined});
     }
@@ -196,6 +205,8 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
       }
     } catch (error) {
       console.error(error);
+      this.setState({renameError: true});
+      setTimeout(() => this.setState({renameError: false}), 3000);
     } finally {
       this.setState({busy: false, editId: undefined});
     }
@@ -203,17 +214,20 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
 
   render() {
     const {onClose, annotationDefinitions} = this.props;
-    const {editId, editValue, busy, deleteId} = this.state;
+    const {editId, editValue, busy, deleteError, deleteId, renameError} = this.state;
     return <Modal loading={busy}>
       <ModalTitle>Edit or Delete a Review Set-Wide Annotation Field</ModalTitle>
       <ModalBody>
+        {(deleteError || renameError) && <div>
+          <ClrIcon style={styles.error} shape='exclamation-triangle'
+            size='20' className='is-solid' />
+          <span style={{color: colorWithWhiteness(colors.dark, -1)}}>
+            {deleteError ? ' Delete' : ' Rename'} Failed
+          </span>
+        </div>}
         {deleteId !== undefined ? <div>
-          <div>Deleting this annotation field will remove this field from ALL PARTICIPANTS in ALL
-            REVIEW SETS generated with this set. Are you sure you want to delete this?</div>
-          <Button type='link' style={{height: 'auto', color: colors.accent}}
-            onClick={() => this.setState({deleteId: undefined})}>No</Button>
-          <Button type='link' style={{height: 'auto', color: colors.accent}}
-            onClick={() => this.delete(deleteId)}>Yes</Button>
+          Deleting this annotation field will remove this field from ALL PARTICIPANTS in ALL
+           REVIEW SETS generated with this set. Are you sure you want to delete this?
         </div> : <React.Fragment>
           {annotationDefinitions.map(({cohortAnnotationDefinitionId: id, columnName}) => {
             return <div key={id} style={styles.editRow}>
@@ -258,7 +272,14 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
         </React.Fragment>}
       </ModalBody>
       <ModalFooter>
-        {deleteId === undefined && <Button disabled={busy} onClick={onClose}>Close</Button>}
+        {deleteId === undefined
+          ? <Button disabled={busy} onClick={onClose}>Close</Button>
+          : <React.Fragment>
+            <Button type='secondary' style={{marginRight: '0.5rem'}}
+              onClick={() => this.setState({deleteId: undefined})}>No</Button>
+            <Button type='primary' onClick={() => this.delete(deleteId)}>Yes</Button>
+          </React.Fragment>
+        }
       </ModalFooter>
     </Modal>;
   }
