@@ -1,5 +1,6 @@
 package org.pmiops.workbench.billing;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -78,11 +79,19 @@ public class BillingAlertsServiceTest {
   }
 
   @Test
+  public void findCreatorByWorkspaceNamespace() {
+    User user = createUser("test@test.com");
+    createWorkspace(user, "rumney");
+    createWorkspace(user, "rumney");
+
+    assertThat(userDao.findCreatorByWorkspaceNamespace("rumney")).isEqualTo(user);
+  }
+
+  @Test
   public void alertUsersExceedingFreeTierBilling_singleProjectExceedsLimit() {
     workbenchConfig.freeCredits.limit = 100.0;
 
     User user = createUser("test@test.com");
-    createWorkspace(user, "aou-test-f1-26");
     createWorkspace(user, "aou-test-f1-26");
 
     billingAlertsService.alertUsersExceedingFreeTierBilling();
@@ -95,6 +104,18 @@ public class BillingAlertsServiceTest {
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
+
+    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    verifyZeroInteractions(notificationService);
+  }
+
+  @Test
+  public void alertUsersExceedingFreeTierBilling_workspaceMissingCreator() {
+    workbenchConfig.freeCredits.limit = 500.0;
+
+    User user = createUser("test@test.com");
+    createWorkspace(user, "aou-test-f1-26");
+    createWorkspace(null, "rumney");
 
     billingAlertsService.alertUsersExceedingFreeTierBilling();
     verifyZeroInteractions(notificationService);
@@ -115,14 +136,11 @@ public class BillingAlertsServiceTest {
 
   // TODO: whitelist test
 
-  // TODO: active?
-
-  // TODO: handle null creator case
+  // TODO: active? user and workspace?
 
   private User createUser(String email) {
     User user = new User();
     user.setEmail(email);
-//    user.setDisabled(false);
     return userDao.save(user);
   }
 
