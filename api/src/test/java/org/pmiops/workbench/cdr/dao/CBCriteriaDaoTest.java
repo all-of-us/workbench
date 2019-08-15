@@ -42,7 +42,7 @@ public class CBCriteriaDaoTest {
         new CBCriteria()
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.SURVEY.toString())
             .group(false)
             .selectable(true);
     cbCriteriaDao.save(criteria);
@@ -52,7 +52,7 @@ public class CBCriteriaDaoTest {
             .findCriteriaLeavesByDomainAndTypeAndSubtype(
                 DomainType.SURVEY.toString(),
                 CriteriaType.PPI.toString(),
-                CriteriaSubType.BASICS.toString())
+                CriteriaSubType.SURVEY.toString())
             .get(0));
   }
 

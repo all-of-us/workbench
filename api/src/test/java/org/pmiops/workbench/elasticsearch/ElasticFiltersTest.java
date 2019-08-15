@@ -72,7 +72,7 @@ public class ElasticFiltersTest {
     return new CBCriteria()
         .domainId(DomainType.SURVEY.toString())
         .type(CriteriaType.PPI.toString())
-        .subtype(CriteriaSubType.BASICS.toString())
+        .subtype(CriteriaSubType.SURVEY.toString())
         .attribute(Boolean.FALSE)
         .standard(false)
         .synonyms("+[SURVEY_rank1]");
@@ -121,7 +121,8 @@ public class ElasticFiltersTest {
             .path(""));
 
     // Four node PPI tree, survey, question, 1 answer.
-    CBCriteria survey = basicsCriteria().code("006").group(true).selectable(true).parentId(0);
+    CBCriteria survey =
+        basicsCriteria().code("006").group(true).selectable(true).parentId(0).conceptId("77");
     saveCriteriaWithPath("", survey);
 
     CBCriteria question =
@@ -328,14 +329,16 @@ public class ElasticFiltersTest {
                                     new SearchParameter()
                                         .domain(DomainType.SURVEY.toString())
                                         .type(CriteriaType.PPI.toString())
-                                        .subtype(CriteriaSubType.BASICS.toString())
+                                        .subtype(CriteriaSubType.SURVEY.toString())
                                         .ancestorData(false)
                                         .standard(false)
-                                        .group(true)))));
+                                        .group(true)
+                                        .conceptId(77L)))));
     assertThat(resp)
         .isEqualTo(
             singleNestedQuery(
-                QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("7771"))));
+                QueryBuilders.termsQuery(
+                    "events.source_concept_id", ImmutableList.of("77", "7771", "777"))));
   }
 
   @Test
@@ -352,7 +355,7 @@ public class ElasticFiltersTest {
                                     new SearchParameter()
                                         .domain(DomainType.SURVEY.toString())
                                         .type(CriteriaType.PPI.toString())
-                                        .subtype(CriteriaSubType.BASICS.toString())
+                                        .subtype(CriteriaSubType.QUESTION.toString())
                                         .conceptId(777L)
                                         .ancestorData(false)
                                         .standard(false)
@@ -380,7 +383,7 @@ public class ElasticFiltersTest {
                                     new SearchParameter()
                                         .domain(DomainType.SURVEY.toString())
                                         .type(CriteriaType.PPI.toString())
-                                        .subtype(CriteriaSubType.BASICS.toString())
+                                        .subtype(CriteriaSubType.ANSWER.toString())
                                         .conceptId(7771L)
                                         .group(false)
                                         .ancestorData(false)
@@ -408,7 +411,7 @@ public class ElasticFiltersTest {
                                     new SearchParameter()
                                         .domain(DomainType.SURVEY.toString())
                                         .type(CriteriaType.PPI.toString())
-                                        .subtype(CriteriaSubType.BASICS.toString())
+                                        .subtype(CriteriaSubType.ANSWER.toString())
                                         .conceptId(777L)
                                         .group(false)
                                         .ancestorData(false)
