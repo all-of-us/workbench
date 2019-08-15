@@ -46,7 +46,7 @@ then
 fi
 
 # Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls --max_results=100)
+datasets=$(bq --project=$BQ_PROJECT ls --max_results=150)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
@@ -61,7 +61,7 @@ else
 fi
 
 # Make dataset for cdr cloudsql tables
-datasets=$(bq --project=$OUTPUT_PROJECT ls)
+datasets=$(bq --project=$OUTPUT_PROJECT ls --max_results=150)
 re=\\b$OUTPUT_DATASET\\b
 if [[ $datasets =~ $re ]]; then
   echo "$OUTPUT_DATASET exists"
@@ -71,7 +71,7 @@ else
 fi
 
 #Check if tables to be copied over exists in bq project dataset
-tables=$(bq --project=$BQ_PROJECT --dataset=$BQ_DATASET ls)
+tables=$(bq --project=$BQ_PROJECT --dataset=$BQ_DATASET ls --max_results=150)
 cb_cri_table_check=\\bcb_criteria\\b
 cb_cri_attr_table_check=\\bcb_criteria_attribute\\b
 cb_cri_rel_table_check=\\bcb_criteria_relationship\\b
