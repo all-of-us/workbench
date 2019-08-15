@@ -133,8 +133,19 @@ public class BillingAlertsServiceTest {
     verify(notificationService).alertUser(eq(user), any());
   }
 
+  @Test
+  public void alertUsersExceedingFreeTierBilling_whitelist() {
+    workbenchConfig.freeCredits.limit = 500.0;
 
-  // TODO: whitelist test
+    User user = createUser("test@test.com");
+    createWorkspace(user, "aou-test-f1-26");
+    createWorkspace(user, "aou-test-f1-47");
+
+    workbenchConfig.freeCredits.whitelistedBillingProjects.add("aou-test-f1-47");
+
+    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    verifyZeroInteractions(notificationService);
+  }
 
   // TODO: active? user and workspace?
 

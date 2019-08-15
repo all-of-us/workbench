@@ -47,6 +47,7 @@ public class WorkbenchConfig {
 
   public static class FreeCreditsConfig {
     public Double limit;
+    public ArrayList<String> whitelistedBillingProjects = new ArrayList<>();
   }
 
   public static class FireCloudConfig {

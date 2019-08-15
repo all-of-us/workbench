@@ -47,6 +47,7 @@ public class BillingAlertsService {
 
     Map<User, Double> userCosts = Streams
         .stream(bigQueryService.executeQuery(queryConfig).getValues())
+        .filter(fv -> !workbenchConfigProvider.get().freeCredits.whitelistedBillingProjects.contains(fv.get("id").getStringValue()) )
         .map(fv -> new Pair<>(
             userDao.findCreatorByWorkspaceNamespace(fv.get("id").getStringValue()),
             fv.get("cost").getDoubleValue()))
