@@ -225,17 +225,17 @@ const AnnotationItem = fp.flow(
     const {error, saving, success} = this.state;
     return <React.Fragment>
       <div style={{alignItems: 'center', ...headerStyles.formLabel}}>
-        <div>{columnName}</div>
-        {error && <div>
+        <div style={{display: 'inline-block'}}>{columnName}</div>
+        {error && <div style={{display: 'inline-block'}}>
           <ClrIcon style={styles.error} shape='exclamation-triangle'
             size='20' className='is-solid' />
           <span style={styles.message}> Save Failed</span>
         </div>}
-        {success && <div>
+        {success && <div style={{display: 'inline-block'}}>
           <ClrIcon style={styles.success} shape='check-circle' size='20' className='is-solid' />
           <span style={styles.message}> Annotation Saved</span>
         </div>}
-        {saving && <Spinner size={16}/>}
+        {saving && <Spinner style={{marginLeft: '0.25rem'}} size={16}/>}
       </div>
       {this.renderInput()}
     </React.Fragment>;
