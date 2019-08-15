@@ -217,7 +217,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
       const hasRegisteredAccess = hasRegisteredAccessFetch(profile.dataAccessLevel);
-      if (!hasRegisteredAccess || parseInt(workbenchAccessTasks, 2) === 1) {
+      if (!hasRegisteredAccess || workbenchAccessTasks) {
         await this.syncCompliance();
       }
       if (workbenchAccessTasks) {
