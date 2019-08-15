@@ -218,62 +218,64 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
     return <Modal loading={busy}>
       <ModalTitle>Edit or Delete a Review Set-Wide Annotation Field</ModalTitle>
       <ModalBody>
-        {(deleteError || renameError) && <div>
-          <ClrIcon style={styles.error} shape='exclamation-triangle'
-            size='20' className='is-solid' />
-          <span style={{color: colorWithWhiteness(colors.dark, -1)}}>
-            {deleteError ? ' Delete' : ' Rename'} Failed
-          </span>
-        </div>}
-        {deleteId !== undefined ? <div>
-          Deleting this annotation field will remove this field from ALL PARTICIPANTS in ALL
-           REVIEW SETS generated with this set. Are you sure you want to delete this?
-        </div> : <React.Fragment>
-          {annotationDefinitions.map(({cohortAnnotationDefinitionId: id, columnName}) => {
-            return <div key={id} style={styles.editRow}>
-              {editId === id ?
-                <TextInput
-                  maxLength={255}
-                  autoFocus
-                  value={editValue}
-                  onChange={v => this.setState({editValue: v})}
-                  onBlur={() => this.rename()}
-                  onKeyPress={e => {
-                    if (e.key === 'Enter') {
-                      this.rename();
-                    }
-                  }}
-                />
-              :
-                <div style={styles.defName}>
-                  {columnName}
-                </div>
-              }
-              <Button
-                type='link'
-                disabled={busy}
-                style={{flex: 'none', margin: '0 0.5rem'}}
-                onClick={() => this.setState({editId: id, editValue: columnName})}
-              >Rename</Button>
-              <div>|</div>
-              <Button
-                type='link'
-                disabled={busy}
-                style={{flex: 'none', marginLeft: '0.5rem'}}
-                onClick={() => this.setState({deleteId: id})}
-              >Delete</Button>
-            </div>;
-          })}
-          {!annotationDefinitions.length &&
-            <div style={{fontStyle: 'italic'}}>
-              No review annotations defined.
-            </div>
-          }
-        </React.Fragment>}
+        <div style={{maxHeight: '10rem', overflow: 'auto'}}>
+          {(deleteError || renameError) && <div>
+            <ClrIcon style={styles.error} shape='exclamation-triangle'
+              size='20' className='is-solid' />
+            <span style={{color: colorWithWhiteness(colors.dark, -1)}}>
+              {deleteError ? ' Delete' : ' Rename'} Failed
+            </span>
+          </div>}
+          {deleteId !== undefined ? <div>
+            Deleting this annotation field will remove this field from ALL PARTICIPANTS in ALL
+             REVIEW SETS generated with this set. Are you sure you want to delete this?
+          </div> : <React.Fragment>
+            {annotationDefinitions.map(({cohortAnnotationDefinitionId: id, columnName}) => {
+              return <div key={id} style={styles.editRow}>
+                {editId === id ?
+                  <TextInput
+                    maxLength={255}
+                    autoFocus
+                    value={editValue}
+                    onChange={v => this.setState({editValue: v})}
+                    onBlur={() => this.rename()}
+                    onKeyPress={e => {
+                      if (e.key === 'Enter') {
+                        this.rename();
+                      }
+                    }}
+                  />
+                :
+                  <div style={styles.defName}>
+                    {columnName}
+                  </div>
+                }
+                <Button
+                  type='link'
+                  disabled={busy}
+                  style={{flex: 'none', margin: '0 0.5rem'}}
+                  onClick={() => this.setState({editId: id, editValue: columnName})}
+                >Rename</Button>
+                <div>|</div>
+                <Button
+                  type='link'
+                  disabled={busy}
+                  style={{flex: 'none', marginLeft: '0.5rem'}}
+                  onClick={() => this.setState({deleteId: id})}
+                >Delete</Button>
+              </div>;
+            })}
+            {!annotationDefinitions.length &&
+              <div style={{fontStyle: 'italic'}}>
+                No review annotations defined.
+              </div>
+            }
+          </React.Fragment>}
+        </div>
       </ModalBody>
       <ModalFooter>
         {deleteId === undefined
-          ? <Button disabled={busy} onClick={onClose}>Close</Button>
+          ? <Button disabled={busy} onClick={() => onClose(false)}>Close</Button>
           : <React.Fragment>
             <Button type='secondary' style={{marginRight: '0.5rem'}}
               onClick={() => this.setState({deleteId: undefined})}>No</Button>
