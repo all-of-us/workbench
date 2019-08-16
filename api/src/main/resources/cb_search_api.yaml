@@ -775,7 +775,7 @@ definitions:
   CriteriaSubType:
     type: string
     description: possible criteria types
-    enum: [BASICS, BMI, BP, CLIN, HC, HEIGHT, HR, HR-DETAIL, HR-IRR, HR-NOIRR, LAB, LIFESTYLE, OVERALLHEALTH, PREG, WC, WEIGHT, WHEEL]
+    enum: [ANSWER, BMI, BP, CLIN, HC, HEIGHT, HR, HR-DETAIL, HR-IRR, HR-NOIRR, LAB, PREG, QUESTION, SURVEY, WC, WEIGHT, WHEEL]
 
   TemporalMention:
     type: string
