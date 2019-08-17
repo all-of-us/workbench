@@ -11,7 +11,7 @@ services:
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
   db:
-    image: mysql:5.7
+    image: mysql:5.7.27
     env_file:
       - db/vars.env
     volumes:
@@ -163,7 +163,7 @@ services:
   mysql-cloud:
     depends_on:
       - cloud-sql-proxy
-    image: mysql:5.7
+    image: mysql:5.7.27
     user: ${UID}
     working_dir: /w
     volumes:
