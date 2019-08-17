@@ -1,11 +1,12 @@
 FROM ubuntu:18.04
 
 #
-# Java for Gradle
+# Development requirements
 #
 
 RUN apt-get update && \
-    apt-get install --no-install-recommends -y openjdk-8-jdk=8u222-b10-1ubuntu1~18.04.1 \
+    apt-get install --no-install-recommends -y \
+     openjdk-8-jdk=8u222-b10-1ubuntu1~18.04.1 \
      curl=7.58.0-2ubuntu3.7 \
      python=2.7.15~rc1-1 \
      gcc=4:7.4.0-1ubuntu2.3 \
@@ -22,13 +23,11 @@ RUN apt-get update && \
      ruby-dev=1:2.5.1 \
      ruby-json=2.1.0+dfsg-2 \
      make=4.1-9.1ubuntu1 \
-     unzip=6.0-21ubuntu1 && \
+     unzip=6.0-21ubuntu1 \
+     wait-for-it=0.0~git20170723-1 \
+     && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-#
-# https://github.com/GoogleCloudPlatform/cloud-sdk-docker/blob/master/alpine/Dockerfile
-#
 
 ENV CLOUD_SDK_VERSION 215.0.0
 
@@ -50,9 +49,6 @@ RUN gcloud components install app-engine-java
 
 RUN curl https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 \
   > /usr/local/bin/cloud_sql_proxy && chmod +x /usr/local/bin/cloud_sql_proxy
-
-RUN curl https://raw.githubusercontent.com/mrako/wait-for/d9699cb9fe8a4622f05c4ee32adf2fd93239d005/wait-for \
-  > /usr/local/bin/wait-for && chmod +x /usr/local/bin/wait-for
 
 # Create a gradle cache directory as a volume that can be read/written by any
 # container (including containers running as any user -- hence the a+rwx)
