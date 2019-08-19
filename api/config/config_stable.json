@@ -14,6 +14,10 @@
     "xAppIdValue": "stable-AoU-RW",
     "vpcServicePerimeterName": ""
   },
+  "freeCredits": {
+    "defaultLimit": 300.0,
+    "whitelistedUsers": []
+  },
   "auth": {
     "serviceAccountApiUsers": [
       "all-of-us-rw-stable@appspot.gserviceaccount.com"

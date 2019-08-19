@@ -99,6 +99,7 @@
     <include file="changelog/db.changelog-89-add-data-use-agreement-signed-version.xml"/>
     <include file="changelog/db.changelog-90-review-version.xml"/>
     <include file="changelog/db.changelog-91-review-last-modified.xml"/>
+    <include file="changelog/db.changelog-92-free-credits.xml"/>
 
     <!--
     Note: to update the DB locally, do the following:

@@ -15,6 +15,10 @@
     "xAppIdValue": "local-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test"
   },
+  "freeCredits": {
+    "defaultLimit": 300.0,
+    "whitelistedUsers": []
+  },
   "auth": {
     "serviceAccountApiUsers": [
       "all-of-us-workbench-test@appspot.gserviceaccount.com"
