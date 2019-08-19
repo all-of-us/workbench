@@ -1,17 +1,14 @@
 package org.pmiops.workbench.billing;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.Streams;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.util.Pair;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,18 +44,27 @@ public class BillingAlertsService {
 
     Map<User, Double> userCosts = Streams
         .stream(bigQueryService.executeQuery(queryConfig).getValues())
-        .filter(fv -> !workbenchConfigProvider.get().freeCredits.whitelistedBillingProjects.contains(fv.get("id").getStringValue()) )
         .map(fv -> new Pair<>(
             userDao.findCreatorByWorkspaceNamespace(fv.get("id").getStringValue()),
             fv.get("cost").getDoubleValue()))
         .filter(pair -> pair.getKey() != null)
+        .filter(pair -> !workbenchConfigProvider.get().freeCredits.whitelistedUsers
+            .contains(pair.getKey().getEmail()) )
         .collect(Collectors.groupingBy(
             pair -> pair.getKey(),
             Collectors.summingDouble(Pair::getValue)
         ));
 
     userCosts.entrySet().stream()
-        .filter(entry -> entry.getValue() > workbenchConfigProvider.get().freeCredits.limit)
+        .filter(entry -> entry.getValue() > getUserFreeTierLimit(entry.getKey()))
         .forEach(entry -> notificationService.alertUser(entry.getKey(), "You have exceeded your free tier credits."));
+  }
+
+  private Double getUserFreeTierLimit(User user) {
+    if (user.getFreeTierCreditsLimitOverride() != null) {
+      return user.getFreeTierCreditsLimitOverride();
+    }
+
+    return workbenchConfigProvider.get().freeCredits.defaultLimit;
   }
 }

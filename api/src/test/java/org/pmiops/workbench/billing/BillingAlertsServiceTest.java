@@ -19,6 +19,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -67,6 +68,8 @@ public class BillingAlertsServiceTest {
     }
   }
 
+  // Free Tier credit is set per user
+
   @Before
   public void setUp() throws Exception {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
@@ -89,7 +92,7 @@ public class BillingAlertsServiceTest {
 
   @Test
   public void alertUsersExceedingFreeTierBilling_singleProjectExceedsLimit() {
-    workbenchConfig.freeCredits.limit = 100.0;
+    workbenchConfig.freeCredits.defaultLimit = 100.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
@@ -99,8 +102,34 @@ public class BillingAlertsServiceTest {
   }
 
   @Test
+  public void alertUsersExceedingFreeTierBilling_deletedUserNotIgnored() {
+    workbenchConfig.freeCredits.defaultLimit = 100.0;
+
+    User user = createUser("test@test.com");
+    user.setDisabled(true);
+    userDao.save(user);
+    createWorkspace(user, "aou-test-f1-26");
+
+    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    verify(notificationService).alertUser(eq(user), any());
+  }
+
+  @Test
+  public void alertUsersExceedingFreeTierBilling_deletedWorkspaceNotIgnored() {
+    workbenchConfig.freeCredits.defaultLimit = 100.0;
+
+    User user = createUser("test@test.com");
+    Workspace workspace = createWorkspace(user, "aou-test-f1-26");
+    workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    workspaceDao.save(workspace);
+
+    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    verify(notificationService).alertUser(eq(user), any());
+  }
+
+  @Test
   public void alertUsersExceedingFreeTierBilling_noAlert() {
-    workbenchConfig.freeCredits.limit = 500.0;
+    workbenchConfig.freeCredits.defaultLimit = 500.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
@@ -111,7 +140,7 @@ public class BillingAlertsServiceTest {
 
   @Test
   public void alertUsersExceedingFreeTierBilling_workspaceMissingCreator() {
-    workbenchConfig.freeCredits.limit = 500.0;
+    workbenchConfig.freeCredits.defaultLimit = 500.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
@@ -123,7 +152,7 @@ public class BillingAlertsServiceTest {
 
   @Test
   public void alertUsersExceedingFreeTierBilling_combinedProjectsExceedsLimit() {
-    workbenchConfig.freeCredits.limit = 500.0;
+    workbenchConfig.freeCredits.defaultLimit = 500.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
@@ -135,19 +164,33 @@ public class BillingAlertsServiceTest {
 
   @Test
   public void alertUsersExceedingFreeTierBilling_whitelist() {
-    workbenchConfig.freeCredits.limit = 500.0;
+    workbenchConfig.freeCredits.defaultLimit = 10.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
-    createWorkspace(user, "aou-test-f1-47");
 
-    workbenchConfig.freeCredits.whitelistedBillingProjects.add("aou-test-f1-47");
+    workbenchConfig.freeCredits.whitelistedUsers.add("test@test.com");
 
     billingAlertsService.alertUsersExceedingFreeTierBilling();
     verifyZeroInteractions(notificationService);
   }
 
-  // TODO: active? user and workspace?
+  @Test
+  public void alertUsersExceedingFreeTierBilling_override() {
+    workbenchConfig.freeCredits.defaultLimit = 10.0;
+
+    User user = createUser("test@test.com");
+    createWorkspace(user, "aou-test-f1-26");
+
+    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    verify(notificationService).alertUser(eq(user), any());
+
+    user.setFreeTierCreditsLimitOverride(1000.0);
+    userDao.save(user);
+
+    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    verifyZeroInteractions(notificationService);
+  }
 
   private User createUser(String email) {
     User user = new User();
@@ -155,10 +198,10 @@ public class BillingAlertsServiceTest {
     return userDao.save(user);
   }
 
-  private void createWorkspace(User creator, String namespace) {
+  private Workspace createWorkspace(User creator, String namespace) {
     Workspace workspace = new Workspace();
     workspace.setCreator(creator);
     workspace.setWorkspaceNamespace(namespace);
-    workspaceDao.save(workspace);
+    return workspaceDao.save(workspace);
   }
 }
