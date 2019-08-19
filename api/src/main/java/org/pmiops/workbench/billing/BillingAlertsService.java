@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class BillingAlertsService {
 
   // TODO eric : Add WorkbenchConfig values
+  // TODO eric : Add liquibase change
 
   private final BigQueryService bigQueryService;
   private final NotificationService notificationService;
