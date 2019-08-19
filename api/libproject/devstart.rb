@@ -1739,7 +1739,7 @@ def print_scoped_access_token(cmd_name, args)
   op.parse.validate
   gcc.validate
   ServiceAccountContext.new(gcc.project).run do
-    if op.opts.scopes == nil
+    if op.opts.scopes.nil?
       op.opts.scopes = []
     end
 
@@ -1747,14 +1747,15 @@ def print_scoped_access_token(cmd_name, args)
 
     require "googleauth"
 
-    f = File.open(ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH)
-    creds = Google::Auth::ServiceAccountCredentials.make_creds(
-      json_key_io: f,
-      scope: scopes
-    )
+    File.open(ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH) do |f|
+      creds = Google::Auth::ServiceAccountCredentials.make_creds(
+          json_key_io: f,
+          scope: scopes
+      )
 
-    token_data = creds.fetch_access_token!
-    puts "\n#{token_data["access_token"]}"
+      token_data = creds.fetch_access_token!
+      puts "\n#{token_data["access_token"]}"
+    end
 
   end
 end
