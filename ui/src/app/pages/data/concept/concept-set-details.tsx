@@ -25,8 +25,9 @@ import {
 import {currentConceptSetStore, navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {WorkspacePermissions} from 'app/utils/workspace-permissions';
-import {Concept, ConceptSet} from 'generated/fetch';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {Concept, ConceptSet, CopyRequest, WorkspaceAccessLevel} from 'generated/fetch';
+import {CopyModal} from "app/components/copy-modal";
 
 const styles = reactStyles({
   conceptSetHeader: {
@@ -48,17 +49,23 @@ const styles = reactStyles({
 });
 
 const ConceptSetMenu: React.FunctionComponent<{
-  canDelete: boolean, canEdit: boolean, onEdit: Function, onDelete: Function
-}> = ({canDelete, canEdit, onEdit, onDelete}) => {
+  canDelete: boolean, canEdit: boolean, onEdit: Function, onDelete: Function, onCopy: Function
+}> = ({canDelete, canEdit, onEdit, onDelete, onCopy}) => {
 
   return <PopupTrigger
     side='right'
     closeOnClick
-    content={ <React.Fragment>
+    content={<React.Fragment>
+      <TooltipTrigger>
+        <MenuItem icon='copy'
+                  onClick={onCopy}>
+          Copy to another Workspace
+        </MenuItem>
+      </TooltipTrigger>
       <TooltipTrigger content={<div>Requires Write Permission</div>}
                       disabled={canEdit}>
         <MenuItem icon='pencil'
-                  onClick={() => onEdit}
+                  onClick={onEdit}
                   disabled={!canEdit}>
           Edit
         </MenuItem>
@@ -81,14 +88,18 @@ const ConceptSetMenu: React.FunctionComponent<{
 
 export const ConceptSetDetails =
   fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<{
-    urlParams: any, workspace: WorkspaceData}, {
-      conceptSet: ConceptSet, deleting: boolean, editName: string, editDescription: string,
-      editSaving: boolean, error: boolean, errorMessage: string, editing: boolean,
-      loading: boolean, removingConcepts: boolean, removeSubmitting: boolean,
-      selectedConcepts: Concept[], workspacePermissions: WorkspacePermissions}> {
+    urlParams: any, workspace: WorkspaceData
+  }, {
+    copying: boolean, copySaving: boolean, conceptSet: ConceptSet, deleting: boolean, editName: string,
+    editDescription: string, editSaving: boolean, error: boolean, errorMessage: string,
+    editing: boolean, loading: boolean, removingConcepts: boolean, removeSubmitting: boolean,
+    selectedConcepts: Concept[]
+  }> {
     constructor(props) {
       super(props);
       this.state = {
+        copying: false,
+        copySaving: false,
         conceptSet: undefined,
         editName: '',
         editDescription: '',
@@ -100,8 +111,7 @@ export const ConceptSetDetails =
         loading: true,
         removingConcepts: false,
         removeSubmitting: false,
-        selectedConcepts: [],
-        workspacePermissions: new WorkspacePermissions(props.workspace)
+        selectedConcepts: []
       };
     }
 
@@ -121,6 +131,21 @@ export const ConceptSetDetails =
         // TODO: what do we do with resources not found?  Currently we just have an endless spinner
         // Maybe want to think about designing an AoU not found page for better UX
       }
+    }
+
+    async copyConceptSet(copyRequest: CopyRequest) {
+      const {urlParams: {ns, wsid, csid}} = this.props;
+      this.setState({copySaving: true});
+      return conceptSetsApi().copyConceptSet(
+        ns,
+        wsid,
+        csid,
+        copyRequest
+      );
+    }
+
+    onCopy() {
+      this.setState({copySaving: false});
     }
 
     async submitEdits() {
@@ -191,10 +216,12 @@ export const ConceptSetDetails =
     }
 
     render() {
-      const {urlParams: {ns, wsid}} = this.props;
-      const {conceptSet, removingConcepts, editing, editDescription, editName,
+      const {urlParams: {ns, wsid}, workspace} = this.props;
+      const {
+        copying, conceptSet, removingConcepts, editing, editDescription, editName,
         error, errorMessage, editSaving, deleting, removeSubmitting, loading,
-        selectedConcepts, workspacePermissions} = this.state;
+        selectedConcepts
+      } = this.state;
       const errors = validate({editName: editName}, {editName: {
         presence: {allowEmpty: false}
       }});
@@ -204,10 +231,11 @@ export const ConceptSetDetails =
         <div style={{display: 'flex', flexDirection: 'column'}}>
           <div style={styles.conceptSetHeader}>
             <div style={{display: 'flex', flexDirection: 'row'}}>
-              <ConceptSetMenu canDelete={workspacePermissions.isOwner}
-                              canEdit={workspacePermissions.canWrite}
+              <ConceptSetMenu canDelete={workspace.accessLevel === WorkspaceAccessLevel.OWNER}
+                              canEdit={WorkspacePermissionsUtil.canWrite(workspace.accessLevel)}
                               onDelete={() => this.setState({deleting: true})}
-                              onEdit={() => this.setState({editing: true})}/>
+                              onEdit={() => this.setState({editing: true})}
+                              onCopy={() => this.setState({copying: true})}/>
               <div style={styles.conceptSetMetadataWrapper}>
               {editing ?
                 <div style={{display: 'flex', flexDirection: 'column'}}>
@@ -238,11 +266,11 @@ export const ConceptSetDetails =
                 <React.Fragment>
                   <div style={styles.conceptSetTitle} data-test-id='concept-set-title'>
                     {conceptSet.name}
-                    <Clickable disabled={!workspacePermissions.canWrite}
+                    <Clickable disabled={!WorkspacePermissionsUtil.canWrite(workspace.accessLevel)}
                                data-test-id='edit-concept-set'
                                onClick={() => this.setState({editing: true})}>
                       <EditComponentReact enableHoverEffect={true}
-                                          disabled={!workspacePermissions.canWrite}
+                                          disabled={!WorkspacePermissionsUtil.canWrite(workspace.accessLevel)}
                                           style={{marginTop: '0.1rem'}}/>
                     </Clickable>
                   </div>
@@ -278,13 +306,13 @@ export const ConceptSetDetails =
                       ('?domain=' + conceptSet.domain))}>
             <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
           </Button>}
-          {workspacePermissions.canWrite && this.selectedConceptsCount > 0 &&
+          {WorkspacePermissionsUtil.canWrite(workspace.accessLevel) && this.selectedConceptsCount > 0 &&
               <SlidingFabReact submitFunction={() => this.setState({removingConcepts: true})}
                                iconShape='trash' expanded='Remove from set'
                                tooltip={this.conceptSetConceptsCount === this.selectedConceptsCount}
                                tooltipContent={
                                  <div>Concept Sets must include at least one concept</div>}
-                               disable={!workspacePermissions.canWrite ||
+                               disable={!WorkspacePermissionsUtil.canWrite(workspace.accessLevel) ||
                                  this.selectedConceptsCount === 0 ||
                                this.conceptSetConceptsCount === this.selectedConceptsCount}/>}
         </div>}
@@ -313,6 +341,15 @@ export const ConceptSetDetails =
                   Remove concepts</Button>
           </ModalFooter>
         </Modal>}
+        {copying && <CopyModal
+          fromWorkspaceNamespace={workspace.namespace}
+          fromWorkspaceName={workspace.id}
+          fromResourceName={conceptSet.name}
+          resourceType={ResourceType.CONCEPT_SET}
+          onClose={() => this.setState({copying: false})}
+          onCopy={() => this.onCopy()}
+          saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
+        }
       </FadeBox>;
     }
   });

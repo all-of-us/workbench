@@ -162,12 +162,16 @@ export class ResourceCard extends React.Component<Props, State> {
   }
 
   get actionsDisabled(): boolean {
-    return !this.writePermission;
+    return !this.writePermission && !this.isConceptSet
   }
 
   get writePermission(): boolean {
     return this.props.resourceCard.permission === 'OWNER'
       || this.props.resourceCard.permission === 'WRITER';
+  }
+
+  get deletePermission(): boolean {
+    return this.props.resourceCard.permission === 'OWNER';
   }
 
   get displayName(): string {
@@ -510,8 +514,10 @@ export class ResourceCard extends React.Component<Props, State> {
                               resourceType={this.resourceType}
                               onCloneResource={() => this.cloneResource()}
                               onCopyConceptSet={() => this.setState({copyingConceptSet: true})}
+                              canDelete={this.deletePermission}
                               onDeleteResource={() => this.openConfirmDelete()}
                               onRenameResource={() => this.renameResource()}
+                              canEdit={this.writePermission}
                               onEdit={() => this.edit()}
                               onExportDataSet={() => this.exportDataSet()}
                               onReviewCohort={() => this.reviewCohort()}/>
