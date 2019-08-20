@@ -48,7 +48,7 @@ const styles = reactStyles({
   }
 });
 
-export interface ConceptSetProps {
+export interface ConceptSetMenuProps {
   canDelete: boolean,
   canEdit: boolean,
   onEdit: Function,
@@ -56,7 +56,9 @@ export interface ConceptSetProps {
   onCopy: Function
 }
 
-const ConceptSetMenu: React.FunctionComponent<ConceptSetProps> = ({canDelete, canEdit, onEdit, onDelete, onCopy}) => {
+const ConceptSetMenu: React.FunctionComponent<ConceptSetMenuProps> = (
+  {canDelete, canEdit, onEdit, onDelete, onCopy}
+) => {
 
   return <PopupTrigger
     side='right'
