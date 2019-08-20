@@ -60,6 +60,14 @@ ENVIRONMENTS = {
     :featured_workspaces_json => "featured_workspaces_staging.json",
     :gae_vars => TEST_GAE_VARS
   },
+  "all-of-us-rw-perf" => {
+    :api_endpoint_host => "api-dot-all-of-us-rw-perf.appspot.com",
+    :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
+    :config_json => "config_perf.json",
+    :cdr_versions_json => "cdr_versions_perf.json",
+    :featured_workspaces_json => "featured_workspaces_perf.json",
+    :gae_vars => TEST_GAE_VARS
+  },
   "all-of-us-rw-stable" => {
     :api_endpoint_host => "api-dot-all-of-us-rw-stable.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
@@ -1559,14 +1567,6 @@ def migrate_database(dry_run = false)
   end
 end
 
-def migrate_workbench_data()
-  common = Common.new
-  common.status "Migrating workbench data..."
-  Dir.chdir("db") do
-    common.run_inline(%W{gradle update -PrunList=data -Pcontexts=cloud})
-  end
-end
-
 def get_fc_config(project)
   config_json = get_config(project)
   return JSON.parse(File.read("config/#{config_json}"))["firecloud"]
@@ -1764,7 +1764,7 @@ def create_project_resources(gcc)
   common = Common.new
   common.status "Enabling APIs..."
   for service in SERVICES
-    common.run_inline("gcloud service-management enable #{service} --project #{gcc.project}")
+    common.run_inline("gcloud services enable #{service} --project #{gcc.project}")
   end
   common.status "Creating GCS bucket to store credentials..."
   common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
@@ -1818,9 +1818,6 @@ def setup_project_data(gcc, cdr_db_name)
 
     common.status "Running schema migrations..."
     migrate_database
-
-    # This will insert a CDR version row pointing at the CDR DB.
-    migrate_workbench_data
 
   end
 end
