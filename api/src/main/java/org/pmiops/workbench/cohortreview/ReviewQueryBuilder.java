@@ -15,7 +15,7 @@ public class ReviewQueryBuilder {
   private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
   private static final String NAMED_DOMAIN_PARAM = "domain";
   private static final String NAMED_LIMIT_PARAM = "limit";
-  private static final String REVIEW_TABLE = "person_all_events";
+  private static final String REVIEW_TABLE = "cb_review_all_events";
 
   private static final String BASE_SQL_TEMPLATE =
       "select person_id as personId,\n"
@@ -41,7 +41,9 @@ public class ReviewQueryBuilder {
           + "first_mention as firstMention,\n"
           + "last_mention as lastMention,\n"
           + "value_as_number as value\n"
-          + "from `${projectId}.${dataSetId}.person_all_events`\n"
+          + "from `${projectId}.${dataSetId}."
+          + REVIEW_TABLE
+          + "`\n"
           + "where person_id = @"
           + NAMED_PARTICIPANTID_PARAM
           + "\n";
@@ -57,21 +59,23 @@ public class ReviewQueryBuilder {
           + "survey as survey,\n"
           + "question as question,\n"
           + "answer as answer\n"
-          + "from `${projectId}.${dataSetId}.person_survey`\n"
+          + "from `${projectId}.${dataSetId}.cb_review_survey`\n"
           + "where person_id = @"
           + NAMED_PARTICIPANTID_PARAM
           + "\n";
 
   private static final String COUNT_TEMPLATE =
       "select count(*) as count\n"
-          + "from `${projectId}.${dataSetId}.person_all_events`\n"
+          + "from `${projectId}.${dataSetId}."
+          + REVIEW_TABLE
+          + "`\n"
           + "where person_id = @"
           + NAMED_PARTICIPANTID_PARAM
           + "\n";
 
   private static final String COUNT_SURVEY_TEMPLATE =
       "select count(*) as count\n"
-          + "from `${projectId}.${dataSetId}.person_survey`\n"
+          + "from `${projectId}.${dataSetId}.cb_review_survey`\n"
           + "where person_id = @"
           + NAMED_PARTICIPANTID_PARAM
           + "\n";
@@ -79,9 +83,13 @@ public class ReviewQueryBuilder {
   private static final String CHART_DATA_TEMPLATE =
       "select distinct a.standard_name as standardName, a.standard_vocabulary as standardVocabulary, "
           + "DATE(a.start_datetime) as startDate, a.age_at_event as ageAtEvent, rnk as rank\n"
-          + "from `${projectId}.${dataSetId}.person_all_events` a\n"
+          + "from `${projectId}.${dataSetId}."
+          + REVIEW_TABLE
+          + "` a\n"
           + "left join (select standard_code, RANK() OVER(ORDER BY COUNT(*) DESC) as rnk\n"
-          + "from `${projectId}.${dataSetId}.person_all_events`\n"
+          + "from `${projectId}.${dataSetId}."
+          + REVIEW_TABLE
+          + "`\n"
           + "where person_id = @"
           + NAMED_PARTICIPANTID_PARAM
           + "\n"
@@ -106,17 +114,25 @@ public class ReviewQueryBuilder {
 
   private static final String VOCAB_DATA_TEMPLATE =
       "SELECT distinct 'Standard' as type, 'ALL_EVENTS' as domain, standard_vocabulary as vocabulary\n"
-          + "FROM `${projectId}.${dataSetId}.person_all_events`\n"
+          + "FROM `${projectId}.${dataSetId}."
+          + REVIEW_TABLE
+          + "`\n"
           + "UNION ALL\n"
           + "SELECT distinct 'Standard' as type, domain, standard_vocabulary as vocabulary\n"
-          + "FROM `${projectId}.${dataSetId}.person_all_events`\n"
+          + "FROM `${projectId}.${dataSetId}."
+          + REVIEW_TABLE
+          + "`\n"
           + "UNION ALL\n"
           + "SELECT distinct 'Source' as type, 'ALL_EVENTS' as domain, source_vocabulary as vocabulary\n"
-          + "FROM `${projectId}.${dataSetId}.person_all_events`\n"
+          + "FROM `${projectId}.${dataSetId}."
+          + REVIEW_TABLE
+          + "`\n"
           + "where domain in ('CONDITION', 'PROCEDURE')\n"
           + "UNION ALL\n"
           + "SELECT distinct 'Source' as type, domain, source_vocabulary as vocabulary\n"
-          + "FROM `${projectId}.${dataSetId}.person_all_events`\n"
+          + "FROM `${projectId}.${dataSetId}."
+          + REVIEW_TABLE
+          + "`\n"
           + "where domain in ('CONDITION', 'PROCEDURE')\n"
           + "order by type, domain, vocabulary";
 

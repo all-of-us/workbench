@@ -20,13 +20,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CohortQueryBuilder {
-  private static final String REVIEW_TABLE = "person_all_events";
+  private static final String REVIEW_TABLE = "cb_review_all_events";
   private static final String COUNT_SQL_TEMPLATE =
       "select count(*) as count\n"
           + "from `${projectId}.${dataSetId}.${table}` ${table}\n"
           + "where\n";
 
-  private static final String SEARCH_PERSON_TABLE = "search_person";
+  private static final String SEARCH_PERSON_TABLE = "cb_search_person";
   private static final String PERSON_TABLE = "person";
 
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =

@@ -48,7 +48,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String DESC = " desc";
   private static final String BASE_SQL =
       "select distinct person_id, entry_date, concept_id\n"
-          + "from `${projectId}.${dataSetId}.search_all_domains`\n"
+          + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
           + "where ";
   private static final String STANDARD_SQL = "is_standard = %s\n" + "and ";
   private static final String CONCEPT_ID_IN = "(concept_id in unnest(%s))\n";
@@ -86,7 +86,7 @@ public final class SearchGroupItemQueryBuilder {
           + ") temp2 on (%s)\n";
   private static final String TEMPORAL_SQL =
       "select person_id, visit_occurrence_id, entry_date%s\n"
-          + "from `${projectId}.${dataSetId}.search_all_domains`\n"
+          + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
           + "where %s\n"
           + "and person_id in (%s)\n";
   private static final String RANK_1_SQL =
