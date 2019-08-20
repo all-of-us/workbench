@@ -49,7 +49,6 @@ export class SearchGroupSelectComponent implements AfterViewInit, OnInit {
     const label = domainToTitle(domain) +
       (domain === DomainType.PERSON ? ' - ' + typeToTitle(type) : '') +
       ' - Cohort Builder';
-    console.log(label);
     triggerEvent(
       this.analyticsCategory,
       GA_ACTION,
@@ -80,7 +79,6 @@ export class SearchGroupSelectComponent implements AfterViewInit, OnInit {
   }
 
   setMenuPosition() {
-    console.log(this.analyticsCategory);
     triggerEvent(
       this.analyticsCategory,
       GA_ACTION,

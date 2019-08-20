@@ -7,6 +7,7 @@ import {integerAndRangeValidator} from 'app/cohort-search/validators';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {DomainType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
+import {triggerEvent} from '../../utils/analytics';
 
 @Component({
   selector: 'app-list-search-group',
@@ -163,6 +164,7 @@ export class SearchGroupComponent implements AfterViewInit, OnInit {
   }
 
   remove() {
+    triggerEvent('Delete', 'Click', 'Snowman - Delete Group - Cohort Builder');
     this.hide('pending');
     const timeoutId = setTimeout(() => {
       this.removeGroup();
@@ -171,27 +173,26 @@ export class SearchGroupComponent implements AfterViewInit, OnInit {
   }
 
   hide(status: string) {
+    triggerEvent('Suppress', 'Click', 'Snowman - Suppress Group - Cohort Builder');
     setTimeout(() => this.setOverlayPosition());
-    this.removeGroup(status);
+    this.setGroupProperty('status', status);
   }
 
   enable() {
+    triggerEvent('Enable', 'Click', 'Enable - Suppress Group - Cohort Builder');
     this.setGroupProperty('status', 'active');
   }
 
   undo() {
+    triggerEvent('Undo', 'Click', 'Undo - Delete Group - Cohort Builder');
     clearTimeout(this.group.timeout);
     this.enable();
   }
 
-  removeGroup(status?: string): void {
+  removeGroup(): void {
     const searchRequest = searchRequestStore.getValue();
-    if (!status) {
-      searchRequest[this.role] = searchRequest[this.role].filter(grp => grp.id !== this.group.id);
-      searchRequestStore.next(searchRequest);
-    } else {
-      this.setGroupProperty('status', status);
-    }
+    searchRequest[this.role] = searchRequest[this.role].filter(grp => grp.id !== this.group.id);
+    searchRequestStore.next(searchRequest);
   }
 
   setOverlayPosition() {

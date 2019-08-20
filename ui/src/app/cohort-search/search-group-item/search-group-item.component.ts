@@ -96,7 +96,7 @@ export class SearchGroupItemComponent implements OnInit {
   }
 
   enable() {
-    triggerEvent('Suppress', 'Click', 'Snowman - Delete Criteria - Cohort Builder');
+    triggerEvent('Enable', 'Click', 'Enable - Suppress Criteria - Cohort Builder');
     this.item.status = 'active';
     this.updateSearchRequest();
   }
