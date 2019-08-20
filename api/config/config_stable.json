@@ -67,6 +67,6 @@
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
-    "enableVpcServicePerimeter": false
+    "enableVpcServicePerimeter": true
   }
 }
