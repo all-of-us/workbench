@@ -57,6 +57,7 @@ export interface Action {
   icon: string;
   displayName: string;
   onClick: () => void;
+  disabled: boolean;
 }
 
 interface Props {
@@ -96,7 +97,8 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
                     return (<MenuItem
                       key={i}
                       icon={action.icon}
-                      onClick={() => action.onClick()}>
+                      onClick={() => action.onClick()}
+                      disabled={action.disabled}>
                       {action.displayName}
                     </MenuItem>);
                   })}

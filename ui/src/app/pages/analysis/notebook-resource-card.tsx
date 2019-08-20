@@ -59,6 +59,10 @@ export const NotebookResourceCard = fp.flow(
       || this.props.resource.permission === 'WRITER';
   }
 
+  get deletePermission(): boolean {
+    return this.props.resource.permission === 'OWNER';
+  }
+
   get actions(): Action[] {
     return [
       {
@@ -67,16 +71,19 @@ export const NotebookResourceCard = fp.flow(
         onClick: () => {
           this.setState({showRenameModal: true});
         },
+        disabled: !this.writePermission,
       },
       {
         icon: 'copy',
         displayName: 'Duplicate',
         onClick: () => this.duplicateNotebook(),
+        disabled: !this.writePermission,
       },
       {
         icon: 'copy',
         displayName: 'Copy to another Workspace',
         onClick: () => this.setState({showCopyNotebookModal: true}),
+        disabled: false,
       },
       {
         icon: 'trash',
@@ -85,6 +92,7 @@ export const NotebookResourceCard = fp.flow(
           this.props.showConfirmDeleteModal(this.displayName,
             this.resourceType, () => this.deleteNotebook());
         },
+        disabled: !this.deletePermission,
       }];
   }
 
@@ -169,7 +177,7 @@ export const NotebookResourceCard = fp.flow(
 
       <ResourceCardTemplate
         actions={this.actions}
-        actionsDisabled={!this.writePermission}
+        actionsDisabled={false}
         disabled={false} // Notebook Cards are always at least readable
         resourceUrl={this.resourceUrl}
         displayName={this.displayName}
