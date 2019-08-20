@@ -590,7 +590,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                 </BoxHeader>
                 <div style={{height: '9rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
-                  <ImmutableListItem name='All AoU Participants' checked={includesAllParticipants}
+                  <ImmutableListItem name='All Participants' checked={includesAllParticipants}
                                      onChange={
                                        () => this.setState({
                                          includesAllParticipants: !includesAllParticipants,
