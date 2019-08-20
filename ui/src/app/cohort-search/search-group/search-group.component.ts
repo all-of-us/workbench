@@ -2,12 +2,12 @@ import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {initExisting, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {generateId, mapGroup} from 'app/cohort-search/utils';
+import {domainToTitle, generateId, mapGroup, typeToTitle} from 'app/cohort-search/utils';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {DomainType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
-import {triggerEvent} from '../../utils/analytics';
 
 @Component({
   selector: 'app-list-search-group',
@@ -220,6 +220,16 @@ export class SearchGroupComponent implements AfterViewInit, OnInit {
 
   launchWizard(criteria: any, tempGroup?: number) {
     const {domain, type, standard} = criteria;
+    if (tempGroup !== undefined) {
+      triggerEvent('Temporal', 'Click', `${domainToTitle(domain)} - Temporal - Cohort Builder`);
+    } else {
+      const category = `${this.role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
+      // If domain is PERSON, list the type as well as the domain in the label
+      const label = domainToTitle(domain) +
+        (domain === DomainType.PERSON ? ' - ' + typeToTitle(type) : '') +
+        ' - Cohort Builder';
+      triggerEvent(category, 'Click', `${category} - ${label}`);
+    }
     const itemId = generateId('items');
     tempGroup = tempGroup || 0;
     const item = this.initItem(itemId, domain, tempGroup);
@@ -255,8 +265,10 @@ export class SearchGroupComponent implements AfterViewInit, OnInit {
   }
 
   getTemporal(e) {
-    this.setGroupProperty('temporal', e.target.checked);
-    if ((!e.target.checked && this.activeItems) || (e.target.checked && !this.temporalError)) {
+    const {checked} = e.target;
+    triggerEvent('Temporal', 'Click', 'Turn On Off - Temporal - Cohort Builder');
+    this.setGroupProperty('temporal', checked);
+    if ((!checked && this.activeItems) || (checked && !this.temporalError)) {
       this.loading = true;
       this.error = false;
       this.getGroupCount();
@@ -265,6 +277,11 @@ export class SearchGroupComponent implements AfterViewInit, OnInit {
 
   getMentionTitle(mentionName) {
     if (mentionName !== this.group.mention) {
+      triggerEvent(
+        'Temporal',
+        'Click',
+        `${this.formatOption(mentionName)} - Temporal - Cohort Builder`
+      );
       this.setGroupProperty('mention', mentionName);
       this.calculateTemporal();
     }
@@ -272,6 +289,11 @@ export class SearchGroupComponent implements AfterViewInit, OnInit {
 
   getTimeTitle(timeName) {
     if (timeName !== this.group.time) {
+      triggerEvent(
+        'Temporal',
+        'Click',
+        `${this.formatOption(timeName)} - Temporal - Cohort Builder`
+      );
       // prevents duplicate group count calls if switching from TemporalTime.DURINGSAMEENCOUNTERAS
       this.preventInputCalculate = this.group.time === TemporalTime.DURINGSAMEENCOUNTERAS;
       this.setGroupProperty('time', timeName);
@@ -297,21 +319,21 @@ export class SearchGroupComponent implements AfterViewInit, OnInit {
     }
   }
 
-  formatStatus(options) {
-    switch (options) {
-      case 'ANY_MENTION' :
+  formatOption(option) {
+    switch (option) {
+      case TemporalMention.ANYMENTION:
         return 'Any Mention';
-      case 'FIRST_MENTION' :
+      case TemporalMention.FIRSTMENTION:
         return 'First Mention';
-      case 'LAST_MENTION' :
+      case TemporalMention.LASTMENTION:
         return 'Last Mention';
-      case 'DURING_SAME_ENCOUNTER_AS' :
+      case TemporalTime.DURINGSAMEENCOUNTERAS:
         return 'During same encounter as';
-      case 'X_DAYS_BEFORE' :
+      case TemporalTime.XDAYSBEFORE:
         return 'X Days before';
-      case 'X_DAYS_AFTER' :
+      case TemporalTime.XDAYSAFTER:
         return 'X Days after';
-      case 'WITHIN_X_DAYS_OF' :
+      case TemporalTime.WITHINXDAYSOF:
         return 'Within X Days of';
     }
   }

@@ -1,18 +1,16 @@
-import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
+import {AfterViewInit, Component, Input} from '@angular/core';
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {DomainType, SearchRequest} from 'generated/fetch';
 
-const GA_ACTION = 'Click';
-
 @Component({
   selector: 'app-search-group-select',
   templateUrl: './search-group-select.component.html',
   styleUrls: ['./search-group-select.component.css']
 })
-export class SearchGroupSelectComponent implements AfterViewInit, OnInit {
+export class SearchGroupSelectComponent implements AfterViewInit {
   @Input() role: keyof SearchRequest;
   @Input() index: number;
 
@@ -21,11 +19,7 @@ export class SearchGroupSelectComponent implements AfterViewInit, OnInit {
   position = 'bottom-left';
   demoOpen = false;
   demoMenuHover = false;
-  analyticsCategory: string;
-
-  ngOnInit(): void {
-    this.analyticsCategory = `${this.role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
-  }
+  category: string;
 
   ngAfterViewInit(): void {
     /* Open nested menu on hover */
@@ -45,15 +39,12 @@ export class SearchGroupSelectComponent implements AfterViewInit, OnInit {
 
   launchWizard(criteria: any) {
     const {domain, type, standard} = criteria;
+    const category = `${this.role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
     // If domain is PERSON, list the type as well as the domain in the label
     const label = domainToTitle(domain) +
       (domain === DomainType.PERSON ? ' - ' + typeToTitle(type) : '') +
       ' - Cohort Builder';
-    triggerEvent(
-      this.analyticsCategory,
-      GA_ACTION,
-      `${this.analyticsCategory} - ${label}`
-    );
+    triggerEvent(category, 'Click', `${category} - ${label}`);
     const fullTree = criteria.fullTree || false;
     const role = this.role;
     let context: any;
@@ -79,11 +70,8 @@ export class SearchGroupSelectComponent implements AfterViewInit, OnInit {
   }
 
   setMenuPosition() {
-    triggerEvent(
-      this.analyticsCategory,
-      GA_ACTION,
-      `${this.analyticsCategory} Dropdown - Cohort Builder`
-    );
+    const category = `${this.role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
+    triggerEvent(category, 'Click', `${category} Dropdown - Cohort Builder`);
     const dropdown = document.getElementById(this.role + '-button').getBoundingClientRect();
     this.position = (window.innerHeight - dropdown.bottom < 315) ? 'top-left' : 'bottom-left';
   }
