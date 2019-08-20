@@ -45,6 +45,7 @@ export class SearchGroupSelectComponent implements AfterViewInit, OnInit {
 
   launchWizard(criteria: any) {
     const {domain, type, standard} = criteria;
+    // If domain is PERSON, list the type as well as the domain in the label
     const label = domainToTitle(domain) +
       (domain === DomainType.PERSON ? ' - ' + typeToTitle(type) : '') +
       ' - Cohort Builder';
