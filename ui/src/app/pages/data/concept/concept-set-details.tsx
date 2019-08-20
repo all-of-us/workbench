@@ -48,9 +48,15 @@ const styles = reactStyles({
   }
 });
 
-const ConceptSetMenu: React.FunctionComponent<{
-  canDelete: boolean, canEdit: boolean, onEdit: Function, onDelete: Function, onCopy: Function
-}> = ({canDelete, canEdit, onEdit, onDelete, onCopy}) => {
+export interface ConceptSetProps {
+  canDelete: boolean,
+  canEdit: boolean,
+  onEdit: Function,
+  onDelete: Function,
+  onCopy: Function
+}
+
+const ConceptSetMenu: React.FunctionComponent<ConceptSetProps> = ({canDelete, canEdit, onEdit, onDelete, onCopy}) => {
 
   return <PopupTrigger
     side='right'
@@ -86,28 +92,43 @@ const ConceptSetMenu: React.FunctionComponent<{
   </PopupTrigger>;
 };
 
+export interface ConceptSetProps {
+  urlParams: any,
+  workspace: WorkspaceData
+}
+
+export interface ConceptSetState {
+  copying: boolean,
+  copySaving: boolean,
+  conceptSet: ConceptSet,
+  deleting: boolean,
+  editing: boolean,
+  editName: string,
+  editDescription: string,
+  editSaving: boolean,
+  error: boolean,
+  errorMessage: string,
+  loading: boolean,
+  removingConcepts: boolean,
+  removeSubmitting: boolean,
+  selectedConcepts: Concept[]
+}
+
 export const ConceptSetDetails =
-  fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<{
-    urlParams: any, workspace: WorkspaceData
-  }, {
-    copying: boolean, copySaving: boolean, conceptSet: ConceptSet, deleting: boolean, editName: string,
-    editDescription: string, editSaving: boolean, error: boolean, errorMessage: string,
-    editing: boolean, loading: boolean, removingConcepts: boolean, removeSubmitting: boolean,
-    selectedConcepts: Concept[]
-  }> {
+  fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<ConceptSetProps, ConceptSetState> {
     constructor(props) {
       super(props);
       this.state = {
         copying: false,
         copySaving: false,
         conceptSet: undefined,
+        editing: false,
         editName: '',
         editDescription: '',
         editSaving: false,
         error: false,
         errorMessage: '',
         deleting: false,
-        editing: false,
         loading: true,
         removingConcepts: false,
         removeSubmitting: false,
