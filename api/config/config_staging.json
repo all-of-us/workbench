@@ -12,7 +12,7 @@
     "billingRetryCount": 2,
     "billingProjectBufferCapacity": 10,
     "xAppIdValue": "staging-AoU-RW",
-    "vpcServicePerimeterName": ""
+    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging"
   },
   "auth": {
     "serviceAccountApiUsers": [

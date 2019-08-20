@@ -12,7 +12,7 @@
     "billingRetryCount": 4,
     "billingProjectBufferCapacity": 20,
     "xAppIdValue": "AoU-RW",
-    "vpcServicePerimeterName": ""
+    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod"
   },
   "auth": {
     "serviceAccountApiUsers": [
