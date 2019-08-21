@@ -9,8 +9,9 @@ import {ResourceType} from 'app/utils/resourceActionsReact';
 
 export const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameResource?: Function,
-  onCloneResource?: Function, onCopyConceptSet?: Function, canDelete: boolean, onDeleteResource?: Function,
-  canEdit: boolean, onEdit?: Function, onExportDataSet: Function, onReviewCohort?: Function,
+  onCloneResource?: Function, onCopyConceptSet?: Function, canDelete: boolean,
+  onDeleteResource?: Function, canEdit: boolean, onEdit?: Function,
+  onExportDataSet: Function, onReviewCohort?: Function,
 }> = ({
         disabled, resourceType, onRenameResource = () => {}, onCloneResource = () => {},
         onCopyConceptSet = () => {}, canDelete, onDeleteResource = () => {},
@@ -41,7 +42,9 @@ export const ResourceCardMenu: React.FunctionComponent<{
           return <React.Fragment>
             <MenuItem icon='pencil' onClick={onEdit} disabled={!canEdit}>Rename</MenuItem>
             <MenuItem icon='copy' onClick={onCopyConceptSet}>Copy to another workspace</MenuItem>
-            <MenuItem icon='trash' onClick={onDeleteResource} disabled={!canDelete}>Delete</MenuItem>
+            <MenuItem icon='trash' onClick={onDeleteResource} disabled={!canDelete}>
+              Delete
+            </MenuItem>
           </React.Fragment>;
         }],
         ['dataSet', () => {

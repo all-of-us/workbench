@@ -7,6 +7,7 @@ import {Button, Clickable, MenuItem} from 'app/components/buttons';
 import {SlidingFabReact} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
+import {CopyModal} from 'app/components/copy-modal';
 import {ClrIcon} from 'app/components/icons';
 import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -27,7 +28,6 @@ import {ResourceType} from 'app/utils/resourceActionsReact';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {Concept, ConceptSet, CopyRequest, WorkspaceAccessLevel} from 'generated/fetch';
-import {CopyModal} from "app/components/copy-modal";
 
 const styles = reactStyles({
   conceptSetHeader: {
@@ -49,11 +49,11 @@ const styles = reactStyles({
 });
 
 export interface ConceptSetMenuProps {
-  canDelete: boolean,
-  canEdit: boolean,
-  onEdit: Function,
-  onDelete: Function,
-  onCopy: Function
+  canDelete: boolean;
+  canEdit: boolean;
+  onEdit: Function;
+  onDelete: Function;
+  onCopy: Function;
 }
 
 const ConceptSetMenu: React.FunctionComponent<ConceptSetMenuProps> = (
@@ -95,29 +95,29 @@ const ConceptSetMenu: React.FunctionComponent<ConceptSetMenuProps> = (
 };
 
 export interface ConceptSetProps {
-  urlParams: any,
-  workspace: WorkspaceData
+  urlParams: any;
+  workspace: WorkspaceData;
 }
 
 export interface ConceptSetState {
-  copying: boolean,
-  copySaving: boolean,
-  conceptSet: ConceptSet,
-  deleting: boolean,
-  editing: boolean,
-  editName: string,
-  editDescription: string,
-  editSaving: boolean,
-  error: boolean,
-  errorMessage: string,
-  loading: boolean,
-  removingConcepts: boolean,
-  removeSubmitting: boolean,
-  selectedConcepts: Concept[]
+  copying: boolean;
+  copySaving: boolean;
+  conceptSet: ConceptSet;
+  deleting: boolean;
+  editing: boolean;
+  editName: string;
+  editDescription: string;
+  editSaving: boolean;
+  error: boolean;
+  errorMessage: string;
+  loading: boolean;
+  removingConcepts: boolean;
+  removeSubmitting: boolean;
+  selectedConcepts: Concept[];
 }
 
-export const ConceptSetDetails =
-  fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<ConceptSetProps, ConceptSetState> {
+export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace())(
+  class extends React.Component<ConceptSetProps, ConceptSetState> {
     constructor(props) {
       super(props);
       this.state = {
@@ -293,7 +293,11 @@ export const ConceptSetDetails =
                                data-test-id='edit-concept-set'
                                onClick={() => this.setState({editing: true})}>
                       <EditComponentReact enableHoverEffect={true}
-                                          disabled={!WorkspacePermissionsUtil.canWrite(workspace.accessLevel)}
+                                          disabled={
+                                            !WorkspacePermissionsUtil.canWrite(
+                                              workspace.accessLevel
+                                            )
+                                          }
                                           style={{marginTop: '0.1rem'}}/>
                     </Clickable>
                   </div>
@@ -329,7 +333,8 @@ export const ConceptSetDetails =
                       ('?domain=' + conceptSet.domain))}>
             <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
           </Button>}
-          {WorkspacePermissionsUtil.canWrite(workspace.accessLevel) && this.selectedConceptsCount > 0 &&
+          {WorkspacePermissionsUtil.canWrite(workspace.accessLevel) &&
+              this.selectedConceptsCount > 0 &&
               <SlidingFabReact submitFunction={() => this.setState({removingConcepts: true})}
                                iconShape='trash' expanded='Remove from set'
                                tooltip={this.conceptSetConceptsCount === this.selectedConceptsCount}

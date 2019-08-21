@@ -162,7 +162,7 @@ export class ResourceCard extends React.Component<Props, State> {
   }
 
   get actionsDisabled(): boolean {
-    return !this.writePermission && !this.isConceptSet
+    return !this.writePermission && !this.isConceptSet;
   }
 
   get writePermission(): boolean {
