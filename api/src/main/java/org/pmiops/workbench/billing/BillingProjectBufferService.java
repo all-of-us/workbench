@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.StorageEnums;
@@ -175,7 +176,7 @@ public class BillingProjectBufferService {
             .toString()
             .substring(0, PROJECT_BILLING_ID_SIZE);
 
-    String prefix = workbenchConfigProvider.get().firecloud.billingProjectPrefix;
+    String prefix = workbenchConfigProvider.get().billingConfig.billingProjectPrefix;
     if (!prefix.endsWith("-")) {
       prefix = prefix + "-";
     }
@@ -192,6 +193,6 @@ public class BillingProjectBufferService {
   }
 
   private int getBufferMaxCapacity() {
-    return workbenchConfigProvider.get().firecloud.billingProjectBufferCapacity;
+    return workbenchConfigProvider.get().billingConfig.billingProjectBufferCapacity;
   }
 }

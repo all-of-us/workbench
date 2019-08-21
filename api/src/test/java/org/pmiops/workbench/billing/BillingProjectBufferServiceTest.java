@@ -38,6 +38,7 @@ import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.CallsRealMethodsWithDelay;
 import org.pmiops.workbench.TestLock;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -102,10 +103,9 @@ public class BillingProjectBufferServiceTest {
 
   @Before
   public void setUp() {
-    workbenchConfig = new WorkbenchConfig();
-    workbenchConfig.firecloud = new FireCloudConfig();
-    workbenchConfig.firecloud.billingProjectPrefix = "test-prefix";
-    workbenchConfig.firecloud.billingProjectBufferCapacity = (int) BUFFER_CAPACITY;
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.billingConfig.billingProjectPrefix = "test-prefix";
+    workbenchConfig.billingConfig.billingProjectBufferCapacity = (int) BUFFER_CAPACITY;
 
     billingProjectBufferEntryDao = spy(billingProjectBufferEntryDao);
     TestLock lock = new TestLock();
@@ -128,7 +128,7 @@ public class BillingProjectBufferServiceTest {
 
     String billingProjectName = captor.getValue();
 
-    assertThat(billingProjectName).startsWith(workbenchConfig.firecloud.billingProjectPrefix);
+    assertThat(billingProjectName).startsWith(workbenchConfig.billingConfig.billingProjectPrefix);
     assertThat(
             billingProjectBufferEntryDao
                 .findByFireCloudProjectName(billingProjectName)
@@ -138,7 +138,7 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void fillBuffer_prefixName() {
-    workbenchConfig.firecloud.billingProjectPrefix = "test-prefix-";
+    workbenchConfig.billingConfig.billingProjectPrefix = "test-prefix-";
     billingProjectBufferService.bufferBillingProject();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -171,7 +171,7 @@ public class BillingProjectBufferServiceTest {
 
     // increase buffer capacity
     expectedCallCount++;
-    workbenchConfig.firecloud.billingProjectBufferCapacity = (int) BUFFER_CAPACITY + 1;
+    workbenchConfig.billingConfig.billingProjectBufferCapacity = (int) BUFFER_CAPACITY + 1;
     billingProjectBufferService.bufferBillingProject();
     verify(fireCloudService, times((int) BUFFER_CAPACITY + expectedCallCount))
         .createAllOfUsBillingProject(anyString());
@@ -189,7 +189,7 @@ public class BillingProjectBufferServiceTest {
       billingProjectBufferService.bufferBillingProject();
     }
 
-    workbenchConfig.firecloud.billingProjectBufferCapacity = (int) BUFFER_CAPACITY - 2;
+    workbenchConfig.billingConfig.billingProjectBufferCapacity = (int) BUFFER_CAPACITY - 2;
 
     // should no op since we're at capacity + 2
     billingProjectBufferService.bufferBillingProject();

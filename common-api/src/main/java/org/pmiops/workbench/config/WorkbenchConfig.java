@@ -22,7 +22,7 @@ public class WorkbenchConfig {
   public AccessConfig access;
   public CohortBuilderConfig cohortbuilder;
   public FeatureFlagsConfig featureFlags;
-  public FreeCreditsConfig freeCredits;
+  public BillingConfig billingConfig;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -41,27 +41,29 @@ public class WorkbenchConfig {
     config.mandrill = new MandrillConfig();
     config.moodle = new MoodleConfig();
     config.server = new ServerConfig();
-    config.freeCredits = new FreeCreditsConfig();
+    config.billingConfig = new BillingConfig();
     return config;
   }
 
-  public static class FreeCreditsConfig {
-    public Double defaultLimit;
+  public static class BillingConfig {
+
+    public Integer billingRetryCount;
+    public Integer billingProjectBufferCapacity;
+    public String billingProjectPrefix;
+    public String billingAccountId;
     public ArrayList<String> whitelistedUsers = new ArrayList<>();
+    public Double defaultFreeCreditLimit;
+
   }
 
   public static class FireCloudConfig {
     public boolean debugEndpoints;
     public String baseUrl;
-    public String billingAccountId;
-    public String billingProjectPrefix;
     public Integer clusterMaxAgeDays;
     public Integer clusterIdleMaxAgeDays;
     public String registeredDomainName;
     public boolean enforceRegistered;
     public String leoBaseUrl;
-    public Integer billingRetryCount;
-    public Integer billingProjectBufferCapacity;
     // This value specifies the information we hand to Terra as our AppId header.
     // It is primarily used for metrics gathering information.
     public String xAppIdValue;

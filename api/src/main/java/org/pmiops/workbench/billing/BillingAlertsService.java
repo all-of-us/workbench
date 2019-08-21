@@ -49,7 +49,7 @@ public class BillingAlertsService {
             userDao.findCreatorByWorkspaceNamespace(fv.get("id").getStringValue()),
             fv.get("cost").getDoubleValue()))
         .filter(spend -> spend.getUser() != null)
-        .filter(spend -> !workbenchConfigProvider.get().freeCredits.whitelistedUsers
+        .filter(spend -> !workbenchConfigProvider.get().billingConfig.whitelistedUsers
               .contains(spend.getUser().getEmail()))
         .collect(Collectors.groupingBy(
             spend -> spend.getUser(),
@@ -66,7 +66,7 @@ public class BillingAlertsService {
       return user.getFreeTierCreditsLimitOverride();
     }
 
-    return workbenchConfigProvider.get().freeCredits.defaultLimit;
+    return workbenchConfigProvider.get().billingConfig.defaultFreeCreditLimit;
   }
 
   public class Spend {
