@@ -8,6 +8,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import * as React from 'react';
@@ -167,6 +168,8 @@ export const ListSearch = withCurrentWorkspace()(
     handleInput = (event: any) => {
       const {key, target: {value}} = event;
       if (key === 'Enter') {
+        const {wizard: {domain}} = this.props;
+        triggerEvent(`Cohort Builder Search - ${domainToTitle(domain)}`, 'Search', value);
         this.getResults(value);
       }
     }
@@ -237,6 +240,11 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     showHierarchy = (row: any) => {
+      const {wizard: {domain}} = this.props;
+      triggerEvent(
+        'Cohort Builder Search',
+        'Click',
+        `More Info - ${domainToTitle(domain)} - Cohort Builder Search`);
       this.props.hierarchy(row);
     }
 
