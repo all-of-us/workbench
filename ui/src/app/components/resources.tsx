@@ -26,16 +26,24 @@ export const ResourceCardMenu: React.FunctionComponent<{
         ['cohort', () => {
           return <React.Fragment>
             <MenuItem icon='note' onClick={onRenameResource} disabled={!canEdit}>Rename</MenuItem>
-            <MenuItem icon='copy' onClick={onCloneResource} disabled={!canEdit}>Duplicate</MenuItem>
+            <MenuItem icon='copy' onClick={onCloneResource} disabled={!canEdit}>
+              Duplicate
+            </MenuItem>
             <MenuItem icon='pencil' onClick={onEdit} disabled={!canEdit}>Edit</MenuItem>
-            <MenuItem icon='grid-view' onClick={onReviewCohort} disabled={!canEdit}>Review</MenuItem>
-            <MenuItem icon='trash' onClick={onDeleteResource} disabled={!canDelete}>Delete</MenuItem>
+            <MenuItem icon='grid-view' onClick={onReviewCohort} disabled={!canEdit}>
+              Review
+            </MenuItem>
+            <MenuItem icon='trash' onClick={onDeleteResource} disabled={!canDelete}>
+              Delete
+            </MenuItem>
           </React.Fragment>;
         }],
         ['cohortReview', () => {
           return <React.Fragment>
             <MenuItem icon='note' onClick={onRenameResource} disabled={!canEdit}>Rename</MenuItem>
-            <MenuItem icon='trash' onClick={onDeleteResource} disabled={!canDelete}>Delete</MenuItem>
+            <MenuItem icon='trash' onClick={onDeleteResource} disabled={!canDelete}>
+              Delete
+            </MenuItem>
           </React.Fragment>;
         }],
         ['conceptSet', () => {
@@ -49,10 +57,16 @@ export const ResourceCardMenu: React.FunctionComponent<{
         }],
         ['dataSet', () => {
           return <React.Fragment>
-            <MenuItem icon='pencil' onClick={onRenameResource} disabled={!canEdit}>Rename Data Set</MenuItem>
+            <MenuItem icon='pencil' onClick={onRenameResource} disabled={!canEdit}>
+              Rename Data Set
+            </MenuItem>
             <MenuItem icon='pencil' onClick={onEdit} disabled={!canEdit}>Edit</MenuItem>
-            <MenuItem icon='clipboard' onClick={onExportDataSet} disabled={!canEdit}>Export to Notebook</MenuItem>
-            <MenuItem icon='trash' onClick={onDeleteResource} disabled={!canDelete}>Delete</MenuItem>
+            <MenuItem icon='clipboard' onClick={onExportDataSet} disabled={!canEdit}>
+              Export to Notebook
+            </MenuItem>
+            <MenuItem icon='trash' onClick={onDeleteResource} disabled={!canDelete}>
+              Delete
+            </MenuItem>
           </React.Fragment>;
         }]
       )
