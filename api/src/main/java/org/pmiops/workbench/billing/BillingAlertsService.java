@@ -2,7 +2,9 @@ package org.pmiops.workbench.billing;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Streams;
+import java.util.AbstractMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
@@ -41,21 +43,21 @@ public class BillingAlertsService {
                 + "` GROUP BY project.id ORDER BY cost desc;")
         .build();
 
-    Map<User, Double> userCosts = Streams
+    Map<User, Double> perUserSpend = Streams
         .stream(bigQueryService.executeQuery(queryConfig).getValues())
         .filter(fv -> !fv.get("id").isNull() && !fv.get("id").isNull())
-        .map(fv -> new Spend(
+        .map(fv -> new AbstractMap.SimpleImmutableEntry<>(
             userDao.findCreatorByWorkspaceNamespace(fv.get("id").getStringValue()),
             fv.get("cost").getDoubleValue()))
-        .filter(spend -> spend.getUser() != null)
-        .filter(spend -> !workbenchConfigProvider.get().billing.whitelistedUsers
-              .contains(spend.getUser().getEmail()))
+        .filter(spend -> spend.getKey() != null)
+        .filter(spend -> !workbenchConfigProvider.get().billing
+            .whitelistedUsers.contains(spend.getKey().getEmail()))
         .collect(Collectors.groupingBy(
-            spend -> spend.getUser(),
-            Collectors.summingDouble(Spend::getAmount)
+            spend -> spend.getKey(),
+            Collectors.summingDouble(Entry::getValue)
         ));
 
-    userCosts.entrySet().stream()
+    perUserSpend.entrySet().stream()
         .filter(entry -> entry.getValue() > getUserFreeTierLimit(entry.getKey()))
         .forEach(entry -> notificationService.alertUser(entry.getKey(), "You have exceeded your free tier credits."));
   }
@@ -66,24 +68,6 @@ public class BillingAlertsService {
     }
 
     return workbenchConfigProvider.get().billing.defaultFreeCreditsLimit;
-  }
-
-  public class Spend {
-    private final User user;
-    private final double amount;
-
-    public Spend(User user, double amount) {
-      this.user = user;
-      this.amount = amount;
-    }
-
-    public User getUser() {
-      return user;
-    }
-
-    public double getAmount() {
-      return amount;
-    }
   }
 }
 
