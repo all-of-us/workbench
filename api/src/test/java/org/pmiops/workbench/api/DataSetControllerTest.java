@@ -78,6 +78,7 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.KernelTypeEnum;
+import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
@@ -247,6 +248,7 @@ public class DataSetControllerTest {
             bigQueryService,
             cdrBigQuerySchemaConfigService,
             cohortDao,
+            conceptBigQueryService,
             conceptSetDao,
             cohortQueryBuilder,
             workbenchConfigProvider);
@@ -465,7 +467,8 @@ public class DataSetControllerTest {
         .conceptSetIds(new ArrayList<>())
         .cohortIds(new ArrayList<>())
         .values(new ArrayList<>())
-        .name("blah");
+        .name("blah")
+        .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
   }
 
   private void stubGetWorkspace(String ns, String name, String creator, WorkspaceAccessLevel access)

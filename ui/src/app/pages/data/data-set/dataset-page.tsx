@@ -40,6 +40,7 @@ import {
   DomainValuePair,
   DomainValuesResponse,
   ErrorResponse,
+  PrePackagedConceptSetEnum,
   Surveys,
   ValueSet,
 } from 'generated/fetch';
@@ -233,6 +234,8 @@ interface State {
   dataSet: DataSet;
   dataSetTouched: boolean;
   includesAllParticipants: boolean;
+  prePackagedDemographics: boolean;
+  prePackagedSurvey: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
   previewError: boolean;
@@ -261,6 +264,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         includesAllParticipants: false,
         loadingResources: true,
         openSaveModal: false,
+        prePackagedDemographics: false,
+        prePackagedSurvey: false,
         previewError: false,
         previewErrorText: '',
         previewList: [],
@@ -293,6 +298,13 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               selectedValues: response.values,
               valuesLoading: true,
             });
+            if (response.prePackagedConceptSet === PrePackagedConceptSetEnum.BOTH) {
+              this.setState({prePackagedSurvey: true, prePackagedDemographics: true});
+            } else if (response.prePackagedConceptSet === PrePackagedConceptSetEnum.DEMOGRAPHICS) {
+              this.setState({prePackagedDemographics: true});
+            } else if (response.prePackagedConceptSet === PrePackagedConceptSetEnum.SURVEY) {
+              this.setState({prePackagedSurvey: true});
+            }
             return response;
           }));
         const [, dataSet] = await Promise.all(allPromises);
@@ -300,7 +312,16 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         // load resources have concluded. However, we want those to happen in
         // parallel, and one is conditional, so we add them to an array to await
         // and only run once both have finished.
-        this.getValuesList(this.getDomainsFromConceptIds(dataSet.conceptSets.map(cs => cs.id)))
+        const domainList = this.getDomainsFromConceptIds(dataSet.conceptSets.map(cs => cs.id));
+        if (dataSet.prePackagedConceptSet === PrePackagedConceptSetEnum.BOTH) {
+          domainList.push(Domain.PERSON);
+          domainList.push(Domain.SURVEY);
+        } else if (dataSet.prePackagedConceptSet === PrePackagedConceptSetEnum.SURVEY) {
+          domainList.push(Domain.SURVEY);
+        } else if (dataSet.prePackagedConceptSet === PrePackagedConceptSetEnum.DEMOGRAPHICS) {
+          domainList.push(Domain.PERSON);
+        }
+        this.getValuesList(fp.uniq(domainList))
           .then(valueSets => this.setState({valueSets: valueSets, valuesLoading: false}));
       }
     }
@@ -311,16 +332,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         const [conceptSets, cohorts] = await Promise.all([
           conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
           cohortsApi().getCohortsInWorkspace(namespace, id)]);
-        // Check if dummy concept set Demographics already exist in workspace. If not add
-        // concept set : name Demographics and Domain Person to the concept set list.
-        const demographicCSIndex = fp.findIndex(['name', 'Demographics'], conceptSets.items);
-        if (demographicCSIndex === -1) {
-          conceptSets.items.push({
-            id: -1,
-            name: 'Demographics',
-            domain: Domain.PERSON
-          });
-        }
         this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
           loadingResources: false});
         return Promise.resolve();
@@ -345,6 +356,27 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         await Promise.all(domains.map((domain) =>
           conceptsApi().getValuesFromDomain(namespace, id, domain.toString()))));
       return valueSets;
+    }
+
+    handlePrePackagedConceptSet(domain, selected) {
+      const {valueSets, selectedValues} = this.state;
+      if (!selected) {
+        const updatedValueSets =
+            valueSets.filter(valueSet => !(fp.contains(valueSet.domain, domain)));
+        const updatedSelectedValues =
+            selectedValues.filter(selectedValue =>
+                !fp.contains(selectedValue.domain, domain));
+        this.setState({valueSets: updatedValueSets, selectedValues: updatedSelectedValues});
+        return;
+      }
+      const newDomains = [];
+      newDomains.push(domain);
+      this.setState({valuesLoading: true});
+      this.getValuesList(newDomains)
+        .then(newValueSets => this.setState({
+          valueSets: valueSets.concat(newValueSets),
+          valuesLoading: false
+        }));
     }
 
     select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
@@ -436,7 +468,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     }
 
     disableSave() {
-      return !this.state.selectedConceptSetIds || this.state.selectedConceptSetIds.length === 0 ||
+      return !this.state.selectedConceptSetIds || (this.state.selectedConceptSetIds.length === 0
+          && !this.state.prePackagedDemographics && !this.state.prePackagedSurvey) ||
           ((!this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0) &&
               !this.state.includesAllParticipants) || !this.state.selectedValues ||
           this.state.selectedValues.length === 0;
@@ -456,6 +489,18 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       return tableData;
     }
 
+    getPrePackagedConceptSet() {
+      let prePackagedConceptState = PrePackagedConceptSetEnum.NONE;
+      if (this.state.prePackagedDemographics && this.state.prePackagedSurvey) {
+        prePackagedConceptState = PrePackagedConceptSetEnum.BOTH;
+      } else if (this.state.prePackagedSurvey) {
+        prePackagedConceptState = PrePackagedConceptSetEnum.SURVEY;
+      } else if (this.state.prePackagedDemographics) {
+        prePackagedConceptState = PrePackagedConceptSetEnum.DEMOGRAPHICS;
+      }
+      return prePackagedConceptState;
+    }
+
     async getPreviewList() {
       this.setState({previewList: [], previewDataLoading: true});
       const {namespace, id} = this.props.workspace;
@@ -465,6 +510,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         conceptSetIds: this.state.selectedConceptSetIds,
         includesAllParticipants: this.state.includesAllParticipants,
         cohortIds: this.state.selectedCohortIds,
+        prePackagedConceptSet: this.getPrePackagedConceptSet(),
         values: this.state.selectedValues
       };
       try {
@@ -564,6 +610,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         includesAllParticipants,
         loadingResources,
         openSaveModal,
+        prePackagedDemographics,
+        prePackagedSurvey,
         previewDataLoading,
         previewError,
         previewErrorText,
@@ -619,6 +667,26 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite)}
                     </BoxHeader>
                   <div style={{height: '9rem', overflowY: 'auto'}}>
+                    <Subheader>Prepackaged Concept Set</Subheader>
+                    <ImmutableListItem name='Demographics' checked={prePackagedDemographics}
+                                       onChange={
+                                         () => {
+                                           this.handlePrePackagedConceptSet(
+                                             Domain.PERSON, !prePackagedDemographics);
+                                           this.setState({
+                                             prePackagedDemographics: !prePackagedDemographics,
+                                             dataSetTouched: true
+                                           }); }}/>
+                    <ImmutableListItem name='All Surveys' checked={prePackagedSurvey}
+                                       onChange={
+                                         () => {
+                                           this.handlePrePackagedConceptSet(
+                                             Domain.SURVEY, !prePackagedSurvey);
+                                           this.setState({
+                                             prePackagedSurvey: !prePackagedSurvey,
+                                             dataSetTouched: true
+                                           }); }}/>
+                    <Subheader>Workspace Concept Set</Subheader>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
                         <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
                                           data-test-id='concept-set-list-item'
@@ -760,6 +828,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                            selectedValues={selectedValues}
                                            workspaceNamespace={namespace}
                                            workspaceId={id}
+                                           prePackagedConceptSet={this.getPrePackagedConceptSet()}
                                            dataSet={dataSet ? dataSet : undefined}
                                            closeFunction={() => {
                                              this.setState({openSaveModal: false});

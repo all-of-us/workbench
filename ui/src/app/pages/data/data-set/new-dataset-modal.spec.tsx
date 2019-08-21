@@ -1,16 +1,22 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {NewDataSetModal} from './new-dataset-modal';
-import {DataSetApi, KernelTypeEnum, WorkspacesApi} from 'generated/fetch';
+import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
+import {
+  DataSetApi,
+  KernelTypeEnum,
+  PrePackagedConceptSetEnum,
+  WorkspacesApi} from 'generated/fetch';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {NewDataSetModal} from './new-dataset-modal';
 
+const prePackagedConceptSet = PrePackagedConceptSetEnum.NONE;
 const workspaceNamespace = 'workspaceNamespace';
 const workspaceId = 'workspaceId';
-let dataSet = undefined;
+
+let dataSet;
 
 const createNewDataSetModal = () => {
   return <NewDataSetModal
@@ -22,6 +28,7 @@ const createNewDataSetModal = () => {
     workspaceNamespace={workspaceNamespace}
     workspaceId={workspaceId}
     dataSet={dataSet}
+    prePackagedConceptSet={prePackagedConceptSet}
   />;
 }
 
@@ -80,7 +87,8 @@ describe('NewDataSetModal', () => {
       description: '',
       conceptSetIds: [],
       cohortIds: [],
-      values: []
+      values: [],
+      prePackagedConceptSet: PrePackagedConceptSetEnum.NONE
     });
     expect(exportSpy).not.toHaveBeenCalled();
   });
@@ -112,7 +120,8 @@ describe('NewDataSetModal', () => {
       description: '',
       conceptSetIds: [],
       cohortIds: [],
-      values: []
+      values: [],
+      prePackagedConceptSet: PrePackagedConceptSetEnum.NONE
     };
 
     wrapper.find('[data-test-id="data-set-name-input"]')

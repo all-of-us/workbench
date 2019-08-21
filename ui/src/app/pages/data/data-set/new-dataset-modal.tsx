@@ -25,13 +25,15 @@ import {
   DataSetRequest,
   DomainValuePair,
   FileDetail,
-  KernelTypeEnum
+  KernelTypeEnum,
+  PrePackagedConceptSetEnum
 } from 'generated/fetch';
 
 interface Props {
   closeFunction: Function;
   dataSet: DataSet;
   includesAllParticipants: boolean;
+  prePackagedConceptSet: PrePackagedConceptSetEnum;
   selectedConceptSetIds: number[];
   selectedCohortIds: number[];
   selectedValues: DomainValuePair[];
@@ -136,7 +138,8 @@ class NewDataSetModal extends React.Component<Props, State> {
       includesAllParticipants: this.props.includesAllParticipants,
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
-      values: this.props.selectedValues
+      values: this.props.selectedValues,
+      prePackagedConceptSet: this.props.prePackagedConceptSet
     };
     try {
       // If data set exist it is an update
@@ -186,6 +189,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       cohortIds: this.props.selectedCohortIds,
       values: this.props.selectedValues,
       includesAllParticipants: this.props.includesAllParticipants,
+      prePackagedConceptSet: this.props.prePackagedConceptSet
     };
     dataSetApi().generateCode(
       workspaceNamespace,
