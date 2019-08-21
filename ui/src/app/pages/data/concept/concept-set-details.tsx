@@ -94,12 +94,12 @@ const ConceptSetMenu: React.FunctionComponent<ConceptSetMenuProps> = (
   </PopupTrigger>;
 };
 
-export interface ConceptSetProps {
+export interface ConceptSetDetailsProps {
   urlParams: any;
   workspace: WorkspaceData;
 }
 
-export interface ConceptSetState {
+export interface ConceptSetDetailsState {
   copying: boolean;
   copySaving: boolean;
   conceptSet: ConceptSet;
@@ -117,7 +117,7 @@ export interface ConceptSetState {
 }
 
 export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace())(
-  class extends React.Component<ConceptSetProps, ConceptSetState> {
+  class extends React.Component<ConceptSetDetailsProps, ConceptSetDetailsState> {
     constructor(props) {
       super(props);
       this.state = {
