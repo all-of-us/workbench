@@ -1,4 +1,5 @@
 import {
+  CriteriaSubType,
   CriteriaType,
   DomainType,
   SearchGroup,
@@ -106,6 +107,18 @@ export function typeToTitle(_type: string): string {
       break;
   }
   return _type;
+}
+
+export function subTypeToTitle(subtype: string): string {
+  switch (subtype) {
+    case CriteriaSubType[CriteriaSubType.BP]:
+      subtype = 'Blood Pressure';
+      break;
+    case CriteriaSubType[CriteriaSubType.HR]:
+      subtype = 'Heart Rate';
+      break;
+  }
+  return subtype;
 }
 
 export function highlightMatches(
