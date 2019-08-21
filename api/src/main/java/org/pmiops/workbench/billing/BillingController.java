@@ -13,7 +13,8 @@ public class BillingController implements BillingApiDelegate {
   private final BillingProjectBufferService billingProjectBufferService;
 
   @Autowired
-  BillingController(BillingAlertsService billingAlertsService,
+  BillingController(
+      BillingAlertsService billingAlertsService,
       BillingProjectBufferService billingProjectBufferService) {
     this.billingAlertsService = billingAlertsService;
     this.billingProjectBufferService = billingProjectBufferService;

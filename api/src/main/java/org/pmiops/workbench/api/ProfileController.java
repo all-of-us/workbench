@@ -231,7 +231,8 @@ public class ProfileController implements ProfileApiDelegate {
     }
     // GCP billing project names must be <= 30 characters. The per-user hash, an integer,
     // is <= 10 chars.
-    String billingProjectNamePrefix = workbenchConfigProvider.get().billing.billingProjectPrefix + suffix;
+    String billingProjectNamePrefix =
+        workbenchConfigProvider.get().billing.billingProjectPrefix + suffix;
     String billingProjectName = billingProjectNamePrefix;
     int numAttempts = 0;
     while (numAttempts < MAX_BILLING_PROJECT_CREATION_ATTEMPTS) {

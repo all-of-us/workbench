@@ -54,7 +54,6 @@ public class WorkbenchConfig {
     public String billingExportBigQueryTable;
     public ArrayList<String> whitelistedUsers = new ArrayList<>();
     public Double defaultFreeCreditsLimit;
-
   }
 
   public static class FireCloudConfig {

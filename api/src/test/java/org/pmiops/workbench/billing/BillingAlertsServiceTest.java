@@ -35,31 +35,21 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import(LiquibaseAutoConfiguration.class)
 public class BillingAlertsServiceTest {
 
-  @Autowired
-  BigQueryService bigQueryService;
+  @Autowired BigQueryService bigQueryService;
 
-  @Autowired
-  BillingAlertsService billingAlertsService;
+  @Autowired BillingAlertsService billingAlertsService;
 
-  @Autowired
-  UserDao userDao;
+  @Autowired UserDao userDao;
 
-  @Autowired
-  NotificationService notificationService;
+  @Autowired NotificationService notificationService;
 
-  @Autowired
-  WorkspaceDao workspaceDao;
+  @Autowired WorkspaceDao workspaceDao;
 
   private static WorkbenchConfig workbenchConfig;
 
   @TestConfiguration
-  @Import({
-      BillingAlertsService.class
-  })
-  @MockBean({
-      BigQueryService.class,
-      NotificationService.class
-  })
+  @Import({BillingAlertsService.class})
+  @MockBean({BigQueryService.class, NotificationService.class})
   static class Configuration {
     @Bean
     @Scope("prototype")
@@ -74,8 +64,8 @@ public class BillingAlertsServiceTest {
   public void setUp() throws Exception {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
 
-    InputStream inputStream = getClass()
-        .getClassLoader().getResourceAsStream("bigquery/get_billing_project_costs.ser");
+    InputStream inputStream =
+        getClass().getClassLoader().getResourceAsStream("bigquery/get_billing_project_costs.ser");
     TableResult tableResult = (TableResult) (new ObjectInputStream(inputStream)).readObject();
 
     doReturn(tableResult).when(bigQueryService).executeQuery(any());

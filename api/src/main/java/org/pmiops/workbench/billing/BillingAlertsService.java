@@ -27,8 +27,7 @@ public class BillingAlertsService {
       BigQueryService bigQueryService,
       NotificationService notificationService,
       UserDao userDao,
-      Provider<WorkbenchConfig> workbenchConfigProvider
-  ) {
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.bigQueryService = bigQueryService;
     this.notificationService = notificationService;
     this.userDao = userDao;
@@ -36,30 +35,39 @@ public class BillingAlertsService {
   }
 
   public void alertUsersExceedingFreeTierBilling() {
-    QueryJobConfiguration queryConfig = QueryJobConfiguration
-        .newBuilder(
-            "SELECT project.id, SUM(cost) cost FROM `"
-                + workbenchConfigProvider.get().billing.billingExportBigQueryTable
-                + "` GROUP BY project.id ORDER BY cost desc;")
-        .build();
+    QueryJobConfiguration queryConfig =
+        QueryJobConfiguration.newBuilder(
+                "SELECT project.id, SUM(cost) cost FROM `"
+                    + workbenchConfigProvider.get().billing.billingExportBigQueryTable
+                    + "` GROUP BY project.id ORDER BY cost desc;")
+            .build();
 
-    Map<User, Double> perUserSpend = Streams
-        .stream(bigQueryService.executeQuery(queryConfig).getValues())
-        .filter(fv -> !fv.get("id").isNull() && !fv.get("id").isNull())
-        .map(fv -> new AbstractMap.SimpleImmutableEntry<>(
-            userDao.findCreatorByWorkspaceNamespace(fv.get("id").getStringValue()),
-            fv.get("cost").getDoubleValue()))
-        .filter(spend -> spend.getKey() != null)
-        .filter(spend -> !workbenchConfigProvider.get().billing
-            .whitelistedUsers.contains(spend.getKey().getEmail()))
-        .collect(Collectors.groupingBy(
-            spend -> spend.getKey(),
-            Collectors.summingDouble(Entry::getValue)
-        ));
+    Map<User, Double> perUserSpend =
+        Streams.stream(bigQueryService.executeQuery(queryConfig).getValues())
+            .filter(fv -> !fv.get("id").isNull() && !fv.get("id").isNull())
+            .map(
+                fv ->
+                    new AbstractMap.SimpleImmutableEntry<>(
+                        userDao.findCreatorByWorkspaceNamespace(fv.get("id").getStringValue()),
+                        fv.get("cost").getDoubleValue()))
+            .filter(spend -> spend.getKey() != null)
+            .filter(
+                spend ->
+                    !workbenchConfigProvider
+                        .get()
+                        .billing
+                        .whitelistedUsers
+                        .contains(spend.getKey().getEmail()))
+            .collect(
+                Collectors.groupingBy(
+                    spend -> spend.getKey(), Collectors.summingDouble(Entry::getValue)));
 
     perUserSpend.entrySet().stream()
         .filter(entry -> entry.getValue() > getUserFreeTierLimit(entry.getKey()))
-        .forEach(entry -> notificationService.alertUser(entry.getKey(), "You have exceeded your free tier credits."));
+        .forEach(
+            entry ->
+                notificationService.alertUser(
+                    entry.getKey(), "You have exceeded your free tier credits."));
   }
 
   private Double getUserFreeTierLimit(User user) {
@@ -70,4 +78,3 @@ public class BillingAlertsService {
     return workbenchConfigProvider.get().billing.defaultFreeCreditsLimit;
   }
 }
-
