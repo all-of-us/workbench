@@ -19,7 +19,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -67,7 +66,7 @@ public class FireCloudServiceImplTest {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.firecloud.baseUrl = "https://api.firecloud.org";
     workbenchConfig.firecloud.debugEndpoints = true;
-    workbenchConfig.billingConfig.billingAccountId = "test-billing-account";
+    workbenchConfig.billing.billingAccountId = "test-billing-account";
 
     service =
         new FireCloudServiceImpl(

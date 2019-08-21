@@ -14,7 +14,6 @@ import org.json.JSONObject;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
@@ -208,7 +207,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     boolean enableVpcFlowLogs = configProvider.get().featureFlags.enableVpcFlowLogs;
     CreateRawlsBillingProjectFullRequest request =
         new CreateRawlsBillingProjectFullRequest()
-            .billingAccount("billingAccounts/" + configProvider.get().billingConfig.billingAccountId)
+            .billingAccount("billingAccounts/" + configProvider.get().billing.billingAccountId)
             .projectName(projectName)
             .highSecurityNetwork(enableVpcFlowLogs)
             .enableFlowLogs(enableVpcFlowLogs);

@@ -22,7 +22,7 @@ public class WorkbenchConfig {
   public AccessConfig access;
   public CohortBuilderConfig cohortbuilder;
   public FeatureFlagsConfig featureFlags;
-  public BillingConfig billingConfig;
+  public BillingConfig billing;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -41,7 +41,7 @@ public class WorkbenchConfig {
     config.mandrill = new MandrillConfig();
     config.moodle = new MoodleConfig();
     config.server = new ServerConfig();
-    config.billingConfig = new BillingConfig();
+    config.billing = new BillingConfig();
     return config;
   }
 

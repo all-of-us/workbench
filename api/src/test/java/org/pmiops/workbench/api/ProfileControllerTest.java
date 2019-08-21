@@ -32,9 +32,6 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -292,7 +289,7 @@ public class ProfileControllerTest {
   @Test
   public void testMe_retriesBillingProjectErrors() throws Exception {
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.billingConfig.billingRetryCount = 2;
+    config.billing.billingRetryCount = 2;
     when(configProvider.get()).thenReturn(config);
     createUser();
 
@@ -312,7 +309,7 @@ public class ProfileControllerTest {
   @Test
   public void testMe_invalidBillingProjectError() throws Exception {
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.billingConfig.billingRetryCount = 2;
+    config.billing.billingRetryCount = 2;
     when(configProvider.get()).thenReturn(config);
     createUser();
 
@@ -332,7 +329,7 @@ public class ProfileControllerTest {
   @Test
   public void testMe_errorsAfterFourProjectFailures() throws Exception {
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.billingConfig.billingRetryCount = 2;
+    config.billing.billingRetryCount = 2;
     when(configProvider.get()).thenReturn(config);
     createUser();
 
@@ -345,7 +342,7 @@ public class ProfileControllerTest {
     membership.setCreationStatus(CreationStatusEnum.ERROR);
     membership.setProjectName(profile.getFreeTierBillingProjectName());
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
-    for (int i = 0; i <= config.billingConfig.billingRetryCount; i++) {
+    for (int i = 0; i <= config.billing.billingRetryCount; i++) {
       profile = profileController.getMe().getBody();
     }
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.ERROR);
@@ -861,8 +858,8 @@ public class ProfileControllerTest {
   private WorkbenchConfig generateConfig() {
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
     config.featureFlags.useBillingProjectBuffer = false;
-    config.billingConfig.billingProjectPrefix = BILLING_PROJECT_PREFIX;
-    config.billingConfig.billingRetryCount = 2;
+    config.billing.billingProjectPrefix = BILLING_PROJECT_PREFIX;
+    config.billing.billingRetryCount = 2;
     config.firecloud.registeredDomainName = "";
     config.access.enableComplianceTraining = false;
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";

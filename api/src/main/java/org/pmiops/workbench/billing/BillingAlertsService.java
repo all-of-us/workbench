@@ -37,7 +37,7 @@ public class BillingAlertsService {
     QueryJobConfiguration queryConfig = QueryJobConfiguration
         .newBuilder(
             "SELECT project.id, SUM(cost) cost FROM `"
-                + workbenchConfigProvider.get().billingConfig.billingExportBigQueryTable
+                + workbenchConfigProvider.get().billing.billingExportBigQueryTable
                 + "` GROUP BY project.id ORDER BY cost desc;")
         .build();
 
@@ -48,7 +48,7 @@ public class BillingAlertsService {
             userDao.findCreatorByWorkspaceNamespace(fv.get("id").getStringValue()),
             fv.get("cost").getDoubleValue()))
         .filter(spend -> spend.getUser() != null)
-        .filter(spend -> !workbenchConfigProvider.get().billingConfig.whitelistedUsers
+        .filter(spend -> !workbenchConfigProvider.get().billing.whitelistedUsers
               .contains(spend.getUser().getEmail()))
         .collect(Collectors.groupingBy(
             spend -> spend.getUser(),
@@ -65,7 +65,7 @@ public class BillingAlertsService {
       return user.getFreeTierCreditsLimitOverride();
     }
 
-    return workbenchConfigProvider.get().billingConfig.defaultFreeCreditsLimit;
+    return workbenchConfigProvider.get().billing.defaultFreeCreditsLimit;
   }
 
   public class Spend {

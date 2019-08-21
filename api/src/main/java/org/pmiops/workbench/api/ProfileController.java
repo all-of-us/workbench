@@ -22,7 +22,6 @@ import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -232,7 +231,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
     // GCP billing project names must be <= 30 characters. The per-user hash, an integer,
     // is <= 10 chars.
-    String billingProjectNamePrefix = workbenchConfigProvider.get().billingConfig.billingProjectPrefix + suffix;
+    String billingProjectNamePrefix = workbenchConfigProvider.get().billing.billingProjectPrefix + suffix;
     String billingProjectName = billingProjectNamePrefix;
     int numAttempts = 0;
     while (numAttempts < MAX_BILLING_PROJECT_CREATION_ATTEMPTS) {
@@ -352,7 +351,7 @@ public class ProfileController implements ProfileApiDelegate {
 
       case ERROR:
         int retries = Optional.ofNullable(user.getBillingProjectRetries()).orElse(0);
-        if (retries < workbenchConfigProvider.get().billingConfig.billingRetryCount) {
+        if (retries < workbenchConfigProvider.get().billing.billingRetryCount) {
           this.userService.setBillingRetryCount(retries + 1);
           log.log(
               Level.INFO,
