@@ -12,6 +12,6 @@ public class NotificationLogger implements NotificationService {
 
   @Override
   public void alertUser(User user, String msg) {
-    logger.info(user.getEmail() + msg); // TODO eric: better message
+    logger.info("\nTO: " + user.getEmail() + " MSG: " + msg);
   }
 }

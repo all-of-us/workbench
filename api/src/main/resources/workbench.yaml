@@ -1191,12 +1191,12 @@ paths:
       security: []
       tags:
         - billing
-#        - cron
+        - cron
       description: Find and alert users that have exceeded their free tier billing usage
       operationId: alertUsersExceedingFreeTierBilling
       responses:
         200:
-          description: Users matching the description are alerted
+          description: No Error
         500:
           description: Internal Error
           schema:
