@@ -180,7 +180,7 @@ const ImmutableListItem: React.FunctionComponent <{
     return <div style={styles.listItem}>
       <input type='checkbox' value={name} onChange={() => onChange()}
              style={styles.listItemCheckbox} checked={checked}/>
-      <div style={{lineHeight: '1.5rem'}}>{name}</div>
+      <div style={{lineHeight: '1.5rem', color: colors.primary}}>{name}</div>
     </div>;
   };
 
@@ -194,7 +194,8 @@ export const ValueListItem: React.FunctionComponent <
     return <div style={{display: 'flex', height: '1.2rem', marginLeft: '0.55rem'}}>
       <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
              style={styles.valueListItemCheckboxStyling} checked={checked}/>
-      <div style={{lineHeight: '1.5rem', wordWrap: 'break-word'}}>{domainValue.value}</div>
+      <div style={{lineHeight: '1.5rem', wordWrap: 'break-word', color: colors.primary}}>
+        {domainValue.value}</div>
     </div>;
   };
 
@@ -358,7 +359,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       return valueSets;
     }
 
-    handlePrePackagedConceptSet(domain, selected) {
+    handlePrePackagedConceptSets(domain, selected) {
       const {valueSets, selectedValues} = this.state;
       if (!selected) {
         const updatedValueSets =
@@ -667,11 +668,11 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite)}
                     </BoxHeader>
                   <div style={{height: '9rem', overflowY: 'auto'}}>
-                    <Subheader>Prepackaged Concept Set</Subheader>
+                    <Subheader>Prepackaged Concept Sets</Subheader>
                     <ImmutableListItem name='Demographics' checked={prePackagedDemographics}
                                        onChange={
                                          () => {
-                                           this.handlePrePackagedConceptSet(
+                                           this.handlePrePackagedConceptSets(
                                              Domain.PERSON, !prePackagedDemographics);
                                            this.setState({
                                              prePackagedDemographics: !prePackagedDemographics,
@@ -680,7 +681,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                     <ImmutableListItem name='All Surveys' checked={prePackagedSurvey}
                                        onChange={
                                          () => {
-                                           this.handlePrePackagedConceptSet(
+                                           this.handlePrePackagedConceptSets(
                                              Domain.SURVEY, !prePackagedSurvey);
                                            this.setState({
                                              prePackagedSurvey: !prePackagedSurvey,
