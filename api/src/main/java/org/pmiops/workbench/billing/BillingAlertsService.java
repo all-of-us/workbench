@@ -4,7 +4,6 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Streams;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javafx.util.Pair;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -38,21 +37,23 @@ public class BillingAlertsService {
 
   public void alertUsersExceedingFreeTierBilling() {
     QueryJobConfiguration queryConfig = QueryJobConfiguration
-        .newBuilder("SELECT project.id, SUM(cost) cost FROM `all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0` "
-            + "GROUP BY project.id ORDER BY cost desc;")
+        .newBuilder(
+            "SELECT project.id, SUM(cost) cost FROM `all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0` "
+                + "GROUP BY project.id ORDER BY cost desc;")
         .build();
 
     Map<User, Double> userCosts = Streams
         .stream(bigQueryService.executeQuery(queryConfig).getValues())
-        .map(fv -> new Pair<>(
+        .filter(fv -> !fv.get("id").isNull() && !fv.get("id").isNull())
+        .map(fv -> new Spend(
             userDao.findCreatorByWorkspaceNamespace(fv.get("id").getStringValue()),
             fv.get("cost").getDoubleValue()))
-        .filter(pair -> pair.getKey() != null)
-        .filter(pair -> !workbenchConfigProvider.get().freeCredits.whitelistedUsers
-            .contains(pair.getKey().getEmail()) )
+        .filter(spend -> spend.getUser() != null)
+        .filter(spend -> !workbenchConfigProvider.get().freeCredits.whitelistedUsers
+              .contains(spend.getUser().getEmail()))
         .collect(Collectors.groupingBy(
-            pair -> pair.getKey(),
-            Collectors.summingDouble(Pair::getValue)
+            spend -> spend.getUser(),
+            Collectors.summingDouble(Spend::getAmount)
         ));
 
     userCosts.entrySet().stream()
@@ -67,4 +68,23 @@ public class BillingAlertsService {
 
     return workbenchConfigProvider.get().freeCredits.defaultLimit;
   }
+
+  public class Spend {
+    private final User user;
+    private final double amount;
+
+    public Spend(User user, double amount) {
+      this.user = user;
+      this.amount = amount;
+    }
+
+    public User getUser() {
+      return user;
+    }
+
+    public double getAmount() {
+      return amount;
+    }
+  }
 }
+
