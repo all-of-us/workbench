@@ -58,8 +58,6 @@ public class BillingAlertsServiceTest {
     }
   }
 
-  // Free Tier credit is set per user
-
   @Before
   public void setUp() throws Exception {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
