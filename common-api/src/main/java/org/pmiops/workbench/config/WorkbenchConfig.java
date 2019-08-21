@@ -51,8 +51,9 @@ public class WorkbenchConfig {
     public Integer billingProjectBufferCapacity;
     public String billingProjectPrefix;
     public String billingAccountId;
+    public String billingExportBigQueryTable;
     public ArrayList<String> whitelistedUsers = new ArrayList<>();
-    public Double defaultFreeCreditLimit;
+    public Double defaultFreeCreditsLimit;
 
   }
 

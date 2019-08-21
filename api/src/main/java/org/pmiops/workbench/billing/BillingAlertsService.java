@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class BillingAlertsService {
 
-  // TODO eric : Add WorkbenchConfig values
-
   private final BigQueryService bigQueryService;
   private final NotificationService notificationService;
   private final UserDao userDao;
@@ -38,8 +36,9 @@ public class BillingAlertsService {
   public void alertUsersExceedingFreeTierBilling() {
     QueryJobConfiguration queryConfig = QueryJobConfiguration
         .newBuilder(
-            "SELECT project.id, SUM(cost) cost FROM `all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0` "
-                + "GROUP BY project.id ORDER BY cost desc;")
+            "SELECT project.id, SUM(cost) cost FROM `"
+                + workbenchConfigProvider.get().billingConfig.billingExportBigQueryTable
+                + "` GROUP BY project.id ORDER BY cost desc;")
         .build();
 
     Map<User, Double> userCosts = Streams
@@ -66,7 +65,7 @@ public class BillingAlertsService {
       return user.getFreeTierCreditsLimitOverride();
     }
 
-    return workbenchConfigProvider.get().billingConfig.defaultFreeCreditLimit;
+    return workbenchConfigProvider.get().billingConfig.defaultFreeCreditsLimit;
   }
 
   public class Spend {

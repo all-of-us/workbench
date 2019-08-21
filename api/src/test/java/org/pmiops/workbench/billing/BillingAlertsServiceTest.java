@@ -92,7 +92,7 @@ public class BillingAlertsServiceTest {
 
   @Test
   public void alertUsersExceedingFreeTierBilling_singleProjectExceedsLimit() {
-    workbenchConfig.billingConfig.defaultFreeCreditLimit = 100.0;
+    workbenchConfig.billingConfig.defaultFreeCreditsLimit = 100.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
@@ -103,7 +103,7 @@ public class BillingAlertsServiceTest {
 
   @Test
   public void alertUsersExceedingFreeTierBilling_deletedUserNotIgnored() {
-    workbenchConfig.billingConfig.defaultFreeCreditLimit = 100.0;
+    workbenchConfig.billingConfig.defaultFreeCreditsLimit = 100.0;
 
     User user = createUser("test@test.com");
     user.setDisabled(true);
@@ -116,7 +116,7 @@ public class BillingAlertsServiceTest {
 
   @Test
   public void alertUsersExceedingFreeTierBilling_deletedWorkspaceNotIgnored() {
-    workbenchConfig.billingConfig.defaultFreeCreditLimit = 100.0;
+    workbenchConfig.billingConfig.defaultFreeCreditsLimit = 100.0;
 
     User user = createUser("test@test.com");
     Workspace workspace = createWorkspace(user, "aou-test-f1-26");
@@ -129,7 +129,7 @@ public class BillingAlertsServiceTest {
 
   @Test
   public void alertUsersExceedingFreeTierBilling_noAlert() {
-    workbenchConfig.billingConfig.defaultFreeCreditLimit = 500.0;
+    workbenchConfig.billingConfig.defaultFreeCreditsLimit = 500.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
@@ -140,7 +140,7 @@ public class BillingAlertsServiceTest {
 
   @Test
   public void alertUsersExceedingFreeTierBilling_workspaceMissingCreator() {
-    workbenchConfig.billingConfig.defaultFreeCreditLimit = 500.0;
+    workbenchConfig.billingConfig.defaultFreeCreditsLimit = 500.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
@@ -152,7 +152,7 @@ public class BillingAlertsServiceTest {
 
   @Test
   public void alertUsersExceedingFreeTierBilling_combinedProjectsExceedsLimit() {
-    workbenchConfig.billingConfig.defaultFreeCreditLimit = 500.0;
+    workbenchConfig.billingConfig.defaultFreeCreditsLimit = 500.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
@@ -164,7 +164,7 @@ public class BillingAlertsServiceTest {
 
   @Test
   public void alertUsersExceedingFreeTierBilling_whitelist() {
-    workbenchConfig.billingConfig.defaultFreeCreditLimit = 10.0;
+    workbenchConfig.billingConfig.defaultFreeCreditsLimit = 10.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
@@ -177,7 +177,7 @@ public class BillingAlertsServiceTest {
 
   @Test
   public void alertUsersExceedingFreeTierBilling_override() {
-    workbenchConfig.billingConfig.defaultFreeCreditLimit = 10.0;
+    workbenchConfig.billingConfig.defaultFreeCreditsLimit = 10.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
