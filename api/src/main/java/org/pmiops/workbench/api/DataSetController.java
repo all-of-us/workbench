@@ -528,7 +528,6 @@ public class DataSetController implements DataSetApiDelegate {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    workspaceService.get(workspaceNamespace, workspaceId).getWorkspaceId();
     dbDataSet.setLastModifiedTime(now);
     dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
     dbDataSet.setCohortSetId(request.getCohortIds());

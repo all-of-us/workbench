@@ -543,7 +543,7 @@ public class DataSetServiceImpl implements DataSetService {
   private ConceptSet handlePrePackagedSurveyConceptSet() {
     List<Long> conceptIds = conceptBigQueryService.getSurveyQuestionConceptIds();
     ConceptSet surveyConceptSets = new ConceptSet();
-    surveyConceptSets.setName("PrePackaged Survey");
+    surveyConceptSets.setName("All Surveys");
     surveyConceptSets.setDomain(CommonStorageEnums.domainToStorage(Domain.SURVEY));
     Set<Long> conceptIdsSet = new HashSet<Long>();
     conceptIdsSet.addAll(conceptIds);
