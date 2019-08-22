@@ -44,9 +44,13 @@ export const CohortResourceCard = fp.flow(
   }
 
   // this is duplicated
-  get writePermission(): boolean {
+  get canWrite(): boolean {
     return this.props.resource.permission === 'OWNER'
       || this.props.resource.permission === 'WRITER';
+  }
+
+  get canDelete(): boolean {
+    return this.props.resource.permission === 'OWNER';
   }
 
   get resourceUrl(): string {
@@ -70,25 +74,25 @@ export const CohortResourceCard = fp.flow(
         onClick: () => {
           this.setState({showRenameModal: true});
         },
-        disabled: !this.writePermission
+        disabled: !this.canWrite
       },
       {
         icon: 'copy',
         displayName: 'Duplicate',
         onClick: () => this.duplicate(),
-        disabled: !this.writePermission
+        disabled: !this.canWrite
       },
       {
         icon: 'pencil',
         displayName: 'Edit',
         onClick: () => navigateByUrl(this.resourceUrl),
-        disabled: !this.writePermission
+        disabled: !this.canWrite
       },
       {
         icon: 'grid-view',
         displayName: 'Review',
         onClick: () => navigateByUrl(this.reviewCohortUrl),
-        disabled: !this.writePermission
+        disabled: !this.canWrite
       },
       {
         icon: 'trash',
@@ -97,7 +101,7 @@ export const CohortResourceCard = fp.flow(
           this.props.showConfirmDeleteModal(this.displayName,
             this.resourceType, () => this.delete());
         },
-        disabled: !this.writePermission
+        disabled: !this.canDelete
       }
     ];
   }
@@ -165,7 +169,7 @@ export const CohortResourceCard = fp.flow(
 
       <ResourceCardTemplate
         actions={this.actions}
-        disabled={!this.writePermission}
+        disabled={!this.canWrite}
         resourceUrl={this.resourceUrl}
         displayName={this.displayName}
         description={this.props.resource.cohort.description}
