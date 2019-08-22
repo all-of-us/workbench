@@ -52,14 +52,14 @@ export const CohortResourceCard = fp.flow(
   get resourceUrl(): string {
     const {workspaceNamespace, workspaceFirecloudName, cohort} = this.props.resource;
     return `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
-      `/cohorts/build?cohortId=${cohort.id}`;
+      `/data/cohorts/build?cohortId=${cohort.id}`;
   }
 
   get reviewCohortUrl(): string {
     const {workspaceNamespace, workspaceFirecloudName, cohort} = this.props.resource;
 
     return `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
-      `/cohorts/${cohort.id}/review`;
+      `/data/cohorts/${cohort.id}/review`;
   }
 
   get actions(): Action[] {
