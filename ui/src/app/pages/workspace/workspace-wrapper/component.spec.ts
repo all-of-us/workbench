@@ -86,7 +86,7 @@ describe('WorkspaceWrapperComponent', () => {
 
       router.navigateByUrl(
         `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/` +
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID);
+        `WorkspaceStubVariables.DEFAULT_WORKSPACE_ID)/about`);
 
       spyOn(workspacesApi(), 'getWorkspace')
         .and.returnValue(Promise.resolve(workspace));

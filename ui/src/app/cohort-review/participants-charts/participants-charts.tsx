@@ -1,7 +1,7 @@
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -24,7 +24,7 @@ const css = `
 
 const styles = reactStyles({
   dataBlue: {
-    backgroundColor: '#216FB4',
+    backgroundColor: colors.secondary,
     color: colors.white,
     height: '24px',
     fontSize: '10px',
@@ -33,7 +33,7 @@ const styles = reactStyles({
     fontWeight: 'bold'
   },
   lightGrey: {
-    backgroundColor: '#CCCCCC',
+    backgroundColor: colorWithWhiteness(colors.dark, 0.7),
     display: '-webkit-box',
   },
   dataBarContainer: {

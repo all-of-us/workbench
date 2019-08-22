@@ -102,7 +102,7 @@ public class NotebooksServiceImpl implements NotebooksService {
       String toWorkspaceNamespace,
       String toWorkspaceName,
       String newNotebookName) {
-    newNotebookName = withNotebookExtension(newNotebookName);
+    newNotebookName = NotebooksService.withNotebookExtension(newNotebookName);
     GoogleCloudLocators fromNotebookLocators =
         getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
     GoogleCloudLocators newNotebookLocators =
@@ -167,7 +167,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             originalName,
             workspaceNamespace,
             workspaceName,
-            withNotebookExtension(newName));
+            NotebooksService.withNotebookExtension(newName));
     deleteNotebook(workspaceNamespace, workspaceName, originalName);
 
     return fileDetail;
@@ -176,18 +176,14 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public JSONObject getNotebookContents(String bucketName, String notebookName) {
     return cloudStorageService.getFileAsJson(
-        bucketName, "notebooks/".concat(withNotebookExtension(notebookName)));
-  }
-
-  private String withNotebookExtension(String notebookName) {
-    return notebookName.endsWith(".ipynb") ? notebookName : notebookName.concat(".ipynb");
+        bucketName, "notebooks/".concat(NotebooksService.withNotebookExtension(notebookName)));
   }
 
   @Override
   public void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents) {
     cloudStorageService.writeFile(
         bucketName,
-        "notebooks/" + notebookName + ".ipynb",
+        "notebooks/" + NotebooksService.withNotebookExtension(notebookName),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
   }
 

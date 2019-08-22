@@ -1,3 +1,4 @@
+import {Component} from '@angular/core';
 import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {CohortDefinition} from 'app/cohort-review/cohort-definition/cohort-definition.component';
 import {ParticipantsCharts} from 'app/cohort-review/participants-charts/participants-charts';
@@ -5,12 +6,11 @@ import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore} from 'app/utils/navigation';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {currentCohortStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, SearchRequest} from 'generated/fetch';
-import {fromJS} from 'immutable';
 import * as moment from 'moment';
 import * as React from 'react';
 
@@ -33,6 +33,14 @@ const css = `
 `;
 
 const styles = reactStyles({
+  backBtn: {
+    padding: 0,
+    border: 0,
+    fontSize: '14px',
+    color: colors.accent,
+    background: 'transparent',
+    cursor: 'pointer',
+  },
   container: {
     width: '100%',
     marginLeft: 'auto',
@@ -84,10 +92,11 @@ const styles = reactStyles({
   },
   graphBorder: {
     minHeight: '10rem',
+    marginLeft: '23%',
     padding: '0.3rem',
   },
   groupHeader: {
-    backgroundColor: '#E2E2EA',
+    backgroundColor: colorWithWhiteness(colors.light, -.5),
     padding: '0.2rem',
     color: colors.primary,
     marginTop: '1rem'
@@ -109,7 +118,7 @@ const styles = reactStyles({
     cursor: 'pointer'
   },
   printDisabled: {
-    color: '#E2E2EA',
+    color: colors.light,
     cursor: 'not-allowed'
   }
 });
@@ -235,12 +244,23 @@ export const QueryReport = withCurrentWorkspace()(
       }
     }
 
+    goBack() {
+      const {ns, wsid, cid} = urlParamsStore.getValue();
+      navigate(['/workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
+    }
+
     render() {
       const {cdrName, data, groupedData, loading} = this.state;
       const totalCount = this.review.matchedParticipantCount;
       const created = moment(this.cohort.creationTime).format('YYYY-MM-DD');
       return <React.Fragment>
         <style>{css}</style>
+        <button
+          style={styles.backBtn}
+          type='button'
+          onClick={() => this.goBack()}>
+          Back to review set
+        </button>
         <div style={styles.reportBackground}>
           <div style={styles.container}>
             <div style={styles.row}>
@@ -348,10 +368,10 @@ export const QueryReport = withCurrentWorkspace()(
                 </div>
                 <div style={{...styles.container, margin: 0}}>
                   <div style={{...styles.row, paddingTop: '1rem'}}>
-                    <div style={{...styles.col, flex: '0 0 66.66667%', maxWidth: '66.66667%'}}>
+                    <div style={{...styles.col, flex: '0 0 75%', maxWidth: '75%'}}>
                       <div style={demoTitle}>Demographics</div>
                       <div style={styles.graphBorder}>
-                        {data && <ComboChart mode={'stacked'} data={fromJS(data)} />}
+                        {data && <ComboChart mode={'stacked'} data={data} />}
                         {loading && <SpinnerOverlay />}
                       </div>
                     </div>
@@ -372,3 +392,12 @@ export const QueryReport = withCurrentWorkspace()(
     }
   }
 );
+
+@Component ({
+  template: '<div #root></div>'
+})
+export class QueryReportComponent extends ReactWrapperBase {
+  constructor() {
+    super(QueryReport, []);
+  }
+}

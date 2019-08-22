@@ -1,14 +1,16 @@
+import {CopyModal} from 'app/components/copy-modal';
 import {RenameModal} from 'app/components/rename-modal';
 import {Action, ResourceCardTemplate} from 'app/components/resource-card-template';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
-import {CopyNotebookModal} from 'app/pages/analysis/copy-notebook-modal';
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
-import {RecentResource} from 'generated/fetch';
+import {encodeURIComponentStrict} from 'app/utils/navigation';
+import {ResourceType} from 'app/utils/resourceActionsReact';
+import {CopyRequest, RecentResource} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
 
@@ -49,12 +51,16 @@ export const NotebookResourceCard = fp.flow(
       this.props.resource;
 
     return `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
-    `/notebooks/preview/${encodeURIComponent(notebook.name)}`;
+    `/notebooks/preview/${encodeURIComponentStrict(notebook.name)}`;
   }
 
   get writePermission(): boolean {
     return this.props.resource.permission === 'OWNER'
       || this.props.resource.permission === 'WRITER';
+  }
+
+  get deletePermission(): boolean {
+    return this.props.resource.permission === 'OWNER';
   }
 
   get actions(): Action[] {
@@ -65,16 +71,19 @@ export const NotebookResourceCard = fp.flow(
         onClick: () => {
           this.setState({showRenameModal: true});
         },
+        disabled: !this.writePermission,
       },
       {
         icon: 'copy',
         displayName: 'Duplicate',
         onClick: () => this.duplicateNotebook(),
+        disabled: !this.writePermission,
       },
       {
         icon: 'copy',
         displayName: 'Copy to another Workspace',
         onClick: () => this.setState({showCopyNotebookModal: true}),
+        disabled: false,
       },
       {
         icon: 'trash',
@@ -83,6 +92,7 @@ export const NotebookResourceCard = fp.flow(
           this.props.showConfirmDeleteModal(this.displayName,
             this.resourceType, () => this.deleteNotebook());
         },
+        disabled: !this.deletePermission,
       }];
   }
 
@@ -134,15 +144,26 @@ export const NotebookResourceCard = fp.flow(
       });
   }
 
+  copyNotebook(copyRequest: CopyRequest) {
+    return workspacesApi().copyNotebook(
+      this.props.resource.workspaceNamespace,
+      this.props.resource.workspaceFirecloudName,
+      dropNotebookFileSuffix(this.props.resource.notebook.name),
+      copyRequest
+    );
+  }
+
   render() {
     return <React.Fragment>
       {this.state.showCopyNotebookModal &&
-      <CopyNotebookModal
+      <CopyModal
         fromWorkspaceNamespace={this.props.resource.workspaceNamespace}
         fromWorkspaceName={this.props.resource.workspaceFirecloudName}
-        fromNotebook={this.props.resource.notebook}
+        fromResourceName={dropNotebookFileSuffix(this.props.resource.notebook.name)}
+        resourceType={ResourceType.NOTEBOOK}
         onClose={() => this.setState({showCopyNotebookModal: false})}
-        onCopy={() => this.props.onUpdate()}/>
+        onCopy={() => this.props.onUpdate()}
+        saveFunction={(copyRequest: CopyRequest) => this.copyNotebook(copyRequest)}/>
       }
 
       {this.state.showRenameModal &&
@@ -156,7 +177,7 @@ export const NotebookResourceCard = fp.flow(
 
       <ResourceCardTemplate
         actions={this.actions}
-        actionsDisabled={!this.writePermission}
+        actionsDisabled={false}
         disabled={false} // Notebook Cards are always at least readable
         resourceUrl={this.resourceUrl}
         displayName={this.displayName}

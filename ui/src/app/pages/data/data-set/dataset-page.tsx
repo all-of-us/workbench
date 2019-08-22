@@ -117,11 +117,15 @@ export const styles = reactStyles({
 
   previewDataHeader: {
     height: '19px',
-    width: '160px',
+    width: 'auto',
     color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: '16px',
-    fontWeight: 600
+    fontWeight: 600,
+    marginBottom: '1rem',
+    paddingRight: '1.5rem',
+    justifyContent: 'space-between',
+    display: 'flex'
   },
 
   warningMessage: {
@@ -136,6 +140,29 @@ export const styles = reactStyles({
     width: '5rem',
     display: 'flex',
     alignItems: 'center'
+  },
+  previewLink: {
+    marginTop: '0.5rem',
+    height: '1.8rem',
+    width: '6.5rem',
+    color: colors.secondary
+  },
+  footer: {
+    display: 'block',
+    padding: '20px',
+    height: '60px',
+    width: '100%'
+  },
+  stickyFooter: {
+    backgroundColor: colors.white,
+    borderTop: `1px solid ${colors.light}`,
+    textAlign: 'right',
+    padding: '3px 10px 50px 20px',
+    position: 'fixed',
+    left: '0',
+    bottom: '0',
+    height: '60px',
+    width: '100%'
   }
 });
 
@@ -526,15 +553,11 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       </DataTable>;
     }
 
-    get isRefreshPreviewDisabled() {
-      return this.disableSave() || this.state.previewList.length === 0;
-    }
-
     render() {
       const {namespace, id} = this.props.workspace;
-      const wsPathPrefix = 'workspaces/' + namespace + '/' + id;
-      const cohortsPath = wsPathPrefix + '/cohorts';
-      const conceptSetsPath = wsPathPrefix + '/concepts';
+      const pathPrefix = 'workspaces/' + namespace + '/' + id + '/data';
+      const cohortsPath = pathPrefix + '/cohorts/build';
+      const conceptSetsPath = pathPrefix + '/concepts';
       const {
         dataSet,
         dataSetTouched,
@@ -554,20 +577,20 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       } = this.state;
       return <React.Fragment>
         <FadeBox style={{marginTop: '1rem'}}>
-          <h2 style={{marginTop: 0}}>Datasets{this.editing &&
+          <h2 style={{paddingTop: 0, marginTop: 0}}>Data Sets{this.editing &&
             dataSet !== undefined && ' - ' + dataSet.name}</h2>
-          <div style={{color: colors.primary, fontSize: '14px'}}>Build a dataset by selecting the
-            variables and values for one or more of your cohorts. Then export the completed dataset
+          <div style={{color: colors.primary, fontSize: '14px'}}>Build a data set by selecting the
+            variables and values for one or more of your cohorts. Then export the completed Data Set
             to Notebooks where you can perform your analysis</div>
           <div style={{display: 'flex', paddingTop: '1rem'}}>
-            <div style={{width: '33%'}}>
+            <div style={{width: '33%', height: '80%'}}>
               <div style={{backgroundColor: 'white', border: `1px solid ${colors.light}`}}>
                 <BoxHeader text='1' header='Select Cohorts' subHeader='Participants'>
                   {plusLink('cohorts-link', cohortsPath, !this.canWrite)}
                 </BoxHeader>
-                <div style={{height: '10rem', overflowY: 'auto'}}>
+                <div style={{height: '9rem', overflowY: 'auto'}}>
                   <Subheader>Prepackaged Cohorts</Subheader>
-                  <ImmutableListItem name='All AoU Participants' checked={includesAllParticipants}
+                  <ImmutableListItem name='All Participants' checked={includesAllParticipants}
                                      onChange={
                                        () => this.setState({
                                          includesAllParticipants: !includesAllParticipants,
@@ -582,8 +605,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                         () => this.select(cohort, ResourceType.COHORT)}/>
                     )
                   }
-                  {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
-                    left: '10rem'}}/>}
+                  {loadingResources && <Spinner style={{position: 'relative', top: '0.5rem',
+                    left: '7rem'}}/>}
                 </div>
               </div>
             </div>
@@ -595,7 +618,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                style={{paddingRight: '1rem'}}>
                       {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite)}
                     </BoxHeader>
-                  <div style={{height: '10rem', overflowY: 'auto'}}>
+                  <div style={{height: '9rem', overflowY: 'auto'}}>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
                         <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
                                           data-test-id='concept-set-list-item'
@@ -621,7 +644,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       </div>
                     </div>
                   </BoxHeader>
-                  <div style={{height: '10rem', overflowY: 'auto'}}>
+                  <div style={{height: '9rem', overflowY: 'auto'}}>
                     {valuesLoading && <Spinner style={{position: 'relative',
                       top: '2rem', left: 'calc(50% - 36px)'}}/>}
                     {valueSets.map(valueSet =>
@@ -650,34 +673,28 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               <div style={{display: 'flex', flexDirection: 'column'}}>
               <div style={{display: 'flex', alignItems: 'flex-end'}}>
                 <div style={styles.previewDataHeader}>
-                  Preview Data Set
+                  <div>
+                    <CircleWithText text={4} width='23.78px' height='23.78px'
+                      style={{marignTop: '0.3rem', fill: colorWithWhiteness(colors.primary, 0.5)}}/>
+                  </div>
+                  <label style={{marginLeft: '0.5rem', color: colors.primary}}>
+                    Preview Data Set
+                  </label>
                 </div>
-                <Clickable data-test-id='refresh-preview-clickable-text'
-                           disabled={this.isRefreshPreviewDisabled}
-                           onClick={() => this.getPreviewList()}
-                           style={{fontSize: '12px',
-                             cursor: this.isRefreshPreviewDisabled ? 'not-allowed' : 'pointer',
-                             fontWeight: 600, lineHeight: '15px',
-                             color: this.isRefreshPreviewDisabled ?
-                               colorWithWhiteness(colors.dark, 0.6) : colors.accent
-                           }}>
-                    Refresh Preview
-                  </Clickable>
-              </div>
-              <div style={{color: colors.primary, fontSize: '14px'}}>
-                A visualization of your data table based on the variable
-                and value you selected above
+                <div style={{color: colors.primary, fontSize: '14px', width: '60%'}}>
+                  A visualization of your data table based on concept sets
+                  and values you selected above. Once complete, export for analysis
+                </div>
               </div>
               </div>
-              <TooltipTrigger data-test-id='save-tooltip'
-                           content='Requires Owner or Writer permission' disabled={this.canWrite}>
-                <Button data-test-id='save-button'
-                  onClick ={() => this.setState({openSaveModal: true})}
-                  disabled={this.disableSave() || !this.canWrite}>
-                  {this.editing ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
-                    'Update And Analyze' : 'Save And Analyze'}
-                </Button>
-              </TooltipTrigger>
+              <Clickable data-test-id='preview-button' style={{
+                marginTop: '0.5rem',
+                cursor: this.disableSave() ? 'not-allowed' : 'pointer', height: '1.8rem',
+                width: '6.5rem', color: this.disableSave() ? colorWithWhiteness(colors.dark, 0.6) :
+                  colors.accent}} disabled={this.disableSave()}
+                onClick={() => this.getPreviewList()}>
+                  View Preview Table
+              </Clickable>
             </div>
             {previewDataLoading && <div style={styles.warningMessage}>
               <Spinner style={{position: 'relative', top: '2rem'}} />
@@ -719,15 +736,24 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   fontSize: '20px', fontWeight: 400}}>
                   Select cohorts, concept sets, and values above to generate a preview table
                 </div>
-                <Button data-test-id='preview-button' disabled={this.disableSave()}
-                        style={{marginTop: '0.5rem', height: '1.8rem', width: '6.5rem'}}
-                        onClick={() => this.getPreviewList()}>
-                  Preview Table
-                </Button>
               </div>
             }
           </div>
         </FadeBox>
+        <div>
+          <div style={styles.footer} />
+          <div style={styles.stickyFooter}>
+            <TooltipTrigger data-test-id='save-tooltip'
+              content='Requires Owner or Writer permission' disabled={this.canWrite}>
+            <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
+              onClick ={() => this.setState({openSaveModal: true})}
+              disabled={this.disableSave() || !this.canWrite}>
+                {this.editing ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
+                  'Update and Analyze' : 'Save and Analyze'}
+            </Button>
+            </TooltipTrigger>
+          </div>
+        </div>
         {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
                                            selectedConceptSetIds={selectedConceptSetIds}
                                            selectedCohortIds={selectedCohortIds}

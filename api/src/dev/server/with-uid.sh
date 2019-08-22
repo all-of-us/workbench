@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 USERNAME=$(whoami 2>/dev/null)
 EXIT_CODE=$?

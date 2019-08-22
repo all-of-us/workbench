@@ -25,6 +25,8 @@ public interface WorkspaceService {
 
   List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces();
 
+  WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
+
   List<WorkspaceResponse> getWorkspaces();
 
   List<WorkspaceResponse> getPublishedWorkspaces();

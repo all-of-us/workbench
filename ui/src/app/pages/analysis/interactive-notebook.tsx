@@ -45,7 +45,7 @@ const styles = reactStyles({
   },
   disabled: {
     cursor: 'not-allowed',
-    opacity: 0.7
+    color: colorWithWhiteness(colors.dark, 0.6)
   },
   navBarIcon: {
     height: '16px',
@@ -141,7 +141,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     private startEditMode() {
-      if (this.canWrite()) {
+      if (this.canWrite) {
         if (!this.notebookInUse) {
           this.setState({userRequestedExecutableNotebook: true});
           this.runCluster(() => { this.navigateEditMode(); });
@@ -156,13 +156,16 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
 
 
     private startPlaygroundMode() {
-      if (this.canWrite()) {
+      if (this.canWrite) {
         this.setState({userRequestedExecutableNotebook: true});
         this.runCluster(() => { this.navigatePlaygroundMode(); });
       }
     }
 
     private onPlaygroundModeClick() {
+      if (!this.canWrite) {
+        return;
+      }
       if (Cookies.get(ConfirmPlaygroundModeModal.DO_NOT_SHOW_AGAIN) === String(true)) {
         this.startPlaygroundMode();
       } else {
@@ -187,8 +190,13 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       this.navigateOldNotebooksPage(false);
     }
 
-    private canWrite() {
+    private get canWrite() {
       return WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel);
+    }
+
+    private get buttonStyleObj() {
+      return Object.assign({}, styles.navBarItem,
+        this.canWrite ? styles.clickable : styles.disabled);
     }
 
     private cloneNotebook() {
@@ -243,21 +251,17 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
                 {this.renderNotebookText()}
               </div>) : (
               <div style={{display: 'flex'}}>
-                <div style={
-                  Object.assign({}, styles.navBarItem,
-                    this.canWrite() ? styles.clickable : styles.disabled)}
+                <div style={this.buttonStyleObj}
                      onClick={() => { this.startEditMode(); }}>
                   <EditComponentReact enableHoverEffect={false}
-                                      disabled={!this.canWrite()}
+                                      disabled={!this.canWrite}
                                       style={styles.navBarIcon}/>
                   Edit {this.notebookInUse && '(In Use)'}
                 </div>
-                <div style={Object.assign({}, styles.navBarItem,
-                  this.canWrite() ? styles.clickable : styles.disabled)}
+                <div style={this.buttonStyleObj}
                      onClick={() => { this.onPlaygroundModeClick(); }}>
-                  <div style={{...styles.navBarIcon, marginBottom: '5px'}}>
-                    <PlaygroundModeIcon />
-                  </div>
+                  <PlaygroundModeIcon enableHoverEffect={false} disabled={!this.canWrite}
+                                      style={styles.navBarIcon}/>
                   Run (Playground Mode)
                 </div>
               </div>)

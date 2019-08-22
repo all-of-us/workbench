@@ -59,6 +59,17 @@ export const navigateByUrl = (...args) => {
   return NavStore.navigateByUrl(...args);
 };
 
+/**
+ * Strict variant of URI encoding to satisfy Angular routing, specifically for
+ * handling parens. See https://github.com/angular/angular/issues/10280 for
+ * details. This should no longer be necessary with Angular 6.
+ */
+export const encodeURIComponentStrict = (uri: string): string => {
+  return encodeURIComponent(uri).replace(/[!'()*]/g, (c) => {
+    return '%' + c.charCodeAt(0).toString(16);
+  });
+};
+
 // if modifier keys are pressed (like shift or cmd) use the href
 // if no keys are pressed, prevent default behavior and route using navigateByUrl
 export const navigateAndPreventDefaultIfNoKeysPressed = (e: React.MouseEvent, url: string) => {
@@ -78,5 +89,7 @@ export enum BreadcrumbType {
   Cohort = 'Cohort',
   Participant = 'Participant',
   CohortAdd = 'CohortAdd',
+  SearchConcepts = 'SearchConcepts',
   Dataset = 'Dataset',
+  Data = 'Data',
 }

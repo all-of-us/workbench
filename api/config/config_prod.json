@@ -11,7 +11,8 @@
     "registeredDomainName": "all-of-us-registered-prod",
     "billingRetryCount": 4,
     "billingProjectBufferCapacity": 20,
-    "xAppIdValue": "AoU-RW"
+    "xAppIdValue": "AoU-RW",
+    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod"
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -61,13 +62,11 @@
     "enableBetaAccess": true,
     "unsafeAllowSelfBypass": false
   },
-  "cohortbuilder": {
-    "enableListSearch": true
-  },
   "featureFlags": {
     "enableLeoWelder": true,
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": false,
-    "enableVpcFlowLogs": false
+    "enableVpcFlowLogs": true,
+    "enableVpcServicePerimeter": true
   }
 }

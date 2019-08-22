@@ -36,7 +36,7 @@ fi
 
 
 # Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls)
+datasets=$(bq --project=$BQ_PROJECT ls --max_results=150)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
@@ -52,15 +52,15 @@ fi
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
 
-bq --project=$BQ_PROJECT rm -f $BQ_DATASET.person_survey
-bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/person_survey.json --time_partitioning_type=DAY --clustering_fields person_id $BQ_DATASET.person_survey
+bq --project=$BQ_PROJECT rm -f $BQ_DATASET.cb_review_survey
+bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/cb_review_survey.json --time_partitioning_type=DAY --clustering_fields person_id $BQ_DATASET.cb_review_survey
 
 #########################################
-# insert survey data into person_survey #
+# insert survey data into cb_review_survey #
 #########################################
-echo "Inserting survey data into person_survey"
+echo "Inserting survey data into cb_review_survey"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_survey\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_survey\`
    (person_id, data_id, start_datetime, survey, question, answer)
 SELECT person_id,
     data_id,
@@ -106,15 +106,15 @@ JOIN
     ) y on x.concept_id = y.concept_id"
 
 # Create bq tables we have json schema for
-bq --project=$BQ_PROJECT rm -f $BQ_DATASET.person_all_events
-bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/person_all_events.json --time_partitioning_type=DAY --clustering_fields person_id,domain $BQ_DATASET.person_all_events
+bq --project=$BQ_PROJECT rm -f $BQ_DATASET.cb_review_all_events
+bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/cb_review_all_events.json --time_partitioning_type=DAY --clustering_fields person_id,domain $BQ_DATASET.cb_review_all_events
 
 ###########################################
-# insert drug data into person_all_events #
+# insert drug data into cb_review_all_events #
 ###########################################
-echo "Inserting drug data into person_all_events"
+echo "Inserting drug data into cb_review_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
  (person_id, data_id, start_datetime, standard_name, standard_code, standard_vocabulary, standard_concept_id, source_name, source_code, source_vocabulary,
  source_concept_id, visit_type, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, dose, strength, route, domain)
 SELECT P.PERSON_ID,
@@ -154,11 +154,11 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on v.VISIT_CONCEPT_ID = c4.CONC
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 
 ################################################
-# insert condition data into person_all_events #
+# insert condition data into cb_review_all_events #
 ################################################
-echo "Inserting conditions data into person_all_events"
+echo "Inserting conditions data into cb_review_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
  (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code,
  source_vocabulary, source_name, source_concept_id, age_at_event, visit_type, domain)
 SELECT P.PERSON_ID,
@@ -183,11 +183,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.conc
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID"
 
 ##########################################
-# insert lab data into person_all_events #
+# insert lab data into cb_review_all_events #
 ##########################################
-echo "Inserting lab data into person_all_events"
+echo "Inserting lab data into cb_review_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
    (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code, source_vocabulary, source_name,
    source_concept_id, value_as_number, unit, ref_range, age_at_event, visit_type, domain)
 SELECT m.person_id,
@@ -220,11 +220,11 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on m.person_id = p.person_id
 where c1.concept_class_id = 'Lab Test'"
 
 ############################################
-# insert vital data into person_all_events #
+# insert vital data into cb_review_all_events #
 ############################################
-echo "Inserting vital data into person_all_events"
+echo "Inserting vital data into cb_review_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
    (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code, source_vocabulary, source_name,
     source_concept_id, value_as_number, unit, ref_range, age_at_event, visit_type, domain)
 SELECT m.person_id,
@@ -257,11 +257,11 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on m.person_id = p.person_id
 where c1.concept_class_id != 'Lab Test'"
 
 ###################################################
-# insert observation data into person_all_events #
+# insert observation data into cb_review_all_events #
 ###################################################
-echo "Inserting observation data into person_all_events"
+echo "Inserting observation data into cb_review_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
    (person_id, data_id, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name,
  source_code, source_concept_id, source_vocabulary, visit_type, age_at_event, domain)
 SELECT P.PERSON_ID,
@@ -286,11 +286,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.conc
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 
 ##########################################################
-# insert physicalMeasurement data into person_all_events #
+# insert physicalMeasurement data into cb_review_all_events #
 ##########################################################
-echo "Inserting pm data into person_all_events"
+echo "Inserting pm data into cb_review_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
    (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code, source_vocabulary, source_name,
    source_concept_id, value_as_number, unit, age_at_event, domain, visit_type)
 SELECT P.PERSON_ID,
@@ -322,11 +322,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on v.visit_concept_id = c4.conc
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 
 ################################################
-# insert procedure data into person_all_events #
+# insert procedure data into cb_review_all_events #
 ################################################
-echo "Inserting procedure data into person_all_events"
+echo "Inserting procedure data into cb_review_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_all_events\`
    (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code, source_vocabulary, source_name,
    source_concept_id, age_at_event, visit_type, domain)
 SELECT P.PERSON_ID,

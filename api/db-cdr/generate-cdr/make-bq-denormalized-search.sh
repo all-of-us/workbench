@@ -36,7 +36,7 @@ fi
 
 
 # Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls)
+datasets=$(bq --project=$BQ_PROJECT ls --max_results=150)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
@@ -52,18 +52,18 @@ fi
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
 
-bq --project=$BQ_PROJECT rm -f $BQ_DATASET.search_person
-bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/search_person.json --time_partitioning_type=DAY --clustering_fields person_id $BQ_DATASET.search_person
+bq --project=$BQ_PROJECT rm -f $BQ_DATASET.cb_search_person
+bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/cb_search_person.json --time_partitioning_type=DAY --clustering_fields person_id $BQ_DATASET.cb_search_person
 
-bq --project=$BQ_PROJECT rm -f $BQ_DATASET.search_all_domains
-bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/search_all_domains.json --time_partitioning_type=DAY --clustering_fields concept_id $BQ_DATASET.search_all_domains
+bq --project=$BQ_PROJECT rm -f $BQ_DATASET.cb_search_all_events
+bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/cb_search_all_events.json --time_partitioning_type=DAY --clustering_fields concept_id $BQ_DATASET.cb_search_all_events
 
 ################################################
-#   insert person data into search_person      #
+#   insert person data into cb_search_person      #
 ################################################
-echo "Inserting conditions data into search_person"
+echo "Inserting conditions data into cb_search_person"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_person\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
  (person_id, gender, race, ethnicity, dob)
 select p.person_id, g.concept_code as gender,
 case when r.concept_name is null then 'Unknown' else r.concept_name end as race,
@@ -75,11 +75,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concep
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id and e.vocabulary_id = 'Ethnicity')"
 
 ############################################################
-#   insert source condition data into search_all_domains   #
+#   insert source condition data into cb_search_all_events   #
 ############################################################
-echo "Inserting conditions data into search_all_domains"
+echo "Inserting conditions data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
  (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 select p.person_id,
 co.condition_start_date as entry_date,
@@ -97,11 +97,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 where co.condition_source_concept_id is not null and co.condition_source_concept_id != 0"
 
 ##############################################################
-#   insert standard condition data into search_all_domains   #
+#   insert standard condition data into cb_search_all_events   #
 ##############################################################
-echo "Inserting conditions data into search_all_domains"
+echo "Inserting conditions data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
  (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 select p.person_id,
 co.condition_start_date as entry_date,
@@ -119,11 +119,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 where co.condition_concept_id is not null and co.condition_concept_id != 0"
 
 ############################################################
-#   insert source procedure data into search_all_domains   #
+#   insert source procedure data into cb_search_all_events   #
 ############################################################
-echo "Inserting procedures data into search_all_domains"
+echo "Inserting procedures data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
  (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 select p.person_id,
 po.procedure_date as entry_date,
@@ -141,11 +141,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 where po.procedure_source_concept_id is not null and po.procedure_source_concept_id != 0"
 
 ##############################################################
-#   insert standard procedure data into search_all_domains   #
+#   insert standard procedure data into cb_search_all_events   #
 ##############################################################
-echo "Inserting procedures data into search_all_domains"
+echo "Inserting procedures data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
  (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 select p.person_id,
 po.procedure_date as entry_date,
@@ -163,11 +163,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 where po.procedure_concept_id is not null and po.procedure_concept_id != 0"
 
 ##############################################################
-#   insert source measurement data into search_all_domains   #
+#   insert source measurement data into cb_search_all_events   #
 ##############################################################
-echo "Inserting measurement data into search_all_domains"
+echo "Inserting measurement data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
  (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id, value_as_number, value_as_concept_id, systolic, diastolic)
 select p.person_id,
 m.measurement_date as entry_date,
@@ -189,11 +189,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 where m.measurement_source_concept_id is not null and m.measurement_source_concept_id != 0"
 
 #####################################################################
-#   update source diastolic pressure data into search_all_domains   #
+#   update source diastolic pressure data into cb_search_all_events   #
 #####################################################################
-echo "Updating diastolic pressure data into search_all_domains"
+echo "Updating diastolic pressure data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` sad
+"update \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` sad
 set sad.diastolic = meas.diastolic
 from (
 select m.person_id,
@@ -206,11 +206,11 @@ where meas.person_id = sad.person_id and meas.measurement_datetime = sad.entry_d
 and sad.is_standard = 0 and sad.concept_id = 903118"
 
 #####################################################################
-#   update source systolic pressure data into search_all_domains   #
+#   update source systolic pressure data into cb_search_all_events   #
 #####################################################################
-echo "Updating diastolic pressure data into search_all_domains"
+echo "Updating diastolic pressure data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` sad
+"update \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` sad
 set sad.systolic = meas.systolic
 from (
 select m.person_id,
@@ -223,11 +223,11 @@ where meas.person_id = sad.person_id and meas.measurement_datetime = sad.entry_d
 and sad.is_standard = 0 and sad.concept_id = 903115"
 
 ################################################################
-#   insert standard measurement data into search_all_domains   #
+#   insert standard measurement data into cb_search_all_events   #
 ################################################################
-echo "Inserting measurement data into search_all_domains"
+echo "Inserting measurement data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
  (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id, value_as_number, value_as_concept_id, systolic, diastolic)
 select p.person_id,
 m.measurement_date as entry_date,
@@ -249,11 +249,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 where m.measurement_concept_id is not null and m.measurement_concept_id != 0"
 
 #####################################################################
-#   update standard diastolic pressure data into search_all_domains   #
+#   update standard diastolic pressure data into cb_search_all_events   #
 #######################################################################
-echo "Updating diastolic pressure data into search_all_domains"
+echo "Updating diastolic pressure data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` sad
+"update \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` sad
 set sad.diastolic = meas.diastolic
 from (
 select m.person_id,
@@ -266,11 +266,11 @@ where meas.person_id = sad.person_id and meas.measurement_datetime = sad.entry_d
 and sad.is_standard = 1 and sad.concept_id = 903118"
 
 #######################################################################
-#   update standard diastolic pressure data into search_all_domains   #
+#   update standard diastolic pressure data into cb_search_all_events   #
 #######################################################################
-echo "Updating diastolic pressure data into search_all_domains"
+echo "Updating diastolic pressure data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` sad
+"update \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` sad
 set sad.systolic = meas.systolic
 from (
 select m.person_id,
@@ -283,11 +283,11 @@ where meas.person_id = sad.person_id and meas.measurement_datetime = sad.entry_d
 and sad.is_standard = 1 and sad.concept_id = 903115"
 
 ##############################################################
-#   insert source observation data into search_all_domains   #
+#   insert source observation data into cb_search_all_events   #
 ##############################################################
-echo "Inserting observation data into search_all_domains"
+echo "Inserting observation data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
  (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id, value_as_number, value_as_concept_id, value_source_concept_id)
 select p.person_id,
 o.observation_date as entry_date,
@@ -308,11 +308,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 where o.observation_source_concept_id is not null and o.observation_source_concept_id != 0"
 
 ################################################################
-#   insert standard observation data into search_all_domains   #
+#   insert standard observation data into cb_search_all_events   #
 ################################################################
-echo "Inserting observation data into search_all_domains"
+echo "Inserting observation data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
  (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id, value_as_number, value_as_concept_id, value_source_concept_id)
 select p.person_id,
 o.observation_date as entry_date,
@@ -333,11 +333,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 where o.observation_concept_id is not null and o.observation_concept_id != 0"
 
 #######################################################
-#   insert source drug data into search_all_domains   #
+#   insert source drug data into cb_search_all_events   #
 #######################################################
-echo "Inserting drug data into search_all_domains"
+echo "Inserting drug data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
  (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 select p.person_id,
 d.drug_exposure_start_date as entry_date,
@@ -355,11 +355,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 where d.drug_source_concept_id is not null and d.drug_source_concept_id != 0"
 
 #########################################################
-#   insert standard drug data into search_all_domains   #
+#   insert standard drug data into cb_search_all_events   #
 #########################################################
-echo "Inserting drug data into search_all_domains"
+echo "Inserting drug data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
  (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 select p.person_id,
 d.drug_exposure_start_date as entry_date,
@@ -377,11 +377,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 where d.drug_concept_id is not null and d.drug_concept_id != 0"
 
 ##########################################################
-#   insert standard visit data into search_all_domains   #
+#   insert standard visit data into cb_search_all_events   #
 ##########################################################
-echo "Inserting visit data into search_all_domains"
+echo "Inserting visit data into cb_search_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
  (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 select p.person_id,
 v.visit_start_date as entry_date,

@@ -15,6 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -28,6 +29,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetListResponse;
+import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -45,6 +47,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   private static final int MAX_CONCEPTS_PER_SET = 1000;
   private static final String CONCEPT_CLASS_ID_QUESTION = "Question";
+  private static final int INITIAL_VERSION = 1;
 
   private final WorkspaceService workspaceService;
   private final ConceptSetDao conceptSetDao;
@@ -95,6 +98,9 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
                 throw new BadRequestException(
                     "Domain " + conceptSet.getDomain() + " is not allowed for concept sets");
               }
+              if (conceptSet.getEtag() != null) {
+                dbConceptSet.setVersion(Etags.toVersion(conceptSet.getEtag()));
+              }
               dbConceptSet.setDescription(conceptSet.getDescription());
               dbConceptSet.setName(conceptSet.getName());
               return dbConceptSet;
@@ -144,7 +150,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.setWorkspaceId(workspace.getWorkspaceId());
     dbConceptSet.setCreationTime(now);
     dbConceptSet.setLastModifiedTime(now);
-    dbConceptSet.setVersion(1);
+    dbConceptSet.setVersion(INITIAL_VERSION);
     dbConceptSet.setParticipantCount(0);
     if (request.getAddedIds() != null && !request.getAddedIds().isEmpty()) {
       addConceptsToSet(dbConceptSet, request.getAddedIds());
@@ -356,6 +362,71 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new ConflictException("Failed due to concurrent concept set modification");
     }
     return ResponseEntity.ok(toClientConceptSet(dbConceptSet));
+  }
+
+  @Override
+  public ResponseEntity<ConceptSet> copyConceptSet(
+      String fromWorkspaceNamespace,
+      String fromWorkspaceId,
+      String fromConceptSetId,
+      CopyRequest copyRequest) {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    workspaceService.enforceWorkspaceAccessLevel(
+        fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
+    Workspace toWorkspace =
+        workspaceService.get(
+            copyRequest.getToWorkspaceNamespace(), copyRequest.getToWorkspaceName());
+    Workspace fromWorkspace = workspaceService.get(fromWorkspaceNamespace, fromWorkspaceId);
+    workspaceService.enforceWorkspaceAccessLevel(
+        toWorkspace.getWorkspaceNamespace(),
+        toWorkspace.getFirecloudName(),
+        WorkspaceAccessLevel.WRITER);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(toWorkspace.getCdrVersion());
+    if (toWorkspace.getCdrVersion().getCdrVersionId()
+        != fromWorkspace.getCdrVersion().getCdrVersionId()) {
+      throw new BadRequestException(
+          "Target workspace does not have the same CDR version as current workspace");
+    }
+    org.pmiops.workbench.db.model.ConceptSet conceptSet =
+        conceptSetDao.findOne(Long.valueOf(fromConceptSetId));
+    if (conceptSet == null) {
+      throw new NotFoundException(
+          String.format(
+              "Concept set %s does not exist",
+              createResourcePath(fromWorkspaceNamespace, fromWorkspaceId, fromConceptSetId)));
+    }
+    org.pmiops.workbench.db.model.ConceptSet newConceptSet =
+        new org.pmiops.workbench.db.model.ConceptSet(conceptSet);
+
+    newConceptSet.setName(copyRequest.getNewName());
+    newConceptSet.setCreator(userProvider.get());
+    newConceptSet.setWorkspaceId(toWorkspace.getWorkspaceId());
+    newConceptSet.setCreationTime(now);
+    newConceptSet.setLastModifiedTime(now);
+    newConceptSet.setVersion(INITIAL_VERSION);
+
+    try {
+      newConceptSet = conceptSetDao.save(newConceptSet);
+    } catch (DataIntegrityViolationException e) {
+      throw new ConflictException(
+          String.format(
+              "Concept set %s already exists.",
+              createResourcePath(
+                  toWorkspace.getWorkspaceNamespace(),
+                  toWorkspace.getFirecloudName(),
+                  newConceptSet.getName())));
+    }
+    userRecentResourceService.updateConceptSetEntry(
+        toWorkspace.getWorkspaceId(),
+        userProvider.get().getUserId(),
+        newConceptSet.getConceptSetId(),
+        now);
+    return ResponseEntity.ok(toClientConceptSet(newConceptSet));
+  }
+
+  private String createResourcePath(
+      String workspaceNamespace, String workspaceFirecloudName, String identifier) {
+    return String.format("\"/%s/%s/%s\"", workspaceNamespace, workspaceFirecloudName, identifier);
   }
 
   private org.pmiops.workbench.db.model.ConceptSet getDbConceptSet(

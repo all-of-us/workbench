@@ -775,20 +775,7 @@ definitions:
   CriteriaSubType:
     type: string
     description: possible criteria types
-    enum: [BASICS, BMI, BP, CLIN, HC, HEIGHT, HR, HR-DETAIL, HR-IRR, HR-NOIRR, LAB, LIFESTYLE, OVERALLHEALTH, PREG, WC, WEIGHT, WHEEL]
-
-  # TODO:Remove freemabd
-  TreeType:
-    type: string
-    description: possible types of trees
-    enum: [ICD9, ICD10, CPT, DEMO, VISIT, PM, DRUG, MEAS, CONDITION, PROCEDURE, PPI, SNOMED]
-  # TODO:Remove freemabd
-  TreeSubType:
-    type: string
-    description: possible subtypes of trees
-    enum: [CM, PROC, PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR,
-           HR-DETAIL, HR-IRR, HR-NOIRR, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC,
-           BRAND, CLIN, LAB, BASICS, LIFESTYLE, OVERALLHEALTH]
+    enum: [ANSWER, BMI, BP, CLIN, HC, HEIGHT, HR, HR-DETAIL, HR-IRR, HR-NOIRR, LAB, PREG, QUESTION, SURVEY, WC, WEIGHT, WHEEL]
 
   TemporalMention:
     type: string

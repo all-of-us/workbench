@@ -8,7 +8,7 @@
   </button>
   <span class="item-info">
     <small *ngIf="showOr" class="selection-or font-weight-bold">OR</small>
-    <small *ngIf="parameter.get('group')" class="text-muted">Group</small>
+    <small *ngIf="parameter.group" class="text-muted">Group</small>
     <small class="name"
            [popper]="codesPopper"
            [popperTrigger]="'hover'"

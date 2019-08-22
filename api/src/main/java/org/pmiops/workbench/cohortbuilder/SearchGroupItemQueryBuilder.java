@@ -1,16 +1,16 @@
 package org.pmiops.workbench.cohortbuilder;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.betweenOperator;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.notBetweenAndNotInOperator;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.notZeroAndNotOne;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.operandsEmpty;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.operandsNotDates;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.operandsNotNumbers;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.operandsNotOne;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.operandsNotTwo;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.operatorNull;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ValidationPredicates.temporalGroupNull;
+import static org.pmiops.workbench.cohortbuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.betweenOperator;
+import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.notBetweenAndNotInOperator;
+import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.notZeroAndNotOne;
+import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.operandsEmpty;
+import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.operandsNotDates;
+import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.operandsNotNumbers;
+import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.operandsNotOne;
+import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.operandsNotTwo;
+import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.operatorNull;
+import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.temporalGroupNull;
 
 import com.google.api.client.util.Sets;
 import com.google.cloud.bigquery.QueryParameterValue;
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
@@ -49,7 +48,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String DESC = " desc";
   private static final String BASE_SQL =
       "select distinct person_id, entry_date, concept_id\n"
-          + "from `${projectId}.${dataSetId}.search_all_domains`\n"
+          + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
           + "where ";
   private static final String STANDARD_SQL = "is_standard = %s\n" + "and ";
   private static final String CONCEPT_ID_IN = "(concept_id in unnest(%s))\n";
@@ -87,7 +86,7 @@ public final class SearchGroupItemQueryBuilder {
           + ") temp2 on (%s)\n";
   private static final String TEMPORAL_SQL =
       "select person_id, visit_occurrence_id, entry_date%s\n"
-          + "from `${projectId}.${dataSetId}.search_all_domains`\n"
+          + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
           + "where %s\n"
           + "and person_id in (%s)\n";
   private static final String RANK_1_SQL =
@@ -125,27 +124,16 @@ public final class SearchGroupItemQueryBuilder {
       Map<SearchParameter, Set<Long>> criteriaLookup,
       Map<String, QueryParameterValue> queryParams,
       List<String> queryParts,
-      SearchGroup searchGroup,
-      boolean isEnableListSearch) {
+      SearchGroup searchGroup) {
     if (searchGroup.getTemporal()) {
       // build the outer temporal sql statement
-      String query =
-          buildOuterTemporalQuery(criteriaLookup, queryParams, searchGroup, isEnableListSearch);
+      String query = buildOuterTemporalQuery(criteriaLookup, queryParams, searchGroup);
       queryParts.add(query);
     } else {
       for (SearchGroupItem searchGroupItem : searchGroup.getItems()) {
         // build regular sql statement
-        String query;
-        if (isEnableListSearch) {
-          query =
-              buildBaseQuery(
-                  criteriaLookup, queryParams, searchGroupItem, searchGroup.getMention());
-        } else {
-          // TODO:Remove when new search is finished - freemabd
-          query =
-              QueryBuilderFactory.getQueryBuilder(FactoryKey.getType(searchGroupItem.getType()))
-                  .buildQuery(queryParams, searchGroupItem, searchGroup.getMention());
-        }
+        String query =
+            buildBaseQuery(criteriaLookup, queryParams, searchGroupItem, searchGroup.getMention());
         queryParts.add(query);
       }
     }
@@ -228,12 +216,6 @@ public final class SearchGroupItemQueryBuilder {
   private static String buildDemoSql(
       Map<String, QueryParameterValue> queryParams, SearchGroupItem searchGroupItem) {
     List<SearchParameter> parameters = searchGroupItem.getSearchParameters();
-    // The UI implementation of demographics only allows for 1 search parameter per search group
-    // item
-    if (parameters.size() != 1) {
-      throw new BadRequestException(
-          "Search unsupported for demographics with more/less than one search parameter.");
-    }
     SearchParameter param = parameters.get(0);
     switch (CriteriaType.valueOf(param.getType())) {
       case AGE:
@@ -308,8 +290,7 @@ public final class SearchGroupItemQueryBuilder {
   private static String buildOuterTemporalQuery(
       Map<SearchParameter, Set<Long>> criteriaLookup,
       Map<String, QueryParameterValue> params,
-      SearchGroup searchGroup,
-      boolean isEnableListSearch) {
+      SearchGroup searchGroup) {
     List<String> temporalQueryParts1 = new ArrayList<>();
     List<String> temporalQueryParts2 = new ArrayList<>();
     ListMultimap<Integer, SearchGroupItem> temporalGroups = getTemporalGroups(searchGroup);
@@ -319,18 +300,7 @@ public final class SearchGroupItemQueryBuilder {
       // key of one indicates belonging to the second temporal group
       boolean isFirstGroup = key == 0;
       for (SearchGroupItem tempGroup : tempGroups) {
-        String query;
-        if (isEnableListSearch) {
-          query = buildBaseQuery(criteriaLookup, params, tempGroup, searchGroup.getMention());
-        } else {
-          // TODO:Remove when new search is finished - freemabd
-          query =
-              QueryBuilderFactory.getQueryBuilder(FactoryKey.getType(tempGroup.getType()))
-                  .buildQuery(
-                      params,
-                      tempGroup,
-                      isFirstGroup ? searchGroup.getMention() : TemporalMention.ANY_MENTION);
-        }
+        String query = buildBaseQuery(criteriaLookup, params, tempGroup, searchGroup.getMention());
         if (isFirstGroup) {
           temporalQueryParts1.add(query);
         } else {
@@ -459,7 +429,7 @@ public final class SearchGroupItemQueryBuilder {
       Map<SearchParameter, Set<Long>> criteriaLookup, List<SearchParameter> params) {
     Set<Long> out = Sets.newHashSet();
     for (SearchParameter param : params) {
-      if (param.getGroup()) {
+      if (param.getGroup() || param.getAncestorData()) {
         out.addAll(criteriaLookup.get(param));
       }
       if (param.getConceptId() != null) {

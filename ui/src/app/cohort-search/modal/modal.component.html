@@ -1,34 +1,26 @@
-
-<div class="crit-modal-container" [class.show]="open">
-  <div class="crit-modal-content" [class.demographics]="ctype === treeType.DEMO">
+<div class="crit-modal-container" *ngIf="wizard" [class.show]="open">
+  <div class="crit-modal-content" [class.demographics]="wizard.domain === domainType.PERSON">
     <div class="container title-margin">
       <div class="row">
         <div class="col padding-zero" [ngClass]="treeClass">
           <div class="title-bar">
             <div class="btn-group btn-link">
               <ng-container>
-                <button  *ngIf="!altTab"
+                <button  *ngIf="!attributesNode"
                  type="button"
                  class="btn tab"
                  [disabled]="!noSelection && conceptType === 'standard'"
-                 [class.active]="mode === 'tree'"
-                 (click)="setMode('tree')">
-                  {{ title }}
+                 [class.active]="mode === 'list' || mode === 'tree'"
+                 (click)="mode = backMode">
+                  {{title}}
                 </button>
-                <button  *ngIf="isCondOrProc"
+                <button *ngIf="attributesNode"
                   type="button"
-                  class="btn tab snomed-tab"
-                  [disabled]="!noSelection && conceptType === 'source'"
-                  [class.active]="mode === 'snomed'"
-                  (click)="setMode('snomed')">
-                  Search SNOMED
-                </button>
-                <button *ngIf="attributesNode.size > 0"
-                  type="button"
-                  class="btn tab-node">
+                  class="btn tab"
+                  [class.active]="mode === 'attributes'"
+                  (click)="mode = 'attributes'">
                   {{attributeTitle}}
                 </button>
-
                 <div *ngIf="showModifiers" class="vbar"></div>
                 <button type="button"
                   class="btn tab"
@@ -40,95 +32,99 @@
                 </button>
               </ng-container>
             </div>
-            <div class="explore-link" *ngIf="ctype === domainType[domainType.DRUG]">
+            <div class="explore-link" *ngIf="wizard.domain === domainType[domainType.DRUG]">
               <a href="https://mor.nlm.nih.gov/RxNav/" target="_blank" rel="noopener noreferrer">
                 Explore
               </a>
-              drugs by brand names outside of All of Us
+              drugs by brand names outside of <i>All of Us</i>
             </div>
-            <button *ngIf="altTab"
+            <button *ngIf="mode === 'attributes'"
               (click)="back()"
               class="btn btn-link btn-icon">
               <clr-icon size="24" shape="close"></clr-icon>
             </button>
           </div>
           <div class="content" *ngIf="open">
-            <ng-container [ngSwitch]="ctype">
-              <crit-demographics *ngSwitchCase="treeType[treeType.DEMO]"></crit-demographics>
+            <ng-container [ngSwitch]="wizard.domain">
+              <crit-list-demographics *ngSwitchCase="domainType[domainType.PERSON]"></crit-list-demographics>
               <ng-container *ngSwitchDefault>
-                <div *ngIf="disableCursor" class="spinner spinner-lg spin-in-overlay">
+                <div *ngIf="loadingSubtree" class="spinner spinner-lg spin-in-overlay">
                   Loading...
                 </div>
                 <div
                   id="tree"
                   class="panel"
-                  [ngClass]="{'disable-tree':disableCursor}"
-                  [class.show]="mode === 'tree' || mode === 'modifiers' || mode === 'attributes' || mode === 'snomed'">
-                   <!-- SNOMED Search -->
-                  <div *ngIf="isCondOrProc" class="panel-left" [class.show]="mode === 'snomed'">
-                    <crit-tree [node]="snomedNode"></crit-tree>
-                  </div>
-                  <!-- Tree Page -->
+                  [class.disable-tree]="loadingSubtree"
+                  [class.show]="['tree', 'list', 'modifiers', 'attributes'].includes(mode)">
+                  <!-- Tree View -->
                   <div class="panel-left" [class.show]="mode === 'tree'">
-                    <crit-tree [node]="rootNode"></crit-tree>
+                    <crit-list-tree *ngIf="hierarchyNode" [node]="hierarchyNode"
+                      [selections]="selectionIds"
+                      [wizard]="wizard"
+                      [back]="back"></crit-list-tree>
+                  </div>
+                  <!-- List View -->
+                  <div class="panel-left" [class.show]="mode === 'list'">
+                    <crit-list-search [hierarchy]="showHierarchy"
+                      [selections]="selectionIds"
+                      [wizard]="wizard"></crit-list-search>
                   </div>
                   <!-- Modifiers Page -->
                   <div class="panel-left" [class.show]="mode === 'modifiers'">
-                    <crit-modifier-page (disabled)="modifiersDisabled = $event"></crit-modifier-page>
+                    <crit-list-modifier-page [disabled]="modifiersFlag" [wizard]="wizard"></crit-list-modifier-page>
                   </div>
                   <!-- Attributes Page -->
                   <div class="panel-left" [class.show]="mode === 'attributes'">
-                    <crit-attributes-page *ngIf="mode === 'attributes'"></crit-attributes-page>
+                    <crit-attributes-page *ngIf="attributesNode"
+                      [node]="attributesNode"
+                      [close]="back"></crit-attributes-page>
                   </div>
                 </div>
               </ng-container>
             </ng-container>
-            <div *ngIf="subtype === treeSubType.AGE" class="footer">
+            <div *ngIf="wizard.type === criteriaType.AGE" class="footer">
               <button type="button"
-                      (click)="cancel()"
-                      class="btn btn-link">
+                (click)="close()"
+                class="btn btn-link">
                 Cancel
               </button>
               <button type="button"
-                      [disabled]="disableFlag"
-                      (click)="finish()"
-                      class="btn btn-primary">
+                [disabled]="disableFlag"
+                (click)="finish()"
+                class="btn btn-primary">
                 Finish
               </button>
             </div>
           </div>
         </div>
 
-        <div *ngIf="subtype !== treeSubType.AGE" class="col padding-zero" [ngClass]="sidebarClass">
+        <div *ngIf="wizard.type !== criteriaType.AGE" class="col padding-zero" [ngClass]="sidebarClass">
           <div class="content" *ngIf="open">
             <div class="panel-right-container">
               <h5 class="selection-title">Selected Criteria</h5>
               <div class="panel-right selected">
-                <ng-container *ngFor="let type of objectKeys(selections); let i = index">
-                  <span class="selection-header" *ngIf="isCondOrProc">{{selectionHeader(type)}}</span>
-                  <crit-selection-info
-                    *ngFor="let parameter of selections[type]; let p = index"
-                    [indexes]="[i,p]"
-                    [parameter]="parameter">
-                  </crit-selection-info>
-                </ng-container>
+                <crit-list-selection-info
+                  *ngFor="let parameter of selectionList; let p = index"
+                  [indexes]="[p]"
+                  [parameter]="parameter">
+                </crit-list-selection-info>
               </div>
               <div class="footer">
                 <button type="button"
-                  (click)="cancel()"
+                  (click)="close()"
                   class="btn btn-link">
                   Cancel
                 </button>
                 <button  *ngIf="showNext"
                   type="button"
                   [disabled]="noSelection"
-                  (click)="setMode('modifiers')"
+                  (click)="mode = 'modifiers'"
                   class="btn btn-primary">
                   Next
                 </button>
                 <button *ngIf="showBack"
                   type="button"
-                  (click)="setMode(backMode)"
+                  (click)="back()"
                   class="btn btn-primary">
                   Back
                 </button>

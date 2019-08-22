@@ -165,6 +165,26 @@ export const Homepage = withUserProfile()(class extends React.Component<
     profileApi().updatePageVisits({ page: this.pageId});
   }
 
+  async syncCompliance() {
+    const complianceStatus = profileApi().syncComplianceTrainingStatus().then(result => {
+      this.setState({
+        trainingCompleted: getRegistrationTasksMap()['complianceTraining'].isComplete(result)
+      });
+    }).catch(err => {
+      this.setState({trainingCompleted: false});
+      console.error('error fetching moodle training status:', err);
+    });
+    const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus().then(result => {
+      this.setState({
+        twoFactorAuthCompleted: getRegistrationTasksMap()['twoFactorAuth'].isComplete(result)
+      });
+    }).catch(err => {
+      this.setState({twoFactorAuthCompleted: false});
+      console.error('error fetching two factor auth status:', err);
+    });
+    return Promise.all([complianceStatus, twoFactorAuthStatus]);
+  }
+
   async callProfile() {
     const {profileState: {profile, reload}} = this.props;
 
@@ -173,7 +193,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
         reload();
       }, 10000);
     } else {
-
       if (!profile.betaAccessRequestTime) {
         profileApi().requestBetaAccess();
       }
@@ -194,37 +213,20 @@ export const Homepage = withUserProfile()(class extends React.Component<
         dataUseAgreementCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
           (() => getRegistrationTasksMap()['dataUseAgreement'].isComplete(profile))() : true)
       });
-
-      try {
-        const result = await profileApi().syncComplianceTrainingStatus();
-        this.setState({
-          trainingCompleted: getRegistrationTasksMap()['complianceTraining'].isComplete(result)
-        });
-      } catch (ex) {
-        this.setState({trainingCompleted: false});
-        console.error('error fetching moodle training status');
-      }
-
-      try {
-        const result = await profileApi().syncTwoFactorAuthStatus();
-        this.setState({
-          twoFactorAuthCompleted: getRegistrationTasksMap()['twoFactorAuth'].isComplete(result)
-        });
-      } catch (ex) {
-        this.setState({twoFactorAuthCompleted: false});
-        console.error('error fetching two factor auth status');
-      }
-
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
+      const hasRegisteredAccess = hasRegisteredAccessFetch(profile.dataAccessLevel);
+      if (!hasRegisteredAccess || workbenchAccessTasks) {
+        await this.syncCompliance();
+      }
       if (workbenchAccessTasks) {
         this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
       } else {
         try {
           if (serverConfigStore.getValue().enforceRegistered) {
             this.setState({
-              accessTasksRemaining: !hasRegisteredAccessFetch(profile.dataAccessLevel),
+              accessTasksRemaining: !hasRegisteredAccess,
               accessTasksLoaded: true
             });
           } else {
@@ -235,9 +237,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
         }
       }
     }
-
-    this.setState(
-        {quickTour: this.state.firstVisit && this.state.accessTasksRemaining === false});
+    this.setState((state, props) => ({
+      quickTour: state.firstVisit && state.accessTasksRemaining === false
+    }));
   }
 
   checkBillingProjectStatus() {

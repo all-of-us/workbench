@@ -99,7 +99,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
       workspace: undefined,
       workspaceUserRoles: [],
       googleBucketModalOpen: false,
-      publishing: false
+      publishing: false,
     };
   }
 
@@ -133,9 +133,11 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
 
   async loadUserRoles() {
     const {workspace} = this.state;
+    this.setState({workspaceUserRoles: []});
     workspacesApi().getFirecloudWorkspaceUserRoles(workspace.namespace, workspace.id).then(
       resp => {
-        this.setState({workspaceUserRoles: fp.sortBy('familyName', resp.items)});
+        this.setState({
+          workspaceUserRoles: fp.sortBy('familyName', resp.items)});
       }
     ).catch(error => {
       console.error(error);
@@ -198,6 +200,12 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
     } finally {
       this.setState({publishing: false});
     }
+  }
+
+  async onShare() {
+    this.setState({sharing: false});
+    await this.reloadWorkspace(currentWorkspaceStore.getValue());
+    this.loadUserRoles();
   }
 
   render() {
@@ -283,7 +291,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
       {sharing && <WorkspaceShare workspace={workspace}
                                   accessLevel={workspace.accessLevel}
                                   userEmail={profile.username}
-                                  onClose={() => this.setState({sharing: false})}
+                                  onClose={() => this.onShare()}
                                   userRoles={workspaceUserRoles}
                                   data-test-id='workspaceShareModal'/>}
     </div>;

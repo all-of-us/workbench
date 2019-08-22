@@ -8,7 +8,6 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {environment} from 'environments/environment';
 import {ConceptSet} from 'generated/fetch';
 import * as React from 'react';
 
@@ -47,18 +46,7 @@ const styles = reactStyles({
   }
 });
 
-const disabledButton = {
-  ...styles.cardButton,
-  cursor: 'not-allowed'
-};
-
 const actionCards = [
-  {
-    title: 'Export to a Notebook',
-    description: `Data can be exported to a cloud-based Jupyter notebook for analysis using R or
-       Python programming language.`,
-    action: 'notebook'
-  },
   {
     title: 'Create a Data Set',
     description: `Here, you can build and preview a data set for one or more cohorts by
@@ -66,7 +54,7 @@ const actionCards = [
     action: 'dataSet'
   },
   {
-    title: 'Create or update another Concept Set',
+    title: 'Create another Concept Set',
     description: `Here, you can create or update another concept set for the same or a
       different domain.`,
     action: 'newConceptSet'
@@ -101,7 +89,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
           if (cs) {
             this.setState({conceptSet: cs, conceptSetLoading: false});
           } else {
-            navigate(['workspaces', namespace, id, 'concepts']);
+            navigate(['workspaces', namespace, id, 'data', 'concepts']);
           }
         });
       }
@@ -113,10 +101,10 @@ export const ConceptSetActions = withCurrentWorkspace()(
       let url = `/workspaces/${namespace}/${id}/`;
       switch (action) {
         case 'conceptSet':
-          url += `concepts/sets/${conceptSet.id}`;
+          url += `data/concepts/sets/${conceptSet.id}`;
           break;
         case 'newConceptSet':
-          url += `concepts`;
+          url += `data/concepts`;
           break;
         case 'notebook':
           url += `notebooks`;
@@ -145,8 +133,6 @@ export const ConceptSetActions = withCurrentWorkspace()(
           <h3 style={{...styles.conceptSetsHeader, marginTop: '1.5rem'}}>What Next?</h3>
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
-              const disabled = card.action === 'notebook' ||
-                (card.action === 'dataSet' && !environment.enableDatasetBuilder);
               return <ActionCardBase key={i} style={styles.card}>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                   <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
@@ -157,8 +143,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
                 <div>
                   <Button
                     type='primary'
-                    style={disabled ? disabledButton : styles.cardButton}
-                    disabled={disabled}
+                    style={styles.cardButton}
                     onClick={() => this.navigateTo(card.action)}>
                     {card.title}
                   </Button>

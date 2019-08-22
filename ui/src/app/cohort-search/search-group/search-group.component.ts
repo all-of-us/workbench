@@ -1,49 +1,43 @@
-import {NgRedux} from '@angular-redux/store';
-import {AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
-import {
-  CohortSearchActions,
-  CohortSearchState,
-  getTemporalGroupItems,
-  groupError
-} from 'app/cohort-search/redux';
+import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
+import {initExisting, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {generateId, mapGroup} from 'app/cohort-search/utils';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
-import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated';
-import {List} from 'immutable';
-import {Subscription} from 'rxjs/Subscription';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {DomainType, SearchRequest, TemporalMention, TemporalTime} from 'generated/fetch';
 
 @Component({
-  selector: 'app-search-group',
+  selector: 'app-list-search-group',
   templateUrl: './search-group.component.html',
   styleUrls: [
     './search-group.component.css',
     '../../styles/buttons.css',
   ]
 })
-export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
+export class SearchGroupComponent implements AfterViewInit, OnInit {
   @Input() group;
   @Input() index;
   @Input() role: keyof SearchRequest;
-  @Output() temporalLength = new EventEmitter<any>();
-  nonTemporalItems = [];
-  temporalItems = [];
-  error: boolean;
-  whichMention = [TemporalMention.ANYMENTION,
-    TemporalMention.FIRSTMENTION,
-    TemporalMention.LASTMENTION];
+  @Input() updateRequest: Function;
 
-  timeDropDown = [TemporalTime.DURINGSAMEENCOUNTERAS,
+  whichMention = [
+    TemporalMention.ANYMENTION,
+    TemporalMention.FIRSTMENTION,
+    TemporalMention.LASTMENTION
+  ];
+
+  timeDropDown = [
+    TemporalTime.DURINGSAMEENCOUNTERAS,
     TemporalTime.XDAYSAFTER,
     TemporalTime.XDAYSBEFORE,
-    TemporalTime.WITHINXDAYSOF];
+    TemporalTime.WITHINXDAYSOF
+  ];
   name = this.whichMention[0];
-  subscription: Subscription;
-  itemSubscription: Subscription;
-  readonly domainTypes = DOMAIN_TYPES;
-  readonly programTypes = PROGRAM_TYPES;
+  readonly domainTypes = LIST_DOMAIN_TYPES;
+  readonly programTypes = LIST_PROGRAM_TYPES;
   itemId: any;
-  treeType = [];
   timeForm = new FormGroup({
     inputTimeValue: new FormControl([Validators.required],
       [integerAndRangeValidator('Form', 0, 9999)]),
@@ -51,26 +45,18 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
   demoOpen = false;
   demoMenuHover = false;
   position = 'bottom-left';
+  count: number;
+  error = false;
+  loading = false;
+  preventInputCalculate = false;
+  apiCallCheck = 0;
 
-  constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
-
-  ngOnInit() {
-    this.subscription = this.ngRedux.select(groupError(this.group.get('id')))
-      .subscribe(error => {
-        this.error = error;
-      });
-
-    this.itemSubscription = this.ngRedux.select(getTemporalGroupItems(this.group.get('id')))
-      .filter(temporal => !!temporal)
-      .subscribe(i => {
-        this.treeType = i.type;
-        this.nonTemporalItems = i.nonTemporalItems;
-        this.temporalItems = i.temporalItems;
-        this.temporalLength.emit( {
-          tempLength: this.warningFlag,
-          flag: this.temporalFlag}
-          );
-      });
+  ngOnInit(): void {
+    this.timeForm.valueChanges
+      .debounceTime(500)
+      .distinctUntilChanged((p: any, n: any) => JSON.stringify(p) === JSON.stringify(n))
+      .map(({inputTimeValue}) => inputTimeValue)
+      .subscribe(this.getTimeValue);
   }
 
   ngAfterViewInit() {
@@ -80,10 +66,10 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
           this.setOverlayPosition();
         }
       });
-      const groupDiv = document.getElementById(this.group.get('id'));
+      const groupDiv = document.getElementById(this.group.id);
       ro.observe(groupDiv);
     }
-    const demoItem = document.getElementById('DEMO-' + this.index);
+    const demoItem = document.getElementById('PERSON-' + this.index);
     if (demoItem) {
       demoItem.addEventListener('mouseenter', () => {
         this.demoOpen = true;
@@ -97,71 +83,122 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-    this.itemSubscription.unsubscribe();
+  getGroupCount() {
+    try {
+      this.apiCallCheck++;
+      const localCheck = this.apiCallCheck;
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const group = mapGroup(this.group);
+      const request = <SearchRequest>{
+        includes: [],
+        excludes: [],
+        [this.role]: [group]
+      };
+      cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
+        if (localCheck === this.apiCallCheck) {
+          this.count = count;
+          this.loading = false;
+        }
+      }, (err) => {
+        console.error(err);
+        this.error = true;
+        this.loading = false;
+      });
+    } catch (error) {
+      console.error(error);
+      this.error = true;
+      this.loading = false;
+    }
   }
 
-  get typeFlag() {
-    let flag = true;
-    this.treeType.map(m => {
-      if ( m === TreeType[TreeType.PM] || m === TreeType[TreeType.DEMO] ||
-        m === TreeType[TreeType.PPI]) {
-        flag = false;
+  update = () => {
+    // timeout prevents Angular 'value changed after checked' error
+    setTimeout(() => {
+      // prevent multiple total count calls when initializing multiple groups simultaneously
+      // (on cohort edit or clone)
+      const init = initExisting.getValue();
+      if (!init || (init && this.index === 0)) {
+        this.updateRequest();
+        if (init) {
+          this.preventInputCalculate = true;
+          initExisting.next(false);
+        }
+      }
+      if (this.activeItems && (!this.temporal || !this.temporalError)) {
+        this.loading = true;
+        this.error = false;
+        this.getGroupCount();
       }
     });
-    return flag;
   }
 
-  get isRequesting() {
-    return this.group.get('isRequesting', false);
-  }
-
-  get temporalFlag() {
-    return this.group.get('temporal');
-  }
-
-  get groupId() {
-    return this.group.get('id');
-  }
-
-  get status() {
-    return this.group.get('status');
+  get activeItems() {
+    return this.group.items.some(it => it.status === 'active');
   }
 
   get items() {
-    return this.group.get('items', List());
+    return !this.group.temporal ? this.group.items
+      : this.group.items.filter(it => it.temporalGroup === 0);
+  }
+
+  get temporalItems() {
+    return !this.group.temporal ? [] : this.group.items.filter(it => it.temporalGroup === 1);
+  }
+
+  get disableTemporal() {
+    return this.items.some(it =>
+      [DomainType.PHYSICALMEASUREMENT, DomainType.PERSON, DomainType.SURVEY].includes(it.type));
+  }
+
+  get temporal() {
+    return this.group.temporal;
+  }
+
+  get groupId() {
+    return this.group.id;
+  }
+
+  get status() {
+    return this.group.status;
   }
 
   remove() {
     this.hide('pending');
     const timeoutId = setTimeout(() => {
-      this.actions.removeGroup(this.role, this.groupId);
+      this.removeGroup();
     }, 10000);
-    // For some reason Angular will delete the timeout id from scope if the inputs change, so we
-    // have to keep in the redux store
-    this.actions.setTimeoutId('groups', this.groupId, timeoutId);
+    this.setGroupProperty('timeout', timeoutId);
   }
 
   hide(status: string) {
     setTimeout(() => this.setOverlayPosition());
-    this.actions.removeGroup(this.role, this.groupId, status);
+    this.removeGroup(status);
   }
 
   enable() {
-    this.actions.enableGroup(this.group);
+    this.setGroupProperty('status', 'active');
   }
 
   undo() {
-    clearTimeout(this.group.get('timeout'));
+    clearTimeout(this.group.timeout);
     this.enable();
   }
 
+  removeGroup(status?: string): void {
+    const searchRequest = searchRequestStore.getValue();
+    if (!status) {
+      searchRequest[this.role] = searchRequest[this.role].filter(grp => grp.id !== this.group.id);
+      searchRequestStore.next(searchRequest);
+    } else {
+      this.setGroupProperty('status', status);
+    }
+  }
+
   setOverlayPosition() {
-    const groupCard = document.getElementById(this.group.get('id'));
+    const groupCard = document.getElementById(this.group.id);
     if (groupCard) {
       const {marginBottom, width, height} = window.getComputedStyle(groupCard);
-      const overlay = document.getElementById('overlay_' + this.group.get('id'));
+      const overlay = document.getElementById('overlay_' + this.group.id);
       const styles = 'width:' + width + '; height:' + height + '; margin: -'
         + (parseFloat(height) + parseFloat(marginBottom)) + 'px 0 ' + marginBottom + ';';
       overlay.setAttribute('style', styles);
@@ -169,43 +206,93 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   get mention() {
-    return this.group.get('mention');
+    return this.group.mention;
   }
 
   get time() {
-    return this.group.get('time');
+    return this.group.time;
   }
 
   get timeValue() {
-    return this.group.get('timeValue');
+    return this.group.timeValue;
   }
 
   launchWizard(criteria: any, tempGroup?: number) {
-    const itemId = this.actions.generateId('items');
-    const criteriaType = criteria.codes ? criteria.codes[0].type : criteria.type;
-    const criteriaSubtype = criteria.codes ? criteria.codes[0].subtype : criteria.subtype;
+    const {domain, type, standard} = criteria;
+    const itemId = generateId('items');
+    tempGroup = tempGroup || 0;
+    const item = this.initItem(itemId, domain, tempGroup);
     const fullTree = criteria.fullTree || false;
-    const codes = criteria.codes || false;
-    const {role, groupId} = this;
-    const context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
-    this.actions.openWizard(itemId, criteria.type, context, tempGroup);
+    const role = this.role;
+    const groupId = this.group.id;
+    const context = {item, domain, type, standard, role, groupId, itemId, fullTree, tempGroup};
+    wizardStore.next(context);
+  }
+
+  initItem(id: string, type: string, tempGroup: number) {
+    return {
+      id,
+      type,
+      searchParameters: [],
+      modifiers: [],
+      count: null,
+      temporalGroup: tempGroup,
+      status: 'active'
+    };
+  }
+
+  setGroupProperty(property: string, value: any) {
+    const searchRequest = searchRequestStore.getValue();
+    searchRequest[this.role] = searchRequest[this.role].map(grp => {
+      if (grp.id === this.group.id) {
+        grp[property] = value;
+      }
+      return grp;
+    });
+    searchRequestStore.next(searchRequest);
+    this.updateRequest();
   }
 
   getTemporal(e) {
-    this.actions.updateTemporal(e.target.checked, this.groupId, this.role);
+    this.setGroupProperty('temporal', e.target.checked);
+    if ((!e.target.checked && this.activeItems) || (e.target.checked && !this.temporalError)) {
+      this.loading = true;
+      this.error = false;
+      this.getGroupCount();
+    }
   }
 
   getMentionTitle(mentionName) {
-    this.actions.updateWhichMention(mentionName, this.groupId, this.role);
+    if (mentionName !== this.group.mention) {
+      this.setGroupProperty('mention', mentionName);
+      this.calculateTemporal();
+    }
   }
 
   getTimeTitle(timeName) {
-    this.actions.updateTemporalTime(timeName, this.groupId, this.role );
+    if (timeName !== this.group.time) {
+      // prevents duplicate group count calls if switching from TemporalTime.DURINGSAMEENCOUNTERAS
+      this.preventInputCalculate = this.group.time === TemporalTime.DURINGSAMEENCOUNTERAS;
+      this.setGroupProperty('time', timeName);
+      this.calculateTemporal();
+    }
   }
 
-  getTimeValue(e) {
-    if (e.target.value >= 0) {
-      this.actions.updateTemporalTimeValue(e.target.value, this.groupId, this.role);
+  getTimeValue = (value: number) => {
+    // prevents duplicate group count calls if changes is triggered by rendering of input
+    if (!this.preventInputCalculate) {
+      this.setGroupProperty('timeValue', value);
+      this.calculateTemporal();
+    } else {
+      this.preventInputCalculate = false;
+    }
+  }
+
+  calculateTemporal() {
+    if (!this.temporalError) {
+      this.loading = true;
+      this.error = false;
+      this.getGroupCount();
     }
   }
 
@@ -228,21 +315,24 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  get groupDiasbleFlag() {
-    const itemLength = this.group.get('items', List).toJS().length;
-    if (!this.temporalFlag && !itemLength ) {
-      return true;
-    } else {
-      return false;
-    }
+  get groupDisableFlag() {
+    return !this.temporal && !this.group.items.length;
   }
 
-  get warningFlag() {
-    const tempWarningFlag =
-      !this.temporalItems.filter(t => t.get('status') === 'active').length;
-    const nonTempWarningFlag =
-      !this.nonTemporalItems.filter(t => t.get('status') === 'active').length;
-    return tempWarningFlag || nonTempWarningFlag;
+  get temporalError() {
+    const counts = this.group.items.reduce((acc, it) => {
+      if (it.status === 'active') {
+        acc[it.temporalGroup]++;
+      }
+      return acc;
+    }, [0, 0]);
+    const inputError = this.group.time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
+      (this.group.timeValue === null || this.group.timeValue < 0);
+    return counts.includes(0) || inputError;
+  }
+
+  get validateInput() {
+    return this.group.temporal && this.group.time !== TemporalTime.DURINGSAMEENCOUNTERAS;
   }
 
   setMenuPosition() {

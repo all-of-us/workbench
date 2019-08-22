@@ -8,7 +8,6 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {environment} from 'environments/environment';
 import {Cohort} from 'generated/fetch';
 import * as React from 'react';
 
@@ -47,23 +46,12 @@ const styles = reactStyles({
   }
 });
 
-const disabledButton = {
-  ...styles.cardButton,
-  cursor: 'not-allowed'
-};
-
 const actionCards = [
   {
     title: 'Create Review Sets',
     description: `The review set feature allows you to select a subset of your cohort to review
        participants row-level data and add notes and annotations.`,
     action: 'review'
-  },
-  {
-    title: 'Export to a Notebook',
-    description: `Data can be exported to a cloud-based Jupyter notebook for analysis using R or
-       Python programming language.`,
-    action: 'notebook'
   },
   {
     title: 'Create a Data Set',
@@ -101,7 +89,7 @@ const CohortActions = withCurrentWorkspace()(
               currentCohortStore.next(c);
               this.setState({cohort: c, cohortLoading: false});
             } else {
-              navigate(['workspaces', namespace, id, 'cohorts']);
+              navigate(['workspaces', namespace, id, 'data', 'cohorts']);
             }
           });
         }
@@ -114,10 +102,10 @@ const CohortActions = withCurrentWorkspace()(
       let url = `/workspaces/${namespace}/${id}/`;
       switch (action) {
         case 'cohort':
-          url += `cohorts/build?cohortId=${cohort.id}`;
+          url += `data/cohorts/build?cohortId=${cohort.id}`;
           break;
         case 'review':
-          url += `cohorts/${cohort.id}/review`;
+          url += `data/cohorts/${cohort.id}/review`;
           break;
         case 'notebook':
           url += 'notebooks';
@@ -147,8 +135,6 @@ const CohortActions = withCurrentWorkspace()(
           <h3 style={{...styles.cohortsHeader, marginTop: '1.5rem'}}>What Next?</h3>
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
-              const disabled = card.action === 'notebook' ||
-                (card.action === 'dataSet' && !environment.enableDatasetBuilder);
               return <ActionCardBase key={i} style={styles.card}>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                   <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
@@ -159,8 +145,7 @@ const CohortActions = withCurrentWorkspace()(
                 <div>
                   <Button
                     type='primary'
-                    style={disabled ? disabledButton : styles.cardButton}
-                    disabled={disabled}
+                    style={styles.cardButton}
                     onClick={() => this.navigateTo(card.action)}>
                     {card.title}
                   </Button>

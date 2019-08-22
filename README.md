@@ -8,7 +8,7 @@ System requirements:
 
   * [Docker CE](https://www.docker.com/community-edition)
     * Docker must be installed to build and run code (For Google workstations, see http://go/installdocker).
-    * __IMPORTANT__: be sure to allocate at least 6GB of memory to the Docker Engine. See
+    * __IMPORTANT__: be sure to allocate 12GB of memory (if possible) and 2GB swap to the Docker Engine. See
 See https://docs.docker.com/docker-for-mac/#advanced for screenshots and instructions for Mac.
   * [Ruby](https://www.ruby-lang.org/en/downloads/)
     * Our team's dev/ops scripts are written in Ruby. Most common operations are launched via the project.rb script at the root of each sub-project.

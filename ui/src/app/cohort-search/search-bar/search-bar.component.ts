@@ -1,34 +1,22 @@
-import {NgRedux, select} from '@angular-redux/store';
-import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {
-  activeCriteriaSubtype,
-  activeCriteriaType,
-  autocompleteError,
-  autocompleteOptions,
-  CohortSearchActions,
-  CohortSearchState,
-  ingredientsForBrand,
-  isAutocompleteLoading,
-  subtreeSelected,
-} from 'app/cohort-search/redux';
-import {TreeSubType, TreeType} from 'generated';
-import {Observable} from 'rxjs/Observable';
+import {autocompleteStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {CriteriaType, DomainType} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
-const trigger = 2;
+const trigger = 3;
 
 @Component({
-  selector: 'app-search-bar',
+  selector: 'app-list-search-bar',
   templateUrl: './search-bar.component.html',
   styleUrls: ['./search-bar.component.css']
 })
 export class SearchBarComponent implements OnInit, OnDestroy {
-  @select(activeCriteriaSubtype) subtype$: Observable<string>;
-  @select(activeCriteriaType) type$: Observable<string>;
-  @select(subtreeSelected) selected$: Observable<any>;
-  @Input() _type;
-  searchTerm: FormControl = new FormControl('');
+  @Input() node: any;
+  @Output() ingredients = new EventEmitter<any>();
+  searchTerm: FormControl = new FormControl();
   typedTerm: string;
   options = [];
   loading = false;
@@ -36,10 +24,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   optionSelected = false;
   error = false;
   subscription: Subscription;
-  ingredientList = [];
   highlightedOption: number;
   subtype: string;
-  codes: any;
 
   @ViewChild('searchBar') searchBar;
   @HostListener('document:mouseup', ['$event.target'])
@@ -50,114 +36,57 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(
-    private ngRedux: NgRedux<CohortSearchState>,
-    private actions: CohortSearchActions
-  ) {}
-
   ngOnInit() {
-    this.codes = this.ngRedux.getState().getIn(['wizard', 'codes']);
-    const errorSub = this.ngRedux
-      .select(autocompleteError())
-      .map(err => !(err === null || err === undefined))
-      .subscribe(err => this.error = err);
-
-    const loadingSub = this.ngRedux
-      .select(isAutocompleteLoading())
-      .subscribe(loading => this.loading = loading);
-
-    const optionsSub = this.ngRedux
-      .select(autocompleteOptions())
-      .subscribe(options => {
-        if (this.triggerSearch) {
-          this.options = [];
-          const optionNames = [];
-          if (options !== null) {
-            options.forEach(option => {
-              this.highlightedOption = null;
-              if (optionNames.indexOf(option.name) === -1) {
-                optionNames.push(option.name);
-                this.options.push(option);
-              }
-            });
-          }
-          this.noResults = !this.optionSelected && !this.options.length;
-        }
-      });
-
-    const ingredientSub = this.ngRedux
-      .select(ingredientsForBrand())
-      .subscribe(ingredients => {
-        this.ingredientList = [];
-        const ids = [];
-        let path = [];
-        ingredients.forEach(item => {
-          if (!this.ingredientList.includes(item.name)) {
-            this.ingredientList.push(item.name);
-            ids.push(item.id);
-            path = path.concat(item.path.split('.'));
-          }
-        });
-        if (this.ingredientList.length) {
-          this.actions.setCriteriaSearchTerms(this.ingredientList);
-          this.actions.loadCriteriaSubtree(this._type, TreeSubType[TreeSubType.BRAND], ids, path);
-        }
-      });
-
-    const typeSub = this.type$
-      .subscribe(subtype => {
-        this.searchTerm.setValue('');
-      });
-
-    const subtypeSub = this.subtype$
-      .subscribe(subtype => {
-        this.subtype = subtype;
-      });
-
-    const inputSub = this.searchTerm.valueChanges
+    this.subscription = autocompleteStore.subscribe(searchTerm => {
+      this.searchTerm.setValue(searchTerm, {emitEvent: false});
+    });
+    this.subscription.add(this.searchTerm.valueChanges
       .debounceTime(300)
       .distinctUntilChanged()
       .subscribe( value => {
-        if (value.length >= trigger) {
-          this.inputChange();
+        if (this.node.domainId === DomainType.PHYSICALMEASUREMENT) {
+          autocompleteStore.next(this.searchTerm.value);
         } else {
-          if (!this.optionSelected) {
-            this.actions.setCriteriaSearchTerms([]);
+          if (value.length >= trigger) {
+            this.inputChange();
+          } else {
+            this.options = [];
+            this.noResults = false;
           }
-          this.options = [];
-          this.noResults = false;
         }
-      });
-
-    this.subscription = errorSub;
-    this.subscription.add(loadingSub);
-    this.subscription.add(optionsSub);
-    this.subscription.add(ingredientSub);
-    this.subscription.add(typeSub);
-    this.subscription.add(subtypeSub);
-    this.subscription.add(inputSub);
+      })
+    );
   }
 
   ngOnDestroy() {
-    this.options = [];
     this.subscription.unsubscribe();
   }
 
   inputChange() {
     this.typedTerm = this.searchTerm.value;
-    if (this._type === TreeType[TreeType.VISIT] || this._type === TreeType[TreeType.PM]) {
-      this.actions.setCriteriaSearchTerms([this.searchTerm.value]);
-    } else {
-      this.optionSelected = false;
-      this.ingredientList = [];
-      this.noResults = false;
-      const subtype = this.codes ? this.subtype : null;
-      this.actions.fetchAutocompleteOptions(this._type, subtype, this.searchTerm.value);
-    }
-  }
-
-  get triggerSearch() {
-    return this.searchTerm.value.length >= trigger;
+    this.loading = true;
+    this.optionSelected = false;
+    this.noResults = false;
+    const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
+    const {domainId, isStandard, type} = this.node;
+    const apiCall = domainId === DomainType.DRUG
+      ? cohortBuilderApi().getDrugBrandOrIngredientByValue(cdrId, this.searchTerm.value)
+      : cohortBuilderApi().getCriteriaAutoComplete(
+        cdrId, domainId, this.searchTerm.value, type, isStandard
+      );
+    apiCall.then(resp => {
+      this.options = [];
+      this.noResults = resp.items.length === 0;
+      const optionNames: Array<string> = [];
+      this.highlightedOption = null;
+      resp.items.forEach(option => {
+        if (optionNames.indexOf(option.name) === -1) {
+          optionNames.push(option.name);
+          this.options.push(option);
+        }
+      });
+      this.loading = false;
+    }, (err) => this.error = err);
   }
 
   get showOverflow() {
@@ -169,13 +98,24 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.optionSelected = true;
       this.searchTerm.reset('');
       this.searchTerm.setValue(option.name, {emitEvent: false});
-      if (option.subtype === TreeSubType[TreeSubType.BRAND]) {
-        this.actions.fetchIngredientsForBrand(option.conceptId);
+      if (option.type === CriteriaType[CriteriaType.BRAND]) {
+        const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
+        cohortBuilderApi().getDrugIngredientByConceptId(cdrId, option.conceptId)
+          .then(resp => {
+            if (resp.items.length) {
+              const ingredients = resp.items.map(it => it.name);
+              this.ingredients.emit(ingredients);
+              // just grabbing the first one on the list for now
+              const {path, id} = resp.items[0];
+              subtreePathStore.next(path.split('.'));
+              subtreeSelectedStore.next(id);
+            }
+          });
       } else {
-        this.actions.setCriteriaSearchTerms([option.name]);
-        const ids = [option.id];
-        const path = option.path.split('.');
-        this.actions.loadCriteriaSubtree(this._type, option.subtype, ids, path);
+        this.ingredients.emit(null);
+        autocompleteStore.next(option.name);
+        subtreePathStore.next(option.path.split('.'));
+        subtreeSelectedStore.next(option.id);
       }
     }
   }

@@ -25,26 +25,21 @@ public class ParticipantCriteria {
   private final SearchRequest searchRequest;
   private final Set<Long> participantIdsToInclude;
   private final Set<Long> participantIdsToExclude;
-  // TODO:Remove freemabd once universal search is in place this can be removed.
-  private boolean enableListSearch;
 
-  public ParticipantCriteria(SearchRequest searchRequest, boolean enableListSearch) {
-    this(searchRequest, NO_PARTICIPANTS_TO_EXCLUDE, enableListSearch);
+  public ParticipantCriteria(SearchRequest searchRequest) {
+    this(searchRequest, NO_PARTICIPANTS_TO_EXCLUDE);
   }
 
-  public ParticipantCriteria(
-      SearchRequest searchRequest, Set<Long> participantIdsToExclude, boolean enableListSearch) {
+  public ParticipantCriteria(SearchRequest searchRequest, Set<Long> participantIdsToExclude) {
     this.searchRequest = searchRequest;
     this.participantIdsToExclude = participantIdsToExclude;
     this.participantIdsToInclude = null;
-    this.enableListSearch = enableListSearch;
   }
 
   public ParticipantCriteria(Set<Long> participantIdsToInclude) {
     this.participantIdsToInclude = participantIdsToInclude;
     this.searchRequest = null;
     this.participantIdsToExclude = null;
-    this.enableListSearch = false;
   }
 
   @Nullable
@@ -60,10 +55,6 @@ public class ParticipantCriteria {
   @Nullable
   public Set<Long> getParticipantIdsToExclude() {
     return participantIdsToExclude;
-  }
-
-  public boolean isEnableListSearch() {
-    return this.enableListSearch;
   }
 
   @Override

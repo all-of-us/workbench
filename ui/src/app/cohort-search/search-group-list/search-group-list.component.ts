@@ -1,13 +1,11 @@
-import {select} from '@angular-redux/store';
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {List} from 'immutable';
-import {Observable} from 'rxjs/Observable';
+import {Component, Input, OnInit} from '@angular/core';
+import {SearchRequest} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
 
-import {SearchRequest} from 'generated';
+import {searchRequestStore} from 'app/cohort-search/search-state.service';
 
 @Component({
-  selector: 'app-search-group-list',
+  selector: 'app-list-search-group-list',
   templateUrl: './search-group-list.component.html',
   styleUrls: [
     './search-group-list.component.css',
@@ -15,16 +13,16 @@ import {SearchRequest} from 'generated';
 })
 export class SearchGroupListComponent implements OnInit {
   @Input() role: keyof SearchRequest;
-  @Input() groups$: Observable<List<any>>;
-  @Input() index: number;
-  @Output() tempLength = new EventEmitter<boolean>();
+  @Input() groups: Array<any>;
+  @Input() updateRequest: Function;
 
-  @select(s => s.get('initShowChart', true)) initShowChart$: Observable<boolean>;
-  listSize: number;
+  index = 0;
   subscription: Subscription;
 
   ngOnInit(): void {
-    this.subscription = this.groups$.subscribe(groups => this.listSize = groups.size);
+    if (this.role === 'excludes') {
+      searchRequestStore.subscribe(sr => this.index = sr.includes.length + 1);
+    }
   }
 
   get title() {
@@ -33,9 +31,6 @@ export class SearchGroupListComponent implements OnInit {
   }
 
   get emptyIndex() {
-    return this.listSize + this.index + 1;
-  }
-  getTemporalLength(e) {
-    this.tempLength.emit(e);
+    return this.groups.length + this.index + 1;
   }
 }

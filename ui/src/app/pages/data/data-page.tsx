@@ -8,7 +8,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {ResourceCard} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {cohortReviewApi, cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
@@ -68,34 +68,25 @@ enum Tabs {
   SHOWALL = 'SHOW ALL',
   DATASETS = 'DATA SETS',
   COHORTS = 'COHORTS',
+  COHORTREVIEWS = 'COHORT REVIEWS',
   CONCEPTSETS = 'CONCEPT SETS'
 }
 
 const descriptions = {
-  data: `The Data Tab is the gateway to all Workbench tools and
-  All of Us Research data that will help you complete your research project.
-  Here, you can build a  cohorts of participants, select concept sets of
-  interest and build analysis-ready tables from the two called datasets.`,
-  datasets: `Datasets are analysis-ready tables that can be exported to
-  analysis tools such as Notebooks. Users can build and preview a dataset
-  for one or more cohorts by selecting the desired concept sets and values
-  for the cohorts. `,
-  cohorts: `A “Cohort” is a group of participants that researchers are
-  interested in. The cohort builder allows you to create and review cohorts
-  and annotate participants in a researcher’s study group.`,
-  conceptSets: `Concepts describe information in a patient’s medical record,
-  such as a condition, a  prescription they are taking or their vital signs.
-  Subject areas such as conditions, drugs, measurements etc. are called “domains”.
-  Users can search for and save collections of concepts from a particular domain
-  as a “Concept set” and then  use concept sets and cohorts to create a dataset,
-  which can be used for analysis.`
+  datasets: `A data set is a table containing data about a Cohort that can
+  be exported for analysis. `,
+  cohorts: `A cohort is a group of participants based on specific criteria.`,
 };
+
+const cohortImg = '/assets/images/cohort-diagram.svg';
+
+const dataSetImg = '/assets/images/dataset-diagram.svg';
 
 export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {activeTab: Tabs, resourceList: RecentResource[], isLoading: boolean,
-    creatingConceptSet: boolean, existingDataSetName: string[],
-    existingCohortName: string[], existingConceptSetName: string[]}> {
+    creatingConceptSet: boolean, existingDataSetName: string[], existingCohortName: string[],
+    existingCohortReviewName: string[], existingConceptSetName: string[]}> {
 
   constructor(props) {
     super(props);
@@ -105,6 +96,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       isLoading: true,
       creatingConceptSet: false,
       existingCohortName: [],
+      existingCohortReviewName: [],
       existingConceptSetName: [],
       existingDataSetName: []
     };
@@ -121,8 +113,9 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       this.setState({
         isLoading: true
       });
-      const [cohorts, conceptSets, dataSets] = await Promise.all([
+      const [cohorts, cohortReviews, conceptSets, dataSets] = await Promise.all([
         cohortsApi().getCohortsInWorkspace(namespace, id),
+        cohortReviewApi().getCohortReviewsInWorkspace(namespace, id),
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
         dataSetApi().getDataSetsInWorkspace(namespace, id)
       ]);
@@ -132,12 +125,15 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           .filter(conceptSet => conceptSet.domain !== Domain.PERSON);
       this.setState({
         existingCohortName: cohorts.items.map(cohort => cohort.name),
+        existingCohortReviewName: cohortReviews.items.map(review => review.cohortName),
         existingConceptSetName: conceptSets.items.map(conceptSet => conceptSet.name),
         existingDataSetName: dataSets.items.map(dataSet => dataSet.name)
       });
       let list: RecentResource[] = [];
       list = list.concat(convertToResources(cohorts.items, namespace,
         id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.COHORT));
+      list = list.concat(convertToResources(cohortReviews.items, namespace,
+        id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.COHORT_REVIEW));
       list = list.concat(convertToResources(conceptSets.items, namespace,
         id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.CONCEPT_SET));
       list = list.concat(convertToResources(dataSets.items, namespace,
@@ -194,6 +190,8 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         return true;
       } else if (activeTab === Tabs.COHORTS) {
         return resource.cohort;
+      } else if (activeTab === Tabs.COHORTREVIEWS) {
+        return resource.cohortReview;
       } else if (activeTab === Tabs.CONCEPTSETS) {
         return resource.conceptSet;
       } else if (activeTab === Tabs.DATASETS) {
@@ -201,15 +199,13 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       }
     });
     return <React.Fragment>
-      <FadeBox style={{marginTop: '1rem'}}>
-        <h2 style={{marginTop: 0}}>Data</h2>
-        <div style={{color: colors.primary, fontSize: '14px'}}>{descriptions.data}</div>
+      <div style={{paddingLeft: '1.5rem'}}>
         <div style={styles.cardButtonArea}>
           <TooltipTrigger content={!writePermission &&
           `Write permission required to create cohorts`} side='top'>
             <CardButton style={styles.resourceTypeButton} disabled={!writePermission}
                         onClick={() => {
-                          navigate(['workspaces', namespace, id,  'cohorts', 'build']);
+                          navigate(['workspaces', namespace, id, 'data', 'cohorts', 'build']);
                         }}>
               <div style={styles.cardHeader}>
                 <h2 style={styles.cardHeaderText(!writePermission)}>Cohorts</h2>
@@ -218,21 +214,10 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <div style={styles.cardText}>
                 {descriptions.cohorts}
               </div>
-            </CardButton>
-          </TooltipTrigger>
-          <TooltipTrigger content={!writePermission &&
-          `Write permission required to create concept sets`} side='top'>
-            <CardButton style={styles.resourceTypeButton}
-                        disabled={!writePermission}
-                        onClick={() => {
-                          navigate(['workspaces', namespace, id,  'concepts']);
-                        }}>
-              <div style={styles.cardHeader}>
-                <h2 style={styles.cardHeaderText(!writePermission)}>Concept Sets</h2>
-                <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
-              </div>
-              <div style={styles.cardText}>
-                {descriptions.conceptSets}
+              {/*Because the container can stretch based on window size, but the height
+              can't we set a max width to cap the height based on aspect ratio*/}
+              <div style={{width: '100%', maxWidth: '425px', paddingTop: '1rem'}}>
+                <img src={cohortImg}/>
               </div>
             </CardButton>
           </TooltipTrigger>
@@ -245,16 +230,21 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
                 navigate(['workspaces', namespace, id, 'data', 'data-sets']);
               }}>
               <div style={styles.cardHeader}>
-                <h2 style={styles.cardHeaderText(!writePermission)}>Datasets</h2>
+                <h2 style={styles.cardHeaderText(!writePermission)}>Data Sets</h2>
                 <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
               </div>
               <div style={styles.cardText}>
                 {descriptions.datasets}
               </div>
+              {/*Because the container can stretch based on window size, but the height
+               can't we set a max width to cap the height based on aspect ratio*/}
+              <div style={{width: '100%', maxWidth: '425px', paddingTop: '1.5rem'}}>
+                <img src={dataSetImg}/>
+              </div>
             </CardButton>
           </TooltipTrigger>
         </div>
-      </FadeBox>
+      </div>
       <FadeBox style={{marginTop: '1rem'}}>
         <div style={styles.tabContainer}>
           <h2 style={{margin: 0,
@@ -271,6 +261,11 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               activeTab: Tabs.COHORTS
             });
           }} data-test-id='view-only-cohorts'>Cohorts</TabButton>
+          <TabButton active={activeTab === Tabs.COHORTREVIEWS} onClick={() => {
+            this.setState({
+              activeTab: Tabs.COHORTREVIEWS
+            });
+          }} data-test-id='view-only-cohort-reviews'>Cohort Reviews</TabButton>
           <TabButton active={activeTab === Tabs.CONCEPTSETS} onClick={() => {
             this.setState({
               activeTab: Tabs.CONCEPTSETS

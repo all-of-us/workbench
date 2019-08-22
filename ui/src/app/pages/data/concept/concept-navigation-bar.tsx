@@ -55,14 +55,14 @@ export const ConceptNavigationBar: React.FunctionComponent<
   ({ns, wsId, showConcepts}) => {
     return <div style={{display: 'flex', flexDirection: 'row'}}>
       <Clickable style={showConcepts ? activatedStyles.headerActivated : styles.headerLinks}
-                 onClick={() => navigate(['workspaces', ns, wsId, 'concepts'])}
+                 onClick={() => navigate(['workspaces', ns, wsId, 'data', 'concepts'])}
                  data-test-id='concepts-link'>
         Concepts
       </Clickable>
       <Clickable
         style={{...(showConcepts ? styles.headerLinks : activatedStyles.headerActivated),
           marginLeft: '1rem'}}
-        onClick={() => navigate(['workspaces', ns, wsId, 'concepts', 'sets'])}
+        onClick={() => navigate(['workspaces', ns, wsId, 'data', 'concepts', 'sets'])}
         data-test-id='concept-sets-link'>
         Concept Sets
       </Clickable>

@@ -23,11 +23,8 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
-import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -65,7 +62,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({
-  QueryBuilderFactory.class,
   BigQueryService.class,
   CloudStorageServiceImpl.class,
   CohortQueryBuilder.class,
@@ -89,13 +85,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CdrVersionDao cdrVersionDao;
 
-  @Autowired private CriteriaDao criteriaDao;
-
   @Autowired private CBCriteriaDao cbCriteriaDao;
 
   @Autowired private CdrVersionService cdrVersionService;
-
-  @Autowired private CriteriaAttributeDao criteriaAttributeDao;
 
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
 
@@ -109,8 +101,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return Arrays.asList(
-        "person", "death", "criteria", "criteria_ancestor", "search_person", "search_all_domains");
+    return Arrays.asList("person", "death", "cb_search_person", "cb_search_all_events");
   }
 
   @Override
@@ -123,8 +114,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.elasticsearch = new WorkbenchConfig.ElasticsearchConfig();
     testConfig.elasticsearch.enableElasticsearchBackend = false;
-    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
-    testConfig.cohortbuilder.enableListSearch = true;
     when(configProvider.get()).thenReturn(testConfig);
 
     ElasticSearchService elasticSearchService =
@@ -134,9 +123,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new CohortBuilderController(
             bigQueryService,
             cohortQueryBuilder,
-            criteriaDao,
             cbCriteriaDao,
-            criteriaAttributeDao,
             cbCriteriaAttributeDao,
             cdrVersionDao,
             genderRaceEthnicityConceptProvider,
@@ -880,6 +867,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .group(true)
             .ancestorData(true)
             .standard(true)
+            .selectable(true)
             .conceptId("21600932");
     saveCriteriaWithPath("0", drugCriteria1);
     CBCriteria drugCriteria2 =
@@ -2336,17 +2324,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .parentId(0)
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.SURVEY.toString())
             .group(true)
             .selectable(true)
-            .standard(false);
+            .standard(false)
+            .conceptId("22");
     saveCriteriaWithPath("0", surveyNode);
     CBCriteria questionNode =
         new CBCriteria()
             .parentId(surveyNode.getId())
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.QUESTION.toString())
             .group(true)
             .selectable(true)
             .standard(false)
@@ -2359,7 +2348,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .parentId(questionNode.getId())
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.ANSWER.toString())
             .group(false)
             .selectable(true)
             .standard(false)
@@ -2372,10 +2361,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.SURVEY.toString())
             .ancestorData(false)
             .standard(false)
-            .group(true);
+            .group(true)
+            .conceptId(22L);
     SearchRequest searchRequest =
         createSearchRequests(ppiSurvey.getType(), Arrays.asList(ppiSurvey), new ArrayList<>());
     assertParticipants(
@@ -2386,7 +2376,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.QUESTION.toString())
             .ancestorData(false)
             .standard(false)
             .group(true)
@@ -2404,7 +2394,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.ANSWER.toString())
             .ancestorData(false)
             .standard(false)
             .group(false)
@@ -2427,7 +2417,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.ANSWER.toString())
             .ancestorData(false)
             .standard(false)
             .group(false)

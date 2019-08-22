@@ -1,107 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <!-- Use a liquibase user with permissions to change the schema -->
-  <preConditions>
-    <runningAs username="liquibase"/>
-  </preConditions>
-  <include file="changelog/db.changelog-1.xml"/>
-  <include file="changelog/db.changelog-2.xml"/>
-  <include file="changelog/db.changelog-3.xml"/>
-  <include file="changelog/db.changelog-4.xml"/>
-  <include file="changelog/db.changelog-5-authority.xml"/>
-  <include file="changelog/db.changelog-6.xml"/>
-  <include file="changelog/db.changelog-7.xml"/>
-  <include file="changelog/db.changelog-8-ws-index.xml"/>
-  <include file="changelog/db.changelog-9-ws-index-fix.xml"/>
-  <include file="changelog/db.changelog-10-userworkspace.xml"/>
-  <include file="changelog/db.changelog-11-version.xml"/>
-  <include file="changelog/db.changelog-12.xml"/>
-  <include file="changelog/db.changelog-13.xml"/>
-  <include file="changelog/db.changelog-14.xml"/>
-  <include file="changelog/db.changelog-15-blockscore.xml"/>
-  <include file="changelog/db.changelog-16.xml"/>
-  <include file="changelog/db.changelog-17.xml"/>
-  <include file="changelog/db.changelog-18.xml"/>
-  <include file="changelog/db.changelog-19.xml"/>
-  <include file="changelog/db.changelog-20-disable-users.xml"/>
-  <include file="changelog/db.changelog-21.xml"/>
-  <include file="changelog/db.changelog-22-email-verification-status.xml"/>
-  <include file="changelog/db.changelog-23.xml"/>
-  <include file="changelog/db.changelog-24-email-verification-status-default.xml"/>
-  <include file="changelog/db.changelog-25.xml"/>
-  <include file="changelog/db.changelog-26-billing-status.xml"/>
-  <include file="changelog/db.changelog-27-underserved-populations.xml"/>
-  <include file="changelog/db.changelog-28-default-rp-values.xml"/>
-  <include file="changelog/db.changelog-29-admin-logging.xml"/>
-  <include file="changelog/db.changelog-30-profile-text-fields-extension.xml"/>
-  <include file="changelog/db.changelog-31-requested-id-verification.xml"/>
-  <include file="changelog/db.changelog-32-firecloud-uuid.xml"/>
-  <include file="changelog/db.changelog-33-uniq-fc-uuid.xml"/>
-  <include file="changelog/db.changelog-34-update-fk-rules.xml"/>
-  <include file="changelog/db.changelog-35-another-fk-update.xml"/>
-  <include file="changelog/db.changelog-36.xml"/>
-  <include file="changelog/db.changelog-37-add-two-factor-column.xml"/>
-  <include file="changelog/db.changelog-38.xml"/>
-  <include file="changelog/db.changelog-39-add-cluster-retry-number.xml"/>
-  <include file="changelog/db.changelog-40-remove-blockscore.xml"/>
-  <include file="changelog/db.changelog-41-billing-project-retry.xml"/>
-  <include file="changelog/db.changelog-42-rename-billing-project-retries.xml"/>
-  <include file="changelog/db.changelog-43-add-page-visit.xml"/>
-  <include file="changelog/db.changelog-44-user-recent-resource.xml"/>
-  <include file="changelog/db.changelog-45-concept-set.xml"/>
-  <include file="changelog/db.changelog-46-add-concept-set-count.xml"/>
-  <include file="changelog/db.changelog-47-request-id-verification-time.xml"/>
-  <include file="changelog/db.changelog-48-default-cdr.xml"/>
-  <include file="changelog/db.changelog-49-add-concept-set-to-user-recent-resource.xml"/>
-  <include file="changelog/db.changelog-50.xml"/>
-  <include file="changelog/db.changelog-51-user-profile-updates.xml"/>
-  <include file="changelog/db.changelog-52-user-nonce.xml"/>
-  <include file="changelog/db.changelog-53-research-purpose-type.xml"/>
-  <include file="changelog/db.changelog-54-update-data-access-level.xml"/>
-  <include file="changelog/db.changelog-55-moodle-training.xml"/>
-  <include file="changelog/db.changelog-56-update-email-lowercase.xml"/>
-  <include file="changelog/db.changelog-57-add-era-commons-entries.xml"/>
-  <include file="changelog/db.changelog-58-update-access-modules.xml"/>
-  <include file="changelog/db.changelog-59-cluster-config-default.xml"/>
-  <include file="changelog/db.changelog-60-backfill-bypass.xml"/>
-  <include file="changelog/db.changelog-61-backfill-beta-bypass.xml"/>
-  <include file="changelog/db.changelog-62.xml"/>
-  <include file="changelog/db.changelog-63.xml"/>
-  <include file="changelog/db.changelog-64.xml"/>
-  <include file="changelog/db.changelog-65.xml"/>
-  <include file="changelog/db.changelog-66.xml"/>
-  <include file="changelog/db.changelog-67-compliance-training-expiration.xml"/>
-  <include file="changelog/db.changelog-68-drop-training-completion-time-col.xml"/>
-  <include file="changelog/db.changelog-69-replace-idv-with-beta-access.xml"/>
-  <include file="changelog/db.changelog-70-data-set.xml"/>
-  <include file="changelog/db.changelog-71-remove-2fa-enabled.xml"/>
-  <include file="changelog/db.changelog-72-all-participants-data-set.xml"/>
-  <include file="changelog/db.changelog-73-add-billing_project_buffer_entry.xml"/>
-  <include file="changelog/db.changelog-74-add-last_sync_request_time-billing-buffer.xml"/>
-  <include file="changelog/db.changelog-75-workspace-deletion.xml"/>
-  <include file="changelog/db.changelog-76-add-assigned_user-billing-buffer.xml"/>
-  <include file="changelog/db.changelog-77-data-set-last-modified.xml"/>
-  <include file="changelog/db.changelog-78-data-set-etag.xml"/>
-  <include file="changelog/db.changelog-79-drop-fc-index.xml"/>
-  <include file="changelog/db.changelog-80-research-purpose-refactor.xml"/>
-  <include file="changelog/db.changelog-81-add-billing_migration_status-workspace.xml"/>
-  <include file="changelog/db.changelog-82-add-cascade-delete-admin-actions-after-user-delete.xml"/>
-  <include file="changelog/db.changelog-83-other-population.xml"/>
-  <include file="changelog/db.changelog-84-add-last_status_changed_time.xml"/>
-  <include file="changelog/db.changelog-85-drop-user_workspace.xml"/>
-  <include file="changelog/db.changelog-86-drop-tos.xml"/>
-  <include file="changelog/db.changelog-87-add-survey-concept-set.xml"/>
-  <include file="changelog/db.changelog-88-published-workspaces.xml"/>
-  <include file="changelog/db.changelog-89-add-data-use-agreement-signed-version.xml"/>
+    <!-- Use a liquibase user with permissions to change the schema -->
+    <preConditions>
+        <runningAs username="liquibase"/>
+    </preConditions>
+    <include file="changelog/db.changelog-1.xml"/>
+    <include file="changelog/db.changelog-2.xml"/>
+    <include file="changelog/db.changelog-3.xml"/>
+    <include file="changelog/db.changelog-4.xml"/>
+    <include file="changelog/db.changelog-5-authority.xml"/>
+    <include file="changelog/db.changelog-6.xml"/>
+    <include file="changelog/db.changelog-7.xml"/>
+    <include file="changelog/db.changelog-8-ws-index.xml"/>
+    <include file="changelog/db.changelog-9-ws-index-fix.xml"/>
+    <include file="changelog/db.changelog-10-userworkspace.xml"/>
+    <include file="changelog/db.changelog-11-version.xml"/>
+    <include file="changelog/db.changelog-12.xml"/>
+    <include file="changelog/db.changelog-13.xml"/>
+    <include file="changelog/db.changelog-14.xml"/>
+    <include file="changelog/db.changelog-15-blockscore.xml"/>
+    <include file="changelog/db.changelog-16.xml"/>
+    <include file="changelog/db.changelog-17.xml"/>
+    <include file="changelog/db.changelog-18.xml"/>
+    <include file="changelog/db.changelog-19.xml"/>
+    <include file="changelog/db.changelog-20-disable-users.xml"/>
+    <include file="changelog/db.changelog-21.xml"/>
+    <include file="changelog/db.changelog-22-email-verification-status.xml"/>
+    <include file="changelog/db.changelog-23.xml"/>
+    <include file="changelog/db.changelog-24-email-verification-status-default.xml"/>
+    <include file="changelog/db.changelog-25.xml"/>
+    <include file="changelog/db.changelog-26-billing-status.xml"/>
+    <include file="changelog/db.changelog-27-underserved-populations.xml"/>
+    <include file="changelog/db.changelog-28-default-rp-values.xml"/>
+    <include file="changelog/db.changelog-29-admin-logging.xml"/>
+    <include file="changelog/db.changelog-30-profile-text-fields-extension.xml"/>
+    <include file="changelog/db.changelog-31-requested-id-verification.xml"/>
+    <include file="changelog/db.changelog-32-firecloud-uuid.xml"/>
+    <include file="changelog/db.changelog-33-uniq-fc-uuid.xml"/>
+    <include file="changelog/db.changelog-34-update-fk-rules.xml"/>
+    <include file="changelog/db.changelog-35-another-fk-update.xml"/>
+    <include file="changelog/db.changelog-36.xml"/>
+    <include file="changelog/db.changelog-37-add-two-factor-column.xml"/>
+    <include file="changelog/db.changelog-38.xml"/>
+    <include file="changelog/db.changelog-39-add-cluster-retry-number.xml"/>
+    <include file="changelog/db.changelog-40-remove-blockscore.xml"/>
+    <include file="changelog/db.changelog-41-billing-project-retry.xml"/>
+    <include file="changelog/db.changelog-42-rename-billing-project-retries.xml"/>
+    <include file="changelog/db.changelog-43-add-page-visit.xml"/>
+    <include file="changelog/db.changelog-44-user-recent-resource.xml"/>
+    <include file="changelog/db.changelog-45-concept-set.xml"/>
+    <include file="changelog/db.changelog-46-add-concept-set-count.xml"/>
+    <include file="changelog/db.changelog-47-request-id-verification-time.xml"/>
+    <include file="changelog/db.changelog-48-default-cdr.xml"/>
+    <include file="changelog/db.changelog-49-add-concept-set-to-user-recent-resource.xml"/>
+    <include file="changelog/db.changelog-50.xml"/>
+    <include file="changelog/db.changelog-51-user-profile-updates.xml"/>
+    <include file="changelog/db.changelog-52-user-nonce.xml"/>
+    <include file="changelog/db.changelog-53-research-purpose-type.xml"/>
+    <include file="changelog/db.changelog-54-update-data-access-level.xml"/>
+    <include file="changelog/db.changelog-55-moodle-training.xml"/>
+    <include file="changelog/db.changelog-56-update-email-lowercase.xml"/>
+    <include file="changelog/db.changelog-57-add-era-commons-entries.xml"/>
+    <include file="changelog/db.changelog-58-update-access-modules.xml"/>
+    <include file="changelog/db.changelog-59-cluster-config-default.xml"/>
+    <include file="changelog/db.changelog-60-backfill-bypass.xml"/>
+    <include file="changelog/db.changelog-61-backfill-beta-bypass.xml"/>
+    <include file="changelog/db.changelog-62.xml"/>
+    <include file="changelog/db.changelog-63.xml"/>
+    <include file="changelog/db.changelog-64.xml"/>
+    <include file="changelog/db.changelog-65.xml"/>
+    <include file="changelog/db.changelog-66.xml"/>
+    <include file="changelog/db.changelog-67-compliance-training-expiration.xml"/>
+    <include file="changelog/db.changelog-68-drop-training-completion-time-col.xml"/>
+    <include file="changelog/db.changelog-69-replace-idv-with-beta-access.xml"/>
+    <include file="changelog/db.changelog-70-data-set.xml"/>
+    <include file="changelog/db.changelog-71-remove-2fa-enabled.xml"/>
+    <include file="changelog/db.changelog-72-all-participants-data-set.xml"/>
+    <include file="changelog/db.changelog-73-add-billing_project_buffer_entry.xml"/>
+    <include file="changelog/db.changelog-74-add-last_sync_request_time-billing-buffer.xml"/>
+    <include file="changelog/db.changelog-75-workspace-deletion.xml"/>
+    <include file="changelog/db.changelog-76-add-assigned_user-billing-buffer.xml"/>
+    <include file="changelog/db.changelog-77-data-set-last-modified.xml"/>
+    <include file="changelog/db.changelog-78-data-set-etag.xml"/>
+    <include file="changelog/db.changelog-79-drop-fc-index.xml"/>
+    <include file="changelog/db.changelog-80-research-purpose-refactor.xml"/>
+    <include file="changelog/db.changelog-81-add-billing_migration_status-workspace.xml"/>
+    <include file="changelog/db.changelog-82-add-cascade-delete-admin-actions-after-user-delete.xml"/>
+    <include file="changelog/db.changelog-83-other-population.xml"/>
+    <include file="changelog/db.changelog-84-add-last_status_changed_time.xml"/>
+    <include file="changelog/db.changelog-85-drop-user_workspace.xml"/>
+    <include file="changelog/db.changelog-86-drop-tos.xml"/>
+    <include file="changelog/db.changelog-87-add-survey-concept-set.xml"/>
+    <include file="changelog/db.changelog-88-published-workspaces.xml"/>
+    <include file="changelog/db.changelog-89-add-data-use-agreement-signed-version.xml"/>
+    <include file="changelog/db.changelog-90-review-version.xml"/>
+    <include file="changelog/db.changelog-91-review-last-modified.xml"/>
 
-  <!--
-  Note: to update the DB locally, do the following:
-  - Migrate schema changes: `./project.rb run-local-all-migrations`
-  - Restart the local API service to generate the new API files.
-  - Restart the local UI service to generate the API files.
-  -->
+    <!--
+    Note: to update the DB locally, do the following:
+    - Migrate schema changes: `./project.rb run-local-all-migrations`
+    - Restart the local API service to generate the new API files.
+    - Restart the local UI service to generate the API files.
+    -->
 </databaseChangeLog>

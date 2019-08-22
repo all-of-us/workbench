@@ -7,16 +7,22 @@ import {ResourceCardMenu} from 'app/components/resources';
 import {TextModal} from 'app/components/text-modal';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {navigate, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {navigate, navigateAndPreventDefaultIfNoKeysPressed, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
+import {CopyModal} from 'app/components/copy-modal';
 import {ExportDataSetModal} from 'app/pages/data/data-set/export-data-set-modal';
-import {DataSet, RecentResource} from 'generated/fetch';
+import {CopyRequest, DataSet, RecentResource} from 'generated/fetch';
 
 import {Modal, ModalBody, ModalTitle} from 'app/components/modals';
 import {RenameModal} from 'app/components/rename-modal';
-import {conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {
+  cohortReviewApi,
+  cohortsApi,
+  conceptSetsApi,
+  dataSetApi
+} from 'app/services/swagger-fetch-clients';
 
 const styles = reactStyles({
   card: {
@@ -64,6 +70,12 @@ const styles = reactStyles({
 });
 
 const resourceTypeStyles = reactStyles({
+  cohort: {
+    backgroundColor: colors.resourceCardHighlights.cohort
+  },
+  cohortReview: {
+    backgroundColor: colors.resourceCardHighlights.cohortReview
+  },
   conceptSet: {
     backgroundColor: colors.resourceCardHighlights.conceptSet
   },
@@ -81,6 +93,7 @@ export interface Props {
 
 export interface State {
   confirmDeleting: boolean;
+  copyingConceptSet: boolean;
   errorModalBody: string;
   errorModalTitle: string;
   exportingDataSet: boolean;
@@ -96,10 +109,12 @@ export class ResourceCard extends React.Component<Props, State> {
     super(props);
     this.state = {
       confirmDeleting: false,
+      copyingConceptSet: false,
       errorModalTitle: 'Error Title',
       errorModalBody: 'Error Body',
       exportingDataSet: false,
       invalidResourceError: !(props.resourceCard.cohort ||
+        props.resourceCard.cohortReview ||
         props.resourceCard.conceptSet ||
         props.resourceCard.dataSet),
       renaming: false,
@@ -117,13 +132,25 @@ export class ResourceCard extends React.Component<Props, State> {
   }
 
   get resourceType(): ResourceType {
-    if (this.props.resourceCard.conceptSet) {
+    if (this.props.resourceCard.cohort) {
+      return ResourceType.COHORT;
+    } else if (this.props.resourceCard.cohortReview) {
+      return ResourceType.COHORT_REVIEW;
+    } else if (this.props.resourceCard.conceptSet) {
       return ResourceType.CONCEPT_SET;
     } else if (this.props.resourceCard.dataSet) {
       return ResourceType.DATA_SET;
     } else {
       return ResourceType.INVALID;
     }
+  }
+
+  get isCohort(): boolean {
+    return this.resourceType === ResourceType.COHORT;
+  }
+
+  get isCohortReview(): boolean {
+    return this.resourceType === ResourceType.COHORT_REVIEW;
   }
 
   get isConceptSet(): boolean {
@@ -134,17 +161,21 @@ export class ResourceCard extends React.Component<Props, State> {
     return this.resourceType === ResourceType.DATA_SET;
   }
 
-  get actionsDisabled(): boolean {
-    return !this.writePermission;
-  }
-
-  get writePermission(): boolean {
+  get writerPermission(): boolean {
     return this.props.resourceCard.permission === 'OWNER'
       || this.props.resourceCard.permission === 'WRITER';
   }
 
+  get ownerPermission(): boolean {
+    return this.props.resourceCard.permission === 'OWNER';
+  }
+
   get displayName(): string {
-    if (this.isConceptSet) {
+    if (this.isCohort) {
+      return this.props.resourceCard.cohort.name;
+    } else if (this.isCohortReview) {
+      return this.props.resourceCard.cohortReview.cohortName;
+    } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.name;
     } else if (this.isDataSet) {
       return this.props.resourceCard.dataSet.name;
@@ -162,7 +193,11 @@ export class ResourceCard extends React.Component<Props, State> {
   }
 
   get description(): string {
-    if (this.isConceptSet) {
+    if (this.isCohort) {
+      return this.props.resourceCard.cohort.description;
+    } else if (this.isCohortReview) {
+      return this.props.resourceCard.cohortReview.description;
+    } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.description;
     } else if (this.isDataSet) {
       return this.props.resourceCard.dataSet.description;
@@ -171,6 +206,14 @@ export class ResourceCard extends React.Component<Props, State> {
 
   edit(): void {
     switch (this.resourceType) {
+      case ResourceType.COHORT: {
+        const url =
+          '/workspaces/' + this.props.resourceCard.workspaceNamespace + '/' +
+          this.props.resourceCard.workspaceFirecloudName + '/data/cohorts/build?cohortId=';
+        navigateByUrl(url + this.props.resourceCard.cohort.id);
+        this.props.onUpdate();
+        break;
+      }
       case ResourceType.DATA_SET: {
         navigate(['workspaces',
           this.props.resourceCard.workspaceNamespace,
@@ -182,6 +225,10 @@ export class ResourceCard extends React.Component<Props, State> {
         this.setState({renaming: true});
       }
     }
+  }
+
+  renameResource(): void {
+    this.setState({renaming: true});
   }
 
   cancelRename(): void {
@@ -215,6 +262,40 @@ export class ResourceCard extends React.Component<Props, State> {
 
   async receiveDelete() {
     switch (this.resourceType) {
+      case ResourceType.COHORT: {
+        const dataSetByResourceIdList = await
+            this.getDataSetByResourceId(this.props.resourceCard.cohort.id);
+        if (dataSetByResourceIdList && dataSetByResourceIdList.length > 0) {
+          this.setState({dataSetByResourceIdList: dataSetByResourceIdList});
+          return;
+        }
+        cohortsApi().deleteCohort(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.cohort.id)
+          .then(() => {
+            this.closeConfirmDelete();
+            this.props.onUpdate();
+          });
+        break;
+      }
+      case ResourceType.COHORT_REVIEW: {
+        const dataSetByResourceIdList = await
+            this.getDataSetByResourceId(this.props.resourceCard.cohortReview.cohortReviewId);
+        if (dataSetByResourceIdList && dataSetByResourceIdList.length > 0) {
+          this.setState({dataSetByResourceIdList: dataSetByResourceIdList});
+          return;
+        }
+        cohortReviewApi().deleteCohortReview(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.cohortReview.cohortReviewId)
+          .then(() => {
+            this.closeConfirmDelete();
+            this.props.onUpdate();
+          });
+        break;
+      }
       case ResourceType.CONCEPT_SET: {
         const dataSetByResourceIdList = await
             this.getDataSetByResourceId(this.props.resourceCard.conceptSet.id);
@@ -247,7 +328,37 @@ export class ResourceCard extends React.Component<Props, State> {
   }
 
   receiveRename(name, description): void {
-    if (this.isConceptSet) {
+    if (this.isCohort) {
+      const request = {
+        ...this.props.resourceCard.cohort,
+        name: name,
+        description: description
+      };
+      cohortsApi().updateCohort(
+        this.props.resourceCard.workspaceNamespace,
+        this.props.resourceCard.workspaceFirecloudName,
+        this.props.resourceCard.cohort.id,
+        request
+      ).then(() => {
+        this.cancelRename();
+        this.props.onUpdate();
+      });
+    } else if (this.isCohortReview) {
+      const request = {
+        ...this.props.resourceCard.cohortReview,
+        cohortName: name,
+        description: description
+      };
+      cohortReviewApi().updateCohortReview(
+        this.props.resourceCard.workspaceNamespace,
+        this.props.resourceCard.workspaceFirecloudName,
+        this.props.resourceCard.cohortReview.cohortReviewId,
+        request
+      ).then(() => {
+        this.cancelRename();
+        this.props.onUpdate();
+      });
+    } else if (this.isConceptSet) {
       const request = {
         ...this.props.resourceCard.conceptSet,
         name: name,
@@ -289,14 +400,26 @@ export class ResourceCard extends React.Component<Props, State> {
     }
   }
 
-  getResourceUrl(): string {
-    const {workspaceNamespace, workspaceFirecloudName, conceptSet, dataSet} =
+  reviewCohort(): void {
+    const {workspaceNamespace, workspaceFirecloudName, cohort} = this.props.resourceCard;
+    navigateByUrl(`/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/data/cohorts/`
+      + `${cohort.id}/review`);
+  }
+
+  getResourceUrl(jupyterLab = false): string {
+    const {workspaceNamespace, workspaceFirecloudName, conceptSet, dataSet, cohort, cohortReview} =
       this.props.resourceCard;
     const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
 
     switch (this.resourceType) {
+      case ResourceType.COHORT: {
+        return `${workspacePrefix}/data/cohorts/build?cohortId=${cohort.id}`;
+      }
+      case ResourceType.COHORT_REVIEW: {
+        return `${workspacePrefix}/data/cohorts/${cohortReview.cohortId}/review`;
+      }
       case ResourceType.CONCEPT_SET: {
-        return `${workspacePrefix}/concepts/sets/${conceptSet.id}`;
+        return `${workspacePrefix}/data/concepts/sets/${conceptSet.id}`;
       }
       case ResourceType.DATA_SET: {
         return `${workspacePrefix}/data/data-sets/${dataSet.id}`;
@@ -306,10 +429,6 @@ export class ResourceCard extends React.Component<Props, State> {
 
   exportDataSet(): void {
     this.setState({exportingDataSet: true});
-  }
-
-  renameDataSet(): void {
-    this.setState({renaming: true});
   }
 
   async markDataSetDirty() {
@@ -336,6 +455,12 @@ export class ResourceCard extends React.Component<Props, State> {
     }
   }
 
+  async copyConceptSet(copyRequest: CopyRequest) {
+    return conceptSetsApi().copyConceptSet(this.props.resourceCard.workspaceNamespace,
+      this.props.resourceCard.workspaceFirecloudName,
+      this.props.resourceCard.conceptSet.id.toString(), copyRequest);
+  }
+
   render() {
     return <React.Fragment>
       {this.state.invalidResourceError &&
@@ -354,13 +479,18 @@ export class ResourceCard extends React.Component<Props, State> {
                         data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
-            <ResourceCardMenu disabled={this.actionsDisabled}
+            <ResourceCardMenu disabled={false}
                               resourceType={this.resourceType}
+                              onCloneResource={() => this.cloneResource()}
+                              onCopyConceptSet={() => this.setState({copyingConceptSet: true})}
+                              canDelete={this.ownerPermission}
                               onDeleteResource={() => this.openConfirmDelete()}
-                              onRenameDataSet={() => this.renameDataSet()}
+                              onRenameResource={() => this.renameResource()}
+                              canEdit={this.writerPermission}
                               onEdit={() => this.edit()}
-                              onExportDataSet={() => this.exportDataSet()}/>
-            <Clickable disabled={this.actionsDisabled}>
+                              onExportDataSet={() => this.exportDataSet()}
+                              onReviewCohort={() => this.reviewCohort()}/>
+            <Clickable>
               <a style={styles.cardName}
                    data-test-id='card-name'
                  href={this.getResourceUrl()}
@@ -380,6 +510,26 @@ export class ResourceCard extends React.Component<Props, State> {
             {fp.startCase(fp.camelCase(this.resourceType.toString()))}</div>
         </div>
       </ResourceCardBase>
+
+      {this.state.renaming && this.isCohort &&
+        <RenameModal
+          onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
+          type='Cohort'
+          onCancel={() => this.cancelRename()}
+          oldDescription={this.props.resourceCard.cohort.description}
+          oldName={this.props.resourceCard.cohort.name}
+          existingNames={this.props.existingNameList}/>
+      }
+      {this.state.renaming && this.isCohortReview &&
+        <RenameModal
+          onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
+          type='Cohort Review'
+          onCancel={() => this.cancelRename()}
+          oldDescription={this.props.resourceCard.cohortReview.description}
+          oldName={this.props.resourceCard.cohortReview.cohortName}
+          existingNames={this.props.existingNameList}/>
+      }
+
       {this.state.renaming && this.isConceptSet &&
         <RenameModal
           onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
@@ -406,6 +556,15 @@ export class ResourceCard extends React.Component<Props, State> {
           oldDescription ={this.props.resourceCard.dataSet.description}
           oldName={this.props.resourceCard.dataSet.name}
           existingNames={this.props.existingNameList}/>
+      }
+      {this.state.copyingConceptSet && <CopyModal
+        fromWorkspaceNamespace={this.props.resourceCard.workspaceNamespace}
+        fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
+        fromResourceName={this.props.resourceCard.conceptSet.name}
+        resourceType={this.resourceType}
+        onClose={() => this.setState({copyingConceptSet: false})}
+        onCopy={() => this.props.onUpdate()}
+        saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
       }
       {this.state.dataSetByResourceIdList.length > 0 && <Modal>
         <ModalTitle>WARNING</ModalTitle>

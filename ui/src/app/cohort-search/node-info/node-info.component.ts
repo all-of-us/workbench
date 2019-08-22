@@ -1,4 +1,3 @@
-import {NgRedux, select} from '@angular-redux/store';
 import {
   AfterViewInit,
   Component,
@@ -10,59 +9,43 @@ import {
   ViewChild
 } from '@angular/core';
 import {PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
-import {
-  CohortSearchActions,
-  CohortSearchState,
-  isParameterActive,
-  ppiAnswers,
-  selectedGroups,
-  subtreeSelected,
-} from 'app/cohort-search/redux';
+import {attributesStore, groupSelectionsStore, ppiQuestions, selectionsStore, subtreeSelectedStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {stripHtml} from 'app/cohort-search/utils';
-import {AttrName, Operator, TreeSubType, TreeType} from 'generated';
-import {Observable} from 'rxjs/Observable';
+import {AttrName, CriteriaSubType, CriteriaType, DomainType, Operator} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
 @Component({
-  selector: 'crit-node-info',
+  selector: 'crit-list-node-info',
   templateUrl: './node-info.component.html',
   styleUrls: ['./node-info.component.css']
 })
 export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
-  @select(selectedGroups) groups$: Observable<any>;
-  @select(subtreeSelected) selected$: Observable<any>;
-  @Input() node;
-  private isSelected: boolean;
-  private isSelectedChild: boolean;
+  @Input() node: any;
+  private selected: boolean;
+  private selectedChild: boolean;
   private subscription: Subscription;
   @ViewChild('name') name: ElementRef;
   isTruncated = false;
   matched = false;
 
-  constructor(
-    private ngRedux: NgRedux<CohortSearchState>,
-    private actions: CohortSearchActions
-  ) {}
-
   ngOnInit() {
-    // set to true so parameters with attrs will show as selected when added
-    const noAttr = true;
+    this.subscription = selectionsStore.subscribe(selections => {
+      this.selected = selections.includes(this.paramId);
+    });
 
-    this.subscription = this.ngRedux
-      .select(isParameterActive(this.paramId))
-      .map(val => noAttr && val)
-      .subscribe(val => {
-        this.isSelected = val;
-      });
-    this.subscription.add(this.groups$
-      .filter(groupIds => !!groupIds)
+    this.subscription.add(groupSelectionsStore
       .subscribe(groupIds => {
-        this.isSelectedChild = groupIds.some(id => this.node.get('path').split('.').includes(id));
+        this.selectedChild = groupIds.some(
+          id => this.node.path.split('.')
+            .filter(pathId => pathId !== this.node.id.toString())
+            .includes(id.toString())
+        );
       }));
 
-    this.subscription.add(this.selected$
-      .filter(selectedIds => !!selectedIds)
-      .subscribe(selectedIds => this.matched = selectedIds.includes(this.node.get('id'))));
+    this.subscription.add(subtreeSelectedStore
+      .filter(selected => !!selected)
+      .subscribe(selected => this.matched = selected === this.node.id)
+    );
   }
 
   ngOnDestroy() {
@@ -89,35 +72,19 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get paramId() {
-    return `param${this.node.get('conceptId') ?
-        (this.node.get('conceptId') + this.node.get('code')) : this.node.get('id')}`;
+    return `param${this.node.conceptId && !this.isSurvey ?
+        (this.node.conceptId + this.node.value) : this.node.id}`;
   }
 
   get selectable() {
-    return this.node.get('selectable', false);
-  }
-
-  get displayName() {
-    return this.node.get('name', '');
-  }
-
-  get popperName() {
-    return stripHtml(this.displayName);
+    return this.node.selectable;
   }
 
   get displayCode() {
-    if ((this.isDrug && this.node.get('group')) || this.isPM || this.isPPI || this.isSNOMED) {
+    if ((this.isDrug && this.node.group) || this.isPM || this.isSurvey || this.isSNOMED) {
       return '';
     }
-    return this.node.get('code', '');
-  }
-
-  get selectAllChildren() {
-    return (this.isDrug
-      || this.node.get('type') === TreeType.ICD9
-      || this.node.get('type') === TreeType.PPI
-      || this.node.get('type') === TreeType.ICD10)
-      && this.node.get('group');
+    return this.node.code;
   }
 
   /*
@@ -130,13 +97,13 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
    * If the node does NOT need an attribute we give it a deterministic ID and
    * add it to the selected params in the state.
    */
-  select(event) {
+  select = (event) => {
     /* Prevents the click from reaching the treenode link, which would then
      * fire a request for children (if there are any)
      */
     event.stopPropagation();
     if (this.hasAttributes) {
-      this.getAttributes();
+      attributesStore.next(this.node);
     } else {
       /*
        * Here we set the parameter ID to `param<criterion ID>` - this is
@@ -144,18 +111,23 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
        * not require attributes.  Criterion which require attributes in order
        * to have a complete sense are given a unique ID based on the attribute
        */
-
-      if (this.selectAllChildren) {
-        this.actions.fetchAllChildren(this.node);
-      } else {
-        let modifiedName = this.node.get('name');
-        if (this.node.get('type') === TreeType[TreeType.PPI]) {
-          const parent = ppiAnswers(this.node.get('path'))(this.ngRedux.getState()).toJS();
-          modifiedName = parent.name + ' - ' + modifiedName;
+      let selections = selectionsStore.getValue();
+      if (!selections.includes(this.paramId)) {
+        if (this.node.group) {
+          const groups = [...groupSelectionsStore.getValue(), this.node.id];
+          groupSelectionsStore.next(groups);
+        }
+        let modifiedName = this.node.name;
+        if (this.isSurvey) {
+          // get PPI question from store
+          const question = ppiQuestions.getValue()[this.node.parentId];
+          if (question) {
+            modifiedName = question + ' - ' + modifiedName;
+          }
         }
         let attributes = [];
-        if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
-          const name = stripHtml(this.node.get('name'));
+        if (this.node.subtype === CriteriaSubType[CriteriaSubType.BP]) {
+          const name = stripHtml(this.node.name);
           Object.keys(PREDEFINED_ATTRIBUTES).forEach(key => {
             if (name.indexOf(key) === 0) {
               attributes = PREDEFINED_ATTRIBUTES[key];
@@ -165,88 +137,88 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
           attributes.push({
             name: AttrName.CAT,
             operator: Operator.IN,
-            operands: [this.node.get('code')]
+            operands: [this.node.value]
           });
-        } else if (this.node.get('type') === TreeType.PPI && !this.node.get('group')) {
-          if (this.node.get('code') === '') {
+        } else if (this.isSurvey && !this.node.group) {
+          if (this.node.conceptId === 1585747) {
             attributes.push({
               name: AttrName.NUM,
               operator: Operator.EQUAL,
-              operands: [this.node.get('name')]
+              operands: [this.node.value]
             });
           } else {
             attributes.push({
               name: AttrName.CAT,
               operator: Operator.IN,
-              operands: [this.node.get('code')]
+              operands: [this.node.value]
             });
           }
         }
-        const param = this.node.set('parameterId', this.paramId)
-          .set('attributes', attributes).set('name', modifiedName);
-        this.actions.addParameter(param);
+        const param = {
+          ...this.node,
+          parameterId: this.paramId,
+          attributes: attributes,
+          name: modifiedName
+        };
+        const wizard = wizardStore.getValue();
+        if (!selections.length && this.checkStandard) {
+          wizard.isStandard = param.isStandard;
+        }
+        wizard.item.searchParameters.push(param);
+        selections = [this.paramId, ...selections];
+        selectionsStore.next(selections);
+        wizardStore.next(wizard);
       }
     }
   }
 
-  getAttributes() {
-    if (this.isMeas) {
-      this.actions.fetchAttributes(this.node);
-    } else {
-      const attributes = this.node.get('subtype') === TreeSubType[TreeSubType.BP]
-        ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
-        : [{
-          name: this.node.get('subtype'),
-          operator: null,
-          operands: [null],
-          MIN: 0,
-          MAX: 10000
-        }];
-      this.actions.loadAttributes(this.node, attributes);
-    }
-  }
-
   get showCount() {
-    return this.node.get('count') > -1
-      && (this.node.get('selectable')
-      || (this.node.get('subtype') === TreeSubType[TreeSubType.LAB]
-      && this.node.get('group')
-      && this.node.get('code') !== null )
-      || this.node.get('type') === TreeType[TreeType.CPT]);
+    return this.node.count > -1
+      && (this.node.selectable
+      || (this.node.subtype === CriteriaSubType.LAB
+      && this.node.group
+      && this.node.code !== null )
+      || this.node.type === CriteriaType.CPT4);
   }
 
   get isPM() {
-    return this.node.get('type') === TreeType[TreeType.PM];
+    return this.node.domainId === DomainType.PHYSICALMEASUREMENT;
   }
 
   get isDrug() {
-    return this.node.get('type') === TreeType[TreeType.DRUG];
+    return this.node.domainId === DomainType.DRUG;
   }
 
-  get isMeas() {
-    return this.node.get('type') === TreeType[TreeType.MEAS];
-  }
-
-  get isPPI() {
-    return this.node.get('type') === TreeType[TreeType.PPI];
+  get isSurvey() {
+    return this.node.domainId === DomainType.SURVEY;
   }
 
   get isSNOMED() {
-    return this.node.get('type') === TreeType[TreeType.SNOMED];
+    return this.node.type === CriteriaType.SNOMED;
   }
 
   get hasAttributes() {
-    return this.node.get('hasAttributes') === true;
+    return this.node.hasAttributes;
   }
 
-  get isDisabled() {
-    return this.isSelected || this.isSelectedChild;
+  get isSelected() {
+    return this.selected || this.selectedChild;
   }
 
   get isPMCat() {
-    return this.node.get('subtype') === TreeSubType.WHEEL ||
-      this.node.get('subtype') === TreeSubType.PREG ||
-      this.node.get('subtype') === TreeSubType.HRIRR ||
-      this.node.get('subtype') === TreeSubType.HRNOIRR;
+    return this.node.subtype === CriteriaSubType.WHEEL ||
+      this.node.subtype === CriteriaSubType.PREG ||
+      this.node.subtype === CriteriaSubType.HRIRR ||
+      this.node.subtype === CriteriaSubType.HRNOIRR;
+  }
+
+  get checkStandard() {
+    return this.node.domainId === DomainType.CONDITION
+      || this.node.domainId === DomainType.PROCEDURE;
+  }
+
+  get isDisabled() {
+    const standard = wizardStore.getValue().isStandard;
+    return this.checkStandard && standard !== undefined && this.node.isStandard !== standard;
   }
 }

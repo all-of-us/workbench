@@ -1,4 +1,6 @@
+import {Location} from '@angular/common';
 import {Component, OnDestroy, OnInit} from '@angular/core';
+import {NavigationStart, Router} from '@angular/router';
 import {
   cohortReviewStore,
   filterStateStore,
@@ -11,6 +13,7 @@ import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagge
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {PageFilterType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   templateUrl: './page-layout.html',
@@ -20,6 +23,20 @@ export class PageLayout implements OnInit, OnDestroy {
   reviewPresent: boolean;
   cohortLoaded = false;
   readonly = false;
+  subscription: Subscription;
+
+  constructor(private location: Location, private router: Router) {
+    this.subscription = router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        const oldRoute = router.url.split('/').pop();
+        const newRoute = event.url.split('/').pop();
+        if (oldRoute === 'participants' && newRoute === 'review') {
+          // back button was pressed on 'participants' route, go back again to avoid blank page
+          location.back();
+        }
+      }
+    });
+  }
 
   ngOnInit() {
     const {ns, wsid, cid} = urlParamsStore.getValue();
@@ -34,8 +51,8 @@ export class PageLayout implements OnInit, OnDestroy {
     }).then(review => {
       cohortReviewStore.next(review);
       this.reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
-      if (this.reviewPresent) {
-        navigate(['workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);
+      if (this.reviewPresent && this.router.url.split('/').pop() === 'review') {
+        navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
       }
     });
     cohortsApi().getCohort(ns, wsid, cid).then(cohort => {
@@ -59,6 +76,7 @@ export class PageLayout implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.subscription.unsubscribe();
     currentCohortStore.next(undefined);
     multiOptions.next(null);
     vocabOptions.next(null);
@@ -69,9 +87,8 @@ export class PageLayout implements OnInit, OnDestroy {
     this.reviewPresent = true;
   }
 
-  returnToCohorts() {
-    const {ns, wsid} = urlParamsStore.getValue();
-    navigate(['workspaces', ns, wsid, 'cohorts']);
+  goBack = () => {
+    this.location.back();
   }
 
   get ableToReview() {

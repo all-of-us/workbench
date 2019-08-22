@@ -1,5 +1,4 @@
 /* tslint:disable:max-line-length */
-import {NgReduxModule} from '@angular-redux/store';
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
@@ -14,6 +13,7 @@ import {CohortCommonModule} from 'app/cohort-common/module';
 import {CreateReviewModalComponent} from './create-review-modal/create-review-modal';
 import {DetailPageComponent} from './detail-page/detail-page';
 import {PageLayout} from './page-layout/page-layout';
+import {QueryReportComponent} from './query-report/query-report.component';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 import {TablePage} from './table-page/table-page';
 
@@ -23,7 +23,6 @@ import {TablePage} from './table-page/table-page';
 @NgModule({
   imports: [
     // Angular
-    NgReduxModule,
     CommonModule,
     ReactiveFormsModule,
     // Routes
@@ -41,6 +40,7 @@ import {TablePage} from './table-page/table-page';
     CreateReviewModalComponent,
     DetailPageComponent,
     PageLayout,
+    QueryReportComponent,
     TablePage,
   ],
   providers: [

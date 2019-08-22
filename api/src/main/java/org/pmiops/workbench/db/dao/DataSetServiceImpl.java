@@ -175,8 +175,7 @@ public class DataSetServiceImpl implements DataSetService {
                       new Gson().fromJson(cohortDefinition, SearchRequest.class);
                   QueryJobConfiguration participantIdQuery =
                       cohortQueryBuilder.buildParticipantIdQuery(
-                          new ParticipantCriteria(
-                              searchRequest, configProvider.get().cohortbuilder.enableListSearch));
+                          new ParticipantCriteria(searchRequest));
                   QueryJobConfiguration participantQueryConfig =
                       bigQueryService.filterBigQueryConfig(participantIdQuery);
                   AtomicReference<String> participantQuery =
@@ -282,10 +281,11 @@ public class DataSetServiceImpl implements DataSetService {
 
       queryMap.put(query, cohortParameters);
       QueryJobConfiguration queryJobConfiguration =
-          QueryJobConfiguration.newBuilder(query)
-              .setNamedParameters(cohortParameters)
-              .setUseLegacySql(false)
-              .build();
+          bigQueryService.filterBigQueryConfig(
+              QueryJobConfiguration.newBuilder(query)
+                  .setNamedParameters(cohortParameters)
+                  .setUseLegacySql(false)
+                  .build());
       dataSetUtil.put(d.toString(), queryJobConfiguration);
     }
     return dataSetUtil;

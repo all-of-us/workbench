@@ -1,28 +1,21 @@
-import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit } from '@angular/core';
-import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {
-  activeCriteriaSubtype,
-  activeCriteriaTreeType,
-  activeCriteriaType,
-  activeItem,
-  activeParameterList,
-  CohortSearchActions,
-  nodeAttributes,
-  previewStatus,
-  scrollId,
-  subtreeSelected,
-  wizardOpen,
-} from 'app/cohort-search/redux';
-import {stripHtml, subtypeToTitle, typeToTitle} from 'app/cohort-search/utils';
-import {DomainType, TreeSubType, TreeType} from 'generated';
-import {Map} from 'immutable';
-import {Observable} from 'rxjs/Observable';
+  attributesStore,
+  autocompleteStore,
+  scrollStore,
+  searchRequestStore,
+  selectionsStore,
+  subtreePathStore,
+  subtreeSelectedStore,
+  wizardStore
+} from 'app/cohort-search/search-state.service';
+import {domainToTitle, generateId, stripHtml} from 'app/cohort-search/utils';
+import {CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
 
 @Component({
-  selector: 'app-modal',
+  selector: 'app-list-modal',
   templateUrl: './modal.component.html',
   styleUrls: [
     './modal.component.css',
@@ -30,216 +23,158 @@ import {Subscription} from 'rxjs/Subscription';
   ]
 })
 export class ModalComponent implements OnInit, OnDestroy {
-  @select(wizardOpen) open$: Observable<boolean>;
-  @select(activeCriteriaSubtype) criteriaSubtype$: Observable<any>;
-  @select(activeCriteriaType) criteriaType$: Observable<string>;
-  @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
-  @select(activeItem) item$: Observable<any>;
-  @select(activeParameterList) selection$: Observable<any>;
-  @select(nodeAttributes) attributes$: Observable<any>;
-  @select(scrollId) scrollTo$: Observable<any>;
-  @select(subtreeSelected) subtree$: Observable<any>;
-  @select(previewStatus) preview$;
 
   readonly domainType = DomainType;
-  readonly treeType = TreeType;
-  readonly treeSubType = TreeSubType;
-  ctype: string;
-  subtype: string;
-  itemType: string;
-  fullTree: boolean;
+  readonly criteriaType = CriteriaType;
   subscription: Subscription;
-  attributesNode: Map<any, any> = Map();
   selections = {};
-  objectKeys = Object.keys;
+  selectionIds: Array<string>;
+  selectionList: Array<any>;
   open = false;
   noSelection = true;
   title = '';
-  mode: 'tree' | 'modifiers' | 'attributes' | 'snomed' = 'tree'; // default to criteria tree
+  mode = 'list';
   backMode: string;
   count = 0;
-  originalNode: any;
-  disableCursor = false;
+  loadingSubtree = false;
   modifiersDisabled = false;
-  preview = Map();
   conceptType: string = null;
+  wizard: any;
+  attributesNode: any;
+  hierarchyNode: any;
 
-  constructor(private actions: CohortSearchActions) {}
+  constructor() {}
 
   ngOnInit() {
-    this.subscription = this.open$
-      .filter(open => !!open)
-      .subscribe(_ => {
+    this.subscription = wizardStore
+      .filter(wizard => !!wizard)
+      .subscribe(wizard => {
         // reset to default each time the modal is opened
-        this.mode = 'tree';
-        this.open = true;
+        this.wizard = wizard;
+        this.selectionList = wizard.item.searchParameters;
+        this.noSelection = this.selectionList.length === 0;
+        if (!this.open) {
+          this.title = domainToTitle(wizard.domain);
+          if (this.initTree) {
+            this.hierarchyNode = {
+              domainId: wizard.domain,
+              type: wizard.type,
+              isStandard: wizard.standard,
+              id: 0,
+            };
+            this.backMode = 'tree';
+            this.mode = 'tree';
+          } else {
+            this.backMode = 'list';
+            this.mode = 'list';
+          }
+          this.open = true;
+        }
       });
 
-    this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
-
-    this.subscription.add(this.criteriaType$
-      .filter(ctype => !!ctype)
-      .subscribe(ctype => {
-        this.ctype = ctype;
-      })
-    );
-
-    this.subscription.add(this.criteriaSubtype$
-      .subscribe(subtype => {
-        this.subtype = subtype;
-      })
-    );
-
-    this.subscription.add(this.isFullTree$.subscribe(fullTree => this.fullTree = fullTree));
-    this.subscription.add(this.selection$
-      .subscribe(selections => {
-        this.selections = {};
-        this.noSelection = selections.size === 0;
-        selections.forEach(selection => {
-          if (this.isCondOrProc) {
-            this.conceptType = selection.get('type') === TreeType[TreeType.SNOMED]
-              ? 'standard' : 'source';
-          }
-          this.addSelectionToGroup(selection);
-        });
-        if (this.conceptType === 'standard') {
-          this.setMode('snomed');
-        }
-      })
-    );
-    this.subscription.add(this.attributes$
-      .subscribe(node => {
-        this.attributesNode = node;
-        if (node.size === 0) {
-          this.mode = 'tree';
-        } else {
-          this.mode = 'attributes';
-        }
-      })
-    );
-
-    this.subscription.add(this.scrollTo$
-      .filter(nodeId => !!nodeId)
-      .subscribe(nodeId => {
-        this.setScroll(nodeId);
-      })
-    );
-
-    this.subscription.add(this.subtree$
-      .filter(nodeIds => !!nodeIds)
-      .subscribe(nodeIds => {
-        this.disableCursor = nodeIds.length > 0;
-      })
-    );
-
-    this.subscription.add(this.item$.subscribe(item => {
-      this.itemType = item.get('type');
-      this.title = 'Codes';
-      for (const crit of DOMAIN_TYPES) {
-        const regex = new RegExp(`.*${crit.type}.*`, 'i');
-        if (regex.test(this.itemType)) {
-          this.title = crit.name;
-          if (crit.type === TreeType.DEMO) {
-            this.title += ' - ' + subtypeToTitle(this.subtype);
-          }
-        }
-      }
-      for (const crit of PROGRAM_TYPES) {
-        const regex = new RegExp(`.*${crit.type}.*`, 'i');
-        if (regex.test(this.itemType)) {
-          this.title = crit.name;
-        }
-      }
-    }));
-    this.originalNode = this.rootNode;
+    this.subscription.add(selectionsStore.subscribe(list => this.selectionIds = list));
+    this.subscription.add(subtreeSelectedStore.subscribe(
+      sel => this.loadingSubtree = sel !== undefined));
+    this.subscription.add(scrollStore.filter(id => !!id).subscribe(id => this.setScroll(id)));
+    this.subscription.add(attributesStore
+      .filter(crit => !!crit)
+      .subscribe(criterion => {
+        this.backMode = this.mode;
+        this.attributesNode = criterion;
+        this.mode = 'attributes';
+      }));
   }
-  addSelectionToGroup(selection: any) {
-    if (selection.get('type') === TreeType[TreeType.DEMO]) {
-      if (selection.get('subtype') === this.subtype) {
-        const key = selection.get('subtype');
-        if (this.selections[key] && !this.selections[key].includes(selection)) {
-          this.selections[key].push(selection);
-        } else {
-          this.selections[key] = [selection];
-        }
-      }
-    } else {
-      const key = selection.get('type');
-      if (this.selections[key] && !this.selections[key].includes(selection)) {
-        this.selections[key].push(selection);
-      } else {
-        this.selections[key] = [selection];
-      }
-    }
-  }
-  setScroll(nodeId: string) {
-    const node = document.getElementById('node' + nodeId.toString());
+
+  setScroll(id: string) {
+    const nodeId = `node${id}`;
+    const node = document.getElementById(nodeId);
     if (node) {
-      setTimeout(() => node.scrollIntoView({behavior: 'smooth'}), 200);
+      setTimeout(() => node.scrollIntoView({behavior: 'smooth', block: 'center'}), 200);
     }
-    this.disableCursor = false;
+    this.loadingSubtree = false;
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  cancel() {
-    this.selections = {};
+  close() {
+    wizardStore.next(undefined);
+    autocompleteStore.next('');
+    selectionsStore.next([]);
+    subtreePathStore.next([]);
+    this.attributesNode = undefined;
+    this.hierarchyNode = undefined;
+    this.loadingSubtree = false;
     this.open = false;
-    this.actions.cancelWizard(this.ctype, 0);
   }
 
-  back() {
-    if (this.attributesNode.size > 0) {
-      this.actions.hideAttributesPage();
-    }
-    if (this.mode === 'snomed') {
-      this.setMode('tree');
+  back = () => {
+    switch (this.mode) {
+      case 'tree':
+        this.backMode = 'list';
+        this.mode = 'list';
+        break;
+      default:
+        this.mode = this.backMode;
+        this.attributesNode = undefined;
+        break;
     }
   }
 
   finish() {
-    this.selections = {};
-    this.open = false;
-    this.actions.finishWizard();
+    const {groupId, item, role} = this.wizard;
+    const searchRequest = searchRequestStore.getValue();
+    if (groupId) {
+      const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
+      if (groupIndex > -1) {
+        const itemIndex = searchRequest[role][groupIndex].items.findIndex(it => it.id === item.id);
+        if (itemIndex > -1) {
+          searchRequest[role][groupIndex].items[itemIndex] = item;
+        } else {
+          searchRequest[role][groupIndex].items.push(item);
+        }
+      }
+    } else {
+      const group = this.initGroup(role, item);
+      searchRequest[role].push(group);
+    }
+    searchRequestStore.next(searchRequest);
+    this.close();
   }
 
-  /* Used to bootstrap the criteria tree */
-  get rootNode() {
-    return Map({
-      type: this.ctype,
-      subtype: this.subtype,
-      fullTree: this.fullTree,
-      id: 0,    // root parent ID is always 0
-    });
-  }
-
-  get snomedNode() {
-    return Map({
-      type: TreeType.SNOMED,
-      subtype: this.subtype === TreeSubType[TreeSubType.CM]
-        ? TreeSubType.CM : TreeSubType.PCS,
-      fullTree: this.fullTree,
-      id: 0,    // root parent ID is always 0
-    });
+  initGroup(role: string, item: any) {
+    return {
+      id: generateId(role),
+      items: [item],
+      count: null,
+      temporal: false,
+      mention: TemporalMention.ANYMENTION,
+      time: TemporalTime.DURINGSAMEENCOUNTERAS,
+      timeValue: 0,
+      timeFrame: '',
+      isRequesting: false,
+      status: 'active'
+    };
   }
 
   get attributeTitle() {
-    return this.ctype === TreeType[TreeType.PM]
-      ? stripHtml(this.attributesNode.get('name'))
-      : typeToTitle(this.ctype) + ' Detail';
+    const domain = this.attributesNode.domainId;
+    return domain === DomainType.PHYSICALMEASUREMENT
+      ? stripHtml(this.attributesNode.name)
+      : domain + ' Detail';
   }
 
   get showModifiers() {
-    return this.itemType !== TreeType[TreeType.PM] &&
-      this.itemType !== TreeType[TreeType.DEMO] &&
-      this.itemType !== TreeType[TreeType.PPI];
+    return this.wizard.domain !== DomainType.PHYSICALMEASUREMENT &&
+      this.wizard.domain !== DomainType.PERSON &&
+      this.wizard.domain !== DomainType.SURVEY;
   }
 
-  get isCondOrProc() {
-    return this.itemType === TreeType[TreeType.CONDITION]
-    || this.itemType === TreeType[TreeType.PROCEDURE];
+  get initTree() {
+    return this.wizard.domain === DomainType.PHYSICALMEASUREMENT
+      || this.wizard.domain === DomainType.SURVEY
+      || this.wizard.domain === DomainType.VISIT;
   }
 
   get showNext() {
@@ -251,49 +186,43 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   get treeClass() {
-    if (this.ctype === TreeType.DEMO) {
-      return this.subtype === TreeSubType.AGE ? 'col-md-12' : 'col-md-6';
+    if (this.wizard.domain === DomainType.PERSON) {
+      return this.wizard.type === CriteriaType.AGE ? 'col-md-12' : 'col-md-6';
     }
     return 'col-md-8';
   }
 
   get sidebarClass() {
-    return this.ctype === TreeType.DEMO ? 'col-md-6' : 'col-md-4';
+    return this.wizard.domain === DomainType.PERSON ? 'col-md-6' : 'col-md-4';
   }
 
   setMode(mode: any) {
-    if (mode !== 'tree' && this.ctype !== TreeType[TreeType.SNOMED]) {
-      this.originalNode = Map({
-        type: this.ctype,
-        subtype: this.subtype,
-        fullTree: this.fullTree,
-        id: 0,
-      });
-    }
-    if (mode !== 'modifiers') {
-      const node = mode === 'tree' ? this.originalNode : this.snomedNode;
-      const criteriaType = node.get('type');
-      const criteriaSubtype = node.get('subtype');
-      const context = {criteriaType, criteriaSubtype};
-      this.actions.setWizardContext(context);
-    } else {
+    if (this.mode !== 'attributes') {
       this.backMode = this.mode;
     }
     this.mode = mode;
   }
 
-  get altTab() {
-    return this.attributesNode.size > 0;
+  showHierarchy = (criterion: any) => {
+    autocompleteStore.next(criterion.name);
+    subtreePathStore.next(criterion.path.split('.'));
+    subtreeSelectedStore.next(criterion.id);
+    this.hierarchyNode = {
+      domainId: criterion.domainId,
+      type: criterion.type,
+      subtype: criterion.subtype,
+      isStandard: criterion.isStandard,
+      id: 0,    // root parent ID is always 0
+    };
+    this.backMode = 'tree';
+    this.mode = 'tree';
   }
 
-  selectionHeader(_type: string) {
-    return this.itemType === TreeType[TreeType.DEMO] ? subtypeToTitle(_type) : typeToTitle(_type);
+  modifiersFlag = (disabled: boolean) => {
+    this.modifiersDisabled = disabled;
   }
 
   get disableFlag() {
-    return this.noSelection
-      || this.preview.get('requesting')
-      || this.preview.get('count') === 0
-      || this.modifiersDisabled;
+    return this.noSelection || this.modifiersDisabled;
   }
 }

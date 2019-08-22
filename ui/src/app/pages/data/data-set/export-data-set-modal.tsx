@@ -129,7 +129,7 @@ class ExportDataSetModal extends React.Component<
     // Open notebook in a new tab and close the modal
     const notebookUrl = '/workspaces/' + workspaceNamespace + '/' + workspaceFirecloudName +
         '/notebooks/' + appendNotebookFileSuffix(encodeURIComponent(this.state.notebookName));
-    window.open(notebookUrl);
+    window.open(notebookUrl, '_blank');
     this.props.closeFunction();
   }
 

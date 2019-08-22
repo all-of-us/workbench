@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import java.sql.Date;
@@ -19,8 +20,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
@@ -35,6 +39,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AllEvents;
 import org.pmiops.workbench.model.CohortChartData;
@@ -102,6 +107,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private Provider<User> userProvider;
   private final Clock clock;
   private Provider<WorkbenchConfig> configProvider;
+  private static final Logger log = Logger.getLogger(CohortReviewController.class.getName());
 
   /**
    * Converter function from backend representation (used with Hibernate) to client representation
@@ -147,6 +153,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                   .creationTime(cohortReview.getCreationTime().toString())
                   .cohortDefinition(cohortReview.getCohortDefinition())
                   .cohortName(cohortReview.getCohortName())
+                  .description(cohortReview.getDescription())
                   .matchedParticipantCount(cohortReview.getMatchedParticipantCount())
                   .reviewedCount(cohortReview.getReviewedCount())
                   .reviewStatus(cohortReview.getReviewStatusEnum())
@@ -169,11 +176,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             public org.pmiops.workbench.model.CohortReview apply(CohortReview cohortReview) {
               return new org.pmiops.workbench.model.CohortReview()
                   .cohortReviewId(cohortReview.getCohortReviewId())
+                  .etag(Etags.fromVersion(cohortReview.getVersion()))
                   .cohortId(cohortReview.getCohortId())
                   .cdrVersionId(cohortReview.getCdrVersionId())
                   .creationTime(cohortReview.getCreationTime().toString())
+                  .lastModifiedTime(cohortReview.getLastModifiedTime().getTime())
                   .cohortDefinition(cohortReview.getCohortDefinition())
                   .cohortName(cohortReview.getCohortName())
+                  .description(cohortReview.getDescription())
                   .matchedParticipantCount(cohortReview.getMatchedParticipantCount())
                   .reviewedCount(cohortReview.getReviewedCount())
                   .reviewStatus(cohortReview.getReviewStatusEnum())
@@ -300,10 +310,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     try {
       cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
     } catch (NotFoundException nfe) {
-      cohortReview =
-          initializeCohortReview(cdrVersionId, cohort)
-              .reviewStatusEnum(ReviewStatus.NONE)
-              .reviewSize(0L);
+      cohortReview = initializeCohortReview(cdrVersionId, cohort, userProvider.get());
       cohortReviewService.saveCohortReview(cohortReview);
     }
     if (cohortReview.getReviewSize() > 0) {
@@ -320,10 +327,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         bigQueryService.executeQuery(
             bigQueryService.filterBigQueryConfig(
                 cohortQueryBuilder.buildRandomParticipantQuery(
-                    new ParticipantCriteria(
-                        searchRequest, configProvider.get().cohortbuilder.enableListSearch),
-                    request.getSize(),
-                    0L)));
+                    new ParticipantCriteria(searchRequest), request.getSize(), 0L)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     List<ParticipantCohortStatus> participantCohortStatuses =
@@ -331,9 +335,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     cohortReview
         .reviewSize(participantCohortStatuses.size())
-        .reviewStatusEnum(ReviewStatus.CREATED)
-        .cohortDefinition(getCohortDefinition(cohort))
-        .cohortName(cohort.getName());
+        .reviewStatusEnum(ReviewStatus.CREATED);
 
     // when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
     cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
@@ -389,6 +391,18 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     return ResponseEntity.ok(
         TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> deleteCohortReview(
+      String workspaceNamespace, String workspaceId, Long cohortReviewId) {
+    cohortReviewService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
+    CohortReview dbCohortReview =
+        cohortReviewService.findCohortReview(workspaceNamespace, workspaceId, cohortReviewId);
+    cohortReviewService.deleteCohortReview(dbCohortReview);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
@@ -450,8 +464,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         bigQueryService.executeQuery(
             bigQueryService.filterBigQueryConfig(
                 cohortQueryBuilder.buildDomainChartInfoCounterQuery(
-                    new ParticipantCriteria(
-                        searchRequest, configProvider.get().cohortbuilder.enableListSearch),
+                    new ParticipantCriteria(searchRequest),
                     DomainType.fromValue(domain),
                     chartLimit)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -577,7 +590,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     try {
       cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
     } catch (NotFoundException nfe) {
-      cohortReview = initializeCohortReview(cdrVersionId, cohort);
+      cohortReview = initializeCohortReview(cdrVersionId, cohort, userProvider.get());
     }
 
     PageRequest pageRequest = createPageRequest(request);
@@ -681,6 +694,40 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   @Override
+  public ResponseEntity<org.pmiops.workbench.model.CohortReview> updateCohortReview(
+      String workspaceNamespace,
+      String workspaceId,
+      Long cohortReviewId,
+      org.pmiops.workbench.model.CohortReview cohortReview) {
+    // This also enforces registered auth domain.
+    cohortReviewService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    CohortReview dbCohortReview =
+        cohortReviewService.findCohortReview(workspaceNamespace, workspaceId, cohortReviewId);
+    if (Strings.isNullOrEmpty(cohortReview.getEtag())) {
+      throw new BadRequestException("missing required update field 'etag'");
+    }
+    int version = Etags.toVersion(cohortReview.getEtag());
+    if (dbCohortReview.getVersion() != version) {
+      throw new ConflictException("Attempted to modify outdated cohort review version");
+    }
+    if (cohortReview.getCohortName() != null) {
+      dbCohortReview.setCohortName(cohortReview.getCohortName());
+    }
+    if (cohortReview.getDescription() != null) {
+      dbCohortReview.setDescription(cohortReview.getDescription());
+    }
+    dbCohortReview.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
+    try {
+      cohortReviewService.saveCohortReview(dbCohortReview);
+    } catch (OptimisticLockException e) {
+      log.log(Level.WARNING, "version conflict for cohort review update", e);
+      throw new ConflictException("Failed due to concurrent cohort review modification");
+    }
+    return ResponseEntity.ok(TO_CLIENT_COHORTREVIEW.apply(dbCohortReview));
+  }
+
+  @Override
   public ResponseEntity<ParticipantCohortAnnotation> updateParticipantCohortAnnotation(
       String workspaceNamespace,
       String workspaceId,
@@ -722,7 +769,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     cohortReviewService.saveParticipantCohortStatus(participantCohortStatus);
     lookupGenderRaceEthnicityValues(Arrays.asList(participantCohortStatus));
 
-    cohortReview.lastModifiedTime(new Timestamp(System.currentTimeMillis()));
+    cohortReview.lastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     cohortReview.incrementReviewedCount();
     cohortReviewService.saveCohortReview(cohortReview);
 
@@ -748,21 +795,20 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    *
    * @param cdrVersionId
    * @param cohort
+   * @param creator
    */
-  private CohortReview initializeCohortReview(Long cdrVersionId, Cohort cohort) {
+  private CohortReview initializeCohortReview(Long cdrVersionId, Cohort cohort, User creator) {
     SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
     TableResult result =
         bigQueryService.executeQuery(
             bigQueryService.filterBigQueryConfig(
-                cohortQueryBuilder.buildParticipantCounterQuery(
-                    new ParticipantCriteria(
-                        request, configProvider.get().cohortbuilder.enableListSearch))));
+                cohortQueryBuilder.buildParticipantCounterQuery(new ParticipantCriteria(request))));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
     List<FieldValue> row = result.iterateAll().iterator().next();
     long cohortCount = bigQueryService.getLong(row, rm.get("count"));
 
-    return createNewCohortReview(cohort.getCohortId(), cdrVersionId, cohortCount);
+    return createNewCohortReview(cohort, cdrVersionId, cohortCount, creator);
   }
 
   /**
@@ -819,20 +865,27 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   /**
    * Helper method that constructs a {@link CohortReview} with the specified ids and count.
    *
-   * @param cohortId
+   * @param cohort
    * @param cdrVersionId
    * @param cohortCount
+   * @param creator
    * @return
    */
-  private CohortReview createNewCohortReview(Long cohortId, Long cdrVersionId, long cohortCount) {
-    CohortReview cohortReview = new CohortReview();
-    cohortReview.setCohortId(cohortId);
-    cohortReview.setCdrVersionId(cdrVersionId);
-    cohortReview.matchedParticipantCount(cohortCount);
-    cohortReview.setCreationTime(new Timestamp(System.currentTimeMillis()));
-    cohortReview.reviewedCount(0L);
-    cohortReview.reviewStatusEnum(ReviewStatus.NONE);
-    return cohortReview;
+  private CohortReview createNewCohortReview(
+      Cohort cohort, Long cdrVersionId, Long cohortCount, User creator) {
+    return new CohortReview()
+        .cohortId(cohort.getCohortId())
+        .cohortDefinition(getCohortDefinition(cohort))
+        .cohortName(cohort.getName())
+        .description(cohort.getDescription())
+        .cdrVersionId(cdrVersionId)
+        .matchedParticipantCount(cohortCount)
+        .creationTime(new Timestamp(clock.instant().toEpochMilli()))
+        .lastModifiedTime(new Timestamp(clock.instant().toEpochMilli()))
+        .reviewedCount(0L)
+        .reviewSize(0L)
+        .reviewStatusEnum(ReviewStatus.NONE)
+        .creator(creator);
   }
 
   /**

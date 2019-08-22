@@ -20,15 +20,13 @@ import org.mockito.Mock;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cohorts.CohortFactory;
+import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortCloningService;
-import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -58,6 +56,7 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
+import org.pmiops.workbench.workspaces.WorkspacesController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -173,10 +172,6 @@ public class ConceptSetsControllerTest {
 
   @Autowired ConceptDao conceptDao;
 
-  @Autowired CohortFactory cohortFactory;
-
-  @Autowired CohortDao cohortDao;
-
   @Autowired WorkspaceDao workspaceDao;
 
   @Autowired UserDao userDao;
@@ -259,9 +254,6 @@ public class ConceptSetsControllerTest {
             workspaceService,
             workspaceMapper,
             cdrVersionDao,
-            cohortDao,
-            cohortFactory,
-            conceptSetDao,
             userDao,
             userProvider,
             fireCloudService,
