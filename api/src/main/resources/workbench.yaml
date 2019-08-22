@@ -1186,14 +1186,14 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  /v1/cron/alertUsersExceedingFreeTierBilling:
+  /v1/cron/checkFreeTierBillingUsage:
     get:
       security: []
       tags:
         - billing
         - cron
       description: Find and alert users that have exceeded their free tier billing usage
-      operationId: alertUsersExceedingFreeTierBilling
+      operationId: checkFreeTierBillingUsage
       responses:
         200:
           description: No Error

@@ -46,13 +46,11 @@ public class WorkbenchConfig {
   }
 
   public static class BillingConfig {
-
     public Integer billingRetryCount;
     public Integer billingProjectBufferCapacity;
     public String billingProjectPrefix;
     public String billingAccountId;
     public String billingExportBigQueryTable;
-    public ArrayList<String> whitelistedUsers = new ArrayList<>();
     public Double defaultFreeCreditsLimit;
   }
 

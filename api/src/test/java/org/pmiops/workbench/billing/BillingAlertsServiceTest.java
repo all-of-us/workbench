@@ -79,18 +79,18 @@ public class BillingAlertsServiceTest {
   }
 
   @Test
-  public void alertUsersExceedingFreeTierBilling_singleProjectExceedsLimit() {
+  public void checkFreeTierBillingUsage_singleProjectExceedsLimit() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
 
-    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    billingAlertsService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
   }
 
   @Test
-  public void alertUsersExceedingFreeTierBilling_deletedUserNotIgnored() {
+  public void checkFreeTierBillingUsage_disabledUserNotIgnored() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
     User user = createUser("test@test.com");
@@ -98,12 +98,12 @@ public class BillingAlertsServiceTest {
     userDao.save(user);
     createWorkspace(user, "aou-test-f1-26");
 
-    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    billingAlertsService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
   }
 
   @Test
-  public void alertUsersExceedingFreeTierBilling_deletedWorkspaceNotIgnored() {
+  public void checkFreeTierBillingUsage_deletedWorkspaceNotIgnored() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
     User user = createUser("test@test.com");
@@ -111,72 +111,59 @@ public class BillingAlertsServiceTest {
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     workspaceDao.save(workspace);
 
-    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    billingAlertsService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
   }
 
   @Test
-  public void alertUsersExceedingFreeTierBilling_noAlert() {
+  public void checkFreeTierBillingUsage_noAlert() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 500.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
 
-    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    billingAlertsService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
   }
 
   @Test
-  public void alertUsersExceedingFreeTierBilling_workspaceMissingCreator() {
+  public void checkFreeTierBillingUsage_workspaceMissingCreator() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 500.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
     createWorkspace(null, "rumney");
 
-    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    billingAlertsService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
   }
 
   @Test
-  public void alertUsersExceedingFreeTierBilling_combinedProjectsExceedsLimit() {
+  public void checkFreeTierBillingUsage_combinedProjectsExceedsLimit() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 500.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
     createWorkspace(user, "aou-test-f1-47");
 
-    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    billingAlertsService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
   }
 
   @Test
-  public void alertUsersExceedingFreeTierBilling_whitelist() {
+  public void checkFreeTierBillingUsage_override() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 10.0;
 
     User user = createUser("test@test.com");
     createWorkspace(user, "aou-test-f1-26");
 
-    workbenchConfig.billing.whitelistedUsers.add("test@test.com");
-
-    billingAlertsService.alertUsersExceedingFreeTierBilling();
-    verifyZeroInteractions(notificationService);
-  }
-
-  @Test
-  public void alertUsersExceedingFreeTierBilling_override() {
-    workbenchConfig.billing.defaultFreeCreditsLimit = 10.0;
-
-    User user = createUser("test@test.com");
-    createWorkspace(user, "aou-test-f1-26");
-
-    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    billingAlertsService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
 
     user.setFreeTierCreditsLimitOverride(1000.0);
     userDao.save(user);
 
-    billingAlertsService.alertUsersExceedingFreeTierBilling();
+    billingAlertsService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
   }
 

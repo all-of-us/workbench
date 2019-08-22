@@ -39,8 +39,8 @@ public class BillingController implements BillingApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> alertUsersExceedingFreeTierBilling() {
-    billingAlertsService.alertUsersExceedingFreeTierBilling();
+  public ResponseEntity<Void> checkFreeTierBillingUsage() {
+    billingAlertsService.checkFreeTierBillingUsage();
     return ResponseEntity.status(HttpStatus.OK).build();
   }
 }

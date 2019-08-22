@@ -55,9 +55,9 @@
     <schedule>every 24 hours</schedule>
   </cron>
   <cron>
-    <url>/v1/cron/alertUsersExceedingFreeTierBilling</url>
+    <url>/v1/cron/checkFreeTierBillingUsage</url>
     <target>api</target>
     <description> Find and alert users that have exceeded their free tier billing usage</description>
-    <schedule>every 24 hours</schedule>
+    <schedule>every 3 hours</schedule>
   </cron>
 </cronentries>

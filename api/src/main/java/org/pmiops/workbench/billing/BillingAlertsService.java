@@ -34,7 +34,7 @@ public class BillingAlertsService {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
-  public void alertUsersExceedingFreeTierBilling() {
+  public void checkFreeTierBillingUsage() {
     QueryJobConfiguration queryConfig =
         QueryJobConfiguration.newBuilder(
                 "SELECT project.id, SUM(cost) cost FROM `"
@@ -51,13 +51,6 @@ public class BillingAlertsService {
                         userDao.findCreatorByWorkspaceNamespace(fv.get("id").getStringValue()),
                         fv.get("cost").getDoubleValue()))
             .filter(spend -> spend.getKey() != null)
-            .filter(
-                spend ->
-                    !workbenchConfigProvider
-                        .get()
-                        .billing
-                        .whitelistedUsers
-                        .contains(spend.getKey().getEmail()))
             .collect(
                 Collectors.groupingBy(
                     spend -> spend.getKey(), Collectors.summingDouble(Entry::getValue)));
