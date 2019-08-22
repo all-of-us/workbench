@@ -25,8 +25,8 @@ public interface CohortAnnotationDefinitionDao
   @Query(
       value =
           "INSERT INTO cohort_annotation_definition"
-              + " (cohort_id, column_name, annotation_type)"
-              + " SELECT :toCohortId, column_name, annotation_type"
+              + " (cohort_id, column_name, annotation_type, version)"
+              + " SELECT :toCohortId, column_name, annotation_type, 0"
               + " FROM cohort_annotation_definition"
               + " WHERE cohort_id = :fromCohortId",
       nativeQuery = true)
