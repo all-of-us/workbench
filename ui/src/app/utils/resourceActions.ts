@@ -7,10 +7,6 @@ import {
   RecentResource,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {NotebookResourceCard} from "app/pages/analysis/notebook-resource-card";
-import {CohortResourceCard} from "app/pages/analysis/cohort-resource-card";
-import {ResourceCard} from "app/components/resource-card";
-import * as React from "react";
 
 export enum ResourceType {
     NOTEBOOK = 'notebook',
@@ -20,18 +16,6 @@ export enum ResourceType {
     DATA_SET = 'dataSet',
     INVALID = 'invalid'
   }
-
-export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[],
-  workspaceNamespace: string, workspaceId: string,
-  accessLevel: WorkspaceAccessLevel,
-  resourceType: ResourceType): RecentResource[] {
-  const resourceList = [];
-  for (const resource of list) {
-    resourceList.push(convertToResource(resource, workspaceNamespace, workspaceId,
-      accessLevel, resourceType));
-  }
-  return resourceList;
-}
 
 export function convertToResource(resource: FileDetail | Cohort | CohortReview | ConceptSet,
   workspaceNamespace: string, workspaceId: string,

@@ -70,21 +70,25 @@ export const CohortResourceCard = fp.flow(
         onClick: () => {
           this.setState({showRenameModal: true});
         },
+        disabled: false
       },
       {
         icon: 'copy',
         displayName: 'Duplicate',
-        onClick: () => this.duplicate()
+        onClick: () => this.duplicate(),
+        disabled: false
       },
       {
         icon: 'pencil',
         displayName: 'Edit',
-        onClick: () => navigateByUrl(this.resourceUrl)
+        onClick: () => navigateByUrl(this.resourceUrl),
+        disabled: false
       },
       {
         icon: 'grid-view',
         displayName: 'Review',
-        onClick: () => navigateByUrl(this.reviewCohortUrl)
+        onClick: () => navigateByUrl(this.reviewCohortUrl),
+        disabled: false
       },
       {
         icon: 'trash',
@@ -92,7 +96,8 @@ export const CohortResourceCard = fp.flow(
         onClick: () => {
           this.props.showConfirmDeleteModal(this.displayName,
             this.resourceType, () => this.delete());
-        }
+        },
+        disabled: false
       }
     ];
   }
