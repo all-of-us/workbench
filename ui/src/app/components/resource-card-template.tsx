@@ -62,7 +62,6 @@ export interface Action {
 
 interface Props {
   actions: Action[];
-  actionsDisabled: boolean;
   disabled: boolean;
   resourceUrl: string;
   displayName: string;
@@ -105,11 +104,13 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
                 </React.Fragment>
               }
             >
-              <Clickable disabled={this.props.actionsDisabled} data-test-id='resource-menu'>
+              <Clickable data-test-id='resource-menu'>
                 <ClrIcon shape='ellipsis-vertical' size={21}
-                         style={{color: this.props.actionsDisabled ? '#9B9B9B' : '#2691D0',
-                           marginLeft: -9, cursor: this.props.actionsDisabled ? 'auto' : 'pointer'}
-                         }/>
+                         style={{
+                           color: '#2691D0',
+                           marginLeft: -9,
+                           cursor: 'pointer'
+                         }}/>
               </Clickable>
             </PopupTrigger>
 

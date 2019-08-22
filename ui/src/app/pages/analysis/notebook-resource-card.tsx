@@ -177,7 +177,6 @@ export const NotebookResourceCard = fp.flow(
 
       <ResourceCardTemplate
         actions={this.actions}
-        actionsDisabled={false}
         disabled={false} // Notebook Cards are always at least readable
         resourceUrl={this.resourceUrl}
         displayName={this.displayName}

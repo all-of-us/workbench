@@ -70,25 +70,25 @@ export const CohortResourceCard = fp.flow(
         onClick: () => {
           this.setState({showRenameModal: true});
         },
-        disabled: false
+        disabled: !this.writePermission
       },
       {
         icon: 'copy',
         displayName: 'Duplicate',
         onClick: () => this.duplicate(),
-        disabled: false
+        disabled: !this.writePermission
       },
       {
         icon: 'pencil',
         displayName: 'Edit',
         onClick: () => navigateByUrl(this.resourceUrl),
-        disabled: false
+        disabled: !this.writePermission
       },
       {
         icon: 'grid-view',
         displayName: 'Review',
         onClick: () => navigateByUrl(this.reviewCohortUrl),
-        disabled: false
+        disabled: !this.writePermission
       },
       {
         icon: 'trash',
@@ -97,7 +97,7 @@ export const CohortResourceCard = fp.flow(
           this.props.showConfirmDeleteModal(this.displayName,
             this.resourceType, () => this.delete());
         },
-        disabled: false
+        disabled: !this.writePermission
       }
     ];
   }
@@ -165,7 +165,6 @@ export const CohortResourceCard = fp.flow(
 
       <ResourceCardTemplate
         actions={this.actions}
-        actionsDisabled={!this.writePermission}
         disabled={!this.writePermission}
         resourceUrl={this.resourceUrl}
         displayName={this.displayName}
