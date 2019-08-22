@@ -3,7 +3,9 @@ import {FormControl, FormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs/Subscription';
 
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {typeToTitle} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
@@ -273,10 +275,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       this.deceased.setValue(true);
     }
     this.subscription = this.deceased.valueChanges.subscribe(includeDeceased => {
-      if (!this.deceasedNode) {
-        console.warn('No node from which to make parameter for deceased status');
-        return ;
-      }
+      triggerEvent('Cohort Builder Search', 'Click', 'Demo - Age/Deceased - Deceased Box');
       const wizard = this.wizard;
       wizard.item.searchParameters = [includeDeceased ? this.deceasedNode : this.selectedNode];
       const selections = [
@@ -323,6 +322,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   selectOption = (opt: any) => {
+    triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(opt.type)} - ${opt.name}`);
     if (!this.selections.includes(opt.parameterId)) {
       const wizard = this.wizard;
       wizard.item.searchParameters.push(opt);

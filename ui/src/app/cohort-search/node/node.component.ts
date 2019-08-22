@@ -151,7 +151,8 @@ export class NodeComponent implements OnInit, OnDestroy {
       triggerEvent(
         'Cohort Builder Search',
         'Click',
-        `${domainToTitle(domainId)} - ${formattedName} - Expand`);
+        `${domainToTitle(domainId)} - ${formattedName} - Expand`
+      );
     }
   }
 
