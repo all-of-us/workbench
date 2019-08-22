@@ -1460,9 +1460,10 @@ def deploy_gcs_artifacts(cmd_name, args)
       generated/aou-snippets-menu.js
       gs://#{gcc.project}-cluster-resources/
     })
-    # This file must be readable by all AoU researchers and the Leonardo service
-    # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make
-    # these public since these assets are public in GitHub anyways.
+    # This bucket must be readable by all AoU researchers and their pet service accounts
+    # account (https://github.com/DataBiosphere/leonardo/issues/220). Sharing with all
+    # registered users. The firecloud.org check is to avoid circular requirements in
+    # environment setup
     if auth_domain_group.end_with?('firecloud.org')
       run_inline_or_log(op.opts.dry_run, %W{
         gsutil iam ch group:#{auth_domain_group}:objectViewer gs://#{gcc.project}-cluster-resources

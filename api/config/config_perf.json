@@ -13,7 +13,7 @@
     "billingRetryCount": 4,
     "billingProjectBufferCapacity": 20,
     "xAppIdValue": "perf-AoU-RW",
-    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_perf"
+    "vpcServicePerimeterName": "TODO"
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -68,6 +68,6 @@
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
-    "enableVpcServicePerimeter": true
+    "enableVpcServicePerimeter": false
   }
 }
