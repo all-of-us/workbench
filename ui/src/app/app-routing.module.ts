@@ -1,6 +1,7 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
@@ -179,6 +180,7 @@ const routes: Routes = [
                       },
                       {
                         path: 'build',
+                        canDeactivate: [CanDeactivateGuard],
                         loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
                       },
                       {

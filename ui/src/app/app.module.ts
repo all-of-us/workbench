@@ -10,6 +10,7 @@ import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
 import {InterceptedHttp} from './factory/InterceptedHttp';
+import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {CdrVersionStorageService} from './services/cdr-version-storage.service';
 import {ErrorHandlingService} from './services/error-handling.service';
 import {ErrorReporterService} from './services/error-reporter.service';
@@ -200,7 +201,8 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
       useValue: window
     },
     WorkbenchRouteReuseStrategy,
-    {provide: RouteReuseStrategy, useExisting: WorkbenchRouteReuseStrategy}
+    {provide: RouteReuseStrategy, useExisting: WorkbenchRouteReuseStrategy},
+    CanDeactivateGuard
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent, ErrorHandlerComponent, InitialErrorComponent]

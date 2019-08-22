@@ -73,6 +73,10 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     searchRequestStore.next({includes: [], excludes: []} as SearchRequest);
   }
 
+  canDeactivate(): Observable<boolean> | boolean {
+    return true;
+  }
+
   getTempObj(e) {
     this.tempLength = e;
   }
