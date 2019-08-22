@@ -16,11 +16,27 @@ const ResourceCardWrapper = {
     cohort: new CohortsApiStub().cohorts[0],
     modifiedTime: new Date().toISOString()
   },
+  readonlyCohortCard: {
+    workspaceId: 1,
+    workspaceNamespace: 'defaultNamespace',
+    workspaceFirecloudName: 'defaultFirecloudName',
+    permission: 'READER',
+    cohort: new CohortsApiStub().cohorts[0],
+    modifiedTime: new Date().toISOString()
+  },
   cohortReviewCard: {
     workspaceId: 1,
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
+    cohortReview: cohortReviewStubs[0],
+    modifiedTime: new Date().toISOString()
+  },
+  readonlyCohortReviewCard: {
+    workspaceId: 1,
+    workspaceNamespace: 'defaultNamespace',
+    workspaceFirecloudName: 'defaultFirecloudName',
+    permission: 'READER',
     cohortReview: cohortReviewStubs[0],
     modifiedTime: new Date().toISOString()
   },
@@ -32,11 +48,31 @@ const ResourceCardWrapper = {
     conceptSet: new ConceptSetsApiStub().conceptSets[0],
     modifiedTime: new Date().toISOString()
   },
+  readonlyConceptSetCard: {
+    workspaceId: 1,
+    workspaceNamespace: 'defaultNamespace',
+    workspaceFirecloudName: 'defaultFire cloudName',
+    permission: 'READER',
+    conceptSet: new ConceptSetsApiStub().conceptSets[0],
+    modifiedTime: new Date().toISOString()
+  },
   notebookCard: {
     workspaceId: 1,
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
+    notebook: {
+      'name': 'mockFile.ipynb',
+      'path': 'gs://bucket/notebooks/mockFile.ipynb',
+      'lastModifiedTime': 100
+    },
+    modifiedTime: new Date().toISOString()
+  },
+  readonlyNotebookCard: {
+    workspaceId: 1,
+    workspaceNamespace: 'defaultNamespace',
+    workspaceFirecloudName: 'defaultFirecloudName',
+    permission: 'READER',
     notebook: {
       'name': 'mockFile.ipynb',
       'path': 'gs://bucket/notebooks/mockFile.ipynb',
@@ -82,6 +118,25 @@ describe('ResourceCardComponent', () => {
     expect(lastModifiedDate(wrapper)).toBeTruthy();
   });
 
-  // Note: this spec is not testing the Popup menus on resource cards due to an issue using
-  //    PopupTrigger in the test suite.
+  // We can't test the popup menus themselves in this test because PopupTrigger doesn't know how to draw the modal
+  // without a browser to define bounding boxes...
+  it('should always have a clickable popup menu (cohort)', () => {
+    const wrapper = component(ResourceCardWrapper.readonlyCohortCard);
+    expect(wrapper.find('[data-test-id="resource-menu"]').props()['disabled']).toBe(false);
+  });
+
+  it('should always have a clickable popup menu (cohort review)', () => {
+    const wrapper = component(ResourceCardWrapper.readonlyCohortReviewCard);
+    expect(wrapper.find('[data-test-id="resource-menu"]').props()['disabled']).toBe(false);
+  });
+
+  it('should always have a clickable popup menu (concept set)', () => {
+    const wrapper = component(ResourceCardWrapper.readonlyConceptSetCard);
+    expect(wrapper.find('[data-test-id="resource-menu"]').props()['disabled']).toBe(false);
+  });
+
+  it('should always have a clickable popup menu (notebook)', () => {
+    const wrapper = component(ResourceCardWrapper.readonlyNotebookCard);
+    expect(wrapper.find('[data-test-id="resource-menu"]').props()['disabled']).toBe(false);
+  });
 });
