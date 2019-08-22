@@ -576,11 +576,13 @@ def register_service_account(cmd_name, *args)
         "Project to register the service account for"
   )
   op.parse.validate
+  firecloud_base_url = get_firecloud_base_url(op.opts.project)
   ServiceAccountContext.new(op.opts.project).run do
     Dir.chdir("../firecloud-tools") do
       common = Common.new
       common.run_inline %W{./run.sh scripts/register_service_account/register_service_account.py
-           -j #{ENV["GOOGLE_APPLICATION_CREDENTIALS"]} -e all-of-us-research-tools@googlegroups.com}
+           -j #{ENV["GOOGLE_APPLICATION_CREDENTIALS"]} -e all-of-us-research-tools@googlegroups.com
+           -u #{firecloud_base_url}}
     end
   end
 end
@@ -1447,6 +1449,7 @@ def deploy_gcs_artifacts(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
+  auth_domain_group = get_auth_domain_group(gcc.project)
 
   Dir.chdir("cluster-resources") do
     common.run_inline(%W{./build.rb build-snippets-menu})
@@ -1460,12 +1463,11 @@ def deploy_gcs_artifacts(cmd_name, args)
     # This file must be readable by all AoU researchers and the Leonardo service
     # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make
     # these public since these assets are public in GitHub anyways.
-    run_inline_or_log(op.opts.dry_run, %W{
-      gsutil acl ch -u AllUsers:R
-      gs://#{gcc.project}-cluster-resources/setup_notebook_cluster.sh
-      gs://#{gcc.project}-cluster-resources/playground-extension.js
-      gs://#{gcc.project}-cluster-resources/aou-snippets-menu.js
-    })
+    if auth_domain_group.end_with?('firecloud.org')
+      run_inline_or_log(op.opts.dry_run, %W{
+        gsutil iam ch group:#{auth_domain_group}:objectViewer gs://#{gcc.project}-cluster-resources
+      })
+    end
   end
 end
 
@@ -1578,6 +1580,14 @@ end
 
 def get_auth_domain(project)
   return get_fc_config(project)["registeredDomainName"]
+end
+
+def get_auth_domain_group(project)
+  return get_fc_config(project)["registeredDomainGroup"]
+end
+
+def get_firecloud_base_url(project)
+  return get_fc_config(project)["baseUrl"]
 end
 
 def get_es_base_url(env)

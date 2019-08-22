@@ -1,46 +1,46 @@
 {
   "firecloud": {
-    "baseUrl": "https:\/\/api.firecloud.org",
+    "baseUrl": "https:\/\/firecloud-orchestration.dsde-perf.broadinstitute.org",
     "billingAccountId": "014D91-FCB792-33D2C0",
-    "billingProjectPrefix": "aou-rw-staging-",
+    "billingProjectPrefix": "aou-rw-perf-",
     "clusterMaxAgeDays": 7,
     "clusterIdleMaxAgeDays": 3,
     "debugEndpoints": false,
     "enforceRegistered": true,
-    "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
-    "registeredDomainName": "all-of-us-registered-staging",
-    "registeredDomainGroup": "GROUP_all-of-us-registered-staging@firecloud.org",
-    "billingRetryCount": 2,
-    "billingProjectBufferCapacity": 10,
-    "xAppIdValue": "staging-AoU-RW",
-    "vpcServicePerimeterName": ""
+    "leoBaseUrl": "https:\/\/leonardo.dsde-perf.broadinstitute.org",
+    "registeredDomainName": "all-of-us-registered-perf",
+    "registeredDomainGroup": "all-of-us-registered-perf@perf.test.firecloud.org",
+    "billingRetryCount": 4,
+    "billingProjectBufferCapacity": 20,
+    "xAppIdValue": "perf-AoU-RW",
+    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_perf"
   },
   "auth": {
     "serviceAccountApiUsers": [
-      "all-of-us-rw-staging@appspot.gserviceaccount.com"
+      "all-of-us-rw-perf@appspot.gserviceaccount.com"
     ]
   },
   "cdr": {
     "debugQueries": true
   },
   "googleCloudStorageService": {
-    "clusterResourcesBucketName": "all-of-us-rw-staging-cluster-resources",
-    "credentialsBucketName": "all-of-us-rw-staging-credentials",
+    "clusterResourcesBucketName": "all-of-us-rw-perf-cluster-resources",
+    "credentialsBucketName": "all-of-us-rw-perf-credentials",
     "emailImagesBucketName": "all-of-us-workbench-test-email-images"
   },
   "googleDirectoryService": {
-    "gSuiteDomain": "staging.fake-research-aou.org"
+    "gSuiteDomain": "perf.fake-research-aou.org"
   },
   "server": {
-    "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-staging.appspot.com",
-    "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
-    "projectId": "all-of-us-rw-staging",
-    "shortName": "Staging",
-    "oauthClientId": "657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com",
+    "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-perf.appspot.com",
+    "publicApiKeyForErrorReports": "AIzaSyB44pugxPbfevF_fb7GichIv9D9ee5-nNk",
+    "projectId": "all-of-us-rw-perf",
+    "shortName": "Perf",
+    "oauthClientId": "63939010390-aj0r8hro7r8lkt7a45gissu3m73ietl2.apps.googleusercontent.com",
     "traceAllRequests": false
   },
   "admin": {
-    "loginUrl": "https:\/\/all-of-us-rw-staging.appspot.com/login",
+    "loginUrl": "https:\/\/all-of-us-rw-perf.appspot.com/login",
     "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
   },
   "mandrill": {
@@ -68,6 +68,6 @@
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
-    "enableVpcServicePerimeter": false
+    "enableVpcServicePerimeter": true
   }
 }

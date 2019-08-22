@@ -49,7 +49,7 @@ def build(cmd_name, ui_name, args)
   # and also uglifies the source.
   # See https://github.com/angular/angular-cli/wiki/build#--dev-vs---prod-builds.
   optimize = "--aot"
-  if Set['staging', 'stable', 'prod'].include?(options.env)
+  if Set['perf', 'staging', 'stable', 'prod'].include?(options.env)
     optimize = "--prod"
   end
 
@@ -184,7 +184,7 @@ end
 
 class BuildOptions
   # Keep in sync with .angular-cli.json.
-  ENV_CHOICES = %W{local-test local test staging stable prod}
+  ENV_CHOICES = %W{local-test local test perf staging stable prod}
   attr_accessor :env
 
   def initialize
@@ -273,6 +273,7 @@ class DeployUI
     validate_options
     environment_names = {
         "all-of-us-workbench-test" => "test",
+        "all-of-us-rw-perf" => "perf",
         "all-of-us-rw-staging" => "staging",
         "all-of-us-rw-stable" => "stable",
         "all-of-us-rw-prod" => "prod",

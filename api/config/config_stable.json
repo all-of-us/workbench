@@ -9,6 +9,7 @@
     "enforceRegistered": true,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-stable",
+    "registeredDomainGroup": "GROUP_all-of-us-registered-stable@firecloud.org",
     "billingRetryCount": 2,
     "billingProjectBufferCapacity": 10,
     "xAppIdValue": "stable-AoU-RW",
