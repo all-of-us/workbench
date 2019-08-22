@@ -100,6 +100,7 @@
     <include file="changelog/db.changelog-90-review-version.xml"/>
     <include file="changelog/db.changelog-91-review-last-modified.xml"/>
     <include file="changelog/db.changelog-92-dataset-add-prepackaged-conceptsets.xml"/>
+    <include file="changelog/db.changelog-93-annotation-version.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

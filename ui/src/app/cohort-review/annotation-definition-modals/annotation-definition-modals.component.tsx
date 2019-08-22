@@ -181,8 +181,11 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
       const {editId, editValue} = this.state;
       if (editValue && !fp.some({columnName: editValue}, annotationDefinitions)) {
         this.setState({busy: true});
+        const {annotationType, etag} = annotationDefinitions
+          .find(annotationDef => annotationDef.cohortAnnotationDefinitionId === editId);
         const newDef = await cohortAnnotationDefinitionApi().updateCohortAnnotationDefinition(
-          ns, wsid, cid, editId, {columnName: editValue}
+          ns, wsid, cid, editId,
+          {cohortId: cid, columnName: editValue, annotationType, etag}
         );
         setAnnotationDefinitions(
           annotationDefinitions.map(oldDef => {

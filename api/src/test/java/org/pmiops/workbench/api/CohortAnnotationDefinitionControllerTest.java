@@ -23,7 +23,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.ModifyCohortAnnotationDefinitionRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 
@@ -215,7 +214,7 @@ public class CohortAnnotationDefinitionControllerTest {
     long cohortId = 1;
     long annotationDefinitionId = 1;
 
-    ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
+    CohortAnnotationDefinition request = new CohortAnnotationDefinition();
     request.setColumnName("ignore");
     WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
@@ -251,7 +250,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
 
-    ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
+    CohortAnnotationDefinition request = new CohortAnnotationDefinition();
     request.setColumnName("ignore");
 
     WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
@@ -294,7 +293,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
     Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-    ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
+    CohortAnnotationDefinition request = new CohortAnnotationDefinition();
     request.setColumnName("ignore");
     WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
@@ -340,8 +339,8 @@ public class CohortAnnotationDefinitionControllerTest {
 
     Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-    ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
-    request.setColumnName(columnName);
+    CohortAnnotationDefinition request =
+        new CohortAnnotationDefinition().columnName(columnName).etag(Etags.fromVersion(0));
 
     org.pmiops.workbench.db.model.CohortAnnotationDefinition definition =
         createDBCohortAnnotationDefinition(
@@ -392,8 +391,11 @@ public class CohortAnnotationDefinitionControllerTest {
 
     Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-    ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
-    request.setColumnName(columnName);
+    CohortAnnotationDefinition request =
+        new CohortAnnotationDefinition()
+            .columnName(columnName)
+            .etag(Etags.fromVersion(0))
+            .cohortId(cohortId);
 
     org.pmiops.workbench.db.model.CohortAnnotationDefinition definition =
         createDBCohortAnnotationDefinition(
@@ -861,6 +863,7 @@ public class CohortAnnotationDefinitionControllerTest {
     request.setColumnName(columnName);
     request.setAnnotationType(annotationType);
     request.setEnumValues(new ArrayList<>());
+    request.setEtag(Etags.fromVersion(0));
     return request;
   }
 
@@ -874,7 +877,8 @@ public class CohortAnnotationDefinitionControllerTest {
         .cohortId(cohortId)
         .cohortAnnotationDefinitionId(annotationDefinitionId)
         .annotationTypeEnum(annotationType)
-        .columnName(columnName);
+        .columnName(columnName)
+        .version(0);
   }
 
   private void verifyNoMoreMockInteractions() {
