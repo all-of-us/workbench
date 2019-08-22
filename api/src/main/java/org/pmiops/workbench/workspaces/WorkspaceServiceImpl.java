@@ -112,9 +112,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return getWorkspacesAndPublicWorkspaces().stream()
         .filter(
             workspaceResponse ->
-                !(workspaceResponse.getAccessLevel() != WorkspaceAccessLevel.OWNER
-                    && workspaceResponse.getAccessLevel() != WorkspaceAccessLevel.WRITER
-                    && workspaceResponse.getWorkspace().getPublished()))
+                workspaceResponse.getAccessLevel() == WorkspaceAccessLevel.OWNER
+                    || workspaceResponse.getAccessLevel() == WorkspaceAccessLevel.WRITER
+                    || !workspaceResponse.getWorkspace().getPublished())
         .collect(Collectors.toList());
   }
 
@@ -156,7 +156,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
 
-    WorkspaceResponse response = new WorkspaceResponse();
+    WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
     // This enforces access controls.
     fcResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
@@ -164,16 +164,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
       // We don't expose PROJECT_OWNER in our API; just use OWNER.
-      response.setAccessLevel(WorkspaceAccessLevel.OWNER);
+      workspaceResponse.setAccessLevel(WorkspaceAccessLevel.OWNER);
     } else {
-      response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
-      if (response.getAccessLevel() == null) {
+      workspaceResponse.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
+      if (workspaceResponse.getAccessLevel() == null) {
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    response.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    workspaceResponse.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
 
-    return response;
+    return workspaceResponse;
   }
 
   private Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse>
