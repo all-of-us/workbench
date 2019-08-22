@@ -122,21 +122,21 @@ describe('ResourceCardComponent', () => {
   // without a browser to define bounding boxes...
   it('should always have a clickable popup menu (cohort)', () => {
     const wrapper = component(ResourceCardWrapper.readonlyCohortCard);
-    expect(wrapper.find('[data-test-id="resource-menu"]').props()['disabled']).toBe(false);
+    expect(wrapper.find('[data-test-id="resource-menu"]').props()['disabled']).toBe(undefined);
   });
 
   it('should always have a clickable popup menu (cohort review)', () => {
     const wrapper = component(ResourceCardWrapper.readonlyCohortReviewCard);
-    expect(wrapper.find('[data-test-id="resource-menu"]').props()['disabled']).toBe(false);
+    expect(wrapper.find('[data-test-id="resource-menu"]').props()['disabled']).toBe(undefined);
   });
 
   it('should always have a clickable popup menu (concept set)', () => {
     const wrapper = component(ResourceCardWrapper.readonlyConceptSetCard);
-    expect(wrapper.find('[data-test-id="resource-menu"]').props()['disabled']).toBe(false);
+    expect(wrapper.find('[data-test-id="resource-menu"]').props()['disabled']).toBe(undefined);
   });
 
   it('should always have a clickable popup menu (notebook)', () => {
     const wrapper = component(ResourceCardWrapper.readonlyNotebookCard);
-    expect(wrapper.find('[data-test-id="resource-menu"]').props()['disabled']).toBe(false);
+    expect(wrapper.find('[data-test-id="resource-menu"]').props()['disabled']).toBe(undefined);
   });
 });
