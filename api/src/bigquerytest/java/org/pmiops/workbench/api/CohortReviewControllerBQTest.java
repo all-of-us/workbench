@@ -189,7 +189,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Override
   public List<String> getTableNames() {
     return Arrays.asList(
-        "person_all_events", "person", "search_person", "search_all_domains", "death");
+        "cb_review_all_events", "person", "cb_search_person", "cb_search_all_events", "death");
   }
 
   @Override
