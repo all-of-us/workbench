@@ -201,6 +201,13 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   setMode(mode: any) {
+    if (mode === 'modifiers') {
+      triggerEvent(
+        'Cohort Builder Search',
+        'Click',
+        `Modifiers - ${domainToTitle(this.wizard.domain)} - Cohort Builder Search`
+      );
+    }
     if (this.mode !== 'attributes') {
       this.backMode = this.mode;
     }

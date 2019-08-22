@@ -200,6 +200,10 @@ export const ListSearch = withCurrentWorkspace()(
       try {
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
         const {sourceMatch} = this.state;
+        triggerEvent(
+          'Cohort Builder Search',
+          'Click',
+          `Standard Vocab Hyperlink - ${domainToTitle(domain)} - Cohort Builder Search`);
         this.setState({data: null, error: false, loading: true, results: 'standard'});
         const resp = await cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(
           +cdrVersionId, domain, sourceMatch.conceptId
@@ -244,7 +248,8 @@ export const ListSearch = withCurrentWorkspace()(
       triggerEvent(
         'Cohort Builder Search',
         'Click',
-        `More Info - ${domainToTitle(domain)} - Cohort Builder Search`);
+        `More Info - ${domainToTitle(domain)} - Cohort Builder Search`
+      );
       this.props.hierarchy(row);
     }
 
@@ -378,6 +383,13 @@ export const ListSearch = withCurrentWorkspace()(
               There are no standard matches for source code {sourceMatch.code}.
             </span>}
             &nbsp;<Clickable style={styles.vocabLink}
+              onMouseDown={() => {
+                triggerEvent(
+                  'Cohort Builder Search',
+                  'Click',
+                  `Standard Vocab Hyperlink - ${domainToTitle(domain)} - Cohort Builder Search`
+                );
+              }}
               onClick={() => this.getResults(sourceMatch.code)}>
               Return to source code
             </Clickable>.

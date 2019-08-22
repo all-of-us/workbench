@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {wizardStore} from 'app/cohort-search/search-state.service';
-import {mapParameter} from 'app/cohort-search/utils';
+import {domainToTitle, mapParameter} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {DatePicker} from 'app/components/inputs';
@@ -8,6 +8,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -329,7 +330,13 @@ export const ListModifierPage = withCurrentWorkspace()(
     }
 
     selectChange = (sel: any, index: number) => {
+      const {wizard: {domain}} = this.props;
       const {formState} = this.state;
+      triggerEvent(
+        'Cohort Builder Search',
+        'Click',
+        `Modifiers - ${formState[index].label} - ${domainToTitle(domain)} - Cohort Builder Search`
+      );
       const {name} = formState[index];
       if (name === ModifierType.ENCOUNTERS) {
         formState[index].values = [sel];
@@ -381,13 +388,17 @@ export const ListModifierPage = withCurrentWorkspace()(
     }
 
     calculate = () => {
-      // TODO update when new api call is ready, currently this will always fail
+      const {
+        wizard: {domain, item: {modifiers, searchParameters}, role},
+        workspace: {cdrVersionId}
+      } = this.props;
+      triggerEvent(
+        'Cohort Builder Search',
+        'Click',
+        `Modifiers - Calculate - ${domainToTitle(domain)} - Cohort Builder Search`
+      );
       try {
         this.setState({loading: true, count: null, error: false});
-        const {
-          wizard: {domain, item: {modifiers, searchParameters}, role},
-          workspace: {cdrVersionId}
-        } = this.props;
         const request = {
           includes: [],
           excludes: [],
