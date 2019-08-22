@@ -13,7 +13,7 @@
     "billingRetryCount": 4,
     "billingProjectBufferCapacity": 20,
     "xAppIdValue": "perf-AoU-RW",
-    "vpcServicePerimeterName": "TODO"
+    "vpcServicePerimeterName": ""
   },
   "auth": {
     "serviceAccountApiUsers": [

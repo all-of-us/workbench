@@ -1464,7 +1464,7 @@ def deploy_gcs_artifacts(cmd_name, args)
     # account (https://github.com/DataBiosphere/leonardo/issues/220). Sharing with all
     # registered users. The firecloud.org check is to avoid circular requirements in
     # environment setup
-    if auth_domain_group.end_with?('firecloud.org')
+    if !auth_domain_group.nil? and !auth_domain_group.empty?
       run_inline_or_log(op.opts.dry_run, %W{
         gsutil iam ch group:#{auth_domain_group}:objectViewer gs://#{gcc.project}-cluster-resources
       })
