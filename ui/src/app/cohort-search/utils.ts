@@ -294,3 +294,7 @@ export function mapParameter(sp: any) {
   }
   return param;
 }
+
+export function sanitizeNumericalInput(input: string) {
+  return (input && input.length > 10) ? input.slice(0, 10) : input;
+}
