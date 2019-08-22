@@ -114,8 +114,23 @@ export function subTypeToTitle(subtype: string): string {
     case CriteriaSubType[CriteriaSubType.BP]:
       subtype = 'Blood Pressure';
       break;
+    case CriteriaSubType[CriteriaSubType.BMI]:
+      subtype = 'BMI';
+      break;
     case CriteriaSubType[CriteriaSubType.HR]:
       subtype = 'Heart Rate';
+      break;
+    case CriteriaSubType[CriteriaSubType.HEIGHT]:
+      subtype = 'Height';
+      break;
+    case CriteriaSubType[CriteriaSubType.HC]:
+      subtype = 'Hip Circumference';
+      break;
+    case CriteriaSubType[CriteriaSubType.WC]:
+      subtype = 'Waist Circumference';
+      break;
+    case CriteriaSubType[CriteriaSubType.WEIGHT]:
+      subtype = 'Weight';
       break;
   }
   return subtype;
