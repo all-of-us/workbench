@@ -8,19 +8,24 @@ import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -30,6 +35,7 @@ import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.KernelTypeEnum;
+import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -84,6 +90,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   private CohortQueryBuilder cohortQueryBuilder;
+  private ConceptBigQueryService conceptBigQueryService;
   private BigQueryService bigQueryService;
   private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private Provider<WorkbenchConfig> configProvider;
@@ -100,12 +107,14 @@ public class DataSetServiceImpl implements DataSetService {
       BigQueryService bigQueryService,
       CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
       CohortDao cohortDao,
+      ConceptBigQueryService conceptBigQueryService,
       ConceptSetDao conceptSetDao,
       CohortQueryBuilder cohortQueryBuilder,
       Provider<WorkbenchConfig> configProvider) {
     this.bigQueryService = bigQueryService;
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.cohortDao = cohortDao;
+    this.conceptBigQueryService = conceptBigQueryService;
     this.conceptSetDao = conceptSetDao;
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.configProvider = configProvider;
@@ -120,6 +129,7 @@ public class DataSetServiceImpl implements DataSetService {
       List<Long> cohortIdList,
       List<Long> conceptIdList,
       List<DataSetValues> values,
+      PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime) {
     DataSet dataSetDb = new DataSet();
@@ -134,6 +144,7 @@ public class DataSetServiceImpl implements DataSetService {
     dataSetDb.setCohortSetId(cohortIdList);
     dataSetDb.setConceptSetId(conceptIdList);
     dataSetDb.setValues(values);
+    dataSetDb.setPrePackagedConceptSetEnum(prePackagedConceptSetEnum);
     dataSetDb = dataSetDao.save(dataSetDb);
     return dataSetDb;
   }
@@ -152,9 +163,9 @@ public class DataSetServiceImpl implements DataSetService {
 
     if (((cohortsSelected == null || cohortsSelected.size() == 0) && !includesAllParticipants)
         || conceptSetsSelected == null
-        || (conceptSetsSelected.size() == 0
-            && (dataSet.getValues().size() == 0
-                || dataSet.getValues().get(0).getDomain() != Domain.PERSON))) {
+        || ((conceptSetsSelected.size() == 0
+                && dataSet.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.NONE))
+            && dataSet.getValues().size() == 0)) {
       throw new BadRequestException("Data Sets must include at least one cohort and concept.");
     }
 
@@ -197,6 +208,13 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(Collectors.joining(" UNION DISTINCT "));
     List<Domain> domainList =
         dataSet.getValues().stream().map(value -> value.getDomain()).collect(Collectors.toList());
+
+    // If pre packaged all survey concept set is selected create a temp concept set with concept ids
+    // of all survey question
+    if (dataSet.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.SURVEY)
+        || dataSet.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.BOTH)) {
+      conceptSetsSelected.add(handlePrePackagedSurveyConceptSet());
+    }
 
     for (Domain d : domainList) {
       Map<String, Map<String, QueryParameterValue>> queryMap = new HashMap<>();
@@ -520,5 +538,16 @@ public class DataSetServiceImpl implements DataSetService {
       default:
         throw new BadRequestException("Language not supported");
     }
+  }
+
+  private ConceptSet handlePrePackagedSurveyConceptSet() {
+    List<Long> conceptIds = conceptBigQueryService.getSurveyQuestionConceptIds();
+    ConceptSet surveyConceptSets = new ConceptSet();
+    surveyConceptSets.setName("All Surveys");
+    surveyConceptSets.setDomain(CommonStorageEnums.domainToStorage(Domain.SURVEY));
+    Set<Long> conceptIdsSet = new HashSet<Long>();
+    conceptIdsSet.addAll(conceptIds);
+    surveyConceptSets.setConceptIds(conceptIdsSet);
+    return surveyConceptSets;
   }
 }
