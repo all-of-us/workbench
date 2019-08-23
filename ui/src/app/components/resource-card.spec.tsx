@@ -1,7 +1,6 @@
 import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 
-import { WorkspaceAccessLevel } from 'generated';
 import {cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
@@ -118,25 +117,29 @@ describe('ResourceCardComponent', () => {
     expect(lastModifiedDate(wrapper)).toBeTruthy();
   });
 
+  function findResourceMenuProps(wrapper: ReactWrapper) {
+    return wrapper.find('[data-test-id="resource-menu"]').props()
+  }
+
   // We can't test the popup menus themselves in this test because PopupTrigger doesn't know how to draw the modal
   // without a browser to define bounding boxes...
   it('should always have a clickable popup menu (cohort)', () => {
     const wrapper = component(ResourceCardWrapper.readonlyCohortCard);
-    expect(wrapper.find('[data-test-id="resource-menu"]').props()).not.toContain('disabled');
+    expect(findResourceMenuProps(wrapper)).not.toContain('disabled');
   });
 
   it('should always have a clickable popup menu (cohort review)', () => {
     const wrapper = component(ResourceCardWrapper.readonlyCohortReviewCard);
-    expect(wrapper.find('[data-test-id="resource-menu"]').props()).not.toContain('disabled');
+    expect(findResourceMenuProps(wrapper)).not.toContain('disabled');
   });
 
   it('should always have a clickable popup menu (concept set)', () => {
     const wrapper = component(ResourceCardWrapper.readonlyConceptSetCard);
-    expect(wrapper.find('[data-test-id="resource-menu"]').props()).not.toContain('disabled');
+    expect(findResourceMenuProps(wrapper)).not.toContain('disabled');
   });
 
   it('should always have a clickable popup menu (notebook)', () => {
     const wrapper = component(ResourceCardWrapper.readonlyNotebookCard);
-    expect(wrapper.find('[data-test-id="resource-menu"]').props()).not.toContain('disabled');
+    expect(findResourceMenuProps(wrapper)).not.toContain('disabled');
   });
 });
