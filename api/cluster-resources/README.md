@@ -58,6 +58,15 @@ Jupyter UI extension for playground mode. Passed via GCS at cluster creation tim
 Tweak the above instructions for testing the user script to push a modified
 extension and modify the cluster controller to use it.
 
+Alternatively, on a live version of a Leo cluster, use Chrome local overrides to
+plug in your locally modified Javascript.
+
+- Follow these instructions to setup local overrides: https://developers.google.com/web/updates/2018/01/devtools#overrides
+- Search the scripts tab to find the extension Javascript and save an override
+- Find the path to that override on disk
+- Copy your local Javascript to this path to push updates
+- Reload the browser, ensuring devtools are open and "enable local overrides" is on
+
 # Snippets Menu
 
 AoU Clusters enable the [Snippets Menu extension](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/snippets_menu/readme.html)
