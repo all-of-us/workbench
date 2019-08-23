@@ -41,10 +41,6 @@ export class ConfirmPlaygroundModeModal extends React.Component<Props, State> {
           Playground mode allows you to explore, change and run the code,
           but your edits will not be saved.
         </p>
-        <p style={{color: colors.primary}}>
-          To save your work, choose <b>Make a Copy</b> from the <b>File Menu </b>
-          to make your own version.
-        </p>
       </ModalBody>
       <ModalFooter style={{alignItems: 'center'}}>
         <CheckBox id='show-again-checkbox'
