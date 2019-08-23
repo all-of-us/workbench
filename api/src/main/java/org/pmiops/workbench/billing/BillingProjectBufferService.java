@@ -175,7 +175,7 @@ public class BillingProjectBufferService {
             .toString()
             .substring(0, PROJECT_BILLING_ID_SIZE);
 
-    String prefix = workbenchConfigProvider.get().billing.billingProjectPrefix;
+    String prefix = workbenchConfigProvider.get().billing.projectNamePrefix;
     if (!prefix.endsWith("-")) {
       prefix = prefix + "-";
     }
@@ -192,6 +192,6 @@ public class BillingProjectBufferService {
   }
 
   private int getBufferMaxCapacity() {
-    return workbenchConfigProvider.get().billing.billingProjectBufferCapacity;
+    return workbenchConfigProvider.get().billing.bufferCapacity;
   }
 }

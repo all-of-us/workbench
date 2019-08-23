@@ -102,8 +102,8 @@ public class BillingProjectBufferServiceTest {
   @Before
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.billing.billingProjectPrefix = "test-prefix";
-    workbenchConfig.billing.billingProjectBufferCapacity = (int) BUFFER_CAPACITY;
+    workbenchConfig.billing.projectNamePrefix = "test-prefix";
+    workbenchConfig.billing.bufferCapacity = (int) BUFFER_CAPACITY;
 
     billingProjectBufferEntryDao = spy(billingProjectBufferEntryDao);
     TestLock lock = new TestLock();
@@ -126,7 +126,7 @@ public class BillingProjectBufferServiceTest {
 
     String billingProjectName = captor.getValue();
 
-    assertThat(billingProjectName).startsWith(workbenchConfig.billing.billingProjectPrefix);
+    assertThat(billingProjectName).startsWith(workbenchConfig.billing.projectNamePrefix);
     assertThat(
             billingProjectBufferEntryDao
                 .findByFireCloudProjectName(billingProjectName)
@@ -136,7 +136,7 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void fillBuffer_prefixName() {
-    workbenchConfig.billing.billingProjectPrefix = "test-prefix-";
+    workbenchConfig.billing.projectNamePrefix = "test-prefix-";
     billingProjectBufferService.bufferBillingProject();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -169,7 +169,7 @@ public class BillingProjectBufferServiceTest {
 
     // increase buffer capacity
     expectedCallCount++;
-    workbenchConfig.billing.billingProjectBufferCapacity = (int) BUFFER_CAPACITY + 1;
+    workbenchConfig.billing.bufferCapacity = (int) BUFFER_CAPACITY + 1;
     billingProjectBufferService.bufferBillingProject();
     verify(fireCloudService, times((int) BUFFER_CAPACITY + expectedCallCount))
         .createAllOfUsBillingProject(anyString());
@@ -187,7 +187,7 @@ public class BillingProjectBufferServiceTest {
       billingProjectBufferService.bufferBillingProject();
     }
 
-    workbenchConfig.billing.billingProjectBufferCapacity = (int) BUFFER_CAPACITY - 2;
+    workbenchConfig.billing.bufferCapacity = (int) BUFFER_CAPACITY - 2;
 
     // should no op since we're at capacity + 2
     billingProjectBufferService.bufferBillingProject();

@@ -1,7 +1,11 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -33,4 +37,14 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
   List<Workspace> findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
 
   List<Workspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
+
+  @Query(
+      "SELECT distinct w.workspaceNamespace, u from Workspace w INNER JOIN User u ON w.creator = u.userId")
+  List<Object[]> findAllWorkspaceCreators();
+
+  default Map<String, User> namespaceToCreator() {
+    Map<String, User> map = new HashMap<>();
+    findAllWorkspaceCreators().stream().forEach(e -> map.put((String) e[0], (User) e[1]));
+    return map;
+  }
 }

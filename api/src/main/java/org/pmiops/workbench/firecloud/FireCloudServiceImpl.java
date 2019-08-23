@@ -207,7 +207,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     boolean enableVpcFlowLogs = configProvider.get().featureFlags.enableVpcFlowLogs;
     CreateRawlsBillingProjectFullRequest request =
         new CreateRawlsBillingProjectFullRequest()
-            .billingAccount("billingAccounts/" + configProvider.get().billing.billingAccountId)
+            .billingAccount("billingAccounts/" + configProvider.get().billing.accountId)
             .projectName(projectName)
             .highSecurityNetwork(enableVpcFlowLogs)
             .enableFlowLogs(enableVpcFlowLogs);

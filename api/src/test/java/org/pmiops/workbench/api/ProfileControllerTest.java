@@ -289,7 +289,7 @@ public class ProfileControllerTest {
   @Test
   public void testMe_retriesBillingProjectErrors() throws Exception {
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.billing.billingRetryCount = 2;
+    config.billing.retryCount = 2;
     when(configProvider.get()).thenReturn(config);
     createUser();
 
@@ -309,7 +309,7 @@ public class ProfileControllerTest {
   @Test
   public void testMe_invalidBillingProjectError() throws Exception {
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.billing.billingRetryCount = 2;
+    config.billing.retryCount = 2;
     when(configProvider.get()).thenReturn(config);
     createUser();
 
@@ -329,7 +329,7 @@ public class ProfileControllerTest {
   @Test
   public void testMe_errorsAfterFourProjectFailures() throws Exception {
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.billing.billingRetryCount = 2;
+    config.billing.retryCount = 2;
     when(configProvider.get()).thenReturn(config);
     createUser();
 
@@ -342,7 +342,7 @@ public class ProfileControllerTest {
     membership.setCreationStatus(CreationStatusEnum.ERROR);
     membership.setProjectName(profile.getFreeTierBillingProjectName());
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
-    for (int i = 0; i <= config.billing.billingRetryCount; i++) {
+    for (int i = 0; i <= config.billing.retryCount; i++) {
       profile = profileController.getMe().getBody();
     }
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.ERROR);
@@ -858,8 +858,8 @@ public class ProfileControllerTest {
   private WorkbenchConfig generateConfig() {
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
     config.featureFlags.useBillingProjectBuffer = false;
-    config.billing.billingProjectPrefix = BILLING_PROJECT_PREFIX;
-    config.billing.billingRetryCount = 2;
+    config.billing.projectNamePrefix = BILLING_PROJECT_PREFIX;
+    config.billing.retryCount = 2;
     config.firecloud.registeredDomainName = "";
     config.access.enableComplianceTraining = false;
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";

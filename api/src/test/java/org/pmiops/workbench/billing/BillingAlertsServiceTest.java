@@ -70,12 +70,12 @@ public class BillingAlertsServiceTest {
   }
 
   @Test
-  public void findCreatorByWorkspaceNamespace() {
+  public void namespaceToCreator() {
     User user = createUser("test@test.com");
     createWorkspace(user, "rumney");
     createWorkspace(user, "rumney");
 
-    assertThat(userDao.findCreatorByWorkspaceNamespace("rumney")).isEqualTo(user);
+    assertThat(workspaceDao.namespaceToCreator().get("rumney")).isEqualTo(user);
   }
 
   @Test

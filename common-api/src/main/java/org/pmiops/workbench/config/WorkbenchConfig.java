@@ -46,11 +46,11 @@ public class WorkbenchConfig {
   }
 
   public static class BillingConfig {
-    public Integer billingRetryCount;
-    public Integer billingProjectBufferCapacity;
-    public String billingProjectPrefix;
-    public String billingAccountId;
-    public String billingExportBigQueryTable;
+    public Integer retryCount;
+    public Integer bufferCapacity;
+    public String projectNamePrefix;
+    public String accountId;
+    public String exportBigQueryTable;
     public Double defaultFreeCreditsLimit;
   }
 

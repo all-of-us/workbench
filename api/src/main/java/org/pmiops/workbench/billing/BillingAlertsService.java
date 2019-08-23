@@ -10,6 +10,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,18 +20,18 @@ public class BillingAlertsService {
 
   private final BigQueryService bigQueryService;
   private final NotificationService notificationService;
-  private final UserDao userDao;
+  private final WorkspaceDao workspaceDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public BillingAlertsService(
       BigQueryService bigQueryService,
       NotificationService notificationService,
-      UserDao userDao,
+      WorkspaceDao workspaceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.bigQueryService = bigQueryService;
     this.notificationService = notificationService;
-    this.userDao = userDao;
+    this.workspaceDao = workspaceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -38,17 +39,19 @@ public class BillingAlertsService {
     QueryJobConfiguration queryConfig =
         QueryJobConfiguration.newBuilder(
                 "SELECT project.id, SUM(cost) cost FROM `"
-                    + workbenchConfigProvider.get().billing.billingExportBigQueryTable
+                    + workbenchConfigProvider.get().billing.exportBigQueryTable
                     + "` GROUP BY project.id ORDER BY cost desc;")
             .build();
 
+    Map<String, User> namespaceToCreator = workspaceDao.namespaceToCreator();
+
     Map<User, Double> perUserSpend =
         Streams.stream(bigQueryService.executeQuery(queryConfig).getValues())
-            .filter(fv -> !fv.get("id").isNull() && !fv.get("id").isNull())
+            .filter(fv -> !fv.get("id").isNull() && !fv.get("cost").isNull())
             .map(
                 fv ->
                     new AbstractMap.SimpleImmutableEntry<>(
-                        userDao.findCreatorByWorkspaceNamespace(fv.get("id").getStringValue()),
+                        namespaceToCreator.get(fv.get("id").getStringValue()),
                         fv.get("cost").getDoubleValue()))
             .filter(spend -> spend.getKey() != null)
             .collect(
