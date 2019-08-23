@@ -17,7 +17,7 @@ import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
 import {ListPageHeader} from 'app/components/headers';
-import {ClrIcon} from 'app/components/icons';
+import {ClrIcon, SnowmanIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
@@ -107,9 +107,8 @@ const WorkspaceCardMenu: React.FunctionComponent<{
       </React.Fragment>}
   >
     <Clickable disabled={disabled} data-test-id='workspace-card-menu'>
-      <ClrIcon shape='ellipsis-vertical' size={21}
-               style={{color: disabled ? '#9B9B9B' : '#216FB4', marginLeft: -9,
-                 cursor: disabled ? 'auto' : 'pointer'}}/>
+      <SnowmanIcon disabled={disabled}
+      />
     </Clickable>
   </PopupTrigger>;
 };

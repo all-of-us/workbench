@@ -8,7 +8,7 @@ import {SlidingFabReact} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
 import {CopyModal} from 'app/components/copy-modal';
-import {ClrIcon} from 'app/components/icons';
+import {ClrIcon, SnowmanIcon} from 'app/components/icons';
 import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
@@ -87,9 +87,7 @@ const ConceptSetMenu: React.FunctionComponent<ConceptSetMenuProps> = (
     </React.Fragment>}
   >
     <Clickable  data-test-id='workspace-menu'>
-      <ClrIcon shape='ellipsis-vertical' size={21}
-               style={{color: colors.accent, marginLeft: -9,
-                 cursor: 'pointer'}}/>
+      <SnowmanIcon />
     </Clickable>
   </PopupTrigger>;
 };

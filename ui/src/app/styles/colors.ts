@@ -17,6 +17,7 @@ export default {
   dark: '#4A4A4A',
   // Text links and Icon links
   accent: '#216FB4',
+  disabled: '#9B9B9B',
   resourceCardHighlights: {
     cohort: '#F8C954',
     cohortReview: '#A8385D',
