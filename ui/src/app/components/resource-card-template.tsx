@@ -1,6 +1,6 @@
 import {Clickable, MenuItem} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
-import {ClrIcon} from 'app/components/icons';
+import {SnowmanIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -106,10 +106,7 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
               }
             >
               <Clickable disabled={this.props.actionsDisabled} data-test-id='resource-menu'>
-                <ClrIcon shape='ellipsis-vertical' size={21}
-                         style={{color: this.props.actionsDisabled ? '#9B9B9B' : '#2691D0',
-                           marginLeft: -9, cursor: this.props.actionsDisabled ? 'auto' : 'pointer'}
-                         }/>
+                <SnowmanIcon disabled={this.props.actionsDisabled}/>
               </Clickable>
             </PopupTrigger>
 
