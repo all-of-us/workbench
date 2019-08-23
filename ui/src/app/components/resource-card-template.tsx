@@ -1,6 +1,6 @@
 import {Clickable, MenuItem} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
-import {ClrIcon, SnowmanIcon} from 'app/components/icons';
+import {SnowmanIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';

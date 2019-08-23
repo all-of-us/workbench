@@ -43,7 +43,7 @@ export const SnowmanIcon = ({style= {}, ...props}) => {
                       color: colors.disabled,
                       cursor: 'auto',
                       ...style
-                    }}/>
+                    }}/>;
   } else {
     return <ClrIcon shape='ellipsis-vertical' {...props}
                     style={{
@@ -51,7 +51,7 @@ export const SnowmanIcon = ({style= {}, ...props}) => {
                       color: colors.accent,
                       cursor: 'pointer',
                       ...style
-                    }} />
+                    }} />;
   }
 };
 
