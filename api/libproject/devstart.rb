@@ -1773,7 +1773,7 @@ Common.register_command({
 
 def create_project_resources(gcc)
   common = Common.new
-  common.status "Enabling APIs..."
+  common.status "Enabling Cloud Service APIs..."
   for service in SERVICES
     common.run_inline("gcloud services enable #{service} --project #{gcc.project}")
   end

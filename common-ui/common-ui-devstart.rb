@@ -271,14 +271,14 @@ class DeployUI
     add_options
     @parser.parse @args
     validate_options
-    environment_names = {
+    project_names_to_environment_names = {
         "all-of-us-workbench-test" => "test",
         "all-of-us-rw-perf" => "perf",
         "all-of-us-rw-staging" => "staging",
         "all-of-us-rw-stable" => "stable",
         "all-of-us-rw-prod" => "prod",
     }
-    environment_name = environment_names[@opts.project]
+    environment_name = project_names_to_environment_names[@opts.project]
 
     swagger_regen(@cmd_name)
     build(@cmd_name, @ui_name, %W{--environment #{environment_name}})
