@@ -38,5 +38,4 @@ public interface UserDao extends CrudRepository<User, Long> {
       "SELECT user FROM User user WHERE user.dataAccessLevel IN :dals AND ( lower(user.email) LIKE lower(concat('%', :term, '%')) OR lower(user.familyName) LIKE lower(concat('%', :term, '%')) OR lower(user.givenName) LIKE lower(concat('%', :term, '%')) )")
   List<User> findUsersByDataAccessLevelsAndSearchString(
       @Param("dals") List<Short> dataAccessLevels, @Param("term") String term, Sort sort);
-
 }
