@@ -32,7 +32,7 @@ public class DataSet {
   private List<Long> conceptSetId;
   private List<Long> cohortSetId;
   private List<DataSetValues> values;
-  private short prePackagedConceptSet;
+  private Short prePackagedConceptSet;
 
   public DataSet() {}
 
@@ -180,16 +180,19 @@ public class DataSet {
   }
 
   @Column(name = "prePackagedConceptSet")
-  public short getPrePackagedConceptSet() {
+  public Short getPrePackagedConceptSet() {
     return prePackagedConceptSet;
   }
 
-  public void setPrePackagedConceptSet(short prePackagedConceptSet) {
+  public void setPrePackagedConceptSet(Short prePackagedConceptSet) {
     this.prePackagedConceptSet = prePackagedConceptSet;
   }
 
   @Transient
   public PrePackagedConceptSetEnum getPrePackagedConceptSetEnum() {
+    if (this.prePackagedConceptSet == null) {
+      this.prePackagedConceptSet = 0;
+    }
     return CommonStorageEnums.prePackageConceptSetsFromStorage(prePackagedConceptSet);
   }
 
