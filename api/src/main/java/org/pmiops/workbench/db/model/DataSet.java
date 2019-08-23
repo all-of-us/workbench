@@ -190,9 +190,6 @@ public class DataSet {
 
   @Transient
   public PrePackagedConceptSetEnum getPrePackagedConceptSetEnum() {
-    if (this.prePackagedConceptSet == null) {
-      this.prePackagedConceptSet = 0;
-    }
     return CommonStorageEnums.prePackageConceptSetsFromStorage(prePackagedConceptSet);
   }
 
