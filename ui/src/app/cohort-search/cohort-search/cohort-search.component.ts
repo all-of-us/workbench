@@ -7,9 +7,10 @@ import {
 } from '@angular/core';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import {Observable} from 'rxjs/Observable';
+import {of} from 'rxjs/observable/of';
 
 import {idsInUse, initExisting, searchRequestStore} from 'app/cohort-search/search-state.service';
-import {parseCohortDefinition} from 'app/cohort-search/utils';
+import {mapRequest, parseCohortDefinition} from 'app/cohort-search/utils';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {SearchRequest} from 'generated/fetch';
 
@@ -26,7 +27,6 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   @ViewChild('wrapper') wrapper;
 
   includeSize: number;
-  tempLength = {};
   private subscription;
   loading = false;
   count: number;
@@ -35,6 +35,8 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   criteria = {includes: [], excludes: []};
   triggerUpdate = 0;
   cohort: any;
+  promise: any;
+  modal = false;
 
   ngOnInit() {
     this.subscription = Observable.combineLatest(
@@ -55,6 +57,8 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
               searchRequestStore.next(parseCohortDefinition(cohort.criteria));
             }
           });
+      } else {
+        this.cohort = {criteria: '{"includes":[],"excludes":[]}'};
       }
     });
 
@@ -74,7 +78,13 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   }
 
   canDeactivate(): Observable<boolean> | boolean {
-    return false;
+    const criteria = JSON.stringify(mapRequest(this.criteria));
+    if (criteria === this.cohort.criteria) {
+      return true;
+    }
+    const message = `Warning! Your cohort has not been saved. If you’d like to save your
+     cohort criteria, please close this box and use Save or Save As to save your criteria. `;
+    return criteria === this.cohort.criteria || of(window.confirm(message));
   }
 
   @HostListener('window:resize')
