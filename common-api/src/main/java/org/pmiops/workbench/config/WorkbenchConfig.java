@@ -51,6 +51,7 @@ public class WorkbenchConfig {
     public Integer clusterMaxAgeDays;
     public Integer clusterIdleMaxAgeDays;
     public String registeredDomainName;
+    public String registeredDomainGroup;
     public boolean enforceRegistered;
     public String leoBaseUrl;
     public Integer billingRetryCount;

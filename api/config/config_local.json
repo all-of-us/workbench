@@ -10,6 +10,7 @@
     "enforceRegistered": true,
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-test",
+    "registeredDomainGroup": "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
     "billingRetryCount": 2,
     "billingProjectBufferCapacity": 2,
     "xAppIdValue": "local-AoU-RW",

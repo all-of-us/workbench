@@ -57,6 +57,7 @@ handlers:
         'self'
         https://api-dot-all-of-us-workbench-test.appspot.com
         https://api-dot-all-of-us-rw-staging.appspot.com
+        https://api-dot-all-of-us-rw-perf.appspot.com
         https://api-dot-all-of-us-rw-stable.appspot.com
         https://api.stable.fake-research-aou.org
         https://api.workbench.researchallofus.org
