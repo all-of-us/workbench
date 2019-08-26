@@ -24,6 +24,7 @@ import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {BugReportComponent} from './components/bug-report';
 import {ErrorHandlerComponent} from './components/error-handler/component';
+import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
@@ -136,6 +137,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     DataSetPageComponent,
     DataUseAgreementComponent,
     ErrorHandlerComponent,
+    HelpSidebarComponent,
     InitialErrorComponent,
     InteractiveNotebookComponent,
     NotebookListComponent,

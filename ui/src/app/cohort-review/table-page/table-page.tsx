@@ -10,6 +10,7 @@ import {
 } from 'app/cohort-review/review-state.service';
 import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {Button} from 'app/components/buttons';
+import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
@@ -660,6 +661,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           </DataTable>
         </React.Fragment>
         {loading && <SpinnerOverlay />}
+        <HelpSidebar location='review' />
       </div>;
     }
   }
