@@ -61,12 +61,12 @@
     "enableEraCommons": true,
     "enableDataUseAgreement": false,
     "enableBetaAccess": true,
-    "unsafeAllowSelfBypass": false
+    "unsafeAllowSelfBypass": true
   },
   "featureFlags": {
     "enableLeoWelder": true,
     "useBillingProjectBuffer": true,
-    "unsafeAllowDeleteUser": false,
+    "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": false
   }
