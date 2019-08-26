@@ -85,7 +85,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .machineConfig(
             new MachineConfig()
                 .masterDiskSize(
-                    Optional.ofNullable(clusterOverride.masterDiskSize).orElse(20 /* GB */))
+                    Optional.ofNullable(clusterOverride.masterDiskSize).orElse(40 /* GB */))
                 .masterMachineType(
                     Optional.ofNullable(clusterOverride.machineType).orElse("n1-standard-2")));
   }
