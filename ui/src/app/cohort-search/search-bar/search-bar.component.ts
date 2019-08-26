@@ -1,12 +1,12 @@
 import {Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {autocompleteStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
+import {domainToTitle} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
-import {domainToTitle} from '../utils';
 
 const trigger = 3;
 
