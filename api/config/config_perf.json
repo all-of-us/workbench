@@ -12,9 +12,9 @@
     "vpcServicePerimeterName": ""
   },
   "billing": {
-    "accountId": "014D91-FCB792-33D2C0",
-    "projectNamePrefix": "aou-rw-staging-",
-    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0",
+    "accountId": "00293C-5DEA2D-6887E7",
+    "projectNamePrefix": "aou-rw-perf-",
+    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_00293C-5DEA2D-6887E7",
     "retryCount": 4,
     "bufferCapacity": 20,
     "defaultFreeCreditsLimit": 300.0
