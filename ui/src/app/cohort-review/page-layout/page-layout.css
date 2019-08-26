@@ -6,5 +6,5 @@
   min-height: calc(100vh - calc(4rem + 60px));
   padding: 1rem;
   position: relative;
-  width: calc(100% + 0.6rem);
+  width: calc(100% + 0.6rem - 45px);
 }
