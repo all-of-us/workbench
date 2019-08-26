@@ -42,6 +42,7 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
   List<Object[]> findAllWorkspaceCreators();
 
   default Map<String, User> namespaceToCreator() {
-    return findAllWorkspaceCreators().stream().collect(Collectors.toMap(e -> (String) e[0], e -> (User) e[1]));
+    return findAllWorkspaceCreators().stream()
+        .collect(Collectors.toMap(e -> (String) e[0], e -> (User) e[1]));
   }
 }
