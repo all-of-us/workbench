@@ -497,8 +497,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public ResponseEntity<ParticipantChartDataListResponse> getParticipantChartData(
       String workspaceNamespace,
       String workspaceId,
-      Long cohortId,
-      Long cdrVersionId,
+      Long cohortReviewId,
       Long participantId,
       String domain,
       Integer limit) {
@@ -509,8 +508,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               "Bad Request: Please provide a chart limit between %d and %d.",
               MIN_LIMIT, MAX_LIMIT));
     }
-    validateRequestAndSetCdrVersion(
-        workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
+    CohortReview cohortReview = cohortReviewService.findCohortReview(cohortReviewId);
+    Cohort cohort = cohortReviewService.findCohort(cohortReview.getCohortId());
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
+        workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
 
     TableResult result =
         bigQueryService.executeQuery(

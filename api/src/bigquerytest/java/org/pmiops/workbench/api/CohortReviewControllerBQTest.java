@@ -46,7 +46,6 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -1393,8 +1392,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .getParticipantChartData(
                 NAMESPACE,
                 NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                review.getCohortReviewId(),
                 PARTICIPANT_ID,
                 DomainType.CONDITION.name(),
                 null)
@@ -1428,50 +1426,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getParticipantChartDataBadCohortId() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
-    try {
-      controller.getParticipantChartData(
-          NAMESPACE,
-          NAME,
-          99L,
-          cdrVersion.getCdrVersionId(),
-          PARTICIPANT_ID,
-          DomainType.CONDITION.name(),
-          null);
-      fail("Should have thrown a NotFoundException!");
-    } catch (NotFoundException nfe) {
-      // Success
-      assertThat(nfe.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: 99");
-    }
-  }
-
-  @Test
-  public void getParticipantChartDataBadCdrVersionId() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
-    try {
-      controller.getParticipantChartData(
-          NAMESPACE,
-          NAME,
-          cohort.getCohortId(),
-          99L,
-          PARTICIPANT_ID,
-          DomainType.CONDITION.name(),
-          null);
-      fail("Should have thrown a NotFoundException!");
-    } catch (NotFoundException nfe) {
-      // Success
-      assertThat(nfe.getMessage())
-          .isEqualTo(
-              "Not Found: Cohort Review does not exist for cohortId: "
-                  + cohort.getCohortId()
-                  + ", cdrVersionId: 99");
-    }
-  }
-
-  @Test
   public void getParticipantChartDataBadLimit() throws Exception {
     stubMockFirecloudGetWorkspace();
 
@@ -1479,8 +1433,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       controller.getParticipantChartData(
           NAMESPACE,
           NAME,
-          cohort.getCohortId(),
-          99L,
+          review.getCohortReviewId(),
           PARTICIPANT_ID,
           DomainType.CONDITION.name(),
           -1);
@@ -1500,8 +1453,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       controller.getParticipantChartData(
           NAMESPACE,
           NAME,
-          cohort.getCohortId(),
-          99L,
+          review.getCohortReviewId(),
           PARTICIPANT_ID,
           DomainType.CONDITION.name(),
           101);
