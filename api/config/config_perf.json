@@ -11,7 +11,7 @@
     "registeredDomainName": "all-of-us-registered-perf",
     "registeredDomainGroup": "all-of-us-registered-perf@perf.test.firecloud.org",
     "billingRetryCount": 4,
-    "billingProjectBufferCapacity": 20,
+    "billingProjectBufferCapacity": 200,
     "xAppIdValue": "perf-AoU-RW",
     "vpcServicePerimeterName": ""
   },
