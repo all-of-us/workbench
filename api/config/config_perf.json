@@ -1,7 +1,7 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/firecloud-orchestration.dsde-perf.broadinstitute.org",
-    "billingAccountId": "014D91-FCB792-33D2C0",
+    "billingAccountId": "00293C-5DEA2D-6887E7",
     "billingProjectPrefix": "aou-rw-perf-",
     "clusterMaxAgeDays": 7,
     "clusterIdleMaxAgeDays": 3,
