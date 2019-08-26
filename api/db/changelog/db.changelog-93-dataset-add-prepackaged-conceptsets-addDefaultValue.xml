@@ -4,9 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="nsaxena" id="db.changelog-92-dataset-add-prepackaged-conceptsets">
-    <addColumn tableName="data_set">
-      <column name="prePackagedConceptSet" type="tinyint"/>
-    </addColumn>
-  </changeSet>
+  <changeSet author="nsaxena" id="db.changelog-93-dataset-add-prepackaged-conceptsets-addDefaultValue.xml">
+    <sql>UPDATE data_set SET prePackagedConceptSet = 0 where prePackagedConceptSet is null</sql>
+   </changeSet>
 </databaseChangeLog>
