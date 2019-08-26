@@ -6,7 +6,7 @@
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="nsaxena" id="db.changelog-92-dataset-add-prepackaged-conceptsets">
     <addColumn tableName="data_set">
-      <column name="prePackagedConceptSet" type="tinyint" />
+      <column name="prePackagedConceptSet" type="tinyint" defaultValue="0"/>
     </addColumn>
   </changeSet>
 </databaseChangeLog>
