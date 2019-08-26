@@ -48,6 +48,10 @@ definitions:
     description: a survey for concepts
     enum: &SURVEYS [THE BASICS, LIFESTYLE, OVERALL HEALTH]
 
+  PrePackagedConceptSetEnum:
+      type: string
+      enum: &PrePackagedConceptSetEnum [NONE, DEMOGRAPHICS, SURVEY, BOTH]
+
   CdrVersionListResponse:
     type: object
     required:

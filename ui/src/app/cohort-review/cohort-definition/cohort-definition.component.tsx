@@ -1,6 +1,6 @@
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {domainToTitle} from 'app/cohort-search/utils';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import * as React from 'react';
@@ -25,7 +25,7 @@ const styles = reactStyles({
     justifyContent: 'start'
   },
   exclude: {
-    backgroundColor: 'rgb(226, 226, 233)',
+    backgroundColor: colorWithWhiteness(colors.light, -.5),
     borderRadius: '1rem',
     width: '4.5rem',
     height: '2.2rem',
@@ -33,7 +33,7 @@ const styles = reactStyles({
     textAlign: 'center'
   },
   andCircle: {
-    backgroundColor: 'rgb(226, 226, 233)',
+    backgroundColor: colorWithWhiteness(colors.light, -.5),
     borderRadius: '50%',
     width: '2.5rem',
     height: '2.5rem',
@@ -41,7 +41,7 @@ const styles = reactStyles({
     textAlign: 'center'
   },
   groupBackground: {
-    backgroundColor: '#E2E2EA',
+    backgroundColor: colorWithWhiteness(colors.light, -.5),
     color: colors.primary,
     padding: '0.3rem 0.6rem',
     margin: '0.7rem 0rem',

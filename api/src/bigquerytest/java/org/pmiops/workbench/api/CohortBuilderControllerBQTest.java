@@ -101,7 +101,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return Arrays.asList("person", "death", "search_person", "search_all_domains");
+    return Arrays.asList("person", "death", "cb_search_person", "cb_search_all_events");
   }
 
   @Override
@@ -2324,17 +2324,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .parentId(0)
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.SURVEY.toString())
             .group(true)
             .selectable(true)
-            .standard(false);
+            .standard(false)
+            .conceptId("22");
     saveCriteriaWithPath("0", surveyNode);
     CBCriteria questionNode =
         new CBCriteria()
             .parentId(surveyNode.getId())
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.QUESTION.toString())
             .group(true)
             .selectable(true)
             .standard(false)
@@ -2347,7 +2348,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .parentId(questionNode.getId())
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.ANSWER.toString())
             .group(false)
             .selectable(true)
             .standard(false)
@@ -2360,10 +2361,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.SURVEY.toString())
             .ancestorData(false)
             .standard(false)
-            .group(true);
+            .group(true)
+            .conceptId(22L);
     SearchRequest searchRequest =
         createSearchRequests(ppiSurvey.getType(), Arrays.asList(ppiSurvey), new ArrayList<>());
     assertParticipants(
@@ -2374,7 +2376,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.QUESTION.toString())
             .ancestorData(false)
             .standard(false)
             .group(true)
@@ -2392,7 +2394,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.ANSWER.toString())
             .ancestorData(false)
             .standard(false)
             .group(false)
@@ -2415,7 +2417,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.ANSWER.toString())
             .ancestorData(false)
             .standard(false)
             .group(false)

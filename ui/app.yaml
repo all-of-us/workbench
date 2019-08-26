@@ -57,6 +57,7 @@ handlers:
         'self'
         https://api-dot-all-of-us-workbench-test.appspot.com
         https://api-dot-all-of-us-rw-staging.appspot.com
+        https://api-dot-all-of-us-rw-perf.appspot.com
         https://api-dot-all-of-us-rw-stable.appspot.com
         https://api.stable.fake-research-aou.org
         https://api.workbench.researchallofus.org
@@ -66,7 +67,8 @@ handlers:
         https://api.firecloud.org
         https://*.googleapis.com
         https://*.zdassets.com
-        https://aousupporthelp.zendesk.com;
+        https://aousupporthelp.zendesk.com
+        https://www.google-analytics.com;
       child-src
         https://accounts.google.com
         https://leonardo.dsde-dev.broadinstitute.org

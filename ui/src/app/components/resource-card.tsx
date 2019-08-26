@@ -161,13 +161,13 @@ export class ResourceCard extends React.Component<Props, State> {
     return this.resourceType === ResourceType.DATA_SET;
   }
 
-  get actionsDisabled(): boolean {
-    return !this.writePermission;
-  }
-
-  get writePermission(): boolean {
+  get writerPermission(): boolean {
     return this.props.resourceCard.permission === 'OWNER'
       || this.props.resourceCard.permission === 'WRITER';
+  }
+
+  get ownerPermission(): boolean {
+    return this.props.resourceCard.permission === 'OWNER';
   }
 
   get displayName(): string {
@@ -506,16 +506,17 @@ export class ResourceCard extends React.Component<Props, State> {
                         data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
-            <ResourceCardMenu disabled={this.actionsDisabled}
-                              resourceType={this.resourceType}
+            <ResourceCardMenu resourceType={this.resourceType}
                               onCloneResource={() => this.cloneResource()}
                               onCopyConceptSet={() => this.setState({copyingConceptSet: true})}
+                              canDelete={this.ownerPermission}
                               onDeleteResource={() => this.openConfirmDelete()}
                               onRenameResource={() => this.renameResource()}
+                              canEdit={this.writerPermission}
                               onEdit={() => this.edit()}
                               onExportDataSet={() => this.exportDataSet()}
                               onReviewCohort={() => this.reviewCohort()}/>
-            <Clickable disabled={this.actionsDisabled}>
+            <Clickable>
               <a style={styles.cardName}
                    data-test-id='card-name'
                  href={this.getResourceUrl()}

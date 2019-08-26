@@ -36,6 +36,10 @@ public class ConceptBigQueryService {
           + "where UPPER(survey) = @"
           + SURVEY_PARAM;
 
+  private static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
+      "select DISTINCT(question_concept_id) as concept_id \n"
+          + "from `${projectId}.${dataSetId}.ds_survey`\n";
+
   private static final String SURVEY_ANSWER_SQL_TEMPLATE =
       "select a.answer, answer_concept_id, ans_part_count, "
           + "round((ans_part_count/ques_part_cnt)*100,2) from "
@@ -117,6 +121,11 @@ public class ConceptBigQueryService {
         .build();
   }
 
+  private QueryJobConfiguration buildSurveyQuestionConceptIdQuery() {
+    String finalSql = SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE;
+    return QueryJobConfiguration.newBuilder(finalSql).setUseLegacySql(false).build();
+  }
+
   public List<SurveyQuestionsResponse> getSurveyQuestions(String surveyName) {
     List<SurveyQuestionsResponse> responseList = new ArrayList<>();
 
@@ -163,5 +172,19 @@ public class ConceptBigQueryService {
               answerList.add(answer);
             });
     return answerList;
+  }
+
+  public List<Long> getSurveyQuestionConceptIds() {
+    TableResult result =
+        bigQueryService.executeQuery(
+            bigQueryService.filterBigQueryConfig(buildSurveyQuestionConceptIdQuery()), 360000L);
+    List<Long> conceptIdList = new ArrayList<>();
+    result
+        .getValues()
+        .forEach(
+            surveyValue -> {
+              conceptIdList.add(Long.parseLong(surveyValue.get(0).getValue().toString()));
+            });
+    return conceptIdList;
   }
 }

@@ -4,9 +4,9 @@ import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {ComboChartComponent} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
+import {AttributesPageComponent} from 'app/cohort-search/attributes-page/attributes-page.component';
 import {DemographicsComponent} from 'app/cohort-search/demographics/demographics.component';
 import {GenderChartComponent} from 'app/cohort-search/gender-chart/gender-chart.component';
-import {ListAttributesPageComponent} from 'app/cohort-search/list-attributes-page/list-attributes-page.component';
 import {ListSearchComponent} from 'app/cohort-search/list-search/list-search.component';
 import {ModalComponent} from 'app/cohort-search/modal/modal.component';
 import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
@@ -44,11 +44,11 @@ describe('CohortSearchComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
+        AttributesPageComponent,
         CohortSearchComponent,
         ComboChartComponent,
         ConfirmDeleteModalComponent,
         GenderChartComponent,
-        ListAttributesPageComponent,
         DemographicsComponent,
         ModalComponent,
         ModifierPageComponent,

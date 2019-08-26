@@ -39,7 +39,7 @@ then
 fi
 
 # Check that bq_project exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls --max_results=100)
+datasets=$(bq --project=$BQ_PROJECT ls --max_results=150)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
@@ -53,7 +53,7 @@ else
 fi
 
 # Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls --max_results=100)
+datasets=$(bq --project=$BQ_PROJECT ls --max_results=150)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
@@ -378,7 +378,7 @@ left join
 left join
 	(
 		select concept_id, count(distinct person_id) cnt
-		from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+		from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
 		where is_standard = 0
 			and concept_id in
 				(
@@ -421,7 +421,7 @@ from
 				join
 					(
 						select a.person_id, a.concept_id
-						from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` a
+						from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
 						join
 							(
     							select concept_id, path
@@ -465,7 +465,7 @@ left join
 left join
 	(
 		select concept_id, count(distinct person_id) cnt
-		from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+		from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
 		where is_standard = 0
 			and concept_id in
 				(
@@ -508,7 +508,7 @@ from
 			    join
                     (
     					select a.person_id, a.concept_id
-    					from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` a
+    					from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
     					join
     						(
     							select concept_id, path
@@ -540,7 +540,7 @@ left join
 left join
 	(
 		select concept_id, count(distinct person_id) cnt
-		from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+		from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
 		where is_standard = 0
 			and concept_id in
 				(
@@ -583,7 +583,7 @@ from
                 join
                     (
                         select a.person_id, a.concept_id
-                        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` a
+                        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
                         join
                             (
                                 select concept_id, path
@@ -629,7 +629,7 @@ left join
 left join
 	(
 		select concept_id, count(distinct person_id) cnt
-		from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+		from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
 		where is_standard = 0
 			and concept_id in
 				(
@@ -672,7 +672,7 @@ from
                 join
                     (
                         select a.person_id, a.concept_id
-                        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` a
+                        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
                         join
                             (
                                 select concept_id, path
@@ -726,7 +726,7 @@ set x.est_count = y.cnt
 from
     (
         select concept_id, CAST(value_source_concept_id as STRING) as value, count(distinct person_id) cnt
-        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
         where is_standard = 0
             and concept_id in
                 (
@@ -753,7 +753,7 @@ set x.est_count = y.cnt
 from
     (
         select concept_id, CAST(value_as_number as STRING) as value, count(distinct person_id) cnt
-        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
         where is_standard = 0
             and concept_id = 1585747
         group by 1,2
@@ -771,7 +771,7 @@ set x.est_count = y.cnt
 from
     (
         SELECT concept_id, count(distinct person_id) cnt
-        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
         where is_standard = 0
             and concept_id in
                 (
@@ -813,7 +813,7 @@ from
         left join
             (
                 SELECT a.person_id, a.concept_id, b.id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\` a
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
                 JOIN
                     (
                         SELECT id, concept_id
@@ -883,7 +883,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set est_count =
     (
         select count(distinct person_id)
-        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
         where concept_id in (903115, 903118)
             and systolic <= 90
             and diastolic <= 60
@@ -898,7 +898,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set est_count =
     (
         select count(distinct person_id)
-        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
         where concept_id in (903115, 903118)
             and systolic <= 120
             and diastolic <= 80
@@ -913,7 +913,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set est_count =
     (
         select count(distinct person_id)
-        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
         where concept_id in (903115, 903118)
             and systolic BETWEEN 120 AND 139
             and diastolic BETWEEN 81 AND 89
@@ -928,7 +928,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set est_count =
     (
         select count(distinct person_id)
-        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
         where concept_id in (903115, 903118)
             and systolic >= 140
             and diastolic >= 90
@@ -943,7 +943,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set est_count =
     (
         select count(distinct person_id)
-        from \`$BQ_PROJECT.$BQ_DATASET.search_all_domains\`
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
         where concept_id in (903115, 903118)
     )
 where domain_id = 'PHYSICAL_MEASUREMENT'

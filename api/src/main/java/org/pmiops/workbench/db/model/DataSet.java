@@ -11,7 +11,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 
 @Entity
 @Table(name = "data_set")
@@ -30,6 +32,7 @@ public class DataSet {
   private List<Long> conceptSetId;
   private List<Long> cohortSetId;
   private List<DataSetValues> values;
+  private short prePackagedConceptSet;
 
   public DataSet() {}
 
@@ -174,5 +177,23 @@ public class DataSet {
 
   public void setValues(List<DataSetValues> values) {
     this.values = values;
+  }
+
+  @Column(name = "prePackagedConceptSet")
+  public short getPrePackagedConceptSet() {
+    return prePackagedConceptSet;
+  }
+
+  public void setPrePackagedConceptSet(short prePackagedConceptSet) {
+    this.prePackagedConceptSet = prePackagedConceptSet;
+  }
+
+  @Transient
+  public PrePackagedConceptSetEnum getPrePackagedConceptSetEnum() {
+    return CommonStorageEnums.prePackageConceptSetsFromStorage(prePackagedConceptSet);
+  }
+
+  public void setPrePackagedConceptSetEnum(PrePackagedConceptSetEnum domain) {
+    this.prePackagedConceptSet = CommonStorageEnums.prePackageConceptSetsToStorage(domain);
   }
 }

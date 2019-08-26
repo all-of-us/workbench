@@ -182,7 +182,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
         "condition_occurrence",
         "observation",
         "vocabulary",
-        "search_all_domains");
+        "cb_search_all_events");
   }
 
   @Override

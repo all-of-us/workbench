@@ -8,6 +8,7 @@
     "enforceRegistered": true,
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-test",
+    "registeredDomainGroup": "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
     "xAppIdValue": "test-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test"
   },

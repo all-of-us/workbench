@@ -184,17 +184,18 @@ public class CriteriaLookupUtilTest {
             .parentId(0)
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.SURVEY.toString())
             .group(true)
             .selectable(true)
-            .standard(false);
+            .standard(false)
+            .conceptId("22");
     saveCriteriaWithPath("0", surveyNode);
     CBCriteria questionNode =
         new CBCriteria()
             .parentId(surveyNode.getId())
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.QUESTION.toString())
             .group(true)
             .selectable(true)
             .standard(false)
@@ -207,7 +208,7 @@ public class CriteriaLookupUtilTest {
             .parentId(questionNode.getId())
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.ANSWER.toString())
             .group(false)
             .selectable(true)
             .standard(false)
@@ -217,15 +218,16 @@ public class CriteriaLookupUtilTest {
     saveCriteriaWithPath(questionNode.getPath(), answerNode);
 
     // Survey search
-    List<Long> childConceptIds = Arrays.asList(5L);
+    List<Long> childConceptIds = Arrays.asList(5L, 1586135L);
     SearchParameter searchParameter =
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BASICS.toString())
+            .subtype(CriteriaSubType.SURVEY.toString())
             .group(true)
             .standard(false)
-            .ancestorData(false);
+            .ancestorData(false)
+            .conceptId(22L);
     SearchRequest searchRequest =
         new SearchRequest()
             .addIncludesItem(
@@ -236,6 +238,7 @@ public class CriteriaLookupUtilTest {
         lookupUtil.buildCriteriaLookupMap(searchRequest));
 
     // Question search
+    childConceptIds = Arrays.asList(5L);
     searchParameter =
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())

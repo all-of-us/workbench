@@ -7,8 +7,9 @@
     "enforceRegistered": true,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-prod",
+    "registeredDomainGroup": "all-of-us-registered-prod@firecloud.org",
     "xAppIdValue": "AoU-RW",
-    "vpcServicePerimeterName": ""
+    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod"
   },
   "billing": {
     "billingAccountId": "015EAA-E95687-1F8614",
@@ -72,6 +73,6 @@
     "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
-    "enableVpcServicePerimeter": false
+    "enableVpcServicePerimeter": true
   }
 }

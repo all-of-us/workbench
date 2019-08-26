@@ -51,7 +51,7 @@ public final class CriteriaLookupUtil {
     static CriteriaLookupUtil.FullTreeType fromParam(SearchParameter param) {
       return new CriteriaLookupUtil.FullTreeType(
           DomainType.valueOf(param.getDomain()),
-          CriteriaType.valueOf(param.getType()),
+          CriteriaType.valueOf(param.getType().toUpperCase()),
           param.getSubtype() == null ? null : CriteriaSubType.valueOf(param.getSubtype()),
           param.getStandard());
     }
@@ -85,14 +85,12 @@ public final class CriteriaLookupUtil {
   public Map<SearchParameter, Set<Long>> buildCriteriaLookupMap(SearchRequest req) {
     // Three categories of criteria groups are currently supported in a SearchRequest:
     // 1. Groups that need lookup in the ancestor table, e.g. drugs
-    // 2. Groups with tree types & a concept ID specified, e.g. ICD9/ICD10/snomed/PPI question and
-    // answer.
-    // 3. Groups with only tree types specified, e.g. PPI surveys (the basics).
+    // 2. Groups with tree types & a concept ID specified, e.g. ICD9/ICD10/snomed/PPI surveys,
+    // questions and answers.
     Map<CriteriaLookupUtil.FullTreeType, Map<Long, Set<Long>>> childrenByAncestor =
         Maps.newHashMap();
     Map<CriteriaLookupUtil.FullTreeType, Map<Long, Set<Long>>> childrenByParentConcept =
         Maps.newHashMap();
-    Map<CriteriaLookupUtil.FullTreeType, Set<Long>> childrenByTreeType = Maps.newHashMap();
 
     // Within each category/tree type combination, we can batch MySQL requests to translate these
     // groups into child concept IDs. First we build up maps to denote which groups to query and
@@ -112,13 +110,11 @@ public final class CriteriaLookupUtil {
           if (param.getAncestorData()) {
             childrenByAncestor.putIfAbsent(treeKey, Maps.newHashMap());
             childrenByAncestor.get(treeKey).putIfAbsent(param.getConceptId(), Sets.newHashSet());
-          } else if (param.getConceptId() != null) {
+          } else {
             childrenByParentConcept.putIfAbsent(treeKey, Maps.newHashMap());
             childrenByParentConcept
                 .get(treeKey)
                 .putIfAbsent(param.getConceptId(), Sets.newHashSet());
-          } else {
-            childrenByTreeType.putIfAbsent(treeKey, Sets.newHashSet());
           }
         }
       }
@@ -211,23 +207,6 @@ public final class CriteriaLookupUtil {
 
       putLeavesOnParent(byParent, parents, leaves);
     }
-    for (CriteriaLookupUtil.FullTreeType treeType : childrenByTreeType.keySet()) {
-      if (treeType.subType == null) {
-        throw new IllegalArgumentException(
-            "Please provide a valid criteria subtype. null is not valid.");
-      }
-      childrenByTreeType
-          .get(treeType)
-          .addAll(
-              cbCriteriaDao
-                  .findCriteriaLeavesByDomainAndTypeAndSubtype(
-                      treeType.domain.toString(),
-                      treeType.type.toString(),
-                      treeType.subType.toString())
-                  .stream()
-                  .map(c -> Long.parseLong(c.getConceptId()))
-                  .collect(Collectors.toSet()));
-    }
 
     // Finally, we unpack the results and map them back to the original SearchParameters.
     Map<SearchParameter, Set<Long>> builder = new HashMap<>();
@@ -241,10 +220,8 @@ public final class CriteriaLookupUtil {
               CriteriaLookupUtil.FullTreeType.fromParam(param);
           if (param.getAncestorData()) {
             builder.put(param, childrenByAncestor.get(treeKey).get(param.getConceptId()));
-          } else if (param.getConceptId() != null) {
-            builder.put(param, childrenByParentConcept.get(treeKey).get(param.getConceptId()));
           } else {
-            builder.put(param, childrenByTreeType.get(treeKey));
+            builder.put(param, childrenByParentConcept.get(treeKey).get(param.getConceptId()));
           }
         }
       }
