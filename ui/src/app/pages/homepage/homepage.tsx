@@ -25,14 +25,8 @@ import {
 
 export const styles = reactStyles({
   mainHeader: {
-    color: colors.white, fontSize: 28, fontWeight: 400,
+    color: colors.primary, fontSize: 28, fontWeight: 400,
     display: 'flex', letterSpacing: 'normal'
-  },
-  backgroundImage: {
-    backgroundImage: 'url("/assets/images/AoU-HP-background.jpg")',
-    backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '100%',
-    marginLeft: '-1rem', marginRight: '-0.6rem', display: 'flex',
-    flexDirection: 'column', justifyContent: 'space-between'
   },
   singleCard: {
     width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
@@ -52,7 +46,7 @@ export const styles = reactStyles({
     flexDirection: 'row', marginLeft: '4rem', padding: '1rem'
   },
   quickTourLabel: {
-    fontSize: 28, lineHeight: '34px', color: colors.white, paddingRight: '2.3rem',
+    fontSize: 28, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
     marginTop: '2rem', width: '33%'
   },
   footer: {
@@ -303,7 +297,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
       }];
 
     return <React.Fragment>
-      <div style={styles.backgroundImage}>
         <div style={{display: 'flex', justifyContent: 'center'}}>
           <div style={styles.singleCard}>
             {accessTasksLoaded ?
@@ -332,10 +325,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
                     </div>
                     <div style={styles.contentWrapperRight}>
                       <a onClick={() => navigate(['workspaces'])}
-                         style={{fontSize: '14px', color: colors.white}}>
+                         style={{fontSize: '14px', color: colors.primary}}>
                         See All Workspaces</a>
                       <div style={{marginRight: '3%', display: 'flex', flexDirection: 'column'}}>
-                        <div style={{color: colors.white, height: '1.9rem'}}>
+                        <div style={{color: colors.primary, height: '1.9rem'}}>
                           <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
                         </div>
                         <RecentWork dark={true}/>
@@ -399,8 +392,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
             </div>
           </div>
         </div>
-
-      </div>
 
       {quickTour &&
         <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
