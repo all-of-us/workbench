@@ -540,8 +540,7 @@ public class CohortReviewControllerTest {
           .createParticipantCohortAnnotation(
               WORKSPACE_NAMESPACE,
               WORKSPACE_NAME,
-              cohort.getCohortId(),
-              cdrVersion.getCdrVersionId(),
+              cohortReview.getCohortReviewId(),
               participantId,
               new ParticipantCohortAnnotation())
           .getBody();
@@ -566,8 +565,7 @@ public class CohortReviewControllerTest {
           .createParticipantCohortAnnotation(
               WORKSPACE_NAMESPACE,
               WORKSPACE_NAME,
-              cohort.getCohortId(),
-              cdrVersion.getCdrVersionId(),
+              cohortReview.getCohortReviewId(),
               participantId,
               new ParticipantCohortAnnotation()
                   .cohortReviewId(cohortReview.getCohortReviewId())
@@ -596,8 +594,7 @@ public class CohortReviewControllerTest {
           .createParticipantCohortAnnotation(
               WORKSPACE_NAMESPACE,
               WORKSPACE_NAME,
-              cohort.getCohortId(),
-              cdrVersion.getCdrVersionId(),
+              cohortReview.getCohortReviewId(),
               participantId,
               new ParticipantCohortAnnotation()
                   .cohortReviewId(cohortReview.getCohortReviewId())
@@ -625,8 +622,7 @@ public class CohortReviewControllerTest {
           .createParticipantCohortAnnotation(
               WORKSPACE_NAMESPACE,
               WORKSPACE_NAME,
-              cohort.getCohortId(),
-              cdrVersion.getCdrVersionId(),
+              cohortReview.getCohortReviewId(),
               participantId,
               new ParticipantCohortAnnotation()
                   .participantId(participantId)
@@ -845,8 +841,7 @@ public class CohortReviewControllerTest {
             .getParticipantCohortAnnotations(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId())
             .getBody();
 
@@ -1032,8 +1027,7 @@ public class CohortReviewControllerTest {
             .createParticipantCohortAnnotation(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                cohortReview.getCohortReviewId(),
                 participantId,
                 request)
             .getBody();
@@ -1067,8 +1061,7 @@ public class CohortReviewControllerTest {
           .createParticipantCohortAnnotation(
               WORKSPACE_NAMESPACE,
               WORKSPACE_NAME,
-              cohort.getCohortId(),
-              cdrVersion.getCdrVersionId(),
+              cohortReview.getCohortReviewId(),
               participantId,
               new ParticipantCohortAnnotation()
                   .cohortReviewId(cohortReview.getCohortReviewId())

@@ -363,8 +363,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public ResponseEntity<ParticipantCohortAnnotation> createParticipantCohortAnnotation(
       String workspaceNamespace,
       String workspaceId,
-      Long cohortId,
-      Long cdrVersionId,
+      Long cohortReviewId,
       Long participantId,
       ParticipantCohortAnnotation request) {
 
@@ -375,12 +374,16 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     if (request.getCohortReviewId() == null) {
       throw new BadRequestException("Bad Request: Please provide a valid cohort review id.");
     }
+    if (request.getCohortReviewId() != cohortReviewId) {
+      throw new BadRequestException(
+          "Bad Request: request cohort review id must equal path parameter cohort review id.");
+    }
     if (request.getParticipantId() == null) {
       throw new BadRequestException("Bad Request: Please provide a valid participant id.");
     }
 
-    validateRequestAndSetCdrVersion(
-        workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
+    cohortReviewService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
         FROM_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(request);
@@ -531,18 +534,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   @Override
   public ResponseEntity<ParticipantCohortAnnotationListResponse> getParticipantCohortAnnotations(
-      String workspaceNamespace,
-      String workspaceId,
-      Long cohortId,
-      Long cdrVersionId,
-      Long participantId) {
-    CohortReview review =
-        validateRequestAndSetCdrVersion(
-            workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
+      String workspaceNamespace, String workspaceId, Long cohortReviewId, Long participantId) {
+    cohortReviewService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     List<org.pmiops.workbench.db.model.ParticipantCohortAnnotation> annotations =
-        cohortReviewService.findParticipantCohortAnnotations(
-            review.getCohortReviewId(), participantId);
+        cohortReviewService.findParticipantCohortAnnotations(cohortReviewId, participantId);
 
     ParticipantCohortAnnotationListResponse response =
         new ParticipantCohortAnnotationListResponse();

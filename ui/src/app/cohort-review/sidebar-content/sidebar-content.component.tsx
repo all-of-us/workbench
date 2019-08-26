@@ -125,7 +125,8 @@ const AnnotationItem = fp.flow(
         clearTimeout(timeout);
         this.setState({error: false, success: false, saving: true});
         await cohortReviewApi()
-          .createParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, {
+          .createParticipantCohortAnnotation(ns, wsid,
+            cohortReviewStore.getValue().cohortReviewId, pid, {
             cohortAnnotationDefinitionId,
             cohortReviewId: cohortReviewStore.getValue().cohortReviewId,
             participantId: pid,

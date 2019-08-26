@@ -17,6 +17,7 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortAnnotationDefinition, ParticipantCohortAnnotation} from 'generated/fetch';
+import {cohortReviewStore} from '../review-state.service';
 
 const styles = reactStyles({
   detailSidebar: {
@@ -113,7 +114,8 @@ export const DetailPage = withCurrentWorkspace()(
                 this.setState({participant: Participant.fromStatus(ps)});
               }),
             from(cohortReviewApi()
-              .getParticipantCohortAnnotations(ns, wsid, +cid, +cdrVersionId, +pid))
+              .getParticipantCohortAnnotations(ns, wsid,
+                cohortReviewStore.getValue().cohortReviewId, +pid))
               .do(({items}) => {
                 this.setState({annotations: items});
               }),
