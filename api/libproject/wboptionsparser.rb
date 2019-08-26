@@ -1,5 +1,7 @@
-require "optparse"
-require "ostruct"
+# frozen_string_literal: true
+
+require 'optparse'
+require 'ostruct'
 
 # Creates a default command-line argument parser.
 # command_name: For help text.
@@ -23,12 +25,12 @@ class WbOptionsParser
   end
 
   def add_option(option, assign, help)
-    @parser.on(option, help) {|v| assign.call(@opts, v)}
+    @parser.on(option, help) { |v| assign.call(@opts, v) }
     self
   end
 
   def add_typed_option(option, type, assign, help)
-    @parser.on(option, type, help) {|v| assign.call(@opts, v)}
+    @parser.on(option, type, help) { |v| assign.call(@opts, v) }
     self
   end
 
@@ -37,17 +39,17 @@ class WbOptionsParser
     self
   end
 
-  def parse()
+  def parse
     @remaining = @parser.parse @args
     self
   end
 
-  def validate()
+  def validate
     @validators.each do |fn|
       begin
         fn.call(@opts)
       rescue ArgumentError
-        STDERR.puts @parser.help
+        warn @parser.help
         exit 1
       end
     end
