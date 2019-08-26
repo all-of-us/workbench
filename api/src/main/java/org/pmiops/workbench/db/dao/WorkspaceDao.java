@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.data.jpa.repository.Query;
@@ -42,8 +43,6 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
   List<Object[]> findAllWorkspaceCreators();
 
   default Map<String, User> namespaceToCreator() {
-    Map<String, User> map = new HashMap<>();
-    findAllWorkspaceCreators().stream().forEach(e -> map.put((String) e[0], (User) e[1]));
-    return map;
+    return findAllWorkspaceCreators().stream().collect(Collectors.toMap(e -> (String) e[0], e -> (User) e[1]));
   }
 }

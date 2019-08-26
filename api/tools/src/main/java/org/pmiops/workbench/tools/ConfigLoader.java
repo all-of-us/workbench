@@ -72,8 +72,6 @@ public class ConfigLoader {
       String marshalledJson = gson.toJson(configObj, configClass);
       JsonNode marshalledNode = jackson.readTree(marshalledJson);
       JsonNode marshalledDiff = JsonDiff.asJson(newJson, marshalledNode);
-      log.info(marshalledNode.toString());
-      log.info(newJson.toString());
       if (marshalledDiff.size() > 0) {
         log.info(
             String.format(
