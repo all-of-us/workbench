@@ -1519,12 +1519,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     try {
       controller.getCohortChartData(
-          NAMESPACE,
-          NAME,
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
-          DomainType.CONDITION.name(),
-          -1);
+          NAMESPACE, NAME, review.getCohortReviewId(), DomainType.CONDITION.name(), -1);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // Success
@@ -1539,12 +1534,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     try {
       controller.getCohortChartData(
-          NAMESPACE,
-          NAME,
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
-          DomainType.CONDITION.name(),
-          101);
+          NAMESPACE, NAME, review.getCohortReviewId(), DomainType.CONDITION.name(), 101);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // Success
@@ -1560,12 +1550,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                DomainType.LAB.name(),
-                10)
+                NAMESPACE, NAME, review.getCohortReviewId(), DomainType.LAB.name(), 10)
             .getBody();
     assertEquals(3, response.getItems().size());
     assertEquals(
@@ -1583,12 +1568,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                DomainType.DRUG.name(),
-                10)
+                NAMESPACE, NAME, review.getCohortReviewId(), DomainType.DRUG.name(), 10)
             .getBody();
     assertEquals(1, response.getItems().size());
     assertEquals(
@@ -1602,12 +1582,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                DomainType.CONDITION.name(),
-                10)
+                NAMESPACE, NAME, review.getCohortReviewId(), DomainType.CONDITION.name(), 10)
             .getBody();
     assertEquals(2, response.getItems().size());
     assertEquals(
@@ -1623,12 +1598,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                DomainType.PROCEDURE.name(),
-                10)
+                NAMESPACE, NAME, review.getCohortReviewId(), DomainType.PROCEDURE.name(), 10)
             .getBody();
     assertEquals(3, response.getItems().size());
     assertEquals(

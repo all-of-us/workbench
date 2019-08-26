@@ -6,6 +6,7 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import * as React from 'react';
+import {cohortReviewStore} from '../review-state.service';
 
 const css = `
   .graph-border {
@@ -125,7 +126,8 @@ export const ParticipantsCharts = withCurrentWorkspace()(
     componentDidMount() {
       const {domain, workspace: {cdrVersionId, id, namespace}} = this.props;
       const cohort = currentCohortStore.getValue();
-      cohortReviewApi().getCohortChartData(namespace, id, cohort.id, +cdrVersionId, domain, 10)
+      cohortReviewApi().getCohortChartData(namespace, id,
+        cohortReviewStore.getValue().cohortReviewId, domain, 10)
         .then(resp => {
           const data = resp.items.map(item => {
             this.nameRefs.push(React.createRef());

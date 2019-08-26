@@ -438,8 +438,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public ResponseEntity<CohortChartDataListResponse> getCohortChartData(
       String workspaceNamespace,
       String workspaceId,
-      Long cohortId,
-      Long cdrVersionId,
+      Long cohortReviewId,
       String domain,
       Integer limit) {
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
@@ -449,10 +448,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               "Bad Request: Please provide a chart limit between %d and %d.",
               MIN_LIMIT, MAX_LIMIT));
     }
-    Cohort cohort = cohortReviewService.findCohort(cohortId);
-    CohortReview cohortReview =
-        validateRequestAndSetCdrVersion(
-            workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
+
+    CohortReview cohortReview = cohortReviewService.findCohortReview(cohortReviewId);
+    Cohort cohort = cohortReviewService.findCohort(cohortReview.getCohortId());
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
+        workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
 
     SearchRequest searchRequest =
         new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
