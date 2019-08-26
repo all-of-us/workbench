@@ -177,7 +177,7 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
   />;
 };
 
-export const MenuItem = ({icon, tooltip = '', disabled = false, solid = false, children, ...props}) => {
+export const MenuItem = ({icon, tooltip = '', disabled = false, solid = false, style={}, children, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
       // data-test-id is the text within the MenuItem, with whitespace removed
@@ -197,7 +197,7 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, solid = false, c
       <ClrIcon
         shape={icon}
         className={solid ? "is-solid": undefined}
-        style={{marginRight: 8}}
+        style={{marginRight: 8, ...style}}
         size={15}
       />
       {children}

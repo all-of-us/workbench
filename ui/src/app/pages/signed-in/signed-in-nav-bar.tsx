@@ -1,11 +1,11 @@
 import {Component, Input} from "@angular/core";
-import {reactStyles, ReactWrapperBase, withUserProfile} from "../../utils";
+import {reactStyles, ReactWrapperBase, withUserProfile} from "app/utils";
 import {Subscription} from "rxjs";
 import * as React from "react";
-import {ClrIcon} from "../../components/icons";
-import colors from "../../styles/colors";
+import {ClrIcon} from "app/components/icons";
+import colors from "app/styles/colors";
 import {BreadCrumb} from "primereact/breadcrumb";
-import {environment} from "../../../environments/environment";
+import {SideNav} from "app/components/side-nav";
 import {MenuItem} from "../../components/buttons";
 
 const styles = reactStyles({
@@ -16,7 +16,7 @@ const styles = reactStyles({
     boxShadow: '3px 0px 10px',
     paddingTop: '1rem',
     paddingBottom: '0.5rem',
-    backgroundColor: 'white',
+    backgroundColor: colors.white,
     /*
      * NOTE: if you ever need to change this number, you need to ALSO change the
      * min-height calc in .content-container in signed-in/component.css or we'll
@@ -42,28 +42,11 @@ const styles = reactStyles({
     width: '126px',
     borderRadius: '2px',
     backgroundColor: colors.primary,
-    color: '#FFFFFF',
+    color: colors.white,
     fontFamily: 'Montserrat',
     fontSize: '8px',
     lineHeight: '12px',
     textAlign: 'center',
-  },
-  sideNav: {
-    backgroundColor: colors.primary,
-    position: 'absolute',
-    top: '4rem',
-    bottom: '0',
-    zIndex: 1500,
-    flexGrow: 1,
-    width: '10rem',
-    boxShadow: '0px 3px 10px',
-    opacity: 1,
-    transition: 'opacity 0.5s',
-  },
-  navLink: {
-    margin: 0,
-    padding: '0.5rem 1.5rem',
-    textAlign: 'left',
   }
 });
 
@@ -137,15 +120,10 @@ export const SignedInNavBar = withUserProfile()(
         <BreadCrumb/>
         {
           this.state.sideNavVisible
-          && <div style={styles.sideNav}>
-              <section>
-                <MenuItem icon="user">{this.props.givenName} {this.props.familyName}</MenuItem>
-                <MenuItem icon="home" solid={true}>Home</MenuItem>
-                <MenuItem icon="applications" solid={true}>Your Workspaces</MenuItem>
-                <MenuItem icon="star" solid={true}>Featured Workspaces</MenuItem>
-                <MenuItem icon="help" solid={true}>User Support</MenuItem>
-              </section>
-          </div>
+          && <SideNav
+            givenName={this.props.givenName}
+            familyName={this.props.familyName}
+          />
         }
       </div>
     }
