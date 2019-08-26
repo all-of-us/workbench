@@ -32,7 +32,7 @@ public class DataSet {
   private List<Long> conceptSetId;
   private List<Long> cohortSetId;
   private List<DataSetValues> values;
-  private Short prePackagedConceptSet;
+  private short prePackagedConceptSet;
 
   public DataSet() {}
 
@@ -180,11 +180,11 @@ public class DataSet {
   }
 
   @Column(name = "prePackagedConceptSet")
-  public Short getPrePackagedConceptSet() {
+  public short getPrePackagedConceptSet() {
     return prePackagedConceptSet;
   }
 
-  public void setPrePackagedConceptSet(Short prePackagedConceptSet) {
+  public void setPrePackagedConceptSet(short prePackagedConceptSet) {
     this.prePackagedConceptSet = prePackagedConceptSet;
   }
 
