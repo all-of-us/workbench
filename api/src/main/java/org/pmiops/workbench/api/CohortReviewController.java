@@ -412,8 +412,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public ResponseEntity<EmptyResponse> deleteParticipantCohortAnnotation(
       String workspaceNamespace,
       String workspaceId,
-      Long cohortId,
-      Long cdrVersionId,
+      Long cohortReviewId,
       Long participantId,
       Long annotationId) {
 
@@ -425,17 +424,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       throw new BadRequestException("Bad Request: Please provide a valid participant id.");
     }
 
-    CohortReview cohortReview =
-        validateRequestAndSetCdrVersion(
-            workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
-
-    // will throw a NotFoundException if participant does not exist
-    cohortReviewService.findParticipantCohortStatus(
-        cohortReview.getCohortReviewId(), participantId);
+    cohortReviewService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     // will throw a NotFoundException if participant cohort annotation does not exist
     cohortReviewService.deleteParticipantCohortAnnotation(
-        annotationId, cohortReview.getCohortReviewId(), participantId);
+        annotationId, cohortReviewId, participantId);
 
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -728,18 +722,16 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public ResponseEntity<ParticipantCohortAnnotation> updateParticipantCohortAnnotation(
       String workspaceNamespace,
       String workspaceId,
-      Long cohortId,
-      Long cdrVersionId,
+      Long cohortReviewId,
       Long participantId,
       Long annotationId,
       ModifyParticipantCohortAnnotationRequest request) {
-    CohortReview cohortReview =
-        validateRequestAndSetCdrVersion(
-            workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
+    cohortReviewService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
         cohortReviewService.updateParticipantCohortAnnotation(
-            annotationId, cohortReview.getCohortReviewId(), participantId, request);
+            annotationId, cohortReviewId, participantId, request);
 
     return ResponseEntity.ok(
         TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));

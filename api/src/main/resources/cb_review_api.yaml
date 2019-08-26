@@ -284,12 +284,11 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantDataListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations/{annotationId}:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/cohortReviewId'
       - $ref: '#/parameters/participantId'
       - in: path
         name: annotationId

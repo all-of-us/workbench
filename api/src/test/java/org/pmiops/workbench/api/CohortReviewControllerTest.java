@@ -723,8 +723,7 @@ public class CohortReviewControllerTest {
     cohortReviewController.deleteParticipantCohortAnnotation(
         WORKSPACE_NAMESPACE,
         WORKSPACE_NAME,
-        cohort.getCohortId(),
-        cdrVersion.getCdrVersionId(),
+        cohortReview.getCohortReviewId(),
         participantCohortStatus1.getParticipantKey().getParticipantId(),
         annotation.getAnnotationId());
 
@@ -738,8 +737,7 @@ public class CohortReviewControllerTest {
       cohortReviewController.deleteParticipantCohortAnnotation(
           WORKSPACE_NAMESPACE,
           WORKSPACE_NAME,
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
+          cohortReview.getCohortReviewId(),
           participantCohortStatus1.getParticipantKey().getParticipantId(),
           null);
       fail("Should have thrown a BadRequestException!");
@@ -763,8 +761,7 @@ public class CohortReviewControllerTest {
       cohortReviewController.deleteParticipantCohortAnnotation(
           WORKSPACE_NAMESPACE,
           WORKSPACE_NAME,
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
+          cohortReview.getCohortReviewId(),
           participantId,
           annotationId);
       fail("Should have thrown a NotFoundException!");
@@ -789,44 +786,11 @@ public class CohortReviewControllerTest {
 
     try {
       cohortReviewController.deleteParticipantCohortAnnotation(
-          WORKSPACE_NAMESPACE,
-          WORKSPACE_NAME,
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
-          null,
-          1L);
+          WORKSPACE_NAMESPACE, WORKSPACE_NAME, cohortReview.getCohortReviewId(), null, 1L);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // Success
       assertThat(bre.getMessage()).isEqualTo("Bad Request: Please provide a valid participant id.");
-    }
-  }
-
-  @Test
-  public void deleteParticipantCohortAnnotationNoParticipant() throws Exception {
-    Long participantId = 9999L;
-
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
-    try {
-      cohortReviewController.deleteParticipantCohortAnnotation(
-          WORKSPACE_NAMESPACE,
-          WORKSPACE_NAME,
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
-          participantId,
-          1L);
-      fail("Should have thrown a NotFoundException!");
-    } catch (NotFoundException nfe) {
-      // Success
-      assertThat(nfe.getMessage())
-          .isEqualTo(
-              "Not Found: Participant Cohort Status does not exist for cohortReviewId: "
-                  + cohortReview.getCohortReviewId()
-                  + ", participantId: "
-                  + participantId);
     }
   }
 
@@ -949,8 +913,7 @@ public class CohortReviewControllerTest {
             .updateParticipantCohortAnnotation(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId(),
                 participantAnnotation.getAnnotationId(),
                 new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1"))
@@ -971,8 +934,7 @@ public class CohortReviewControllerTest {
           .updateParticipantCohortAnnotation(
               WORKSPACE_NAMESPACE,
               WORKSPACE_NAME,
-              cohort.getCohortId(),
-              cdrVersion.getCdrVersionId(),
+              cohortReview.getCohortReviewId(),
               participantCohortStatus1.getParticipantKey().getParticipantId(),
               badAnnotationId,
               new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1"))

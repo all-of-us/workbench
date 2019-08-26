@@ -110,12 +110,14 @@ const AnnotationItem = fp.flow(
       this.setState({savingValue: newValue});
       if (aid && fp.includes(newValue, [null, ''])) {
         setAnnotation(await cohortReviewApi()
-          .deleteParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, aid));
+          .deleteParticipantCohortAnnotation(ns, wsid,
+            cohortReviewStore.getValue().cohortReviewId, pid, aid));
       } else if (aid && newValue !== value) {
         clearTimeout(timeout);
         this.setState({error: false, success: false, saving: true});
         await cohortReviewApi()
-          .updateParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, aid, {
+          .updateParticipantCohortAnnotation(ns, wsid,
+            cohortReviewStore.getValue().cohortReviewId, pid, aid, {
             ...writeValue(annotationType, newValue),
           }).then(res => {
             setAnnotation(res);
