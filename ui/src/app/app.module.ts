@@ -22,7 +22,6 @@ import {StatusCheckService} from './services/status-check.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
-import {BreadcrumbComponent} from './components/breadcrumb';
 import {BugReportComponent} from './components/bug-report';
 import {ErrorHandlerComponent} from './components/error-handler/component';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
@@ -72,6 +71,7 @@ import {
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
+import {SignedInNavBarComponent} from "./pages/signed-in/signed-in-nav-bar";
 
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
@@ -127,7 +127,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AdminReviewWorkspaceComponent,
     AdminUserComponent,
     AppComponent,
-    BreadcrumbComponent,
     BugReportComponent,
     CohortActionsComponent,
     ConceptSetActionsComponent,
@@ -145,6 +144,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ProfilePageComponent,
     RoutingSpinnerComponent,
     SignedInComponent,
+    SignedInNavBarComponent,
     SignInComponent,
     StigmatizationPageComponent,
     TextModalComponent,

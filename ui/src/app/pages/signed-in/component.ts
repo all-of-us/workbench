@@ -72,14 +72,14 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild('sidenav') sidenav: ElementRef;
 
-  @HostListener('document:click', ['$event'])
-  onClickOutsideSideNav(event: MouseEvent) {
-    const inSidenav = this.sidenav.nativeElement.contains(event.target);
-    const inSidenavToggle = this.sidenavToggleElement.nativeElement.contains(event.target);
-    if (this.sidenavToggle && !(inSidenav || inSidenavToggle)) {
-      this.sidenavToggle = false;
-    }
-  }
+  // @HostListener('document:click', ['$event'])
+  // onClickOutsideSideNav(event: MouseEvent) {
+  //   const inSidenav = this.sidenav.nativeElement.contains(event.target);
+  //   const inSidenavToggle = this.sidenavToggleElement.nativeElement.contains(event.target);
+  //   if (this.sidenavToggle && !(inSidenav || inSidenavToggle)) {
+  //     this.sidenavToggle = false;
+  //   }
+  // }
 
   constructor(
     /* Ours */
@@ -111,8 +111,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     });
 
-    // TODO: Remove or move into CSS.
-    document.body.style.backgroundColor = '#f1f2f2';
     this.signInService.isSignedIn$.subscribe(signedIn => {
       if (signedIn) {
         this.profileImage = this.signInService.profileImage;
