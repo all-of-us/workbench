@@ -531,8 +531,7 @@ public class DataSetServiceImpl implements DataSetService {
                         .map(arrayValue -> "list(value = " + arrayValue.getValue() + ")")
                         .collect(Collectors.joining(","))
                     + ")"
-                : "value = \"" + namedParameterValue.getValue())
-            + "\""
+                : "value = \"" + namedParameterValue.getValue() + "\"")
             + ")\n"
             + "      )";
       default:
