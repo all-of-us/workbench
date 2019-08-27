@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {attributesStore, groupSelectionsStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {domainToTitle, subTypeToTitle} from 'app/cohort-search/utils';
+import {domainToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
@@ -241,7 +241,6 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     showHierarchy = (row: any) => {
-      const {wizard: {domain}} = this.props;
       this.trackEvent('More Info');
       this.props.hierarchy(row);
     }
