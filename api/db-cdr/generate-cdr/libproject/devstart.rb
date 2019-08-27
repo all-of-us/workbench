@@ -64,12 +64,8 @@ def publish_cdr(cmd_name, args)
     ->(opts, v) { opts.project = v},
     "The Google Cloud project associated with this environment."
   )
-  op.add_validator ->(opts) {
-    raise ArgumentError unless opts.bq_dataset and opts.project
-  }
-  op.add_validator ->(opts) {
-    raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project
-  }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project }
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.parse.validate
 
   common = Common.new
