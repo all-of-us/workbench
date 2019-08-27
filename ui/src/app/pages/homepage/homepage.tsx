@@ -8,6 +8,7 @@ import {
   CardButton,
   Clickable,
 } from 'app/components/buttons';
+import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {Modal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
@@ -28,6 +29,13 @@ export const styles = reactStyles({
     color: colors.primary, fontSize: 28, fontWeight: 400,
     display: 'flex', letterSpacing: 'normal'
   },
+  pageWrapper: {
+    marginLeft: '-1rem', marginRight: '-0.6rem', display: 'flex',
+    flexDirection: 'column', justifyContent: 'space-between'
+  },
+  fadeBox: {
+    margin: '1rem 0 0 2%', width: '97.5%', padding: '0 0.1rem'
+  },
   singleCard: {
     width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
     display: 'flex', flexDirection: 'column', borderRadius: '5px',
@@ -41,44 +49,50 @@ export const styles = reactStyles({
   contentWrapperRight: {
     display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '60%'
   },
-  quickRow: {
+  quickTour: {
+    display: 'flex', flexDirection: 'column', marginLeft: '3%'
+  },
+  quickTourCardsRow: {
     display: 'flex', justifyContent: 'flex-start', maxHeight: '26rem',
-    flexDirection: 'row', marginLeft: '4rem', padding: '1rem'
+    flexDirection: 'row', marginTop: '0.5rem'
   },
   quickTourLabel: {
-    fontSize: 28, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
-    marginTop: '2rem', width: '33%'
+    fontSize: 18, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
+    fontWeight: 600, marginTop: '2rem', width: '33%'
   },
   footer: {
-    height: '300px', width: '100%', backgroundColor: colors.primary,
-    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    marginTop: '2%',
+    width: '100%', backgroundColor: colors.light, marginTop: '2%'
   },
   footerInner: {
-    display: 'flex', flexDirection: 'column', marginLeft: '5%', marginRight: '5%',
+    display: 'flex', flexDirection: 'column', marginLeft: '3%', marginRight: '2%',
   },
   footerTitle: {
-    height: '34px', opacity: 0.87, color: colors.white, fontSize: 28,
-    fontWeight: 600, lineHeight: '34px', width: '87.34%', marginTop: '1.4rem'
+    height: '34px', opacity: 0.87, color: colors.primary, fontSize: '0.75rem',
+    fontWeight: 600, lineHeight: '34px', marginTop: '1rem', marginBottom: '0.5rem'
   },
   footerText: {
-    height: '176px', opacity: 0.87, color: colors.secondary, fontSize: '16px',
-    fontWeight: 400, lineHeight: '30px', display: 'flex', width: '100%',
+    height: '176px', opacity: 0.87, color: colors.secondary, fontSize: '0.6rem',
+    fontWeight: 500, lineHeight: '30px', display: 'flex', width: '100%',
     flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'auto'
   },
+  footerTextTitle: {
+    color: colors.primary,
+    fontSize: '0.67rem',
+    fontWeight: 600
+  },
   linksBlock: {
-    display: 'flex', marginBottom: '1.2rem', marginLeft: '1.4rem',
-    flexDirection: 'column', flexShrink: 1, minWidth: 0
+    display: 'flex', marginBottom: '1rem',
+    flexDirection: 'column', flexShrink: 1, minWidth: '13rem'
   },
   bottomBanner: {
-    width: '100%', display: 'flex', backgroundColor: colors.primary, height: '5rem',
+    width: '100%', display: 'flex', backgroundColor: colors.primary,
     paddingLeft: '3.5rem', alignItems: 'center'
   },
   logo: {
     height: '3.5rem', width: '7rem', lineHeight: '85px'
   },
   bottomLinks: {
-    color: colors.white, fontSize: '0.7rem', height: '1rem',
+    color: colors.white, fontSize: '.5rem', height: '1rem',
     marginLeft: '2.5rem', fontWeight: 400
   }
 });
@@ -297,79 +311,84 @@ export const Homepage = withUserProfile()(class extends React.Component<
       }];
 
     return <React.Fragment>
-        <div style={{display: 'flex', justifyContent: 'center'}}>
-          <div style={styles.singleCard}>
-            {accessTasksLoaded ?
-              (accessTasksRemaining ?
-                (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
-                                        eraCommonsError={eraCommonsError}
-                                        trainingCompleted={trainingCompleted}
-                                        firstVisitTraining={firstVisitTraining}
-                                        betaAccessGranted={betaAccessGranted}
-                                        twoFactorAuthCompleted={twoFactorAuthCompleted}
-                                        dataUseAgreementCompleted={dataUseAgreementCompleted}/>
-                ) : (
-                  <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
-                    <div style={styles.contentWrapperLeft}>
-                      <div style={styles.mainHeader}>Researcher Workbench</div>
-                      <TooltipTrigger content={<div>Your Firecloud billing project is still being
-                        initialized. Workspace creation will be available in a few minutes.</div>}
-                                      disabled={canCreateWorkspaces}>
-                        <CardButton disabled={!canCreateWorkspaces}
-                                    onClick={() => navigate(['workspaces/build'])}
-                                    style={{margin: '1.9rem 106px 0 3%'}}>
-                          Create a <br/> New Workspace
-                          <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
-                        </CardButton>
-                      </TooltipTrigger>
-                    </div>
-                    <div style={styles.contentWrapperRight}>
-                      <a onClick={() => navigate(['workspaces'])}
-                         style={{fontSize: '14px', color: colors.primary}}>
-                        See All Workspaces</a>
-                      <div style={{marginRight: '3%', display: 'flex', flexDirection: 'column'}}>
-                        <div style={{color: colors.primary, height: '1.9rem'}}>
-                          <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
-                        </div>
-                        <RecentWork dark={true}/>
+      <div style={styles.pageWrapper}>
+        <FadeBox style={styles.fadeBox}>
+          <div style={{display: 'flex', justifyContent: 'center'}}>
+            <div style={styles.singleCard}>
+              {accessTasksLoaded ?
+                (accessTasksRemaining ?
+                  (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
+                                          eraCommonsError={eraCommonsError}
+                                          trainingCompleted={trainingCompleted}
+                                          firstVisitTraining={firstVisitTraining}
+                                          betaAccessGranted={betaAccessGranted}
+                                          twoFactorAuthCompleted={twoFactorAuthCompleted}
+                                          dataUseAgreementCompleted={dataUseAgreementCompleted}/>
+                  ) : (
+                    <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
+                      <div style={styles.contentWrapperLeft}>
+                        <div style={styles.mainHeader}>Researcher Workbench</div>
+                        <TooltipTrigger content={<div>Your Firecloud billing project is still being
+                          initialized. Workspace creation will be available in a few minutes.</div>}
+                                        disabled={canCreateWorkspaces}>
+                          <CardButton disabled={!canCreateWorkspaces}
+                                      onClick={() => navigate(['workspaces/build'])}
+                                      style={{margin: '1.9rem 106px 0 3%'}}>
+                            Create a <br/> New Workspace
+                            <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
+                          </CardButton>
+                        </TooltipTrigger>
                       </div>
-                    </div>
-                  </div>)
-                ) :
-              <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
+                      <div style={styles.contentWrapperRight}>
+                        <a onClick={() => navigate(['workspaces'])}
+                           style={{fontSize: '14px', color: colors.primary}}>
+                          See All Workspaces</a>
+                        <div style={{marginRight: '3%', display: 'flex', flexDirection: 'column'}}>
+                          <div style={{color: colors.primary, height: '1.9rem'}}>
+                            <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
+                          </div>
+                          <RecentWork dark={true}/>
+                        </div>
+                      </div>
+                    </div>)
+                  ) :
+                <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
+            </div>
           </div>
-        </div>
+        </FadeBox>
         <div>
-          <div style={styles.quickRow}>
-            <div style={styles.quickTourLabel}>Quick Tour & Videos</div>
+          <div style={styles.quickTour}>
+            <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
+            <div style={styles.quickTourCardsRow}>
             {quickTourResources.map((thumbnail, i) => {
               return <React.Fragment key={i}>
                 <Clickable onClick={thumbnail.onClick}
                            data-test-id={'quick-tour-resource-' + i}>
-                  <img style={{maxHeight: '121px', width: '8rem', marginRight: '1rem'}}
+                  <img style={{maxHeight: '7rem', width: '9rem', marginRight: '0.5rem'}}
                        src={thumbnail.src}/>
                 </Clickable>
               </React.Fragment>;
             })}
+            </div>
           </div>
           <div>
             <div style={styles.footer}>
               <div style={styles.footerInner}>
                 <div style={styles.footerTitle}>
                   How to Use the All of Us Researcher Workbench</div>
-                <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-                  <TooltipTrigger content='Coming Soon' side='left'>
-                    <a href='#' style={{color: colors.white}}>See all documentation</a>
-                  </TooltipTrigger>
-                </div>
+                {/*<div style={{display: 'flex', justifyContent: 'flex-end'}}>*/}
+                {/*  <TooltipTrigger content='Coming Soon' side='left'>*/}
+                {/*    <a href='#' style={{color: colors.primary}}>See all documentation</a>*/}
+                {/*  </TooltipTrigger>*/}
+                {/*</div>*/}
                 <div style={{display: 'flex', flexDirection: 'row',
-                  width: '87.34%', justifyContent: 'space-between'}}>
+                  justifyContent: 'space-between'}}>
                   {footerLinks.map((col, i) => {
                     return <React.Fragment key={i}>
                       <div style={styles.linksBlock}>
                         <div style={styles.footerText}>
-                          <div style={{color: colors.white, marginTop: '2%'}}>{col.title}</div>
-                          <ul style={{color: colors.secondary}}>
+                          <div style={styles.footerTextTitle}>{col.title}</div>
+                          <ul style={{color: colors.secondary, marginLeft: '2%'}}>
                             {col.links.map((link, ii) => {
                               return <li key={ii}>
                                 <a href='#' style={{color: colors.secondary}}>{link}</a>
@@ -383,16 +402,17 @@ export const Homepage = withUserProfile()(class extends React.Component<
                 </div>
               </div>
             </div>
-            <div style={styles.bottomBanner}>
-              <div style={styles.logo}>
-                <img src='/assets/images/all-of-us-logo-footer.svg'/>
-              </div>
-              <div style={styles.bottomLinks}>Privacy Policy</div>
-              <div style={styles.bottomLinks}>Terms of Service</div>
+          </div>
+          <div style={styles.bottomBanner}>
+            <div style={styles.logo}>
+              <img src='/assets/images/all-of-us-logo-footer.svg'/>
             </div>
+            <div style={styles.bottomLinks}>Copyright ©2018</div>
+            <div style={styles.bottomLinks}>Privacy Policy</div>
+            <div style={styles.bottomLinks}>Terms of Service</div>
           </div>
         </div>
-
+      </div>
       {quickTour &&
         <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
       {videoOpen && <Modal width={900}>
