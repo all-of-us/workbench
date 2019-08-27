@@ -570,7 +570,7 @@ The following shows how to make an authenticated backend request as the shared  
 
 ```
 # From the "api" directory.
-curl -X GET -H "$(~/go/bin/oauth2l header --json build/exploded-api/WEB-INF/sa-key.json userinfo.email userinfo.profile cloud-billing)" -H "Content-Type: application/json" https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing
+curl -X GET -H "$(~/go/bin/oauth2l header --json build/exploded-api/WEB-INF/sa-key.json email profile cloud-billing)" -H "Content-Type: application/json" https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing
 
 # If you get 401 errors, you may need to clear your token cache.
 oauth2l reset
