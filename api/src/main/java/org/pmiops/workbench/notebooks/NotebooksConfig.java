@@ -3,6 +3,8 @@ package org.pmiops.workbench.notebooks;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -86,11 +88,13 @@ public class NotebooksConfig {
   }
 
   private ApiClient buildApiClient(WorkbenchConfig workbenchConfig) {
-    return new NotebooksApiClientTracer()
+    ApiClient apiClient = new NotebooksApiClientTracer()
         .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
         .setDebugging(workbenchConfig.firecloud.debugEndpoints)
         .addDefaultHeader(
             org.pmiops.workbench.firecloud.FireCloudConfig.X_APP_ID_HEADER,
             workbenchConfig.firecloud.xAppIdValue);
+    apiClient.getHttpClient().setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
+    return apiClient
   }
 }

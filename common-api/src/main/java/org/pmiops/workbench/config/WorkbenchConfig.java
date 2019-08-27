@@ -69,6 +69,8 @@ public class WorkbenchConfig {
     // The name of the VPC service perimeter to create our Terra GCP projects inside,
     // if enabled.
     public String vpcServicePerimeterName;
+    // The length of our API HTTP client timeouts to firecloud
+    public Integer timeoutInSeconds;
   }
 
   public static class AuthConfig {

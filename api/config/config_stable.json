@@ -9,7 +9,8 @@
     "registeredDomainName": "all-of-us-registered-stable",
     "registeredDomainGroup": "GROUP_all-of-us-registered-stable@firecloud.org",
     "xAppIdValue": "stable-AoU-RW",
-    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable"
+    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable",
+    "timeoutInSeconds": 20
   },
   "billing": {
     "accountId": "014D91-FCB792-33D2C0",
