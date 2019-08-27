@@ -81,6 +81,9 @@ export const SignedInNavBar = withUserProfile()(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
+      // Bind the this context - this will be passed down into the actual
+      // sidenav so clicks on it can close the nav
+      this.onToggleSideNav = this.onToggleSideNav.bind(this);
       this.state = {
         profileLoadingSub: null,
         subscriptions: [],
@@ -138,6 +141,9 @@ export const SignedInNavBar = withUserProfile()(
           && <SideNav
             givenName={this.props.givenName}
             familyName={this.props.familyName}
+            // Passing the function itself deliberately, we want to be able to
+            // toggle the nav whenever we click anything in it
+            onToggleSideNav={this.onToggleSideNav}
           />
         }
       </div>

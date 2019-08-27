@@ -3,7 +3,7 @@ import colors, {colorWithWhiteness} from "app/styles/colors";
 import {reactStyles} from "app/utils";
 import {Clickable, MenuItem} from "app/components/buttons";
 import {ClrIcon} from "./icons";
-import {TooltipTrigger} from "./popups";
+import {navigate} from "../utils/navigation";
 
 const styles = reactStyles({
   sideNav: {
@@ -62,6 +62,8 @@ class SideNavSubItem extends React.Component<SideNavSubItemProps> {
 interface SideNavItemProps {
   icon: string,
   content: string,
+  onToggleSideNav: Function,
+  href?: string,
   subItems?: Array<any>
 }
 
@@ -77,13 +79,23 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
     }
   }
 
+  onClick() {
+    if (this.props.href) {
+      this.props.onToggleSideNav();
+      navigate([this.props.href]);
+    }
+    else {
+      this.setState(previousState => ({dropdownOpen: !previousState.dropdownOpen}));
+    }
+  }
+
   render() {
     return <Clickable
       // data-test-id is the text within the SideNavItem, with whitespace removed
       // and appended with '-menu-item'
       data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
       style={styles.navLink}
-      // hover={backgroundColor: colorWithWhiteness(colors.accent, .10)}
+      onClick={(previousState) => this.onClick()}
     >
       <span>
         <ClrIcon
@@ -120,6 +132,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
 export interface Props {
   givenName: string;
   familyName: string;
+  onToggleSideNav: Function;
 }
 
 export class SideNav extends React.Component<Props, {}> {
@@ -134,18 +147,20 @@ export class SideNav extends React.Component<Props, {}> {
         <SideNavItem
           icon="user"
           content={`${this.props.givenName} ${this.props.familyName}`}
+          onToggleSideNav={this.props.onToggleSideNav}
           subItems={[
             {text: "Profile"},
             {text: "Billing Dashboard"},
             {text: "Sign Out"},
           ]}
         />
-        <SideNavItem icon="home" content="Home"/>
-        <SideNavItem icon="applications" content="Your Workspaces"/>
-        <SideNavItem icon="star" content="Featured Workspaces"/>
+        <SideNavItem icon="home" content="Home" onToggleSideNav={this.props.onToggleSideNav} href="/"/>
+        <SideNavItem icon="applications" content="Your Workspaces" onToggleSideNav={this.props.onToggleSideNav} href={"/workspaces"}/>
+        <SideNavItem icon="star" content="Featured Workspaces" onToggleSideNav={this.props.onToggleSideNav}/>
         <SideNavItem
           icon="help"
           content="User Support"
+          onToggleSideNav={this.props.onToggleSideNav}
           subItems={[
             {text: "How-to Guides"},
             {text: "User Forum"},
