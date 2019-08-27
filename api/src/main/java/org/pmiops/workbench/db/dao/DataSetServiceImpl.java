@@ -211,8 +211,8 @@ public class DataSetServiceImpl implements DataSetService {
 
     // If pre packaged all survey concept set is selected create a temp concept set with concept ids
     // of all survey question
-    if (dataSet.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.SURVEY)
-        || dataSet.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.BOTH)) {
+    if (PrePackagedConceptSetEnum.SURVEY.equals(dataSet.getPrePackagedConceptSet())
+        || PrePackagedConceptSetEnum.BOTH.equals(dataSet.getPrePackagedConceptSet())) {
       conceptSetsSelected.add(handlePrePackagedSurveyConceptSet());
     }
 
