@@ -302,7 +302,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
       if (!vocabOptions.getValue()) {
         const vocabFilters = {source: {}, standard: {}};
         try {
-          await cohortReviewApi().getVocabularies(namespace, id, cohortReviewStore.getValue().cohortReviewId)
+          await cohortReviewApi().getVocabularies(namespace, id,
+            cohortReviewStore.getValue().cohortReviewId)
             .then(response => {
               response.items.forEach(item => {
                 const type = item.type.toLowerCase();

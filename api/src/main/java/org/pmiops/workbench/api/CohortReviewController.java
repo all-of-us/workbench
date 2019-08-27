@@ -764,20 +764,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
   }
 
-  private CohortReview validateRequestAndSetCdrVersion(
-      String workspaceNamespace,
-      String workspaceId,
-      Long cohortId,
-      Long cdrVersionId,
-      WorkspaceAccessLevel level) {
-    Cohort cohort = cohortReviewService.findCohort(cohortId);
-    // this validates that the user is in the proper workspace
-    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
-        workspaceNamespace, workspaceId, cohort.getWorkspaceId(), level);
-
-    return cohortReviewService.findCohortReview(cohort.getCohortId(), cdrVersionId);
-  }
-
   /**
    * Helper method to create a new {@link CohortReview}.
    *
