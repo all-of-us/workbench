@@ -62,6 +62,7 @@ public class User {
   private String organization;
   private String freeTierBillingProjectName;
   private Short freeTierBillingProjectStatus;
+  private Double freeTierCreditsLimitOverride = null;
   private Timestamp firstSignInTime;
   private Set<Short> authorities = new HashSet<>();
   private Boolean idVerificationIsValid;
@@ -226,6 +227,15 @@ public class User {
 
   public void setFreeTierBillingProjectStatus(Short freeTierBillingProjectStatus) {
     this.freeTierBillingProjectStatus = freeTierBillingProjectStatus;
+  }
+
+  @Column(name = "free_tier_credits_limit_override")
+  public Double getFreeTierCreditsLimitOverride() {
+    return freeTierCreditsLimitOverride;
+  }
+
+  public void setFreeTierCreditsLimitOverride(Double freeTierCreditsLimitOverride) {
+    this.freeTierCreditsLimitOverride = freeTierCreditsLimitOverride;
   }
 
   @Transient

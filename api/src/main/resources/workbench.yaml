@@ -1186,6 +1186,22 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/cron/checkFreeTierBillingUsage:
+    get:
+      security: []
+      tags:
+        - billing
+        - cron
+      description: Find and alert users that have exceeded their free tier billing usage
+      operationId: checkFreeTierBillingUsage
+      responses:
+        200:
+          description: No Error
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # Notebooks ############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:

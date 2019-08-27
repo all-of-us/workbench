@@ -9,10 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class BillingController implements BillingApiDelegate {
 
+  private final BillingAlertsService billingAlertsService;
   private final BillingProjectBufferService billingProjectBufferService;
 
   @Autowired
-  BillingController(BillingProjectBufferService billingProjectBufferService) {
+  BillingController(
+      BillingAlertsService billingAlertsService,
+      BillingProjectBufferService billingProjectBufferService) {
+    this.billingAlertsService = billingAlertsService;
     this.billingProjectBufferService = billingProjectBufferService;
   }
 
@@ -31,6 +35,12 @@ public class BillingController implements BillingApiDelegate {
   @Override
   public ResponseEntity<Void> cleanBillingBuffer() {
     billingProjectBufferService.cleanBillingBuffer();
+    return ResponseEntity.status(HttpStatus.OK).build();
+  }
+
+  @Override
+  public ResponseEntity<Void> checkFreeTierBillingUsage() {
+    billingAlertsService.checkFreeTierBillingUsage();
     return ResponseEntity.status(HttpStatus.OK).build();
   }
 }
