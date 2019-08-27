@@ -271,7 +271,7 @@ export const SidebarContent = fp.flow(
       } = this.props;
       this.setState({savingStatus: v});
       const data = await cohortReviewApi().updateParticipantCohortStatus(
-        ns, wsid, cid, +cdrVersionId, pid, {status: v}
+        ns, wsid, cohortReviewStore.getValue().cohortReviewId, pid, {status: v}
       );
       // make sure we're still on the same page before updating
       if (data.participantId === +this.props.urlParams.pid) {

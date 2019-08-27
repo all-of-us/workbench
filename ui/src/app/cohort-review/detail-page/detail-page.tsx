@@ -109,7 +109,8 @@ export const DetailPage = withCurrentWorkspace()(
         .switchMap(({ns, wsid, cid, pid}) => {
           return Observable.forkJoin(
             from(cohortReviewApi()
-              .getParticipantCohortStatus(ns, wsid, +cid, +cdrVersionId, +pid))
+              .getParticipantCohortStatus(ns, wsid,
+                cohortReviewStore.getValue().cohortReviewId, +pid))
               .do(ps => {
                 this.setState({participant: Participant.fromStatus(ps)});
               }),

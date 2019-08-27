@@ -1,5 +1,5 @@
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
-import {vocabOptions} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, vocabOptions} from 'app/cohort-review/review-state.service';
 import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
@@ -273,8 +273,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         cohortReviewApi().getParticipantData(
           namespace,
           id,
-          +cid,
-          +cdrVersionId,
+          cohortReviewStore.getValue().cohortReviewId,
           participantId,
           pageFilterRequest
         ).then(response => {

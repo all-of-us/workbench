@@ -126,12 +126,11 @@ paths:
           schema:
             $ref: "#/definitions/CohortReview"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/cohortReviewId'
       - $ref: '#/parameters/participantId'
     get:
       tags:
@@ -253,12 +252,11 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantCohortAnnotationListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/data:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/data:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/cohortReviewId'
       - $ref: '#/parameters/participantId'
     post:
       tags:
@@ -324,12 +322,11 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/vocabularies:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/vocabularies:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/cohortReviewId'
     get:
       tags:
         - cohortReview

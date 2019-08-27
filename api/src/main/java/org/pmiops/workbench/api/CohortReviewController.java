@@ -548,14 +548,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   @Override
   public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
       getParticipantCohortStatus(
-          String workspaceNamespace,
-          String workspaceId,
-          Long cohortId,
-          Long cdrVersionId,
-          Long participantId) {
-    CohortReview review =
-        validateRequestAndSetCdrVersion(
-            workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
+          String workspaceNamespace, String workspaceId, Long cohortReviewId, Long participantId) {
+    CohortReview review = cohortReviewService.findCohortReview(cohortReviewId);
+    Cohort cohort = cohortReviewService.findCohort(review.getCohortId());
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
+        workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
 
     ParticipantCohortStatus status =
         cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
@@ -622,16 +619,16 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public ResponseEntity<ParticipantDataListResponse> getParticipantData(
       String workspaceNamespace,
       String workspaceId,
-      Long cohortId,
-      Long cdrVersionId,
+      Long cohortReviewId,
       Long participantId,
       PageFilterRequest request) {
-    CohortReview review =
-        validateRequestAndSetCdrVersion(
-            workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
+    CohortReview review = cohortReviewService.findCohortReview(cohortReviewId);
+    Cohort cohort = cohortReviewService.findCohort(review.getCohortId());
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
+        workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
 
     // this validates that the participant is in the requested review.
-    cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
+    cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId);
 
     DomainType domain = ((ReviewFilter) request).getDomain();
     PageRequest pageRequest = createPageRequest(request);
@@ -665,9 +662,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   @Override
   public ResponseEntity<VocabularyListResponse> getVocabularies(
-      String workspaceNamespace, String workspaceId, Long cohortId, Long cdrVersionId) {
-    validateRequestAndSetCdrVersion(
-        workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
+      String workspaceNamespace, String workspaceId, Long cohortReviewId) {
+    CohortReview review = cohortReviewService.findCohortReview(cohortReviewId);
+    Cohort cohort = cohortReviewService.findCohort(review.getCohortId());
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
+        workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
 
     TableResult result =
         bigQueryService.executeQuery(
@@ -743,17 +742,16 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       updateParticipantCohortStatus(
           String workspaceNamespace,
           String workspaceId,
-          Long cohortId,
-          Long cdrVersionId,
+          Long cohortReviewId,
           Long participantId,
           ModifyCohortStatusRequest cohortStatusRequest) {
-    CohortReview cohortReview =
-        validateRequestAndSetCdrVersion(
-            workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
+    CohortReview cohortReview = cohortReviewService.findCohortReview(cohortReviewId);
+    Cohort cohort = cohortReviewService.findCohort(cohortReview.getCohortId());
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
+        workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
 
     ParticipantCohortStatus participantCohortStatus =
-        cohortReviewService.findParticipantCohortStatus(
-            cohortReview.getCohortReviewId(), participantId);
+        cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId);
 
     participantCohortStatus.setStatusEnum(cohortStatusRequest.getStatus());
     cohortReviewService.saveParticipantCohortStatus(participantCohortStatus);

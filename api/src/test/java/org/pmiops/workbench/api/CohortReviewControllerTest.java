@@ -827,8 +827,7 @@ public class CohortReviewControllerTest {
             .getParticipantCohortStatus(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId())
             .getBody();
 
@@ -962,8 +961,7 @@ public class CohortReviewControllerTest {
             .updateParticipantCohortStatus(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId(),
                 new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED))
             .getBody();
