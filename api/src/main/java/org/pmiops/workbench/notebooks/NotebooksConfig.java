@@ -95,6 +95,6 @@ public class NotebooksConfig {
             org.pmiops.workbench.firecloud.FireCloudConfig.X_APP_ID_HEADER,
             workbenchConfig.firecloud.xAppIdValue);
     apiClient.getHttpClient().setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
-    return apiClient
+    return apiClient;
   }
 }
