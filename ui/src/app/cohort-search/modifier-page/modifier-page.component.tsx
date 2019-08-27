@@ -330,13 +330,8 @@ export const ListModifierPage = withCurrentWorkspace()(
     }
 
     selectChange = (sel: any, index: number) => {
-      const {wizard: {domain}} = this.props;
       const {formState} = this.state;
-      triggerEvent(
-        'Cohort Builder Search',
-        'Click',
-        `Modifiers - ${formState[index].label} - ${domainToTitle(domain)} - Cohort Builder Search`
-      );
+      this.trackEvent(formState[index].label);
       const {name} = formState[index];
       if (name === ModifierType.ENCOUNTERS) {
         formState[index].values = [sel];
@@ -392,11 +387,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         wizard: {domain, item: {modifiers, searchParameters}, role},
         workspace: {cdrVersionId}
       } = this.props;
-      triggerEvent(
-        'Cohort Builder Search',
-        'Click',
-        `Modifiers - Calculate - ${domainToTitle(domain)} - Cohort Builder Search`
-      );
+      this.trackEvent('Calculate');
       try {
         this.setState({loading: true, count: null, error: false});
         const request = {
@@ -418,6 +409,15 @@ export const ListModifierPage = withCurrentWorkspace()(
         // TODO this is not catching errors. Need to try again with the new api call
         this.setState({loading: false, error: true});
       }
+    }
+
+    trackEvent = (label: string) => {
+      const {wizard: {domain}} = this.props;
+      triggerEvent(
+        'Cohort Builder Search',
+        'Click',
+        `Modifiers - ${label} - ${domainToTitle(domain)} - Cohort Builder Search`
+      );
     }
 
     validateValues() {

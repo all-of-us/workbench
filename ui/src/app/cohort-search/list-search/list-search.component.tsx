@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {attributesStore, groupSelectionsStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {domainToTitle} from 'app/cohort-search/utils';
+import {domainToTitle, subTypeToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
@@ -200,10 +200,7 @@ export const ListSearch = withCurrentWorkspace()(
       try {
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
         const {sourceMatch} = this.state;
-        triggerEvent(
-          'Cohort Builder Search',
-          'Click',
-          `Standard Vocab Hyperlink - ${domainToTitle(domain)} - Cohort Builder Search`);
+        this.trackEvent('Standard Vocab Hyperlink');
         this.setState({data: null, error: false, loading: true, results: 'standard'});
         const resp = await cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(
           +cdrVersionId, domain, sourceMatch.conceptId
@@ -245,11 +242,7 @@ export const ListSearch = withCurrentWorkspace()(
 
     showHierarchy = (row: any) => {
       const {wizard: {domain}} = this.props;
-      triggerEvent(
-        'Cohort Builder Search',
-        'Click',
-        `More Info - ${domainToTitle(domain)} - Cohort Builder Search`
-      );
+      this.trackEvent('More Info');
       this.props.hierarchy(row);
     }
 
@@ -294,6 +287,15 @@ export const ListSearch = withCurrentWorkspace()(
 
     getParamId(row: any) {
       return `param${row.conceptId ? (row.conceptId + row.code) : row.id}`;
+    }
+
+    trackEvent = (label: string) => {
+      const {wizard: {domain}} = this.props;
+      triggerEvent(
+        'Cohort Builder Search',
+        'Click',
+        `${label} - ${domainToTitle(domain)} - Cohort Builder Search`
+      );
     }
 
     renderRow(row: any, child: boolean) {
@@ -383,13 +385,7 @@ export const ListSearch = withCurrentWorkspace()(
               There are no standard matches for source code {sourceMatch.code}.
             </span>}
             &nbsp;<Clickable style={styles.vocabLink}
-              onMouseDown={() => {
-                triggerEvent(
-                  'Cohort Builder Search',
-                  'Click',
-                  `Standard Vocab Hyperlink - ${domainToTitle(domain)} - Cohort Builder Search`
-                );
-              }}
+              onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
               onClick={() => this.getResults(sourceMatch.code)}>
               Return to source code
             </Clickable>.
