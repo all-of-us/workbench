@@ -1,0 +1,77 @@
+{
+  "firecloud": {
+    "baseUrl": "https:\/\/firecloud-orchestration.dsde-perf.broadinstitute.org",
+    "clusterMaxAgeDays": 7,
+    "clusterIdleMaxAgeDays": 3,
+    "debugEndpoints": false,
+    "enforceRegistered": true,
+    "leoBaseUrl": "https:\/\/leonardo.dsde-perf.broadinstitute.org",
+    "registeredDomainName": "all-of-us-registered-perf",
+    "registeredDomainGroup": "all-of-us-registered-perf@perf.test.firecloud.org",
+    "xAppIdValue": "perf-AoU-RW",
+    "vpcServicePerimeterName": ""
+  },
+  "billing": {
+    "accountId": "00293C-5DEA2D-6887E7",
+    "projectNamePrefix": "aou-rw-perf-",
+    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_00293C-5DEA2D-6887E7",
+    "retryCount": 4,
+    "bufferCapacity": 200,
+    "defaultFreeCreditsLimit": 300.0
+  },
+  "auth": {
+    "serviceAccountApiUsers": [
+      "all-of-us-rw-perf@appspot.gserviceaccount.com"
+    ]
+  },
+  "cdr": {
+    "debugQueries": true
+  },
+  "googleCloudStorageService": {
+    "clusterResourcesBucketName": "all-of-us-rw-perf-cluster-resources",
+    "credentialsBucketName": "all-of-us-rw-perf-credentials",
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images"
+  },
+  "googleDirectoryService": {
+    "gSuiteDomain": "perf.fake-research-aou.org"
+  },
+  "server": {
+    "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-perf.appspot.com",
+    "publicApiKeyForErrorReports": "AIzaSyB44pugxPbfevF_fb7GichIv9D9ee5-nNk",
+    "projectId": "all-of-us-rw-perf",
+    "shortName": "Perf",
+    "oauthClientId": "63939010390-aj0r8hro7r8lkt7a45gissu3m73ietl2.apps.googleusercontent.com",
+    "traceAllRequests": false
+  },
+  "admin": {
+    "loginUrl": "https:\/\/all-of-us-rw-perf.appspot.com/login",
+    "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
+  },
+  "mandrill": {
+    "fromEmail": "donotreply@fake-research-aou.org",
+    "sendRetries": 3
+  },
+  "elasticsearch": {
+    "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
+    "enableBasicAuth": true,
+    "enableElasticsearchBackend": false
+  },
+  "moodle": {
+    "host": "aoudev.nnlm.gov",
+    "enableMoodleBackend": true
+  },
+  "access": {
+    "enableComplianceTraining": true,
+    "enableEraCommons": true,
+    "enableDataUseAgreement": false,
+    "enableBetaAccess": true,
+    "unsafeAllowSelfBypass": true
+  },
+  "featureFlags": {
+    "enableLeoWelder": true,
+    "useBillingProjectBuffer": true,
+    "unsafeAllowDeleteUser": true,
+    "enableVpcFlowLogs": true,
+    "enableVpcServicePerimeter": false
+  }
+}

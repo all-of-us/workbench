@@ -4,6 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.Surveys;
 
 public class CommonStorageEnums {
@@ -96,5 +97,22 @@ public class CommonStorageEnums {
 
   public static Surveys surveyIdToSurvey(String survey) {
     return SURVEY_ID_MAP.inverse().get(survey);
+  }
+
+  private static final BiMap<PrePackagedConceptSetEnum, Short>
+      CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET =
+          ImmutableBiMap.<PrePackagedConceptSetEnum, Short>builder()
+              .put(PrePackagedConceptSetEnum.NONE, (short) 0)
+              .put(PrePackagedConceptSetEnum.DEMOGRAPHICS, (short) 1)
+              .put(PrePackagedConceptSetEnum.SURVEY, (short) 2)
+              .put(PrePackagedConceptSetEnum.BOTH, (short) 3)
+              .build();
+
+  public static PrePackagedConceptSetEnum prePackageConceptSetsFromStorage(Short conceptSet) {
+    return CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET.inverse().get(conceptSet);
+  }
+
+  public static Short prePackageConceptSetsToStorage(PrePackagedConceptSetEnum conceptSet) {
+    return CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET.get(conceptSet);
   }
 }

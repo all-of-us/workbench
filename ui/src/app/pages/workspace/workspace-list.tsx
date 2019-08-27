@@ -17,7 +17,7 @@ import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
 import {ListPageHeader} from 'app/components/headers';
-import {ClrIcon} from 'app/components/icons';
+import {ClrIcon, SnowmanIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
@@ -30,6 +30,7 @@ import {
   ReactWrapperBase,
   withUserProfile
 } from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {
   BillingProjectStatus,
   ErrorResponse,
@@ -37,6 +38,8 @@ import {
 } from 'generated/fetch';
 import * as React from 'react';
 import RSelect from 'react-select';
+
+const EVENT_CATEGORY = 'Workspace list';
 
 const styles = reactStyles({
   fadeBox: {
@@ -107,9 +110,8 @@ const WorkspaceCardMenu: React.FunctionComponent<{
       </React.Fragment>}
   >
     <Clickable disabled={disabled} data-test-id='workspace-card-menu'>
-      <ClrIcon shape='ellipsis-vertical' size={21}
-               style={{color: disabled ? '#9B9B9B' : '#216FB4', marginLeft: -9,
-                 cursor: disabled ? 'auto' : 'pointer'}}/>
+      <SnowmanIcon disabled={disabled}
+      />
     </Clickable>
   </PopupTrigger>;
 };
@@ -215,14 +217,23 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
           <div style={{display: 'flex', flexDirection: 'column'}}>
             <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
               <WorkspaceCardMenu wp={wp}
-                                 onDelete={() => {this.setState({confirmDeleting: true}); }}
-                                 onShare={() => this.handleShareAction()}
+                                 onDelete={() => {
+                                   triggerEvent(
+                                     EVENT_CATEGORY, 'delete', 'Card menu - click delete');
+                                   this.setState({confirmDeleting: true});
+                                 }}
+                                 onShare={() => {
+                                   triggerEvent(EVENT_CATEGORY, 'share', 'Card menu - click share');
+                                   this.handleShareAction();
+                                 }}
                                  disabled={false}/>
               <Clickable>
                 <div style={styles.workspaceName}
                      data-test-id='workspace-card-name'
-                     onClick={() => navigate(
-                         ['workspaces', wp.workspace.namespace, wp.workspace.id, 'data'])}>
+                     onClick={() => {
+                       triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
+                       navigate(['workspaces', wp.workspace.namespace, wp.workspace.id, 'data']);
+                     }}>
                   {wp.workspace.name}</div>
               </Clickable>
             </div>

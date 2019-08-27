@@ -231,7 +231,8 @@ public class ProfileController implements ProfileApiDelegate {
     }
     // GCP billing project names must be <= 30 characters. The per-user hash, an integer,
     // is <= 10 chars.
-    String billingProjectNamePrefix = workbenchConfig.firecloud.billingProjectPrefix + suffix;
+    String billingProjectNamePrefix =
+        workbenchConfigProvider.get().billing.projectNamePrefix + suffix;
     String billingProjectName = billingProjectNamePrefix;
     int numAttempts = 0;
     while (numAttempts < MAX_BILLING_PROJECT_CREATION_ATTEMPTS) {
@@ -351,7 +352,7 @@ public class ProfileController implements ProfileApiDelegate {
 
       case ERROR:
         int retries = Optional.ofNullable(user.getBillingProjectRetries()).orElse(0);
-        if (retries < workbenchConfigProvider.get().firecloud.billingRetryCount) {
+        if (retries < workbenchConfigProvider.get().billing.retryCount) {
           this.userService.setBillingRetryCount(retries + 1);
           log.log(
               Level.INFO,

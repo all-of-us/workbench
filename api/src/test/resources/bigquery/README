@@ -1,0 +1,23 @@
+// Generating .ser files
+1. Write the code necessary to get the query to execute successfully.
+2. Attach a debugger so that the output of BigQueryService.executeQuery() can be inspected
+3. Run the following code block in the debugger's "Evaluate Expression" feature
+
+    // where tableResult is the output of BigQueryService.executeQuery()
+    FileOutputStream file = new FileOutputStream("your_bq_output.ser");
+    ObjectOutputStream out = new ObjectOutputStream(file);
+    out.writeObject(tableResult);
+    out.close();
+    file.close();
+
+4. Find the output file by running this from the /api directory `find . -name your_bq_output.ser`
+5. Copy that file into src/test/resources/bigquery/
+6. See `BillingAlertsServiceTest` to see an example on how to read the file and use it in tests
+
+// Generating .json files
+// This isn't necessary to run the tests but useful for having a human readable version of the test
+// data since the serialized format is not.
+1. Go to cloud.google.com and log in with the necessary google account, probably pmi-ops
+2. Go to BigQuery
+3. Run your query
+4. Go to the JSON tab in the results window and copy/paste that into the src/test/resources/bigquery/ folder

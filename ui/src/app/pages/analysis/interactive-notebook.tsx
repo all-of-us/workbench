@@ -286,7 +286,10 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
             onCancel={() => {
               this.setState({showInUseModal: false}); }}
             onCopy={() => {this.cloneNotebook(); }}
-            onPlaygroundMode={() => {this.startPlaygroundMode(); }}>
+            onPlaygroundMode={() => {
+              this.setState({showInUseModal: false});
+              this.startPlaygroundMode();
+            }}>
           </NotebookInUseModal>}
         </div>
       );

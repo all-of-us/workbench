@@ -1,18 +1,23 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/api.firecloud.org",
-    "billingAccountId": "015EAA-E95687-1F8614",
-    "billingProjectPrefix": "aou-rw-",
     "clusterMaxAgeDays": 14,
     "clusterIdleMaxAgeDays": 7,
     "debugEndpoints": false,
     "enforceRegistered": true,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-prod",
-    "billingRetryCount": 4,
-    "billingProjectBufferCapacity": 20,
+    "registeredDomainGroup": "all-of-us-registered-prod@firecloud.org",
     "xAppIdValue": "AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod"
+  },
+  "billing": {
+    "accountId": "015EAA-E95687-1F8614",
+    "projectNamePrefix": "aou-rw-",
+    "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.gcp_billing_export_v1_015EAA_E95687_1F8614",
+    "retryCount": 4,
+    "bufferCapacity": 20,
+    "defaultFreeCreditsLimit": 300.0
   },
   "auth": {
     "serviceAccountApiUsers": [

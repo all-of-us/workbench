@@ -1,7 +1,6 @@
 import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 
-import { WorkspaceAccessLevel } from 'generated';
 import {cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
@@ -16,11 +15,27 @@ const ResourceCardWrapper = {
     cohort: new CohortsApiStub().cohorts[0],
     modifiedTime: new Date().toISOString()
   },
+  readonlyCohortCard: {
+    workspaceId: 1,
+    workspaceNamespace: 'defaultNamespace',
+    workspaceFirecloudName: 'defaultFirecloudName',
+    permission: 'READER',
+    cohort: new CohortsApiStub().cohorts[0],
+    modifiedTime: new Date().toISOString()
+  },
   cohortReviewCard: {
     workspaceId: 1,
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
+    cohortReview: cohortReviewStubs[0],
+    modifiedTime: new Date().toISOString()
+  },
+  readonlyCohortReviewCard: {
+    workspaceId: 1,
+    workspaceNamespace: 'defaultNamespace',
+    workspaceFirecloudName: 'defaultFirecloudName',
+    permission: 'READER',
     cohortReview: cohortReviewStubs[0],
     modifiedTime: new Date().toISOString()
   },
@@ -32,11 +47,31 @@ const ResourceCardWrapper = {
     conceptSet: new ConceptSetsApiStub().conceptSets[0],
     modifiedTime: new Date().toISOString()
   },
+  readonlyConceptSetCard: {
+    workspaceId: 1,
+    workspaceNamespace: 'defaultNamespace',
+    workspaceFirecloudName: 'defaultFire cloudName',
+    permission: 'READER',
+    conceptSet: new ConceptSetsApiStub().conceptSets[0],
+    modifiedTime: new Date().toISOString()
+  },
   notebookCard: {
     workspaceId: 1,
     workspaceNamespace: 'defaultNamespace',
     workspaceFirecloudName: 'defaultFirecloudName',
     permission: 'OWNER',
+    notebook: {
+      'name': 'mockFile.ipynb',
+      'path': 'gs://bucket/notebooks/mockFile.ipynb',
+      'lastModifiedTime': 100
+    },
+    modifiedTime: new Date().toISOString()
+  },
+  readonlyNotebookCard: {
+    workspaceId: 1,
+    workspaceNamespace: 'defaultNamespace',
+    workspaceFirecloudName: 'defaultFirecloudName',
+    permission: 'READER',
     notebook: {
       'name': 'mockFile.ipynb',
       'path': 'gs://bucket/notebooks/mockFile.ipynb',
@@ -82,6 +117,29 @@ describe('ResourceCardComponent', () => {
     expect(lastModifiedDate(wrapper)).toBeTruthy();
   });
 
-  // Note: this spec is not testing the Popup menus on resource cards due to an issue using
-  //    PopupTrigger in the test suite.
+  function findResourceMenuProps(wrapper: ReactWrapper) {
+    return wrapper.find('[data-test-id="resource-menu"]').props()
+  }
+
+  // We can't test the popup menus themselves in this test because PopupTrigger doesn't know how to draw the modal
+  // without a browser to define bounding boxes...
+  it('should always have a clickable popup menu (cohort)', () => {
+    const wrapper = component(ResourceCardWrapper.readonlyCohortCard);
+    expect(findResourceMenuProps(wrapper)).not.toContain('disabled');
+  });
+
+  it('should always have a clickable popup menu (cohort review)', () => {
+    const wrapper = component(ResourceCardWrapper.readonlyCohortReviewCard);
+    expect(findResourceMenuProps(wrapper)).not.toContain('disabled');
+  });
+
+  it('should always have a clickable popup menu (concept set)', () => {
+    const wrapper = component(ResourceCardWrapper.readonlyConceptSetCard);
+    expect(findResourceMenuProps(wrapper)).not.toContain('disabled');
+  });
+
+  it('should always have a clickable popup menu (notebook)', () => {
+    const wrapper = component(ResourceCardWrapper.readonlyNotebookCard);
+    expect(findResourceMenuProps(wrapper)).not.toContain('disabled');
+  });
 });

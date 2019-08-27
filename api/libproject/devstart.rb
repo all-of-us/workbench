@@ -60,6 +60,14 @@ ENVIRONMENTS = {
     :featured_workspaces_json => "featured_workspaces_staging.json",
     :gae_vars => TEST_GAE_VARS
   },
+  "all-of-us-rw-perf" => {
+    :api_endpoint_host => "api-dot-all-of-us-rw-perf.appspot.com",
+    :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
+    :config_json => "config_perf.json",
+    :cdr_versions_json => "cdr_versions_perf.json",
+    :featured_workspaces_json => "featured_workspaces_perf.json",
+    :gae_vars => TEST_GAE_VARS
+  },
   "all-of-us-rw-stable" => {
     :api_endpoint_host => "api-dot-all-of-us-rw-stable.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
@@ -568,11 +576,13 @@ def register_service_account(cmd_name, *args)
         "Project to register the service account for"
   )
   op.parse.validate
+  firecloud_base_url = get_firecloud_base_url(op.opts.project)
   ServiceAccountContext.new(op.opts.project).run do
     Dir.chdir("../firecloud-tools") do
       common = Common.new
       common.run_inline %W{./run.sh scripts/register_service_account/register_service_account.py
-           -j #{ENV["GOOGLE_APPLICATION_CREDENTIALS"]} -e all-of-us-research-tools@googlegroups.com}
+           -j #{ENV["GOOGLE_APPLICATION_CREDENTIALS"]} -e all-of-us-research-tools@googlegroups.com
+           -u #{firecloud_base_url}}
     end
   end
 end
@@ -1439,6 +1449,7 @@ def deploy_gcs_artifacts(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
+  auth_domain_group = get_auth_domain_group(gcc.project)
 
   Dir.chdir("cluster-resources") do
     common.run_inline(%W{./build.rb build-snippets-menu})
@@ -1449,15 +1460,15 @@ def deploy_gcs_artifacts(cmd_name, args)
       generated/aou-snippets-menu.js
       gs://#{gcc.project}-cluster-resources/
     })
-    # This file must be readable by all AoU researchers and the Leonardo service
-    # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make
-    # these public since these assets are public in GitHub anyways.
-    run_inline_or_log(op.opts.dry_run, %W{
-      gsutil acl ch -u AllUsers:R
-      gs://#{gcc.project}-cluster-resources/setup_notebook_cluster.sh
-      gs://#{gcc.project}-cluster-resources/playground-extension.js
-      gs://#{gcc.project}-cluster-resources/aou-snippets-menu.js
-    })
+    # This bucket must be readable by all AoU researchers and their pet service accounts
+    # account (https://github.com/DataBiosphere/leonardo/issues/220). Sharing with all
+    # registered users. The firecloud.org check is to avoid circular requirements in
+    # environment setup
+    if !auth_domain_group.nil? and !auth_domain_group.empty?
+      run_inline_or_log(op.opts.dry_run, %W{
+        gsutil iam ch group:#{auth_domain_group}:objectViewer gs://#{gcc.project}-cluster-resources
+      })
+    end
   end
 end
 
@@ -1559,14 +1570,6 @@ def migrate_database(dry_run = false)
   end
 end
 
-def migrate_workbench_data()
-  common = Common.new
-  common.status "Migrating workbench data..."
-  Dir.chdir("db") do
-    common.run_inline(%W{gradle update -PrunList=data -Pcontexts=cloud})
-  end
-end
-
 def get_fc_config(project)
   config_json = get_config(project)
   return JSON.parse(File.read("config/#{config_json}"))["firecloud"]
@@ -1578,6 +1581,14 @@ end
 
 def get_auth_domain(project)
   return get_fc_config(project)["registeredDomainName"]
+end
+
+def get_auth_domain_group(project)
+  return get_fc_config(project)["registeredDomainGroup"]
+end
+
+def get_firecloud_base_url(project)
+  return get_fc_config(project)["baseUrl"]
 end
 
 def get_es_base_url(env)
@@ -1768,9 +1779,9 @@ Common.register_command({
 
 def create_project_resources(gcc)
   common = Common.new
-  common.status "Enabling APIs..."
+  common.status "Enabling Cloud Service APIs..."
   for service in SERVICES
-    common.run_inline("gcloud service-management enable #{service} --project #{gcc.project}")
+    common.run_inline("gcloud services enable #{service} --project #{gcc.project}")
   end
   common.status "Creating GCS bucket to store credentials..."
   common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
@@ -1824,9 +1835,6 @@ def setup_project_data(gcc, cdr_db_name)
 
     common.status "Running schema migrations..."
     migrate_database
-
-    # This will insert a CDR version row pointing at the CDR DB.
-    migrate_workbench_data
 
   end
 end

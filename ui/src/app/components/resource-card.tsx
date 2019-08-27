@@ -403,8 +403,7 @@ export class ResourceCard extends React.Component<Props, State> {
                         data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
-            <ResourceCardMenu disabled={false}
-                              resourceType={this.resourceType}
+            <ResourceCardMenu resourceType={this.resourceType}
                               onCopyConceptSet={() => this.setState({copyingConceptSet: true})}
                               canDelete={this.ownerPermission}
                               onDeleteResource={() => this.openConfirmDelete()}
