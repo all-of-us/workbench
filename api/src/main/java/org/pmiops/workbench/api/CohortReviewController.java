@@ -367,19 +367,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long participantId,
       ParticipantCohortAnnotation request) {
 
-    if (request.getCohortAnnotationDefinitionId() == null) {
-      throw new BadRequestException(
-          "Bad Request: Please provide a valid cohort annotation definition id.");
-    }
-    if (request.getCohortReviewId() == null) {
-      throw new BadRequestException("Bad Request: Please provide a valid cohort review id.");
-    }
     if (request.getCohortReviewId() != cohortReviewId) {
       throw new BadRequestException(
           "Bad Request: request cohort review id must equal path parameter cohort review id.");
-    }
-    if (request.getParticipantId() == null) {
-      throw new BadRequestException("Bad Request: Please provide a valid participant id.");
     }
 
     cohortReviewService.enforceWorkspaceAccessLevel(
@@ -415,14 +405,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       Long participantId,
       Long annotationId) {
-
-    if (annotationId == null) {
-      throw new BadRequestException(
-          "Bad Request: Please provide a valid cohort annotation definition id.");
-    }
-    if (participantId == null) {
-      throw new BadRequestException("Bad Request: Please provide a valid participant id.");
-    }
 
     cohortReviewService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
