@@ -1,4 +1,4 @@
-import {convertToResources, ResourceType} from 'app/utils/resourceActionsReact';
+import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 import {
   Cohort,
   CohortAnnotationsResponse,

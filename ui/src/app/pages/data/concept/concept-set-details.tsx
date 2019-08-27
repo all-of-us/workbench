@@ -24,7 +24,7 @@ import {
   withUrlParams
 } from 'app/utils';
 import {currentConceptSetStore, navigate, navigateByUrl} from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActionsReact';
+import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {Concept, ConceptSet, CopyRequest, WorkspaceAccessLevel} from 'generated/fetch';

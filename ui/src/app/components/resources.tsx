@@ -4,19 +4,17 @@ import {Clickable, MenuItem} from 'app/components/buttons';
 import {SnowmanIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import {switchCase} from 'app/utils';
-import {ResourceType} from 'app/utils/resourceActionsReact';
+import {ResourceType} from 'app/utils/resourceActions';
 
 export interface ResourceCardMenuProps {
   resourceType: ResourceType;
   onRenameResource?: Function;
-  onCloneResource?: Function;
   onCopyConceptSet?: Function;
   canDelete: boolean;
   onDeleteResource?: Function;
   canEdit: boolean;
   onEdit?: Function;
   onExportDataSet: Function;
-  onReviewCohort?: Function;
 }
 
 export class ResourceCardMenu extends React.Component<ResourceCardMenuProps> {
@@ -27,41 +25,6 @@ export class ResourceCardMenu extends React.Component<ResourceCardMenuProps> {
       closeOnClick
       content={
         switchCase(this.props.resourceType,
-          ['cohort', () => {
-            return <React.Fragment>
-              <MenuItem icon='note'
-                        onClick={this.props.onRenameResource}
-                        disabled={!this.props.canEdit}
-              >
-                Rename
-              </MenuItem>
-              <MenuItem icon='copy'
-                        onClick={this.props.onCloneResource}
-                        disabled={!this.props.canEdit}
-              >
-                Duplicate
-              </MenuItem>
-              <MenuItem
-                icon='pencil'
-                onClick={this.props.onEdit}
-                disabled={!this.props.canEdit}
-              >
-                Edit
-              </MenuItem>
-              <MenuItem icon='grid-view'
-                        onClick={this.props.onReviewCohort}
-                        disabled={!this.props.canEdit}
-              >
-                Review
-              </MenuItem>
-              <MenuItem icon='trash'
-                        onClick={this.props.onDeleteResource}
-                        disabled={!this.props.canDelete}
-              >
-                Delete
-              </MenuItem>
-            </React.Fragment>;
-          }],
           ['cohortReview', () => {
             return <React.Fragment>
               <MenuItem icon='note'
