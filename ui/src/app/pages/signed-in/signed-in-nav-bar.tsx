@@ -71,7 +71,11 @@ export interface State {
   profileLoadingSub: Subscription;
   subscriptions: Array<Subscription>;
   sideNavVisible: boolean;
+  barsTransform: string;
 }
+
+const barsTransformNotRotated = 'rotate(0deg)';
+const barsTransformRotated = 'rotate(90deg)';
 
 export const SignedInNavBar = withUserProfile()(
   class extends React.Component<Props, State> {
@@ -80,17 +84,28 @@ export const SignedInNavBar = withUserProfile()(
       this.state = {
         profileLoadingSub: null,
         subscriptions: [],
-        sideNavVisible: false
+        sideNavVisible: false,
+        barsTransform: barsTransformNotRotated
       };
     }
 
     onToggleSideNav() {
-      this.setState(previousState => ({sideNavVisible: !previousState.sideNavVisible}))
+      this.setState(previousState => ({sideNavVisible: !previousState.sideNavVisible}));
+      this.setState(previousState => ({
+        barsTransform: previousState.barsTransform === barsTransformNotRotated
+          ? barsTransformRotated
+          : barsTransformNotRotated
+      }));
     }
 
     render() {
       return <div style={styles.headerContainer}>
-        <div style={styles.sidenavToggle}>
+        <div style={{
+          transform: this.state.barsTransform,
+          display: 'inline-block',
+          marginLeft: '1rem',
+          transition: 'transform 0.5s',
+        }}>
           <ClrIcon
             shape='bars'
             onClick={() => this.onToggleSideNav()}
@@ -103,11 +118,12 @@ export const SignedInNavBar = withUserProfile()(
           </ClrIcon>
         </div>
         <div>
-          <img
-            src={this.props.headerImg}
-            style={styles.headerImage}
-            //routerLink='/'
-          />
+          <a href={"/"}>
+            <img
+              src={this.props.headerImg}
+              style={styles.headerImage}
+            />
+          </a>
           {
             this.props.shouldShowDisplayTag
               ? <div style={styles.displayTag}>
