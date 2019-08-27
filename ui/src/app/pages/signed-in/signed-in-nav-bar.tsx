@@ -4,9 +4,8 @@ import {Subscription} from "rxjs";
 import * as React from "react";
 import {ClrIcon} from "app/components/icons";
 import colors from "app/styles/colors";
-import {BreadCrumb} from "primereact/breadcrumb";
+import {Breadcrumb} from "app/components/breadcrumb";
 import {SideNav} from "app/components/side-nav";
-import {MenuItem} from "../../components/buttons";
 
 const styles = reactStyles({
   headerContainer: {
@@ -117,7 +116,7 @@ export const SignedInNavBar = withUserProfile()(
               : null
           }
         </div>
-        <BreadCrumb/>
+        <Breadcrumb/>
         {
           this.state.sideNavVisible
           && <SideNav

@@ -131,7 +131,7 @@ const BreadcrumbLink = ({href, ...props}) => {
   />;
 };
 
-export interface Props {
+interface Props {
   workspace: WorkspaceData,
   cohort: Cohort,
   conceptSet: ConceptSet,
@@ -149,7 +149,7 @@ export const Breadcrumb = fp.flow(
   class extends React.Component<Props, {}> {
     constructor(props) {
       super(props);
-      this.state = {}
+      // this.state = {}
     }
 
     trail(): Array<BreadcrumbData> {
