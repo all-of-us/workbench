@@ -65,6 +65,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   }
 
   loadChildren(event) {
+    // TODO remove condition to only track SURVEY domain for 'Phase 2' of CB Google Analytics
     if (this.node.domainId === DomainType.SURVEY) {
       this.trackEvent();
     }

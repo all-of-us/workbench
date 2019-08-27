@@ -406,6 +406,7 @@ export const AttributesPage = withCurrentWorkspace() (
     requestPreview() {
       this.setState({count: null, calculating: true, countError: false});
       const param = this.paramWithAttributes;
+      // TODO remove condition to only track PM criteria for 'Phase 2' of CB Google Analytics
       if (this.isPhysicalMeasurement) {
         this.trackEvent(param.subtype, 'Calculate');
       }
@@ -430,6 +431,7 @@ export const AttributesPage = withCurrentWorkspace() (
 
     addParameterToSearchItem() {
       const param = this.paramWithAttributes;
+      // TODO remove condition to only track PM criteria for 'Phase 2' of CB Google Analytics
       if (this.isPhysicalMeasurement) {
         this.trackEvent(param.subtype, 'Add');
       }
