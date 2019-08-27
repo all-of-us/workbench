@@ -9,23 +9,41 @@ import {
 } from 'generated/fetch';
 
 export enum ResourceType {
-    NOTEBOOK = 'notebook',
-    COHORT = 'cohort',
-    COHORT_REVIEW = 'cohortReview',
-    CONCEPT_SET = 'conceptSet',
-    DATA_SET = 'dataSet',
-    INVALID = 'invalid'
-  }
+  NOTEBOOK = 'notebook',
+  COHORT = 'cohort',
+  COHORT_REVIEW = 'cohortReview',
+  CONCEPT_SET = 'conceptSet',
+  DATA_SET = 'dataSet',
+  INVALID = 'invalid'
+}
 
-export function convertToResource(resource: FileDetail | Cohort | CohortReview | ConceptSet,
-  workspaceNamespace: string, workspaceId: string,
+export const ResourceTypeDisplayNames = new Map()
+  .set(ResourceType.NOTEBOOK, 'notebook')
+  .set(ResourceType.COHORT, 'cohort')
+  .set(ResourceType.CONCEPT_SET, 'concept set')
+  .set(ResourceType.DATA_SET, 'data set');
+
+export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[]
+  | DataSet[], workspaceNamespace: string, workspaceId: string,
+  accessLevel: WorkspaceAccessLevel,
+  resourceType: ResourceType): RecentResource[] {
+  const resourceList = [];
+  for (const resource of list) {
+    resourceList.push(convertToResource(resource, workspaceNamespace, workspaceId,
+      accessLevel, resourceType));
+  }
+  return resourceList;
+}
+
+export function convertToResource(resource: FileDetail | Cohort | CohortReview | ConceptSet
+  | DataSet, workspaceNamespace: string, workspaceId: string,
   accessLevel: WorkspaceAccessLevel,
   resourceType: ResourceType): RecentResource {
   let modifiedTime: string;
   if (!resource.lastModifiedTime) {
     modifiedTime = new Date().toDateString();
   } else {
-    modifiedTime = resource.lastModifiedTime.toString();
+    modifiedTime = new Date(resource.lastModifiedTime).toString();
   }
   const newResource: RecentResource = {
     workspaceNamespace: workspaceNamespace,

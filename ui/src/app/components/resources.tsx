@@ -4,7 +4,7 @@ import {Clickable, MenuItem} from 'app/components/buttons';
 import {SnowmanIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import {switchCase} from 'app/utils';
-import {ResourceType} from 'app/utils/resourceActionsReact';
+import {ResourceType} from 'app/utils/resourceActions';
 
 export interface ResourceCardMenuProps {
   resourceType: ResourceType;

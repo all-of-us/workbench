@@ -17,7 +17,7 @@ import {navigate} from 'app/utils/navigation';
 import {
   convertToResources,
   ResourceType
-} from 'app/utils/resourceActionsReact';
+} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Domain, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
 
