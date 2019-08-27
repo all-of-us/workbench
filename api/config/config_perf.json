@@ -9,7 +9,8 @@
     "registeredDomainName": "all-of-us-registered-perf",
     "registeredDomainGroup": "all-of-us-registered-perf@perf.test.firecloud.org",
     "xAppIdValue": "perf-AoU-RW",
-    "vpcServicePerimeterName": ""
+    "vpcServicePerimeterName": "",
+    "timeoutInSeconds": 40
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",
