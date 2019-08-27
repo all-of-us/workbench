@@ -9,7 +9,7 @@ import {formatRecentResourceDisplayDate} from 'app/utils';
 import {navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 import {RecentResource} from 'generated/fetch';
-import * as fp from 'lodash';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {

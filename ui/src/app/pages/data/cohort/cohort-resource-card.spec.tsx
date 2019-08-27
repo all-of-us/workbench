@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {CohortResourceCard} from './cohort-resource-card';
+import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 
 
 describe('CohortResourceCard', () => {

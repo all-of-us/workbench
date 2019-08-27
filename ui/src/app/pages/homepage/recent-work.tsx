@@ -7,7 +7,7 @@ import {Scroll} from 'app/icons/scroll';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
 
 import {ResourceCard} from 'app/components/resource-card';
-import {CohortResourceCard} from 'app/pages/analysis/cohort-resource-card';
+import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {RecentResource} from 'generated/fetch';
 

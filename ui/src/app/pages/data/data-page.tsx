@@ -8,7 +8,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {ResourceCard} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {CohortResourceCard} from 'app/pages/analysis/cohort-resource-card';
+import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {cohortReviewApi, cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';

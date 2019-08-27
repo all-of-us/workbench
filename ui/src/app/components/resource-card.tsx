@@ -109,7 +109,7 @@ export class ResourceCard extends React.Component<Props, State> {
       errorModalTitle: 'Error Title',
       errorModalBody: 'Error Body',
       exportingDataSet: false,
-      invalidResourceError: !( props.resourceCard.cohortReview ||
+      invalidResourceError: !(props.resourceCard.cohortReview ||
         props.resourceCard.conceptSet ||
         props.resourceCard.dataSet),
       renaming: false,
