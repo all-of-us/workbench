@@ -9,18 +9,21 @@ const styles = reactStyles({
   sidebar: {
     position: 'absolute',
     top: 0,
-    right: 0,
+    right: '-45px',
     height: '100%',
-    marginRight: '-45px',
+    width: 'calc(14rem + 45px)',
+    overflow: 'hidden',
+    color: colors.primary,
   },
   content: {
     position: 'absolute',
     top: 0,
     right: '45px',
     height: '100%',
-    overflow: 'hidden',
-    background: colors.light,
-    transition: 'width 0.5s ease-out'
+    width: '14rem',
+    padding: '0.5rem',
+    background: colorWithWhiteness(colors.primary, .87),
+    transition: 'margin-right 0.5s ease-out'
   },
   iconContainer: {
     position: 'absolute',
@@ -42,11 +45,11 @@ const styles = reactStyles({
 const contentStyles = {
   closed: {
     ...styles.content,
-    width: 0
+    marginRight: '-14rem',
   },
   open: {
     ...styles.content,
-    width: '10rem'
+    marginRight: 0,
   },
 };
 
@@ -74,7 +77,7 @@ export class HelpSidebar extends React.Component<Props, State> {
     const {activeIcon, sidebarOpen} = this.state;
     return <div style={styles.sidebar}>
       <div style={sidebarOpen ? contentStyles.open : contentStyles.closed}>
-        <h3>Sidebar Content</h3>
+        <h3 style={{fontWeight: 600, margin: 0}}>Help Tips</h3>
       </div>
       <div style={styles.iconContainer}>
         <ClrIcon className='is-solid' shape='info-standard' size={28} style={styles.icon}
