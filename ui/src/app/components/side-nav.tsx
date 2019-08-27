@@ -1,7 +1,9 @@
 import * as React from 'react';
-import colors from "app/styles/colors";
+import colors, {colorWithWhiteness} from "app/styles/colors";
 import {reactStyles} from "app/utils";
-import {MenuItem} from "app/components/buttons";
+import {Clickable, MenuItem} from "app/components/buttons";
+import {ClrIcon} from "./icons";
+import {TooltipTrigger} from "./popups";
 
 const styles = reactStyles({
   sideNav: {
@@ -17,20 +19,103 @@ const styles = reactStyles({
     transition: 'opacity 0.5s',
   },
   navLink: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     margin: 0,
-    padding: '0.5rem 1.5rem',
+    padding: '1rem',
     textAlign: 'left',
     textTransform: 'none',
     height: '2rem',
     color: colors.white,
+  },
+  navIcon: {
+    marginRight: 8
+  },
+  dropdownIcon: {
+    transform: 'rotate(180deg)',
   }
 });
 
-const SideNavMenuItem = (icon, content) => {
-  return <MenuItem icon={icon} solid={true} style={styles.navLink}>
-    {{content}}
-  </MenuItem>
-};
+interface SideNavSubItemProps {
+  text: string,
+}
+
+class SideNavSubItem extends React.Component<SideNavSubItemProps> {
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return <Clickable
+      // data-test-id is the text within the SideNavItem, with whitespace removed
+      // and appended with '-menu-item'
+      data-test-id={this.props.text.toString().replace(/\s/g, '') + '-menu-sub-item'}
+      style={styles.navLink}
+      // hover={backgroundColor: colorWithWhiteness(colors.accent, .10)}
+    >
+      {this.props.text}
+    </Clickable>
+  }
+}
+
+interface SideNavItemProps {
+  icon: string,
+  content: string,
+  subItems?: Array<any>
+}
+
+interface SideNavItemState {
+  dropdownOpen: boolean;
+}
+
+class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
+  constructor(props) {
+    super(props);
+    this.state = {
+      dropdownOpen: false
+    }
+  }
+
+  render() {
+    return <Clickable
+      // data-test-id is the text within the SideNavItem, with whitespace removed
+      // and appended with '-menu-item'
+      data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
+      style={styles.navLink}
+      // hover={backgroundColor: colorWithWhiteness(colors.accent, .10)}
+    >
+      <span>
+        <ClrIcon
+          shape={this.props.icon}
+          className={"is-solid"}
+          style={styles.navIcon}
+          size={21}
+        />
+        {this.props.content}
+      </span>
+      {
+        this.props.subItems != undefined
+        && this.props.subItems.length > 0
+        && <ClrIcon
+          shape="angle"
+          style={styles.dropdownIcon}
+          size={21}
+        />
+      }
+      {
+        this.props.subItems != undefined
+        && this.props.subItems.length > 0
+        && this.state.dropdownOpen
+        && <React.Fragment>
+          {this.props.subItems.map(subItem => (
+            <SideNavSubItem text={subItem.text} />
+          ))}
+        </React.Fragment>
+      }
+    </Clickable>
+  }
+}
 
 export interface Props {
   givenName: string;
@@ -44,22 +129,29 @@ export class SideNav extends React.Component<Props, {}> {
   }
 
   render() {
-    // return <div style={styles.sideNav}>
-    //   <section>
-    //     <SideNavMenuItem icon="user" content={`${this.props.givenName} ${this.props.familyName}`}/>
-    //     <SideNavMenuItem icon="home" content="Home"/>
-    //     <SideNavMenuItem icon="applications" content="Your Workspaces"/>
-    //     <SideNavMenuItem icon="star" content="Featured Workspaces"/>
-    //     <SideNavMenuItem icon="help" content="User Support"/>
-    //   </section>
-    // </div>
     return <div style={styles.sideNav}>
       <section>
-        <MenuItem icon="user">{this.props.givenName} {this.props.familyName}</MenuItem>
-        <MenuItem icon="home">Home</MenuItem>
-        <MenuItem icon="applications">Your Workspaces</MenuItem>
-        <MenuItem icon="star">Featured Workspaces</MenuItem>
-        <MenuItem icon="help">User Support</MenuItem>
+        <SideNavItem
+          icon="user"
+          content={`${this.props.givenName} ${this.props.familyName}`}
+          subItems={[
+            {text: "Profile"},
+            {text: "Billing Dashboard"},
+            {text: "Sign Out"},
+          ]}
+        />
+        <SideNavItem icon="home" content="Home"/>
+        <SideNavItem icon="applications" content="Your Workspaces"/>
+        <SideNavItem icon="star" content="Featured Workspaces"/>
+        <SideNavItem
+          icon="help"
+          content="User Support"
+          subItems={[
+            {text: "How-to Guides"},
+            {text: "User Forum"},
+            {text: "Contact Us"},
+          ]}
+        />
       </section>
     </div>
   }
