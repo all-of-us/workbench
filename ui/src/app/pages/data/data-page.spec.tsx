@@ -3,11 +3,11 @@ import * as React from 'react';
 
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
+import {ResourceCardBase} from 'app/components/card';
 import {DataPage} from 'app/pages/data/data-page';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {ResourceCard} from 'app/components/resource-card';
 import {CohortReviewApi, CohortsApi, ConceptsApi, ConceptSetsApi, DataSetApi, WorkspacesApi} from 'generated/fetch';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
@@ -17,6 +17,7 @@ import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {WorkspacesApiStub, workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+
 
 describe('DataPage', () => {
   beforeEach(() => {
@@ -49,7 +50,7 @@ describe('DataPage', () => {
       DataSetApiStub.stubDataSets().length;
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(ResourceCard).length).toBe(resourceCardsExpected);
+    expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
   });
 
   it('should show only cohorts when selected', async() => {
@@ -59,7 +60,7 @@ describe('DataPage', () => {
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="view-only-cohorts"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(ResourceCard).length).toBe(resourceCardsExpected);
+    expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
   });
 
   it('should show only cohort reviews when selected', async() => {
@@ -69,7 +70,7 @@ describe('DataPage', () => {
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="view-only-cohort-reviews"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(ResourceCard).length).toBe(resourceCardsExpected);
+    expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
   });
 
   it('should show only conceptSets when selected', async() => {
@@ -79,7 +80,7 @@ describe('DataPage', () => {
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="view-only-concept-sets"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(ResourceCard).length).toBe(resourceCardsExpected);
+    expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
   });
 
   it('should show only dataSets when selected', async() => {
@@ -89,6 +90,6 @@ describe('DataPage', () => {
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="view-only-data-sets"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find(ResourceCard).length).toBe(resourceCardsExpected);
+    expect(wrapper.find(ResourceCardBase).length).toBe(resourceCardsExpected);
   });
 });
