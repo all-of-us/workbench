@@ -559,19 +559,44 @@ These are easiest if you need to authenticate as one of your researcher accounts
 
 This approach is required if you want to issue a request to a backend as a service account. This may be necessary in some cases as the Workbench service is an owner on all AoU billing projects.
 
-This approach requires [oauth2l](https://github.com/google/oauth2l) to be installed:
-```
-(For macs: `brew install go`)
+This approach requires [oauth2l](https://github.com/google/oauth2l) to be installed (and `brew install go` on MacOS):
+
+```Shell
 go get github.com/google/oauth2l
 go install github.com/google/oauth2l
 ```
 
+To obtain the service account credentials, run
+```Shell
+cd api
+gcloud auth login <user>@pmi-ops.org # for test environment
+./project.rb get-test-service-creds
+```
+You should see a file `sa-key.json` in the current directory
 The following shows how to make an authenticated backend request as the shared  workbench test service account against Firecloud dev (assumes you have run dev-up at least once):
 
-```
+```Shell
 # From the "api" directory.
-curl -X GET -H "$(~/go/bin/oauth2l header --json build/exploded-api/WEB-INF/sa-key.json email profile cloud-billing)" -H "Content-Type: application/json" https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing
+auth_token=`~/go/bin/oauth2l header --json ./sa-key.json email profile cloud-billing`
+# verify this works (on test only) with
+echo $auth_token
+```
+
+Now we'll demonstrate calling Firecloud's [profile/billing API](https://api.firecloud.org/#!/Profile/billing)
+with the service account credentials.
+```Shell
+# call the API
+url_prefix="firecloud-orchestration.dsde-dev.broadinstitute.org"
+output_file="~/billing_projects_per_user.txt"
+
+curl -X GET -H $auth_token \
+    -H "Content-Type: application/json" \
+    https://$url_prefix/api/profile/billing \
+    > $output_file
 
 # If you get 401 errors, you may need to clear your token cache.
 oauth2l reset
+
+# clear the $auth_token variable
+auth_token=
 ```
