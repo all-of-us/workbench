@@ -294,6 +294,7 @@ interface State {
 
 export const DetailTabs = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
+    private subscription;
     constructor(props: any) {
       super(props);
       this.state = {
@@ -308,7 +309,7 @@ export const DetailTabs = withCurrentWorkspace()(
 
     componentDidMount() {
       const {cdrVersionId} = this.props.workspace;
-      urlParamsStore.distinctUntilChanged(fp.isEqual)
+      this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(({pid}) => !!pid)
         .switchMap(({ns, wsid, cid, pid}) => {
           const chartData = {};
@@ -342,6 +343,10 @@ export const DetailTabs = withCurrentWorkspace()(
         updateState++;
         this.setState({filterState, updateState});
       });
+    }
+
+    componentWillUnmount() {
+      this.subscription.unsubscribe();
     }
 
     filteredData(_domain: string, checkedItems: any) {

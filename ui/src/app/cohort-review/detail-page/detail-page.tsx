@@ -82,6 +82,7 @@ interface State {
 
 export const DetailPage = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
+    private subscription;
     constructor(props: any) {
       super(props);
       this.state = {
@@ -104,7 +105,7 @@ export const DetailPage = withCurrentWorkspace()(
 
     componentDidMount() {
       const {cdrVersionId} = this.props.workspace;
-      urlParamsStore.distinctUntilChanged(fp.isEqual)
+      this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(params => !!params.pid)
         .switchMap(({ns, wsid, cid, pid}) => {
           return Observable.forkJoin(
@@ -124,6 +125,10 @@ export const DetailPage = withCurrentWorkspace()(
           );
         })
         .subscribe();
+    }
+
+    componentWillUnmount() {
+      this.subscription.unsubscribe();
     }
 
     loadAnnotationDefinitions() {
