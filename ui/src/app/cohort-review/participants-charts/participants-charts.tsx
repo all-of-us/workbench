@@ -4,7 +4,6 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import * as React from 'react';
 

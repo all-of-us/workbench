@@ -7,7 +7,6 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
