@@ -44,33 +44,56 @@
       ]
     },
     {
-      "title": "Conditions",
+      "title": "Domain Descriptions",
       "content": [
-        "Conditions are listed by ICD9 or ICD10 or SNOMED standard codes."
-      ]
-    },
-    {
-      "title": "Procedures",
-      "content": [
-        "Procedures are listed by ICD9, ICD10, or CPT or SNOMED standard codes."
-      ]
-    },
-    {
-      "title": "Drugs",
-      "content": [
-        "Drugs or medications are listed by ingredient and organized by therapeutic uses."
-      ]
-    },
-    {
-      "title": "Measurements",
-      "content": [
-        "Measurements refer to laboratory tests and vital signs and are organized in the LOINC (Logical Observation Identifiers Names and Codes) code hierarchy. Also included in this section are Program Physical Measurements recorded when a participant enrolls in the program."
-      ]
-    },
-    {
-      "title": "Visits",
-      "content": [
-        "Visits refer to the type of facility at which the participant received medical care (e.g. emergency room, outpatient, inpatient)."
+        {
+          "title": "Conditions",
+          "content": [
+            "Conditions are listed by ICD9 or ICD10 or SNOMED standard codes."
+          ]
+        },
+        {
+          "title": "Procedures",
+          "content": [
+            "Procedures are listed by ICD9, ICD10, or CPT or SNOMED standard codes."
+          ]
+        },
+        {
+          "title": "Drugs",
+          "content": [
+            "Drugs or medications are listed by ingredient and organized by therapeutic uses."
+          ]
+        },
+        {
+          "title": "Measurements",
+          "content": [
+            "Measurements refer to laboratory tests and vital signs and are organized in the LOINC (Logical Observation Identifiers Names and Codes) code hierarchy. Also included in this section are Program Physical Measurements recorded when a participant enrolls in the program."
+          ]
+        },
+        {
+          "title": "Visits",
+          "content": [
+            "Visits refer to the type of facility at which the participant received medical care (e.g. emergency room, outpatient, inpatient)."
+          ]
+        },
+        {
+          "title": "Surveys",
+          "content": [
+            "Questions and associated response options for participant completed surveys."
+          ]
+        },
+        {
+          "title": "Physical Measurements",
+          "content": [
+            "Measurements taken at the time of participant enrollment, including blood pressure, heart rate, height, weight, body mass index (BMI), waist and hip circumference, pregnancy status and wheelchair use."
+          ]
+        },
+        {
+          "title": "Demographics",
+          "content": [
+            "Age, gender, race, ethnicity and deceased status."
+          ]
+        }
       ]
     }
   ],
@@ -148,10 +171,74 @@
           "title": "Source and Standard Search",
           "content": [
             "The All of Us Research Program employs Observational Medical Outcomes Partnership (OMOP) Common Data Model Version 5 infrastructure to ensure feasibility and standardization across all program data types (physical measurements, electronic health records and PPI). Medical concepts are recorded in the EHR as standard codes (e.g. ICD9, ICD10, CPT, etc.). These codes are then mapped to standard vocabularies such as LOINC, ICD9, or SNOMED and the associated \"standard\" concept_id. Sometimes the source vocabulary is the same as the standard vocabulary. All medical concepts can be searched via either the standard or source vocabulary concept_id.",
-            "Upon entering a standard code in the search bar, a list of all matching standard codes will be generated. To see the standard vocabulary equivalent, select \"STANDARD VOCABULARY.\"",
+            "Upon entering a standard code in the search bar, a list of all matching standard codes will be generated. To see the standard vocabulary equivalent, select \"STANDARD VOCABULARY.\""
+          ]
+        },
+        {
+          "title": "Modifiers",
+          "content": [
+            "Modifiers allow you to specify the age at event, date of event and/or number of occurrences for a selected criteria. Privacy preserving methods in our curated data set require that all dates are consistently shifted within a particular participants record."
+          ]
+        },
+        {
+          "title": "Temporal",
+          "content": [
+            "Temporal relationships allow you to search for participants using criteria domains as a group and relating them with time."
           ]
         }
       ]
+    },
+    {
+      "title": "Group Count",
+      "content": [
+        "The group count displays the number of participant records if any of the criteria joined by the OR operator are true."
+      ]
+    },
+    {
+      "title": "Total Count",
+      "content": [
+        "The total count displays the number of participant records if all of the criteria joined by the AND operator are true."
+      ]
+    },
+    {
+      "title": "Generate Review Set",
+      "content": [
+        "In order to validate the criteria you used to create your cohort, you can create a subset of participant records you wish to review in detail"
+      ]
+    }
+  ],
+  "datasetBuilder": [
+    {
+      "title": "Dataset Builder",
+      "content": "Datasets are analysis-ready tables containing data about a Cohort can be exported to analysis tools such as Notebooks. Users can build and preview a dataset for one or more cohorts by selecting the desired concepts sets and values for the cohorts."
+    }
+  ],
+  "reviewParticipants": [
+    {
+      "title": "Participant Status",
+      "content": "Within the Review Set, you can review individual participant records and choose to include, exclude, or mark them for further review."
+    },
+    {
+      "title": "Annotations",
+      "content": "Within the Review Set, you have the option of creating a review-set-wide annotation or set of annotations. Annotations allow you to add an explanation (free text), date, number (numeric field), selection from a specified list (dropdown list) or checkbox to each participant record."
+    }
+  ],
+  "reviewParticipantDetail": [
+    {
+      "title": "Participant Status",
+      "content": "Within the Review Set, you can review individual participant records and choose to include, exclude, or mark them for further review."
+    },
+    {
+      "title": "Annotations",
+      "content": "Within the Review Set, you have the option of creating a review-set-wide annotation or set of annotations. Annotations allow you to add an explanation (free text), date, number (numeric field), selection from a specified list (dropdown list) or checkbox to each participant record."
+    },
+    {
+      "title": "Create a Review Set-Wide Annotation Field",
+      "content": "Annotation field will appear across all Participants in this Review Set. Input in the field will be on a participant by participant basis."
+    },
+    {
+      "title": "Edit or Delete a Review Set-Wide Annotation Field",
+      "content": "Edit or Delete an Annotation Field across all Review Sets created in this set."
     }
   ]
 }
