@@ -32,3 +32,14 @@
   </div>
 </div>
 <app-list-modal></app-list-modal>
+<clr-modal [(clrModalOpen)]="modalOpen">
+  <h3 class="modal-title">Warning!</h3>
+  <div class="modal-body">
+    <p>Your cohort has not been saved. If you’d like to save your
+      cohort criteria, please close this box and use Save or Save As to save your criteria.</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="getModalResponse(false)">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="getModalResponse(true)">Ok</button>
+  </div>
+</clr-modal>

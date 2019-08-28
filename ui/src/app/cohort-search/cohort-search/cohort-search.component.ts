@@ -35,8 +35,9 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   criteria = {includes: [], excludes: []};
   triggerUpdate = 0;
   cohort: any;
-  promise: any;
-  modal = false;
+  resolve: Function;
+  modalPromise: Promise<boolean> | null = null;
+  modalOpen = false;
 
   ngOnInit() {
     this.subscription = Observable.combineLatest(
@@ -77,14 +78,20 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     searchRequestStore.next({includes: [], excludes: []} as SearchRequest);
   }
 
-  canDeactivate(): Observable<boolean> | boolean {
+  canDeactivate(): Promise<boolean> | boolean {
     const criteria = JSON.stringify(mapRequest(this.criteria));
-    if (criteria === this.cohort.criteria) {
-      return true;
-    }
-    const message = `Warning! Your cohort has not been saved. If you’d like to save your
-     cohort criteria, please close this box and use Save or Save As to save your criteria. `;
-    return criteria === this.cohort.criteria || of(window.confirm(message));
+    return criteria === this.cohort.criteria || this.showWarningModal();
+  }
+
+  async showWarningModal() {
+    this.modalPromise = new Promise<boolean>((resolve => this.resolve = resolve));
+    this.modalOpen = true;
+    return await this.modalPromise;
+  }
+
+  getModalResponse(res: boolean) {
+    this.modalOpen = false;
+    this.resolve(res);
   }
 
   @HostListener('window:resize')
