@@ -81,6 +81,15 @@ def publish_cdr(cmd_name, args)
     dest_dataset = "#{env.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
     common.status "Copying from '#{source_dataset}' to '#{dest_dataset}' as #{account}"
 
+    # If you receive an error from "bq" like "Invalid JWT Signature", you may
+    # need to delete cached BigQuery creds on your local machine. Try deleting
+    # files matching ~/.config/gcloud/legacy_credentials/*/singlestore_bq.json
+    # (verify the file location on your machine first).
+    # TODO: Find a better solution for Google credentials in docker.
+
+    # If you receive a prompt from "bq" for selecting a default project ID, just
+    # hit enter.
+    # TODO: Figure out how to prepopulate this value or disable interactivity.
     common.run_inline %W{bq mk -f --dataset #{dest_dataset}}
     common.run_inline %W{./copy-bq-dataset.sh #{source_dataset} #{dest_dataset} #{env.fetch(:source_cdr_project)}}
 
