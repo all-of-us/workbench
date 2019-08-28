@@ -10,16 +10,6 @@ define([
 ], (Jupyter) => {
   const load = () => {
 
-  $('#download_menu li a').click(function(e) {
-    e.preventDefault();
-    var ans = confirm("It is All of Us data use policy that researchers should not make copies of " +
-        "or download individual-level data (including taking screenshots or other means of viewing " +
-        "individual-level data) outside of the All of Us research environment without approval from " +
-        "AoU Resource Access Board (RAB).So, please make sure that the output cells in the notebook " +
-        "you are downloading do not contain individual-level data");
-    return ans;
-  });
-
   // This prefix must be kept in sync with the Workbench localization API,
   // see https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/api/ClusterController.java
 
