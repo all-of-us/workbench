@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 import {
   cohortReviewStore,
   filterStateStore,
+  getVocabOptions,
   multiOptions,
   vocabOptions
 } from 'app/cohort-review/review-state.service';
@@ -331,7 +332,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             .then(review => {
               cohortReviewStore.next(review);
               if (!vocabOptions.getValue()) {
-                this.getVocabOptions(review.cohortReviewId);
+                getVocabOptions(namespace, id, review.cohortReviewId);
               }
               this.setState({
                 data: review.participantCohortStatuses.map(this.mapData),
@@ -346,26 +347,6 @@ export const ParticipantsTable = withCurrentWorkspace()(
           loading: false,
           error: true
         });
-      }
-    }
-
-    getVocabOptions(cohortReviewId: number) {
-      const {id, namespace} = this.props.workspace;
-      const vocabFilters = {source: {}, standard: {}};
-      try {
-        cohortReviewApi().getVocabularies(namespace, id, cohortReviewId)
-        .then(response => {
-          response.items.forEach(item => {
-            const type = item.type.toLowerCase();
-            vocabFilters[type][item.domain] = [
-              ...(vocabFilters[type][item.domain] || []),
-              item.vocabulary
-            ];
-          });
-        });
-      } catch (error) {
-        vocabOptions.next(vocabFilters);
-        console.error(error);
       }
     }
 

@@ -8,7 +8,7 @@ import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/
 import {DetailHeader} from 'app/cohort-review/detail-header/detail-header.component';
 import {DetailTabs} from 'app/cohort-review/detail-tabs/detail-tabs.component';
 import {Participant} from 'app/cohort-review/participant.model';
-import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, getVocabOptions, vocabOptions} from 'app/cohort-review/review-state.service';
 import {SidebarContent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -106,7 +106,7 @@ export const DetailPage = withCurrentWorkspace()(
     componentDidMount() {
       this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(params => !!params.pid)
-        .switchMap(({ns, wsid, cid, pid}) => {
+        .switchMap(({ns, wsid, pid}) => {
           return Observable.forkJoin(
             from(cohortReviewApi()
               .getParticipantCohortStatus(ns, wsid,
@@ -124,6 +124,11 @@ export const DetailPage = withCurrentWorkspace()(
           );
         })
         .subscribe();
+      if (!vocabOptions.getValue()) {
+        const {workspace: {id, namespace}} = this.props;
+        const {cohortReviewId} = cohortReviewStore.getValue();
+        getVocabOptions(namespace, id, cohortReviewId);
+      }
     }
 
     componentWillUnmount() {
