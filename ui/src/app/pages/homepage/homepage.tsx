@@ -9,6 +9,7 @@ import {
   Clickable,
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {Header, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Modal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
@@ -33,8 +34,17 @@ export const styles = reactStyles({
     marginLeft: '-1rem', marginRight: '-0.6rem', display: 'flex',
     flexDirection: 'column', justifyContent: 'space-between'
   },
+  welcomeMessage: {
+    marginLeft: '3%', display: 'flex', flexDirection: 'row'
+  },
+  welcomeMessageIconRow: {
+    display: 'flex', flexDirection: 'row', alignItems: 'flex-end', marginLeft: '1rem'
+  },
+  welcomeMessageIcon: {
+    height: '2.25rem', width: '2.75rem'
+  },
   fadeBox: {
-    margin: '1rem 0 0 2%', width: '97.5%', padding: '0 0.1rem'
+    margin: '1rem 0 0 3%', width: '97.5%', padding: '0 0.1rem'
   },
   singleCard: {
     width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
@@ -78,7 +88,7 @@ export const styles = reactStyles({
   footerTextTitle: {
     color: colors.primary,
     fontSize: '0.67rem',
-    fontWeight: 600
+    fontWeight: 500
   },
   linksBlock: {
     display: 'flex', marginBottom: '1rem',
@@ -312,46 +322,67 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
     return <React.Fragment>
       <div style={styles.pageWrapper}>
+        <div style={styles.welcomeMessage}>
+          <div style={{display: 'flex', flexDirection: 'column', width: '50%'}}>
+            <div style={{display: 'flex', flexDirection: 'row'}}>
+              <div style={{display: 'flex', flexDirection: 'column'}}>
+                <Header style={{fontWeight: 500, color: colors.secondary, fontSize: '0.92rem'}}>
+                  Welcome to</Header>
+                <Header style={{textTransform: 'uppercase', marginTop: '0.2rem'}}>
+                  Researcher Workbench</Header>
+              </div>
+              <div style={styles.welcomeMessageIconRow}>
+                <img style={styles.welcomeMessageIcon} src='/assets/images/workspace-icon.svg'/>
+                <img style={styles.welcomeMessageIcon} src='/assets/images/cohort-icon.svg'/>
+                <img style={styles.welcomeMessageIcon} src='/assets/images/analysis-icon.svg'/>
+              </div>
+            </div>
+            <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
+              the secure analysis platform for All of Us data</SmallHeader>
+          </div>
+          <div></div>
+        </div>
         <FadeBox style={styles.fadeBox}>
           <div style={{display: 'flex', justifyContent: 'center'}}>
             <div style={styles.singleCard}>
               {accessTasksLoaded ?
                 (accessTasksRemaining ?
-                  (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
-                                          eraCommonsError={eraCommonsError}
-                                          trainingCompleted={trainingCompleted}
-                                          firstVisitTraining={firstVisitTraining}
-                                          betaAccessGranted={betaAccessGranted}
-                                          twoFactorAuthCompleted={twoFactorAuthCompleted}
-                                          dataUseAgreementCompleted={dataUseAgreementCompleted}/>
-                  ) : (
-                    <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
-                      <div style={styles.contentWrapperLeft}>
-                        <div style={styles.mainHeader}>Researcher Workbench</div>
-                        <TooltipTrigger content={<div>Your Firecloud billing project is still being
-                          initialized. Workspace creation will be available in a few minutes.</div>}
-                                        disabled={canCreateWorkspaces}>
-                          <CardButton disabled={!canCreateWorkspaces}
-                                      onClick={() => navigate(['workspaces/build'])}
-                                      style={{margin: '1.9rem 106px 0 3%'}}>
-                            Create a <br/> New Workspace
-                            <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
-                          </CardButton>
-                        </TooltipTrigger>
-                      </div>
-                      <div style={styles.contentWrapperRight}>
-                        <a onClick={() => navigate(['workspaces'])}
-                           style={{fontSize: '14px', color: colors.primary}}>
-                          See All Workspaces</a>
-                        <div style={{marginRight: '3%', display: 'flex', flexDirection: 'column'}}>
-                          <div style={{color: colors.primary, height: '1.9rem'}}>
-                            <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
-                          </div>
-                          <RecentWork dark={true}/>
+                    (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
+                                            eraCommonsError={eraCommonsError}
+                                            trainingCompleted={trainingCompleted}
+                                            firstVisitTraining={firstVisitTraining}
+                                            betaAccessGranted={betaAccessGranted}
+                                            twoFactorAuthCompleted={twoFactorAuthCompleted}
+                                            dataUseAgreementCompleted={dataUseAgreementCompleted}/>
+                    ) : (
+                      <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
+                        <div style={styles.contentWrapperLeft}>
+                          <div style={styles.mainHeader}>Researcher Workbench</div>
+                          <TooltipTrigger disabled={canCreateWorkspaces} content={<div>
+                            Your Firecloud billing project is still being initialized.
+                            Workspace creation will be available in a few minutes.</div>}>
+                            <CardButton disabled={!canCreateWorkspaces}
+                                        onClick={() => navigate(['workspaces/build'])}
+                                        style={{margin: '1.9rem 106px 0 3%'}}>
+                              Create a <br/> New Workspace
+                              <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
+                            </CardButton>
+                          </TooltipTrigger>
                         </div>
-                      </div>
-                    </div>)
-                  ) :
+                        <div style={styles.contentWrapperRight}>
+                          <a onClick={() => navigate(['workspaces'])}
+                             style={{fontSize: '14px', color: colors.primary}}>
+                            See All Workspaces</a>
+                          <div style={{marginRight: '3%', display: 'flex',
+                            flexDirection: 'column'}}>
+                            <div style={{color: colors.primary, height: '1.9rem'}}>
+                              <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
+                            </div>
+                            <RecentWork dark={true}/>
+                          </div>
+                        </div>
+                      </div>)
+                ) :
                 <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
             </div>
           </div>
@@ -360,15 +391,15 @@ export const Homepage = withUserProfile()(class extends React.Component<
           <div style={styles.quickTour}>
             <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
             <div style={styles.quickTourCardsRow}>
-            {quickTourResources.map((thumbnail, i) => {
-              return <React.Fragment key={i}>
-                <Clickable onClick={thumbnail.onClick}
-                           data-test-id={'quick-tour-resource-' + i}>
-                  <img style={{maxHeight: '7rem', width: '9rem', marginRight: '0.5rem'}}
-                       src={thumbnail.src}/>
-                </Clickable>
-              </React.Fragment>;
-            })}
+              {quickTourResources.map((thumbnail, i) => {
+                return <React.Fragment key={i}>
+                  <Clickable onClick={thumbnail.onClick}
+                             data-test-id={'quick-tour-resource-' + i}>
+                    <img style={{maxHeight: '7rem', width: '9rem', marginRight: '0.5rem'}}
+                         src={thumbnail.src}/>
+                  </Clickable>
+                </React.Fragment>;
+              })}
             </div>
           </div>
           <div>
@@ -376,11 +407,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
               <div style={styles.footerInner}>
                 <div style={styles.footerTitle}>
                   How to Use the All of Us Researcher Workbench</div>
-                {/*<div style={{display: 'flex', justifyContent: 'flex-end'}}>*/}
-                {/*  <TooltipTrigger content='Coming Soon' side='left'>*/}
-                {/*    <a href='#' style={{color: colors.primary}}>See all documentation</a>*/}
-                {/*  </TooltipTrigger>*/}
-                {/*</div>*/}
                 <div style={{display: 'flex', flexDirection: 'row',
                   justifyContent: 'space-between'}}>
                   {footerLinks.map((col, i) => {
@@ -414,7 +440,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
         </div>
       </div>
       {quickTour &&
-        <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
+      <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
       {videoOpen && <Modal width={900}>
         <div style={{display: 'flex'}}>
           <div style={{flexGrow: 1}}></div>
