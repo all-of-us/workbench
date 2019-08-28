@@ -6,7 +6,7 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import * as React from 'react';
-import {cohortReviewStore} from '../review-state.service';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 
 const css = `
   .graph-border {

@@ -17,7 +17,7 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortAnnotationDefinition, ParticipantCohortAnnotation} from 'generated/fetch';
-import {cohortReviewStore} from '../review-state.service';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 
 const styles = reactStyles({
   detailSidebar: {
