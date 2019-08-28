@@ -76,7 +76,7 @@ export const WorkspaceLibrary = withUserProfile()
   constructor(props) {
     super(props);
     this.state = {
-      currentTab: libraryTabEnums.PUBLISHED_WORKSPACES,
+      currentTab: libraryTabEnums.FEATURED_WORKSPACES,
       errorText: '',
       featuredWorkspaces: [],
       workspaceList: [],

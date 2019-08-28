@@ -7,6 +7,10 @@ import {navigate} from "../utils/navigation";
 
 const styles = reactStyles({
   sideNav: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
     backgroundColor: colors.primary,
     position: 'absolute',
     top: '4rem',
@@ -18,19 +22,29 @@ const styles = reactStyles({
     opacity: 1,
     transition: 'opacity 0.5s',
   },
-  navLink: {
+  sideNavItem: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
+    width: '100%',
     margin: 0,
-    padding: '1rem',
+    paddingLeft: '1rem',
     textAlign: 'left',
     textTransform: 'none',
     height: '2rem',
     color: colors.white,
   },
+  sideNavItemContent: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   navIcon: {
-    marginRight: 8
+    marginRight: '8px'
+  },
+  spacer: {
+    marginRight: '8px',
+    width: '21px'
   },
   dropdownIcon: {
     transform: 'rotate(180deg)',
@@ -38,6 +52,7 @@ const styles = reactStyles({
 });
 
 interface SideNavSubItemProps {
+  key: string,
   text: string,
 }
 
@@ -51,20 +66,38 @@ class SideNavSubItem extends React.Component<SideNavSubItemProps> {
       // data-test-id is the text within the SideNavItem, with whitespace removed
       // and appended with '-menu-item'
       data-test-id={this.props.text.toString().replace(/\s/g, '') + '-menu-sub-item'}
-      style={styles.navLink}
-      // hover={backgroundColor: colorWithWhiteness(colors.accent, .10)}
+      style={styles.sideNavItem}
     >
       {this.props.text}
     </Clickable>
   }
 }
 
+interface SideNavSubItemContainerProps {
+  subItems: Array<any>
+}
+
+class SideNavSubItemContainer extends React.Component<SideNavSubItemContainerProps> {
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return <div>
+      {this.props.subItems.map(subItem => (
+        <SideNavSubItem {...subItem} />
+      ))}
+    </div>
+  }
+}
+
 interface SideNavItemProps {
-  icon: string,
+  icon?: string,
   content: string,
+  onClick?: Function,
   onToggleSideNav: Function,
   href?: string,
-  subItems?: Array<any>
+  containsSubItems?: boolean,
 }
 
 interface SideNavItemState {
@@ -84,9 +117,6 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
       this.props.onToggleSideNav();
       navigate([this.props.href]);
     }
-    else {
-      this.setState(previousState => ({dropdownOpen: !previousState.dropdownOpen}));
-    }
   }
 
   render() {
@@ -94,80 +124,123 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
       // data-test-id is the text within the SideNavItem, with whitespace removed
       // and appended with '-menu-item'
       data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
-      style={styles.navLink}
-      onClick={(previousState) => this.onClick()}
+      style={styles.sideNavItem}
+      onClick={() => this.props.onClick ? this.props.onClick() : this.onClick()}
     >
-      <span>
-        <ClrIcon
-          shape={this.props.icon}
-          className={"is-solid"}
-          style={styles.navIcon}
-          size={21}
-        />
-        {this.props.content}
-      </span>
-      {
-        this.props.subItems != undefined
-        && this.props.subItems.length > 0
-        && <ClrIcon
-          shape="angle"
-          style={styles.dropdownIcon}
-          size={21}
-        />
-      }
-      {
-        this.props.subItems != undefined
-        && this.props.subItems.length > 0
-        && this.state.dropdownOpen
-        && <React.Fragment>
-          {this.props.subItems.map(subItem => (
-            <SideNavSubItem text={subItem.text} />
-          ))}
-        </React.Fragment>
-      }
+      <div
+        style={styles.sideNavItemContent}
+      >
+        <span
+          style={this.props.icon ? {marginLeft: '0px'} : {marginLeft: '29px'}}
+        >
+          {
+            this.props.icon && <ClrIcon
+              shape={this.props.icon}
+              className={"is-solid"}
+              style={styles.navIcon}
+              size={21}
+            />
+          }
+          {this.props.content}
+        </span>
+        {
+          this.props.containsSubItems
+          && <ClrIcon
+            shape="angle"
+            style={styles.dropdownIcon}
+            size={21}
+          />
+        }
+      </div>
     </Clickable>
   }
 }
 
-export interface Props {
+export interface SideNavProps {
   givenName: string;
   familyName: string;
   onToggleSideNav: Function;
 }
 
-export class SideNav extends React.Component<Props, {}> {
+export interface SideNavState {
+  showUserOptions: boolean;
+  showHelpOptions: boolean;
+}
+
+export class SideNav extends React.Component<SideNavProps, SideNavState> {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      showUserOptions: false,
+      showHelpOptions: false,
+    };
+  }
+
+  onToggleUser() {
+    this.setState({showHelpOptions: false});
+    this.setState(previousState => ({showUserOptions: !previousState.showUserOptions}));
+  }
+
+  onToggleHelp() {
+    this.setState({showUserOptions: false});
+    this.setState(previousState => ({showHelpOptions: !previousState.showHelpOptions}));
   }
 
   render() {
     return <div style={styles.sideNav}>
-      <section>
-        <SideNavItem
-          icon="user"
-          content={`${this.props.givenName} ${this.props.familyName}`}
+      <SideNavItem
+        icon="user"
+        content={`${this.props.givenName} ${this.props.familyName}`}
+        onClick={() => this.onToggleUser()}
+        onToggleSideNav={this.props.onToggleSideNav}
+        containsSubItems={true}
+      />
+      {
+        this.state.showUserOptions && <SideNavItem
+          content={"Profile"}
           onToggleSideNav={this.props.onToggleSideNav}
-          subItems={[
-            {text: "Profile"},
-            {text: "Billing Dashboard"},
-            {text: "Sign Out"},
-          ]}
         />
-        <SideNavItem icon="home" content="Home" onToggleSideNav={this.props.onToggleSideNav} href="/"/>
-        <SideNavItem icon="applications" content="Your Workspaces" onToggleSideNav={this.props.onToggleSideNav} href={"/workspaces"}/>
-        <SideNavItem icon="star" content="Featured Workspaces" onToggleSideNav={this.props.onToggleSideNav}/>
-        <SideNavItem
-          icon="help"
-          content="User Support"
+      }
+      {
+        this.state.showUserOptions && <SideNavItem
+          content={"Billing Dashboard"}
           onToggleSideNav={this.props.onToggleSideNav}
-          subItems={[
-            {text: "How-to Guides"},
-            {text: "User Forum"},
-            {text: "Contact Us"},
-          ]}
         />
-      </section>
+      }
+      {
+        this.state.showUserOptions && <SideNavItem
+          content={"Sign Out"}
+          onToggleSideNav={this.props.onToggleSideNav}
+        />
+      }
+      <SideNavItem icon="home" content="Home" onToggleSideNav={this.props.onToggleSideNav} href="/"/>
+      <SideNavItem icon="applications" content="Your Workspaces" onToggleSideNav={this.props.onToggleSideNav} href={"/workspaces"}/>
+      <SideNavItem icon="star" content="Featured Workspaces" onToggleSideNav={this.props.onToggleSideNav} href={"/library"}/>
+      <SideNavItem
+        icon="help"
+        content="User Support"
+        onClick={() => this.onToggleHelp()}
+        onToggleSideNav={this.props.onToggleSideNav}
+        containsSubItems={true}
+      />
+      {
+        this.state.showHelpOptions && <SideNavItem
+          content={"How-to Guides"}
+          onToggleSideNav={this.props.onToggleSideNav}
+        />
+      }
+      {
+        this.state.showHelpOptions && <SideNavItem
+          content={"User Forum"}
+          onToggleSideNav={this.props.onToggleSideNav}
+        />
+      }
+      {
+        this.state.showHelpOptions && <SideNavItem
+          content={"Contact Us"}
+          onToggleSideNav={this.props.onToggleSideNav}
+        />
+      }
     </div>
   }
 }
