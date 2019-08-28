@@ -643,8 +643,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantCohortStatus participantCohortStatus2 =
         new ParticipantCohortStatus().participantKey(key2);
     participantCohortStatusDao.save(participantCohortStatus2);
-
-    controller.setConfigProvider(configProvider);
   }
 
   @After

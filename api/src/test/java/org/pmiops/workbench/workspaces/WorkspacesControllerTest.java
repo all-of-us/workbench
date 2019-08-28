@@ -311,7 +311,6 @@ public class WorkspacesControllerTest {
     testConfig.featureFlags.useBillingProjectBuffer = false;
     when(configProvider.get()).thenReturn(testConfig);
 
-    cohortReviewController.setConfigProvider(configProvider);
     workspacesController.setWorkbenchConfigProvider(configProvider);
     fcWorkspaceAcl = createWorkspaceACL();
 

@@ -106,7 +106,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private UserRecentResourceService userRecentResourceService;
   private Provider<User> userProvider;
   private final Clock clock;
-  private Provider<WorkbenchConfig> configProvider;
   private static final Logger log = Logger.getLogger(CohortReviewController.class.getName());
 
   /**
@@ -265,17 +264,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
     this.clock = clock;
-    this.configProvider = configProvider;
   }
 
   @VisibleForTesting
   public void setUserProvider(Provider<User> userProvider) {
     this.userProvider = userProvider;
-  }
-
-  @VisibleForTesting
-  public void setConfigProvider(Provider<WorkbenchConfig> configProvider) {
-    this.configProvider = configProvider;
   }
 
   /**

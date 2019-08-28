@@ -340,8 +340,6 @@ public class CohortReviewControllerTest {
             .cohortAnnotationDefinitionId(
                 stringAnnotationDefinition.getCohortAnnotationDefinitionId());
     participantCohortAnnotationDao.save(participantAnnotation);
-
-    cohortReviewController.setConfigProvider(configProvider);
   }
 
   @Test
