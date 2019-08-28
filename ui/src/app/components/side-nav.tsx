@@ -1,9 +1,10 @@
 import * as React from 'react';
-import colors, {colorWithWhiteness} from "app/styles/colors";
+import colors from "app/styles/colors";
 import {reactStyles} from "app/utils";
-import {Clickable, MenuItem} from "app/components/buttons";
+import {Clickable} from "app/components/buttons";
 import {ClrIcon} from "./icons";
-import {navigate} from "../utils/navigation";
+import {navigate} from "app/utils/navigation";
+import {SignInService} from "app/services/sign-in.service"
 
 const styles = reactStyles({
   sideNav: {
@@ -199,6 +200,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         this.state.showUserOptions && <SideNavItem
           content={"Profile"}
           onToggleSideNav={this.props.onToggleSideNav}
+          href="/profile"
         />
       }
       {
@@ -210,12 +212,28 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       {
         this.state.showUserOptions && <SideNavItem
           content={"Sign Out"}
+          // signOut()
           onToggleSideNav={this.props.onToggleSideNav}
         />
       }
-      <SideNavItem icon="home" content="Home" onToggleSideNav={this.props.onToggleSideNav} href="/"/>
-      <SideNavItem icon="applications" content="Your Workspaces" onToggleSideNav={this.props.onToggleSideNav} href={"/workspaces"}/>
-      <SideNavItem icon="star" content="Featured Workspaces" onToggleSideNav={this.props.onToggleSideNav} href={"/library"}/>
+      <SideNavItem
+        icon="home"
+        content="Home"
+        onToggleSideNav={this.props.onToggleSideNav}
+        href="/"
+      />
+      <SideNavItem
+        icon="applications"
+        content="Your Workspaces"
+        onToggleSideNav={this.props.onToggleSideNav}
+        href={"/workspaces"}
+      />
+      <SideNavItem
+        icon="star"
+        content="Featured Workspaces"
+        onToggleSideNav={this.props.onToggleSideNav}
+        href={"/library"}
+      />
       <SideNavItem
         icon="help"
         content="User Support"
@@ -233,11 +251,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         this.state.showHelpOptions && <SideNavItem
           content={"User Forum"}
           onToggleSideNav={this.props.onToggleSideNav}
+          // openHubForum()
+          href={"https://aousupporthelp.zendesk.com/hc"}
         />
       }
       {
         this.state.showHelpOptions && <SideNavItem
           content={"Contact Us"}
+          // openZendesk()
           onToggleSideNav={this.props.onToggleSideNav}
         />
       }
