@@ -1457,6 +1457,7 @@ def deploy_gcs_artifacts(cmd_name, args)
       gsutil cp
       setup_notebook_cluster.sh
       playground-extension.js
+      aou-download-policy-extension.js
       generated/aou-snippets-menu.js
       gs://#{gcc.project}-cluster-resources/
     })
