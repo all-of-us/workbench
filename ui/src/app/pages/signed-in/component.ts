@@ -109,6 +109,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     window.addEventListener("keypress", this.onActiveEvent, false);
     window.addEventListener("touchmove", this.onActiveEvent, false);
 
+    window.addEventListener('message', (e) => console.log(e), false);
   }
 
   onActiveEvent(e) {

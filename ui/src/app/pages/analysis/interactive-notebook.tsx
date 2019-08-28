@@ -99,6 +99,39 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       };
     }
 
+    // activityReporter(report) {
+    //   const lastActiveTimestamp = (new Date()).getMilliseconds();
+    //
+    //   const last = () => {
+    //     return (new Date()).getMilliseconds();
+    //   };
+    //
+    //   setInterval(() => {
+    //     if ((new Date()).getMilliseconds() - lastActiveTimestamp() < 1000) {
+    //       report();
+    //     }
+    //   }, 1000);
+    //
+    //   return {
+    //     signalUserActivity: () => { report(); }
+    //   };
+    // }
+
+    activityReporter(report) {
+      var t = Date.now();
+
+      setInterval(() => {
+        if (Date.now() - t < 1000) {
+          report();
+        }
+      }, 1000);
+
+      return () => {
+        t = Date.now();
+      }
+    }
+
+
     componentDidMount(): void {
       workspacesApi().readOnlyNotebook(this.props.urlParams.ns,
         this.props.urlParams.wsid, this.props.urlParams.nbName)
@@ -106,8 +139,15 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
           this.setState({html: html.html});
           let frame = document.getElementById('notebook-frame') as HTMLFrameElement;
           frame.addEventListener('load', () => {
-            frame.contentWindow.addEventListener("mousemove", (e) => console.log(e), false);
-            console.log('loaded');
+            const signalUserActivity = this.activityReporter(() => {
+              frame.contentWindow.parent.postMessage("Frame is active", '*');
+            });
+
+            frame.contentWindow.addEventListener('mousemove', () => signalUserActivity(), false);
+            frame.contentWindow.addEventListener('mousedown', () => signalUserActivity(), false);
+            frame.contentWindow.addEventListener('keypress', () => signalUserActivity(), false);
+            frame.contentWindow.addEventListener('scroll', () => signalUserActivity(), false);
+            frame.contentWindow.addEventListener('click', () => signalUserActivity(), false);
           });
         });
 
