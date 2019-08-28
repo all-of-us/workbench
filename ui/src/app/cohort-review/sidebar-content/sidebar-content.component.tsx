@@ -101,8 +101,7 @@ const AnnotationItem = fp.flow(
       const {
         annotation, setAnnotation,
         definition: {annotationType, cohortAnnotationDefinitionId},
-        urlParams: {ns, wsid, cid, pid},
-        workspace: {cdrVersionId},
+        urlParams: {ns, wsid, pid},
       } = this.props;
       const {timeout} = this.state;
       const aid = annotation ? annotation.annotationId : undefined;
@@ -266,8 +265,7 @@ export const SidebarContent = fp.flow(
     try {
       const {
         setParticipant,
-        urlParams: {ns, wsid, cid, pid},
-        workspace: {cdrVersionId},
+        urlParams: {ns, wsid, pid},
       } = this.props;
       this.setState({savingStatus: v});
       const data = await cohortReviewApi().updateParticipantCohortStatus(

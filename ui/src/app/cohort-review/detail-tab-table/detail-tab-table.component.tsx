@@ -259,8 +259,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     getParticipantData() {
       try {
         const {columns, domain, filterType, participantId,
-          workspace: {cdrVersionId, id, namespace}} = this.props;
-        const {cid} = urlParamsStore.getValue();
+          workspace: {id, namespace}} = this.props;
         const pageFilterRequest = {
           page: 0,
           pageSize: 10000,

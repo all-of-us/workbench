@@ -308,7 +308,6 @@ export const DetailTabs = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      const {cdrVersionId} = this.props.workspace;
       this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(({pid}) => !!pid)
         .switchMap(({ns, wsid, cid, pid}) => {

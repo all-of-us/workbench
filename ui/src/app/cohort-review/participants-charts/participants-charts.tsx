@@ -1,3 +1,4 @@
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
@@ -6,7 +7,6 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import * as React from 'react';
-import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 
 const css = `
   .graph-border {
@@ -124,8 +124,7 @@ export const ParticipantsCharts = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      const {domain, workspace: {cdrVersionId, id, namespace}} = this.props;
-      const cohort = currentCohortStore.getValue();
+      const {domain, workspace: {id, namespace}} = this.props;
       cohortReviewApi().getCohortChartData(namespace, id,
         cohortReviewStore.getValue().cohortReviewId, domain, 10)
         .then(resp => {

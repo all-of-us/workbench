@@ -8,6 +8,7 @@ import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/
 import {DetailHeader} from 'app/cohort-review/detail-header/detail-header.component';
 import {DetailTabs} from 'app/cohort-review/detail-tabs/detail-tabs.component';
 import {Participant} from 'app/cohort-review/participant.model';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {SidebarContent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -17,7 +18,6 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CohortAnnotationDefinition, ParticipantCohortAnnotation} from 'generated/fetch';
-import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 
 const styles = reactStyles({
   detailSidebar: {
@@ -104,7 +104,6 @@ export const DetailPage = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      const {cdrVersionId} = this.props.workspace;
       this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(params => !!params.pid)
         .switchMap(({ns, wsid, cid, pid}) => {
