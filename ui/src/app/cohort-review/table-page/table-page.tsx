@@ -255,8 +255,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
 
     async componentDidMount() {
       const {filters} = this.state;
-      const {cdrVersionId, id, namespace} = this.props.workspace;
-      const {cid} = urlParamsStore.getValue();
+      const {cdrVersionId} = this.props.workspace;
       if (!multiOptions.getValue()) {
         try {
           await cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
@@ -299,26 +298,6 @@ export const ParticipantsTable = withCurrentWorkspace()(
         }
         setTimeout(() => this.getTableData());
       }
-      if (!vocabOptions.getValue()) {
-        const vocabFilters = {source: {}, standard: {}};
-        try {
-          await cohortReviewApi().getVocabularies(namespace, id,
-            cohortReviewStore.getValue().cohortReviewId)
-            .then(response => {
-              response.items.forEach(item => {
-                const type = item.type.toLowerCase();
-                vocabFilters[type][item.domain] = [
-                  ...(vocabFilters[type][item.domain] || []),
-                  item.vocabulary
-                ];
-              });
-            });
-        } catch (error) {
-          console.error(error);
-        } finally {
-          vocabOptions.next(vocabFilters);
-        }
-      }
     }
 
     componentWillUnmount(): void {
@@ -351,6 +330,9 @@ export const ParticipantsTable = withCurrentWorkspace()(
           cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query)
             .then(review => {
               cohortReviewStore.next(review);
+              if (!vocabOptions.getValue()) {
+                this.getVocabOptions(review.cohortReviewId);
+              }
               this.setState({
                 data: review.participantCohortStatuses.map(this.mapData),
                 loading: false,
@@ -364,6 +346,26 @@ export const ParticipantsTable = withCurrentWorkspace()(
           loading: false,
           error: true
         });
+      }
+    }
+
+    getVocabOptions(cohortReviewId: number) {
+      const {id, namespace} = this.props.workspace;
+      const vocabFilters = {source: {}, standard: {}};
+      try {
+        cohortReviewApi().getVocabularies(namespace, id, cohortReviewId)
+        .then(response => {
+          response.items.forEach(item => {
+            const type = item.type.toLowerCase();
+            vocabFilters[type][item.domain] = [
+              ...(vocabFilters[type][item.domain] || []),
+              item.vocabulary
+            ];
+          });
+        });
+      } catch (error) {
+        vocabOptions.next(vocabFilters);
+        console.error(error);
       }
     }
 
