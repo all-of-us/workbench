@@ -4,7 +4,8 @@ define([
     'base/js/namespace'
 ], (Jupyter) => {
   const load = () => {
-
+    // This will open a dialog box when the user clicks any one of the Download As option. 
+    // File will be downloaded only if the user clicks OK else it will just close the dialog box and do nothing.
     $('#download_menu li a').click(function(e) {
       e.preventDefault();
       return confirm("It is All of Us data use policy that researchers should not make copies of " +
