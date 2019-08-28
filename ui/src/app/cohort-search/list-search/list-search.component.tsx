@@ -8,6 +8,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import * as React from 'react';
@@ -167,6 +168,8 @@ export const ListSearch = withCurrentWorkspace()(
     handleInput = (event: any) => {
       const {key, target: {value}} = event;
       if (key === 'Enter') {
+        const {wizard: {domain}} = this.props;
+        triggerEvent(`Cohort Builder Search - ${domainToTitle(domain)}`, 'Search', value);
         this.getResults(value);
       }
     }
@@ -197,6 +200,7 @@ export const ListSearch = withCurrentWorkspace()(
       try {
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
         const {sourceMatch} = this.state;
+        this.trackEvent('Standard Vocab Hyperlink');
         this.setState({data: null, error: false, loading: true, results: 'standard'});
         const resp = await cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(
           +cdrVersionId, domain, sourceMatch.conceptId
@@ -237,6 +241,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     showHierarchy = (row: any) => {
+      this.trackEvent('More Info');
       this.props.hierarchy(row);
     }
 
@@ -281,6 +286,15 @@ export const ListSearch = withCurrentWorkspace()(
 
     getParamId(row: any) {
       return `param${row.conceptId ? (row.conceptId + row.code) : row.id}`;
+    }
+
+    trackEvent = (label: string) => {
+      const {wizard: {domain}} = this.props;
+      triggerEvent(
+        'Cohort Builder Search',
+        'Click',
+        `${label} - ${domainToTitle(domain)} - Cohort Builder Search`
+      );
     }
 
     renderRow(row: any, child: boolean) {
@@ -370,6 +384,7 @@ export const ListSearch = withCurrentWorkspace()(
               There are no standard matches for source code {sourceMatch.code}.
             </span>}
             &nbsp;<Clickable style={styles.vocabLink}
+              onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
               onClick={() => this.getResults(sourceMatch.code)}>
               Return to source code
             </Clickable>.

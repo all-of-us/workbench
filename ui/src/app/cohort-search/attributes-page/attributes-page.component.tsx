@@ -4,7 +4,12 @@ import * as React from 'react';
 
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {mapParameter, sanitizeNumericalInput, stripHtml} from 'app/cohort-search/utils';
+import {
+  mapParameter,
+  sanitizeNumericalInput,
+  stripHtml,
+  subTypeToTitle
+} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
@@ -12,6 +17,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Dropdown} from 'primereact/dropdown';
@@ -393,13 +399,17 @@ export const AttributesPage = withCurrentWorkspace() (
       }
       form.cat.filter(ca => ca.checked).forEach(attr => selectionDisplay.push(attr.conceptName));
       return node.name + ' (' + selectionDisplay.join(', ') +
-        (this.isPhysicalMeasurement && form.num[0].name !== AttrName.ANY
+        (this.isPhysicalMeasurement && form.num[0].operator !== AttrName.ANY
           ? PM_UNITS[node.subtype] : '') + ')';
     }
 
     requestPreview() {
       this.setState({count: null, calculating: true, countError: false});
       const param = this.paramWithAttributes;
+      // TODO remove condition to only track PM criteria for 'Phase 2' of CB Google Analytics
+      if (this.isPhysicalMeasurement) {
+        this.trackEvent(param.subtype, 'Calculate');
+      }
       const cdrVersionId = +(currentWorkspaceStore.getValue().cdrVersionId);
       const request = {
         excludes: [],
@@ -421,6 +431,10 @@ export const AttributesPage = withCurrentWorkspace() (
 
     addParameterToSearchItem() {
       const param = this.paramWithAttributes;
+      // TODO remove condition to only track PM criteria for 'Phase 2' of CB Google Analytics
+      if (this.isPhysicalMeasurement) {
+        this.trackEvent(param.subtype, 'Add');
+      }
       const wizard = wizardStore.getValue();
       let selections = selectionsStore.getValue();
       if (!selections.includes(param.parameterId)) {
@@ -433,6 +447,14 @@ export const AttributesPage = withCurrentWorkspace() (
       wizard.item.searchParameters.push(param);
       wizardStore.next(wizard);
       this.props.close();
+    }
+
+    trackEvent(subtype: string, eventType: string) {
+      triggerEvent(
+        'Cohort Builder Search',
+        'Click',
+        `Physical Measurements - ${subTypeToTitle(subtype)} - ${eventType}`
+      );
     }
 
     get hasUnits() {
@@ -486,7 +508,7 @@ export const AttributesPage = withCurrentWorkspace() (
                     placeholder='Select Operator' onChange={(e) => this.selectChange(a, e.value)}/>
                 </div>
                 {![null, 'ANY'].includes(attr.operator) && <div>
-                  <input style={styles.number} type='number' value={attr.operands[0]}
+                  <input style={styles.number} type='number' value={attr.operands[0] || ''}
                     min={attr.MIN} max={attr.MAX}
                     onChange={(e) => this.inputChange(e.target.value, a, 0)}/>
                   {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
@@ -494,7 +516,7 @@ export const AttributesPage = withCurrentWorkspace() (
                 {attr.operator === Operator.BETWEEN && <React.Fragment>
                   <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
                   <div>
-                    <input style={styles.number} type='number' value={attr.operands[1]}
+                    <input style={styles.number} type='number' value={attr.operands[1] || ''}
                       min={attr.MIN} max={attr.MAX}
                       onChange={(e) => this.inputChange(e.target.value, a, 1)}/>
                     {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
