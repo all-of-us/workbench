@@ -570,10 +570,12 @@ To obtain the service account credentials, run
 ```Shell
 cd api
 gcloud auth login <user>@pmi-ops.org # for test environment
-./project.rb get-test-service-creds
+./project.rb get-test-service-creds # the dev-up command should also include this step.
 ```
 You should see a file `sa-key.json` in the current directory
-The following shows how to make an authenticated backend request as the shared  workbench test service account against Firecloud dev (assumes you have run dev-up at least once):
+The following shows how to make an authenticated backend request as the shared
+workbench test service account against Firecloud dev. It retrieves required authorizaiton
+scopes of `email`, `profile`, and `cloud-billing`.
 
 ```Shell
 # From the "api" directory.
@@ -587,12 +589,15 @@ with the service account credentials.
 ```Shell
 # call the API
 url_prefix="firecloud-orchestration.dsde-dev.broadinstitute.org"
-output_file="~/billing_projects_per_user.txt"
+output_file=~/billing_projects_per_user.json
 
-curl -X GET -H $auth_token \
+curl -X GET -H "${auth_token}" \
     -H "Content-Type: application/json" \
-    https://$url_prefix/api/profile/billing \
+    "https://${url_prefix}/api/profile/billing" \
     > $output_file
+
+# check that it worked
+head $output_file
 
 # If you get 401 errors, you may need to clear your token cache.
 oauth2l reset
