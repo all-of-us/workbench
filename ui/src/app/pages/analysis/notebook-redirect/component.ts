@@ -224,7 +224,17 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         // so instead just giving it a sec to "redirect"
         setTimeout(() => {
           this.incrementProgress(Progress.Loaded);
+          // let frame = document.getElementById('leo-iframe') as HTMLFrameElement;
+          // frame.addEventListener('load', () => {
+          //   frame.contentWindow.addEventListener("mousemove", (e) => console.log(e), false);
+          //   console.log('LOADED IFRAME');
+          // });
         }, 1000);
+
+        document.getElementById('overlay-test').addEventListener('mousemove', (e) => {
+          console.log(e);
+          e.stopPropagation();
+        } , false);
       });
   }
 

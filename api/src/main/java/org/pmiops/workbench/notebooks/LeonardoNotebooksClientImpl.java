@@ -75,7 +75,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .labels(ImmutableMap.of(CLUSTER_LABEL_AOU, "true", CLUSTER_LABEL_CREATED_BY, userEmail))
         .defaultClientId(config.server.oauthClientId)
         // Note: Filenames must be kept in sync with files in cluster-resources directory.
-        .jupyterUserScriptUri(gcsPrefix + "/setup_notebook_cluster.sh")
+        .jupyterUserScriptUri(gcsPrefix + "/setup_notebook_cluster-songe.sh")
         .userJupyterExtensionConfig(
             new UserJupyterExtensionConfig()
                 .nbExtensions(nbExtensions)

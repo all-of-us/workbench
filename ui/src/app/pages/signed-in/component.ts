@@ -103,6 +103,16 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     cdrVersionsApi().getCdrVersions().then(resp => {
       cdrVersionStore.next(resp.items);
     });
+
+    window.addEventListener("mousemove", this.onActiveEvent, false);
+    window.addEventListener("mousedown", this.onActiveEvent, false);
+    window.addEventListener("keypress", this.onActiveEvent, false);
+    window.addEventListener("touchmove", this.onActiveEvent, false);
+
+  }
+
+  onActiveEvent(e) {
+    console.log(e);
   }
 
   ngAfterViewInit() {

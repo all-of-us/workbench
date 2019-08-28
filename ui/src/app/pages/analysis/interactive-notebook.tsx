@@ -104,7 +104,13 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         this.props.urlParams.wsid, this.props.urlParams.nbName)
         .then(html => {
           this.setState({html: html.html});
+          let frame = document.getElementById('notebook-frame') as HTMLFrameElement;
+          frame.addEventListener('load', () => {
+            frame.contentWindow.addEventListener("mousemove", (e) => console.log(e), false);
+            console.log('loaded');
+          });
         });
+
       workspacesApi().getNotebookLockingMetadata(this.props.urlParams.ns,
         this.props.urlParams.wsid, this.props.urlParams.nbName).then((resp) => {
           this.setState({
@@ -269,7 +275,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
           </div>
           <div style={styles.previewDiv}>
             {html ?
-              (<iframe style={styles.previewFrame} srcDoc={html}/>) :
+              (<iframe id='notebook-frame' style={styles.previewFrame} srcDoc={html}/>) :
               (<SpinnerOverlay/>)}
           </div>
           {showPlaygroundModeModal &&
