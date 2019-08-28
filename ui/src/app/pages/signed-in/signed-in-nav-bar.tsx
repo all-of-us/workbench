@@ -6,6 +6,7 @@ import {ClrIcon} from "app/components/icons";
 import colors from "app/styles/colors";
 import {Breadcrumb} from "app/components/breadcrumb";
 import {SideNav} from "app/components/side-nav";
+import {Ref} from "react";
 
 const styles = reactStyles({
   headerContainer: {
@@ -84,6 +85,10 @@ export const SignedInNavBar = withUserProfile()(
       // Bind the this context - this will be passed down into the actual
       // sidenav so clicks on it can close the nav
       this.onToggleSideNav = this.onToggleSideNav.bind(this);
+      // In this case we're binding the context so these functions can be
+      // performed on the sidenav instead of on #document
+      this.setWrapperRef = this.setWrapperRef.bind(this);
+      this.handleClickOutside = this.handleClickOutside.bind(this);
       this.state = {
         profileLoadingSub: null,
         subscriptions: [],
@@ -101,8 +106,33 @@ export const SignedInNavBar = withUserProfile()(
       }));
     }
 
+    componentDidMount() {
+      document.addEventListener('click', this.handleClickOutside);
+    }
+
+    componentWillUnmount() {
+      document.removeEventListener('click', this.handleClickOutside);
+    }
+
+    handleClickOutside(event) {
+      if (
+        this.wrapperRef
+        && !this.wrapperRef.contains(event.target)
+        && this.state.sideNavVisible
+      ) {
+        this.onToggleSideNav();
+      }
+    }
+
+    setWrapperRef(node) {
+      this.wrapperRef = node;
+    }
+
     render() {
-      return <div style={styles.headerContainer}>
+      return <div
+        style={styles.headerContainer}
+        ref={this.setWrapperRef}
+      >
         <div style={{
           transform: this.state.barsTransform,
           display: 'inline-block',
