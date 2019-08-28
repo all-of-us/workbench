@@ -9,7 +9,7 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActionsReact';
+import {ResourceType} from 'app/utils/resourceActions';
 import {CopyRequest, RecentResource} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
@@ -177,7 +177,6 @@ export const NotebookResourceCard = fp.flow(
 
       <ResourceCardTemplate
         actions={this.actions}
-        actionsDisabled={false}
         disabled={false} // Notebook Cards are always at least readable
         resourceUrl={this.resourceUrl}
         displayName={this.displayName}

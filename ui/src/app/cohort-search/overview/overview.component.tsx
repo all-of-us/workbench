@@ -13,6 +13,7 @@ import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortStore, currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {Cohort, TemporalTime} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
@@ -218,6 +219,7 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     saveCohort() {
+      triggerEvent('Click icon', 'Click', 'Icon - Save - Cohort Builder');
       const {cohort} = this.state;
       cohort.criteria = this.criteria;
       this.setState({cohort, saving: true, saveError: false});
@@ -233,6 +235,7 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     submit() {
+      triggerEvent('Click icon', 'Click', 'Icon - Save As - Cohort Builder');
       this.setState({saving: true, saveError: false});
       const {ns, wsid} = urlParamsStore.getValue();
       const {name, description} = this.state;
@@ -249,6 +252,7 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     delete = () => {
+      triggerEvent('Click icon', 'Click', 'Icon - Delete - Cohort Builder');
       const {ns, wsid} = urlParamsStore.getValue();
       const {cohort} = this.state;
       cohortsApi().deleteCohort(ns, wsid, cohort.id).then(() => {
@@ -268,9 +272,11 @@ export const ListOverview = withCurrentWorkspace()(
       let url = `/workspaces/${ns}/${wsid}/`;
       switch (action) {
         case 'notebook':
+          triggerEvent('Click icon', 'Click', 'Icon - Export - Cohort Builder');
           url += 'notebooks';
           break;
         case 'review':
+          triggerEvent('Click icon', 'Click', 'Icon - Review - Cohort Builder');
           url += `data/cohorts/${cohort.id}/review`;
           break;
       }
@@ -278,6 +284,7 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     toggleChartMode() {
+      triggerEvent('Graphs', 'Click', 'Graphs - Flip - Gender Age Race - Cohort Builder');
       const {stackChart} = this.state;
       this.setState({stackChart: !stackChart});
     }
@@ -351,7 +358,11 @@ export const ListOverview = withCurrentWorkspace()(
                 <div style={styles.cardHeader}>
                   Results by Gender
                 </div>
-                <div style={{padding: '0.5rem 0.75rem'}}>
+                <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
+                  'Graphs',
+                  'Hover',
+                  'Graphs - Gender - Cohort Builder'
+                )}>
                   {!!chartData.length && <GenderChart data={chartData} />}
                 </div>
               </div>
@@ -362,7 +373,11 @@ export const ListOverview = withCurrentWorkspace()(
                     className={stackChart ? 'is-info' : ''}
                     onClick={() => this.toggleChartMode()} />
                 </div>
-                <div style={{padding: '0.5rem 0.75rem'}}>
+                <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
+                  'Graphs',
+                  'Hover',
+                  'Graphs - Gender Age Race - Cohort Builder'
+                )}>
                   {!!chartData.length &&
                     <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
                 </div>

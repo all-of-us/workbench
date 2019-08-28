@@ -4,7 +4,7 @@ import * as React from 'react';
 import {DetailTabTable} from 'app/cohort-review/detail-tab-table/detail-tab-table.component';
 import {IndividualParticipantsCharts} from 'app/cohort-review/individual-participants-charts/individual-participants-charts';
 import {filterStateStore} from 'app/cohort-review/review-state.service';
-import {typeToTitle} from 'app/cohort-search/utils';
+import {domainToTitle} from 'app/cohort-search/utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
@@ -325,7 +325,7 @@ export const DetailTabs = withCurrentWorkspace()(
                 .do(({items}) => {
                   chartData[domainName] = {
                     loading: false,
-                    conditionTitle: typeToTitle(domainName),
+                    conditionTitle: domainToTitle(domainName),
                     items
                   };
                   this.setState({chartData});

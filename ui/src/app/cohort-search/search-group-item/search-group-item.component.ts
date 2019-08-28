@@ -2,6 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {initExisting, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {attributeDisplay, domainToTitle, mapGroupItem, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
 
@@ -95,16 +96,19 @@ export class SearchGroupItemComponent implements OnInit {
   }
 
   enable() {
+    triggerEvent('Enable', 'Click', 'Enable - Suppress Criteria - Cohort Builder');
     this.item.status = 'active';
     this.updateSearchRequest();
   }
 
   suppress() {
+    triggerEvent('Suppress', 'Click', 'Snowman - Suppress Criteria - Cohort Builder');
     this.item.status = 'hidden';
     this.updateSearchRequest();
   }
 
   remove() {
+    triggerEvent('Delete', 'Click', 'Snowman - Delete Criteria - Cohort Builder');
     this.item.status = 'pending';
     this.updateSearchRequest();
     this.item.timeout = setTimeout(() => {
@@ -113,6 +117,7 @@ export class SearchGroupItemComponent implements OnInit {
   }
 
   undo() {
+    triggerEvent('Undo', 'Click', 'Undo - Delete Criteria - Cohort Builder');
     clearTimeout(this.item.timeout);
     this.item.status = 'active';
     this.updateSearchRequest();
@@ -155,6 +160,7 @@ export class SearchGroupItemComponent implements OnInit {
   }
 
   launchWizard() {
+    triggerEvent('Edit', 'Click', 'Snowman - Edit Criteria - Cohort Builder');
     const selections = this.item.searchParameters.map(sp => sp.parameterId);
     selectionsStore.next(selections);
     const fullTree = this.item.fullTree;

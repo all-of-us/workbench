@@ -9,7 +9,7 @@ import {ConceptSet, FileDetail, Workspace} from 'generated/fetch';
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { navigate } from 'app/utils/navigation';
-import {ResourceType, ResourceTypeDisplayNames} from 'app/utils/resourceActionsReact';
+import {ResourceType, ResourceTypeDisplayNames} from 'app/utils/resourceActions';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 enum RequestState { UNSENT, ERROR, SUCCESS }

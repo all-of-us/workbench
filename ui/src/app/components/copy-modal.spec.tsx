@@ -3,9 +3,9 @@ import * as React from 'react';
 import Select from 'react-select';
 
 import {TextInput} from 'app/components/inputs';
-import {ResourceType} from 'app/utils/resourceActionsReact';
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {ResourceType} from 'app/utils/resourceActions';
+import {WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 

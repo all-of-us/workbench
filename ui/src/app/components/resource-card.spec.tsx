@@ -99,12 +99,6 @@ describe('ResourceCardComponent', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should render a cohort if resource is cohort', () => {
-    const wrapper = component(ResourceCardWrapper.cohortCard);
-    expect(wrapper.find('[data-test-id="card-type"]').text()).toBe('Cohort');
-    expect(lastModifiedDate(wrapper)).toBeTruthy();
-  });
-
   it('should render a cohort review if resource is cohort review', () => {
     const wrapper = component(ResourceCardWrapper.cohortReviewCard);
     expect(wrapper.find('[data-test-id="card-type"]').text()).toBe('Cohort Review');

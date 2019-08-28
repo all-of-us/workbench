@@ -2,8 +2,6 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/firecloud-orchestration.dsde-dev.broadinstitute.org",
-    "billingAccountId": "014D91-FCB792-33D2C0",
-    "billingProjectPrefix": "aou-rw-local1-",
     "clusterMaxAgeDays": 7,
     "clusterIdleMaxAgeDays": 3,
     "debugEndpoints": false,
@@ -11,10 +9,17 @@
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-test",
     "registeredDomainGroup": "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
-    "billingRetryCount": 2,
-    "billingProjectBufferCapacity": 2,
     "xAppIdValue": "local-AoU-RW",
-    "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test"
+    "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
+    "timeoutInSeconds": 40
+  },
+  "billing": {
+    "accountId": "014D91-FCB792-33D2C0",
+    "projectNamePrefix": "aou-rw-local1-",
+    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0",
+    "retryCount": 2,
+    "bufferCapacity": 2,
+    "defaultFreeCreditsLimit": 300.0
   },
   "auth": {
     "serviceAccountApiUsers": [
