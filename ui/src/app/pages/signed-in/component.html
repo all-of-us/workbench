@@ -29,43 +29,6 @@
 
 <div class="content-container">
   <div class="background-image"></div>
-  <nav #sidenav class="sidenav" [ngClass]="{'sidenavHidden': !sidenavToggle}">
-    <section class="sidenav-content">
-      <button class="btn btn-primary nav-link"
-          [class.active]="homeActive"
-          routerLink="/"
-          (click)="sidenavToggle = false">Home</button>
-      <button class="btn btn-primary nav-link"
-              routerLink="/library"
-              (click)="sidenavToggle = false">Workspace Library</button>
-      <a class="btn btn-primary nav-link"
-          [href]="publicUiUrl" target="_blank">Browse Data</a>
-      <button class="btn btn-primary nav-link"
-          [class.active]="createWorkspaceActive"
-          routerLink="/workspaces/build"
-          [disabled]="hasDataAccess ? null : true"
-          (click)="sidenavToggle = false">Create Workspace</button>
-      <button class="btn btn-primary nav-link"
-          [class.active]="workspacesActive"
-          routerLink="/workspaces"
-          [disabled]="hasDataAccess ? null : true"
-          (click)="sidenavToggle = false">My Workspaces</button>
-      <button class="btn btn-primary nav-link"
-          [class.active]="reviewWorkspaceActive"
-          *ngIf="hasReviewResearchPurpose"
-          routerLink="/admin/review-workspace"
-          (click)="sidenavToggle = false">Review Workspaces</button>
-      <button class="btn btn-primary nav-link"
-          [class.active]="userAdminActive"
-          *ngIf="hasAccessModuleAdmin"
-          routerLink="/admin/user"
-          (click)="sidenavToggle = false">User Admin</button>
-      <button class="btn btn-primary nav-link help-desk-item"
-          (click)="openZendesk(); sidenavToggle = false;">Contact Support</button>
-      <button class="btn btn-primary nav-link hub-forum-item"
-          (click)="openHubForum(); sidenavToggle = false;">Hub Forum</button>
-    </section>
-  </nav>
   <div class="app-container" [class.minimize-chrome]="minimizeChrome">
     <!--
       Angular's builtin Router module will attach specific views here
