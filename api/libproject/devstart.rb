@@ -50,7 +50,7 @@ ENVIRONMENTS = {
     :config_json => "config_test.json",
     :cdr_versions_json => "cdr_versions_test.json",
     :featured_workspaces_json => "featured_workspaces_test.json",
-    :gae_vars => make_gae_vars(10, 10)
+    :gae_vars => TEST_GAE_VARS
   },
   "all-of-us-rw-staging" => {
     :api_endpoint_host => "api-dot-all-of-us-rw-staging.appspot.com",
