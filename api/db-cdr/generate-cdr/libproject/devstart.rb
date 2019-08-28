@@ -71,6 +71,7 @@ def publish_cdr(cmd_name, args)
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
   account = env.fetch(:publisher_account)
+  # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
   key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
   ServiceAccountContext.new(
     op.opts.project, account, key_file.path).run do
