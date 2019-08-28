@@ -571,6 +571,7 @@ To obtain the service account credentials, run
 cd api
 gcloud auth login <user>@pmi-ops.org # for test environment
 gcloud config set account <user>@pmi-ops.org # also works if logged in.
+gcloud auth list # confirm it's what you expect
 ./project.rb get-test-service-creds # the dev-up command should also include this step.
 ```
 You should see a file `sa-key.json` in the current directory
