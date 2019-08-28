@@ -44,6 +44,8 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.inject.Provider;
+
 /**
  * Workspace manipulation and shared business logic which can't be represented by automatic query
  * generation in WorkspaceDao, or convenience aliases.
@@ -61,6 +63,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private CohortCloningService cohortCloningService;
   private ConceptSetService conceptSetService;
   private UserDao userDao;
+  private Provider<User> userProvider;
   private WorkspaceDao workspaceDao;
   private WorkspaceMapper workspaceMapper;
 
@@ -74,12 +77,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       ConceptSetService conceptSetService,
       FireCloudService fireCloudService,
       UserDao userDao,
+      Provider<User> userProvider,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
     this.fireCloudService = fireCloudService;
+    this.userProvider = userProvider;
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
@@ -394,8 +399,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public WorkspaceAccessLevel getWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId) {
+    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceAccessLevel> object;
+    Object obj = fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId).getAcl();
+    if (obj instanceof Map) {
+      object = (Map) obj;
+    }
+    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceAccessLevel> myMap =
+        (Map<String, org.pmiops.workbench.firecloud.model.WorkspaceAccessLevel>)
+            fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId).getAcl();
     String userAccess =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
+        ((Map<String, String>) myMap.get(userProvider.get().getEmail())).get("accessLevel");
     if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
       return WorkspaceAccessLevel.OWNER;
     }
