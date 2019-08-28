@@ -3,8 +3,8 @@ import * as React from 'react';
 
 import {DetailTabTable} from 'app/cohort-review/detail-tab-table/detail-tab-table.component';
 import {IndividualParticipantsCharts} from 'app/cohort-review/individual-participants-charts/individual-participants-charts';
-import {filterStateStore} from 'app/cohort-review/review-state.service';
-import {cohortReviewStore, domainToTitle} from 'app/cohort-search/utils';
+import {cohortReviewStore, filterStateStore} from 'app/cohort-review/review-state.service';
+import {domainToTitle} from 'app/cohort-search/utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
