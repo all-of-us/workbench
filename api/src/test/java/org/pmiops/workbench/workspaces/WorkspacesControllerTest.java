@@ -311,7 +311,6 @@ public class WorkspacesControllerTest {
     testConfig.featureFlags.useBillingProjectBuffer = false;
     when(configProvider.get()).thenReturn(testConfig);
 
-    cohortReviewController.setConfigProvider(configProvider);
     workspacesController.setWorkbenchConfigProvider(configProvider);
     fcWorkspaceAcl = createWorkspaceACL();
 
@@ -916,8 +915,7 @@ public class WorkspacesControllerTest {
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
                 workspace.getId(),
-                c1.getId(),
-                cdrVersion.getCdrVersionId(),
+                cr1.getCohortReviewId(),
                 participantId,
                 new ParticipantCohortAnnotation()
                     .cohortAnnotationDefinitionId(
@@ -942,8 +940,7 @@ public class WorkspacesControllerTest {
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
                 workspace.getId(),
-                c1.getId(),
-                cdrVersion.getCdrVersionId(),
+                cr1.getCohortReviewId(),
                 participantId,
                 new ParticipantCohortAnnotation()
                     .cohortAnnotationDefinitionId(
@@ -980,15 +977,14 @@ public class WorkspacesControllerTest {
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
                 workspace.getId(),
-                c2.getId(),
-                cdrVersion.getCdrVersionId(),
+                cr2.getCohortReviewId(),
                 participantId,
                 new ParticipantCohortAnnotation()
                     .cohortAnnotationDefinitionId(
                         cad2EnumResponse.getCohortAnnotationDefinitionId())
                     .annotationValueEnum("value")
                     .participantId(participantId)
-                    .cohortReviewId(cr1.getCohortReviewId()))
+                    .cohortReviewId(cr2.getCohortReviewId()))
             .getBody();
     CohortAnnotationDefinition cad2BooleanResponse =
         cohortAnnotationDefinitionController
@@ -1006,15 +1002,14 @@ public class WorkspacesControllerTest {
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
                 workspace.getId(),
-                c2.getId(),
-                cdrVersion.getCdrVersionId(),
+                cr2.getCohortReviewId(),
                 participantId,
                 new ParticipantCohortAnnotation()
                     .cohortAnnotationDefinitionId(
                         cad2BooleanResponse.getCohortAnnotationDefinitionId())
                     .annotationValueBoolean(Boolean.TRUE)
                     .participantId(participantId)
-                    .cohortReviewId(cr1.getCohortReviewId()))
+                    .cohortReviewId(cr2.getCohortReviewId()))
             .getBody();
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
@@ -1113,11 +1108,7 @@ public class WorkspacesControllerTest {
     ParticipantCohortAnnotationListResponse clonedPca1List =
         cohortReviewController
             .getParticipantCohortAnnotations(
-                cloned.getNamespace(),
-                cloned.getId(),
-                cohortsByName.get("c1").getId(),
-                cdrVersion.getCdrVersionId(),
-                participantId)
+                cloned.getNamespace(), cloned.getId(), gotCr1.getCohortReviewId(), participantId)
             .getBody();
     assertParticipantCohortAnnotation(
         clonedPca1List,
@@ -1152,11 +1143,7 @@ public class WorkspacesControllerTest {
     ParticipantCohortAnnotationListResponse clonedPca2List =
         cohortReviewController
             .getParticipantCohortAnnotations(
-                cloned.getNamespace(),
-                cloned.getId(),
-                cohortsByName.get("c2").getId(),
-                cdrVersion.getCdrVersionId(),
-                participantId)
+                cloned.getNamespace(), cloned.getId(), gotCr2.getCohortReviewId(), participantId)
             .getBody();
     assertParticipantCohortAnnotation(
         clonedPca2List,

@@ -8,6 +8,7 @@ import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/
 import {DetailHeader} from 'app/cohort-review/detail-header/detail-header.component';
 import {DetailTabs} from 'app/cohort-review/detail-tabs/detail-tabs.component';
 import {Participant} from 'app/cohort-review/participant.model';
+import {cohortReviewStore, getVocabOptions, vocabOptions} from 'app/cohort-review/review-state.service';
 import {SidebarContent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -81,6 +82,7 @@ interface State {
 
 export const DetailPage = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
+    private subscription;
     constructor(props: any) {
       super(props);
       this.state = {
@@ -102,18 +104,19 @@ export const DetailPage = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      const {cdrVersionId} = this.props.workspace;
-      urlParamsStore.distinctUntilChanged(fp.isEqual)
+      this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(params => !!params.pid)
-        .switchMap(({ns, wsid, cid, pid}) => {
+        .switchMap(({ns, wsid, pid}) => {
           return Observable.forkJoin(
             from(cohortReviewApi()
-              .getParticipantCohortStatus(ns, wsid, +cid, +cdrVersionId, +pid))
+              .getParticipantCohortStatus(ns, wsid,
+                cohortReviewStore.getValue().cohortReviewId, +pid))
               .do(ps => {
                 this.setState({participant: Participant.fromStatus(ps)});
               }),
             from(cohortReviewApi()
-              .getParticipantCohortAnnotations(ns, wsid, +cid, +cdrVersionId, +pid))
+              .getParticipantCohortAnnotations(ns, wsid,
+                cohortReviewStore.getValue().cohortReviewId, +pid))
               .do(({items}) => {
                 this.setState({annotations: items});
               }),
@@ -121,6 +124,15 @@ export const DetailPage = withCurrentWorkspace()(
           );
         })
         .subscribe();
+      if (!vocabOptions.getValue()) {
+        const {workspace: {id, namespace}} = this.props;
+        const {cohortReviewId} = cohortReviewStore.getValue();
+        getVocabOptions(namespace, id, cohortReviewId);
+      }
+    }
+
+    componentWillUnmount() {
+      this.subscription.unsubscribe();
     }
 
     loadAnnotationDefinitions() {

@@ -30,7 +30,6 @@ import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -46,7 +45,6 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -144,8 +142,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Autowired private FireCloudService mockFireCloudService;
 
   @Autowired private UserDao userDao;
-
-  @Mock private Provider<WorkbenchConfig> configProvider;
 
   @Mock private Provider<User> userProvider;
 
@@ -644,8 +640,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantCohortStatus participantCohortStatus2 =
         new ParticipantCohortStatus().participantKey(key2);
     participantCohortStatusDao.save(participantCohortStatus2);
-
-    controller.setConfigProvider(configProvider);
   }
 
   @After
@@ -722,12 +716,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(
@@ -742,12 +731,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(
@@ -773,12 +757,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition3), 3);
@@ -789,12 +768,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition1), 3);
   }
@@ -813,12 +787,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(
@@ -833,12 +802,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(
@@ -864,12 +828,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedPhysicalMeasure1), 2);
@@ -880,12 +839,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedPhysicalMeasure2), 2);
   }
@@ -904,12 +858,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedLab1, expectedLab2), 2);
@@ -920,12 +869,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedLab2, expectedLab1), 2);
@@ -945,12 +889,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedVital1, expectedVital2), 2);
@@ -961,12 +900,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedVital2, expectedVital1), 2);
@@ -988,12 +922,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedLab1), 2);
@@ -1004,12 +933,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedLab2), 2);
   }
@@ -1028,12 +952,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(
@@ -1045,12 +964,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(
@@ -1073,12 +987,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedProcedure1), 2);
@@ -1089,12 +998,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedProcedure2), 2);
@@ -1114,12 +1018,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(
@@ -1134,12 +1033,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(
@@ -1165,12 +1059,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedObservation1), 2);
@@ -1181,12 +1070,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedObservation2), 2);
@@ -1206,12 +1090,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedDrug1, expectedDrug2), 2);
@@ -1222,12 +1101,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedDrug2, expectedDrug1), 2);
@@ -1249,12 +1123,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedDrug1), 2);
@@ -1265,12 +1134,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedDrug2), 2);
@@ -1292,12 +1156,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID2,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedAllEvents7), 8);
@@ -1308,12 +1167,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID2,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedAllEvents8), 8);
@@ -1333,12 +1187,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantDataListResponse response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID2,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
     assertResponse(
@@ -1361,12 +1210,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     response =
         controller
             .getParticipantData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                PARTICIPANT_ID2,
-                testFilter)
+                NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
     assertResponse(
@@ -1393,8 +1237,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .getParticipantChartData(
                 NAMESPACE,
                 NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                review.getCohortReviewId(),
                 PARTICIPANT_ID,
                 DomainType.CONDITION.name(),
                 null)
@@ -1428,50 +1271,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getParticipantChartDataBadCohortId() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
-    try {
-      controller.getParticipantChartData(
-          NAMESPACE,
-          NAME,
-          99L,
-          cdrVersion.getCdrVersionId(),
-          PARTICIPANT_ID,
-          DomainType.CONDITION.name(),
-          null);
-      fail("Should have thrown a NotFoundException!");
-    } catch (NotFoundException nfe) {
-      // Success
-      assertThat(nfe.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: 99");
-    }
-  }
-
-  @Test
-  public void getParticipantChartDataBadCdrVersionId() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
-    try {
-      controller.getParticipantChartData(
-          NAMESPACE,
-          NAME,
-          cohort.getCohortId(),
-          99L,
-          PARTICIPANT_ID,
-          DomainType.CONDITION.name(),
-          null);
-      fail("Should have thrown a NotFoundException!");
-    } catch (NotFoundException nfe) {
-      // Success
-      assertThat(nfe.getMessage())
-          .isEqualTo(
-              "Not Found: Cohort Review does not exist for cohortId: "
-                  + cohort.getCohortId()
-                  + ", cdrVersionId: 99");
-    }
-  }
-
-  @Test
   public void getParticipantChartDataBadLimit() throws Exception {
     stubMockFirecloudGetWorkspace();
 
@@ -1479,8 +1278,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       controller.getParticipantChartData(
           NAMESPACE,
           NAME,
-          cohort.getCohortId(),
-          99L,
+          review.getCohortReviewId(),
           PARTICIPANT_ID,
           DomainType.CONDITION.name(),
           -1);
@@ -1500,8 +1298,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       controller.getParticipantChartData(
           NAMESPACE,
           NAME,
-          cohort.getCohortId(),
-          99L,
+          review.getCohortReviewId(),
           PARTICIPANT_ID,
           DomainType.CONDITION.name(),
           101);
@@ -1519,12 +1316,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     try {
       controller.getCohortChartData(
-          NAMESPACE,
-          NAME,
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
-          DomainType.CONDITION.name(),
-          -1);
+          NAMESPACE, NAME, review.getCohortReviewId(), DomainType.CONDITION.name(), -1);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // Success
@@ -1539,12 +1331,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     try {
       controller.getCohortChartData(
-          NAMESPACE,
-          NAME,
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
-          DomainType.CONDITION.name(),
-          101);
+          NAMESPACE, NAME, review.getCohortReviewId(), DomainType.CONDITION.name(), 101);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // Success
@@ -1560,12 +1347,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                DomainType.LAB.name(),
-                10)
+                NAMESPACE, NAME, review.getCohortReviewId(), DomainType.LAB.name(), 10)
             .getBody();
     assertEquals(3, response.getItems().size());
     assertEquals(
@@ -1583,12 +1365,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                DomainType.DRUG.name(),
-                10)
+                NAMESPACE, NAME, review.getCohortReviewId(), DomainType.DRUG.name(), 10)
             .getBody();
     assertEquals(1, response.getItems().size());
     assertEquals(
@@ -1602,12 +1379,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                DomainType.CONDITION.name(),
-                10)
+                NAMESPACE, NAME, review.getCohortReviewId(), DomainType.CONDITION.name(), 10)
             .getBody();
     assertEquals(2, response.getItems().size());
     assertEquals(
@@ -1623,12 +1395,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
-                NAMESPACE,
-                NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
-                DomainType.PROCEDURE.name(),
-                10)
+                NAMESPACE, NAME, review.getCohortReviewId(), DomainType.PROCEDURE.name(), 10)
             .getBody();
     assertEquals(3, response.getItems().size());
     assertEquals(
@@ -1644,9 +1411,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     stubMockFirecloudGetWorkspace();
 
     VocabularyListResponse response =
-        controller
-            .getVocabularies(NAMESPACE, NAME, cohort.getCohortId(), cdrVersion.getCdrVersionId())
-            .getBody();
+        controller.getVocabularies(NAMESPACE, NAME, review.getCohortReviewId()).getBody();
     assertEquals(27, response.getItems().size());
     assertEquals(
         new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("CPT4"),

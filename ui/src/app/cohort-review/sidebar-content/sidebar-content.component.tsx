@@ -101,8 +101,7 @@ const AnnotationItem = fp.flow(
       const {
         annotation, setAnnotation,
         definition: {annotationType, cohortAnnotationDefinitionId},
-        urlParams: {ns, wsid, cid, pid},
-        workspace: {cdrVersionId},
+        urlParams: {ns, wsid, pid},
       } = this.props;
       const {timeout} = this.state;
       const aid = annotation ? annotation.annotationId : undefined;
@@ -110,12 +109,14 @@ const AnnotationItem = fp.flow(
       this.setState({savingValue: newValue});
       if (aid && fp.includes(newValue, [null, ''])) {
         setAnnotation(await cohortReviewApi()
-          .deleteParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, aid));
+          .deleteParticipantCohortAnnotation(ns, wsid,
+            cohortReviewStore.getValue().cohortReviewId, pid, aid));
       } else if (aid && newValue !== value) {
         clearTimeout(timeout);
         this.setState({error: false, success: false, saving: true});
         await cohortReviewApi()
-          .updateParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, aid, {
+          .updateParticipantCohortAnnotation(ns, wsid,
+            cohortReviewStore.getValue().cohortReviewId, pid, aid, {
             ...writeValue(annotationType, newValue),
           }).then(res => {
             setAnnotation(res);
@@ -125,7 +126,8 @@ const AnnotationItem = fp.flow(
         clearTimeout(timeout);
         this.setState({error: false, success: false, saving: true});
         await cohortReviewApi()
-          .createParticipantCohortAnnotation(ns, wsid, cid, +cdrVersionId, pid, {
+          .createParticipantCohortAnnotation(ns, wsid,
+            cohortReviewStore.getValue().cohortReviewId, pid, {
             cohortAnnotationDefinitionId,
             cohortReviewId: cohortReviewStore.getValue().cohortReviewId,
             participantId: pid,
@@ -263,12 +265,11 @@ export const SidebarContent = fp.flow(
     try {
       const {
         setParticipant,
-        urlParams: {ns, wsid, cid, pid},
-        workspace: {cdrVersionId},
+        urlParams: {ns, wsid, pid},
       } = this.props;
       this.setState({savingStatus: v});
       const data = await cohortReviewApi().updateParticipantCohortStatus(
-        ns, wsid, cid, +cdrVersionId, pid, {status: v}
+        ns, wsid, cohortReviewStore.getValue().cohortReviewId, pid, {status: v}
       );
       // make sure we're still on the same page before updating
       if (data.participantId === +this.props.urlParams.pid) {

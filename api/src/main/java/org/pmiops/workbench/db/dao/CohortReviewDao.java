@@ -11,6 +11,8 @@ public interface CohortReviewDao extends JpaRepository<CohortReview, Long> {
   CohortReview findCohortReviewByCohortIdAndCdrVersionId(
       @Param("cohortId") long cohortId, @Param("cdrVersionId") long cdrVersionId);
 
+  CohortReview findCohortReviewByCohortReviewId(@Param("cohortReviewId") long cohortReviewId);
+
   @Query(
       value =
           "select * from cohort_review cr "
