@@ -46,5 +46,5 @@ export interface Environment {
   // CAPS Requirement changes, homepage changes and user registration ; excludes DUA
   // See RW-3275
   // Exit criteria: once the epic is completed and fully reviewed
-  enableCapsRequirement: boolean;
+  enableHomepageRestyle: boolean;
 }

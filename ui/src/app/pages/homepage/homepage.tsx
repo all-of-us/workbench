@@ -106,7 +106,7 @@ export const styles = reactStyles({
     color: colors.white, fontSize: '.5rem', height: '1rem',
     marginLeft: '2.5rem', fontWeight: 400
   },
-  // once enableCapsRequirement is enabled, delete all styles ending in 'ToDelete'
+  // once enableHomepageRestyle is enabled, delete all styles ending in 'ToDelete'
   mainHeaderToDelete: {
     color: colors.white, fontSize: 28, fontWeight: 400,
     display: 'flex', letterSpacing: 'normal'
@@ -371,7 +371,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
           'Sharing and Publishing Notebooks']
       }];
 
-    if (environment.enableCapsRequirement) {
+    if (environment.enableHomepageRestyle) {
       return <React.Fragment>
         <div style={styles.pageWrapper}>
           <div style={styles.welcomeMessage}>
@@ -510,7 +510,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
           </video>
         </Modal>}
       </React.Fragment>;
-    } else { // delete this block below once enableCapsRequirement is removed
+    } else { // delete this block below once enableHomepageRestyle is removed
       return <React.Fragment>
         <div style={styles.backgroundImageToDelete}>
           <div style={{display: 'flex', justifyContent: 'center'}}>

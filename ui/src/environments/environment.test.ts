@@ -5,5 +5,5 @@ export const environment: Environment = {
   ...testEnvironmentBase,
   displayTag: 'Test',
   debug: false,
-  enableCapsRequirement: true
+  enableHomepageRestyle: true
 };
