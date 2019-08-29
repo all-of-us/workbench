@@ -6,7 +6,7 @@ import {ClrIcon} from "./icons";
 import {navigate} from "app/utils/navigation";
 import {SignInService} from "app/services/sign-in.service"
 import {environment} from "../../environments/environment";
-import {Ref} from "react";
+import {Ref, RefObject} from "react";
 
 const styles = reactStyles({
   sideNav: {
@@ -178,8 +178,8 @@ export interface SideNavProps {
 export interface SideNavState {
   showUserOptions: boolean;
   showHelpOptions: boolean;
-  userRef: Ref<SideNavItem>;
-  helpRef: Ref<SideNavItem>;
+  userRef: RefObject<SideNavItem>;
+  helpRef: RefObject<SideNavItem>;
 
 }
 

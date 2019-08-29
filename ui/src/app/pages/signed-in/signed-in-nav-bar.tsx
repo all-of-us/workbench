@@ -6,7 +6,7 @@ import {ClrIcon} from "app/components/icons";
 import colors from "app/styles/colors";
 import {Breadcrumb} from "app/components/breadcrumb";
 import {SideNav} from "app/components/side-nav";
-import {Ref} from "react";
+import {Ref, RefObject} from "react";
 
 const styles = reactStyles({
   headerContainer: {
@@ -80,6 +80,7 @@ export interface State {
   sideNavVisible: boolean;
   barsTransform: string;
   hovering: boolean;
+  wrapperRef: RefObject<HTMLDivElement>
 }
 
 const barsTransformNotRotated = 'rotate(0deg)';
@@ -92,9 +93,6 @@ export const SignedInNavBar = withUserProfile()(
       // Bind the this context - this will be passed down into the actual
       // sidenav so clicks on it can close the nav
       this.onToggleSideNav = this.onToggleSideNav.bind(this);
-      // In this case we're binding the context so these functions can be
-      // performed on the sidenav instead of on #document
-      this.setWrapperRef = this.setWrapperRef.bind(this);
       this.handleClickOutside = this.handleClickOutside.bind(this);
       this.state = {
         profileLoadingSub: null,
@@ -102,6 +100,7 @@ export const SignedInNavBar = withUserProfile()(
         sideNavVisible: false,
         barsTransform: barsTransformNotRotated,
         hovering: false,
+        wrapperRef: React.createRef(),
       };
     }
 
@@ -124,22 +123,18 @@ export const SignedInNavBar = withUserProfile()(
 
     handleClickOutside(event) {
       if (
-        this.wrapperRef
-        && !this.wrapperRef.contains(event.target)
+        this.state.wrapperRef
+        && !this.state.wrapperRef.current.contains(event.target)
         && this.state.sideNavVisible
       ) {
         this.onToggleSideNav();
       }
     }
 
-    setWrapperRef(node) {
-      this.wrapperRef = node;
-    }
-
     render() {
       return <div
         style={styles.headerContainer}
-        ref={this.setWrapperRef}
+        ref={this.state.wrapperRef}
       >
         <div style={{
           transform: this.state.barsTransform,
