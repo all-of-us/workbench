@@ -4,6 +4,9 @@ import * as React from 'react';
 import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {k} from '@angular/core/src/render3';
+
+const sidebarContent = require('assets/json/help-sidebar.json')
 
 const styles = reactStyles({
   sidebar: {
@@ -70,6 +73,7 @@ export class HelpSidebar extends React.Component<Props, State> {
       sidebarOpen: false,
       searchTerm: undefined
     };
+    console.log(sidebarContent);
   }
 
   render() {
@@ -78,6 +82,16 @@ export class HelpSidebar extends React.Component<Props, State> {
     return <div style={styles.sidebar}>
       <div style={sidebarOpen ? contentStyles.open : contentStyles.closed}>
         <h3 style={{fontWeight: 600, margin: 0}}>Help Tips</h3>
+        {sidebarContent[location].map((section, s) => <div key={s}>
+          <h4>{section.title}</h4>
+          {section.content.map((content, c) => {
+            return typeof content === 'string' ? <p key={c}>{content}</p> :
+              <div>
+                <h5>{content.title}</h5>
+                {content.content.map((item, i) => <p key={i}>{item}</p>)}
+              </div>;
+          })}
+        </div>)}
       </div>
       <div style={styles.iconContainer}>
         <ClrIcon className='is-solid' shape='info-standard' size={28} style={styles.icon}

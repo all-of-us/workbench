@@ -661,7 +661,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           </DataTable>
         </React.Fragment>
         {loading && <SpinnerOverlay />}
-        <HelpSidebar location='review' />
+        <HelpSidebar location='cohortBuilder' />
       </div>;
     }
   }
