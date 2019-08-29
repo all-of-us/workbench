@@ -43,7 +43,7 @@ export interface Environment {
 
   // Transient client-side flags.
   //
-  // CAPS Requirement changes, homepage changes and user registration ; excludes DUA
+  // homepage restyling changes ; excludes DUA
   // See RW-3275
   // Exit criteria: once the epic is completed and fully reviewed
   enableHomepageRestyle: boolean;
