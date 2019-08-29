@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import {Observable} from 'rxjs/Observable';
-import {of} from 'rxjs/observable/of';
 
 import {idsInUse, initExisting, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {mapRequest, parseCohortDefinition} from 'app/cohort-search/utils';
