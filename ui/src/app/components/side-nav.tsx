@@ -35,6 +35,13 @@ const styles = reactStyles({
     height: '2rem',
     color: colors.white,
   },
+  sideNavItemActive: {
+    backgroundColor: '#4356a7',
+    fontWeight: 'bold',
+  },
+  sideNavItemHover: {
+    backgroundColor: '#4356a7',
+  },
   sideNavItemContent: {
     display: 'flex',
     alignItems: 'center',
@@ -59,17 +66,18 @@ interface SideNavItemProps {
   onToggleSideNav: Function,
   href?: string,
   containsSubItems?: boolean,
+  active: boolean;
 }
 
 interface SideNavItemState {
-  dropdownOpen: boolean;
+  hovering: boolean;
 }
 
 class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
   constructor(props) {
     super(props);
     this.state = {
-      dropdownOpen: false
+      hovering: false
     }
   }
 
@@ -80,13 +88,26 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
     }
   }
 
+  getStyles(active, hovering) {
+    let sideNavItemStyles = {...styles.sideNavItem}
+    if (active) {
+      sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemActive}
+    }
+    if (hovering) {
+      sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemHover}
+    }
+    return sideNavItemStyles;
+  }
+
   render() {
     return <Clickable
       // data-test-id is the text within the SideNavItem, with whitespace removed
       // and appended with '-menu-item'
       data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
-      style={styles.sideNavItem}
+      style={this.getStyles(this.props.active, this.state.hovering)}
       onClick={() => this.props.onClick ? this.props.onClick() : this.onClick()}
+      onMouseEnter={() => this.setState({hovering: true})}
+      onMouseLeave={() => this.setState({hovering: false})}
     >
       <div
         style={styles.sideNavItemContent}
@@ -118,6 +139,9 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
 }
 
 export interface SideNavProps {
+  homeActive: boolean;
+  workspacesActive: boolean;
+  libraryActive: boolean;
   givenName: string;
   familyName: string;
   onToggleSideNav: Function;
@@ -155,18 +179,21 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onClick={() => this.onToggleUser()}
         onToggleSideNav={this.props.onToggleSideNav}
         containsSubItems={true}
+        active={false}
       />
       {
         this.state.showUserOptions && <SideNavItem
           content={"Profile"}
           onToggleSideNav={this.props.onToggleSideNav}
           href="/profile"
+          active={false}
         />
       }
       {
         this.state.showUserOptions && <SideNavItem
           content={"Billing Dashboard"}
           onToggleSideNav={this.props.onToggleSideNav}
+          active={false}
         />
       }
       {
@@ -174,6 +201,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           content={"Sign Out"}
           // signOut()
           onToggleSideNav={this.props.onToggleSideNav}
+          active={false}
         />
       }
       <SideNavItem
@@ -181,18 +209,21 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         content="Home"
         onToggleSideNav={this.props.onToggleSideNav}
         href="/"
+        active={this.props.homeActive}
       />
       <SideNavItem
         icon="applications"
         content="Your Workspaces"
         onToggleSideNav={this.props.onToggleSideNav}
         href={"/workspaces"}
+        active={this.props.workspacesActive}
       />
       <SideNavItem
         icon="star"
         content="Featured Workspaces"
         onToggleSideNav={this.props.onToggleSideNav}
         href={"/library"}
+        active={this.props.libraryActive}
       />
       <SideNavItem
         icon="help"
@@ -200,11 +231,13 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onClick={() => this.onToggleHelp()}
         onToggleSideNav={this.props.onToggleSideNav}
         containsSubItems={true}
+        active={false}
       />
       {
         this.state.showHelpOptions && <SideNavItem
           content={"How-to Guides"}
           onToggleSideNav={this.props.onToggleSideNav}
+          active={false}
         />
       }
       {
@@ -213,6 +246,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           onToggleSideNav={this.props.onToggleSideNav}
           // openHubForum()
           href={"https://aousupporthelp.zendesk.com/hc"}
+          active={false}
         />
       }
       {
@@ -220,6 +254,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           content={"Contact Us"}
           // openZendesk()
           onToggleSideNav={this.props.onToggleSideNav}
+          active={false}
         />
       }
     </div>

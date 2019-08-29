@@ -74,6 +74,9 @@ export interface Props {
   publicUiUrl: string;
   minimizeChrome: boolean;
   zendeskLoadError: boolean;
+  homeActive: boolean;
+  workspacesActive: boolean;
+  libraryActive: boolean;
 }
 
 export interface State {
@@ -179,6 +182,9 @@ export const SignedInNavBar = withUserProfile()(
         {
           this.state.sideNavVisible
           && <SideNav
+            homeActive={this.props.homeActive}
+            workspacesActive={this.props.workspacesActive}
+            libraryActive={this.props.libraryActive}
             givenName={this.props.givenName}
             familyName={this.props.familyName}
             // Passing the function itself deliberately, we want to be able to
@@ -210,6 +216,9 @@ export class SignedInNavBarComponent extends ReactWrapperBase {
   @Input('publicUiUrl') publicUiUrl: Props['publicUiUrl'];
   @Input('minimizeChrome') minimizeChrome: Props['minimizeChrome'];
   @Input('zendeskLoadError') zendeskLoadError: Props['zendeskLoadError'];
+  @Input('homeActive') homeActive: Props['homeActive'];
+  @Input('workspacesActive') workspacesActive: Props['workspacesActive'];
+  @Input('libraryActive') libraryActive: Props['libraryActive'];
   constructor() {
     super(SignedInNavBar, [
       'hasDataAccess',
@@ -226,6 +235,9 @@ export class SignedInNavBarComponent extends ReactWrapperBase {
       'publicUiUrl',
       'minimizeChrome',
       'zendeskLoadError',
+      'homeActive',
+      'workspacesActive',
+      'libraryActive',
     ]);
   }
 }

@@ -2,6 +2,104 @@ body {
   background-color: #f1f2f2;
 }
 
+.content-container {
+  display: flex;
+  /*View height minus top bar.*/
+  min-height: calc(100vh - 4rem);
+}
+
+.btn.btn-primary.nav-link.active {
+  background-color: #4356a7;
+  color: #f1f2f2;
+  font-weight: bold;
+}
+
+.btn.btn-primary.nav-link:hover {
+  color: #f1f2f2;
+}
+
+.btn.btn-primary.nav-link:disabled {
+  background-color: #262262;
+  color: #aeb2b7;
+  opacity: 0.5;
+  cursor: auto;
+}
+
+.app-container {
+  width: 100%;
+  padding-right: 0.6rem;
+  padding-left: 0.6rem;
+  flex-grow: 1;
+  /* Needed for absolute positioned child elements, e.g. spinner. */
+  position: relative;
+}
+
+.background-image {
+  background-image: url('/assets/images/hex-background@2x.png');
+  background-repeat: no-repeat;
+  z-index: -1;
+  background-size: cover;
+  right: 0rem;
+  top: 3.3rem;
+  width: 50%;
+  position: absolute;
+  height: calc(100vh - 3.3rem);
+}
+
+.minimize-chrome {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/*
+ * Everything below this line is styles supporting the 'old' Angular sidenav and will be removed
+ * when the feature toggle enableCapsRequirement is removed. If that toggle is turned on, these
+ * styles will not match anything.
+ */
+
+.header-image {
+  height: 57px;
+  width: 155px;
+  margin-left: 1rem;
+}
+
+.header-image:hover {
+  cursor: pointer;
+}
+
+.header-image:focus {
+  outline: none;
+}
+
+.display-tag {
+  margin-left: 1rem;
+  height: 12px;
+  width: 126px;
+  border-radius: 2px;
+  background-color: #262262;
+  color: #FFFFFF;
+  font-family: Montserrat;
+  font-size: 8px;
+  line-height:12px;
+  text-align: center;
+}
+
+.header-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.sidenav-toggle {
+  transform: rotate(0deg);
+  display: inline-block;
+  margin-left: 1rem;
+  transition: transform 0.5s;
+}
+.sidenav-toggle.rotate {
+  transform: rotate(90deg);
+}
+
 .sidenav-toggle:hover {
   cursor: pointer;
 }
@@ -36,12 +134,6 @@ body {
   text-decoration: none;
 }
 
-.content-container {
-  display: flex;
-  /*View height minus top bar.*/
-  min-height: calc(100vh - 4rem);
-}
-
 .sidenav {
   background-color: #262262;
   position: absolute;
@@ -66,33 +158,6 @@ body {
   height: 2rem;
   color: #aeb2b7;
 }
-
-.btn.btn-primary.nav-link.active {
-  background-color: #4356a7;
-  color: #f1f2f2;
-  font-weight: bold;
-}
-
-.btn.btn-primary.nav-link:hover {
-  color: #f1f2f2;
-}
-
-.btn.btn-primary.nav-link:disabled {
-  background-color: #262262;
-  color: #aeb2b7;
-  opacity: 0.5;
-  cursor: auto;
-}
-
-.app-container {
-  width: 100%;
-  padding-right: 0.6rem;
-  padding-left: 0.6rem;
-  flex-grow: 1;
-  /* Needed for absolute positioned child elements, e.g. spinner. */
-  position: relative;
-}
-
 button.btn:focus {
   outline: none;
 }
@@ -114,19 +179,3 @@ a.btn.btn-primary.nav-link {
   margin-right: calc(50% - 3rem);
 }
 
-.background-image {
-  background-image: url('/assets/images/hex-background@2x.png');
-  background-repeat: no-repeat;
-  z-index: -1;
-  background-size: cover;
-  right: 0rem;
-  top: 3.3rem;
-  width: 50%;
-  position: absolute;
-  height: calc(100vh - 3.3rem);
-}
-
-.minimize-chrome {
-  padding-left: 0;
-  padding-right: 0;
-}
