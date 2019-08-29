@@ -64,6 +64,13 @@ export class AppComponent implements OnInit {
         };
         console.log('To override the API URLs, try:\n' +
           'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
+
+        const lastActive = window.localStorage.getItem('LAST_ACTIVE_TIMESTAMP_EPOCH_MS');
+
+        if (lastActive && Date.now() - parseInt(lastActive) > environment.inactivityTimeoutInSeconds) {
+          localStorage.setItem('LAST_ACTIVE_TIMESTAMP_EPOCH_MS', Date.now().toString());
+          console.log("Logging out the user. Passed the inactivity timeout.");
+        }
       } catch (err) {
         console.log('Error setting urls: ' + err);
       }

@@ -118,8 +118,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     }, environment.inactivityTimeoutInSeconds * 1000);
 
     window.addEventListener('message', (e) => {
-      console.log("Storing last active time " + Date.now().toString());
-      window.localStorage.setItem('lastActiveTimestampEpochMs', Date.now().toString());
+      window.localStorage.setItem('LAST_ACTIVE_TIMESTAMP_EPOCH_MS', Date.now().toString());
       resetLogoutTimeout();
     }, false);
   }
