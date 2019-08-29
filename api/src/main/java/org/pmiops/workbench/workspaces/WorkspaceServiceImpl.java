@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -398,12 +399,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public WorkspaceAccessLevel getWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId) {
-    String userAccess =
-        fireCloudService
-            .getWorkspaceAcl(workspaceNamespace, workspaceId)
-            .getAcl()
-            .get(userProvider.get().getEmail())
-            .getAccessLevel();
+    WorkspaceACL workspaceACL = fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId);
+    Map<String, WorkspaceAccessEntry> workspaceAccessEntryMap = workspaceACL.getAcl();
+    WorkspaceAccessEntry workspaceAccessEntry =
+        Optional.of(workspaceAccessEntryMap.get(userProvider.get().getEmail()))
+            .orElseThrow(() -> new NotFoundException(String.format("Workspace %s/%s not found", workspaceNamespace, workspaceId)));
+    String userAccess = workspaceAccessEntry.getAccessLevel();
 
     if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
       return WorkspaceAccessLevel.OWNER;
