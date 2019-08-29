@@ -87,7 +87,7 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
       }
     });
     return <Modal loading={saving}>
-      <ModalTitle>Create a Review Set-Wide Annotation</ModalTitle>
+      <ModalTitle>Create a Review-Wide Annotation Field</ModalTitle>
       <ModalBody>
         <div style={{...headerStyles.formLabel, marginTop: '1rem'}}>Type:</div>
         <Select
@@ -216,7 +216,7 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
     const {onClose, annotationDefinitions} = this.props;
     const {editId, editValue, busy, deleteError, deleteId, renameError} = this.state;
     return <Modal loading={busy}>
-      <ModalTitle>Edit or Delete a Review Set-Wide Annotation Field</ModalTitle>
+      <ModalTitle>Edit or Delete Review-Wide Annotation Fields</ModalTitle>
       <ModalBody>
         <div style={{maxHeight: '10rem', overflow: 'auto'}}>
           {(deleteError || renameError) && <div>
@@ -227,8 +227,8 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
             </span>
           </div>}
           {deleteId !== undefined ? <div>
-            Deleting this annotation field will remove this field from ALL PARTICIPANTS in ALL
-             REVIEW SETS generated with this set. Are you sure you want to delete this?
+            Deleting this annotation field will remove this field (and any associated data) from ALL
+            PARTICIPANTS in this review set. Are you sure you want to delete this item?
           </div> : <React.Fragment>
             {annotationDefinitions.map(({cohortAnnotationDefinitionId: id, columnName}) => {
               return <div key={id} style={styles.editRow}>
