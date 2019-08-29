@@ -7,7 +7,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
-import {hasRegisteredAccess} from 'app/utils';
+import {debouncer, hasRegisteredAccess} from 'app/utils';
 import {cdrVersionStore, routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget, openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
@@ -104,16 +104,16 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       cdrVersionStore.next(resp.items);
     });
 
-    window.addEventListener("mousemove", this.onActiveEvent, false);
-    window.addEventListener("mousedown", this.onActiveEvent, false);
-    window.addEventListener("keypress", this.onActiveEvent, false);
-    window.addEventListener("touchmove", this.onActiveEvent, false);
+    const signalUserActivity = debouncer(() => {
+      window.postMessage("Frame is active", '*');
+    }, 1000);
+    window.addEventListener('mousemove', () => signalUserActivity(), false);
+    window.addEventListener('mousedown', () => signalUserActivity(), false);
+    window.addEventListener('keypress', () => signalUserActivity(), false);
+    window.addEventListener('scroll', () => signalUserActivity(), false);
+    window.addEventListener('click', () => signalUserActivity(), false);
 
     window.addEventListener('message', (e) => console.log(e), false);
-  }
-
-  onActiveEvent(e) {
-    console.log(e);
   }
 
   ngAfterViewInit() {

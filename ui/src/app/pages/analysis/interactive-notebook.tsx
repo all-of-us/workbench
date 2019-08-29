@@ -12,7 +12,7 @@ import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {debouncer, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -99,39 +99,6 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       };
     }
 
-    // activityReporter(report) {
-    //   const lastActiveTimestamp = (new Date()).getMilliseconds();
-    //
-    //   const last = () => {
-    //     return (new Date()).getMilliseconds();
-    //   };
-    //
-    //   setInterval(() => {
-    //     if ((new Date()).getMilliseconds() - lastActiveTimestamp() < 1000) {
-    //       report();
-    //     }
-    //   }, 1000);
-    //
-    //   return {
-    //     signalUserActivity: () => { report(); }
-    //   };
-    // }
-
-    activityReporter(report) {
-      var t = Date.now();
-
-      setInterval(() => {
-        if (Date.now() - t < 1000) {
-          report();
-        }
-      }, 1000);
-
-      return () => {
-        t = Date.now();
-      }
-    }
-
-
     componentDidMount(): void {
       workspacesApi().readOnlyNotebook(this.props.urlParams.ns,
         this.props.urlParams.wsid, this.props.urlParams.nbName)
@@ -139,9 +106,9 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
           this.setState({html: html.html});
           let frame = document.getElementById('notebook-frame') as HTMLFrameElement;
           frame.addEventListener('load', () => {
-            const signalUserActivity = this.activityReporter(() => {
+            const signalUserActivity = debouncer(() => {
               frame.contentWindow.parent.postMessage("Frame is active", '*');
-            });
+            }, 1000);
 
             frame.contentWindow.addEventListener('mousemove', () => signalUserActivity(), false);
             frame.contentWindow.addEventListener('mousedown', () => signalUserActivity(), false);

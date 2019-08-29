@@ -353,3 +353,17 @@ export const toggleIncludes = fp.curry((value, arr) => {
 export function sliceByHalfLength(obj) {
   return Math.ceil(obj.length / 2);
 }
+
+export function debouncer(action, sensitivityMs) {
+  var t = Date.now();
+
+  setInterval(() => {
+    if (Date.now() - t < sensitivityMs) {
+      action();
+    }
+  }, sensitivityMs);
+
+  return () => {
+    t = Date.now();
+  }
+}
