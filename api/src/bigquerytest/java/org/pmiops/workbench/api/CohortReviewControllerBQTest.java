@@ -30,7 +30,6 @@ import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -143,8 +142,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Autowired private FireCloudService mockFireCloudService;
 
   @Autowired private UserDao userDao;
-
-  @Mock private Provider<WorkbenchConfig> configProvider;
 
   @Mock private Provider<User> userProvider;
 

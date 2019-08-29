@@ -33,7 +33,6 @@ import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -141,8 +140,6 @@ public class CohortReviewControllerTest {
   @Autowired private BigQueryService bigQueryService;
 
   @Autowired private UserDao userDao;
-
-  @Mock private Provider<WorkbenchConfig> configProvider;
 
   @Mock private Provider<User> userProvider;
 
