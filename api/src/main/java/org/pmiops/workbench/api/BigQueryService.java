@@ -41,10 +41,12 @@ public class BigQueryService {
 
   private BigQuery getBigQueryService() {
     CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
-    return BigQueryOptions.newBuilder().setProjectId(
-        cdrVersion.getBigqueryProject()).build().getService();
+    return BigQueryOptions.newBuilder()
+        .setProjectId(cdrVersion.getBigqueryProject())
+        .build()
+        .getService();
   }
-  
+
   /** Execute the provided query using bigquery. */
   public TableResult executeQuery(QueryJobConfiguration query) {
     return executeQuery(query, 60000L);
