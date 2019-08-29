@@ -20,7 +20,7 @@ const ONE_REM = 24;  // value in pixels
 @Component({
   selector: 'app-cohort-search',
   templateUrl: './cohort-search.component.html',
-  styleUrls: ['./cohort-search.component.css'],
+  styleUrls: ['./cohort-search.component.css', '../../styles/buttons.css'],
 })
 export class CohortSearchComponent implements OnInit, OnDestroy {
 
