@@ -165,9 +165,10 @@ class NewDataSetModal extends React.Component<Props, State> {
         // Open notebook in a new tab and return back to the Data tab
         const notebookUrl = '/workspaces/' + workspaceNamespace + '/' + workspaceId +
             '/notebooks/' + appendNotebookFileSuffix(encodeURIComponent(this.state.notebookName));
-        window.open(notebookUrl, '_blank');
+        window.open(notebookUrl);
+      } else {
+        window.history.back();
       }
-      window.history.back();
     } catch (e) {
       if (e.status === 409) {
         this.setState({conflictDataSetName: true, loading: false});
