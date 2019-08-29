@@ -233,14 +233,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       }
       {
         this.state.showUserOptions && <SideNavItem
-          content={"Billing Dashboard"}
-          onToggleSideNav={this.props.onToggleSideNav}
-          active={false}
-          disabled={true}
-        />
-      }
-      {
-        this.state.showUserOptions && <SideNavItem
           content={"Sign Out"}
           // signOut()
           onToggleSideNav={this.props.onToggleSideNav}
@@ -282,14 +274,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         disabled={false}
         ref={this.state.helpRef}
       />
-      {
-        this.state.showHelpOptions && <SideNavItem
-          content={"How-to Guides"}
-          onToggleSideNav={this.props.onToggleSideNav}
-          active={false}
-          disabled={true}
-        />
-      }
       {
         this.state.showHelpOptions && <SideNavItem
           content={"User Forum"}
