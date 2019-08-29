@@ -43,11 +43,6 @@ export interface Environment {
 
   // Transient client-side flags.
   //
-  // Whether users should be able to use JupyterLab as an option.
-  // See RW-1966 for details.
-  // Exit criteria: remove flag for Athens release.
-  enableJupyterLab: boolean;
-
   // CAPS Requirement changes, homepage changes and user registration ; excludes DUA
   // See RW-3275
   // Exit criteria: once the epic is completed and fully reviewed
