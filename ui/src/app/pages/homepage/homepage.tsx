@@ -26,8 +26,7 @@ import {
   Profile,
 } from 'generated/fetch';
 
-
-export const styles = environment.enableCapsRequirement ? reactStyles({
+export const styles = reactStyles({
   mainHeader: {
     color: colors.primary, fontSize: 28, fontWeight: 400,
     display: 'flex', letterSpacing: 'normal'
@@ -106,73 +105,57 @@ export const styles = environment.enableCapsRequirement ? reactStyles({
   bottomLinks: {
     color: colors.white, fontSize: '.5rem', height: '1rem',
     marginLeft: '2.5rem', fontWeight: 400
+  },
+  // once enableCapsRequirement is enabled, delete all styles ending in 'ToDelete'
+  mainHeaderToDelete: {
+    color: colors.white, fontSize: 28, fontWeight: 400,
+    display: 'flex', letterSpacing: 'normal'
+  },
+  backgroundImageToDelete: {
+    backgroundImage: 'url("/assets/images/AoU-HP-background.jpg")',
+    backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '100%',
+    marginLeft: '-1rem', marginRight: '-0.6rem', display: 'flex',
+    flexDirection: 'column', justifyContent: 'space-between'
+  },
+  quickRowToDelete: {
+    display: 'flex', justifyContent: 'flex-start', maxHeight: '26rem',
+    flexDirection: 'row', marginLeft: '4rem', padding: '1rem'
+  },
+  quickTourLabelToDelete: {
+    fontSize: 28, lineHeight: '34px', color: colors.white, paddingRight: '2.3rem',
+    marginTop: '2rem', width: '33%'
+  },
+  footerToDelete: {
+    height: '300px', width: '100%', backgroundColor: colors.primary,
+    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
+    marginTop: '2%',
+  },
+  footerInnerToDelete: {
+    display: 'flex', flexDirection: 'column', marginLeft: '5%', marginRight: '5%',
+  },
+  footerTitleToDelete: {
+    height: '34px', opacity: 0.87, color: colors.white, fontSize: 28,
+    fontWeight: 600, lineHeight: '34px', width: '87.34%', marginTop: '1.4rem'
+  },
+  footerTextToDelete: {
+    height: '176px', opacity: 0.87, color: colors.secondary, fontSize: '16px',
+    fontWeight: 400, lineHeight: '30px', display: 'flex', width: '100%',
+    flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'auto'
+  },
+  linksBlockToDelete: {
+    display: 'flex', marginBottom: '1.2rem', marginLeft: '1.4rem',
+    flexDirection: 'column', flexShrink: 1, minWidth: 0
+  },
+  bottomBannerToDelete: {
+    width: '100%', display: 'flex', backgroundColor: colors.primary, height: '5rem',
+    paddingLeft: '3.5rem', alignItems: 'center'
+  },
+  bottomLinksToDelete: {
+    color: colors.white, fontSize: '0.7rem', height: '1rem',
+    marginLeft: '2.5rem', fontWeight: 400
   }
-})
-  : reactStyles({
-    mainHeader: {
-      color: colors.white, fontSize: 28, fontWeight: 400,
-      display: 'flex', letterSpacing: 'normal'
-    },
-    backgroundImage: {
-      backgroundImage: 'url("/assets/images/AoU-HP-background.jpg")',
-      backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '100%',
-      marginLeft: '-1rem', marginRight: '-0.6rem', display: 'flex',
-      flexDirection: 'column', justifyContent: 'space-between'
-    },
-    singleCard: {
-      width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
-      display: 'flex', flexDirection: 'column', borderRadius: '5px',
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-      boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-      border: 'none', marginTop: '1rem'
-    },
-    contentWrapperLeft: {
-      display: 'flex', flexDirection: 'column', paddingLeft: '3%', width: '40%'
-    },
-    contentWrapperRight: {
-      display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '60%'
-    },
-    quickRow: {
-      display: 'flex', justifyContent: 'flex-start', maxHeight: '26rem',
-      flexDirection: 'row', marginLeft: '4rem', padding: '1rem'
-    },
-    quickTourLabel: {
-      fontSize: 28, lineHeight: '34px', color: colors.white, paddingRight: '2.3rem',
-      marginTop: '2rem', width: '33%'
-    },
-    footer: {
-      height: '300px', width: '100%', backgroundColor: colors.primary,
-      boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-      marginTop: '2%',
-    },
-    footerInner: {
-      display: 'flex', flexDirection: 'column', marginLeft: '5%', marginRight: '5%',
-    },
-    footerTitle: {
-      height: '34px', opacity: 0.87, color: colors.white, fontSize: 28,
-      fontWeight: 600, lineHeight: '34px', width: '87.34%', marginTop: '1.4rem'
-    },
-    footerText: {
-      height: '176px', opacity: 0.87, color: colors.secondary, fontSize: '16px',
-      fontWeight: 400, lineHeight: '30px', display: 'flex', width: '100%',
-      flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'auto'
-    },
-    linksBlock: {
-      display: 'flex', marginBottom: '1.2rem', marginLeft: '1.4rem',
-      flexDirection: 'column', flexShrink: 1, minWidth: 0
-    },
-    bottomBanner: {
-      width: '100%', display: 'flex', backgroundColor: colors.primary, height: '5rem',
-      paddingLeft: '3.5rem', alignItems: 'center'
-    },
-    logo: {
-      height: '3.5rem', width: '7rem', lineHeight: '85px'
-    },
-    bottomLinks: {
-      color: colors.white, fontSize: '0.7rem', height: '1rem',
-      marginLeft: '2.5rem', fontWeight: 400
-    }
-  });
+
+});
 
 
 export const Homepage = withUserProfile()(class extends React.Component<
@@ -527,9 +510,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
           </video>
         </Modal>}
       </React.Fragment>;
-    } else {
+    } else { // delete this block below once enableCapsRequirement is removed
       return <React.Fragment>
-        <div style={styles.backgroundImage}>
+        <div style={styles.backgroundImageToDelete}>
           <div style={{display: 'flex', justifyContent: 'center'}}>
             <div style={styles.singleCard}>
               {accessTasksLoaded ?
@@ -544,7 +527,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                     ) : (
                       <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                         <div style={styles.contentWrapperLeft}>
-                          <div style={styles.mainHeader}>Researcher Workbench</div>
+                          <div style={styles.mainHeaderToDelete}>Researcher Workbench</div>
                           <TooltipTrigger
                             content={<div>Your Firecloud billing project is still being initialized
                               . Workspace creation will be available in a few minutes.</div>}
@@ -575,8 +558,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
             </div>
           </div>
           <div>
-            <div style={styles.quickRow}>
-              <div style={styles.quickTourLabel}>Quick Tour & Videos</div>
+            <div style={styles.quickRowToDelete}>
+              <div style={styles.quickTourLabelToDelete}>Quick Tour & Videos</div>
               {quickTourResources.map((thumbnail, i) => {
                 return <React.Fragment key={i}>
                   <Clickable onClick={thumbnail.onClick}
@@ -588,9 +571,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
               })}
             </div>
             <div>
-              <div style={styles.footer}>
-                <div style={styles.footerInner}>
-                  <div style={styles.footerTitle}>
+              <div style={styles.footerToDelete}>
+                <div style={styles.footerInnerToDelete}>
+                  <div style={styles.footerTitleToDelete}>
                     How to Use the All of Us Researcher Workbench</div>
                   <div style={{display: 'flex', justifyContent: 'flex-end'}}>
                     <TooltipTrigger content='Coming Soon' side='left'>
@@ -601,8 +584,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
                     width: '87.34%', justifyContent: 'space-between'}}>
                     {footerLinks.map((col, i) => {
                       return <React.Fragment key={i}>
-                        <div style={styles.linksBlock}>
-                          <div style={styles.footerText}>
+                        <div style={styles.linksBlockToDelete}>
+                          <div style={styles.footerTextToDelete}>
                             <div style={{color: colors.white, marginTop: '2%'}}>{col.title}</div>
                             <ul style={{color: colors.secondary}}>
                               {col.links.map((link, ii) => {
@@ -618,12 +601,12 @@ export const Homepage = withUserProfile()(class extends React.Component<
                   </div>
                 </div>
               </div>
-              <div style={styles.bottomBanner}>
+              <div style={styles.bottomBannerToDelete}>
                 <div style={styles.logo}>
                   <img src='/assets/images/all-of-us-logo-footer.svg'/>
                 </div>
-                <div style={styles.bottomLinks}>Privacy Policy</div>
-                <div style={styles.bottomLinks}>Terms of Service</div>
+                <div style={styles.bottomLinksToDelete}>Privacy Policy</div>
+                <div style={styles.bottomLinksToDelete}>Terms of Service</div>
               </div>
             </div>
           </div>
