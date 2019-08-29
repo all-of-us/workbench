@@ -140,15 +140,164 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     cdrVersionDao.save(cdrVersion);
   }
 
+  private static SearchParameter icd9() {
+    return new SearchParameter()
+        .domain(DomainType.CONDITION.toString())
+        .type(CriteriaType.ICD9CM.toString())
+        .standard(false)
+        .ancestorData(false)
+        .group(false)
+        .conceptId(1L);
+  }
+
+  private static SearchParameter icd10() {
+    return new SearchParameter()
+        .domain(DomainType.CONDITION.toString())
+        .type(CriteriaType.ICD10CM.toString())
+        .standard(false)
+        .ancestorData(false)
+        .group(false)
+        .conceptId(9L);
+  }
+
+  private static SearchParameter snomed() {
+    return new SearchParameter()
+        .domain(DomainType.CONDITION.toString())
+        .type(CriteriaType.SNOMED.toString())
+        .standard(false)
+        .ancestorData(false)
+        .group(false)
+        .conceptId(4L);
+  }
+
+  private static SearchParameter drug() {
+    return new SearchParameter()
+        .domain(DomainType.DRUG.toString())
+        .type(CriteriaType.ATC.toString())
+        .group(false)
+        .ancestorData(true)
+        .standard(true)
+        .conceptId(11L);
+  }
+
+  private static SearchParameter measurement() {
+    return new SearchParameter()
+        .domain(DomainType.MEASUREMENT.toString())
+        .type(CriteriaType.LOINC.toString())
+        .subtype(CriteriaSubType.LAB.toString())
+        .group(false)
+        .ancestorData(false)
+        .standard(true)
+        .conceptId(3L);
+  }
+
+  private static SearchParameter visit() {
+    return new SearchParameter()
+        .domain(DomainType.VISIT.toString())
+        .type(CriteriaType.VISIT.toString())
+        .group(false)
+        .ancestorData(false)
+        .standard(true)
+        .conceptId(1L);
+  }
+
+  private static SearchParameter procedure() {
+    return new SearchParameter()
+        .domain(DomainType.PROCEDURE.toString())
+        .type(CriteriaType.CPT4.toString())
+        .group(false)
+        .ancestorData(false)
+        .standard(false)
+        .conceptId(10L);
+  }
+
+  private static SearchParameter bloodPressure() {
+    return new SearchParameter()
+        .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.BP.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(false);
+  }
+
+  private static SearchParameter hrDetail() {
+    return new SearchParameter()
+        .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.HR_DETAIL.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(false)
+        .conceptId(903126L);
+  }
+
+  private static SearchParameter age() {
+    return new SearchParameter()
+        .domain(DomainType.PERSON.toString())
+        .type(CriteriaType.AGE.toString())
+        .group(false)
+        .ancestorData(false)
+        .standard(true);
+  }
+
+  private static SearchParameter male() {
+    return new SearchParameter()
+        .domain(DomainType.PERSON.toString())
+        .type(CriteriaType.GENDER.toString())
+        .group(false)
+        .standard(true)
+        .ancestorData(false)
+        .conceptId(8507L);
+  }
+
+  private static SearchParameter race() {
+    return new SearchParameter()
+        .domain(DomainType.PERSON.toString())
+        .type(CriteriaType.RACE.toString())
+        .group(false)
+        .standard(true)
+        .ancestorData(false)
+        .conceptId(1L);
+  }
+
+  private static SearchParameter ethnicity() {
+    return new SearchParameter()
+        .domain(DomainType.PERSON.toString())
+        .type(CriteriaType.ETHNICITY.toString())
+        .group(false)
+        .standard(true)
+        .ancestorData(false)
+        .conceptId(9898L);
+  }
+
+  private static SearchParameter deceased() {
+    return new SearchParameter()
+        .domain(DomainType.PERSON.toString())
+        .type(CriteriaType.DECEASED.toString())
+        .group(false)
+        .standard(true)
+        .ancestorData(false)
+        .value("Deceased");
+  }
+
+  private static Modifier ageModifier() {
+    return new Modifier()
+        .name(ModifierType.AGE_AT_EVENT)
+        .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+        .operands(Arrays.asList("25"));
+  }
+
+  private static Modifier visitModifier() {
+    return new Modifier()
+        .name(ModifierType.ENCOUNTERS)
+        .operator(Operator.IN)
+        .operands(Arrays.asList("1"));
+  }
+
   @Test
   public void validateAttribute() throws Exception {
-    SearchParameter demo =
-        new SearchParameter()
-            .domain(DomainType.PERSON.toString())
-            .type(CriteriaType.AGE.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true);
+    SearchParameter demo = age();
     Attribute attribute = new Attribute().name(AttrName.NUM);
     demo.attributes(Arrays.asList(attribute));
     SearchRequest searchRequest =
@@ -201,19 +350,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void validateModifiers() throws Exception {
-    SearchParameter searchParameter =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true);
-    Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT);
+    Modifier modifier = ageModifier().operator(null).operands(new ArrayList<>());
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(),
-            Arrays.asList(searchParameter),
-            Arrays.asList(modifier));
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(modifier));
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
@@ -271,35 +411,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChild() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .value("001.1")
-            .standard(false)
-            .ancestorData(false)
-            .conceptId(1L);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9), new ArrayList<>());
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void temporalGroupExceptions() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .standard(false)
-            .ancestorData(false)
-            .group(false)
-            .conceptId(1L);
-
     SearchGroupItem icd9SGI =
-        new SearchGroupItem().type(DomainType.CONDITION.toString()).addSearchParametersItem(icd9);
+        new SearchGroupItem().type(DomainType.CONDITION.toString()).addSearchParametersItem(icd9());
 
     SearchGroup temporalGroup = new SearchGroup().items(Arrays.asList(icd9SGI)).temporal(true);
 
@@ -326,58 +448,22 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void firstMentionOfICD9WithModifiersOrSnomed5DaysAfterICD10WithModifiers()
       throws Exception {
-    Modifier ageModifier =
-        new Modifier()
-            .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-            .operands(Arrays.asList("25"));
-    Modifier visitsModifier =
-        new Modifier()
-            .name(ModifierType.ENCOUNTERS)
-            .operator(Operator.IN)
-            .operands(Arrays.asList("1"));
-
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .standard(false)
-            .ancestorData(false)
-            .group(false)
-            .conceptId(1L);
-    SearchParameter icd10 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD10CM.toString())
-            .standard(false)
-            .ancestorData(false)
-            .group(false)
-            .conceptId(9L);
-    SearchParameter snomed =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .standard(false)
-            .ancestorData(false)
-            .group(false)
-            .conceptId(4L);
-
     SearchGroupItem icd9SGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
-            .addSearchParametersItem(icd9)
+            .addSearchParametersItem(icd9())
             .temporalGroup(0)
-            .addModifiersItem(ageModifier);
+            .addModifiersItem(ageModifier());
     SearchGroupItem icd10SGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
-            .addSearchParametersItem(icd10)
+            .addSearchParametersItem(icd10())
             .temporalGroup(1)
-            .addModifiersItem(visitsModifier);
+            .addModifiersItem(visitModifier());
     SearchGroupItem snomedSGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
-            .addSearchParametersItem(snomed)
+            .addSearchParametersItem(snomed())
             .temporalGroup(0);
 
     // First Mention Of (ICD9 w/modifiers or Snomed) 5 Days After ICD10 w/modifiers
@@ -403,46 +489,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
             .operands(Arrays.asList("2"));
 
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .standard(false)
-            .ancestorData(false)
-            .group(false)
-            .conceptId(1L);
-    SearchParameter icd10 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD10CM.toString())
-            .standard(false)
-            .ancestorData(false)
-            .group(false)
-            .conceptId(9L);
-    SearchParameter snomed =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .standard(false)
-            .ancestorData(false)
-            .group(false)
-            .conceptId(4L);
-
     SearchGroupItem icd9SGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
-            .addSearchParametersItem(icd9)
+            .addSearchParametersItem(icd9())
             .temporalGroup(0)
             .addModifiersItem(occurrencesModifier);
     SearchGroupItem icd10SGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
-            .addSearchParametersItem(icd10)
+            .addSearchParametersItem(icd10())
             .temporalGroup(1);
     SearchGroupItem snomedSGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
-            .addSearchParametersItem(snomed)
+            .addSearchParametersItem(snomed())
             .temporalGroup(0);
 
     // First Mention Of (ICD9 w/modifiers or Snomed) 5 Days After ICD10 w/modifiers
@@ -486,41 +547,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (1520218, 1520218)");
-
-    Modifier visitsModifier =
-        new Modifier()
-            .name(ModifierType.ENCOUNTERS)
-            .operator(Operator.IN)
-            .operands(Arrays.asList("1"));
-
-    SearchParameter drug =
-        new SearchParameter()
-            .domain(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .standard(false)
-            .ancestorData(true)
-            .group(true)
-            .conceptId(21600932L);
-    SearchParameter icd10 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .standard(false)
-            .ancestorData(false)
-            .group(false)
-            .conceptId(9L);
-
     SearchGroupItem drugSGI =
         new SearchGroupItem()
             .type(DomainType.DRUG.toString())
-            .addSearchParametersItem(drug)
+            .addSearchParametersItem(drug().conceptId(21600932L))
             .temporalGroup(0);
     SearchGroupItem icd10SGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
-            .addSearchParametersItem(icd10)
+            .addSearchParametersItem(icd10())
             .temporalGroup(1)
-            .addModifiersItem(visitsModifier);
+            .addModifiersItem(visitModifier());
 
     // First Mention Of Drug 5 Days Before ICD10 w/modifiers
     SearchGroup temporalGroup =
@@ -564,39 +601,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .synonyms("+[CONDITION_rank1]");
     saveCriteriaWithPath(icd9Parent.getPath(), icd9Child);
 
-    Modifier visitsModifier =
-        new Modifier()
-            .name(ModifierType.ENCOUNTERS)
-            .operator(Operator.IN)
-            .operands(Arrays.asList("1"));
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.CPT4.toString())
-            .standard(false)
-            .ancestorData(false)
-            .group(true)
-            .value("001")
-            .conceptId(0L);
-    SearchParameter icd10 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD10CM.toString())
-            .standard(false)
-            .ancestorData(false)
-            .group(false)
-            .conceptId(9L);
-
     SearchGroupItem icd9SGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
-            .addSearchParametersItem(icd9)
+            .addSearchParametersItem(
+                icd9().type(CriteriaType.CPT4.toString()).group(true).conceptId(0L))
             .temporalGroup(0)
-            .addModifiersItem(visitsModifier);
+            .addModifiersItem(visitModifier());
     SearchGroupItem icd10SGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
-            .addSearchParametersItem(icd10)
+            .addSearchParametersItem(icd10())
             .temporalGroup(1);
 
     // Any Mention Of ICD9 5 Days After ICD10
@@ -617,32 +632,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void anyMentionOfCPTWithIn5DaysOfVisit() throws Exception {
-    SearchParameter cpt =
-        new SearchParameter()
-            .domain(DomainType.PROCEDURE.toString())
-            .type(CriteriaType.CPT4.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(false)
-            .conceptId(10L);
-    SearchParameter visit =
-        new SearchParameter()
-            .domain(DomainType.VISIT.toString())
-            .type(CriteriaType.VISIT.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(1L);
-
     SearchGroupItem cptSGI =
         new SearchGroupItem()
             .type(DomainType.PROCEDURE.toString())
-            .addSearchParametersItem(cpt)
+            .addSearchParametersItem(procedure())
             .temporalGroup(0);
     SearchGroupItem visitSGI =
         new SearchGroupItem()
             .type(DomainType.VISIT.toString())
-            .addSearchParametersItem(visit)
+            .addSearchParametersItem(visit())
             .temporalGroup(1);
 
     // Any Mention Of ICD10 Parent within 5 Days of visit
@@ -677,33 +675,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (11, 11)");
 
-    SearchParameter drug =
-        new SearchParameter()
-            .domain(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(false)
-            .ancestorData(true)
-            .standard(true)
-            .conceptId(11L);
-    SearchParameter measurement =
-        new SearchParameter()
-            .domain(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .subtype(CriteriaSubType.LAB.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(3L);
-
     SearchGroupItem drugSGI =
         new SearchGroupItem()
             .type(DomainType.DRUG.toString())
-            .addSearchParametersItem(drug)
+            .addSearchParametersItem(drug())
             .temporalGroup(0);
     SearchGroupItem measurementSGI =
         new SearchGroupItem()
             .type(DomainType.MEASUREMENT.toString())
-            .addSearchParametersItem(measurement)
+            .addSearchParametersItem(measurement())
             .temporalGroup(1);
 
     // First Mention Of Drug during same encounter as measurement
@@ -739,33 +719,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (11, 11)");
 
-    SearchParameter drug =
-        new SearchParameter()
-            .domain(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(false)
-            .ancestorData(true)
-            .standard(true)
-            .conceptId(11L);
-    SearchParameter measurement =
-        new SearchParameter()
-            .domain(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .subtype(CriteriaSubType.LAB.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(3L);
-
     SearchGroupItem drugSGI =
         new SearchGroupItem()
             .type(DomainType.DRUG.toString())
-            .addSearchParametersItem(drug)
+            .addSearchParametersItem(drug())
             .temporalGroup(0);
     SearchGroupItem measurementSGI =
         new SearchGroupItem()
             .type(DomainType.MEASUREMENT.toString())
-            .addSearchParametersItem(measurement)
+            .addSearchParametersItem(measurement())
             .temporalGroup(1);
 
     // Last Mention Of Drug during same encounter as measurement
@@ -801,46 +763,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (11, 11)");
 
-    SearchParameter drug =
-        new SearchParameter()
-            .domain(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(false)
-            .ancestorData(true)
-            .standard(true)
-            .conceptId(11L);
-    SearchParameter measurement =
-        new SearchParameter()
-            .domain(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .subtype(CriteriaSubType.LAB.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(3L);
-    SearchParameter visit =
-        new SearchParameter()
-            .domain(DomainType.VISIT.toString())
-            .type(CriteriaType.VISIT.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(1L);
-
     SearchGroupItem drugSGI =
         new SearchGroupItem()
             .type(DomainType.DRUG.toString())
-            .addSearchParametersItem(drug)
+            .addSearchParametersItem(drug())
             .temporalGroup(0);
     SearchGroupItem measurementSGI =
         new SearchGroupItem()
             .type(DomainType.MEASUREMENT.toString())
-            .addSearchParametersItem(measurement)
+            .addSearchParametersItem(measurement())
             .temporalGroup(1);
     SearchGroupItem visitSGI =
         new SearchGroupItem()
             .type(DomainType.VISIT.toString())
-            .addSearchParametersItem(visit)
+            .addSearchParametersItem(visit())
             .temporalGroup(1);
 
     // Last Mention Of Drug during same encounter as measurement
@@ -887,46 +823,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (1520218, 1520218)");
 
-    SearchParameter measurement =
-        new SearchParameter()
-            .domain(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .subtype(CriteriaSubType.LAB.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(3L);
-    SearchParameter visit =
-        new SearchParameter()
-            .domain(DomainType.VISIT.toString())
-            .type(CriteriaType.VISIT.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(1L);
-    SearchParameter drug =
-        new SearchParameter()
-            .domain(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(true)
-            .ancestorData(true)
-            .standard(true)
-            .conceptId(21600932L);
-
     SearchGroupItem measurementSGI =
         new SearchGroupItem()
             .type(DomainType.MEASUREMENT.toString())
-            .addSearchParametersItem(measurement)
+            .addSearchParametersItem(measurement())
             .temporalGroup(0);
     SearchGroupItem visitSGI =
         new SearchGroupItem()
             .type(DomainType.VISIT.toString())
-            .addSearchParametersItem(visit)
+            .addSearchParametersItem(visit())
             .temporalGroup(0);
     SearchGroupItem drugSGI =
         new SearchGroupItem()
             .type(DomainType.DRUG.toString())
-            .addSearchParametersItem(drug)
+            .addSearchParametersItem(drug().group(true).conceptId(21600932L))
             .temporalGroup(1);
 
     // Last Mention Of Measurement or Visit 5 days after Drug
@@ -948,76 +858,30 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ConditionChildAgeAtEvent() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .value("001.1")
-            .standard(false)
-            .ancestorData(false)
-            .conceptId(1L);
-
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-            .operands(Arrays.asList("25"));
-
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9), Arrays.asList(modifier));
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(ageModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionChildEncounter() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.name())
-            .group(false)
-            .value("001.1")
-            .standard(false)
-            .ancestorData(false)
-            .ancestorData(false)
-            .conceptId(1L);
-
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.ENCOUNTERS)
-            .operator(Operator.IN)
-            .operands(Arrays.asList("1"));
-
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9), Arrays.asList(modifier));
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(visitModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionChildAgeAtEventBetween() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .standard(false)
-            .value("001.1")
-            .ancestorData(false)
-            .conceptId(1L);
-
     Modifier modifier =
-        new Modifier()
-            .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.BETWEEN)
-            .operands(Arrays.asList("37", "39"));
+        ageModifier().operator(Operator.BETWEEN).operands(Arrays.asList("37", "39"));
 
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9), Arrays.asList(modifier));
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(modifier));
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1025,21 +889,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrences() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .standard(false)
-            .value("001.1")
-            .ancestorData(false)
-            .conceptId(1L);
-
-    Modifier modifier1 =
-        new Modifier()
-            .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-            .operands(Arrays.asList("25"));
     Modifier modifier2 =
         new Modifier()
             .name(ModifierType.NUM_OF_OCCURRENCES)
@@ -1049,8 +898,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
-            Arrays.asList(icd9),
-            Arrays.asList(modifier1, modifier2));
+            Arrays.asList(icd9()),
+            Arrays.asList(ageModifier(), modifier2));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1058,30 +907,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditioChildAgeAtEventAndOccurrencesAndEventDate()
       throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .standard(false)
-            .value("001.1")
-            .ancestorData(false)
-            .conceptId(1L);
-    SearchParameter icd92 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .standard(false)
-            .value("001.1")
-            .ancestorData(false)
-            .conceptId(2L);
-
-    Modifier modifier1 =
-        new Modifier()
-            .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-            .operands(Arrays.asList("25"));
     Modifier modifier2 =
         new Modifier()
             .name(ModifierType.NUM_OF_OCCURRENCES)
@@ -1096,24 +921,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
-            Arrays.asList(icd9, icd92),
-            Arrays.asList(modifier1, modifier2, modifier3));
+            Arrays.asList(icd9(), icd9().conceptId(2L)),
+            Arrays.asList(ageModifier(), modifier2, modifier3));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionChildEventDate() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .standard(false)
-            .value("001.1")
-            .ancestorData(false)
-            .conceptId(1L);
-
     Modifier modifier =
         new Modifier()
             .name(ModifierType.EVENT_DATE)
@@ -1122,23 +937,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9), Arrays.asList(modifier));
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(modifier));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionNumOfOccurrences() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .standard(false)
-            .value("001.1")
-            .ancestorData(false)
-            .conceptId(1L);
-
     Modifier modifier2 =
         new Modifier()
             .name(ModifierType.NUM_OF_OCCURRENCES)
@@ -1147,51 +952,22 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9), Arrays.asList(modifier2));
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(modifier2));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ParentAndChild() throws Exception {
-    SearchParameter icd9Child =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .standard(false)
-            .value("001.1")
-            .conceptId(1L)
-            .ancestorData(false);
-    SearchParameter icd9Parent =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(true)
-            .standard(false)
-            .value("001")
-            .conceptId(1L)
-            .ancestorData(false);
-
+  public void countSubjectsICD9Child() throws Exception {
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9Parent), new ArrayList<>());
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionParent() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(true)
-            .standard(false)
-            .value("001")
-            .ancestorData(false)
-            .conceptId(2L);
-
     CBCriteria criteriaParent =
         new CBCriteria()
             .parentId(99999)
@@ -1224,7 +1000,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9), new ArrayList<>());
+            DomainType.CONDITION.toString(),
+            Arrays.asList(icd9().group(true).conceptId(2L)),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     cbCriteriaDao.delete(criteriaParent.getId());
@@ -1233,68 +1011,36 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoGender() throws Exception {
-    SearchParameter demo =
-        new SearchParameter()
-            .domain(DomainType.PERSON.toString())
-            .type(CriteriaType.GENDER.toString())
-            .group(false)
-            .standard(true)
-            .ancestorData(false)
-            .conceptId(8507L);
-
     SearchRequest searchRequest =
-        createSearchRequests(DomainType.PERSON.toString(), Arrays.asList(demo), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PERSON.toString(), Arrays.asList(male()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsDemoRace() throws Exception {
-    SearchParameter demo =
-        new SearchParameter()
-            .domain(DomainType.PERSON.toString())
-            .type(CriteriaType.RACE.toString())
-            .group(false)
-            .standard(true)
-            .ancestorData(false)
-            .conceptId(1L);
-
     SearchRequest searchRequest =
-        createSearchRequests(DomainType.PERSON.toString(), Arrays.asList(demo), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PERSON.toString(), Arrays.asList(race()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsDemoEthnicity() throws Exception {
-    SearchParameter demo =
-        new SearchParameter()
-            .domain(DomainType.PERSON.toString())
-            .type(CriteriaType.ETHNICITY.toString())
-            .group(false)
-            .standard(true)
-            .ancestorData(false)
-            .conceptId(9898L);
-
     SearchRequest searchRequest =
-        createSearchRequests(DomainType.PERSON.toString(), Arrays.asList(demo), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PERSON.toString(), Arrays.asList(ethnicity()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsDemoDec() throws Exception {
-    SearchParameter demo =
-        new SearchParameter()
-            .domain(DomainType.PERSON.toString())
-            .type(CriteriaType.DECEASED.toString())
-            .group(false)
-            .standard(true)
-            .ancestorData(false)
-            .value("Deceased");
-
     SearchRequest searchRequest =
-        createSearchRequests(DomainType.PERSON.toString(), Arrays.asList(demo), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PERSON.toString(), Arrays.asList(deceased()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1306,13 +1052,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Period period = new Period(birthDate, now);
     Integer lo = period.getYears() - 1;
     Integer hi = period.getYears() + 1;
-    SearchParameter demo =
-        new SearchParameter()
-            .domain(DomainType.PERSON.toString())
-            .type(CriteriaType.AGE.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true);
+    SearchParameter demo = age();
     demo.attributes(
         Arrays.asList(
             new Attribute()
@@ -1327,32 +1067,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9AndDemo() throws Exception {
-    SearchParameter icd9 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(false)
-            .standard(false)
-            .ancestorData(false)
-            .conceptId(3L)
-            .value("003.1");
-
-    SearchParameter demoGenderSearchParam =
-        new SearchParameter()
-            .domain(DomainType.PERSON.toString())
-            .type(CriteriaType.GENDER.toString())
-            .group(false)
-            .standard(true)
-            .ancestorData(false)
-            .conceptId(8507L);
-
-    SearchParameter demoAgeSearchParam =
-        new SearchParameter()
-            .domain(DomainType.PERSON.toString())
-            .type(CriteriaType.AGE.toString())
-            .standard(true)
-            .ancestorData(false)
-            .group(false);
+    SearchParameter demoAgeSearchParam = age();
 
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
@@ -1368,12 +1083,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequests =
         createSearchRequests(
-            DomainType.PERSON.toString(), Arrays.asList(demoGenderSearchParam), new ArrayList<>());
+            DomainType.PERSON.toString(), Arrays.asList(male()), new ArrayList<>());
 
     SearchGroupItem anotherSearchGroupItem =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
-            .searchParameters(Arrays.asList(icd9))
+            .searchParameters(Arrays.asList(icd9().conceptId(3L)))
             .modifiers(new ArrayList<>());
 
     SearchGroupItem anotherNewSearchGroupItem =
@@ -1391,33 +1106,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoExcluded() throws Exception {
-    SearchParameter demoGenderSearchParam =
-        new SearchParameter()
-            .domain(DomainType.PERSON.toString())
-            .type(CriteriaType.GENDER.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(8507L);
-
-    SearchParameter demoGenderSearchParamExclude =
-        new SearchParameter()
-            .domain(DomainType.PERSON.toString())
-            .type(CriteriaType.GENDER.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(8507L);
-
     SearchGroupItem excludeSearchGroupItem =
         new SearchGroupItem()
             .type(DomainType.PERSON.toString())
-            .searchParameters(Arrays.asList(demoGenderSearchParamExclude));
+            .searchParameters(Arrays.asList(male()));
     SearchGroup excludeSearchGroup = new SearchGroup().addItemsItem(excludeSearchGroupItem);
 
     SearchRequest searchRequests =
         createSearchRequests(
-            DomainType.PERSON.toString(), Arrays.asList(demoGenderSearchParam), new ArrayList<>());
+            DomainType.PERSON.toString(), Arrays.asList(male()), new ArrayList<>());
     searchRequests.getExcludes().add(excludeSearchGroup);
 
     assertParticipants(
@@ -1426,16 +1123,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ParentAndICD10ChildCondition() throws Exception {
-    SearchParameter icd9Parent =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .group(true)
-            .standard(false)
-            .ancestorData(false)
-            .conceptId(2L)
-            .value("001");
-
     CBCriteria criteriaParent =
         new CBCriteria()
             .parentId(99999)
@@ -1466,17 +1153,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .conceptId("1");
     saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
 
-    SearchParameter icd10 =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD10CM.toString())
-            .group(false)
-            .standard(false)
-            .ancestorData(false)
-            .conceptId(6L);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9Parent, icd10), new ArrayList<>());
+            DomainType.CONDITION.toString(),
+            Arrays.asList(icd9().group(true).conceptId(2L), icd10().conceptId(6L)),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
     cbCriteriaDao.delete(criteriaParent.getId());
@@ -1485,48 +1166,29 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsCPTProcedure() throws Exception {
-    SearchParameter cpt =
-        new SearchParameter()
-            .domain(DomainType.PROCEDURE.toString())
-            .type(CriteriaType.CPT4.toString())
-            .group(false)
-            .standard(false)
-            .ancestorData(false)
-            .conceptId(4L);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PROCEDURE.toString(), Arrays.asList(cpt), new ArrayList<>());
+            DomainType.PROCEDURE.toString(),
+            Arrays.asList(procedure().conceptId(4L)),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsSnomedChildCondition() throws Exception {
-    SearchParameter snomed =
-        new SearchParameter()
-            .domain(DomainType.CONDITION.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .group(false)
-            .standard(true)
-            .ancestorData(false)
-            .conceptId(6L);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(snomed), new ArrayList<>());
+            DomainType.CONDITION.toString(),
+            Arrays.asList(snomed().standard(true).conceptId(6L)),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsSnomedParentProcedure() throws Exception {
-    SearchParameter snomed =
-        new SearchParameter()
-            .domain(DomainType.PROCEDURE.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .group(true)
-            .standard(true)
-            .ancestorData(false)
-            .conceptId(4302541L);
+    SearchParameter snomed = snomed().group(true).standard(true).conceptId(4302541L);
 
     CBCriteria criteriaParent =
         new CBCriteria()
@@ -1570,37 +1232,25 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsVisit() throws Exception {
-    SearchParameter visit =
-        new SearchParameter()
-            .domain(DomainType.VISIT.toString())
-            .type(CriteriaType.VISIT.toString())
-            .group(false)
-            .standard(true)
-            .ancestorData(false)
-            .conceptId(10L);
     SearchRequest searchRequest =
-        createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
+        createSearchRequests(
+            DomainType.VISIT.toString(), Arrays.asList(visit().conceptId(10L)), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
   public void countSubjectsVisitModifiers() throws Exception {
-    SearchParameter visit =
-        new SearchParameter()
-            .domain(DomainType.VISIT.toString())
-            .type(CriteriaType.VISIT.toString())
-            .group(false)
-            .standard(true)
-            .ancestorData(false)
-            .conceptId(10L);
     Modifier modifier =
         new Modifier()
             .name(ModifierType.NUM_OF_OCCURRENCES)
             .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
             .operands(Arrays.asList("1"));
     SearchRequest searchRequest =
-        createSearchRequests(visit.getType(), Arrays.asList(visit), Arrays.asList(modifier));
+        createSearchRequests(
+            DomainType.VISIT.toString(),
+            Arrays.asList(visit().conceptId(10L)),
+            Arrays.asList(modifier));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
@@ -1611,16 +1261,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (11, 11)");
-    SearchParameter drug =
-        new SearchParameter()
-            .domain(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(false)
-            .ancestorData(true)
-            .standard(true)
-            .conceptId(11L);
     SearchRequest searchRequest =
-        createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
+        createSearchRequests(DomainType.DRUG.toString(), Arrays.asList(drug()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -1655,16 +1297,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (1520218, 1520218)");
-    SearchParameter drug =
-        new SearchParameter()
-            .domain(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(true)
-            .conceptId(21600932L)
-            .ancestorData(true)
-            .standard(true);
     SearchRequest searchRequest =
-        createSearchRequests(drug.getDomain(), Arrays.asList(drug), new ArrayList<>());
+        createSearchRequests(
+            DomainType.DRUG.toString(),
+            Arrays.asList(drug().group(true).conceptId(21600932L)),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -1701,26 +1338,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (1520218, 1520218)");
-
-    SearchParameter drugChild =
-        new SearchParameter()
-            .domain(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(false)
-            .ancestorData(true)
-            .standard(true)
-            .conceptId(11L);
-    SearchParameter drugParent =
-        new SearchParameter()
-            .domain(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(true)
-            .conceptId(21600932L)
-            .ancestorData(true)
-            .standard(true);
     SearchRequest searchRequest =
         createSearchRequests(
-            drugParent.getType(), Arrays.asList(drugParent, drugChild), new ArrayList<>());
+            DomainType.DRUG.toString(),
+            Arrays.asList(drug().group(true).conceptId(21600932L), drug()),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -1734,21 +1356,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (11, 11)");
-    SearchParameter drug =
-        new SearchParameter()
-            .domain(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(false)
-            .ancestorData(true)
-            .standard(true)
-            .conceptId(11L);
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.ENCOUNTERS)
-            .operator(Operator.IN)
-            .operands(Arrays.asList("1"));
     SearchRequest searchRequest =
-        createSearchRequests(drug.getType(), Arrays.asList(drug), Arrays.asList(modifier));
+        createSearchRequests(
+            DomainType.DRUG.toString(), Arrays.asList(drug()), Arrays.asList(visitModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -1760,21 +1370,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (11, 11)");
-    SearchParameter drug =
-        new SearchParameter()
-            .domain(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(false)
-            .ancestorData(true)
-            .standard(true)
-            .conceptId(11L);
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-            .operands(Arrays.asList("25"));
     SearchRequest searchRequest =
-        createSearchRequests(drug.getType(), Arrays.asList(drug), Arrays.asList(modifier));
+        createSearchRequests(
+            DomainType.DRUG.toString(), Arrays.asList(drug()), Arrays.asList(ageModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -1782,37 +1380,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabEncounter() throws Exception {
-    SearchParameter lab =
-        new SearchParameter()
-            .domain(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .subtype(CriteriaSubType.LAB.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(3L);
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.ENCOUNTERS)
-            .operator(Operator.IN)
-            .operands(Arrays.asList("1"));
     SearchRequest searchRequest =
-        createSearchRequests(lab.getType(), Arrays.asList(lab), Arrays.asList(modifier));
+        createSearchRequests(
+            DomainType.MEASUREMENT.toString(),
+            Arrays.asList(measurement()),
+            Arrays.asList(visitModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsLabNumericalBetween() throws Exception {
-    SearchParameter lab =
-        new SearchParameter()
-            .domain(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .subtype(CriteriaSubType.LAB.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(3L);
+    SearchParameter lab = measurement();
     lab.attributes(
         Arrays.asList(
             new Attribute()
@@ -1820,22 +1399,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.BETWEEN)
                 .operands(Arrays.asList("0", "1"))));
     SearchRequest searchRequest =
-        createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
+        createSearchRequests(
+            DomainType.MEASUREMENT.toString(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsLabCategoricalIn() throws Exception {
-    SearchParameter lab =
-        new SearchParameter()
-            .domain(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .subtype(CriteriaSubType.LAB.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(3L);
+    SearchParameter lab = measurement();
     lab.attributes(
         Arrays.asList(
             new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("1"))));
@@ -1847,15 +1419,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabBothNumericalAndCategorical() throws Exception {
-    SearchParameter lab =
-        new SearchParameter()
-            .domain(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .subtype(CriteriaSubType.LAB.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(3L);
+    SearchParameter lab = measurement();
     Attribute numerical =
         new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
     Attribute categorical =
@@ -1869,55 +1433,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabCategoricalAgeAtEvent() throws Exception {
-    SearchParameter lab =
-        new SearchParameter()
-            .domain(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .subtype(CriteriaSubType.LAB.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(3L);
-    Modifier modifier =
-        new Modifier()
-            .name(ModifierType.AGE_AT_EVENT)
-            .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-            .operands(Arrays.asList("25"));
     SearchRequest searchRequest =
-        createSearchRequests(lab.getDomain(), Arrays.asList(lab), Arrays.asList(modifier));
+        createSearchRequests(
+            DomainType.MEASUREMENT.toString(),
+            Arrays.asList(measurement()),
+            Arrays.asList(ageModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsLabMoreThanOneSearchParameter() throws Exception {
-    SearchParameter lab1 =
-        new SearchParameter()
-            .domain(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .subtype(CriteriaSubType.LAB.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(3L);
-    SearchParameter lab2 =
-        new SearchParameter()
-            .domain(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .subtype(CriteriaSubType.LAB.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(9L);
-    SearchParameter lab3 =
-        new SearchParameter()
-            .domain(DomainType.MEASUREMENT.toString())
-            .type(CriteriaType.LOINC.toString())
-            .subtype(CriteriaSubType.LAB.toString())
-            .group(false)
-            .ancestorData(false)
-            .standard(true)
-            .conceptId(9L);
+    SearchParameter lab1 = measurement();
+    SearchParameter lab2 = measurement().conceptId(9L);
+    SearchParameter lab3 = measurement().conceptId(9L);
     Attribute labCategorical =
         new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("77"));
     lab3.attributes(Arrays.asList(labCategorical));
@@ -1941,15 +1470,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.BETWEEN)
                 .operands(Arrays.asList("60", "80"))
                 .conceptId(903115L));
-    SearchParameter pm =
-        new SearchParameter()
-            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BP.toString())
-            .ancestorData(false)
-            .standard(false)
-            .group(false)
-            .attributes(attributes);
+    SearchParameter pm = bloodPressure().attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(pm.getType(), Arrays.asList(pm), new ArrayList<>());
     assertParticipants(
@@ -1962,15 +1483,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         Arrays.asList(
             new Attribute().name(AttrName.ANY).operands(new ArrayList<>()).conceptId(903118L),
             new Attribute().name(AttrName.ANY).operands(new ArrayList<>()).conceptId(903115L));
-    SearchParameter pm =
-        new SearchParameter()
-            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BP.toString())
-            .ancestorData(false)
-            .standard(false)
-            .group(false)
-            .attributes(attributes);
+    SearchParameter pm = bloodPressure().attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
@@ -1992,15 +1505,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.BETWEEN)
                 .operands(Arrays.asList("60", "80"))
                 .conceptId(903115L));
-    SearchParameter bpPm =
-        new SearchParameter()
-            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BP.toString())
-            .ancestorData(false)
-            .standard(false)
-            .group(false)
-            .attributes(bpAttributes);
+    SearchParameter bpPm = bloodPressure().attributes(bpAttributes);
 
     List<Attribute> hrAttributes =
         Arrays.asList(
@@ -2008,16 +1513,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.NUM)
                 .operator(Operator.EQUAL)
                 .operands(Arrays.asList("71")));
-    SearchParameter hrPm =
-        new SearchParameter()
-            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.HR_DETAIL.toString())
-            .ancestorData(false)
-            .standard(false)
-            .group(false)
-            .conceptId(903126L)
-            .attributes(hrAttributes);
+    SearchParameter hrPm = hrDetail().attributes(hrAttributes);
 
     SearchRequest searchRequest =
         createSearchRequests(
@@ -2043,15 +1539,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.BETWEEN)
                 .operands(Arrays.asList("60", "80"))
                 .conceptId(903115L));
-    SearchParameter bpPm =
-        new SearchParameter()
-            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.BP.toString())
-            .ancestorData(false)
-            .standard(false)
-            .group(false)
-            .attributes(bpAttributes);
+    SearchParameter bpPm = bloodPressure().attributes(bpAttributes);
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(bpPm), new ArrayList<>());
@@ -2062,16 +1550,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.NUM)
                 .operator(Operator.EQUAL)
                 .operands(Arrays.asList("71")));
-    SearchParameter hrPm =
-        new SearchParameter()
-            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.HR_DETAIL.toString())
-            .ancestorData(false)
-            .standard(false)
-            .group(false)
-            .conceptId(903126L)
-            .attributes(hrAttributes);
+    SearchParameter hrPm = hrDetail().attributes(hrAttributes);
     SearchGroupItem anotherSearchGroupItem =
         new SearchGroupItem()
             .type(DomainType.PHYSICAL_MEASUREMENT.toString())
@@ -2110,18 +1589,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsHeartRateAny() throws Exception {
-    SearchParameter pm =
-        new SearchParameter()
-            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.HR_DETAIL.toString())
-            .group(false)
-            .conceptId(1586218L)
-            .ancestorData(false)
-            .standard(false);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
+            DomainType.PHYSICAL_MEASUREMENT.toString(),
+            Arrays.asList(hrDetail().conceptId(1586218L)),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
@@ -2134,19 +1606,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.NUM)
                 .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
                 .operands(Arrays.asList("45")));
-    SearchParameter pm =
-        new SearchParameter()
-            .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.HR_DETAIL.toString())
-            .group(false)
-            .conceptId(1586218L)
-            .ancestorData(false)
-            .standard(false)
-            .attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
+            DomainType.PHYSICAL_MEASUREMENT.toString(),
+            Arrays.asList(hrDetail().conceptId(1586218L).attributes(attributes)),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
