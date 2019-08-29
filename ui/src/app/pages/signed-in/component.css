@@ -8,16 +8,6 @@ body {
   min-height: calc(100vh - 4rem);
 }
 
-.btn.btn-primary.nav-link.active {
-  background-color: #4356a7;
-  color: #f1f2f2;
-  font-weight: bold;
-}
-
-.btn.btn-primary.nav-link:hover {
-  color: #f1f2f2;
-}
-
 .btn.btn-primary.nav-link:disabled {
   background-color: #262262;
   color: #aeb2b7;
@@ -177,5 +167,16 @@ a.btn.btn-primary.nav-link {
   margin-top: 6rem;
   margin-left: calc(50% - 3rem);
   margin-right: calc(50% - 3rem);
+}
+
+
+.btn.btn-primary.nav-link.active {
+  background-color: #4356a7;
+  color: #f1f2f2;
+  font-weight: bold;
+}
+
+.btn.btn-primary.nav-link:hover {
+  color: #f1f2f2;
 }
 

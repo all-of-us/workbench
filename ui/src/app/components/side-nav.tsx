@@ -42,6 +42,10 @@ const styles = reactStyles({
   sideNavItemHover: {
     backgroundColor: '#4356a7',
   },
+  sideNavItemDisabled: {
+    color: colors.disabled,
+    cursor: 'auto',
+  },
   sideNavItemContent: {
     display: 'flex',
     alignItems: 'center',
@@ -67,6 +71,7 @@ interface SideNavItemProps {
   href?: string,
   containsSubItems?: boolean,
   active: boolean;
+  disabled: boolean;
 }
 
 interface SideNavItemState {
@@ -82,14 +87,18 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
   }
 
   onClick() {
-    if (this.props.href) {
+    if (this.props.href && !this.props.disabled) {
       this.props.onToggleSideNav();
       navigate([this.props.href]);
     }
   }
 
-  getStyles(active, hovering) {
-    let sideNavItemStyles = {...styles.sideNavItem}
+  getStyles(active, hovering, disabled) {
+    let sideNavItemStyles = {...styles.sideNavItem};
+    if (disabled) {
+      // We want to short-circuit in this case.
+      return {...sideNavItemStyles, ...styles.sideNavItemDisabled}
+    }
     if (active) {
       sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemActive}
     }
@@ -104,7 +113,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
       // data-test-id is the text within the SideNavItem, with whitespace removed
       // and appended with '-menu-item'
       data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
-      style={this.getStyles(this.props.active, this.state.hovering)}
+      style={this.getStyles(this.props.active, this.state.hovering, this.props.disabled)}
       onClick={() => this.props.onClick ? this.props.onClick() : this.onClick()}
       onMouseEnter={() => this.setState({hovering: true})}
       onMouseLeave={() => this.setState({hovering: false})}
@@ -142,6 +151,7 @@ export interface SideNavProps {
   homeActive: boolean;
   workspacesActive: boolean;
   libraryActive: boolean;
+  hasDataAccess: boolean;
   givenName: string;
   familyName: string;
   onToggleSideNav: Function;
@@ -180,6 +190,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={this.props.onToggleSideNav}
         containsSubItems={true}
         active={false}
+        disabled={false}
       />
       {
         this.state.showUserOptions && <SideNavItem
@@ -187,6 +198,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           onToggleSideNav={this.props.onToggleSideNav}
           href="/profile"
           active={false}
+          disabled={false}
         />
       }
       {
@@ -194,6 +206,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           content={"Billing Dashboard"}
           onToggleSideNav={this.props.onToggleSideNav}
           active={false}
+          disabled={false}
         />
       }
       {
@@ -202,6 +215,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           // signOut()
           onToggleSideNav={this.props.onToggleSideNav}
           active={false}
+          disabled={false}
         />
       }
       <SideNavItem
@@ -210,6 +224,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={this.props.onToggleSideNav}
         href="/"
         active={this.props.homeActive}
+        disabled={false}
       />
       <SideNavItem
         icon="applications"
@@ -217,6 +232,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={this.props.onToggleSideNav}
         href={"/workspaces"}
         active={this.props.workspacesActive}
+        disabled={!this.props.hasDataAccess}
       />
       <SideNavItem
         icon="star"
@@ -224,6 +240,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={this.props.onToggleSideNav}
         href={"/library"}
         active={this.props.libraryActive}
+        disabled={false}
       />
       <SideNavItem
         icon="help"
@@ -232,12 +249,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={this.props.onToggleSideNav}
         containsSubItems={true}
         active={false}
+        disabled={false}
       />
       {
         this.state.showHelpOptions && <SideNavItem
           content={"How-to Guides"}
           onToggleSideNav={this.props.onToggleSideNav}
           active={false}
+          disabled={false}
         />
       }
       {
@@ -247,6 +266,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           // openHubForum()
           href={"https://aousupporthelp.zendesk.com/hc"}
           active={false}
+          disabled={false}
         />
       }
       {
@@ -255,6 +275,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           // openZendesk()
           onToggleSideNav={this.props.onToggleSideNav}
           active={false}
+          disabled={false}
         />
       }
     </div>

@@ -60,8 +60,6 @@ const styles = reactStyles({
 
 export interface Props {
   hasDataAccess: boolean;
-  hasReviewResearchPurpose: boolean;
-  hasAccessModuleAdmin: boolean;
   headerImg: string;
   displayTag: string;
   shouldShowDisplayTag: boolean;
@@ -185,6 +183,7 @@ export const SignedInNavBar = withUserProfile()(
             homeActive={this.props.homeActive}
             workspacesActive={this.props.workspacesActive}
             libraryActive={this.props.libraryActive}
+            hasDataAccess={this.props.hasDataAccess}
             givenName={this.props.givenName}
             familyName={this.props.familyName}
             // Passing the function itself deliberately, we want to be able to
@@ -203,8 +202,6 @@ export const SignedInNavBar = withUserProfile()(
 })
 export class SignedInNavBarComponent extends ReactWrapperBase {
   @Input('hasDataAccess') hasDataAccess: Props['hasDataAccess'];
-  @Input('hasReviewResearchPurpose') hasReviewResearchPurpose: Props['hasReviewResearchPurpose'];
-  @Input('hasAccessModuleAdmin') hasAccessModuleAdmin: Props['hasAccessModuleAdmin'];
   @Input('headerImg') headerImg: Props['headerImg'];
   @Input('displayTag') displayTag: Props['displayTag'];
   @Input('shouldShowDisplayTag') shouldShowDisplayTag: Props['shouldShowDisplayTag'];
@@ -222,8 +219,6 @@ export class SignedInNavBarComponent extends ReactWrapperBase {
   constructor() {
     super(SignedInNavBar, [
       'hasDataAccess',
-      'hasReviewResearchPurpose',
-      'hasAccessModuleAdmin',
       'headerImg',
       'displayTag',
       'shouldShowDisplayTag',
