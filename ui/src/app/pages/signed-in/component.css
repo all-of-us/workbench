@@ -2,48 +2,6 @@ body {
   background-color: #f1f2f2;
 }
 
-.header-image {
-  height: 57px;
-  width: 155px;
-  margin-left: 1rem;
-}
-
-.header-image:hover {
-  cursor: pointer;
-}
-
-.header-image:focus {
-  outline: none;
-}
-
-.display-tag {
-  margin-left: 1rem;
-  height: 12px;
-  width: 126px;
-  border-radius: 2px;
-  background-color: #262262;
-  color: #FFFFFF;
-  font-family: Montserrat;
-  font-size: 8px;
-  line-height:12px;
-  text-align: center;
-}
-
-.header-container {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
-
-.sidenav-toggle {
-  transform: rotate(0deg);
-  display: inline-block;
-  margin-left: 1rem;
-  transition: transform 0.5s;
-}
-.sidenav-toggle.rotate {
-  transform: rotate(90deg);
-}
 .sidenav-toggle:hover {
   cursor: pointer;
 }

@@ -31,6 +31,14 @@ const styles = reactStyles({
     marginLeft: '1rem',
     transition: 'transform 0.5s',
   },
+  sidenavIcon: {
+    width: '1.5rem',
+    height: '1.5rem',
+    fill: colors.accent,
+  },
+  sidenavIconHovering: {
+    cursor: 'pointer',
+  },
   headerImage: {
     height: '57px',
     width: '155px',
@@ -73,6 +81,7 @@ export interface State {
   subscriptions: Array<Subscription>;
   sideNavVisible: boolean;
   barsTransform: string;
+  hovering: boolean;
 }
 
 const barsTransformNotRotated = 'rotate(0deg)';
@@ -93,7 +102,8 @@ export const SignedInNavBar = withUserProfile()(
         profileLoadingSub: null,
         subscriptions: [],
         sideNavVisible: false,
-        barsTransform: barsTransformNotRotated
+        barsTransform: barsTransformNotRotated,
+        hovering: false,
       };
     }
 
@@ -142,11 +152,11 @@ export const SignedInNavBar = withUserProfile()(
           <ClrIcon
             shape='bars'
             onClick={() => this.onToggleSideNav()}
-            style={{
-              width: '1.5rem',
-              height: '1.5rem',
-              fill: colors.accent
-            }}
+            onMouseEnter={() => this.setState({hovering: true})}
+            onMouseLeave={() => this.setState({hovering: false})}
+            style={this.state.hovering
+              ? {...styles.sidenavIcon, ...styles.sidenavIconHovering}
+              : {...styles.sidenavIcon}}
           >
           </ClrIcon>
         </div>

@@ -52,46 +52,6 @@ const styles = reactStyles({
   }
 });
 
-interface SideNavSubItemProps {
-  key: string,
-  text: string,
-}
-
-class SideNavSubItem extends React.Component<SideNavSubItemProps> {
-  constructor(props) {
-    super(props)
-  }
-
-  render() {
-    return <Clickable
-      // data-test-id is the text within the SideNavItem, with whitespace removed
-      // and appended with '-menu-item'
-      data-test-id={this.props.text.toString().replace(/\s/g, '') + '-menu-sub-item'}
-      style={styles.sideNavItem}
-    >
-      {this.props.text}
-    </Clickable>
-  }
-}
-
-interface SideNavSubItemContainerProps {
-  subItems: Array<any>
-}
-
-class SideNavSubItemContainer extends React.Component<SideNavSubItemContainerProps> {
-  constructor(props) {
-    super(props)
-  }
-
-  render() {
-    return <div>
-      {this.props.subItems.map(subItem => (
-        <SideNavSubItem {...subItem} />
-      ))}
-    </div>
-  }
-}
-
 interface SideNavItemProps {
   icon?: string,
   content: string,

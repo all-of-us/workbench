@@ -72,15 +72,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild('sidenav') sidenav: ElementRef;
 
-  // @HostListener('document:click', ['$event'])
-  // onClickOutsideSideNav(event: MouseEvent) {
-  //   const inSidenav = this.sidenav.nativeElement.contains(event.target);
-  //   const inSidenavToggle = this.sidenavToggleElement.nativeElement.contains(event.target);
-  //   if (this.sidenavToggle && !(inSidenav || inSidenavToggle)) {
-  //     this.sidenavToggle = false;
-  //   }
-  // }
-
   constructor(
     /* Ours */
     public errorHandlingService: ErrorHandlingService,
