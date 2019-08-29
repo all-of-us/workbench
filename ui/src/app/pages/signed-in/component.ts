@@ -228,9 +228,4 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     openZendeskWidget(this.givenName, this.familyName, this.aouAccountEmailAddress,
       this.contactEmailAddress);
   }
-
-  openHubForum(): void {
-    window.open(environment.zendeskHelpCenterUrl, '_blank');
-  }
-
 }
