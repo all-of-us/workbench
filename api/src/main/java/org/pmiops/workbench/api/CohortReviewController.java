@@ -31,7 +31,6 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -115,12 +114,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private static final Function<
           ParticipantCohortStatus, org.pmiops.workbench.model.ParticipantCohortStatus>
       TO_CLIENT_PARTICIPANT =
-          new Function<
-              ParticipantCohortStatus, org.pmiops.workbench.model.ParticipantCohortStatus>() {
-            @Override
-            public org.pmiops.workbench.model.ParticipantCohortStatus apply(
-                ParticipantCohortStatus participant) {
-              return new org.pmiops.workbench.model.ParticipantCohortStatus()
+          participant ->
+              new org.pmiops.workbench.model.ParticipantCohortStatus()
                   .participantId(participant.getParticipantKey().getParticipantId())
                   .status(participant.getStatusEnum())
                   .birthDate(participant.getBirthDate().toString())
@@ -131,8 +126,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                   .raceConceptId(participant.getRaceConceptId())
                   .race(participant.getRace())
                   .deceased(participant.getDeceased());
-            }
-          };
 
   /**
    * Converter function from backend representation (used with Hibernate) to client representation
@@ -141,11 +134,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private static final BiFunction<
           CohortReview, PageRequest, org.pmiops.workbench.model.CohortReview>
       TO_CLIENT_COHORTREVIEW_WITH_PAGING =
-          new BiFunction<CohortReview, PageRequest, org.pmiops.workbench.model.CohortReview>() {
-            @Override
-            public org.pmiops.workbench.model.CohortReview apply(
-                CohortReview cohortReview, PageRequest pageRequest) {
-              return new org.pmiops.workbench.model.CohortReview()
+          (cohortReview, pageRequest) ->
+              new org.pmiops.workbench.model.CohortReview()
                   .cohortReviewId(cohortReview.getCohortReviewId())
                   .cohortId(cohortReview.getCohortId())
                   .cdrVersionId(cohortReview.getCdrVersionId())
@@ -161,8 +151,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                   .pageSize(pageRequest.getPageSize())
                   .sortOrder(pageRequest.getSortOrder().toString())
                   .sortColumn(pageRequest.getSortColumn());
-            }
-          };
 
   /**
    * Converter function from backend representation (used with Hibernate) to client representation
@@ -170,10 +158,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    */
   private static final Function<CohortReview, org.pmiops.workbench.model.CohortReview>
       TO_CLIENT_COHORTREVIEW =
-          new Function<CohortReview, org.pmiops.workbench.model.CohortReview>() {
-            @Override
-            public org.pmiops.workbench.model.CohortReview apply(CohortReview cohortReview) {
-              return new org.pmiops.workbench.model.CohortReview()
+          cohortReview ->
+              new org.pmiops.workbench.model.CohortReview()
                   .cohortReviewId(cohortReview.getCohortReviewId())
                   .etag(Etags.fromVersion(cohortReview.getVersion()))
                   .cohortId(cohortReview.getCohortId())
@@ -187,19 +173,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                   .reviewedCount(cohortReview.getReviewedCount())
                   .reviewStatus(cohortReview.getReviewStatusEnum())
                   .reviewSize(cohortReview.getReviewSize());
-            }
-          };
 
   private static final Function<
           ParticipantCohortAnnotation, org.pmiops.workbench.db.model.ParticipantCohortAnnotation>
       FROM_CLIENT_PARTICIPANT_COHORT_ANNOTATION =
-          new Function<
-              ParticipantCohortAnnotation,
-              org.pmiops.workbench.db.model.ParticipantCohortAnnotation>() {
-            @Override
-            public org.pmiops.workbench.db.model.ParticipantCohortAnnotation apply(
-                ParticipantCohortAnnotation participantCohortAnnotation) {
-              return new org.pmiops.workbench.db.model.ParticipantCohortAnnotation()
+          participantCohortAnnotation ->
+              new org.pmiops.workbench.db.model.ParticipantCohortAnnotation()
                   .annotationId(participantCohortAnnotation.getAnnotationId())
                   .cohortAnnotationDefinitionId(
                       participantCohortAnnotation.getCohortAnnotationDefinitionId())
@@ -210,39 +189,30 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                   .annotationValueDateString(participantCohortAnnotation.getAnnotationValueDate())
                   .annotationValueBoolean(participantCohortAnnotation.getAnnotationValueBoolean())
                   .annotationValueInteger(participantCohortAnnotation.getAnnotationValueInteger());
-            }
-          };
 
   private static final Function<
           org.pmiops.workbench.db.model.ParticipantCohortAnnotation, ParticipantCohortAnnotation>
       TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION =
-          new Function<
-              org.pmiops.workbench.db.model.ParticipantCohortAnnotation,
-              ParticipantCohortAnnotation>() {
-            @Override
-            public ParticipantCohortAnnotation apply(
-                org.pmiops.workbench.db.model.ParticipantCohortAnnotation
-                    participantCohortAnnotation) {
-              String date =
-                  participantCohortAnnotation.getAnnotationValueDate() == null
-                      ? null
-                      : participantCohortAnnotation.getAnnotationValueDate().toString();
-              String enumValue =
-                  participantCohortAnnotation.getCohortAnnotationEnumValue() == null
-                      ? null
-                      : participantCohortAnnotation.getCohortAnnotationEnumValue().getName();
-              return new ParticipantCohortAnnotation()
-                  .annotationId(participantCohortAnnotation.getAnnotationId())
-                  .cohortAnnotationDefinitionId(
-                      participantCohortAnnotation.getCohortAnnotationDefinitionId())
-                  .cohortReviewId(participantCohortAnnotation.getCohortReviewId())
-                  .participantId(participantCohortAnnotation.getParticipantId())
-                  .annotationValueString(participantCohortAnnotation.getAnnotationValueString())
-                  .annotationValueEnum(enumValue)
-                  .annotationValueDate(date)
-                  .annotationValueBoolean(participantCohortAnnotation.getAnnotationValueBoolean())
-                  .annotationValueInteger(participantCohortAnnotation.getAnnotationValueInteger());
-            }
+          participantCohortAnnotation -> {
+            String date =
+                participantCohortAnnotation.getAnnotationValueDate() == null
+                    ? null
+                    : participantCohortAnnotation.getAnnotationValueDate().toString();
+            String enumValue =
+                participantCohortAnnotation.getCohortAnnotationEnumValue() == null
+                    ? null
+                    : participantCohortAnnotation.getCohortAnnotationEnumValue().getName();
+            return new ParticipantCohortAnnotation()
+                .annotationId(participantCohortAnnotation.getAnnotationId())
+                .cohortAnnotationDefinitionId(
+                    participantCohortAnnotation.getCohortAnnotationDefinitionId())
+                .cohortReviewId(participantCohortAnnotation.getCohortReviewId())
+                .participantId(participantCohortAnnotation.getParticipantId())
+                .annotationValueString(participantCohortAnnotation.getAnnotationValueString())
+                .annotationValueEnum(enumValue)
+                .annotationValueDate(date)
+                .annotationValueBoolean(participantCohortAnnotation.getAnnotationValueBoolean())
+                .annotationValueInteger(participantCohortAnnotation.getAnnotationValueInteger());
           };
 
   @Autowired
@@ -254,8 +224,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
       UserRecentResourceService userRecentResourceService,
       Provider<User> userProvider,
-      Clock clock,
-      Provider<WorkbenchConfig> configProvider) {
+      Clock clock) {
     this.cohortReviewService = cohortReviewService;
     this.bigQueryService = bigQueryService;
     this.cohortQueryBuilder = cohortQueryBuilder;
