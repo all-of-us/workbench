@@ -145,6 +145,7 @@
     "lolex": "^3.0.0",
     "protractor": "~5.4.1",
     "react-test-renderer": "^16.6.3",
+    "set-value": "^2.0.1",
     "ts-node": "~3.0.4",
     "tslint": "^5.9.1",
     "tslint-eslint-rules": "^5.4.0",
