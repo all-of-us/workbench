@@ -6,6 +6,7 @@ import {ClrIcon} from "./icons";
 import {navigate} from "app/utils/navigation";
 import {SignInService} from "app/services/sign-in.service"
 import {environment} from "../../environments/environment";
+import {Ref} from "react";
 
 const styles = reactStyles({
   sideNav: {
@@ -101,6 +102,12 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
     }
   }
 
+  closeSubItems() {
+    if(this.props.containsSubItems) {
+      this.setState({subItemsOpen: false});
+    }
+  }
+
   getStyles(active, hovering, disabled) {
     let sideNavItemStyles = {...styles.sideNavItem};
     if (disabled) {
@@ -171,6 +178,9 @@ export interface SideNavProps {
 export interface SideNavState {
   showUserOptions: boolean;
   showHelpOptions: boolean;
+  userRef: Ref<SideNavItem>;
+  helpRef: Ref<SideNavItem>;
+
 }
 
 export class SideNav extends React.Component<SideNavProps, SideNavState> {
@@ -179,16 +189,20 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
     this.state = {
       showUserOptions: false,
       showHelpOptions: false,
+      userRef: React.createRef(),
+      helpRef: React.createRef(),
     };
   }
 
   onToggleUser() {
     this.setState({showHelpOptions: false});
+    this.state.helpRef.current.closeSubItems();
     this.setState(previousState => ({showUserOptions: !previousState.showUserOptions}));
   }
 
   onToggleHelp() {
     this.setState({showUserOptions: false});
+    this.state.userRef.current.closeSubItems();
     this.setState(previousState => ({showHelpOptions: !previousState.showHelpOptions}));
   }
 
@@ -206,6 +220,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         containsSubItems={true}
         active={false}
         disabled={false}
+        ref={this.state.userRef}
       />
       {
         this.state.showUserOptions && <SideNavItem
@@ -221,7 +236,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           content={"Billing Dashboard"}
           onToggleSideNav={this.props.onToggleSideNav}
           active={false}
-          disabled={false}
+          disabled={true}
         />
       }
       {
@@ -265,13 +280,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         containsSubItems={true}
         active={false}
         disabled={false}
+        ref={this.state.helpRef}
       />
       {
         this.state.showHelpOptions && <SideNavItem
           content={"How-to Guides"}
           onToggleSideNav={this.props.onToggleSideNav}
           active={false}
-          disabled={false}
+          disabled={true}
         />
       }
       {
