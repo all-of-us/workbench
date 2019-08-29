@@ -399,16 +399,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public WorkspaceAccessLevel getWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId) {
-    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceAccessLevel> object;
-    Object obj = fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId).getAcl();
-    if (obj instanceof Map) {
-      object = (Map) obj;
-    }
-    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceAccessLevel> myMap =
-        (Map<String, org.pmiops.workbench.firecloud.model.WorkspaceAccessLevel>)
-            fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId).getAcl();
     String userAccess =
-        ((Map<String, String>) myMap.get(userProvider.get().getEmail())).get("accessLevel");
+        fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId).getAcl().get(userProvider.get().getEmail()).getAccessLevel();
+
     if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
       return WorkspaceAccessLevel.OWNER;
     }
