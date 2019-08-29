@@ -12,4 +12,5 @@ export const testEnvironmentBase = {
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   shouldShowDisplayTag: true,
+  inactivityTimeoutInSeconds: 99999999999999,
 };

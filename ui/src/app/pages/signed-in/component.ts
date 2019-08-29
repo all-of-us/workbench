@@ -113,10 +113,9 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     window.addEventListener('scroll', () => signalUserActivity(), false);
     window.addEventListener('click', () => signalUserActivity(), false);
 
-    const timeoutInSeconds = 5;
     const resetLogoutTimeout = this.resettableTimeout(() => {
       console.log("logging out the user!")
-    }, timeoutInSeconds * 1000);
+    }, environment.inactivityTimeoutInSeconds * 1000);
 
     window.addEventListener('message', (e) => {
       console.log("Storing last active time " + Date.now().toString());
