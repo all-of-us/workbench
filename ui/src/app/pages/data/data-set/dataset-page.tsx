@@ -344,7 +344,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
 
     getDomainsFromConceptIds(selectedConceptSetIds: number[]): Domain[] {
       const {conceptSetList} = this.state;
-      let domains = fp.uniq(conceptSetList.filter((conceptSet: ConceptSet) =>
+      const domains = fp.uniq(conceptSetList.filter((conceptSet: ConceptSet) =>
         selectedConceptSetIds.includes(conceptSet.id))
         .map((conceptSet: ConceptSet) => conceptSet.domain));
       if (this.state.prePackagedSurvey) {
@@ -690,8 +690,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                            this.setState({
                                              prePackagedDemographics: !prePackagedDemographics,
                                              dataSetTouched: true
-                                           }, () => this.handlePrePackagedConceptSets(
-                                               Domain.PERSON, !prePackagedDemographics))}}/>
+                                           }, () => {this.handlePrePackagedConceptSets(
+                                             Domain.PERSON, !prePackagedDemographics);})}}/>
                     <ImmutableListItem name='All Surveys' checked={prePackagedSurvey}
                                        onChange={
                                          () => {
@@ -699,7 +699,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                              prePackagedSurvey: !prePackagedSurvey,
                                              dataSetTouched: true
                                            }, () => {this.handlePrePackagedConceptSets(
-                                               Domain.SURVEY, !prePackagedSurvey)});
+                                             Domain.SURVEY, !prePackagedSurvey);});
 
                                          }}/>
                     <Subheader>Workspace Concept Set</Subheader>
