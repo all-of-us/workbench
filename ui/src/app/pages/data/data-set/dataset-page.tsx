@@ -691,7 +691,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                              prePackagedDemographics: !prePackagedDemographics,
                                              dataSetTouched: true
                                            }, () => {this.handlePrePackagedConceptSets(
-                                             Domain.PERSON, !prePackagedDemographics);})}}/>
+                                             Domain.PERSON, !prePackagedDemographics); }); }}/>
                     <ImmutableListItem name='All Surveys' checked={prePackagedSurvey}
                                        onChange={
                                          () => {
@@ -699,7 +699,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                              prePackagedSurvey: !prePackagedSurvey,
                                              dataSetTouched: true
                                            }, () => {this.handlePrePackagedConceptSets(
-                                             Domain.SURVEY, !prePackagedSurvey);});
+                                             Domain.SURVEY, !prePackagedSurvey); });
 
                                          }}/>
                     <Subheader>Workspace Concept Set</Subheader>
