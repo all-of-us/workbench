@@ -344,9 +344,16 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
 
     getDomainsFromConceptIds(selectedConceptSetIds: number[]): Domain[] {
       const {conceptSetList} = this.state;
-      return fp.uniq(conceptSetList.filter((conceptSet: ConceptSet) =>
+      let domains = fp.uniq(conceptSetList.filter((conceptSet: ConceptSet) =>
         selectedConceptSetIds.includes(conceptSet.id))
         .map((conceptSet: ConceptSet) => conceptSet.domain));
+      if (this.state.prePackagedSurvey) {
+        domains.push(Domain.SURVEY);
+      }
+      if (this.state.prePackagedDemographics) {
+        domains.push(Domain.PERSON);
+      }
+      return domains;
     }
 
     async getValuesList(domains: Domain[], survey?: Surveys): Promise<ValueSet[]> {
@@ -370,8 +377,16 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         this.setState({valueSets: updatedValueSets, selectedValues: updatedSelectedValues});
         return;
       }
-      const newDomains = [];
-      newDomains.push(domain);
+      const currentDomains = [];
+      if (this.state.prePackagedDemographics) {
+        currentDomains.push(Domain.PERSON);
+      }
+      if (this.state.prePackagedSurvey) {
+        currentDomains.push(Domain.SURVEY);
+      }
+      const origDomains = valueSets.map(valueSet => valueSet.domain);
+      const newDomains = fp.without(origDomains, currentDomains) as unknown as Domain[];
+
       this.setState({valuesLoading: true});
       this.getValuesList(newDomains)
         .then(newValueSets => this.setState({
@@ -672,21 +687,21 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                     <ImmutableListItem name='Demographics' checked={prePackagedDemographics}
                                        onChange={
                                          () => {
-                                           this.handlePrePackagedConceptSets(
-                                             Domain.PERSON, !prePackagedDemographics);
                                            this.setState({
                                              prePackagedDemographics: !prePackagedDemographics,
                                              dataSetTouched: true
-                                           }); }}/>
+                                           }, () => this.handlePrePackagedConceptSets(
+                                               Domain.PERSON, !prePackagedDemographics))}}/>
                     <ImmutableListItem name='All Surveys' checked={prePackagedSurvey}
                                        onChange={
                                          () => {
-                                           this.handlePrePackagedConceptSets(
-                                             Domain.SURVEY, !prePackagedSurvey);
                                            this.setState({
                                              prePackagedSurvey: !prePackagedSurvey,
                                              dataSetTouched: true
-                                           }); }}/>
+                                           }, () => {this.handlePrePackagedConceptSets(
+                                               Domain.SURVEY, !prePackagedSurvey)});
+
+                                         }}/>
                     <Subheader>Workspace Concept Set</Subheader>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
                         <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
