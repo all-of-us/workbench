@@ -113,7 +113,24 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     window.addEventListener('scroll', () => signalUserActivity(), false);
     window.addEventListener('click', () => signalUserActivity(), false);
 
-    window.addEventListener('message', (e) => console.log(e), false);
+    const timeoutInSeconds = 5;
+    const resetLogoutTimeout = this.resettableTimeout(() => {
+      console.log("logging out the user!")
+    }, timeoutInSeconds * 1000);
+
+    window.addEventListener('message', (e) => {
+      console.log("Storing last active time " + Date.now().toString());
+      window.localStorage.setItem('lastActiveTimestampEpochMs', Date.now().toString());
+      resetLogoutTimeout();
+    }, false);
+  }
+
+  resettableTimeout(f, timeoutInSeconds) {
+    let timeout;
+    return () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(f, timeoutInSeconds);
+    };
   }
 
   ngAfterViewInit() {

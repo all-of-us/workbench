@@ -4,14 +4,14 @@ define([
     'base/js/namespace'
 ], (Jupyter) => {
 
-  function activityReporter(report) {
+  function debouncer(action, sensitivityMs) {
     var t = Date.now();
 
     setInterval(() => {
-      if (Date.now() - t < 1000) {
-      report();
-    }
-  }, 1000);
+      if (Date.now() - t < sensitivityMs) {
+        action();
+      }
+    }, sensitivityMs);
 
     return () => {
       t = Date.now();
@@ -19,9 +19,9 @@ define([
   }
 
   const load = () => {
-    const signalUserActivity = activityReporter(() => {
+    const signalUserActivity = debouncer(() => {
       window.parent.postMessage("Frame is active", '*');
-    });
+    }, 1000);
 
     window.addEventListener('mousemove', () => signalUserActivity(), false);
     window.addEventListener('mousedown', () => signalUserActivity(), false);
