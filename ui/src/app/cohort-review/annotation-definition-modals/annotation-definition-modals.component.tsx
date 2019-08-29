@@ -24,6 +24,10 @@ const styles = reactStyles({
   error: {
     color: colors.warning,
     marginTop: '-3px',
+  },
+  button: {
+    flex: 'none',
+    margin: '0 0.5rem'
   }
 });
 
@@ -253,14 +257,14 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
                 <Button
                   type='link'
                   disabled={busy}
-                  style={{flex: 'none', margin: '0 0.5rem'}}
+                  style={styles.button}
                   onClick={() => this.setState({editId: id, editValue: columnName})}
                 >Rename</Button>
                 <div>|</div>
                 <Button
                   type='link'
                   disabled={busy}
-                  style={{flex: 'none', marginLeft: '0.5rem'}}
+                  style={styles.button}
                   onClick={() => this.setState({deleteId: id})}
                 >Delete</Button>
               </div>;

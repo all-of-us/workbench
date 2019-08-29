@@ -37,6 +37,9 @@ const styles = {
   button: {
     marginLeft: '1rem',
     height: 'auto'
+  },
+  inlineBlock: {
+    display: 'inline-block'
   }
 };
 
@@ -225,13 +228,13 @@ const AnnotationItem = fp.flow(
     const {error, saving, success} = this.state;
     return <React.Fragment>
       <div style={{alignItems: 'center', ...headerStyles.formLabel}}>
-        <div style={{display: 'inline-block'}}>{columnName}</div>
-        {error && <div style={{display: 'inline-block'}}>
+        <div style={styles.inlineBlock}>{columnName}</div>
+        {error && <div style={styles.inlineBlock}>
           <ClrIcon style={styles.error} shape='exclamation-triangle'
             size='20' className='is-solid' />
           <span style={styles.message}> Save Failed</span>
         </div>}
-        {success && <div style={{display: 'inline-block'}}>
+        {success && <div style={styles.inlineBlock}>
           <ClrIcon style={styles.success} shape='check-circle' size='20' className='is-solid' />
           <span style={styles.message}> Annotation Saved</span>
         </div>}
