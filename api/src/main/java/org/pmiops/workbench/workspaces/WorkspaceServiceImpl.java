@@ -400,10 +400,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public WorkspaceAccessLevel getWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId) {
     WorkspaceACL workspaceACL = fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId);
-    Map<String, WorkspaceAccessEntry> workspaceAccessEntryMap = workspaceACL.getAcl();
     WorkspaceAccessEntry workspaceAccessEntry =
-        Optional.of(workspaceAccessEntryMap.get(userProvider.get().getEmail()))
-            .orElseThrow(() -> new NotFoundException(String.format("Workspace %s/%s not found", workspaceNamespace, workspaceId)));
+        Optional.of(workspaceACL.getAcl().get(userProvider.get().getEmail()))
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Workspace %s/%s not found", workspaceNamespace, workspaceId)));
     String userAccess = workspaceAccessEntry.getAccessLevel();
 
     if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
