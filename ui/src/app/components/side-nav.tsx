@@ -5,6 +5,7 @@ import {Clickable} from "app/components/buttons";
 import {ClrIcon} from "./icons";
 import {navigate} from "app/utils/navigation";
 import {SignInService} from "app/services/sign-in.service"
+import {environment} from "../../environments/environment";
 
 const styles = reactStyles({
   sideNav: {
@@ -50,23 +51,25 @@ const styles = reactStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
+    flex: '1 0 auto',
   },
   navIcon: {
     marginRight: '8px'
   },
-  spacer: {
-    marginRight: '8px',
-    width: '21px'
-  },
   dropdownIcon: {
+    marginRight: '8px',
     transform: 'rotate(180deg)',
+    transition: 'transform 0.5s',
+  },
+  dropdownIconOpen: {
+    transform: 'rotate(0deg)',
   }
 });
 
 interface SideNavItemProps {
   icon?: string,
   content: string,
-  onClick?: Function,
+  parentOnClick?: Function,
   onToggleSideNav: Function,
   href?: string,
   containsSubItems?: boolean,
@@ -76,13 +79,15 @@ interface SideNavItemProps {
 
 interface SideNavItemState {
   hovering: boolean;
+  subItemsOpen: boolean;
 }
 
 class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
   constructor(props) {
     super(props);
     this.state = {
-      hovering: false
+      hovering: false,
+      subItemsOpen: false,
     }
   }
 
@@ -90,6 +95,9 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
     if (this.props.href && !this.props.disabled) {
       this.props.onToggleSideNav();
       navigate([this.props.href]);
+    }
+    if (this.props.containsSubItems) {
+      this.setState((previousState) => ({subItemsOpen: !previousState.subItemsOpen}));
     }
   }
 
@@ -114,7 +122,10 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
       // and appended with '-menu-item'
       data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
       style={this.getStyles(this.props.active, this.state.hovering, this.props.disabled)}
-      onClick={() => this.props.onClick ? this.props.onClick() : this.onClick()}
+      onClick={() => {
+        this.props.parentOnClick();
+        this.onClick();
+      }}
       onMouseEnter={() => this.setState({hovering: true})}
       onMouseLeave={() => this.setState({hovering: false})}
     >
@@ -138,7 +149,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
           this.props.containsSubItems
           && <ClrIcon
             shape="angle"
-            style={styles.dropdownIcon}
+            style={this.state.subItemsOpen ? {...styles.dropdownIcon, ...styles.dropdownIconOpen} : styles.dropdownIcon}
             size={21}
           />
         }
@@ -181,12 +192,16 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
     this.setState(previousState => ({showHelpOptions: !previousState.showHelpOptions}));
   }
 
+  redirectToZendesk() {
+    window.open(environment.zendeskHelpCenterUrl, '_blank');
+  }
+
   render() {
     return <div style={styles.sideNav}>
       <SideNavItem
         icon="user"
         content={`${this.props.givenName} ${this.props.familyName}`}
-        onClick={() => this.onToggleUser()}
+        parentOnClick={() => this.onToggleUser()}
         onToggleSideNav={this.props.onToggleSideNav}
         containsSubItems={true}
         active={false}
@@ -245,7 +260,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       <SideNavItem
         icon="help"
         content="User Support"
-        onClick={() => this.onToggleHelp()}
+        parentOnClick={() => this.onToggleHelp()}
         onToggleSideNav={this.props.onToggleSideNav}
         containsSubItems={true}
         active={false}
@@ -263,8 +278,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         this.state.showHelpOptions && <SideNavItem
           content={"User Forum"}
           onToggleSideNav={this.props.onToggleSideNav}
-          // openHubForum()
-          href={"https://aousupporthelp.zendesk.com/hc"}
+          parentOnClick={() => this.redirectToZendesk()}
           active={false}
           disabled={false}
         />
