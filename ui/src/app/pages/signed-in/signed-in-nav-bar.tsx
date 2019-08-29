@@ -69,9 +69,6 @@ export interface Props {
   contactEmailAddress: string;
   profileImage: string;
   sidenavToggle: boolean;
-  publicUiUrl: string;
-  minimizeChrome: boolean;
-  zendeskLoadError: boolean;
   homeActive: boolean;
   workspacesActive: boolean;
   libraryActive: boolean;
@@ -210,9 +207,6 @@ export class SignedInNavBarComponent extends ReactWrapperBase {
   @Input('aouAccountEmailAddress') aouAccountEmailAddress: Props['aouAccountEmailAddress'];
   @Input('contactEmailAddress') contactEmailAddress: Props['contactEmailAddress'];
   @Input('profileImage') profileImage: Props['profileImage'];
-  @Input('publicUiUrl') publicUiUrl: Props['publicUiUrl'];
-  @Input('minimizeChrome') minimizeChrome: Props['minimizeChrome'];
-  @Input('zendeskLoadError') zendeskLoadError: Props['zendeskLoadError'];
   @Input('homeActive') homeActive: Props['homeActive'];
   @Input('workspacesActive') workspacesActive: Props['workspacesActive'];
   @Input('libraryActive') libraryActive: Props['libraryActive'];
@@ -227,9 +221,6 @@ export class SignedInNavBarComponent extends ReactWrapperBase {
       'aouAccountEmailAddress',
       'contactEmailAddress',
       'profileImage',
-      'publicUiUrl',
-      'minimizeChrome',
-      'zendeskLoadError',
       'homeActive',
       'workspacesActive',
       'libraryActive',
