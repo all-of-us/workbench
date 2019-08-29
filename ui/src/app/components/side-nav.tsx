@@ -4,9 +4,9 @@ import {reactStyles} from "app/utils";
 import {Clickable} from "app/components/buttons";
 import {ClrIcon} from "./icons";
 import {navigate} from "app/utils/navigation";
-import {SignInService} from "app/services/sign-in.service"
 import {environment} from "../../environments/environment";
-import {Ref, RefObject} from "react";
+import {RefObject} from "react";
+import {openZendeskWidget} from 'app/utils/zendesk';
 
 const styles = reactStyles({
   sideNav: {
@@ -170,6 +170,8 @@ export interface SideNavProps {
   workspacesActive: boolean;
   libraryActive: boolean;
   hasDataAccess: boolean;
+  aouAccountEmailAddress: string;
+  contactEmailAddress: string;
   givenName: string;
   familyName: string;
   onToggleSideNav: Function;
@@ -206,8 +208,17 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
     this.setState(previousState => ({showHelpOptions: !previousState.showHelpOptions}));
   }
 
-  redirectToZendesk() {
+  redirectToZendesk(): void {
     window.open(environment.zendeskHelpCenterUrl, '_blank');
+  }
+
+  openContactWidget(): void {
+    openZendeskWidget(
+      this.props.givenName,
+      this.props.familyName,
+      this.props.aouAccountEmailAddress,
+      this.props.contactEmailAddress,
+    )
   }
 
   render() {
@@ -216,7 +227,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         icon="user"
         content={`${this.props.givenName} ${this.props.familyName}`}
         parentOnClick={() => this.onToggleUser()}
-        onToggleSideNav={this.props.onToggleSideNav}
+        onToggleSideNav={() => this.props.onToggleSideNav()}
         containsSubItems={true}
         active={false}
         disabled={false}
@@ -225,7 +236,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       {
         this.state.showUserOptions && <SideNavItem
           content={"Profile"}
-          onToggleSideNav={this.props.onToggleSideNav}
+          onToggleSideNav={() => this.props.onToggleSideNav()}
           href="/profile"
           active={false}
           disabled={false}
@@ -235,7 +246,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         this.state.showUserOptions && <SideNavItem
           content={"Sign Out"}
           // signOut()
-          onToggleSideNav={this.props.onToggleSideNav}
+          onToggleSideNav={() => this.props.onToggleSideNav()}
           active={false}
           disabled={false}
         />
@@ -243,7 +254,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       <SideNavItem
         icon="home"
         content="Home"
-        onToggleSideNav={this.props.onToggleSideNav}
+        onToggleSideNav={() => this.props.onToggleSideNav()}
         href="/"
         active={this.props.homeActive}
         disabled={false}
@@ -251,7 +262,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       <SideNavItem
         icon="applications"
         content="Your Workspaces"
-        onToggleSideNav={this.props.onToggleSideNav}
+        onToggleSideNav={() => this.props.onToggleSideNav()}
         href={"/workspaces"}
         active={this.props.workspacesActive}
         disabled={!this.props.hasDataAccess}
@@ -259,7 +270,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       <SideNavItem
         icon="star"
         content="Featured Workspaces"
-        onToggleSideNav={this.props.onToggleSideNav}
+        onToggleSideNav={() => this.props.onToggleSideNav()}
         href={"/library"}
         active={this.props.libraryActive}
         disabled={false}
@@ -268,7 +279,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         icon="help"
         content="User Support"
         parentOnClick={() => this.onToggleHelp()}
-        onToggleSideNav={this.props.onToggleSideNav}
+        onToggleSideNav={() => this.props.onToggleSideNav()}
         containsSubItems={true}
         active={false}
         disabled={false}
@@ -277,7 +288,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       {
         this.state.showHelpOptions && <SideNavItem
           content={"User Forum"}
-          onToggleSideNav={this.props.onToggleSideNav}
+          onToggleSideNav={() => this.props.onToggleSideNav()}
           parentOnClick={() => this.redirectToZendesk()}
           active={false}
           disabled={false}
@@ -286,8 +297,8 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       {
         this.state.showHelpOptions && <SideNavItem
           content={"Contact Us"}
-          // openZendesk()
-          onToggleSideNav={this.props.onToggleSideNav}
+          onToggleSideNav={() => this.props.onToggleSideNav()}
+          parentOnClick={() => this.openContactWidget()}
           active={false}
           disabled={false}
         />

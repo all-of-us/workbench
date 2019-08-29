@@ -6,7 +6,7 @@ import {ClrIcon} from "app/components/icons";
 import colors from "app/styles/colors";
 import {Breadcrumb} from "app/components/breadcrumb";
 import {SideNav} from "app/components/side-nav";
-import {Ref, RefObject} from "react";
+import {RefObject} from "react"
 
 const styles = reactStyles({
   headerContainer: {
@@ -176,6 +176,8 @@ export const SignedInNavBar = withUserProfile()(
             workspacesActive={this.props.workspacesActive}
             libraryActive={this.props.libraryActive}
             hasDataAccess={this.props.hasDataAccess}
+            aouAccountEmailAddress={this.props.aouAccountEmailAddress}
+            contactEmailAddress={this.props.contactEmailAddress}
             givenName={this.props.givenName}
             familyName={this.props.familyName}
             // Passing the function itself deliberately, we want to be able to
