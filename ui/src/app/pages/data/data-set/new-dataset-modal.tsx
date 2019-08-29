@@ -20,6 +20,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
+import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {
   DataSet,
   DataSetRequest,
@@ -28,7 +29,6 @@ import {
   KernelTypeEnum,
   PrePackagedConceptSetEnum
 } from 'generated/fetch';
-import {navigateByUrl} from "../../../utils/navigation";
 
 interface Props {
   closeFunction: Function;
@@ -164,8 +164,9 @@ class NewDataSetModal extends React.Component<Props, State> {
             newNotebook: this.state.newNotebook
           });
         // Open notebook in a new tab and return back to the Data tab
-        const notebookUrl = '/workspaces/' + workspaceNamespace + '/' + workspaceId +
-            '/notebooks/' + appendNotebookFileSuffix(encodeURIComponent(this.state.notebookName));
+        const notebookUrl = `/workspaces/${workspaceNamespace}/${workspaceId}` +
+            `/notebooks/preview/${appendNotebookFileSuffix(
+              encodeURIComponentStrict(this.state.notebookName))}`;
         navigateByUrl(notebookUrl);
       } else {
         window.history.back();
