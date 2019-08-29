@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryException;
+import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
@@ -36,10 +37,14 @@ public class BigQueryService {
 
   private static final Logger logger = Logger.getLogger(BigQueryService.class.getName());
 
-  @Autowired private BigQuery bigquery;
-
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
+  private BigQuery getBigQueryService() {
+    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    return BigQueryOptions.newBuilder().setProjectId(
+        cdrVersion.getBigqueryProject()).build().getService();
+  }
+  
   /** Execute the provided query using bigquery. */
   public TableResult executeQuery(QueryJobConfiguration query) {
     return executeQuery(query, 60000L);
@@ -54,7 +59,7 @@ public class BigQueryService {
           new Object[] {query.getQuery(), query.getNamedParameters()});
     }
     try {
-      return bigquery
+      return getBigQueryService()
           .create(JobInfo.of(query))
           .getQueryResults(BigQuery.QueryResultsOption.maxWaitTime(waitTime));
     } catch (InterruptedException e) {
@@ -151,6 +156,6 @@ public class BigQueryService {
     TableId tableId =
         TableId.of(cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), tableName);
 
-    return bigquery.getTable(tableId).getDefinition().getSchema().getFields();
+    return getBigQueryService().getTable(tableId).getDefinition().getSchema().getFields();
   }
 }
