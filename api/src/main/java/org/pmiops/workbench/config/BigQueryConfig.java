@@ -10,6 +10,6 @@ public class BigQueryConfig {
 
   @Bean
   public BigQuery bigQuery() {
-    return BigQueryOptions.getDefaultInstance().getService();
+    return BigQueryOptions.newBuilder().setProjectId("fc-aou-cdr-synthetic-test").build().getService();
   }
 }
