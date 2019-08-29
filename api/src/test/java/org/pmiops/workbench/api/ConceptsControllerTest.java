@@ -13,9 +13,12 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -956,11 +959,10 @@ public class ConceptsControllerTest {
 
   private void stubGetWorkspaceAcl(String ns, String name, String creator, WorkspaceAccessLevel access) {
     WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
-    HashMap<String, WorkspaceAccessEntry> acl = new HashMap<>();
     WorkspaceAccessEntry accessLevelEntry =
         new WorkspaceAccessEntry().accessLevel(access.toString());
-    acl.put(creator, accessLevelEntry);
-    workspaceAccessLevelResponse.setAcl(acl);
+    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry = ImmutableMap.of(creator, accessLevelEntry);
+    workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
   }
 }

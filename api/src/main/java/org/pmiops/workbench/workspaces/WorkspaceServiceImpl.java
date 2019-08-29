@@ -407,7 +407,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                     new NotFoundException(
                         String.format(
                             "Workspace %s/%s not found", workspaceNamespace, workspaceId)));
-    String userAccess = workspaceAccessEntry.getAccessLevel();
+    final String userAccess = workspaceAccessEntry.getAccessLevel();
 
     if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
       return WorkspaceAccessLevel.OWNER;

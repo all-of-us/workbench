@@ -6,12 +6,14 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import javax.inject.Provider;
 import org.junit.Before;
@@ -308,7 +310,9 @@ public class ConceptSetsControllerTest {
     conceptSetsController.setUserProvider(userProvider);
 
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspaceAcl(WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspaceAcl(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
     workspacesController.createWorkspace(workspace);
     workspacesController.createWorkspace(workspace2);
 
@@ -785,16 +789,14 @@ public class ConceptSetsControllerTest {
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
-    stubGetWorkspaceAcl(ns, name, creator, access);
   }
 
   private void stubGetWorkspaceAcl(String ns, String name, String creator, WorkspaceAccessLevel access) {
     WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
-    HashMap<String, WorkspaceAccessEntry> acl = new HashMap<>();
     WorkspaceAccessEntry accessLevelEntry =
         new WorkspaceAccessEntry().accessLevel(access.toString());
-    acl.put(creator, accessLevelEntry);
-    workspaceAccessLevelResponse.setAcl(acl);
+    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry = ImmutableMap.of(creator, accessLevelEntry);
+    workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
   }
 

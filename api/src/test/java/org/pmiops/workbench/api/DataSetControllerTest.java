@@ -17,6 +17,7 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.io.FileReader;
 import java.time.Clock;
@@ -25,6 +26,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -343,6 +345,7 @@ public class DataSetControllerTest {
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspaceAcl(WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
     workspacesController.createWorkspace(workspace);
 
     searchRequest = SearchRequests.males();
@@ -496,16 +499,14 @@ public class DataSetControllerTest {
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
-    stubGetWorkspaceAcl(ns, name, creator, access);
   }
 
   private void stubGetWorkspaceAcl(String ns, String name, String creator, WorkspaceAccessLevel access) {
     WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
-    HashMap<String, WorkspaceAccessEntry> acl = new HashMap<>();
     WorkspaceAccessEntry accessLevelEntry =
         new WorkspaceAccessEntry().accessLevel(access.toString());
-    acl.put(creator, accessLevelEntry);
-    workspaceAccessLevelResponse.setAcl(acl);
+    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry = ImmutableMap.of(creator, accessLevelEntry);
+    workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
   }
 

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -711,12 +712,10 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   private void stubMockFirecloudGetWorkspaceAcl() throws ApiException {
     WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
-    HashMap<String, WorkspaceAccessEntry> acl = new HashMap<>();
     WorkspaceAccessEntry accessLevelEntry =
         new WorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.WRITER.toString());
-    acl.put(userProvider.get().getEmail(), accessLevelEntry);
-    workspaceAccessLevelResponse.setAcl(acl);
+    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry = ImmutableMap.of(userProvider.get().getEmail(), accessLevelEntry);
+    workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(mockFireCloudService.getWorkspaceAcl(NAMESPACE, NAME)).thenReturn(workspaceAccessLevelResponse);
-
   }
 }
