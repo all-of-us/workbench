@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
@@ -43,8 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.inject.Provider;
 
 /**
  * Workspace manipulation and shared business logic which can't be represented by automatic query
@@ -400,7 +399,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public WorkspaceAccessLevel getWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId) {
     String userAccess =
-        fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId).getAcl().get(userProvider.get().getEmail()).getAccessLevel();
+        fireCloudService
+            .getWorkspaceAcl(workspaceNamespace, workspaceId)
+            .getAcl()
+            .get(userProvider.get().getEmail())
+            .getAccessLevel();
 
     if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
       return WorkspaceAccessLevel.OWNER;
