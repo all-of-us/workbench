@@ -35,8 +35,8 @@
 <clr-modal [(clrModalOpen)]="modalOpen" [clrModalClosable]="false">
   <h3 class="modal-title">Warning! </h3>
   <div class="modal-body">
-    <p>Your cohort has not been saved. If you’d like to save your
-      cohort criteria, please click CANCEL and use Save or Save As to save your criteria.</p>
+    Your cohort has not been saved. If you’d like to save your cohort criteria, please click CANCEL
+    and {{cohort && cohort.id ? 'use Save or Save As' : 'click CREATE COHORT'}} to save your criteria.
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-link" (click)="getModalResponse(false)">Cancel</button>
