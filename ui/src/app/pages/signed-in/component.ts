@@ -200,10 +200,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       `out if there is no action in the next ${this.secondsToText(environment.inactivityWarningBeforeSeconds)}.`;
   }
 
-  get reviewWorkspaceActive(): boolean {
-    return this.locationService.path() === '/admin/review-workspace';
-  }
-
   get userAdminActive(): boolean {
     return this.locationService.path() === '/admin/user';
   }
@@ -218,14 +214,5 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
   get workspacesActive(): boolean {
     return this.locationService.path() === '/workspaces';
-  }
-
-  get createWorkspaceActive(): boolean {
-    return this.locationService.path() === '/workspaces/build';
-  }
-
-  openZendesk(): void {
-    openZendeskWidget(this.givenName, this.familyName, this.aouAccountEmailAddress,
-      this.contactEmailAddress);
   }
 }
