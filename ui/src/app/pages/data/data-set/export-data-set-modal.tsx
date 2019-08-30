@@ -131,7 +131,6 @@ class ExportDataSetModal extends React.Component<
     const notebookUrl = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/notebooks/
       preview/${appendNotebookFileSuffix(encodeURIComponentStrict(this.state.notebookName))}`;
     navigateByUrl(notebookUrl);
-    window.open(notebookUrl);
     this.props.closeFunction();
   }
 
