@@ -14,5 +14,6 @@ export const environment: Environment = {
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   inactivityTimeoutInSeconds: 30 * 60,
+  inactivityWarningInSeconds: 5 * 60,
   enableJupyterLab: false,
 };

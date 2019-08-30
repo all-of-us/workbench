@@ -108,7 +108,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     const signalUserActivity = debouncer(() => {
-      console.log('active');
       window.postMessage("Frame is active", '*');
     }, 1000);
 
@@ -122,7 +121,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const resetInactivityModalTimeout = resettableTimeout(() => {
       this.showInactivityModal = true;
-    }, (environment.inactivityTimeoutInSeconds - 5) * 1000);
+    }, (environment.inactivityTimeoutInSeconds - environment.inactivityWarningInSeconds) * 1000);
 
     window.addEventListener('message', (e) => {
       window.localStorage.setItem('LAST_ACTIVE_TIMESTAMP_EPOCH_MS', Date.now().toString());
@@ -159,6 +158,14 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
   closeInactivityModal(): void {
     this.showInactivityModal = false;
+  }
+
+  get inactivityModalText(): string {
+    const timeText = environment.inactivityWarningInSeconds % 60 == 0 && environment.inactivityWarningInSeconds > 60 ?
+      `${environment.inactivityWarningInSeconds / 60} minutes` :
+      `${environment.inactivityWarningInSeconds} seconds`;
+
+    return `You've been idle for sometime. You will be logged out in ${timeText} if no activity is detected.`;
   }
 
   get reviewWorkspaceActive(): boolean {

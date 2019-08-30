@@ -96,6 +96,6 @@
 
   <text-modal *ngIf="showInactivityModal"
               [title]="'Your session is about to expire'"
-              [body]="'You\'ve been idle for sometime. You will be logged out in 5 minutes if no activity is detected.'"
+              [body]="inactivityModalText"
               [closeFunction]="closeInactivityModal"></text-modal>
 </div>
