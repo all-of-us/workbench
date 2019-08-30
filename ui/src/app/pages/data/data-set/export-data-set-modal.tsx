@@ -9,6 +9,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {summarizeErrors} from 'app/utils';
+import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 
 
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
@@ -127,8 +128,9 @@ class ExportDataSetModal extends React.Component<
         kernelType: this.state.kernelType
       });
     // Open notebook in a new tab and close the modal
-    const notebookUrl = '/workspaces/' + workspaceNamespace + '/' + workspaceFirecloudName +
-        '/notebooks/' + appendNotebookFileSuffix(encodeURIComponent(this.state.notebookName));
+    const notebookUrl = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/notebooks/
+      preview/${appendNotebookFileSuffix(encodeURIComponentStrict(this.state.notebookName))}`;
+    navigateByUrl(notebookUrl);
     window.open(notebookUrl);
     this.props.closeFunction();
   }
