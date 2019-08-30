@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -46,6 +47,8 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceACL;
+import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.AllEvents;
 import org.pmiops.workbench.model.CohortChartData;
@@ -80,6 +83,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({TestJpaConfig.class})
@@ -117,6 +121,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   private Cohort cohort;
   private CohortReview review;
+  private static User currentUser;
 
   @TestConfiguration
   @Import({
@@ -147,6 +152,12 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     }
 
     @Bean
+    @Scope("prototype")
+    User user() {
+      return currentUser;
+    }
+
+    @Bean
     public Clock clock() {
       return CLOCK;
     }
@@ -164,13 +175,14 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     User user = new User();
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
+    currentUser = user;
     when(userProvider.get()).thenReturn(user);
     controller.setUserProvider(userProvider);
 
@@ -184,6 +196,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     workspace.setWorkspaceNamespace(NAMESPACE);
     workspace.setFirecloudName(NAME);
     workspaceDao.save(workspace);
+    stubMockFirecloudGetWorkspace();
+    stubMockFirecloudGetWorkspaceAcl();
 
     Gson gson = new Gson();
     cohort = new Cohort();
@@ -309,7 +323,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getCohortReviewsInWorkspace() throws Exception {
-    stubMockFirecloudGetWorkspace();
     org.pmiops.workbench.model.CohortReview expectedReview =
         new org.pmiops.workbench.model.CohortReview()
             .cohortReviewId(review.getCohortReviewId())
@@ -331,8 +344,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void createCohortReview() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
     Cohort cohortWithoutReview = new Cohort();
     cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
     String criteria =
@@ -365,8 +376,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   public void getParticipantConditionsSorting() throws Exception {
     PageRequest expectedPageRequest =
         new PageRequest().page(0).pageSize(25).sortOrder(SortOrder.ASC).sortColumn("startDate");
-
-    stubMockFirecloudGetWorkspace();
 
     ReviewFilter testFilter = new ReviewFilter().domain(DomainType.CONDITION);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
@@ -408,6 +417,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     stubMockFirecloudGetWorkspace();
 
     ReviewFilter testFilter = new ReviewFilter().domain(DomainType.CONDITION);
+
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
@@ -436,8 +446,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   public void getParticipantAllEventsPagination() throws Exception {
     PageRequest expectedPageRequest =
         new PageRequest().page(0).pageSize(1).sortOrder(SortOrder.ASC).sortColumn("startDate");
-
-    stubMockFirecloudGetWorkspace();
 
     ReviewFilter testFilter = new ReviewFilter().domain(DomainType.ALL_EVENTS);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
@@ -469,8 +477,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   public void getParticipantAllEventsSorting() throws Exception {
     PageRequest expectedPageRequest =
         new PageRequest().page(0).pageSize(25).sortOrder(SortOrder.ASC).sortColumn("startDate");
-
-    stubMockFirecloudGetWorkspace();
 
     ReviewFilter testFilter = new ReviewFilter().domain(DomainType.ALL_EVENTS);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
@@ -506,8 +512,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getParticipantChartData() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
     ParticipantChartDataListResponse response =
         controller
             .getParticipantChartData(
@@ -547,8 +551,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getParticipantChartDataBadLimit() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
     try {
       controller.getParticipantChartData(
           NAMESPACE,
@@ -567,8 +569,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getParticipantChartDataBadLimitOverHundred() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
     try {
       controller.getParticipantChartData(
           NAMESPACE,
@@ -587,8 +587,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getCohortChartDataBadLimit() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
     try {
       controller.getCohortChartData(
           NAMESPACE, NAME, review.getCohortReviewId(), DomainType.CONDITION.name(), -1);
@@ -602,8 +600,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getCohortChartDataBadLimitOverHundred() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
     try {
       controller.getCohortChartData(
           NAMESPACE, NAME, review.getCohortReviewId(), DomainType.CONDITION.name(), 101);
@@ -617,8 +613,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getCohortChartDataLab() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
@@ -635,8 +629,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getCohortChartDataDrug() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
@@ -649,8 +641,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getCohortChartDataCondition() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
@@ -665,8 +655,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getCohortChartDataProcedure() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
@@ -683,8 +671,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getVocabularies() throws Exception {
-    stubMockFirecloudGetWorkspace();
-
     VocabularyListResponse response =
         controller.getVocabularies(NAMESPACE, NAME, review.getCohortReviewId()).getBody();
     assertEquals(20, response.getItems().size());
@@ -721,5 +707,16 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
     workspaceResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
     when(mockFireCloudService.getWorkspace(NAMESPACE, NAME)).thenReturn(workspaceResponse);
+  }
+
+  private void stubMockFirecloudGetWorkspaceAcl() throws ApiException {
+    WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
+    WorkspaceAccessEntry accessLevelEntry =
+        new WorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.WRITER.toString());
+    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
+        ImmutableMap.of(userProvider.get().getEmail(), accessLevelEntry);
+    workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
+    when(mockFireCloudService.getWorkspaceAcl(NAMESPACE, NAME))
+        .thenReturn(workspaceAccessLevelResponse);
   }
 }

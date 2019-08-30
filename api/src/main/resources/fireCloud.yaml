@@ -1100,6 +1100,8 @@ definitions:
     properties:
       acl:
         type: object
+        additionalProperties:
+          $ref: '#/definitions/WorkspaceAccessEntry'
         description: Map[String, WorkspaceAccessEntry]
 
   WorkspaceACLUpdate:

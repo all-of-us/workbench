@@ -6,11 +6,13 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 import javax.inject.Provider;
 import org.junit.Before;
@@ -37,6 +39,8 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceACL;
+import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Concept;
@@ -65,6 +69,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
@@ -159,6 +164,7 @@ public class ConceptSetsControllerTest {
   private static final String WORKSPACE_NAME_2 = "name2";
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  private static User currentUser;
 
   @Autowired BillingProjectBufferService billingProjectBufferService;
 
@@ -228,6 +234,12 @@ public class ConceptSetsControllerTest {
     }
 
     @Bean
+    @Scope("prototype")
+    User user() {
+      return currentUser;
+    }
+
+    @Bean
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
@@ -269,6 +281,7 @@ public class ConceptSetsControllerTest {
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
+    currentUser = user;
     when(userProvider.get()).thenReturn(user);
 
     CdrVersion cdrVersion = new CdrVersion();
@@ -296,7 +309,11 @@ public class ConceptSetsControllerTest {
     conceptSetsController.setUserProvider(userProvider);
 
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspaceAcl(
+        WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspaceAcl(
+        WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
     workspacesController.createWorkspace(workspace);
     workspacesController.createWorkspace(workspace2);
 
@@ -773,6 +790,17 @@ public class ConceptSetsControllerTest {
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
+  }
+
+  private void stubGetWorkspaceAcl(
+      String ns, String name, String creator, WorkspaceAccessLevel access) {
+    WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
+    WorkspaceAccessEntry accessLevelEntry =
+        new WorkspaceAccessEntry().accessLevel(access.toString());
+    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
+        ImmutableMap.of(creator, accessLevelEntry);
+    workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
+    when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
   }
 
   private void saveConcepts() {
