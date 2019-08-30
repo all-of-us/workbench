@@ -177,17 +177,7 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
   />;
 };
 
-export const MenuItem = ({
-  icon,
-  tooltip = '',
-  disabled = false,
-  solid = false,
-  hoverWhiteness = .92,
-  clickableStyle={},
-  iconStyle={},
-  children,
-  ...props
-}) => {
+export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
       // data-test-id is the text within the MenuItem, with whitespace removed
@@ -195,26 +185,16 @@ export const MenuItem = ({
       data-test-id={children.toString().replace(/\s/g, '') + '-menu-item'}
       disabled={disabled}
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'start',
-        fontSize: 12,
-        minWidth: 125,
-        height: 32,
+        display: 'flex', alignItems: 'center', justifyContent: 'start',
+        fontSize: 12, minWidth: 125, height: 32,
         color: disabled ? colorWithWhiteness(colors.dark, disabledAlpha) : 'black',
         padding: '0 12px',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        ...clickableStyle
       }}
-      hover={!disabled ? {backgroundColor: colorWithWhiteness(colors.accent, hoverWhiteness)} : undefined}
+      hover={!disabled ? {backgroundColor: colorWithWhiteness(colors.accent, 0.92)} : undefined}
       {...props}
     >
-      <ClrIcon
-        shape={icon}
-        className={solid ? "is-solid": undefined}
-        style={{marginRight: 8, ...iconStyle}}
-        size={15}
-      />
+      <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>
       {children}
     </Clickable>
   </TooltipTrigger>;

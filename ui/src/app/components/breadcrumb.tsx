@@ -15,6 +15,13 @@ import {WorkspaceData} from "../utils/workspace-data";
 import {Cohort, ConceptSet} from "../../generated/fetch";
 
 const styles = {
+  breadcrumb: {
+    marginLeft: '3.25rem',
+    display: 'inline-block',
+  },
+  primary: {
+    color: colors.primary
+  },
   firstLink: {
     color: colors.accent,
     textDecoration: 'none'
@@ -170,13 +177,13 @@ export const Breadcrumb = fp.flow(
     }
 
     render() {
-      return <div style={{marginLeft: '3.25rem', display: 'inline-block'}}>
+      return <div style={styles.breadcrumb}>
         {this.first().map(({label, url}, i) => {
           return <React.Fragment key={i}>
             <BreadcrumbLink href={url} style={styles.firstLink}>
               {label}
             </BreadcrumbLink>
-            <span style={{color: colors.primary}}> &gt; </span>
+            <span style={styles.primary}> &gt; </span>
           </React.Fragment>;
         })}
         {this.last() && <div>
