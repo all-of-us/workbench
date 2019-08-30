@@ -42,6 +42,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   // True if the user tried to open the Zendesk support widget and an error
   // occurred.
   zendeskLoadError = false;
+  showInactivityModal = true;
   private profileLoadingSub: Subscription;
   private subscriptions = [];
 
@@ -67,7 +68,10 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     /* Angular's */
     private locationService: Location,
     private elementRef: ElementRef
-  ) {}
+  ) {
+    this.closeInactivityModal = this.closeInactivityModal.bind(this);
+    console.log('bounded');
+  }
 
   ngOnInit(): void {
     this.serverConfigService.getConfig().subscribe((config) => {
@@ -114,12 +118,16 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     window.addEventListener('click', () => signalUserActivity(), false);
 
     const resetLogoutTimeout = this.resettableTimeout(() => {
-      console.log("logging out the user!")
+      console.log("logging out the user!");
     }, environment.inactivityTimeoutInSeconds * 1000);
+    const resetInactivityModalTimeout = this.resettableTimeout(() => {
+      this.showInactivityModal = true;
+    }, (environment.inactivityTimeoutInSeconds - 5) * 1000);
 
     window.addEventListener('message', (e) => {
       window.localStorage.setItem('LAST_ACTIVE_TIMESTAMP_EPOCH_MS', Date.now().toString());
       resetLogoutTimeout();
+      resetInactivityModalTimeout();
     }, false);
   }
 
@@ -157,6 +165,9 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     window.location.assign('https://accounts.google.com/logout');
   }
 
+  closeInactivityModal(): void {
+    this.showInactivityModal = false;
+  }
 
   get reviewWorkspaceActive(): boolean {
     return this.locationService.path() === '/admin/review-workspace';

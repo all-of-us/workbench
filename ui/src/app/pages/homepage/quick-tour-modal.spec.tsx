@@ -19,10 +19,10 @@ describe('QuickTourModalComponent', () => {
     };
   });
 
-  it('should render, should have a next and close button', () => {
+  it('should render, should have a next and closeFunction button', () => {
     const wrapper = component();
     expect(wrapper).toBeTruthy();
-    expect(wrapper.exists('[data-test-id="close"]')).toBeTruthy();
+    expect(wrapper.exists('[data-test-id="closeFunction"]')).toBeTruthy();
     expect(wrapper.exists('[data-test-id="next"]')).toBeTruthy();
   });
 
@@ -57,7 +57,7 @@ describe('QuickTourModalComponent', () => {
   it('should not show the next button when we are on the last slide', () => {
     const wrapper = component();
     wrapper.find('[data-test-id="breadcrumb' + lastPanel + '"]').simulate('click');
-    expect(wrapper.exists('[data-test-id="close"]')).toBeFalsy();
+    expect(wrapper.exists('[data-test-id="closeFunction"]')).toBeFalsy();
     expect(wrapper.find('[data-test-id="next"]').childAt(0).text()).toBe('Close');
   });
 

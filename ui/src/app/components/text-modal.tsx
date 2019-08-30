@@ -18,7 +18,7 @@ import {ReactWrapperBase} from "app/utils";
 export interface TextModalProps {
   title: string;
   body: string;
-  onConfirm: Function;
+  closeFunction: Function;
 }
 
 export class TextModal extends React.Component<TextModalProps> {
@@ -31,11 +31,11 @@ export class TextModal extends React.Component<TextModalProps> {
     console.log(this.props);
     return (
       <React.Fragment>
-        <Modal>
+        <Modal onRequestClose={() => { console.log("from request closeFunction"); this.props.closeFunction()}}>
           <ModalTitle>{this.props.title}</ModalTitle>
           <ModalBody>{this.props.body}</ModalBody>
           <ModalFooter>
-            <Button onClick={this.props.onConfirm}>OK</Button>
+            <Button onClick={() => { console.log("from on click "); this.props.closeFunction()}}>OK</Button>
           </ModalFooter>
         </Modal>
       </React.Fragment>
@@ -50,9 +50,9 @@ export class TextModal extends React.Component<TextModalProps> {
 export class TextModalComponent extends ReactWrapperBase {
   @Input('title') title: TextModalProps['title'];
   @Input('body') body: TextModalProps['body'];
-  @Input('onConfirm') onConfirm: TextModalProps['onConfirm'];
+  @Input('closeFunction') closeFunction: TextModalProps['closeFunction'];
 
   constructor() {
-    super(TextModal, ['title', 'body', 'onConfirm']);
+    super(TextModal, ['title', 'body', 'closeFunction']);
   }
 }
