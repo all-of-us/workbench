@@ -70,6 +70,8 @@ import {
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
+import {TextModalComponent} from "app/components/text-modal";
+import {NotificationModalComponent} from "app/components/notification-modal";
 
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
@@ -145,6 +147,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     SignedInComponent,
     SignInComponent,
     StigmatizationPageComponent,
+    TextModalComponent,
     WorkspaceAboutComponent,
     WorkspaceEditComponent,
     WorkspaceLibraryComponent,

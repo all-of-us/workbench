@@ -154,7 +154,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   private navigateSignOut(): void {
     // Force a hard browser reload here. We want to ensure that no local state
     // is persisting across user sessions, as this can lead to subtle bugs.
-    window.location.assign('/');
+    window.location.assign('https://accounts.google.com/logout');
   }
 
 

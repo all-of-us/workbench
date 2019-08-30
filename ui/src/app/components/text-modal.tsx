@@ -11,6 +11,8 @@ import {
 
 
 import * as React from 'react';
+import {Component, Input} from "@angular/core";
+import {ReactWrapperBase} from "app/utils";
 
 
 export interface TextModalProps {
@@ -26,6 +28,7 @@ export class TextModal extends React.Component<TextModalProps> {
   }
 
   render() {
+    console.log(this.props);
     return (
       <React.Fragment>
         <Modal>
@@ -37,5 +40,19 @@ export class TextModal extends React.Component<TextModalProps> {
         </Modal>
       </React.Fragment>
     );
+  }
+}
+
+@Component({
+  selector: 'text-modal',
+  template: '<div #root></div>',
+})
+export class TextModalComponent extends ReactWrapperBase {
+  @Input('title') title: TextModalProps['title'];
+  @Input('body') body: TextModalProps['body'];
+  @Input('onConfirm') onConfirm: TextModalProps['onConfirm'];
+
+  constructor() {
+    super(TextModal, ['title', 'body', 'onConfirm']);
   }
 }

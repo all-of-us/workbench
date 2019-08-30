@@ -93,4 +93,8 @@
     <router-outlet></router-outlet>
     <app-routing-spinner></app-routing-spinner>
   </div>
+  <text-modal *ngIf="true"
+              [title]="'title'"
+              [body]="'body'"
+              [onConfirm]="null"></text-modal>
 </div>
