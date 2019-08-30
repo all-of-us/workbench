@@ -13,6 +13,9 @@ import {initializeZendeskWidget, openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Authority} from 'generated';
 
+export const TRACKED_USER_EVENTS = ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'];
+export const LOCAL_STORAGE_LAST_ACTIVE_KEY = 'LAST_ACTIVE_TIMESTAMP_EPOCH_MS';
+
 @Component({
   selector: 'app-signed-in',
   styleUrls: ['./component.css',
@@ -111,7 +114,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       window.postMessage("Frame is active", '*');
     }, 1000);
 
-    ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'].forEach(eventName => {
+    TRACKED_USER_EVENTS.forEach(eventName => {
       window.addEventListener(eventName, () => signalUserActivity(), false);
     });
 
@@ -124,7 +127,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     }, (environment.inactivityTimeoutInSeconds - environment.inactivityWarningInSeconds) * 1000);
 
     window.addEventListener('message', (e) => {
-      window.localStorage.setItem('LAST_ACTIVE_TIMESTAMP_EPOCH_MS', Date.now().toString());
+      window.localStorage.setItem(LOCAL_STORAGE_LAST_ACTIVE_KEY, Date.now().toString());
       resetLogoutTimeout();
       resetInactivityModalTimeout();
     }, false);

@@ -104,16 +104,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         this.props.urlParams.wsid, this.props.urlParams.nbName)
         .then(html => {
           this.setState({html: html.html});
-          let frame = document.getElementById('notebook-frame') as HTMLFrameElement;
-          frame.addEventListener('load', () => {
-            const signalUserActivity = debouncer(() => {
-              frame.contentWindow.parent.postMessage("Frame is active", '*');
-            }, 1000);
-            
-            ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'].forEach(eventName => {
-              window.addEventListener(eventName, () => signalUserActivity(), false);
-            });
-          });
+          this.loadNotebookActivityTracker();
         });
 
       workspacesApi().getNotebookLockingMetadata(this.props.urlParams.ns,
@@ -123,6 +114,19 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
             lockExpirationTime: resp.lockExpirationTime
           });
         });
+    }
+
+    loadNotebookActivityTracker() {
+      let frame = document.getElementById('notebook-frame') as HTMLFrameElement;
+      frame.addEventListener('load', () => {
+        const signalUserActivity = debouncer(() => {
+          frame.contentWindow.parent.postMessage("Frame is active", '*');
+        }, 1000);
+
+        ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'].forEach(eventName => {
+          window.addEventListener(eventName, () => signalUserActivity(), false);
+        });
+      });
     }
 
     private runCluster(onClusterReady: Function): void {
