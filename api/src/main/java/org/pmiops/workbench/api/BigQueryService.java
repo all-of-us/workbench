@@ -40,8 +40,8 @@ public class BigQueryService {
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   /**
-   * Changed access modifier to protected so that BigQueryServiceTest.java can override this method.
-   * Need to override to make tests runnable with IntelliJ.
+   * This method is protected, rather than private, so that it can be overridden for testing
+   * purposes.
    */
   protected BigQuery getBigQueryService() {
     CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();

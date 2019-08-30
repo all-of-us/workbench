@@ -62,7 +62,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({
-  BigQueryServiceTest.class,
+  BigQueryTestService.class,
   CloudStorageServiceImpl.class,
   CohortQueryBuilder.class,
   SearchGroupItemQueryBuilder.class,

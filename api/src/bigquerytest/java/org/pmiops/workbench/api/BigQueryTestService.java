@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * This sole purpose of this class is to override the setting of projectId on the BigQuery service
  * instance so test cases are runnable inside IntelliJ.
  */
-public class BigQueryServiceTest extends BigQueryService {
+public class BigQueryTestService extends BigQueryService {
 
   @Autowired private BigQuery bigquery;
 
