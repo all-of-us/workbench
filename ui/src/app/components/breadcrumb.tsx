@@ -146,10 +146,9 @@ export const Breadcrumb = fp.flow(
   withUrlParams(),
   withRouteConfigData()
 )(
-  class extends React.Component<Props, {}> {
+  class extends React.Component<Props> {
     constructor(props) {
       super(props);
-      // this.state = {}
     }
 
     trail(): Array<BreadcrumbData> {

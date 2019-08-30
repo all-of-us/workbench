@@ -26,6 +26,7 @@ import {TextModalComponent} from 'app/components/text-modal';
 import {SignedInComponent} from 'app/pages/signed-in/component';
 import {CdrVersionsApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
+import {SignedInNavBarComponent} from "./signed-in-nav-bar";
 
 describe('SignedInComponent', () => {
   let fixture: ComponentFixture<SignedInComponent>;
@@ -41,6 +42,7 @@ describe('SignedInComponent', () => {
         SignedInComponent,
         RoutingSpinnerComponent,
         TextModalComponent,
+        SignedInNavBarComponent
       ],
       providers: [
         {provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub()},
