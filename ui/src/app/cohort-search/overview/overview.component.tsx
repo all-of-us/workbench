@@ -221,7 +221,7 @@ export const ListOverview = withCurrentWorkspace()(
       triggerEvent('Click icon', 'Click', 'Icon - Save - Cohort Builder');
       const {cohort} = this.state;
       cohort.criteria = this.criteria;
-      this.setState({cohort, saving: true, saveError: false});
+      this.setState({saving: true, saveError: false});
       const {ns, wsid} = urlParamsStore.getValue();
       const cid = cohort.id;
       cohortsApi().updateCohort(ns, wsid, cid, cohort).then(() => {
