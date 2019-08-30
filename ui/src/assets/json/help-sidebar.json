@@ -210,35 +210,49 @@
   "datasetBuilder": [
     {
       "title": "Dataset Builder",
-      "content": "Datasets are analysis-ready tables containing data about a Cohort can be exported to analysis tools such as Notebooks. Users can build and preview a dataset for one or more cohorts by selecting the desired concepts sets and values for the cohorts."
+      "content": [
+        "Datasets are analysis-ready tables containing data about a Cohort can be exported to analysis tools such as Notebooks. Users can build and preview a dataset for one or more cohorts by selecting the desired concepts sets and values for the cohorts."
+      ]
     }
   ],
   "reviewParticipants": [
     {
       "title": "Participant Status",
-      "content": "Within the Review Set, you can review individual participant records and choose to include, exclude, or mark them for further review."
+      "content": [
+        "Within the Review Set, you can review individual participant records and choose to include, exclude, or mark them for further review."
+      ]
     },
     {
       "title": "Annotations",
-      "content": "Within the Review Set, you have the option of creating a review-set-wide annotation or set of annotations. Annotations allow you to add an explanation (free text), date, number (numeric field), selection from a specified list (dropdown list) or checkbox to each participant record."
+      "content": [
+        "Within the Review Set, you have the option of creating a review-set-wide annotation or set of annotations. Annotations allow you to add an explanation (free text), date, number (numeric field), selection from a specified list (dropdown list) or checkbox to each participant record."
+      ]
     }
   ],
   "reviewParticipantDetail": [
     {
       "title": "Participant Status",
-      "content": "Within the Review Set, you can review individual participant records and choose to include, exclude, or mark them for further review."
+      "content": [
+        "Within the Review Set, you can review individual participant records and choose to include, exclude, or mark them for further review."
+      ]
     },
     {
       "title": "Annotations",
-      "content": "Within the Review Set, you have the option of creating a review-set-wide annotation or set of annotations. Annotations allow you to add an explanation (free text), date, number (numeric field), selection from a specified list (dropdown list) or checkbox to each participant record."
+      "content": [
+        "Within the Review Set, you have the option of creating a review-set-wide annotation or set of annotations. Annotations allow you to add an explanation (free text), date, number (numeric field), selection from a specified list (dropdown list) or checkbox to each participant record."
+      ]
     },
     {
       "title": "Create a Review Set-Wide Annotation Field",
-      "content": "Annotation field will appear across all Participants in this Review Set. Input in the field will be on a participant by participant basis."
+      "content": [
+        "Annotation field will appear across all Participants in this Review Set. Input in the field will be on a participant by participant basis."
+      ]
     },
     {
       "title": "Edit or Delete a Review Set-Wide Annotation Field",
-      "content": "Edit or Delete an Annotation Field across all Review Sets created in this set."
+      "content": [
+        "Edit or Delete an Annotation Field across all Review Sets created in this set."
+      ]
     }
   ]
 }
