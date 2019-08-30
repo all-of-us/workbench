@@ -20,7 +20,6 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
-import {BreadcrumbComponent} from 'app/components/breadcrumb';
 import {BugReportComponent} from 'app/components/bug-report';
 import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
 import {TextModalComponent} from 'app/components/text-modal';
@@ -38,7 +37,6 @@ describe('SignedInComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        BreadcrumbComponent,
         BugReportComponent,
         SignedInComponent,
         RoutingSpinnerComponent,
