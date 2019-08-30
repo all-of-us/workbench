@@ -39,7 +39,7 @@ public class BigQueryService {
 
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  private BigQuery getBigQueryService() {
+  protected BigQuery getBigQueryService() {
     CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     return BigQueryOptions.newBuilder()
         .setProjectId(cdrVersion.getBigqueryProject())

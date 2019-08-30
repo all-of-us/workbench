@@ -124,7 +124,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     WorkspaceMapper.class,
     CohortReviewServiceImpl.class,
     CohortReviewController.class,
-    BigQueryService.class,
+    BigQueryServiceTest.class,
     ReviewQueryBuilder.class,
     CohortCloningService.class,
     CohortQueryBuilder.class,
