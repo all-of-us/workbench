@@ -25,6 +25,7 @@ const styles = reactStyles({
     height: '100%',
     width: '14rem',
     padding: '0.5rem',
+    overflow: 'auto',
     background: colorWithWhiteness(colors.primary, .87),
     transition: 'margin-right 0.5s ease-out'
   },
@@ -42,6 +43,21 @@ const styles = reactStyles({
     color: colors.white,
     marginTop: '1.25rem',
     cursor: 'pointer'
+  },
+  sectionTitle: {
+    marginTop: '0.5rem',
+    fontWeight: 600,
+    color: colors.primary
+  },
+  contentTitle: {
+    marginTop: '0.25rem',
+    fontSize: '14px',
+    fontWeight: 600,
+    color: colors.primary
+  },
+  contentItem: {
+    marginTop: 0,
+    color: colors.primary
   }
 });
 
@@ -81,14 +97,14 @@ export class HelpSidebar extends React.Component<Props, State> {
     const {activeIcon, sidebarOpen} = this.state;
     return <div style={styles.sidebar}>
       <div style={sidebarOpen ? contentStyles.open : contentStyles.closed}>
-        <h3 style={{fontWeight: 600, margin: 0}}>Help Tips</h3>
+        <h3 style={{...styles.sectionTitle, margin: 0}}>Help Tips</h3>
         {sidebarContent[location].map((section, s) => <div key={s}>
-          <h4>{section.title}</h4>
+          <h3 style={styles.sectionTitle}>{section.title}</h3>
           {section.content.map((content, c) => {
-            return typeof content === 'string' ? <p key={c}>{content}</p> :
-              <div>
-                <h5>{content.title}</h5>
-                {content.content.map((item, i) => <p key={i}>{item}</p>)}
+            return typeof content === 'string' ? <p key={c} style={styles.contentItem}>{content}</p>
+              : <div>
+                <h4 style={styles.contentTitle}>{content.title}</h4>
+                {content.content.map((item, i) => <p key={i} style={styles.contentItem}>{item}</p>)}
               </div>;
           })}
         </div>)}
