@@ -351,18 +351,22 @@ public class WorkspacesControllerTest {
   }
 
   private WorkspaceACL createWorkspaceACL() {
+    return createWorkspaceACLWithPermission(WorkspaceAccessLevel.OWNER);
+  }
+
+  private WorkspaceACL createWorkspaceACL(JSONObject acl) {
+    return new Gson().fromJson(new JSONObject().put("acl", acl).toString(), WorkspaceACL.class);
+  }
+
+  private WorkspaceACL createWorkspaceACLWithPermission(WorkspaceAccessLevel permission) {
     return createWorkspaceACL(
         new JSONObject()
             .put(
                 currentUser.getEmail(),
                 new JSONObject()
-                    .put("accessLevel", "OWNER")
+                    .put("accessLevel", permission.toString())
                     .put("canCompute", true)
                     .put("canShare", true)));
-  }
-
-  private WorkspaceACL createWorkspaceACL(JSONObject acl) {
-    return new Gson().fromJson(new JSONObject().put("acl", acl).toString(), WorkspaceACL.class);
   }
 
   private JSONObject createDemoCriteria() {
@@ -410,6 +414,10 @@ public class WorkspacesControllerTest {
 
   private void stubFcGetWorkspaceACL(WorkspaceACL acl) {
     when(fireCloudService.getWorkspaceAcl(anyString(), anyString())).thenReturn(acl);
+  }
+
+  private void stubFcGetWorkspaceACLForWorkspace(String workspaceNamespace, String workspaceId, WorkspaceACL acl) {
+    when(fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId)).thenReturn(acl);
   }
 
   private void stubFcGetGroup() {
@@ -650,7 +658,7 @@ public class WorkspacesControllerTest {
   public void testUpdateWorkspace() throws Exception {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
-
+    stubFcGetWorkspaceACL();
     ws.setName("updated-name");
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     request.setWorkspace(ws);
@@ -671,6 +679,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspaceResearchPurpose() throws Exception {
+    stubFcGetWorkspaceACL();
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -718,15 +727,17 @@ public class WorkspacesControllerTest {
     ws.setName("updated-name");
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     request.setWorkspace(ws);
+    stubFcGetWorkspaceACL(createWorkspaceACLWithPermission(WorkspaceAccessLevel.READER));
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
-
+    stubFcGetWorkspaceACL(createWorkspaceACLWithPermission(WorkspaceAccessLevel.WRITER));
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
   }
 
   @Test(expected = ConflictException.class)
   public void testUpdateWorkspaceStaleThrows() throws Exception {
+    stubFcGetWorkspaceACL();
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
@@ -740,6 +751,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspaceInvalidEtagsThrow() throws Exception {
+    stubFcGetWorkspaceACL();
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -876,6 +888,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspaceWithCohortsAndConceptSets() throws Exception {
+    stubFcGetWorkspaceACL();
     Long participantId = 1L;
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
     Workspace workspace = createWorkspace();
@@ -1175,6 +1188,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspaceWithConceptSetNewCdrVersionNewConceptSetCount() throws Exception {
+    stubFcGetWorkspaceACL();
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -1996,6 +2010,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testRenameNotebookInWorkspace() throws Exception {
+    stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2020,6 +2035,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testRenameNotebookWoExtension() throws Exception {
+    stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2044,6 +2060,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void copyNotebook() {
+    stubFcGetWorkspaceACL();
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
@@ -2079,6 +2096,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void copyNotebook_onlyAppendsSuffixIfNeeded() {
+    stubFcGetWorkspaceACL();
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
@@ -2109,6 +2127,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ForbiddenException.class)
   public void copyNotebook_onlyHasReadPermissionsToDestination() {
+    stubFcGetWorkspaceACL(createWorkspaceACLWithPermission(WorkspaceAccessLevel.READER));
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
@@ -2144,6 +2163,7 @@ public class WorkspacesControllerTest {
         fromWorkspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.NO_ACCESS);
+    stubFcGetWorkspaceACLForWorkspace(fromWorkspace.getNamespace(), fromWorkspace.getName(), createWorkspaceACLWithPermission(WorkspaceAccessLevel.NO_ACCESS));
     String fromNotebookName = "origin";
 
     Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
@@ -2153,6 +2173,7 @@ public class WorkspacesControllerTest {
         toWorkspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.WRITER);
+    stubFcGetWorkspaceACLForWorkspace(toWorkspace.getNamespace(), toWorkspace.getName(), createWorkspaceACLWithPermission(WorkspaceAccessLevel.WRITER));
     String newNotebookName = "new";
 
     CopyRequest copyNotebookRequest =
@@ -2170,6 +2191,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ConflictException.class)
   public void copyNotebook_alreadyExists() {
+    stubFcGetWorkspaceACL();
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
@@ -2199,6 +2221,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneNotebook() throws Exception {
+    stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
