@@ -28,14 +28,13 @@ export class TextModal extends React.Component<TextModalProps> {
   }
 
   render() {
-    console.log(this.props);
     return (
       <React.Fragment>
-        <Modal onRequestClose={() => { console.log("from request closeFunction"); this.props.closeFunction()}}>
+        <Modal onRequestClose={this.props.closeFunction}>
           <ModalTitle>{this.props.title}</ModalTitle>
           <ModalBody>{this.props.body}</ModalBody>
           <ModalFooter>
-            <Button onClick={() => { console.log("from on click "); this.props.closeFunction()}}>OK</Button>
+            <Button onClick={this.props.closeFunction}>OK</Button>
           </ModalFooter>
         </Modal>
       </React.Fragment>

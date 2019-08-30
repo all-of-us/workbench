@@ -367,3 +367,11 @@ export function debouncer(action, sensitivityMs) {
     t = Date.now();
   }
 }
+
+export function resettableTimeout(f, timeoutInSeconds) {
+  let timeout;
+  return () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(f, timeoutInSeconds);
+  };
+}

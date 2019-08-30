@@ -109,12 +109,10 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
             const signalUserActivity = debouncer(() => {
               frame.contentWindow.parent.postMessage("Frame is active", '*');
             }, 1000);
-
-            frame.contentWindow.addEventListener('mousemove', () => signalUserActivity(), false);
-            frame.contentWindow.addEventListener('mousedown', () => signalUserActivity(), false);
-            frame.contentWindow.addEventListener('keypress', () => signalUserActivity(), false);
-            frame.contentWindow.addEventListener('scroll', () => signalUserActivity(), false);
-            frame.contentWindow.addEventListener('click', () => signalUserActivity(), false);
+            
+            ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'].forEach(eventName => {
+              window.addEventListener(eventName, () => signalUserActivity(), false);
+            });
           });
         });
 

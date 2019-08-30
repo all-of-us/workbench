@@ -7,7 +7,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
-import {debouncer, hasRegisteredAccess} from 'app/utils';
+import {debouncer, hasRegisteredAccess, resettableTimeout} from 'app/utils';
 import {cdrVersionStore, routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget, openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
@@ -70,7 +70,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     private elementRef: ElementRef
   ) {
     this.closeInactivityModal = this.closeInactivityModal.bind(this);
-    console.log('bounded');
   }
 
   ngOnInit(): void {
@@ -109,18 +108,19 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     const signalUserActivity = debouncer(() => {
+      console.log('active');
       window.postMessage("Frame is active", '*');
     }, 1000);
-    window.addEventListener('mousemove', () => signalUserActivity(), false);
-    window.addEventListener('mousedown', () => signalUserActivity(), false);
-    window.addEventListener('keypress', () => signalUserActivity(), false);
-    window.addEventListener('scroll', () => signalUserActivity(), false);
-    window.addEventListener('click', () => signalUserActivity(), false);
 
-    const resetLogoutTimeout = this.resettableTimeout(() => {
+    ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'].forEach(eventName => {
+      window.addEventListener(eventName, () => signalUserActivity(), false);
+    });
+
+    const resetLogoutTimeout = resettableTimeout(() => {
       console.log("logging out the user!");
     }, environment.inactivityTimeoutInSeconds * 1000);
-    const resetInactivityModalTimeout = this.resettableTimeout(() => {
+
+    const resetInactivityModalTimeout = resettableTimeout(() => {
       this.showInactivityModal = true;
     }, (environment.inactivityTimeoutInSeconds - 5) * 1000);
 
@@ -129,14 +129,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       resetLogoutTimeout();
       resetInactivityModalTimeout();
     }, false);
-  }
-
-  resettableTimeout(f, timeoutInSeconds) {
-    let timeout;
-    return () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(f, timeoutInSeconds);
-    };
   }
 
   ngAfterViewInit() {

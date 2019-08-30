@@ -1,4 +1,4 @@
-// Workbench "Download policy" extension, to show the policy before letting user download the notebook
+// Sends a message to the parent frame every second that user activity is detected
 
 define([
     'base/js/namespace'
@@ -23,11 +23,9 @@ define([
       window.parent.postMessage("Frame is active", '*');
     }, 1000);
 
-    window.addEventListener('mousemove', () => signalUserActivity(), false);
-    window.addEventListener('mousedown', () => signalUserActivity(), false);
-    window.addEventListener('keypress', () => signalUserActivity(), false);
-    window.addEventListener('scroll', () => signalUserActivity(), false);
-    window.addEventListener('click', () => signalUserActivity(), false);
+  ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'].forEach(eventName => {
+    window.addEventListener(eventName, () => signalUserActivity(), false);
+  });
 
     console.log("Loaded Activity Tracker");
   };
