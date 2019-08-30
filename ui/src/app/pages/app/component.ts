@@ -15,7 +15,7 @@ import {queryParamsStore, routeConfigDataStore, serverConfigStore, urlParamsStor
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
-import {LOCAL_STORAGE_LAST_ACTIVE_KEY} from "app/pages/signed-in/component";
+import {INACTIVITY_CONFIG} from "app/pages/signed-in/component";
 
 declare let gtag: Function;
 
@@ -66,10 +66,10 @@ export class AppComponent implements OnInit {
         console.log('To override the API URLs, try:\n' +
           'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
 
-        const lastActive = window.localStorage.getItem(LOCAL_STORAGE_LAST_ACTIVE_KEY);
+        const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY);
 
         if (lastActive && Date.now() - parseInt(lastActive) > environment.inactivityTimeoutInSeconds) {
-          localStorage.setItem(LOCAL_STORAGE_LAST_ACTIVE_KEY, Date.now().toString());
+          localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY, Date.now().toString());
           console.log("Logging out the user. Passed the inactivity timeout.");
         }
       } catch (err) {

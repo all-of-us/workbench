@@ -17,6 +17,7 @@ import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ClusterStatus} from 'generated/fetch';
+import {INACTIVITY_CONFIG} from "app/pages/signed-in/component";
 
 
 const styles = reactStyles({
@@ -120,10 +121,10 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       let frame = document.getElementById('notebook-frame') as HTMLFrameElement;
       frame.addEventListener('load', () => {
         const signalUserActivity = debouncer(() => {
-          frame.contentWindow.parent.postMessage("Frame is active", '*');
+          frame.contentWindow.parent.postMessage(INACTIVITY_CONFIG.MESSAGE_KEY, '*');
         }, 1000);
 
-        ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'].forEach(eventName => {
+        INACTIVITY_CONFIG.TRACKED_EVENTS.forEach(eventName => {
           window.addEventListener(eventName, () => signalUserActivity(), false);
         });
       });
