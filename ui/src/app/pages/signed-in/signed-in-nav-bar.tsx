@@ -178,7 +178,6 @@ export const SignedInNavBar = withUserProfile()(
             hasDataAccess={this.props.hasDataAccess}
             aouAccountEmailAddress={this.props.aouAccountEmailAddress}
             contactEmailAddress={this.props.contactEmailAddress}
-            profileImage={this.props.profileImage}
             givenName={this.props.givenName}
             familyName={this.props.familyName}
             // Passing the function itself deliberately, we want to be able to
@@ -204,7 +203,6 @@ export class SignedInNavBarComponent extends ReactWrapperBase {
   @Input('familyName') familyName: Props['familyName'];
   @Input('aouAccountEmailAddress') aouAccountEmailAddress: Props['aouAccountEmailAddress'];
   @Input('contactEmailAddress') contactEmailAddress: Props['contactEmailAddress'];
-  @Input('profileImage') profileImage: Props['profileImage'];
   @Input('homeActive') homeActive: Props['homeActive'];
   @Input('workspacesActive') workspacesActive: Props['workspacesActive'];
   @Input('libraryActive') libraryActive: Props['libraryActive'];
@@ -218,7 +216,6 @@ export class SignedInNavBarComponent extends ReactWrapperBase {
       'familyName',
       'aouAccountEmailAddress',
       'contactEmailAddress',
-      'profileImage',
       'homeActive',
       'workspacesActive',
       'libraryActive',

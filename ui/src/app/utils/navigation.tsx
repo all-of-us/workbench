@@ -28,10 +28,10 @@ export const userProfileStore =
 export const signInStore =
   new BehaviorSubject<{
     signOut: Function,
-    profileImage: Function,
+    profileImage: string,
   }>({
     signOut: () => {},
-    profileImage: () => {},
+    profileImage: {} as string,
   });
 
 

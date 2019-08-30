@@ -53,9 +53,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   aouAccountEmailAddress = '';
   // The researcher's preferred contact email address.
   contactEmailAddress = '';
-  profileImage = '';
-  sidenavToggle = false;
-  publicUiUrl = environment.publicUiUrl;
   minimizeChrome = false;
   // True if the user tried to open the Zendesk support widget and an error
   // occurred.
@@ -103,16 +100,10 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.signInService.isSignedIn$.subscribe(signedIn => {
-      if (signedIn) {
-        this.profileImage = this.signInService.profileImage;
-      } else {
-<<<<<<< HEAD
-        navigateSignOut();
-=======
+      if (!signedIn) {
         // Force a hard browser reload here. We want to ensure that no local state
         // is persisting across user sessions, as this can lead to subtle bugs.
         window.location.assign('/');
->>>>>>> signout and profile picture
       }
     });
 

@@ -78,7 +78,7 @@ const styles = reactStyles({
 
 interface SideNavItemProps {
   icon?: string,
-  profileImage?: string,
+  hasProfileImage?: boolean,
   content: string,
   parentOnClick?: Function,
   onToggleSideNav: Function,
@@ -151,9 +151,9 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
       >
         <span
           style={
-            this.props.icon || this.props.profileImage
+            this.props.icon || this.props.hasProfileImage
               ? {marginLeft: '0px'}
-              : {marginLeft: '29px'}
+              : {marginLeft: '33px'}
           }
         >
           {
@@ -165,8 +165,8 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
             />
           }
           {
-            this.props.profileImage && <img
-              src={this.props.profileImage}
+            this.props.hasProfileImage && <img
+              src={signInStore.getValue().profileImage}
               style={styles.profileImage}
             />
           }
@@ -192,7 +192,6 @@ export interface SideNavProps {
   hasDataAccess: boolean;
   aouAccountEmailAddress: string;
   contactEmailAddress: string;
-  profileImage: string;
   givenName: string;
   familyName: string;
   onToggleSideNav: Function;
@@ -252,7 +251,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
   render() {
     return <div style={styles.sideNav}>
       <SideNavItem
-        profileImage={this.props.profileImage}
+        hasProfileImage={true}
         content={`${this.props.givenName} ${this.props.familyName}`}
         parentOnClick={() => this.onToggleUser()}
         onToggleSideNav={() => this.props.onToggleSideNav()}
