@@ -189,7 +189,7 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...pro
         fontSize: 12, minWidth: 125, height: 32,
         color: disabled ? colorWithWhiteness(colors.dark, disabledAlpha) : 'black',
         padding: '0 12px',
-        cursor: disabled ? 'not-allowed' : 'pointer',
+        cursor: disabled ? 'not-allowed' : 'pointer'
       }}
       hover={!disabled ? {backgroundColor: colorWithWhiteness(colors.accent, 0.92)} : undefined}
       {...props}
