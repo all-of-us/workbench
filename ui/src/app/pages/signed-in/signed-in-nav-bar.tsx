@@ -72,6 +72,7 @@ export interface Props {
   homeActive: boolean;
   workspacesActive: boolean;
   libraryActive: boolean;
+  profileActive: boolean;
 }
 
 export interface State {

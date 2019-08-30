@@ -57,8 +57,11 @@ const styles = reactStyles({
   navIcon: {
     marginRight: '12px'
   },
+  noIconMargin: {
+    marginLeft: '33px'
+  },
   profileImage: {
-    // Yes, this is bad, but otherwise I'd need to special case
+    // Negative margin is kind of bad, but otherwise I'd need throw conditionals in
     // the margin of the entire sidenav for this one thing
     marginLeft: '-4px',
     marginRight: '8px',
@@ -101,6 +104,8 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
       subItemsOpen: false,
     }
   }
+
+  iconSize = 21;
 
   onClick() {
     if (this.props.href && !this.props.disabled) {
@@ -154,8 +159,8 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
         <span
           style={
             this.props.icon || this.props.hasProfileImage
-              ? {marginLeft: '0px'}
-              : {marginLeft: '33px'}
+              ? null
+              : {...styles.noIconMargin}
           }
         >
           {
@@ -163,7 +168,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
               shape={this.props.icon}
               className={"is-solid"}
               style={styles.navIcon}
-              size={21}
+              size={this.iconSize}
             />
           }
           {
@@ -178,8 +183,12 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
           this.props.containsSubItems
           && <ClrIcon
             shape="angle"
-            style={this.state.subItemsOpen ? {...styles.dropdownIcon, ...styles.dropdownIconOpen} : styles.dropdownIcon}
-            size={21}
+            style={
+              this.state.subItemsOpen
+                ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
+                : styles.dropdownIcon
+            }
+            size={this.iconSize}
           />
         }
       </div>
@@ -318,7 +327,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           content={"Contact Us"}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           parentOnClick={() => this.openContactWidget()}
-          active={false}
         />
       }
     </div>
