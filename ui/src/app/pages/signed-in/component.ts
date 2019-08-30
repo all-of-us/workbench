@@ -113,6 +113,11 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       cdrVersionStore.next(resp.items);
     });
 
+    this.startUserActivityTracker();
+    this.startInactivityTimers();
+  }
+
+  startUserActivityTracker() {
     const signalUserActivity = debouncer(() => {
       window.postMessage(INACTIVITY_CONFIG.MESSAGE_KEY, '*');
     }, 1000);
@@ -120,7 +125,9 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     INACTIVITY_CONFIG.TRACKED_EVENTS.forEach(eventName => {
       window.addEventListener(eventName, () => signalUserActivity(), false);
     });
+  }
 
+  startInactivityTimers() {
     const resetLogoutTimeout = resettableTimeout(() => {
       console.log("logging out the user!");
     }, environment.inactivityTimeoutInSeconds * 1000);
@@ -129,6 +136,8 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       this.showInactivityModal = true;
     }, (environment.inactivityTimeoutInSeconds - environment.inactivityWarningInSeconds) * 1000);
 
+    resetLogoutTimeout();
+    resetInactivityModalTimeout();
     window.addEventListener('message', (e) => {
       if (e.data != INACTIVITY_CONFIG.MESSAGE_KEY) {
         return;

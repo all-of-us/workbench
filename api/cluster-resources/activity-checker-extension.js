@@ -28,10 +28,10 @@ define([
       window.parent.postMessage('USER_ACTIVITY_DETECTED', '*');
     }, 1000);
 
-  // Events array should be in sync with INACTIVITY_CONFIG.TRACKED_EVENTS from signed-in/component.ts
-  ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'].forEach(eventName => {
-    window.addEventListener(eventName, () => signalUserActivity(), false);
-  });
+    // Events array should be in sync with INACTIVITY_CONFIG.TRACKED_EVENTS from signed-in/component.ts
+    ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'].forEach(eventName => {
+      window.addEventListener(eventName, () => signalUserActivity(), false);
+    });
 
     console.log("Loaded Activity Tracker");
   };
