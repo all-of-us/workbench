@@ -429,6 +429,58 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .conceptId(903115L));
   }
 
+  private static CBCriteria drugCriteriaParent() {
+    return new CBCriteria()
+        .parentId(99999)
+        .domainId(DomainType.DRUG.toString())
+        .type(CriteriaType.ATC.toString())
+        .conceptId("21600932")
+        .group(true)
+        .standard(true)
+        .selectable(true);
+  }
+
+  private static CBCriteria drugCriteriaChild(long parentId) {
+    return new CBCriteria()
+        .parentId(parentId)
+        .domainId(DomainType.DRUG.toString())
+        .type(CriteriaType.RXNORM.toString())
+        .conceptId("1520218")
+        .group(false)
+        .selectable(true);
+  }
+
+  private static CBCriteria icd9CriteriaParent() {
+    return new CBCriteria()
+        .parentId(99999)
+        .domainId(DomainType.CONDITION.toString())
+        .type(CriteriaType.ICD9CM.toString())
+        .standard(false)
+        .code("001")
+        .name("Cholera")
+        .count("19")
+        .group(true)
+        .selectable(true)
+        .ancestorData(false)
+        .conceptId("2")
+        .synonyms("[CONDITION_rank1]");
+  }
+
+  private static CBCriteria icd9CriteriaChild(long parentId) {
+    return new CBCriteria()
+        .parentId(parentId)
+        .domainId(DomainType.CONDITION.toString())
+        .type(CriteriaType.ICD9CM.toString())
+        .standard(false)
+        .code("001.1")
+        .name("Cholera")
+        .count("19")
+        .group(false)
+        .selectable(true)
+        .ancestorData(false)
+        .conceptId("1");
+  }
+
   @Test
   public void validateAttribute() throws Exception {
     SearchParameter demo = age();
@@ -616,58 +668,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void firstMentionOfICD9WithOccurrencesOrSnomed5DaysAfterICD10() throws Exception {
-    SearchGroupItem icd9SGI =
-        new SearchGroupItem()
-            .type(DomainType.CONDITION.toString())
-            .addSearchParametersItem(icd9())
-            .temporalGroup(0)
-            .addModifiersItem(occurrencesModifier().operands(Arrays.asList("2")));
-    SearchGroupItem icd10SGI =
-        new SearchGroupItem()
-            .type(DomainType.CONDITION.toString())
-            .addSearchParametersItem(icd10())
-            .temporalGroup(1);
-    SearchGroupItem snomedSGI =
-        new SearchGroupItem()
-            .type(DomainType.CONDITION.toString())
-            .addSearchParametersItem(snomed())
-            .temporalGroup(0);
-
-    // First Mention Of (ICD9 w/modifiers or Snomed) 5 Days After ICD10 w/modifiers
-    SearchGroup temporalGroup =
-        new SearchGroup()
-            .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
-            .temporal(true)
-            .mention(TemporalMention.FIRST_MENTION)
-            .time(TemporalTime.X_DAYS_AFTER)
-            .timeValue(5L);
-
-    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
-    // matches icd9SGI in group 0 and icd10SGI in group 1
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
   public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() throws Exception {
-    CBCriteria drugNode1 =
-        new CBCriteria()
-            .parentId(99999)
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .conceptId("21600932")
-            .group(true)
-            .selectable(true);
+    CBCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
-    CBCriteria drugNode2 =
-        new CBCriteria()
-            .parentId(drugNode1.getId())
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.RXNORM.toString())
-            .conceptId("1520218")
-            .group(false)
-            .selectable(true);
+    CBCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
     insertCriteriaAncestor(1520218, 1520218);
     SearchGroupItem drugSGI =
@@ -782,14 +786,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void firstMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
-    CBCriteria drugCriteria =
-        new CBCriteria()
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(false)
-            .ancestorData(true)
-            .standard(true)
-            .conceptId("11");
+    CBCriteria drugCriteria = drugCriteriaChild(1).conceptId("11");
     saveCriteriaWithPath("0", drugCriteria);
     insertCriteriaAncestor(11, 11);
 
@@ -821,14 +818,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void lastMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
-    CBCriteria drugCriteria =
-        new CBCriteria()
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(false)
-            .ancestorData(true)
-            .standard(true)
-            .conceptId("11");
+    CBCriteria drugCriteria = drugCriteriaChild(1).conceptId("11");
     saveCriteriaWithPath("0", drugCriteria);
     insertCriteriaAncestor(11, 11);
 
@@ -904,25 +894,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void lastMentionOfMeasurementOrVisit5DaysAfterDrug() throws Exception {
-    CBCriteria drugCriteria1 =
-        new CBCriteria()
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(true)
-            .ancestorData(true)
-            .standard(true)
-            .selectable(true)
-            .conceptId("21600932");
+    CBCriteria drugCriteria1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugCriteria1);
-    CBCriteria drugCriteria2 =
-        new CBCriteria()
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.RXNORM.toString())
-            .group(false)
-            .selectable(true)
-            .ancestorData(true)
-            .standard(true)
-            .conceptId("1520218");
+    CBCriteria drugCriteria2 = drugCriteriaChild(drugCriteria1.getId());
     saveCriteriaWithPath(drugCriteria1.getPath(), drugCriteria2);
     insertCriteriaAncestor(1520218, 1520218);
 
@@ -1046,34 +1020,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ConditionParent() throws Exception {
-    CBCriteria criteriaParent =
-        new CBCriteria()
-            .parentId(99999)
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .standard(false)
-            .code("001")
-            .name("Cholera")
-            .count("19")
-            .group(true)
-            .selectable(true)
-            .ancestorData(false)
-            .conceptId("2")
-            .synonyms("[CONDITION_rank1]");
+    CBCriteria criteriaParent = icd9CriteriaParent();
     saveCriteriaWithPath("0", criteriaParent);
-    CBCriteria criteriaChild =
-        new CBCriteria()
-            .parentId(criteriaParent.getId())
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .standard(false)
-            .code("001.1")
-            .name("Cholera")
-            .count("19")
-            .group(false)
-            .selectable(true)
-            .ancestorData(false)
-            .conceptId("1");
+    CBCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
     saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
 
     SearchRequest searchRequest =
@@ -1194,34 +1143,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ParentAndICD10ChildCondition() throws Exception {
-    CBCriteria criteriaParent =
-        new CBCriteria()
-            .parentId(99999)
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .standard(false)
-            .code("001")
-            .name("Cholera")
-            .count("19")
-            .group(true)
-            .selectable(true)
-            .ancestorData(false)
-            .conceptId("2")
-            .synonyms("[CONDITION_rank1]");
+    CBCriteria criteriaParent = icd9CriteriaParent();
     saveCriteriaWithPath("0", criteriaParent);
-    CBCriteria criteriaChild =
-        new CBCriteria()
-            .parentId(criteriaParent.getId())
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .standard(false)
-            .code("001.1")
-            .name("Cholera")
-            .count("19")
-            .group(false)
-            .selectable(true)
-            .ancestorData(false)
-            .conceptId("1");
+    CBCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
     saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
 
     SearchRequest searchRequest =
@@ -1333,25 +1257,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugParent() throws Exception {
-    CBCriteria drugNode1 =
-        new CBCriteria()
-            .parentId(99999)
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .conceptId("21600932")
-            .group(true)
-            .standard(true)
-            .selectable(true);
+    CBCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
-    CBCriteria drugNode2 =
-        new CBCriteria()
-            .parentId(drugNode1.getId())
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.RXNORM.toString())
-            .conceptId("1520218")
-            .group(false)
-            .standard(true)
-            .selectable(true);
+    CBCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
 
     insertCriteriaAncestor(1520218, 1520218);
@@ -1369,25 +1277,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugParentAndChild() throws Exception {
-    CBCriteria drugNode1 =
-        new CBCriteria()
-            .parentId(99999)
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .conceptId("21600932")
-            .group(true)
-            .standard(true)
-            .selectable(true);
+    CBCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
-    CBCriteria drugNode2 =
-        new CBCriteria()
-            .parentId(drugNode1.getId())
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.RXNORM.toString())
-            .conceptId("1520218")
-            .group(false)
-            .standard(true)
-            .selectable(true);
+    CBCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
 
     insertCriteriaAncestor(1520218, 1520218);
