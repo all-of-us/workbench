@@ -3,7 +3,7 @@ import colors from "app/styles/colors";
 import {reactStyles} from "app/utils";
 import {Clickable} from "app/components/buttons";
 import {ClrIcon} from "./icons";
-import {navigate} from "app/utils/navigation";
+import {navigate, signInStore} from "app/utils/navigation";
 import {environment} from "../../environments/environment";
 import {RefObject} from "react";
 import {openZendeskWidget} from 'app/utils/zendesk';
@@ -55,7 +55,16 @@ const styles = reactStyles({
     flex: '1 0 auto',
   },
   navIcon: {
-    marginRight: '8px'
+    marginRight: '12px'
+  },
+  profileImage: {
+    // Yes, this is bad, but otherwise I'd need to special case
+    // the margin of the entire sidenav for this one thing
+    marginLeft: '-4px',
+    marginRight: '8px',
+    borderRadius: '100px',
+    height: '29px',
+    width: '29px',
   },
   dropdownIcon: {
     marginRight: '8px',
@@ -69,6 +78,7 @@ const styles = reactStyles({
 
 interface SideNavItemProps {
   icon?: string,
+  profileImage?: string,
   content: string,
   parentOnClick?: Function,
   onToggleSideNav: Function,
@@ -140,7 +150,11 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
         style={styles.sideNavItemContent}
       >
         <span
-          style={this.props.icon ? {marginLeft: '0px'} : {marginLeft: '29px'}}
+          style={
+            this.props.icon || this.props.profileImage
+              ? {marginLeft: '0px'}
+              : {marginLeft: '29px'}
+          }
         >
           {
             this.props.icon && <ClrIcon
@@ -148,6 +162,12 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
               className={"is-solid"}
               style={styles.navIcon}
               size={21}
+            />
+          }
+          {
+            this.props.profileImage && <img
+              src={this.props.profileImage}
+              style={styles.profileImage}
             />
           }
           {this.props.content}
@@ -172,6 +192,7 @@ export interface SideNavProps {
   hasDataAccess: boolean;
   aouAccountEmailAddress: string;
   contactEmailAddress: string;
+  profileImage: string;
   givenName: string;
   familyName: string;
   onToggleSideNav: Function;
@@ -208,11 +229,11 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
     this.setState(previousState => ({showHelpOptions: !previousState.showHelpOptions}));
   }
 
-  redirectToZendesk(): void {
+  redirectToZendesk() {
     window.open(environment.zendeskHelpCenterUrl, '_blank');
   }
 
-  openContactWidget(): void {
+  openContactWidget() {
     openZendeskWidget(
       this.props.givenName,
       this.props.familyName,
@@ -221,10 +242,17 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
     )
   }
 
+  signOut() {
+    signInStore.getValue().signOut();
+    // Force a hard browser reload here. We want to ensure that no local state
+    // is persisting across user sessions, as this can lead to subtle bugs.
+    window.location.assign('/');
+  }
+
   render() {
     return <div style={styles.sideNav}>
       <SideNavItem
-        icon="user"
+        profileImage={this.props.profileImage}
         content={`${this.props.givenName} ${this.props.familyName}`}
         parentOnClick={() => this.onToggleUser()}
         onToggleSideNav={() => this.props.onToggleSideNav()}
@@ -245,8 +273,8 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       {
         this.state.showUserOptions && <SideNavItem
           content={"Sign Out"}
-          // signOut()
           onToggleSideNav={() => this.props.onToggleSideNav()}
+          parentOnClick={() => this.signOut()}
           active={false}
           disabled={false}
         />

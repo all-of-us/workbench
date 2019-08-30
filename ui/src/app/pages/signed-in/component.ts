@@ -106,7 +106,13 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       if (signedIn) {
         this.profileImage = this.signInService.profileImage;
       } else {
+<<<<<<< HEAD
         navigateSignOut();
+=======
+        // Force a hard browser reload here. We want to ensure that no local state
+        // is persisting across user sessions, as this can lead to subtle bugs.
+        window.location.assign('/');
+>>>>>>> signout and profile picture
       }
     });
 
@@ -175,11 +181,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
-  }
-
-  signOut(): void {
-    this.signInService.signOut();
-    navigateSignOut();
   }
 
   closeInactivityModal(): void {

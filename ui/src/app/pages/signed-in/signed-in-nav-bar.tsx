@@ -178,6 +178,7 @@ export const SignedInNavBar = withUserProfile()(
             hasDataAccess={this.props.hasDataAccess}
             aouAccountEmailAddress={this.props.aouAccountEmailAddress}
             contactEmailAddress={this.props.contactEmailAddress}
+            profileImage={this.props.profileImage}
             givenName={this.props.givenName}
             familyName={this.props.familyName}
             // Passing the function itself deliberately, we want to be able to
