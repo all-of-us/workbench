@@ -3,7 +3,7 @@
  */
 import {Injectable, NgZone} from '@angular/core';
 import {ServerConfigService} from 'app/services/server-config.service';
-import {signInStore} from "app/utils/navigation";
+import {signInStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
 import {ReplaySubject} from 'rxjs/ReplaySubject';

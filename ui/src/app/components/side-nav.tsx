@@ -1,12 +1,11 @@
-import * as React from 'react';
-import colors from "app/styles/colors";
-import {reactStyles} from "app/utils";
-import {Clickable} from "app/components/buttons";
-import {ClrIcon} from "./icons";
-import {navigate, signInStore} from "app/utils/navigation";
-import {environment} from "../../environments/environment";
-import {RefObject} from "react";
+import {Clickable} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
+import colors from 'app/styles/colors';
+import {reactStyles} from 'app/utils';
+import {navigate, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget} from 'app/utils/zendesk';
+import {environment} from 'environments/environment';
+import * as React from 'react';
 
 const styles = reactStyles({
   sideNav: {
@@ -80,13 +79,13 @@ const styles = reactStyles({
 });
 
 interface SideNavItemProps {
-  icon?: string,
-  hasProfileImage?: boolean,
-  content: string,
-  parentOnClick?: Function,
-  onToggleSideNav: Function,
-  href?: string,
-  containsSubItems?: boolean,
+  icon?: string;
+  hasProfileImage?: boolean;
+  content: string;
+  parentOnClick?: Function;
+  onToggleSideNav: Function;
+  href?: string;
+  containsSubItems?: boolean;
   active?: boolean;
   disabled?: boolean;
 }
@@ -102,7 +101,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
     this.state = {
       hovering: false,
       subItemsOpen: false,
-    }
+    };
   }
 
   iconSize = 21;
@@ -118,7 +117,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
   }
 
   closeSubItems() {
-    if(this.props.containsSubItems) {
+    if (this.props.containsSubItems) {
       this.setState({subItemsOpen: false});
     }
   }
@@ -127,13 +126,13 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
     let sideNavItemStyles = {...styles.sideNavItem};
     if (disabled) {
       // We want to short-circuit in this case.
-      return {...sideNavItemStyles, ...styles.sideNavItemDisabled}
+      return {...sideNavItemStyles, ...styles.sideNavItemDisabled};
     }
     if (active) {
-      sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemActive}
+      sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemActive};
     }
     if (hovering) {
-      sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemHover}
+      sideNavItemStyles = {...sideNavItemStyles, ...styles.sideNavItemHover};
     }
     return sideNavItemStyles;
   }
@@ -166,7 +165,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
           {
             this.props.icon && <ClrIcon
               shape={this.props.icon}
-              className={"is-solid"}
+              className={'is-solid'}
               style={styles.navIcon}
               size={this.iconSize}
             />
@@ -182,7 +181,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
         {
           this.props.containsSubItems
           && <ClrIcon
-            shape="angle"
+            shape='angle'
             style={
               this.state.subItemsOpen
                 ? {...styles.dropdownIcon, ...styles.dropdownIconOpen}
@@ -192,7 +191,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
           />
         }
       </div>
-    </Clickable>
+    </Clickable>;
   }
 }
 
@@ -212,8 +211,8 @@ export interface SideNavProps {
 export interface SideNavState {
   showUserOptions: boolean;
   showHelpOptions: boolean;
-  userRef: RefObject<SideNavItem>;
-  helpRef: RefObject<SideNavItem>;
+  userRef: React.RefObject<SideNavItem>;
+  helpRef: React.RefObject<SideNavItem>;
 
 }
 
@@ -250,7 +249,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       this.props.familyName,
       this.props.aouAccountEmailAddress,
       this.props.contactEmailAddress,
-    )
+    );
   }
 
   signOut() {
@@ -272,44 +271,44 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       />
       {
         this.state.showUserOptions && <SideNavItem
-          content={"Profile"}
+          content={'Profile'}
           onToggleSideNav={() => this.props.onToggleSideNav()}
-          href="/profile"
+          href='/profile'
           active={this.props.profileActive}
         />
       }
       {
         this.state.showUserOptions && <SideNavItem
-          content={"Sign Out"}
+          content={'Sign Out'}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           parentOnClick={() => this.signOut()}
         />
       }
       <SideNavItem
-        icon="home"
-        content="Home"
+        icon='home'
+        content='Home'
         onToggleSideNav={() => this.props.onToggleSideNav()}
-        href="/"
+        href='/'
         active={this.props.homeActive}
       />
       <SideNavItem
-        icon="applications"
-        content="Your Workspaces"
+        icon='applications'
+        content='Your Workspaces'
         onToggleSideNav={() => this.props.onToggleSideNav()}
-        href={"/workspaces"}
+        href={'/workspaces'}
         active={this.props.workspacesActive}
         disabled={!this.props.hasDataAccess}
       />
       <SideNavItem
-        icon="star"
-        content="Featured Workspaces"
+        icon='star'
+        content='Featured Workspaces'
         onToggleSideNav={() => this.props.onToggleSideNav()}
-        href={"/library"}
+        href={'/library'}
         active={this.props.libraryActive}
       />
       <SideNavItem
-        icon="help"
-        content="User Support"
+        icon='help'
+        content='User Support'
         parentOnClick={() => this.onToggleHelp()}
         onToggleSideNav={() => this.props.onToggleSideNav()}
         containsSubItems={true}
@@ -317,18 +316,18 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       />
       {
         this.state.showHelpOptions && <SideNavItem
-          content={"User Forum"}
+          content={'User Forum'}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           parentOnClick={() => this.redirectToZendesk()}
         />
       }
       {
         this.state.showHelpOptions && <SideNavItem
-          content={"Contact Us"}
+          content={'Contact Us'}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           parentOnClick={() => this.openContactWidget()}
         />
       }
-    </div>
+    </div>;
   }
 }

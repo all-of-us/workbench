@@ -60,18 +60,18 @@ import {
   ConfigService,
   Configuration,
 } from 'generated';
-
 import {Configuration as FetchConfiguration} from 'generated/fetch';
-
-import {TextModalComponent} from 'app/components/text-modal';
-import {DataPageComponent} from 'app/pages/data/data-page';
-import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
-import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
-import {SignedInNavBarComponent} from "./pages/signed-in/signed-in-nav-bar";
+
+import {TextModalComponent} from 'app/components/text-modal';
+import {InteractiveNotebookComponent} from 'app/pages/analysis/interactive-notebook';
+import {DataPageComponent} from 'app/pages/data/data-page';
+import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
+import {SignedInNavBarComponent} from 'app/pages/signed-in/signed-in-nav-bar';
+
 
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so

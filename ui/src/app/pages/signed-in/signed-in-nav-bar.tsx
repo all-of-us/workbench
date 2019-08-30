@@ -1,12 +1,10 @@
-import {Component, Input} from "@angular/core";
-import {reactStyles, ReactWrapperBase, withUserProfile} from "app/utils";
-import {Subscription} from "rxjs";
-import * as React from "react";
-import {ClrIcon} from "app/components/icons";
-import colors from "app/styles/colors";
-import {Breadcrumb} from "app/components/breadcrumb";
-import {SideNav} from "app/components/side-nav";
-import {RefObject} from "react"
+import {Component, Input} from '@angular/core';
+import {Breadcrumb} from 'app/components/breadcrumb';
+import {ClrIcon} from 'app/components/icons';
+import {SideNav} from 'app/components/side-nav';
+import colors from 'app/styles/colors';
+import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import * as React from 'react';
 
 const styles = reactStyles({
   headerContainer: {
@@ -76,12 +74,10 @@ export interface Props {
 }
 
 export interface State {
-  profileLoadingSub: Subscription;
-  subscriptions: Array<Subscription>;
   sideNavVisible: boolean;
   barsTransform: string;
   hovering: boolean;
-  wrapperRef: RefObject<HTMLDivElement>
+  wrapperRef: React.RefObject<HTMLDivElement>;
 }
 
 const barsTransformNotRotated = 'rotate(0deg)';
@@ -96,8 +92,6 @@ export const SignedInNavBar = withUserProfile()(
       this.onToggleSideNav = this.onToggleSideNav.bind(this);
       this.handleClickOutside = this.handleClickOutside.bind(this);
       this.state = {
-        profileLoadingSub: null,
-        subscriptions: [],
         sideNavVisible: false,
         barsTransform: barsTransformNotRotated,
         hovering: false,
@@ -155,7 +149,7 @@ export const SignedInNavBar = withUserProfile()(
           </ClrIcon>
         </div>
         <div>
-          <a href={"/"}>
+          <a href={'/'}>
             <img
               src={this.props.headerImg}
               style={styles.headerImage}
@@ -187,7 +181,7 @@ export const SignedInNavBar = withUserProfile()(
             onToggleSideNav={this.onToggleSideNav}
           />
         }
-      </div>
+      </div>;
     }
   }
 );

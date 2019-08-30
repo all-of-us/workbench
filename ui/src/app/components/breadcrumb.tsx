@@ -11,8 +11,8 @@ import {
   withUrlParams
 } from 'app/utils';
 import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
-import {WorkspaceData} from "../utils/workspace-data";
-import {Cohort, ConceptSet} from "../../generated/fetch";
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {Cohort, ConceptSet} from 'generated/fetch';
 
 const styles = {
   breadcrumb: {
@@ -86,7 +86,11 @@ export const getTrail = (
     case BreadcrumbType.ConceptSet:
       return [
         ...getTrail(BreadcrumbType.Data, workspace, cohort, conceptSet, urlParams),
-        new BreadcrumbData(conceptSet ? conceptSet.name : '...', `${prefix}/data/concepts/sets/${csid}`)
+        new BreadcrumbData(
+          conceptSet
+            ? conceptSet.name
+            : '...', `${prefix}/data/concepts/sets/${csid}`
+        )
       ];
     case BreadcrumbType.Cohort:
       return [
@@ -139,11 +143,11 @@ const BreadcrumbLink = ({href, ...props}) => {
 };
 
 interface Props {
-  workspace: WorkspaceData,
-  cohort: Cohort,
-  conceptSet: ConceptSet,
-  urlParams: any,
-  routeConfigData: any
+  workspace: WorkspaceData;
+  cohort: Cohort;
+  conceptSet: ConceptSet;
+  urlParams: any;
+  routeConfigData: any;
 }
 
 export const Breadcrumb = fp.flow(
@@ -165,15 +169,15 @@ export const Breadcrumb = fp.flow(
         this.props.cohort,
         this.props.conceptSet,
         this.props.urlParams
-      )
+      );
     }
 
     first(): Array<BreadcrumbData> {
-      return fp.dropRight(1, this.trail())
+      return fp.dropRight(1, this.trail());
     }
 
     last(): BreadcrumbData {
-      return fp.last(this.trail())
+      return fp.last(this.trail());
     }
 
     render() {

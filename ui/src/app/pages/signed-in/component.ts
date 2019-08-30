@@ -1,5 +1,5 @@
 import {Location} from '@angular/common';
-import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
@@ -7,9 +7,15 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
+<<<<<<< HEAD
 import {debouncer, hasRegisteredAccess, resettableTimeout} from 'app/utils';
 import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget, openZendeskWidget} from 'app/utils/zendesk';
+=======
+import {hasRegisteredAccess} from 'app/utils';
+import {cdrVersionStore, routeConfigDataStore} from 'app/utils/navigation';
+import {initializeZendeskWidget} from 'app/utils/zendesk';
+>>>>>>> linting with a HEPA filter
 import {environment} from 'environments/environment';
 import {Authority} from 'generated';
 import Timeout = NodeJS.Timeout;
@@ -209,6 +215,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get profileActive(): boolean {
-    return this.locationService.path() === "/profile";
+    return this.locationService.path() === '/profile';
   }
 }
