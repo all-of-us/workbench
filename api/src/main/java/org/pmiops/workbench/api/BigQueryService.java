@@ -10,6 +10,7 @@ import com.google.cloud.bigquery.JobInfo;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableId;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -39,10 +40,7 @@ public class BigQueryService {
 
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  /**
-   * This method is protected, rather than private, so that it can be overridden for testing
-   * purposes.
-   */
+  @VisibleForTesting
   protected BigQuery getBigQueryService() {
     CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     return BigQueryOptions.newBuilder()
