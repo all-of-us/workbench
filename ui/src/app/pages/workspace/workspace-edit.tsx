@@ -439,7 +439,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       try {
         const cdrVersions = await cdrVersionsApi().getCdrVersions();
         this.setState({cdrVersionItems: cdrVersions.items});
-        if (this.isMode(WorkspaceEditMode.Create)) {
+        // TODO(RW-3342): On duplicate, use the source CDR unless it is archived, else use the
+        // default. For now we always use the default as a short-term band-aid during the VPC-SC
+        // transition (old CDRs won't work, don't default to them when cloning).
+        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
           this.setState(fp.set(['workspace', 'cdrVersionId'], cdrVersions.defaultCdrVersionId));
         }
       } catch (exception) {
