@@ -377,7 +377,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     PageRequest expectedPageRequest =
         new PageRequest().page(0).pageSize(25).sortOrder(SortOrder.ASC).sortColumn("startDate");
 
-
     ReviewFilter testFilter = new ReviewFilter().domain(DomainType.CONDITION);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
@@ -714,8 +713,10 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
     WorkspaceAccessEntry accessLevelEntry =
         new WorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.WRITER.toString());
-    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry = ImmutableMap.of(userProvider.get().getEmail(), accessLevelEntry);
+    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
+        ImmutableMap.of(userProvider.get().getEmail(), accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(mockFireCloudService.getWorkspaceAcl(NAMESPACE, NAME)).thenReturn(workspaceAccessLevelResponse);
+    when(mockFireCloudService.getWorkspaceAcl(NAMESPACE, NAME))
+        .thenReturn(workspaceAccessLevelResponse);
   }
 }

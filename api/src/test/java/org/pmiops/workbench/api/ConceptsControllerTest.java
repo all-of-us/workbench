@@ -9,16 +9,14 @@ import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -313,7 +311,8 @@ public class ConceptsControllerTest {
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
     when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)).thenReturn(fcResponse);
-    stubGetWorkspaceAcl(WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.WRITER);
+    stubGetWorkspaceAcl(
+        WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.WRITER);
   }
 
   @Test
@@ -957,11 +956,13 @@ public class ConceptsControllerTest {
     assertThat(response.getBody().getVocabularyCounts()).isNull();
   }
 
-  private void stubGetWorkspaceAcl(String ns, String name, String creator, WorkspaceAccessLevel access) {
+  private void stubGetWorkspaceAcl(
+      String ns, String name, String creator, WorkspaceAccessLevel access) {
     WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
     WorkspaceAccessEntry accessLevelEntry =
         new WorkspaceAccessEntry().accessLevel(access.toString());
-    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry = ImmutableMap.of(creator, accessLevelEntry);
+    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
+        ImmutableMap.of(creator, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
   }

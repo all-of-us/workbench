@@ -13,7 +13,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -294,11 +293,13 @@ public class CohortsControllerTest {
     stubGetWorkspaceAcl(ns, name, creator, access);
   }
 
-  private void stubGetWorkspaceAcl(String ns, String name, String creator, WorkspaceAccessLevel access) {
+  private void stubGetWorkspaceAcl(
+      String ns, String name, String creator, WorkspaceAccessLevel access) {
     WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
     WorkspaceAccessEntry accessLevelEntry =
         new WorkspaceAccessEntry().accessLevel(access.toString());
-    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry = ImmutableMap.of(creator, accessLevelEntry);
+    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
+        ImmutableMap.of(creator, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
   }
@@ -459,7 +460,8 @@ public class CohortsControllerTest {
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setAccessLevel(owner.toString());
     when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, workspaceName)).thenReturn(fcResponse);
-    stubGetWorkspaceAcl(WORKSPACE_NAMESPACE, workspaceName, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspaceAcl(
+        WORKSPACE_NAMESPACE, workspaceName, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
     when(workspaceService.getWorkspaceAccessLevel(WORKSPACE_NAMESPACE, workspaceName))
         .thenThrow(new NotFoundException());
     MaterializeCohortRequest request = new MaterializeCohortRequest();

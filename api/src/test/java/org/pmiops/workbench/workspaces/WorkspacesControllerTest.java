@@ -416,7 +416,8 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspaceAcl(anyString(), anyString())).thenReturn(acl);
   }
 
-  private void stubFcGetWorkspaceACLForWorkspace(String workspaceNamespace, String workspaceId, WorkspaceACL acl) {
+  private void stubFcGetWorkspaceACLForWorkspace(
+      String workspaceNamespace, String workspaceId, WorkspaceACL acl) {
     when(fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId)).thenReturn(acl);
   }
 
@@ -2163,7 +2164,10 @@ public class WorkspacesControllerTest {
         fromWorkspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.NO_ACCESS);
-    stubFcGetWorkspaceACLForWorkspace(fromWorkspace.getNamespace(), fromWorkspace.getName(), createWorkspaceACLWithPermission(WorkspaceAccessLevel.NO_ACCESS));
+    stubFcGetWorkspaceACLForWorkspace(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        createWorkspaceACLWithPermission(WorkspaceAccessLevel.NO_ACCESS));
     String fromNotebookName = "origin";
 
     Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
@@ -2173,7 +2177,10 @@ public class WorkspacesControllerTest {
         toWorkspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.WRITER);
-    stubFcGetWorkspaceACLForWorkspace(toWorkspace.getNamespace(), toWorkspace.getName(), createWorkspaceACLWithPermission(WorkspaceAccessLevel.WRITER));
+    stubFcGetWorkspaceACLForWorkspace(
+        toWorkspace.getNamespace(),
+        toWorkspace.getName(),
+        createWorkspaceACLWithPermission(WorkspaceAccessLevel.WRITER));
     String newNotebookName = "new";
 
     CopyRequest copyNotebookRequest =
