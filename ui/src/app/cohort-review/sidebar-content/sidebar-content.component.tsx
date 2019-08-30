@@ -33,6 +33,13 @@ const styles = {
     color: colorWithWhiteness(colors.dark, -1),
     fontSize: '13px',
     fontWeight: 400
+  },
+  button: {
+    marginLeft: '1rem',
+    height: 'auto'
+  },
+  inlineBlock: {
+    display: 'inline-block'
   }
 };
 
@@ -210,6 +217,7 @@ const AnnotationItem = fp.flow(
               this.save(value);
             }
           }}
+          placeholder='YYYY-MM-DD'
           disabled={disabled}
         />;
     }
@@ -220,17 +228,17 @@ const AnnotationItem = fp.flow(
     const {error, saving, success} = this.state;
     return <React.Fragment>
       <div style={{alignItems: 'center', ...headerStyles.formLabel}}>
-        <div>{columnName}</div>
-        {error && <div>
+        <div style={styles.inlineBlock}>{columnName}</div>
+        {error && <div style={styles.inlineBlock}>
           <ClrIcon style={styles.error} shape='exclamation-triangle'
             size='20' className='is-solid' />
           <span style={styles.message}> Save Failed</span>
         </div>}
-        {success && <div>
+        {success && <div style={styles.inlineBlock}>
           <ClrIcon style={styles.success} shape='check-circle' size='20' className='is-solid' />
           <span style={styles.message}> Annotation Saved</span>
         </div>}
-        {saving && <Spinner size={16}/>}
+        {saving && <Spinner style={{marginLeft: '0.25rem'}} size={16}/>}
       </div>
       {this.renderInput()}
     </React.Fragment>;
@@ -246,6 +254,7 @@ export const SidebarContent = fp.flow(
     setParticipant: Function,
     annotations: ParticipantCohortAnnotation[],
     annotationDefinitions: CohortAnnotationDefinition[],
+    annotationDeleted: boolean,
     setAnnotations: Function,
     openCreateDefinitionModal: Function,
     openEditDefinitionsModal: Function,
@@ -284,8 +293,8 @@ export const SidebarContent = fp.flow(
 
   render() {
     const {
-      participant: {participantId, birthDate, gender, race, ethnicity, status},
-      annotations, setAnnotations, annotationDefinitions,
+      participant: {participantId, birthDate, gender, race, ethnicity, deceased, status},
+      annotations, setAnnotations, annotationDefinitions, annotationDeleted,
       openCreateDefinitionModal, openEditDefinitionsModal, workspace: {accessLevel}
     } = this.props;
     const {savingStatus} = this.state;
@@ -297,13 +306,14 @@ export const SidebarContent = fp.flow(
       <div><span style={{fontWeight: 'bold'}}>Gender:</span> {gender}</div>
       <div><span style={{fontWeight: 'bold'}}>Race:</span> {race}</div>
       <div><span style={{fontWeight: 'bold'}}>Ethnicity:</span> {ethnicity}</div>
+      <div><span style={{fontWeight: 'bold'}}>Deceased:</span> {deceased ? 'Yes' : 'No'}</div>
 
       <div style={{display: 'flex', marginTop: '1rem'}}>
         <div style={styles.header}>Participant Status</div>
         {savingStatus && <Spinner width={16} height={16} style={{marginLeft: 'auto'}} />}
       </div>
       <div>Choose a Review Status for Participant {participantId}</div>
-      <div style={{...(disabled ? {cursor: 'not-allowed'} : {})}}>
+      <div style={{...(disabled ? {cursor: 'not-allowed'} : {}), marginBottom: '1rem'}}>
         <Select
           options={[
             {label: '--', value: CohortStatus.NOTREVIEWED},
@@ -316,16 +326,19 @@ export const SidebarContent = fp.flow(
           isDisabled={disabled}
         />
       </div>
-
-      <div style={{display: 'flex', marginTop: '1rem'}}>
+      {annotationDeleted && <div>
+        <ClrIcon style={styles.success} shape='check-circle' size='20' className='is-solid' />
+        <span style={styles.message}> Annotation Field Deleted</span>
+      </div>}
+      <div style={{display: 'flex'}}>
         <div style={styles.header}>Annotations</div>
         <Button
-          type='link' style={{marginLeft: '1rem', ...(disabled ? {cursor: 'not-allowed'} : {})}}
+          type='link' style={{...styles.button, ...(disabled ? {cursor: 'not-allowed'} : {})}}
           onClick={openCreateDefinitionModal} disabled={disabled}>
           <ClrIcon shape='plus-circle' size={21} />
         </Button>
         {!!annotationDefinitions.length && <Button
-          style={{marginLeft: '1rem', ...(disabled ? {cursor: 'not-allowed'} : {})}} type='link'
+          type='link' style={{...styles.button, ...(disabled ? {cursor: 'not-allowed'} : {})}}
           onClick={openEditDefinitionsModal} disabled={disabled}
         >Edit</Button>}
       </div>

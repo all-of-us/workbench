@@ -78,6 +78,7 @@ interface State {
   participant: Participant;
   annotations: ParticipantCohortAnnotation[];
   annotationDefinitions: CohortAnnotationDefinition[];
+  annotationDeleted: boolean;
 }
 
 export const DetailPage = withCurrentWorkspace()(
@@ -91,7 +92,8 @@ export const DetailPage = withCurrentWorkspace()(
         editingDefinitions: false,
         participant: null,
         annotations: null,
-        annotationDefinitions: null
+        annotationDefinitions: null,
+        annotationDeleted: false
       };
       this.setAnnotations = this.setAnnotations.bind(this);
       this.openCreateDefinitionModal = this.openCreateDefinitionModal.bind(this);
@@ -173,8 +175,11 @@ export const DetailPage = withCurrentWorkspace()(
       this.setState({editingDefinitions: true});
     }
 
-    closeEditDefinitionsModal() {
-      this.setState({editingDefinitions: false});
+    closeEditDefinitionsModal(deleted: boolean = false) {
+      this.setState({editingDefinitions: false, annotationDeleted: deleted});
+      if (deleted) {
+        setTimeout(() => this.setState({annotationDeleted: false}), 5000);
+      }
     }
 
     setAnnotationDefinitions(v) {
@@ -186,8 +191,8 @@ export const DetailPage = withCurrentWorkspace()(
     }
 
     render() {
-      const {annotations, annotationDefinitions, creatingDefinition, editingDefinitions,
-        participant, sidebarOpen} = this.state;
+      const {annotations, annotationDefinitions, annotationDeleted, creatingDefinition,
+        editingDefinitions, participant, sidebarOpen} = this.state;
       return <React.Fragment>
         {!(participant && annotations && annotationDefinitions) && <SpinnerOverlay />}
         {participant && annotations && annotationDefinitions && <React.Fragment>
@@ -209,6 +214,7 @@ export const DetailPage = withCurrentWorkspace()(
                 setParticipant={this.setParticipant}
                 annotations={annotations}
                 annotationDefinitions={annotationDefinitions}
+                annotationDeleted={annotationDeleted}
                 setAnnotations={this.setAnnotations}
                 openCreateDefinitionModal={this.openCreateDefinitionModal}
                 openEditDefinitionsModal={this.openEditDefinitionsModal}>
