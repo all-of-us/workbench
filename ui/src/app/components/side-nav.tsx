@@ -84,8 +84,8 @@ interface SideNavItemProps {
   onToggleSideNav: Function,
   href?: string,
   containsSubItems?: boolean,
-  active: boolean;
-  disabled: boolean;
+  active?: boolean;
+  disabled?: boolean;
 }
 
 interface SideNavItemState {
@@ -140,7 +140,9 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
       data-test-id={this.props.content.toString().replace(/\s/g, '') + '-menu-item'}
       style={this.getStyles(this.props.active, this.state.hovering, this.props.disabled)}
       onClick={() => {
-        this.props.parentOnClick();
+        if (this.props.parentOnClick) {
+          this.props.parentOnClick();
+        }
         this.onClick();
       }}
       onMouseEnter={() => this.setState({hovering: true})}
@@ -189,6 +191,7 @@ export interface SideNavProps {
   homeActive: boolean;
   workspacesActive: boolean;
   libraryActive: boolean;
+  profileActive: boolean;
   hasDataAccess: boolean;
   aouAccountEmailAddress: string;
   contactEmailAddress: string;
@@ -256,8 +259,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         parentOnClick={() => this.onToggleUser()}
         onToggleSideNav={() => this.props.onToggleSideNav()}
         containsSubItems={true}
-        active={false}
-        disabled={false}
         ref={this.state.userRef}
       />
       {
@@ -265,8 +266,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           content={"Profile"}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           href="/profile"
-          active={false}
-          disabled={false}
+          active={this.props.profileActive}
         />
       }
       {
@@ -274,8 +274,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           content={"Sign Out"}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           parentOnClick={() => this.signOut()}
-          active={false}
-          disabled={false}
         />
       }
       <SideNavItem
@@ -284,7 +282,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={() => this.props.onToggleSideNav()}
         href="/"
         active={this.props.homeActive}
-        disabled={false}
       />
       <SideNavItem
         icon="applications"
@@ -300,7 +297,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={() => this.props.onToggleSideNav()}
         href={"/library"}
         active={this.props.libraryActive}
-        disabled={false}
       />
       <SideNavItem
         icon="help"
@@ -308,8 +304,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         parentOnClick={() => this.onToggleHelp()}
         onToggleSideNav={() => this.props.onToggleSideNav()}
         containsSubItems={true}
-        active={false}
-        disabled={false}
         ref={this.state.helpRef}
       />
       {
@@ -317,8 +311,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           content={"User Forum"}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           parentOnClick={() => this.redirectToZendesk()}
-          active={false}
-          disabled={false}
         />
       }
       {
@@ -327,7 +319,6 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           onToggleSideNav={() => this.props.onToggleSideNav()}
           parentOnClick={() => this.openContactWidget()}
           active={false}
-          disabled={false}
         />
       }
     </div>

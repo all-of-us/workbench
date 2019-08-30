@@ -207,4 +207,8 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   get workspacesActive(): boolean {
     return this.locationService.path() === '/workspaces';
   }
+
+  get profileActive(): boolean {
+    return this.locationService.path() === "/profile";
+  }
 }

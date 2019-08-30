@@ -175,6 +175,7 @@ export const SignedInNavBar = withUserProfile()(
             homeActive={this.props.homeActive}
             workspacesActive={this.props.workspacesActive}
             libraryActive={this.props.libraryActive}
+            profileActive={this.props.profileActive}
             hasDataAccess={this.props.hasDataAccess}
             aouAccountEmailAddress={this.props.aouAccountEmailAddress}
             contactEmailAddress={this.props.contactEmailAddress}
@@ -206,6 +207,7 @@ export class SignedInNavBarComponent extends ReactWrapperBase {
   @Input('homeActive') homeActive: Props['homeActive'];
   @Input('workspacesActive') workspacesActive: Props['workspacesActive'];
   @Input('libraryActive') libraryActive: Props['libraryActive'];
+  @Input('profileActive') profileActive: Props['profileActive'];
   constructor() {
     super(SignedInNavBar, [
       'hasDataAccess',
@@ -219,6 +221,7 @@ export class SignedInNavBarComponent extends ReactWrapperBase {
       'homeActive',
       'workspacesActive',
       'libraryActive',
+      'profileActive',
     ]);
   }
 }
