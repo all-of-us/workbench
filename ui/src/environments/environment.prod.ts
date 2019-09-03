@@ -14,7 +14,7 @@ export const environment: Environment = {
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   trainingUrl: 'https://aou.nnlm.gov',
   inactivityTimeoutInSeconds: 30 * 60,
-  inactivityWarningInSeconds: 5 * 60,
+  inactivityWarningInSecondsBefore: 5 * 60,
   // Use care when changing these flags in prod!
   //
   // See environment-type.ts for more details on transient flags, including

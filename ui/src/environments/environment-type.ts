@@ -42,7 +42,7 @@ export interface Environment {
   zendeskHelpCenterUrl: string;
 
   inactivityTimeoutInSeconds: number;
-  inactivityWarningInSeconds: number;
+  inactivityWarningInSecondsBefore: number;
   // Transient client-side flags.
   //
   // Whether users should be able to use JupyterLab as an option.

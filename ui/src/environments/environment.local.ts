@@ -15,6 +15,6 @@ export const environment: Environment = {
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   inactivityTimeoutInSeconds: 20,
-  inactivityWarningInSeconds: 10,
+  inactivityWarningInSecondsBefore: 10,
   enableJupyterLab: true,
 };

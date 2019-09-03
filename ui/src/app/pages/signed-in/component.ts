@@ -15,9 +15,16 @@ import {Authority} from 'generated';
 
 export const INACTIVITY_CONFIG = {
   TRACKED_EVENTS: ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'],
-  LOCAL_STORAGE_KEY: 'LAST_ACTIVE_TIMESTAMP_EPOCH_MS',
-  MESSAGE_KEY: 'USER_ACTIVITY_DETECTED'
+  LOCAL_STORAGE_KEY_LAST_ACTIVE: 'LAST_ACTIVE_TIMESTAMP_EPOCH_MS',
+  MESSAGE_KEY: 'USER_ACTIVITY_DETECTED',
+  LOCAL_STORAGE_KEY_LOGOUT_METHOD: 'SYSTEM_VERIFIED_LOGGED_OUT'
 };
+
+export enum LogoutMethod {
+  UNKNOWN,
+  AUTO,
+  MANUAL
+}
 
 @Component({
   selector: 'app-signed-in',
@@ -48,7 +55,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   // True if the user tried to open the Zendesk support widget and an error
   // occurred.
   zendeskLoadError = false;
-  showInactivityModal = true;
+  showInactivityModal = false;
   private profileLoadingSub: Subscription;
   private subscriptions = [];
 
@@ -129,13 +136,16 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
   startInactivityTimers() {
     const resetLogoutTimeout = resettableTimeout(() => {
-      console.log("logging out the user!");
+      localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LOGOUT_METHOD, LogoutMethod.AUTO.toString());
+      this.signOut();
     }, environment.inactivityTimeoutInSeconds * 1000);
 
     const resetInactivityModalTimeout = resettableTimeout(() => {
       this.showInactivityModal = true;
-    }, (environment.inactivityTimeoutInSeconds - environment.inactivityWarningInSeconds) * 1000);
+    }, (environment.inactivityTimeoutInSeconds - environment.inactivityWarningInSecondsBefore) * 1000);
 
+    localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
+    localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LOGOUT_METHOD, LogoutMethod.UNKNOWN.toString());
     resetLogoutTimeout();
     resetInactivityModalTimeout();
     window.addEventListener('message', (e) => {
@@ -143,7 +153,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
-      window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY, Date.now().toString());
+      window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
       resetLogoutTimeout();
       resetInactivityModalTimeout();
     }, false);
@@ -164,6 +174,11 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  onClickSignOut(): void {
+    localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LOGOUT_METHOD, LogoutMethod.MANUAL.toString());
+    this.signOut();
+  }
+
   signOut(): void {
     this.signInService.signOut();
     this.navigateSignOut();
@@ -180,9 +195,9 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get inactivityModalText(): string {
-    const timeText = environment.inactivityWarningInSeconds % 60 == 0 && environment.inactivityWarningInSeconds > 60 ?
-      `${environment.inactivityWarningInSeconds / 60} minutes` :
-      `${environment.inactivityWarningInSeconds} seconds`;
+    const timeText = environment.inactivityWarningInSecondsBefore % 60 == 0 && environment.inactivityWarningInSecondsBefore > 60 ?
+      `${environment.inactivityWarningInSecondsBefore / 60} minutes` :
+      `${environment.inactivityWarningInSecondsBefore} seconds`;
 
     return `You've been idle for sometime. You will be logged out in ${timeText} if no activity is detected.`;
   }

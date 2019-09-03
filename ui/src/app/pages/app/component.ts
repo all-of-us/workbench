@@ -15,7 +15,7 @@ import {queryParamsStore, routeConfigDataStore, serverConfigStore, urlParamsStor
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
-import {INACTIVITY_CONFIG} from "app/pages/signed-in/component";
+import {INACTIVITY_CONFIG, LogoutMethod} from "app/pages/signed-in/component";
 
 declare let gtag: Function;
 
@@ -66,11 +66,21 @@ export class AppComponent implements OnInit {
         console.log('To override the API URLs, try:\n' +
           'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
 
-        const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY);
+        // const logoutMethod = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LOGOUT_METHOD);
+        // if (logoutMethod == null || logoutMethod == LogoutMethod.UNKNOWN.toString()) {
+        //   const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
+        //   if (lastActive && Date.now() - parseInt(lastActive) > environment.inactivityTimeoutInSeconds * 1000) {
+        //     localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
+        //     localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LOGOUT_METHOD, LogoutMethod.AUTO.toString());
+        //     window.location.assign('https://accounts.google.com/logout');
+        //   }
+        // }
 
-        if (lastActive && Date.now() - parseInt(lastActive) > environment.inactivityTimeoutInSeconds) {
-          localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY, Date.now().toString());
-          console.log("Logging out the user. Passed the inactivity timeout.");
+        const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
+        if (lastActive && Date.now() - parseInt(lastActive) > environment.inactivityTimeoutInSeconds * 1000) {
+          localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
+          localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LOGOUT_METHOD, LogoutMethod.AUTO.toString());
+          window.location.assign('https://accounts.google.com/logout');
         }
       } catch (err) {
         console.log('Error setting urls: ' + err);
