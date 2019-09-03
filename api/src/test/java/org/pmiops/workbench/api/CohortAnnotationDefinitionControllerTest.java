@@ -498,49 +498,4 @@ public class CohortAnnotationDefinitionControllerTest {
         .thenReturn(WorkspaceAccessLevel.OWNER);
     when(workspaceService.getRequired(NAMESPACE, NAME)).thenReturn(mockWorkspace);
   }
-
-  private org.pmiops.workbench.model.CohortAnnotationDefinition
-      createClientCohortAnnotationDefinition(
-          long annotationDefinitionId,
-          long cohortId,
-          String columnName,
-          AnnotationType annotationType) {
-    org.pmiops.workbench.model.CohortAnnotationDefinition request =
-        new org.pmiops.workbench.model.CohortAnnotationDefinition();
-    request.setCohortAnnotationDefinitionId(annotationDefinitionId);
-    request.setCohortId(cohortId);
-    request.setColumnName(columnName);
-    request.setAnnotationType(annotationType);
-    request.setEnumValues(new ArrayList<>());
-    request.setEtag(Etags.fromVersion(0));
-    return request;
-  }
-
-  private org.pmiops.workbench.db.model.CohortAnnotationDefinition
-      createDBCohortAnnotationDefinition(
-          long cohortId,
-          long annotationDefinitionId,
-          AnnotationType annotationType,
-          String columnName) {
-    return new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
-        .cohortId(cohortId)
-        .cohortAnnotationDefinitionId(annotationDefinitionId)
-        .annotationTypeEnum(annotationType)
-        .columnName(columnName)
-        .version(0);
-  }
-
-  private Cohort createCohort(long workspaceId) {
-    Cohort cohort = new Cohort();
-    cohort.setWorkspaceId(workspaceId);
-    return cohort;
-  }
-
-  private Workspace createWorkspace(String namespace, String name, long badWorkspaceId) {
-    Workspace workspace = new Workspace();
-    workspace.setWorkspaceId(badWorkspaceId);
-    workspace.setWorkspaceNamespace(namespace);
-    workspace.setFirecloudName(name);
-    return workspace;
-  }
 }
