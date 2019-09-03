@@ -16,15 +16,8 @@ import {Authority} from 'generated';
 export const INACTIVITY_CONFIG = {
   TRACKED_EVENTS: ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'],
   LOCAL_STORAGE_KEY_LAST_ACTIVE: 'LAST_ACTIVE_TIMESTAMP_EPOCH_MS',
-  MESSAGE_KEY: 'USER_ACTIVITY_DETECTED',
-  LOCAL_STORAGE_KEY_LOGOUT_METHOD: 'SYSTEM_VERIFIED_LOGGED_OUT'
+  MESSAGE_KEY: 'USER_ACTIVITY_DETECTED'
 };
-
-export enum LogoutMethod {
-  UNKNOWN,
-  AUTO,
-  MANUAL
-}
 
 @Component({
   selector: 'app-signed-in',
@@ -136,7 +129,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
   startInactivityTimers() {
     const resetLogoutTimeout = resettableTimeout(() => {
-      localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LOGOUT_METHOD, LogoutMethod.AUTO.toString());
       this.signOut();
     }, environment.inactivityTimeoutInSeconds * 1000);
 
@@ -145,7 +137,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     }, (environment.inactivityTimeoutInSeconds - environment.inactivityWarningInSecondsBefore) * 1000);
 
     localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
-    localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LOGOUT_METHOD, LogoutMethod.UNKNOWN.toString());
     resetLogoutTimeout();
     resetInactivityModalTimeout();
     window.addEventListener('message', (e) => {
@@ -175,7 +166,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onClickSignOut(): void {
-    localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LOGOUT_METHOD, LogoutMethod.MANUAL.toString());
     this.signOut();
   }
 
