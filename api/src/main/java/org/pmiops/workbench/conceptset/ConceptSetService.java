@@ -34,7 +34,6 @@ public class ConceptSetService {
     c.setCreationTime(targetWorkspace.getCreationTime());
     c.setVersion(1);
     ConceptSet saved = conceptSetDao.save(c);
-    conceptSetDao.bulkCopyConceptIds(conceptSet.getConceptSetId(), saved.getConceptSetId());
     return saved;
   }
 
