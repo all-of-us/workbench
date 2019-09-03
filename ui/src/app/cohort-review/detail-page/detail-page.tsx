@@ -1,10 +1,8 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
 
-import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/cohort-review/annotation-definition-modals/annotation-definition-modals.component';
 import {DetailHeader} from 'app/cohort-review/detail-header/detail-header.component';
 import {DetailTabs} from 'app/cohort-review/detail-tabs/detail-tabs.component';
 import {Participant} from 'app/cohort-review/participant.model';
@@ -12,12 +10,11 @@ import {cohortReviewStore, getVocabOptions, vocabOptions} from 'app/cohort-revie
 import {SidebarContent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {cohortAnnotationDefinitionApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CohortAnnotationDefinition, ParticipantCohortAnnotation} from 'generated/fetch';
 
 const styles = reactStyles({
   detailSidebar: {
@@ -73,12 +70,7 @@ interface Props {
 
 interface State {
   sidebarOpen: boolean;
-  creatingDefinition: boolean;
-  editingDefinitions: boolean;
   participant: Participant;
-  annotations: ParticipantCohortAnnotation[];
-  annotationDefinitions: CohortAnnotationDefinition[];
-  annotationDeleted: boolean;
 }
 
 export const DetailPage = withCurrentWorkspace()(
@@ -86,22 +78,7 @@ export const DetailPage = withCurrentWorkspace()(
     private subscription;
     constructor(props: any) {
       super(props);
-      this.state = {
-        sidebarOpen: true,
-        creatingDefinition: false,
-        editingDefinitions: false,
-        participant: null,
-        annotations: null,
-        annotationDefinitions: null,
-        annotationDeleted: false
-      };
-      this.setAnnotations = this.setAnnotations.bind(this);
-      this.openCreateDefinitionModal = this.openCreateDefinitionModal.bind(this);
-      this.closeCreateDefinitionModal = this.closeCreateDefinitionModal.bind(this);
-      this.definitionCreated = this.definitionCreated.bind(this);
-      this.openEditDefinitionsModal = this.openEditDefinitionsModal.bind(this);
-      this.closeEditDefinitionsModal = this.closeEditDefinitionsModal.bind(this);
-      this.setAnnotationDefinitions = this.setAnnotationDefinitions.bind(this);
+      this.state = {sidebarOpen: true, participant: null};
       this.setParticipant = this.setParticipant.bind(this);
     }
 
@@ -109,21 +86,12 @@ export const DetailPage = withCurrentWorkspace()(
       this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(params => !!params.pid)
         .switchMap(({ns, wsid, pid}) => {
-          return Observable.forkJoin(
-            from(cohortReviewApi()
-              .getParticipantCohortStatus(ns, wsid,
-                cohortReviewStore.getValue().cohortReviewId, +pid))
-              .do(ps => {
-                this.setState({participant: Participant.fromStatus(ps)});
-              }),
-            from(cohortReviewApi()
-              .getParticipantCohortAnnotations(ns, wsid,
-                cohortReviewStore.getValue().cohortReviewId, +pid))
-              .do(({items}) => {
-                this.setState({annotations: items});
-              }),
-            this.loadAnnotationDefinitions()
-          );
+          return from(cohortReviewApi()
+            .getParticipantCohortStatus(ns, wsid,
+              cohortReviewStore.getValue().cohortReviewId, +pid))
+            .do(ps => {
+              this.setState({participant: Participant.fromStatus(ps)});
+            });
         })
         .subscribe();
       if (!vocabOptions.getValue()) {
@@ -137,18 +105,6 @@ export const DetailPage = withCurrentWorkspace()(
       this.subscription.unsubscribe();
     }
 
-    loadAnnotationDefinitions() {
-      const {ns, wsid, cid} = urlParamsStore.getValue();
-      return from(cohortAnnotationDefinitionApi().getCohortAnnotationDefinitions(ns, wsid, +cid))
-        .do(({items}) => {
-          this.setState({annotationDefinitions: items});
-        });
-    }
-
-    setAnnotations(v) {
-      this.setState({annotations: v});
-    }
-
     get angleDir() {
       return this.state.sidebarOpen ? 'right' : 'left';
     }
@@ -158,44 +114,14 @@ export const DetailPage = withCurrentWorkspace()(
       this.setState({sidebarOpen});
     }
 
-    openCreateDefinitionModal() {
-      this.setState({creatingDefinition: true});
-    }
-
-    closeCreateDefinitionModal() {
-      this.setState({creatingDefinition: false});
-    }
-
-    definitionCreated(ad) {
-      const annotationDefinitions = this.state.annotationDefinitions.concat([ad]);
-      this.setState({annotationDefinitions, creatingDefinition: false});
-    }
-
-    openEditDefinitionsModal() {
-      this.setState({editingDefinitions: true});
-    }
-
-    closeEditDefinitionsModal(deleted: boolean = false) {
-      this.setState({editingDefinitions: false, annotationDeleted: deleted});
-      if (deleted) {
-        setTimeout(() => this.setState({annotationDeleted: false}), 5000);
-      }
-    }
-
-    setAnnotationDefinitions(v) {
-      this.setState({annotationDefinitions: v});
-    }
-
     setParticipant(v) {
       this.setState({participant: v});
     }
 
     render() {
-      const {annotations, annotationDefinitions, annotationDeleted, creatingDefinition,
-        editingDefinitions, participant, sidebarOpen} = this.state;
+      const {participant, sidebarOpen} = this.state;
       return <React.Fragment>
-        {!(participant && annotations && annotationDefinitions) && <SpinnerOverlay />}
-        {participant && annotations && annotationDefinitions && <React.Fragment>
+        {!participant ? <SpinnerOverlay /> : <React.Fragment>
           <div className={'detail-page ' + (sidebarOpen ? 'sidebar-open' : '')}
                style={{...styles.detailPage, ...(sidebarOpen ? styles.detailPageOpen : {})}}>
             <DetailHeader participant={participant}>
@@ -211,27 +137,10 @@ export const DetailPage = withCurrentWorkspace()(
               style={{...styles.sidebarContent, ...(sidebarOpen ? styles.sidebarContentOpen : {})}}>
               <SidebarContent
                 participant={participant}
-                setParticipant={this.setParticipant}
-                annotations={annotations}
-                annotationDefinitions={annotationDefinitions}
-                annotationDeleted={annotationDeleted}
-                setAnnotations={this.setAnnotations}
-                openCreateDefinitionModal={this.openCreateDefinitionModal}
-                openEditDefinitionsModal={this.openEditDefinitionsModal}>
+                setParticipant={this.setParticipant}>
               </SidebarContent>
             </div>
           </div>
-
-          {editingDefinitions && <EditAnnotationDefinitionsModal
-            onClose={this.closeEditDefinitionsModal}
-            annotationDefinitions={annotationDefinitions}
-            setAnnotationDefinitions={this.setAnnotationDefinitions}>
-          </EditAnnotationDefinitionsModal>}
-          {creatingDefinition && <AddAnnotationDefinitionModal
-            annotationDefinitions={annotationDefinitions}
-            onCancel={this.closeCreateDefinitionModal}
-            onCreate={this.definitionCreated}>
-          </AddAnnotationDefinitionModal>}
         </React.Fragment>}
       </React.Fragment>;
     }
