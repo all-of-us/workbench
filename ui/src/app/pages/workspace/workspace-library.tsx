@@ -86,6 +86,7 @@ export const WorkspaceLibrary = withUserProfile()
 
   async componentDidMount() {
     this.loadPublishedWorkspaces();
+    this.loadFeaturedWorkspaces();
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -97,7 +98,7 @@ export const WorkspaceLibrary = withUserProfile()
 
   updateListedWorkspaces(tabEnum) {
     switch (tabEnum) {
-      case tabEnum === libraryTabEnums.PUBLISHED_WORKSPACES:
+      case libraryTabEnums.PUBLISHED_WORKSPACES:
         this.loadPublishedWorkspaces();
         break;
       default:

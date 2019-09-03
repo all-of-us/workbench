@@ -46,7 +46,7 @@ describe('WorkspaceLibrary', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should display published workspaces', async () => {
+  it('should display featured workspaces', async () => {
     const publishedWorkspaceStubs = workspaceStubs.map(w => ({...w, published: true}));
     registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
     const wrapper = component();
@@ -64,12 +64,12 @@ describe('WorkspaceLibrary', () => {
     expect(cardNameList.length).toBe(0);
   });
 
-  it('should display featured workspaces', async () => {
+  it('should display published workspaces', async () => {
     const publishedWorkspaceStubs = workspaceStubs.map(w => ({...w, published: true}));
     registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="Featured Workspaces"]').simulate('click');
+    wrapper.find('[data-test-id="Published Workspaces"]').simulate('click');
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
       .map(c => c.text());
