@@ -165,10 +165,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  onClickSignOut(): void {
-    this.signOut();
-  }
-
   signOut(): void {
     this.signInService.signOut();
     this.navigateSignOut();
