@@ -1540,10 +1540,6 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
     %W{--project #{gcc.project} #{promote}} +
     (op.opts.quiet ? %W{--quiet} : []) +
     (op.opts.version ? %W{--version #{op.opts.version}} : []))
-
-  with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
-    load_config(ctx.project)
-  end
 end
 
 def create_workbench_db()
