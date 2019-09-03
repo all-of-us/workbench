@@ -1540,20 +1540,11 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
     %W{--project #{gcc.project} #{promote}} +
     (op.opts.quiet ? %W{--quiet} : []) +
     (op.opts.version ? %W{--version #{op.opts.version}} : []))
-end
 
-def deploy_api(cmd_name, args)
-  ensure_docker cmd_name, args
-  common = Common.new
-  common.status "Deploying api..."
-  deploy_app(cmd_name, args, true, true)
+  with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
+    load_config(ctx.project)
+  end
 end
-
-Common.register_command({
-  :invocation => "deploy-api",
-  :description => "Deploys the API server to the specified cloud project.",
-  :fn => ->(*args) { deploy_api("deploy-api", args) }
-})
 
 def create_workbench_db()
   run_with_redirects(
@@ -1693,7 +1684,8 @@ def deploy(cmd_name, args)
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
     } + dry_flag
-    deploy_api(cmd_name, deploy_args)
+    common.status "Deploying api..."
+    deploy_app(cmd_name, deploy_args, true, true)
   end
 end
 
