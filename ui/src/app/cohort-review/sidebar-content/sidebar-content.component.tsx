@@ -333,7 +333,7 @@ export const SidebarContent = fp.flow(
     const disabled = accessLevel === WorkspaceAccessLevel.NOACCESS ||
       accessLevel === WorkspaceAccessLevel.READER;
     const annotationsExist = annotationDefinitions && annotationDefinitions.length > 0;
-    return <div>
+    return <React.Fragment>
       <div style={styles.header}>Participant {participantId}</div>
       <div><span style={{fontWeight: 'bold'}}>DOB:</span> {birthDate}</div>
       <div><span style={{fontWeight: 'bold'}}>Gender:</span> {gender}</div>
@@ -399,6 +399,6 @@ export const SidebarContent = fp.flow(
           onCancel={() => this.setState({creatingDefinition: false})}
           onCreate={this.definitionCreated}>
       </AddAnnotationDefinitionModal>}
-    </div>;
+    </React.Fragment>;
   }
 });

@@ -1,6 +1,7 @@
 import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
+import {SidebarContent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
 import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
@@ -16,6 +17,7 @@ const styles = reactStyles({
     width: 'calc(14rem + 85px)',
     overflow: 'hidden',
     color: colors.primary,
+    zIndex: 1000
   },
   content: {
     position: 'absolute',
@@ -34,26 +36,22 @@ const styles = reactStyles({
     height: '100%',
     width: '45px',
     background: colorWithWhiteness(colors.primary, 0.4),
-    zIndex: 10010
   },
   icon: {
     color: colors.white,
-    marginTop: '0.75rem',
+    marginTop: '1rem',
     padding: '0.25rem 0',
     cursor: 'pointer',
     textAlign: 'center',
   },
   closeIcon: {
-    cursor: 'pointer',
     position: 'absolute',
-    margin: '-10px 0 0 -52px',
-    width: '40px',
-    borderBottomLeftRadius: '10px',
-    borderTopLeftRadius: '10px',
+    top: 0,
+    right: 0,
+    width: '100%',
     background: colorWithWhiteness(colors.primary, 0.4),
     color: colors.white,
-    height: '40px',
-    textAlign: 'center',
+    height: '1rem',
   },
   sectionTitle: {
     marginTop: '0.5rem',
@@ -90,6 +88,8 @@ const activeIconStyle = {
 
 interface Props {
   location: string;
+  participant?: any;
+  setParticipant?: Function;
 }
 
 interface State {
@@ -116,25 +116,38 @@ export class HelpSidebar extends React.Component<Props, State> {
   }
 
   render() {
-    const {location} = this.props;
+    const {location, participant, setParticipant} = this.props;
     const {activeIcon, sidebarOpen} = this.state;
+    const contentStyle = (tab: string) => ({
+      display: activeIcon === tab ? 'block' : 'none',
+      overflow: 'auto',
+      marginTop: '1rem'
+    });
     return <div style={styles.sidebar}>
       <div style={sidebarOpen ? contentStyles.open : contentStyles.closed}>
         <div style={styles.closeIcon}
              onClick={() => this.setState({activeIcon: undefined, sidebarOpen: false})}>
-          <ClrIcon shape='caret right' size={32} style={{marginTop: '3px'}}/>
+          <ClrIcon shape='caret right' size={24} style={{cursor: 'pointer', verticalAlign: 'none'}}/>
         </div>
-        <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
-        {sidebarContent[location].map((section, s) => <div key={s}>
-          <h3 style={styles.sectionTitle}>{section.title}</h3>
-          {section.content.map((content, c) => {
-            return typeof content === 'string' ? <p key={c} style={styles.contentItem}>{content}</p>
-              : <div>
-                <h4 style={styles.contentTitle}>{content.title}</h4>
-                {content.content.map((item, i) => <p key={i} style={styles.contentItem}>{item}</p>)}
-              </div>;
-          })}
-        </div>)}
+        <div style={contentStyle('help')}>
+          <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
+          {sidebarContent[location].map((section, s) => <div key={s}>
+            <h3 style={styles.sectionTitle}>{section.title}</h3>
+            {section.content.map((content, c) => {
+              return typeof content === 'string'
+                ? <p key={c} style={styles.contentItem}>{content}</p>
+                : <div>
+                  <h4 style={styles.contentTitle}>{content.title}</h4>
+                  {content.content.map((item, i) =>
+                    <p key={i} style={styles.contentItem}>{item}</p>)
+                  }
+                </div>;
+            })}
+          </div>)}
+        </div>
+        <div style={contentStyle('annotations')}>
+          <SidebarContent participant={participant} setParticipant={setParticipant} />
+        </div>
       </div>
       <div style={styles.iconContainer}>
         <div style={activeIcon === 'help' ? activeIconStyle : styles.icon}>
@@ -145,7 +158,7 @@ export class HelpSidebar extends React.Component<Props, State> {
           <ClrIcon className='is-solid' shape='book' size={32}
             onClick={() => this.onIconClick('book')} />
         </div>
-        {location === 'review' &&
+        {location === 'reviewParticipantDetail' &&
           <div style={activeIcon === 'annotations' ? activeIconStyle : styles.icon}>
             <ClrIcon shape='note' size={32}
               onClick={() => this.onIconClick('annotations')} />
@@ -162,8 +175,10 @@ export class HelpSidebar extends React.Component<Props, State> {
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('location') location: Props['location'];
+  @Input('participant') participant: Props['participant'];
+  @Input('setParticipant') setParticipant: Props['setParticipant'];
 
   constructor() {
-    super(HelpSidebar, ['location']);
+    super(HelpSidebar, ['location', 'participant', 'setParticipant']);
   }
 }
