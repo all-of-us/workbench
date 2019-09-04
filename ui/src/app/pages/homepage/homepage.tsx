@@ -19,6 +19,7 @@ import {RecentWork} from 'app/pages/homepage/recent-work';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import {flexStyle} from 'app/styles/flex';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {environment} from 'environments/environment';
 import {
@@ -32,14 +33,14 @@ export const styles = reactStyles({
     display: 'flex', letterSpacing: 'normal'
   },
   pageWrapper: {
-    marginLeft: '-1rem', marginRight: '-0.6rem', display: 'flex',
-    flexDirection: 'column', justifyContent: 'space-between'
+    marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between',
+    ...flexStyle.column
   },
   welcomeMessage: {
-    marginLeft: '3%', display: 'flex', flexDirection: 'row'
+    marginLeft: '3%', ...flexStyle.row
   },
   welcomeMessageIconRow: {
-    display: 'flex', flexDirection: 'row', alignItems: 'flex-end', marginLeft: '1rem'
+    ...flexStyle.row, alignItems: 'flex-end', marginLeft: '1rem'
   },
   welcomeMessageIcon: {
     height: '2.25rem', width: '2.75rem'
@@ -49,23 +50,22 @@ export const styles = reactStyles({
   },
   singleCard: {
     width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
-    display: 'flex', flexDirection: 'column', borderRadius: '5px',
+    ...flexStyle.column, borderRadius: '5px',
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
     border: 'none', marginTop: '1rem'
   },
   contentWrapperLeft: {
-    display: 'flex', flexDirection: 'column', paddingLeft: '3%', width: '40%'
+    ...flexStyle.column, paddingLeft: '3%', width: '40%'
   },
   contentWrapperRight: {
-    display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '60%'
+    ...flexStyle.column, justifyContent: 'space-between', width: '60%'
   },
   quickTour: {
-    display: 'flex', flexDirection: 'column', marginLeft: '3%'
+    ...flexStyle.column, marginLeft: '3%'
   },
   quickTourCardsRow: {
-    display: 'flex', justifyContent: 'flex-start', maxHeight: '26rem',
-    flexDirection: 'row', marginTop: '0.5rem'
+    ...flexStyle.row, justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem'
   },
   quickTourLabel: {
     fontSize: 18, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
@@ -75,7 +75,7 @@ export const styles = reactStyles({
     width: '100%', backgroundColor: colors.light, marginTop: '2%'
   },
   footerInner: {
-    display: 'flex', flexDirection: 'column', marginLeft: '3%', marginRight: '2%',
+    ...flexStyle.column, marginLeft: '3%', marginRight: '2%',
   },
   footerTitle: {
     height: '34px', opacity: 0.87, color: colors.primary, fontSize: '0.75rem',
@@ -83,8 +83,8 @@ export const styles = reactStyles({
   },
   footerText: {
     height: '176px', opacity: 0.87, color: colors.secondary, fontSize: '0.6rem',
-    fontWeight: 500, lineHeight: '30px', display: 'flex', width: '100%',
-    flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'auto'
+    fontWeight: 500, lineHeight: '30px', ...flexStyle.column, width: '100%',
+    flexWrap: 'nowrap', overflowY: 'auto'
   },
   footerTextTitle: {
     color: colors.primary,
@@ -92,8 +92,7 @@ export const styles = reactStyles({
     fontWeight: 500
   },
   linksBlock: {
-    display: 'flex', marginBottom: '1rem',
-    flexDirection: 'column', flexShrink: 1, minWidth: '13rem'
+    ...flexStyle.column, marginBottom: '1rem', flexShrink: 1, minWidth: '13rem'
   },
   bottomBanner: {
     width: '100%', display: 'flex', backgroundColor: colors.primary,
@@ -375,9 +374,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
       return <React.Fragment>
         <div style={styles.pageWrapper}>
           <div style={styles.welcomeMessage}>
-            <div style={{display: 'flex', flexDirection: 'column', width: '50%'}}>
-              <div style={{display: 'flex', flexDirection: 'row'}}>
-                <div style={{display: 'flex', flexDirection: 'column'}}>
+            <div style={{...flexStyle.column, width: '50%'}}>
+              <div style={{...flexStyle.row}}>
+                <div style={{...flexStyle.column}}>
                   <Header style={{fontWeight: 500, color: colors.secondary, fontSize: '0.92rem'}}>
                     Welcome to</Header>
                   <Header style={{textTransform: 'uppercase', marginTop: '0.2rem'}}>
@@ -407,7 +406,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                               twoFactorAuthCompleted={twoFactorAuthCompleted}
                                             dataUseAgreementCompleted={dataUseAgreementCompleted}/>
                       ) : (
-                        <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
+                        <div style={{...flexStyle.row, paddingTop: '2rem'}}>
                           <div style={styles.contentWrapperLeft}>
                             <div style={styles.mainHeader}>Researcher Workbench</div>
                             <TooltipTrigger disabled={canCreateWorkspaces} content={<div>
@@ -426,8 +425,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                             <a onClick={() => navigate(['workspaces'])}
                                style={{fontSize: '14px', color: colors.primary}}>
                               See All Workspaces</a>
-                            <div style={{marginRight: '3%', display: 'flex',
-                              flexDirection: 'column'}}>
+                            <div style={{marginRight: '3%', ...flexStyle.column}}>
                               <div style={{color: colors.primary, height: '1.9rem'}}>
                                 <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
                               </div>
@@ -460,8 +458,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                 <div style={styles.footerInner}>
                   <div style={styles.footerTitle}>
                     How to Use the All of Us Researcher Workbench</div>
-                  <div style={{display: 'flex', flexDirection: 'row',
-                    justifyContent: 'space-between'}}>
+                  <div style={{...flexStyle.row, justifyContent: 'space-between'}}>
                     {footerLinks.map((col, i) => {
                       return <React.Fragment key={i}>
                         <div style={styles.linksBlock}>
