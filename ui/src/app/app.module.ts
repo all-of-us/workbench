@@ -64,6 +64,7 @@ import {
 
 import {Configuration as FetchConfiguration} from 'generated/fetch';
 
+import {TextModalComponent} from 'app/components/text-modal';
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {
@@ -71,7 +72,6 @@ import {
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
 import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
-import {TextModalComponent} from "app/components/text-modal";
 
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so

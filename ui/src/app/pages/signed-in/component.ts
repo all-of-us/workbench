@@ -14,12 +14,15 @@ import {environment} from 'environments/environment';
 import {Authority} from 'generated';
 
 /*
- * The user's last known active timestamp is stored in localStorage with the key of INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE
- * This value is checked whenever the application is reloaded. If the difference between the time at reload and the value in local storage
- * is greater than the inactivity timeout period, the user will be signed out of all Google accounts.
+ * The user's last known active timestamp is stored in localStorage with the key of
+ * INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE. This value is checked whenever
+ * the application is reloaded. If the difference between the time at reload and the
+ * value in local storage is greater than the inactivity timeout period, the user will
+ * be signed out of all Google accounts.
  *
- * If the localStorage value is null for whatever reason, we defer to the more secure solution of logging out the user. This should not
- * affect new users since the logout flow is ignored if there is no user session.
+ * If the localStorage value is null for whatever reason, we defer to the more secure
+ * solution of logging out the user. This should not affect new users since the logout
+ * flow is ignored if there is no user session.
  */
 export const INACTIVITY_CONFIG = {
   TRACKED_EVENTS: ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'],
@@ -148,11 +151,12 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     resetLogoutTimeout();
     resetInactivityModalTimeout();
     window.addEventListener('message', (e) => {
-      if (e.data != INACTIVITY_CONFIG.MESSAGE_KEY) {
+      if (e.data !== INACTIVITY_CONFIG.MESSAGE_KEY) {
         return;
       }
 
-      window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
+      window.localStorage
+        .setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
       resetLogoutTimeout();
       resetInactivityModalTimeout();
     }, false);
@@ -181,7 +185,8 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   navigateSignOut(): void {
     // Force a hard browser reload here. We want to ensure that no local state
     // is persisting across user sessions, as this can lead to subtle bugs.
-    window.location.assign(`https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=${window.location.origin}/login`);
+    window.location.assign(`https://www.google.com/accounts/Logout?continue=` +
+      `https://appengine.google.com/_ah/logout?continue=${window.location.origin}/login`);
   }
 
   closeInactivityModal(): void {
@@ -189,11 +194,13 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get inactivityModalText(): string {
-    const timeText = environment.inactivityWarningBeforeSeconds % 60 == 0 && environment.inactivityWarningBeforeSeconds > 60 ?
+    const timeText = environment.inactivityWarningBeforeSeconds % 60 === 0 &&
+    environment.inactivityWarningBeforeSeconds > 60 ?
       `${environment.inactivityWarningBeforeSeconds / 60} minutes` :
       `${environment.inactivityWarningBeforeSeconds} seconds`;
 
-    return `You've been idle for some time. You will be logged out in ${timeText} if no activity is detected.`;
+    return `You've been idle for some time. You will be logged out in ${timeText}` +
+      ` if no activity is detected.`;
   }
 
   get reviewWorkspaceActive(): boolean {

@@ -10,9 +10,9 @@ import {
 } from 'app/components/modals';
 
 
+import {Component, Input} from '@angular/core';
+import {ReactWrapperBase} from 'app/utils';
 import * as React from 'react';
-import {Component, Input} from "@angular/core";
-import {ReactWrapperBase} from "app/utils";
 
 
 export interface TextModalProps {
@@ -43,7 +43,7 @@ export class TextModal extends React.Component<TextModalProps> {
 }
 
 @Component({
-  selector: 'text-modal',
+  selector: 'app-text-modal',
   template: '<div #root></div>',
 })
 export class TextModalComponent extends ReactWrapperBase {

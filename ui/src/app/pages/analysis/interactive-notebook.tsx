@@ -9,6 +9,7 @@ import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-mode-modal';
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
+import {INACTIVITY_CONFIG} from 'app/pages/signed-in/component';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -17,7 +18,6 @@ import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ClusterStatus} from 'generated/fetch';
-import {INACTIVITY_CONFIG} from "app/pages/signed-in/component";
 
 
 const styles = reactStyles({
@@ -118,7 +118,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     loadNotebookActivityTracker() {
-      let frame = document.getElementById('notebook-frame') as HTMLFrameElement;
+      const frame = document.getElementById('notebook-frame') as HTMLFrameElement;
       frame.addEventListener('load', () => {
         const signalUserActivity = debouncer(() => {
           frame.contentWindow.parent.postMessage(INACTIVITY_CONFIG.MESSAGE_KEY, '*');

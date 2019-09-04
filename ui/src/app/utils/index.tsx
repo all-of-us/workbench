@@ -358,7 +358,7 @@ export function sliceByHalfLength(obj) {
 // if the returned function has been invoked within the last `sensitivityMs` milliseconds
 // Example : debouncing user activity events to change rate of invocation from 1000/s to 1/s
 export function debouncer(action, sensitivityMs) {
-  var t = Date.now();
+  let t = Date.now();
 
   setInterval(() => {
     if (Date.now() - t < sensitivityMs) {
@@ -368,7 +368,7 @@ export function debouncer(action, sensitivityMs) {
 
   return () => {
     t = Date.now();
-  }
+  };
 }
 
 // Starts a timer which will invoke `f` after `timeoutInSeconds` has passed
