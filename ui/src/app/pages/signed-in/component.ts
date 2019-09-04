@@ -13,6 +13,14 @@ import {initializeZendeskWidget, openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Authority} from 'generated';
 
+/*
+ * The user's last known active timestamp is stored in localStorage with the key of INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE
+ * This value is checked whenever the application is reloaded. If the difference between the time at reload and the value in local storage
+ * is greater than the inactivity timeout period, the user will be signed out of all Google accounts.
+ *
+ * If the localStorage value is null for whatever reason, we defer to the more secure solution of logging out the user. This should not
+ * affect new users since the logout flow is ignored if there is no user session.
+ */
 export const INACTIVITY_CONFIG = {
   TRACKED_EVENTS: ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'],
   LOCAL_STORAGE_KEY_LAST_ACTIVE: 'LAST_ACTIVE_TIMESTAMP_EPOCH_MS',
@@ -170,10 +178,10 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     this.navigateSignOut();
   }
 
-  private navigateSignOut(): void {
+  navigateSignOut(): void {
     // Force a hard browser reload here. We want to ensure that no local state
     // is persisting across user sessions, as this can lead to subtle bugs.
-    window.location.assign('https://accounts.google.com/logout');
+    window.location.assign(`https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=${window.location.origin}/login`);
   }
 
   closeInactivityModal(): void {
@@ -185,7 +193,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       `${environment.inactivityWarningInSecondsBefore / 60} minutes` :
       `${environment.inactivityWarningInSecondsBefore} seconds`;
 
-    return `You've been idle for sometime. You will be logged out in ${timeText} if no activity is detected.`;
+    return `You've been idle for some time. You will be logged out in ${timeText} if no activity is detected.`;
   }
 
   get reviewWorkspaceActive(): boolean {

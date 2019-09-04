@@ -15,7 +15,8 @@ import {queryParamsStore, routeConfigDataStore, serverConfigStore, urlParamsStor
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
-import {INACTIVITY_CONFIG} from "app/pages/signed-in/component";
+import {INACTIVITY_CONFIG, SignedInComponent} from "app/pages/signed-in/component";
+import {SignInService} from "app/services/sign-in.service";
 
 declare let gtag: Function;
 
@@ -37,6 +38,7 @@ export class AppComponent implements OnInit {
   constructor(
     private activatedRoute: ActivatedRoute,
     private serverConfigService: ServerConfigService,
+    private signInService: SignInService,
     private router: Router,
     private titleService: Title
   ) {}
@@ -66,11 +68,15 @@ export class AppComponent implements OnInit {
         console.log('To override the API URLs, try:\n' +
           'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
 
-        const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
-        if (lastActive == null || Date.now() - parseInt(lastActive) > environment.inactivityTimeoutInSeconds * 1000) {
-          localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
-          window.location.assign('https://accounts.google.com/logout');
-        }
+        this.signInService.isSignedIn$.subscribe(signedIn => {
+          if (signedIn) {
+            const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
+            if (lastActive == null || Date.now() - parseInt(lastActive) > environment.inactivityTimeoutInSeconds * 1000) {
+              localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
+              SignedInComponent.prototype.navigateSignOut();
+            }
+          }
+        });
       } catch (err) {
         console.log('Error setting urls: ' + err);
       }
