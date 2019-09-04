@@ -1,6 +1,6 @@
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {navigate, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget} from 'app/utils/zendesk';
@@ -37,11 +37,11 @@ const styles = reactStyles({
     color: colors.white,
   },
   sideNavItemActive: {
-    backgroundColor: '#4356a7',
+    backgroundColor: colorWithWhiteness(colors.primary, .2),
     fontWeight: 'bold',
   },
   sideNavItemHover: {
-    backgroundColor: '#4356a7',
+    backgroundColor: colorWithWhiteness(colors.primary, .2),
   },
   sideNavItemDisabled: {
     color: colors.disabled,
