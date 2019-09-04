@@ -360,15 +360,18 @@ export function sliceByHalfLength(obj) {
 export function debouncer(action, sensitivityMs) {
   let t = Date.now();
 
-  setInterval(() => {
+  const timer = setInterval(() => {
     if (Date.now() - t < sensitivityMs) {
       action();
     }
   }, sensitivityMs);
 
-  return () => {
-    t = Date.now();
-  };
+  return {
+    invoke: () => {
+      t = Date.now();
+    },
+    getTimer: () => timer
+  }
 }
 
 // Starts a timer which will invoke `f` after `timeoutInSeconds` has passed
@@ -376,8 +379,11 @@ export function debouncer(action, sensitivityMs) {
 // Example : Call a logout function after 30 seconds of the returned function not being invoked
 export function resettableTimeout(f, timeoutInSeconds) {
   let timeout;
-  return () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(f, timeoutInSeconds);
-  };
+  return {
+    reset: () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(f, timeoutInSeconds);
+    },
+    getTimer: () => timeout
+  }
 }

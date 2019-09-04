@@ -11,10 +11,16 @@ import {
 
 import {ServerConfigService} from 'app/services/server-config.service';
 import {cookiesEnabled} from 'app/utils';
-import {queryParamsStore, routeConfigDataStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
+import {
+  navigateSignOut,
+  queryParamsStore,
+  routeConfigDataStore,
+  serverConfigStore,
+  urlParamsStore
+} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
-import {INACTIVITY_CONFIG, SignedInComponent} from 'app/pages/signed-in/component';
+import {INACTIVITY_CONFIG} from 'app/pages/signed-in/component';
 import {SignInService} from 'app/services/sign-in.service';
 import outdatedBrowserRework from 'outdated-browser-rework';
 
@@ -76,7 +82,7 @@ export class AppComponent implements OnInit {
               Date.now() - parseInt(lastActive, 10) > environment.inactivityTimeoutSeconds * 1000) {
               localStorage
                 .setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
-              SignedInComponent.prototype.navigateSignOut();
+              navigateSignOut();
             }
           }
         });

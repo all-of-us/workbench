@@ -6,16 +6,19 @@ define([
 
   // Should have the same implementation as debouncer in app/utils/index.tsx
   function debouncer(action, sensitivityMs) {
-    var t = Date.now();
+    let t = Date.now();
 
-    setInterval(() => {
+    const timer = setInterval(() => {
       if (Date.now() - t < sensitivityMs) {
         action();
       }
     }, sensitivityMs);
 
-    return () => {
-      t = Date.now();
+    return {
+      invoke: () => {
+        t = Date.now();
+      },
+      getTimer: () => timer
     }
   }
 
@@ -30,7 +33,7 @@ define([
 
     // Events array should be in sync with INACTIVITY_CONFIG.TRACKED_EVENTS from signed-in/component.ts
     ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'].forEach(eventName => {
-      window.addEventListener(eventName, () => signalUserActivity(), false);
+      window.addEventListener(eventName, () => signalUserActivity.invoke(), false);
     });
 
     console.log("Loaded Activity Tracker");

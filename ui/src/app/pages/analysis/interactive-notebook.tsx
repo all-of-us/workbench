@@ -125,7 +125,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         }, 1000);
 
         INACTIVITY_CONFIG.TRACKED_EVENTS.forEach(eventName => {
-          window.addEventListener(eventName, () => signalUserActivity(), false);
+          window.addEventListener(eventName, () => signalUserActivity.invoke(), false);
         });
       });
     }

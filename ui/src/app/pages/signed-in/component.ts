@@ -8,7 +8,7 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 import {debouncer, hasRegisteredAccess, resettableTimeout} from 'app/utils';
-import {cdrVersionStore, routeConfigDataStore} from 'app/utils/navigation';
+import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget, openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Authority} from 'generated';
@@ -63,6 +63,10 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   private profileLoadingSub: Subscription;
   private subscriptions = [];
 
+  private getUserActivityTimer;
+  private getLogoutTimer;
+  private getInactivityModalTimer;
+
   @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
 
   @ViewChild('sidenav') sidenav: ElementRef;
@@ -112,7 +116,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       if (signedIn) {
         this.profileImage = this.signInService.profileImage;
       } else {
-        this.navigateSignOut();
+        navigateSignOut();
       }
     });
 
@@ -132,9 +136,10 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     const signalUserActivity = debouncer(() => {
       window.postMessage(INACTIVITY_CONFIG.MESSAGE_KEY, '*');
     }, 1000);
+    this.getUserActivityTimer = signalUserActivity.getTimer;
 
     INACTIVITY_CONFIG.TRACKED_EVENTS.forEach(eventName => {
-      window.addEventListener(eventName, () => signalUserActivity(), false);
+      window.addEventListener(eventName, () => signalUserActivity.invoke(), false);
     });
   }
 
@@ -142,14 +147,16 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     const resetLogoutTimeout = resettableTimeout(() => {
       this.signOut();
     }, environment.inactivityTimeoutSeconds * 1000);
+    this.getLogoutTimer = resetLogoutTimeout.getTimer;
 
     const resetInactivityModalTimeout = resettableTimeout(() => {
       this.showInactivityModal = true;
     }, (environment.inactivityTimeoutSeconds - environment.inactivityWarningBeforeSeconds) * 1000);
+    this.getInactivityModalTimer = resetInactivityModalTimeout.getTimer;
 
     localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
-    resetLogoutTimeout();
-    resetInactivityModalTimeout();
+    resetLogoutTimeout.reset();
+    resetInactivityModalTimeout.reset();
     window.addEventListener('message', (e) => {
       if (e.data !== INACTIVITY_CONFIG.MESSAGE_KEY) {
         return;
@@ -157,8 +164,8 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
       window.localStorage
         .setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
-      resetLogoutTimeout();
-      resetInactivityModalTimeout();
+      resetLogoutTimeout.reset();
+      resetInactivityModalTimeout.reset();
     }, false);
   }
 
@@ -169,6 +176,10 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
+    clearInterval(this.getUserActivityTimer());
+    clearTimeout(this.getLogoutTimer());
+    clearTimeout(this.getInactivityModalTimer());
+
     if (this.profileLoadingSub) {
       this.profileLoadingSub.unsubscribe();
     }
@@ -179,14 +190,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
   signOut(): void {
     this.signInService.signOut();
-    this.navigateSignOut();
-  }
-
-  navigateSignOut(): void {
-    // Force a hard browser reload here. We want to ensure that no local state
-    // is persisting across user sessions, as this can lead to subtle bugs.
-    window.location.assign(`https://www.google.com/accounts/Logout?continue=` +
-      `https://appengine.google.com/_ah/logout?continue=${window.location.origin}/login`);
+    navigateSignOut();
   }
 
   closeInactivityModal(): void {

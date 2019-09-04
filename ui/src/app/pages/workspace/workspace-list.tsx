@@ -324,7 +324,7 @@ export const WorkspaceList = withUserProfile()
   }
 
   componentWillUnmount() {
-    clearTimeout(this.timer);
+    clearTimeout(this.getTimer);
   }
 
   async reloadWorkspaces(filter) {
@@ -349,7 +349,7 @@ export const WorkspaceList = withUserProfile()
     if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
       this.setState({billingProjectInitialized: true});
     } else {
-      this.timer = setTimeout(() => {
+      this.getTimer = setTimeout(() => {
         reload();
       }, 10000);
     }

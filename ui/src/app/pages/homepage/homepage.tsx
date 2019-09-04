@@ -146,7 +146,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
   }
 
   componentWillUnmount() {
-    clearTimeout(this.timer);
+    clearTimeout(this.getTimer);
   }
 
   async validateNihToken() {
@@ -247,7 +247,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
       this.setState({billingProjectInitialized: true});
     } else {
-      this.timer = setTimeout(() => {
+      this.getTimer = setTimeout(() => {
         reload();
       }, 10000);
     }
