@@ -329,7 +329,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long participantId,
       ParticipantCohortAnnotation request) {
 
-    if (request.getCohortReviewId() != cohortReviewId) {
+    if (!request.getCohortReviewId().equals(cohortReviewId)) {
       throw new BadRequestException(
           "Bad Request: request cohort review id must equal path parameter cohort review id.");
     }
