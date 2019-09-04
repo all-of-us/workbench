@@ -26,7 +26,7 @@ export class TextModal extends React.Component<TextModalProps> {
 
   static defaultProps = {
     buttonText: 'OK'
-  }
+  };
 
   constructor(props: TextModalProps) {
     super(props);
