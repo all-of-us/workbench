@@ -18,10 +18,15 @@ import * as React from 'react';
 export interface TextModalProps {
   title: string;
   body: string;
+  buttonText: string;
   closeFunction: Function;
 }
 
 export class TextModal extends React.Component<TextModalProps> {
+
+  static defaultProps = {
+    buttonText: 'OK'
+  }
 
   constructor(props: TextModalProps) {
     super(props);
@@ -34,7 +39,7 @@ export class TextModal extends React.Component<TextModalProps> {
           <ModalTitle>{this.props.title}</ModalTitle>
           <ModalBody>{this.props.body}</ModalBody>
           <ModalFooter>
-            <Button onClick={this.props.closeFunction}>OK</Button>
+            <Button onClick={this.props.closeFunction}>{this.props.buttonText}</Button>
           </ModalFooter>
         </Modal>
       </React.Fragment>
@@ -49,9 +54,10 @@ export class TextModal extends React.Component<TextModalProps> {
 export class TextModalComponent extends ReactWrapperBase {
   @Input('title') title: TextModalProps['title'];
   @Input('body') body: TextModalProps['body'];
+  @Input('buttonText') buttonText: TextModalProps['buttonText'];
   @Input('closeFunction') closeFunction: TextModalProps['closeFunction'];
 
   constructor() {
-    super(TextModal, ['title', 'body', 'closeFunction']);
+    super(TextModal, ['title', 'body', 'buttonText', 'closeFunction']);
   }
 }
