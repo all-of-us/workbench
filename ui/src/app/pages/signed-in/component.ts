@@ -12,6 +12,7 @@ import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/
 import {initializeZendeskWidget, openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Authority} from 'generated';
+import Timeout = NodeJS.Timeout;
 
 /*
  * The user's last known active timestamp is stored in localStorage with the key of
@@ -63,9 +64,9 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   private profileLoadingSub: Subscription;
   private subscriptions = [];
 
-  private getUserActivityTimer;
-  private getLogoutTimer;
-  private getInactivityModalTimer;
+  private getUserActivityTimer: () => Timeout;
+  private getLogoutTimer: () => Timeout;
+  private getInactivityModalTimer: () => Timeout;
 
   @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
 
