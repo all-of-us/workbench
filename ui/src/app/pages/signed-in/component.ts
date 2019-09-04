@@ -138,11 +138,11 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   startInactivityTimers() {
     const resetLogoutTimeout = resettableTimeout(() => {
       this.signOut();
-    }, environment.inactivityTimeoutInSeconds * 1000);
+    }, environment.inactivityTimeoutSeconds * 1000);
 
     const resetInactivityModalTimeout = resettableTimeout(() => {
       this.showInactivityModal = true;
-    }, (environment.inactivityTimeoutInSeconds - environment.inactivityWarningInSecondsBefore) * 1000);
+    }, (environment.inactivityTimeoutSeconds - environment.inactivityWarningBeforeSeconds) * 1000);
 
     localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
     resetLogoutTimeout();
@@ -189,9 +189,9 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get inactivityModalText(): string {
-    const timeText = environment.inactivityWarningInSecondsBefore % 60 == 0 && environment.inactivityWarningInSecondsBefore > 60 ?
-      `${environment.inactivityWarningInSecondsBefore / 60} minutes` :
-      `${environment.inactivityWarningInSecondsBefore} seconds`;
+    const timeText = environment.inactivityWarningBeforeSeconds % 60 == 0 && environment.inactivityWarningBeforeSeconds > 60 ?
+      `${environment.inactivityWarningBeforeSeconds / 60} minutes` :
+      `${environment.inactivityWarningBeforeSeconds} seconds`;
 
     return `You've been idle for some time. You will be logged out in ${timeText} if no activity is detected.`;
   }

@@ -71,7 +71,7 @@ export class AppComponent implements OnInit {
         this.signInService.isSignedIn$.subscribe(signedIn => {
           if (signedIn) {
             const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
-            if (lastActive == null || Date.now() - parseInt(lastActive) > environment.inactivityTimeoutInSeconds * 1000) {
+            if (lastActive == null || Date.now() - parseInt(lastActive) > environment.inactivityTimeoutSeconds * 1000) {
               localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
               SignedInComponent.prototype.navigateSignOut();
             }

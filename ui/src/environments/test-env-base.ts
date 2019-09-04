@@ -12,6 +12,6 @@ export const testEnvironmentBase = {
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   shouldShowDisplayTag: true,
-  inactivityTimeoutInSeconds: 99999999999,
-  inactivityWarningInSecondsBefore: 5 * 60,
+  inactivityTimeoutSeconds: 99999999999,
+  inactivityWarningBeforeSeconds: 5 * 60,
 };

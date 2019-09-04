@@ -41,8 +41,8 @@ export interface Environment {
   // Example value: https://aousupporthelp.zendesk.com/hc/
   zendeskHelpCenterUrl: string;
 
-  inactivityTimeoutInSeconds: number;
-  inactivityWarningInSecondsBefore: number;
+  inactivityTimeoutSeconds: number;
+  inactivityWarningBeforeSeconds: number;
   // Transient client-side flags.
   //
   // Whether users should be able to use JupyterLab as an option.

@@ -14,9 +14,7 @@ export const environment: Environment = {
   gaUserAgentDimension: 'dimension1',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
-  // inactivityTimeoutInSeconds: 99999999999,
-  // inactivityWarningInSecondsBefore: 5 * 60,
-  inactivityTimeoutInSeconds: 30,
-  inactivityWarningInSecondsBefore: 15,
+  inactivityTimeoutSeconds: 99999999999,
+  inactivityWarningBeforeSeconds: 5 * 60,
   enableJupyterLab: true,
 };
