@@ -85,7 +85,7 @@ export interface State {
 const barsTransformNotRotated = 'rotate(0deg)';
 const barsTransformRotated = 'rotate(90deg)';
 
-export const SignedInNavBar = withUserProfile()(
+export const NavBar = withUserProfile()(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
@@ -159,10 +159,9 @@ export const SignedInNavBar = withUserProfile()(
           </a>
           {
             this.props.shouldShowDisplayTag
-              ? <div style={styles.displayTag}>
-                {this.props.displayTag}
-              </div>
-              : null
+            && <div style={styles.displayTag}>
+              {this.props.displayTag}
+            </div>
           }
         </div>
         <Breadcrumb/>
@@ -191,10 +190,10 @@ export const SignedInNavBar = withUserProfile()(
 );
 
 @Component({
-  selector: 'app-signed-in-nav-bar',
+  selector: 'app-nav-bar',
   template: '<div #root></div>'
 })
-export class SignedInNavBarComponent extends ReactWrapperBase {
+export class NavBarComponent extends ReactWrapperBase {
   @Input('hasDataAccess') hasDataAccess: Props['hasDataAccess'];
   @Input('hasAccessModuleAdmin') hasAccessModuleAdmin: Props['hasAccessModuleAdmin'];
   @Input('headerImg') headerImg: Props['headerImg'];
@@ -210,7 +209,7 @@ export class SignedInNavBarComponent extends ReactWrapperBase {
   @Input('profileActive') profileActive: Props['profileActive'];
   @Input('userAdminActive') userAdminActive: Props['userAdminActive'];
   constructor() {
-    super(SignedInNavBar, [
+    super(NavBar, [
       'hasDataAccess',
       'hasAccessModuleAdmin',
       'headerImg',

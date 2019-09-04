@@ -24,7 +24,7 @@ import {BugReportComponent} from 'app/components/bug-report';
 import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
 import {TextModalComponent} from 'app/components/text-modal';
 import {SignedInComponent} from 'app/pages/signed-in/component';
-import {SignedInNavBarComponent} from 'app/pages/signed-in/signed-in-nav-bar';
+import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
 import {CdrVersionsApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 
@@ -42,7 +42,8 @@ describe('SignedInComponent', () => {
         SignedInComponent,
         RoutingSpinnerComponent,
         TextModalComponent,
-        SignedInNavBarComponent
+        SignedInNavBarComponent,
+        NavBarComponent
       ],
       providers: [
         {provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub()},

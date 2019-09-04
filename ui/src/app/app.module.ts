@@ -70,7 +70,7 @@ import {TextModalComponent} from 'app/components/text-modal';
 import {InteractiveNotebookComponent} from 'app/pages/analysis/interactive-notebook';
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
-import {SignedInNavBarComponent} from 'app/pages/signed-in/signed-in-nav-bar';
+import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
 
 
 
@@ -144,7 +144,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ProfilePageComponent,
     RoutingSpinnerComponent,
     SignedInComponent,
-    SignedInNavBarComponent,
+    NavBarComponent,
     SignInComponent,
     StigmatizationPageComponent,
     TextModalComponent,
