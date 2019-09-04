@@ -82,7 +82,7 @@ export const navigateAndPreventDefaultIfNoKeysPressed = (e: React.MouseEvent, ur
 export const navigateSignOut = () => {
   window.location.assign(`https://www.google.com/accounts/Logout?continue=` +
     `https://appengine.google.com/_ah/logout?continue=${window.location.origin}/login`);
-}
+};
 
 export enum BreadcrumbType {
   Workspaces = 'Workspaces',

@@ -197,14 +197,18 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     this.showInactivityModal = false;
   }
 
-  get inactivityModalText(): string {
-    const timeText = environment.inactivityWarningBeforeSeconds % 60 === 0 &&
-    environment.inactivityWarningBeforeSeconds > 60 ?
-      `${environment.inactivityWarningBeforeSeconds / 60} minutes` :
-      `${environment.inactivityWarningBeforeSeconds} seconds`;
+  secondsToText(seconds) {
+    return seconds % 60 === 0 && seconds > 60 ?
+      `${seconds / 60} minutes` : `${seconds} seconds`;
+  }
 
-    return `You've been idle for some time. You will be logged out in ${timeText}` +
-      ` if no activity is detected.`;
+  get inactivityModalText(): string {
+    const secondsBeforeDisplayingModal =
+      environment.inactivityTimeoutSeconds - environment.inactivityWarningBeforeSeconds;
+
+    return `You have been idle for over ${this.secondsToText(secondsBeforeDisplayingModal)}. ` +
+      `You can choose to extend your session by clicking the button below. You will be automatically logged ` +
+      `out if there is no action in the next ${this.secondsToText(environment.inactivityWarningBeforeSeconds)}.`;
   }
 
   get reviewWorkspaceActive(): boolean {

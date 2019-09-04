@@ -23,10 +23,10 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {BreadcrumbComponent} from 'app/components/breadcrumb';
 import {BugReportComponent} from 'app/components/bug-report';
 import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
+import {TextModalComponent} from 'app/components/text-modal';
 import {SignedInComponent} from 'app/pages/signed-in/component';
 import {CdrVersionsApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
-import {TextModalComponent} from "app/components/text-modal";
 
 describe('SignedInComponent', () => {
   let fixture: ComponentFixture<SignedInComponent>;

@@ -371,7 +371,7 @@ export function debouncer(action, sensitivityMs) {
       t = Date.now();
     },
     getTimer: () => timer
-  }
+  };
 }
 
 // Starts a timer which will invoke `f` after `timeoutInSeconds` has passed
@@ -385,5 +385,5 @@ export function resettableTimeout(f, timeoutInSeconds) {
       timeout = setTimeout(f, timeoutInSeconds);
     },
     getTimer: () => timeout
-  }
+  };
 }
