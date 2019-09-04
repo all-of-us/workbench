@@ -1,4 +1,5 @@
 <app-signed-in-nav-bar
+  [hasAccessModuleAdmin]="hasAccessModuleAdmin"
   [hasDataAccess]="hasDataAccess"
   [headerImg]="headerImg"
   [displayTag]="displayTag"
@@ -11,6 +12,7 @@
   [workspacesActive]="workspacesActive"
   [libraryActive]="libraryActive"
   [profileActive]="profileActive"
+  [userAdminActive]="userAdminActive"
 ></app-signed-in-nav-bar>
 
 <clr-alert

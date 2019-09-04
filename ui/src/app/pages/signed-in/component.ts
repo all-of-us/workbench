@@ -217,4 +217,8 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   get profileActive(): boolean {
     return this.locationService.path() === '/profile';
   }
+
+  get userAdminActive(): boolean {
+    return this.locationService.path() === '/admin/user';
+  }
 }

@@ -58,6 +58,7 @@ const styles = reactStyles({
 
 export interface Props {
   hasDataAccess: boolean;
+  hasAccessModuleAdmin;
   headerImg: string;
   displayTag: string;
   shouldShowDisplayTag: boolean;
@@ -71,6 +72,7 @@ export interface Props {
   workspacesActive: boolean;
   libraryActive: boolean;
   profileActive: boolean;
+  userAdminActive: boolean;
 }
 
 export interface State {
@@ -171,7 +173,9 @@ export const SignedInNavBar = withUserProfile()(
             workspacesActive={this.props.workspacesActive}
             libraryActive={this.props.libraryActive}
             profileActive={this.props.profileActive}
+            userAdminActive={this.props.userAdminActive}
             hasDataAccess={this.props.hasDataAccess}
+            hasAccessModuleAdmin={this.props.hasAccessModuleAdmin}
             aouAccountEmailAddress={this.props.aouAccountEmailAddress}
             contactEmailAddress={this.props.contactEmailAddress}
             givenName={this.props.givenName}
@@ -192,6 +196,7 @@ export const SignedInNavBar = withUserProfile()(
 })
 export class SignedInNavBarComponent extends ReactWrapperBase {
   @Input('hasDataAccess') hasDataAccess: Props['hasDataAccess'];
+  @Input('hasAccessModuleAdmin') hasAccessModuleAdmin: Props['hasAccessModuleAdmin'];
   @Input('headerImg') headerImg: Props['headerImg'];
   @Input('displayTag') displayTag: Props['displayTag'];
   @Input('shouldShowDisplayTag') shouldShowDisplayTag: Props['shouldShowDisplayTag'];
@@ -203,9 +208,11 @@ export class SignedInNavBarComponent extends ReactWrapperBase {
   @Input('workspacesActive') workspacesActive: Props['workspacesActive'];
   @Input('libraryActive') libraryActive: Props['libraryActive'];
   @Input('profileActive') profileActive: Props['profileActive'];
+  @Input('userAdminActive') userAdminActive: Props['userAdminActive'];
   constructor() {
     super(SignedInNavBar, [
       'hasDataAccess',
+      'hasAccessModuleAdmin',
       'headerImg',
       'displayTag',
       'shouldShowDisplayTag',
@@ -217,6 +224,7 @@ export class SignedInNavBarComponent extends ReactWrapperBase {
       'workspacesActive',
       'libraryActive',
       'profileActive',
+      'userAdminActive',
     ]);
   }
 }

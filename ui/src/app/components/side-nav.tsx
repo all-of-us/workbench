@@ -200,7 +200,9 @@ export interface SideNavProps {
   workspacesActive: boolean;
   libraryActive: boolean;
   profileActive: boolean;
+  userAdminActive: boolean;
   hasDataAccess: boolean;
+  hasAccessModuleAdmin: boolean;
   aouAccountEmailAddress: string;
   contactEmailAddress: string;
   givenName: string;
@@ -326,6 +328,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           content={'Contact Us'}
           onToggleSideNav={() => this.props.onToggleSideNav()}
           parentOnClick={() => this.openContactWidget()}
+        />
+      }
+      {
+        this.props.hasAccessModuleAdmin && <SideNavItem
+          content={'User Admin'}
+          onToggleSideNav={() => this.props.onToggleSideNav}
+          href={"/admin/user"}
+          active={this.props.userAdminActive}
         />
       }
     </div>;
