@@ -138,15 +138,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
     let initializedProgress = false;
     this.loadingSub = serverConfigStore.asObservable()
-      .flatMap(({useBillingProjectBuffer}) => {
-        if (useBillingProjectBuffer) {
-          return this.clusterService.listClusters(this.wsNamespace);
-        }
-        return  userProfileStore.asObservable()
-          .flatMap((profileStore) => {
-            return this.clusterService.listClusters(
-              profileStore.profile.freeTierBillingProjectName);
-          });
+      .flatMap(({}) => {
+        return this.clusterService.listClusters(this.wsNamespace);
       })
       .do((resp) => {
         if (initializedProgress) {

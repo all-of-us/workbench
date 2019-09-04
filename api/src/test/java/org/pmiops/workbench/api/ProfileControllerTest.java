@@ -857,7 +857,6 @@ public class ProfileControllerTest {
 
   private WorkbenchConfig generateConfig() {
     WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-    config.featureFlags.useBillingProjectBuffer = false;
     config.billing.projectNamePrefix = BILLING_PROJECT_PREFIX;
     config.billing.retryCount = 2;
     config.firecloud.registeredDomainName = "";

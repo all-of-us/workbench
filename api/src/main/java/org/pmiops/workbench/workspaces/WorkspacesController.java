@@ -217,34 +217,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("Workspace name must be 80 characters or less");
     }
 
-    final boolean useBillingProjectBuffer =
-        workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer;
-    if (!useBillingProjectBuffer) {
-      if (Strings.isNullOrEmpty(workspace.getNamespace())) {
-        throw new BadRequestException("missing required field 'namespace'");
-      }
-      org.pmiops.workbench.db.model.Workspace existingWorkspace =
-          workspaceService.getByName(workspace.getNamespace(), workspace.getName());
-      if (existingWorkspace != null) {
-        throw new ConflictException(
-            String.format(
-                "Workspace %s/%s already exists", workspace.getNamespace(), workspace.getName()));
-      }
-    }
-
     User user = userProvider.get();
     String workspaceNamespace;
-    if (useBillingProjectBuffer) {
-      BillingProjectBufferEntry bufferedBillingProject;
-      try {
-        bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
-      } catch (EmptyBufferException e) {
-        throw new TooManyRequestsException();
-      }
-      workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
-    } else {
-      workspaceNamespace = workspace.getNamespace();
+    BillingProjectBufferEntry bufferedBillingProject;
+    try {
+      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+    } catch (EmptyBufferException e) {
+      throw new TooManyRequestsException();
     }
+    workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+
 
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
@@ -252,26 +234,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     FirecloudWorkspaceId fcWorkspaceId = workspaceId;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
 
-    if (useBillingProjectBuffer) {
-      fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
-    } else {
-      fcWorkspace = null;
-      for (int attemptValue = 1; attemptValue < MAX_FC_CREATION_ATTEMPT_VALUES; attemptValue++) {
-        try {
-          fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
-          break;
-        } catch (ConflictException e) {
-          if (attemptValue >= 5) {
-            throw e;
-          } else {
-            fcWorkspaceId =
-                new FirecloudWorkspaceId(
-                    workspaceId.getWorkspaceNamespace(),
-                    workspaceId.getWorkspaceName() + Integer.toString(attemptValue));
-          }
-        }
-      }
-    }
+    fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
@@ -299,11 +262,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
 
-    if (useBillingProjectBuffer) {
-      dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
-    } else {
-      dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.OLD);
-    }
+    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
 
@@ -392,34 +351,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'workspace.researchPurpose'");
     }
 
-    final boolean useBillingProjectBuffer =
-        workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer;
-    if (!useBillingProjectBuffer) {
-      if (Strings.isNullOrEmpty(toWorkspace.getNamespace())) {
-        throw new BadRequestException("missing required field 'workspace.namespace'");
-      }
-      if (workspaceService.getByName(toWorkspace.getNamespace(), toWorkspace.getName()) != null) {
-        throw new ConflictException(
-            String.format(
-                "Workspace %s/%s already exists",
-                toWorkspace.getNamespace(), toWorkspace.getName()));
-      }
-    }
-
     User user = userProvider.get();
 
     String toWorkspaceName;
-    if (useBillingProjectBuffer) {
-      BillingProjectBufferEntry bufferedBillingProject;
-      try {
-        bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
-      } catch (EmptyBufferException e) {
-        throw new TooManyRequestsException();
-      }
-      toWorkspaceName = bufferedBillingProject.getFireCloudProjectName();
-    } else {
-      toWorkspaceName = toWorkspace.getNamespace();
+    BillingProjectBufferEntry bufferedBillingProject;
+    try {
+      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+    } catch (EmptyBufferException e) {
+      throw new TooManyRequestsException();
     }
+    toWorkspaceName = bufferedBillingProject.getFireCloudProjectName();
 
     // Retrieving the workspace is done first, which acts as an access check.
     String fromBucket =
@@ -514,11 +455,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
     }
 
-    if (useBillingProjectBuffer) {
-      dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
-    } else {
-      dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.OLD);
-    }
+    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
     org.pmiops.workbench.db.model.Workspace savedWorkspace =
         workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);

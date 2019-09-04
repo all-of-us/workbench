@@ -99,7 +99,6 @@ public class UserControllerTest {
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.enforceRegistered = false;
     config.featureFlags = new FeatureFlagsConfig();
-    config.featureFlags.useBillingProjectBuffer = false;
 
     saveFamily();
   }

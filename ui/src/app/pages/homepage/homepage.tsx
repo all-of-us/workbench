@@ -265,9 +265,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
       twoFactorAuthCompleted, dataUseAgreementCompleted
     } = this.state;
 
-    const canCreateWorkspaces = billingProjectInitialized ||
-      serverConfigStore.getValue().useBillingProjectBuffer;
-
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -319,16 +316,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                     <div style={styles.contentWrapperLeft}>
                       <div style={styles.mainHeader}>Researcher Workbench</div>
-                      <TooltipTrigger content={<div>Your Firecloud billing project is still being
-                        initialized. Workspace creation will be available in a few minutes.</div>}
-                                      disabled={canCreateWorkspaces}>
-                        <CardButton disabled={!canCreateWorkspaces}
-                                    onClick={() => navigate(['workspaces/build'])}
-                                    style={{margin: '1.9rem 106px 0 3%'}}>
-                          Create a <br/> New Workspace
-                          <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
-                        </CardButton>
-                      </TooltipTrigger>
+                      <CardButton onClick={() => navigate(['workspaces/build'])}
+                                  style={{margin: '1.9rem 106px 0 3%'}}>
+                        Create a <br/> New Workspace
+                        <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
+                      </CardButton>
                     </div>
                     <div style={styles.contentWrapperRight}>
                       <a onClick={() => navigate(['workspaces'])}

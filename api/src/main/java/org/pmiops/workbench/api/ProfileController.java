@@ -296,15 +296,6 @@ public class ProfileController implements ProfileApiDelegate {
       fireCloudService.registerUser(
           user.getContactEmail(), user.getGivenName(), user.getFamilyName());
 
-      // TODO(calbach): After the next DB wipe, switch this null check to
-      // instead use the freeTierBillingProjectStatus.
-      if (!workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer
-          && user.getFreeTierBillingProjectName() == null) {
-        String billingProjectName = createFirecloudBillingProject(user);
-        user.setFreeTierBillingProjectName(billingProjectName);
-        user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.PENDING);
-      }
-
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       // If the user is logged in, then we know that they have followed the account creation
       // instructions sent to
@@ -313,97 +304,7 @@ public class ProfileController implements ProfileApiDelegate {
       return saveUserWithConflictHandling(user);
     }
 
-    // everything after this if block is code that will be deleted when useBillingProjectBuffer is
-    // turned on permanently.
-    if (workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer) {
-      return user;
-    }
-
-    // Free tier billing project setup is complete; nothing to do.
-    if (BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatusEnum())) {
-      return user;
-    }
-
-    // On subsequent sign-ins to the first, attempt to complete the setup of the FC billing project
-    // and mark the Workbench's project setup as completed. FC project creation is asynchronous, so
-    // first confirm whether Firecloud claims the project setup is complete.
-    BillingProjectStatus status;
-    try {
-      String billingProjectName = user.getFreeTierBillingProjectName();
-      status =
-          fireCloudService.getBillingProjectMemberships().stream()
-              .filter(m -> m.getProjectName() != null)
-              .filter(m -> m.getCreationStatus() != null)
-              .filter(m -> fcToWorkbenchBillingMap.containsKey(m.getCreationStatus()))
-              .filter(m -> billingProjectName.equals(m.getProjectName()))
-              .map(m -> fcToWorkbenchBillingMap.get(m.getCreationStatus()))
-              // Should be at most one matching billing project; though we're not asserting this.
-              .findFirst()
-              .orElse(BillingProjectStatus.NONE);
-    } catch (WorkbenchException e) {
-      log.log(Level.WARNING, "failed to retrieve billing projects, continuing", e);
-      return user;
-    }
-    switch (status) {
-      case NONE:
-      case PENDING:
-        log.log(Level.INFO, "free tier project is still initializing, continuing");
-        return user;
-
-      case ERROR:
-        int retries = Optional.ofNullable(user.getBillingProjectRetries()).orElse(0);
-        if (retries < workbenchConfigProvider.get().billing.retryCount) {
-          this.userService.setBillingRetryCount(retries + 1);
-          log.log(
-              Level.INFO,
-              String.format(
-                  "Billing project %s failed to be created, retrying.",
-                  user.getFreeTierBillingProjectName()));
-          try {
-            fireCloudService.removeUserFromBillingProject(
-                user.getEmail(), user.getFreeTierBillingProjectName());
-          } catch (WorkbenchException e) {
-            log.log(Level.INFO, "Failed to remove user from errored billing project");
-          }
-          String billingProjectName = createFirecloudBillingProject(user);
-          return this.userService.setFreeTierBillingProjectNameAndStatus(
-              billingProjectName, BillingProjectStatus.PENDING);
-        } else {
-          String billingProjectName = user.getFreeTierBillingProjectName();
-          log.log(
-              Level.SEVERE,
-              String.format("free tier project %s failed to be created", billingProjectName));
-          return userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, status);
-        }
-      case READY:
-        log.log(Level.INFO, "free tier project initialized");
-        break;
-
-      default:
-        log.log(Level.SEVERE, String.format("unrecognized status '%s'", status));
-        return user;
-    }
-
-    String billingProjectName = user.getFreeTierBillingProjectName();
-    try {
-      this.leonardoNotebooksClient.createCluster(
-          billingProjectName, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
-      log.log(
-          Level.INFO,
-          String.format(
-              "created cluster %s/%s",
-              billingProjectName, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
-    } catch (ConflictException e) {
-      log.log(
-          Level.INFO,
-          String.format(
-              "Cluster %s/%s already exists",
-              billingProjectName, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
-    } catch (GatewayTimeoutException e) {
-      log.log(Level.WARNING, "Socket Timeout creating cluster.");
-    }
-    return userService.setFreeTierBillingProjectNameAndStatus(
-        billingProjectName, BillingProjectStatus.READY);
+    return user;
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {

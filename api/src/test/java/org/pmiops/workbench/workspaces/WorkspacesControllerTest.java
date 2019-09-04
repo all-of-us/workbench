@@ -262,7 +262,6 @@ public class WorkspacesControllerTest {
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-      workbenchConfig.featureFlags.useBillingProjectBuffer = false;
       return workbenchConfig;
     }
   }
@@ -308,7 +307,6 @@ public class WorkspacesControllerTest {
     testConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
     testConfig.firecloud.registeredDomainName = "allUsers";
     testConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-    testConfig.featureFlags.useBillingProjectBuffer = false;
     when(configProvider.get()).thenReturn(testConfig);
 
     workspacesController.setWorkbenchConfigProvider(configProvider);

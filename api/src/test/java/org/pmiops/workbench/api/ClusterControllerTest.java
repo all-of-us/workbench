@@ -150,7 +150,6 @@ public class ClusterControllerTest {
     config.access = new WorkbenchConfig.AccessConfig();
     config.access.enableComplianceTraining = true;
     config.featureFlags = new FeatureFlagsConfig();
-    config.featureFlags.useBillingProjectBuffer = false;
     config.featureFlags.enableLeoWelder = false;
 
     user = new User();
@@ -167,11 +166,10 @@ public class ClusterControllerTest {
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
 
-    // TODO: Update cluster names to include user IDs once useBillingProjectBuffer is the default.
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
     testFcCluster =
         new org.pmiops.workbench.notebooks.model.Cluster()
-            .clusterName("all-of-us")
+            .clusterName("all-of-us" + user.getUserId())
             .googleProject(BILLING_PROJECT_ID)
             .status(org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING)
             .createdDate(createdDate);
@@ -277,7 +275,6 @@ public class ClusterControllerTest {
     when(notebookService.createCluster(eq(BILLING_PROJECT_ID), eq("all-of-us-123")))
         .thenReturn(testFcCluster);
 
-    config.featureFlags.useBillingProjectBuffer = true;
     assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
   }
