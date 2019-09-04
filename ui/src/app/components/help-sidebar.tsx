@@ -14,7 +14,7 @@ const styles = reactStyles({
     top: 0,
     right: '-45px',
     height: '100%',
-    width: 'calc(14rem + 85px)',
+    width: 'calc(14rem + 45px)',
     overflow: 'hidden',
     color: colors.primary,
     zIndex: 1000
@@ -25,7 +25,7 @@ const styles = reactStyles({
     right: '45px',
     height: '100%',
     width: '14rem',
-    padding: '0.5rem',
+    overflow: 'auto',
     background: colorWithWhiteness(colors.primary, .87),
     transition: 'margin-right 0.5s ease-out'
   },
@@ -36,6 +36,7 @@ const styles = reactStyles({
     height: '100%',
     width: '45px',
     background: colorWithWhiteness(colors.primary, 0.4),
+    zIndex: 2
   },
   icon: {
     color: colors.white,
@@ -44,14 +45,17 @@ const styles = reactStyles({
     cursor: 'pointer',
     textAlign: 'center',
   },
-  closeIcon: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: '100%',
+  topBar: {
+    position: 'fixed',
+    width: '14rem',
     background: colorWithWhiteness(colors.primary, 0.4),
     color: colors.white,
     height: '1rem',
+    zIndex: 1
+  },
+  closeIcon: {
+    cursor: 'pointer',
+    verticalAlign: 'top'
   },
   sectionTitle: {
     marginTop: '0.5rem',
@@ -110,9 +114,24 @@ export class HelpSidebar extends React.Component<Props, State> {
 
   onIconClick = (icon: string) => {
     let {activeIcon, sidebarOpen} = this.state;
-    sidebarOpen = icon === activeIcon ? !sidebarOpen : true;
-    activeIcon = sidebarOpen ? icon : undefined;
-    this.setState({activeIcon, sidebarOpen});
+    sidebarOpen = !(icon === activeIcon && sidebarOpen);
+    if (sidebarOpen) {
+      this.setState({activeIcon: icon, sidebarOpen});
+    } else {
+      this.hideSidebar();
+    }
+  }
+
+  hideSidebar = () => {
+    this.setState({sidebarOpen: false});
+    // keep activeIcon set while the sidebar transition completes
+    setTimeout(() => {
+      const {sidebarOpen} = this.state;
+      // check if the sidebar has been opened again before resetting activeIcon
+      if (!sidebarOpen) {
+        this.setState({activeIcon: undefined});
+      }
+    }, 300);
   }
 
   render() {
@@ -121,13 +140,14 @@ export class HelpSidebar extends React.Component<Props, State> {
     const contentStyle = (tab: string) => ({
       display: activeIcon === tab ? 'block' : 'none',
       overflow: 'auto',
-      marginTop: '1rem'
+      marginTop: '1rem',
+      padding: '0.5rem',
     });
     return <div style={styles.sidebar}>
       <div style={sidebarOpen ? contentStyles.open : contentStyles.closed}>
-        <div style={styles.closeIcon}
-             onClick={() => this.setState({activeIcon: undefined, sidebarOpen: false})}>
-          <ClrIcon shape='caret right' size={24} style={{cursor: 'pointer', verticalAlign: 'none'}}/>
+        <div style={styles.topBar}>
+          <ClrIcon shape='caret right' size={22} style={styles.closeIcon}
+            onClick={() => this.hideSidebar()} />
         </div>
         <div style={contentStyle('help')}>
           <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
@@ -146,7 +166,9 @@ export class HelpSidebar extends React.Component<Props, State> {
           </div>)}
         </div>
         <div style={contentStyle('annotations')}>
-          <SidebarContent participant={participant} setParticipant={setParticipant} />
+          {!!participant &&
+            <SidebarContent participant={participant} setParticipant={setParticipant} />
+          }
         </div>
       </div>
       <div style={styles.iconContainer}>
