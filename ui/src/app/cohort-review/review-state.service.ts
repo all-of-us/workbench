@@ -1,8 +1,7 @@
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
-import {
-  CohortReview, CohortStatus,
-} from 'generated/fetch';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {CohortReview, CohortStatus} from 'generated/fetch';
 
 export const initialFilterState = {
   global: {
@@ -101,3 +100,27 @@ export const filterStateStore =
   new BehaviorSubject<any>(JSON.parse(JSON.stringify(initialFilterState)));
 export const vocabOptions = new BehaviorSubject<any>(null);
 export const multiOptions = new BehaviorSubject<any>(null);
+
+export function getVocabOptions(
+  workspaceNamespace: string,
+  workspaceId: string,
+  cohortReviewId: number
+) {
+  const vocabFilters = {source: {}, standard: {}};
+  try {
+    cohortReviewApi().getVocabularies(workspaceNamespace, workspaceId, cohortReviewId)
+      .then(response => {
+        response.items.forEach(item => {
+          const type = item.type.toLowerCase();
+          vocabFilters[type][item.domain] = [
+            ...(vocabFilters[type][item.domain] || []),
+            item.vocabulary
+          ];
+        });
+        vocabOptions.next(vocabFilters);
+      });
+  } catch (error) {
+    vocabOptions.next(vocabFilters);
+    console.error(error);
+  }
+}

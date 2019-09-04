@@ -8,6 +8,7 @@ import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/
 import {DetailHeader} from 'app/cohort-review/detail-header/detail-header.component';
 import {DetailTabs} from 'app/cohort-review/detail-tabs/detail-tabs.component';
 import {Participant} from 'app/cohort-review/participant.model';
+import {cohortReviewStore, getVocabOptions, vocabOptions} from 'app/cohort-review/review-state.service';
 import {SidebarContent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -77,10 +78,12 @@ interface State {
   participant: Participant;
   annotations: ParticipantCohortAnnotation[];
   annotationDefinitions: CohortAnnotationDefinition[];
+  annotationDeleted: boolean;
 }
 
 export const DetailPage = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
+    private subscription;
     constructor(props: any) {
       super(props);
       this.state = {
@@ -89,7 +92,8 @@ export const DetailPage = withCurrentWorkspace()(
         editingDefinitions: false,
         participant: null,
         annotations: null,
-        annotationDefinitions: null
+        annotationDefinitions: null,
+        annotationDeleted: false
       };
       this.setAnnotations = this.setAnnotations.bind(this);
       this.openCreateDefinitionModal = this.openCreateDefinitionModal.bind(this);
@@ -102,18 +106,19 @@ export const DetailPage = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      const {cdrVersionId} = this.props.workspace;
-      urlParamsStore.distinctUntilChanged(fp.isEqual)
+      this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(params => !!params.pid)
-        .switchMap(({ns, wsid, cid, pid}) => {
+        .switchMap(({ns, wsid, pid}) => {
           return Observable.forkJoin(
             from(cohortReviewApi()
-              .getParticipantCohortStatus(ns, wsid, +cid, +cdrVersionId, +pid))
+              .getParticipantCohortStatus(ns, wsid,
+                cohortReviewStore.getValue().cohortReviewId, +pid))
               .do(ps => {
                 this.setState({participant: Participant.fromStatus(ps)});
               }),
             from(cohortReviewApi()
-              .getParticipantCohortAnnotations(ns, wsid, +cid, +cdrVersionId, +pid))
+              .getParticipantCohortAnnotations(ns, wsid,
+                cohortReviewStore.getValue().cohortReviewId, +pid))
               .do(({items}) => {
                 this.setState({annotations: items});
               }),
@@ -121,6 +126,15 @@ export const DetailPage = withCurrentWorkspace()(
           );
         })
         .subscribe();
+      if (!vocabOptions.getValue()) {
+        const {workspace: {id, namespace}} = this.props;
+        const {cohortReviewId} = cohortReviewStore.getValue();
+        getVocabOptions(namespace, id, cohortReviewId);
+      }
+    }
+
+    componentWillUnmount() {
+      this.subscription.unsubscribe();
     }
 
     loadAnnotationDefinitions() {
@@ -161,8 +175,11 @@ export const DetailPage = withCurrentWorkspace()(
       this.setState({editingDefinitions: true});
     }
 
-    closeEditDefinitionsModal() {
-      this.setState({editingDefinitions: false});
+    closeEditDefinitionsModal(deleted: boolean = false) {
+      this.setState({editingDefinitions: false, annotationDeleted: deleted});
+      if (deleted) {
+        setTimeout(() => this.setState({annotationDeleted: false}), 5000);
+      }
     }
 
     setAnnotationDefinitions(v) {
@@ -174,8 +191,8 @@ export const DetailPage = withCurrentWorkspace()(
     }
 
     render() {
-      const {annotations, annotationDefinitions, creatingDefinition, editingDefinitions,
-        participant, sidebarOpen} = this.state;
+      const {annotations, annotationDefinitions, annotationDeleted, creatingDefinition,
+        editingDefinitions, participant, sidebarOpen} = this.state;
       return <React.Fragment>
         {!(participant && annotations && annotationDefinitions) && <SpinnerOverlay />}
         {participant && annotations && annotationDefinitions && <React.Fragment>
@@ -197,6 +214,7 @@ export const DetailPage = withCurrentWorkspace()(
                 setParticipant={this.setParticipant}
                 annotations={annotations}
                 annotationDefinitions={annotationDefinitions}
+                annotationDeleted={annotationDeleted}
                 setAnnotations={this.setAnnotations}
                 openCreateDefinitionModal={this.openCreateDefinitionModal}
                 openEditDefinitionsModal={this.openEditDefinitionsModal}>

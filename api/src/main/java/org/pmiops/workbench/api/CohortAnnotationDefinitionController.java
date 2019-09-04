@@ -45,61 +45,47 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
   private static final Function<
           org.pmiops.workbench.db.model.CohortAnnotationDefinition, CohortAnnotationDefinition>
       TO_CLIENT_COHORT_ANNOTATION_DEFINITION =
-          new Function<
-              org.pmiops.workbench.db.model.CohortAnnotationDefinition,
-              CohortAnnotationDefinition>() {
-            @Override
-            public CohortAnnotationDefinition apply(
-                org.pmiops.workbench.db.model.CohortAnnotationDefinition
-                    cohortAnnotationDefinition) {
-              List<String> enumValues =
-                  cohortAnnotationDefinition.getEnumValues() == null
-                      ? null
-                      : cohortAnnotationDefinition.getEnumValues().stream()
-                          .map(CohortAnnotationEnumValue::getName)
-                          .collect(Collectors.toList());
-              return new CohortAnnotationDefinition()
-                  .etag(Etags.fromVersion(cohortAnnotationDefinition.getVersion()))
-                  .columnName(cohortAnnotationDefinition.getColumnName())
-                  .cohortId(cohortAnnotationDefinition.getCohortId())
-                  .annotationType(cohortAnnotationDefinition.getAnnotationTypeEnum())
-                  .cohortAnnotationDefinitionId(
-                      cohortAnnotationDefinition.getCohortAnnotationDefinitionId())
-                  .enumValues(enumValues);
-            }
+          cohortAnnotationDefinition -> {
+            List<String> enumValues =
+                cohortAnnotationDefinition.getEnumValues() == null
+                    ? null
+                    : cohortAnnotationDefinition.getEnumValues().stream()
+                        .map(CohortAnnotationEnumValue::getName)
+                        .collect(Collectors.toList());
+            return new CohortAnnotationDefinition()
+                .etag(Etags.fromVersion(cohortAnnotationDefinition.getVersion()))
+                .columnName(cohortAnnotationDefinition.getColumnName())
+                .cohortId(cohortAnnotationDefinition.getCohortId())
+                .annotationType(cohortAnnotationDefinition.getAnnotationTypeEnum())
+                .cohortAnnotationDefinitionId(
+                    cohortAnnotationDefinition.getCohortAnnotationDefinitionId())
+                .enumValues(enumValues);
           };
 
   private static final Function<
           CohortAnnotationDefinition, org.pmiops.workbench.db.model.CohortAnnotationDefinition>
       FROM_CLIENT_COHORT_ANNOTATION_DEFINITION =
-          new Function<
-              CohortAnnotationDefinition,
-              org.pmiops.workbench.db.model.CohortAnnotationDefinition>() {
-            @Override
-            public org.pmiops.workbench.db.model.CohortAnnotationDefinition apply(
-                CohortAnnotationDefinition cohortAnnotationDefinition) {
-              org.pmiops.workbench.db.model.CohortAnnotationDefinition
-                  dbCohortAnnotationDefinition =
-                      new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
-                          .cohortId(cohortAnnotationDefinition.getCohortId())
-                          .columnName(cohortAnnotationDefinition.getColumnName())
-                          .annotationTypeEnum(cohortAnnotationDefinition.getAnnotationType());
-              List<CohortAnnotationEnumValue> enumValuesList =
-                  (cohortAnnotationDefinition.getEnumValues() == null)
-                      ? new ArrayList<>()
-                      : IntStream.range(0, cohortAnnotationDefinition.getEnumValues().size())
-                          .mapToObj(
-                              i ->
-                                  new CohortAnnotationEnumValue()
-                                      .name(cohortAnnotationDefinition.getEnumValues().get(i))
-                                      .order(i)
-                                      .cohortAnnotationDefinition(dbCohortAnnotationDefinition))
-                          .collect(Collectors.toList());
-              for (CohortAnnotationEnumValue cohortAnnotationEnumValue : enumValuesList) {
-                dbCohortAnnotationDefinition.getEnumValues().add(cohortAnnotationEnumValue);
-              }
-              return dbCohortAnnotationDefinition;
+          cohortAnnotationDefinition -> {
+            org.pmiops.workbench.db.model.CohortAnnotationDefinition dbCohortAnnotationDefinition =
+                new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
+                    .cohortId(cohortAnnotationDefinition.getCohortId())
+                    .columnName(cohortAnnotationDefinition.getColumnName())
+                    .annotationTypeEnum(cohortAnnotationDefinition.getAnnotationType());
+            List<CohortAnnotationEnumValue> enumValuesList =
+                (cohortAnnotationDefinition.getEnumValues() == null)
+                    ? new ArrayList<>()
+                    : IntStream.range(0, cohortAnnotationDefinition.getEnumValues().size())
+                        .mapToObj(
+                            i ->
+                                new CohortAnnotationEnumValue()
+                                    .name(cohortAnnotationDefinition.getEnumValues().get(i))
+                                    .order(i)
+                                    .cohortAnnotationDefinition(dbCohortAnnotationDefinition))
+                        .collect(Collectors.toList());
+            for (CohortAnnotationEnumValue cohortAnnotationEnumValue : enumValuesList) {
+              dbCohortAnnotationDefinition.getEnumValues().add(cohortAnnotationEnumValue);
             }
+            return dbCohortAnnotationDefinition;
           };
 
   @Autowired

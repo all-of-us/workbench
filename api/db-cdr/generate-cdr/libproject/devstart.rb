@@ -1,69 +1,129 @@
+require_relative "../../../../aou-utils/serviceaccounts"
 require_relative "../../../../aou-utils/utils/common"
 require_relative "../../../libproject/wboptionsparser"
 require "json"
 require "set"
 require "tempfile"
 
-def update_bq_acl(cmd_name, args)
+ENVIRONMENTS = {
+  "all-of-us-workbench-test" => {
+    :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
+    :source_cdr_project => "all-of-us-ehr-dev",
+    :dest_cdr_project => "fc-aou-cdr-synth-test",
+    :config_json => "config_test.json"
+  },
+  "all-of-us-rw-staging" => {
+    :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
+    :source_cdr_project => "all-of-us-ehr-dev",
+    :dest_cdr_project => "fc-aou-cdr-synth-staging",
+    :config_json => "config_staging.json"
+  },
+  "all-of-us-rw-stable" => {
+    :publisher_account => "deploy@all-of-us-rw-stable.iam.gserviceaccount.com",
+    :source_cdr_project => "all-of-us-ehr-dev",
+    :dest_cdr_project => "fc-aou-cdr-synth-stable",
+    :config_json => "config_stable.json"
+  },
+  "all-of-us-rw-prod" => {
+    :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
+    :source_cdr_project => "aou-res-curation-output-prod",
+    :dest_cdr_project => "fc-aou-cdr-prod",
+    :config_json => "config_prod.json"
+  }
+}
+
+def get_config(env)
+  unless ENVIRONMENTS.fetch(env, {}).has_key?(:config_json)
+    raise ArgumentError.new("env '#{env}' lacks a valid configuration")
+  end
+  return JSON.parse(File.read("../../config/" + ENVIRONMENTS[env][:config_json]))
+end
+
+def get_auth_domain_group(project)
+  return get_config(project)["firecloud"]["registeredDomainGroup"]
+end
+
+def ensure_docker(cmd_name, args=nil)
+  args = (args or [])
+  unless Workbench.in_docker?
+    exec(*(%W{docker-compose run --rm cdr-scripts ./generate-cdr/project.rb #{cmd_name}} + args))
+  end
+end
+
+def publish_cdr(cmd_name, args)
+  ensure_docker cmd_name, args
+
   op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-   "--bq-project [project]",
-      ->(opts, v) { opts.bq_project = v},
-      "Project containing the CDR version. Required."
-    )
   op.add_option(
     "--bq-dataset [dataset]",
     ->(opts, v) { opts.bq_dataset = v},
     "Dataset for the CDR version. Required."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "The Google Cloud project associated with this environment."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project }
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.parse.validate
 
-  # TODO: add controlled authorization domains here later; choose controlled vs. registered based
-  # on data access level of CDR version.
-  if op.opts.bq_project == "all-of-us-ehr-dev"
-    # We include prod in here for now since it uses synthetic data. We might remove this in future.
-    authorization_domains = ["all-of-us-registered-prod@firecloud.org",
-                             "GROUP_all-of-us-registered-stable@firecloud.org",
-                             "GROUP_all-of-us-registered-staging@firecloud.org",
-                             "GROUP_all-of-us-registered-test@dev.test.firecloud.org"]
-  elsif op.opts.bq_project == "aou-res-curation-prod"
-    authorization_domains = ["all-of-us-registered-prod@firecloud.org"]
-  else
-    raise ArgumentError.new("bq-project must be all-of-us-ehr-dev (synthetic) or aou-res-curation-prod (prod)")
-  end
-
   common = Common.new
-  config_file = Tempfile.new("#{op.opts.bq_dataset}-config.json")
-  begin
-    common.run_inline %{bq show --format=prettyjson #{op.opts.bq_project}:#{op.opts.bq_dataset} > #{config_file.path}}
-    json = JSON.parse(File.read(config_file.path))
-    existing_groups = Set[]
-    for entry in json["access"]
-      if entry.key?("groupByEmail")
-        existing_groups.add(entry["groupByEmail"])
+  env = ENVIRONMENTS[op.opts.project]
+  account = env.fetch(:publisher_account)
+  # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
+  key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
+  ServiceAccountContext.new(
+    op.opts.project, account, key_file.path).run do
+    common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
+
+    source_dataset = "#{env.fetch(:source_cdr_project)}:#{op.opts.bq_dataset}"
+    dest_dataset = "#{env.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
+    common.status "Copying from '#{source_dataset}' to '#{dest_dataset}' as #{account}"
+
+    # If you receive an error from "bq" like "Invalid JWT Signature", you may
+    # need to delete cached BigQuery creds on your local machine. Try deleting
+    # files matching ~/.config/gcloud/legacy_credentials/*/singlestore_bq.json
+    # (verify the file location on your machine first).
+    # TODO: Find a better solution for Google credentials in docker.
+
+    # If you receive a prompt from "bq" for selecting a default project ID, just
+    # hit enter.
+    # TODO: Figure out how to prepopulate this value or disable interactivity.
+    common.run_inline %W{bq mk -f --dataset #{dest_dataset}}
+    common.run_inline %W{./copy-bq-dataset.sh #{source_dataset} #{dest_dataset} #{env.fetch(:source_cdr_project)}}
+
+    auth_domain_group = get_auth_domain_group(op.opts.project)
+
+    config_file = Tempfile.new("#{op.opts.bq_dataset}-config.json")
+    begin
+      json = JSON.parse(
+        common.capture_stdout %{bq show --format=prettyjson #{dest_dataset}})
+      existing_groups = Set[]
+      for entry in json["access"]
+        if entry.key?("groupByEmail")
+          existing_groups.add(entry["groupByEmail"])
+        end
       end
-    end
-    for domain in authorization_domains
-      if existing_groups.include?(domain)
-        puts "#{domain} already in ACL, skipping..."
+      if existing_groups.include?(auth_domain_group)
+        common.status "#{auth_domain_group} already in ACL, skipping..."
       else
-        puts "Adding #{domain} to ACL..."
-        new_entry = { "groupByEmail" => domain, "role" => "READER"}
+        common.status "Adding #{auth_domain_group} as a READER..."
+        new_entry = { "groupByEmail" => auth_domain_group, "role" => "READER"}
         json["access"].push(new_entry)
       end
+      File.open(config_file.path, "w") do |f|
+        f.write(JSON.pretty_generate(json))
+      end
+      common.run_inline %{bq update --source #{config_file.path} #{dest_dataset}}
+    ensure
+      config_file.unlink
     end
-    File.open(config_file.path, "w") do |f|
-      f.write(JSON.pretty_generate(json))
-    end
-    common.run_inline %{bq update --source #{config_file.path} #{op.opts.bq_project}:#{op.opts.bq_dataset}}
-  ensure
-    config_file.unlink
   end
 end
 
 Common.register_command({
-  :invocation => "update-bq-acl",
-  :description => "Updates the BigQuery dataset ACL for a CDR version to have the appropriate FireCloud groups on it.",
-  :fn => ->(*args) { update_bq_acl("update-bq-acl", args) }
+  :invocation => "publish-cdr",
+  :description => "Publishes a CDR dataset by copying it into a Firecloud CDR project and making it readable by registered users in the corresponding environment",
+  :fn => ->(*args) { publish_cdr("publish-cdr", args) }
 })
