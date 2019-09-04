@@ -274,10 +274,10 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
       {googleBucketModalOpen && <Modal>
         <ModalTitle>Policy Reminder</ModalTitle>
         <ModalBody style={{color: colors.primary}}>
-            It is All of Us data use policy that researchers should not make copies of or download
-            individual-level data (including taking screenshots or other means of viewing
+            It is <i>All of Us</i> data use policy that researchers should not make copies of or
+            download individual-level data (including taking screenshots or other means of viewing
             individual-level data) outside of the <i>All of Us</i> research environment without
-            approval from All of Us Resource Access Board (RAB).<br/><br/>
+            approval from <i>All of Us</i> Resource Access Board (RAB).<br/><br/>
             Notebooks should rarely be downloaded directly from Google Cloud Console, as output
             cells in Notebooks may contain sensitive individual level data.
         </ModalBody>
