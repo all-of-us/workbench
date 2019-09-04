@@ -93,4 +93,10 @@
     <router-outlet></router-outlet>
     <app-routing-spinner></app-routing-spinner>
   </div>
+
+  <app-text-modal *ngIf="showInactivityModal"
+              [title]="'Your session is about to expire'"
+              [body]="inactivityModalText"
+              [buttonText]="'Extend Session'"
+              [closeFunction]="closeInactivityModal"></app-text-modal>
 </div>

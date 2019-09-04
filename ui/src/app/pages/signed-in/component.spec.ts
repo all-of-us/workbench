@@ -23,6 +23,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {BreadcrumbComponent} from 'app/components/breadcrumb';
 import {BugReportComponent} from 'app/components/bug-report';
 import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
+import {TextModalComponent} from 'app/components/text-modal';
 import {SignedInComponent} from 'app/pages/signed-in/component';
 import {CdrVersionsApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
@@ -40,7 +41,8 @@ describe('SignedInComponent', () => {
         BreadcrumbComponent,
         BugReportComponent,
         SignedInComponent,
-        RoutingSpinnerComponent
+        RoutingSpinnerComponent,
+        TextModalComponent,
       ],
       providers: [
         {provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub()},
@@ -67,5 +69,6 @@ describe('SignedInComponent', () => {
   it('should render', fakeAsync(() => {
     updateAndTick(fixture);
     expect(fixture).toBeTruthy();
+    fixture.destroy();
   }));
 });

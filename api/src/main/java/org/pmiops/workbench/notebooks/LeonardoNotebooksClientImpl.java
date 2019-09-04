@@ -66,6 +66,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     Map<String, String> nbExtensions = new HashMap<>();
     nbExtensions.put("aou-snippets-menu", gcsPrefix + "/aou-snippets-menu.js");
     nbExtensions.put("aou-download-extension", gcsPrefix + "/aou-download-policy-extension.js");
+    nbExtensions.put("aou-download-extension", gcsPrefix + "/activity-checker-extension.js");
     if (!config.featureFlags.enableLeoWelder) {
       // Enabling Welder automatically installs a Leo-maintained playground extension.
       nbExtensions.put("aou-playground-extension", gcsPrefix + "/playground-extension.js");

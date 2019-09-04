@@ -64,6 +64,7 @@ import {
 
 import {Configuration as FetchConfiguration} from 'generated/fetch';
 
+import {TextModalComponent} from 'app/components/text-modal';
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {
@@ -146,6 +147,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     SignedInComponent,
     SignInComponent,
     StigmatizationPageComponent,
+    TextModalComponent,
     WorkspaceAboutComponent,
     WorkspaceEditComponent,
     WorkspaceLibraryComponent,
