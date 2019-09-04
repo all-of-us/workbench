@@ -62,8 +62,10 @@ handlers:
         https://api.stable.fake-research-aou.org
         https://api.workbench.researchallofus.org
         https://leonardo.dsde-dev.broadinstitute.org
+        https://leonardo.dsde-perf.broadinstitute.org
         https://notebooks.firecloud.org
         https://firecloud-orchestration.dsde-dev.broadinstitute.org
+        https://firecloud-orchestration.dsde-perf.broadinstitute.org
         https://api.firecloud.org
         https://*.googleapis.com
         https://*.zdassets.com
