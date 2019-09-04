@@ -259,10 +259,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
 
   render() {
-    const {billingProjectInitialized, betaAccessGranted,
-      videoOpen, accessTasksLoaded, accessTasksRemaining, eraCommonsLinked,
-      eraCommonsError, firstVisitTraining, trainingCompleted, quickTour, videoLink,
-      twoFactorAuthCompleted, dataUseAgreementCompleted
+    const {betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
+      eraCommonsLinked, eraCommonsError, firstVisitTraining, trainingCompleted, quickTour,
+      videoLink, twoFactorAuthCompleted, dataUseAgreementCompleted
     } = this.state;
 
     const quickTourResources = [

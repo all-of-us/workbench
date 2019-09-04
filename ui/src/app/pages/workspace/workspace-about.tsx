@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {cdrVersionStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {cdrVersionStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';

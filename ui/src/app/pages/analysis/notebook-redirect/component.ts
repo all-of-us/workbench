@@ -9,8 +9,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {
   queryParamsStore,
   serverConfigStore,
-  urlParamsStore,
-  userProfileStore
+  urlParamsStore
 } from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';

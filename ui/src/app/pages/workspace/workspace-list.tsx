@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
-import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
 import {AlertDanger} from 'app/components/alert';
