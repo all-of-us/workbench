@@ -6,13 +6,13 @@ import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 
-const sidebarContent = require('assets/json/help-sidebar.json')
+const sidebarContent = require('assets/json/help-sidebar.json');
 
 const styles = reactStyles({
   sidebar: {
     position: 'absolute',
     top: 0,
-    right: '-45px',
+    right: 'calc(-0.6rem - 45px)',
     height: '100%',
     width: 'calc(14rem + 45px)',
     overflow: 'hidden',
@@ -46,7 +46,6 @@ const styles = reactStyles({
     textAlign: 'center',
   },
   topBar: {
-    position: 'fixed',
     width: '14rem',
     background: colorWithWhiteness(colors.primary, 0.4),
     color: colors.white,
@@ -139,8 +138,8 @@ export class HelpSidebar extends React.Component<Props, State> {
     const {activeIcon, sidebarOpen} = this.state;
     const contentStyle = (tab: string) => ({
       display: activeIcon === tab ? 'block' : 'none',
+      height: 'calc(100% - 1rem)',
       overflow: 'auto',
-      marginTop: '1rem',
       padding: '0.5rem',
     });
     return <div style={styles.sidebar}>
