@@ -37,6 +37,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   resolve: Function;
   modalPromise: Promise<boolean> | null = null;
   modalOpen = false;
+  saving = false;
 
   ngOnInit() {
     this.subscription = Observable.combineLatest(
@@ -79,7 +80,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
   canDeactivate(): Promise<boolean> | boolean {
     const criteria = JSON.stringify(mapRequest(this.criteria));
-    return criteria === this.cohort.criteria || this.showWarningModal();
+    return criteria === this.cohort.criteria || this.saving || this.showWarningModal();
   }
 
   async showWarningModal() {
@@ -107,5 +108,9 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
   updateRequest = () => {
     this.triggerUpdate++;
+  }
+
+  updateSaving = (flag: boolean) => {
+    this.saving = flag;
   }
 }

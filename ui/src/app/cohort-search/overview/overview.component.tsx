@@ -100,7 +100,8 @@ const styles = reactStyles({
 
 interface Props {
   searchRequest: any;
-  update: number;
+  updateCount: number;
+  updateSaving: Function;
 }
 
 interface State {
@@ -152,7 +153,7 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (this.props.update > prevProps.update && !this.definitionErrors) {
+      if (this.props.updateCount > prevProps.updateCount && !this.definitionErrors) {
         this.setState({loading: true, apiError: false});
         this.getTotalCount();
       }
@@ -219,6 +220,7 @@ export const ListOverview = withCurrentWorkspace()(
 
     saveCohort() {
       triggerEvent('Click icon', 'Click', 'Icon - Save - Cohort Builder');
+      this.props.updateSaving(true);
       const {cohort} = this.state;
       cohort.criteria = this.criteria;
       this.setState({saving: true, saveError: false});
@@ -235,6 +237,7 @@ export const ListOverview = withCurrentWorkspace()(
 
     submit() {
       triggerEvent('Click icon', 'Click', 'Icon - Save As - Cohort Builder');
+      this.props.updateSaving(true);
       this.setState({saving: true, saveError: false});
       const {ns, wsid} = urlParamsStore.getValue();
       const {name, description} = this.state;
@@ -261,8 +264,14 @@ export const ListOverview = withCurrentWorkspace()(
       });
     }
 
-    cancel = () => {
+    cancelDelete = () => {
       this.setState({deleting: false});
+    }
+
+    cancelSave = () => {
+      this.props.updateSaving(false);
+      this.setState({saveModalOpen: false, name: undefined, description: undefined,
+        saveError: false, nameTouched: false});
     }
 
     navigateTo(action: string) {
@@ -399,17 +408,15 @@ export const ListOverview = withCurrentWorkspace()(
               onChange={(v) => this.setState({description: v})}/>
           </ModalBody>
           <ModalFooter>
-            <Button style={{color: colors.primary}} type='link' onClick={() => this.setState({
-              saveModalOpen: false, name: undefined, description: undefined, saveError: false,
-              nameTouched: false
-            })} disabled={saving}>Cancel</Button>
+            <Button style={{color: colors.primary}} type='link' onClick={() => this.cancelSave()}
+              disabled={saving}>Cancel</Button>
             <Button type='primary' disabled={!name || saving} onClick={() => this.submit()}>
               {saving && <Spinner style={{marginRight: '0.25rem'}} size={18} />}
                Save
             </Button>
           </ModalFooter>
         </Modal>}
-        {deleting && <ConfirmDeleteModal closeFunction={this.cancel}
+        {deleting && <ConfirmDeleteModal closeFunction={this.cancelDelete}
           resourceType='cohort'
           receiveDelete={this.delete}
           resourceName={cohort.name} />}
@@ -424,9 +431,10 @@ export const ListOverview = withCurrentWorkspace()(
 })
 export class OverviewComponent extends ReactWrapperBase {
   @Input('searchRequest') searchRequest: Props['searchRequest'];
-  @Input('update') update: Props['update'];
+  @Input('updateCount') updateCount: Props['updateCount'];
+  @Input('updateSaving') updateSaving: Props['updateSaving'];
 
   constructor() {
-    super(ListOverview, ['searchRequest', 'update']);
+    super(ListOverview, ['searchRequest', 'updateCount', 'updateSaving']);
   }
 }
