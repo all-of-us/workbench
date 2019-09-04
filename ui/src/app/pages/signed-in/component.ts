@@ -162,8 +162,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
-      window.localStorage
-        .setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
+      window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
       resetLogoutTimeout.reset();
       resetInactivityModalTimeout.reset();
     }, false);

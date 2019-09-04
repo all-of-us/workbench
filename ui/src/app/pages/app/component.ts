@@ -80,8 +80,7 @@ export class AppComponent implements OnInit {
               .getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
             if (lastActive == null ||
               Date.now() - parseInt(lastActive, 10) > environment.inactivityTimeoutSeconds * 1000) {
-              localStorage
-                .setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
+              localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
               navigateSignOut();
             }
           }
