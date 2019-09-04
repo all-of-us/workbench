@@ -38,6 +38,8 @@ public class DirectoryServiceImpl implements DirectoryService {
   private static final String ALLOWED =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
   private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
+  // Matches the API org unit path defined in the Gsuite UI where researcher accounts reside.
+  private static final String GSUITE_WORKBENCH_ORG_UNIT_PATH = "/workbench-users";
   // Name of the GSuite custom schema containing AOU custom fields.
   private static final String GSUITE_AOU_SCHEMA_NAME = "All_of_Us_Workbench";
   // Name of the "contact email" custom field, which is stored within the AoU GSuite custom schema.
@@ -192,7 +194,8 @@ public class DirectoryServiceImpl implements DirectoryService {
             .setPrimaryEmail(primaryEmail)
             .setPassword(password)
             .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
-            .setChangePasswordAtNextLogin(true);
+            .setChangePasswordAtNextLogin(true)
+            .setOrgUnitPath(GSUITE_WORKBENCH_ORG_UNIT_PATH);
     addCustomSchemaAndEmails(user, primaryEmail, contactEmail);
 
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
