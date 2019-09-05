@@ -287,12 +287,11 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         }}>
         </div>
         <div style={{
-          marginBottom: '1rem',
           display: 'flex',
           flexWrap: 'wrap',
           position: 'relative',
           minHeight: 247,
-          padding: '0 0.5rem'
+          padding: '0 0.5rem 1rem'
         }}>
           {filteredList.map((resource: RecentResource, index: number) => {
             return <div key={index}> {this.createResourceCard(resource)} </div>;

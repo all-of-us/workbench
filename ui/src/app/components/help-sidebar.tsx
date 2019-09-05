@@ -9,7 +9,7 @@ import {reactStyles, ReactWrapperBase} from 'app/utils';
 const sidebarContent = require('assets/json/help-sidebar.json');
 
 const styles = reactStyles({
-  sidebar: {
+  sidebarContainer: {
     position: 'absolute',
     top: 0,
     right: 'calc(-0.6rem - 45px)',
@@ -17,9 +17,8 @@ const styles = reactStyles({
     width: 'calc(14rem + 45px)',
     overflow: 'hidden',
     color: colors.primary,
-    zIndex: 1000
   },
-  content: {
+  sidebar: {
     position: 'absolute',
     top: 0,
     right: '45px',
@@ -32,11 +31,11 @@ const styles = reactStyles({
   iconContainer: {
     position: 'absolute',
     top: 0,
-    right: 0,
+    right: 'calc(-0.6rem - 45px)',
     height: '100%',
     width: '45px',
     background: colorWithWhiteness(colors.primary, 0.4),
-    zIndex: 2
+    zIndex: 101
   },
   icon: {
     color: colors.white,
@@ -44,6 +43,7 @@ const styles = reactStyles({
     padding: '0.25rem 0',
     cursor: 'pointer',
     textAlign: 'center',
+    transition: 'background 0.2s linear'
   },
   topBar: {
     width: '14rem',
@@ -72,17 +72,6 @@ const styles = reactStyles({
     color: colors.primary
   }
 });
-
-const contentStyles = {
-  closed: {
-    ...styles.content,
-    marginRight: 'calc(-14rem - 40px)',
-  },
-  open: {
-    ...styles.content,
-    marginRight: 0,
-  },
-};
 
 const activeIconStyle = {
   ...styles.icon,
@@ -136,57 +125,61 @@ export class HelpSidebar extends React.Component<Props, State> {
   render() {
     const {location, participant, setParticipant} = this.props;
     const {activeIcon, sidebarOpen} = this.state;
+    const sidebarContainerStyles = {...styles.sidebarContainer, zIndex: activeIcon ? 100 : -1};
+    const sidebarStyles = {...styles.sidebar, marginRight: sidebarOpen ? 0 : 'calc(-14rem - 40px)'};
     const contentStyle = (tab: string) => ({
       display: activeIcon === tab ? 'block' : 'none',
       height: 'calc(100% - 1rem)',
       overflow: 'auto',
       padding: '0.5rem',
     });
-    return <div style={styles.sidebar}>
-      <div style={sidebarOpen ? contentStyles.open : contentStyles.closed}>
-        <div style={styles.topBar}>
-          <ClrIcon shape='caret right' size={22} style={styles.closeIcon}
-            onClick={() => this.hideSidebar()} />
-        </div>
-        <div style={contentStyle('help')}>
-          <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
-          {sidebarContent[location].map((section, s) => <div key={s}>
-            <h3 style={styles.sectionTitle}>{section.title}</h3>
-            {section.content.map((content, c) => {
-              return typeof content === 'string'
-                ? <p key={c} style={styles.contentItem}>{content}</p>
-                : <div>
-                  <h4 style={styles.contentTitle}>{content.title}</h4>
-                  {content.content.map((item, i) =>
-                    <p key={i} style={styles.contentItem}>{item}</p>)
-                  }
-                </div>;
-            })}
-          </div>)}
-        </div>
-        <div style={contentStyle('annotations')}>
-          {!!participant &&
-            <SidebarContent participant={participant} setParticipant={setParticipant} />
-          }
-        </div>
-      </div>
+    return <React.Fragment>
       <div style={styles.iconContainer}>
         <div style={activeIcon === 'help' ? activeIconStyle : styles.icon}>
           <ClrIcon className='is-solid' shape='info-standard' size={28}
-            onClick={() => this.onIconClick('help')} />
+                   onClick={() => this.onIconClick('help')} />
         </div>
         <div style={activeIcon === 'book' ? activeIconStyle : styles.icon}>
           <ClrIcon className='is-solid' shape='book' size={32}
-            onClick={() => this.onIconClick('book')} />
+                   onClick={() => this.onIconClick('book')} />
         </div>
         {location === 'reviewParticipantDetail' &&
           <div style={activeIcon === 'annotations' ? activeIconStyle : styles.icon}>
             <ClrIcon shape='note' size={32}
-              onClick={() => this.onIconClick('annotations')} />
+                     onClick={() => this.onIconClick('annotations')} />
           </div>
         }
       </div>
-    </div>;
+      <div style={sidebarContainerStyles}>
+        <div style={sidebarStyles}>
+          <div style={styles.topBar}>
+            <ClrIcon shape='caret right' size={22} style={styles.closeIcon}
+              onClick={() => this.hideSidebar()} />
+          </div>
+          <div style={contentStyle('help')}>
+            <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
+            {sidebarContent[location].map((section, s) => <div key={s}>
+              <h3 style={styles.sectionTitle}>{section.title}</h3>
+              {section.content.map((content, c) => {
+                return typeof content === 'string'
+                  ? <p key={c} style={styles.contentItem}>{content}</p>
+                  : <div>
+                    <h4 style={styles.contentTitle}>{content.title}</h4>
+                    {content.content.map((item, i) =>
+                      <p key={i} style={styles.contentItem}>{item}</p>)
+                    }
+                  </div>;
+              })}
+            </div>)}
+          </div>
+          <div style={contentStyle('annotations')}>
+            {!!participant &&
+              <SidebarContent participant={participant} setParticipant={setParticipant} />
+            }
+          </div>
+        </div>
+      </div>
+    </React.Fragment>;
   }
 }
 
