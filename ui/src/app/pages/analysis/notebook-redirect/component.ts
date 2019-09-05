@@ -136,10 +136,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.setNotebookNames();
 
     let initializedProgress = false;
-    this.loadingSub = serverConfigStore.asObservable()
-      .flatMap(({}) => {
-        return this.clusterService.listClusters(this.wsNamespace);
-      })
+    this.loadingSub = this.clusterService.listClusters(this.wsNamespace)
       .do((resp) => {
         if (initializedProgress) {
           // Only initialize progress once. This callback will re-execute as we

@@ -263,7 +263,6 @@ public class CohortsControllerTest {
 
     CLOCK.setInstant(NOW);
 
-
     Cohort cohort = new Cohort();
     cohort.setName("demo");
     cohort.setDescription("demo");

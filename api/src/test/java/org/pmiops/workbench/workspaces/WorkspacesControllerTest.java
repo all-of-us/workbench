@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -42,7 +41,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONArray;
@@ -509,7 +507,8 @@ public class WorkspacesControllerTest {
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setWorkspace(
+        testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -2261,7 +2260,8 @@ public class WorkspacesControllerTest {
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setWorkspace(
+        testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -2281,7 +2281,8 @@ public class WorkspacesControllerTest {
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setWorkspace(
+        testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -2300,7 +2301,8 @@ public class WorkspacesControllerTest {
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setWorkspace(
+        testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -2319,7 +2321,8 @@ public class WorkspacesControllerTest {
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setWorkspace(
+        testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
@@ -2371,7 +2374,8 @@ public class WorkspacesControllerTest {
     final String testNotebook = NotebooksService.withNotebookExtension("test-notebook");
 
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        testMockFactory.createFcWorkspace(testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
+        testMockFactory.createFcWorkspace(
+            testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName(BUCKET_NAME);
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL(acl);

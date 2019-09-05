@@ -311,13 +311,13 @@ public class DataSetControllerTest {
             userProvider,
             CLOCK);
     doAnswer(
-      invocation -> {
-        BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
-        doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
-        return entry;
-      })
-      .when(billingProjectBufferService)
-      .assignBillingProject(any());
+            invocation -> {
+              BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
+              doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
+              return entry;
+            })
+        .when(billingProjectBufferService)
+        .assignBillingProject(any());
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     Gson gson = new Gson();
@@ -349,7 +349,8 @@ public class DataSetControllerTest {
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspace(
+        workspace.getNamespace(), workspace.getName(), USER_EMAIL, WorkspaceAccessLevel.OWNER);
     stubGetWorkspaceAcl(
         workspace.getNamespace(), WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
@@ -358,12 +359,15 @@ public class DataSetControllerTest {
     cohortCriteria = new Gson().toJson(searchRequest);
 
     Cohort cohort = new Cohort().name(COHORT_ONE_NAME).criteria(cohortCriteria);
-    cohort = cohortsController.createCohort(workspace.getNamespace(), WORKSPACE_NAME, cohort).getBody();
+    cohort =
+        cohortsController.createCohort(workspace.getNamespace(), WORKSPACE_NAME, cohort).getBody();
     COHORT_ONE_ID = cohort.getId();
 
     Cohort cohortTwo = new Cohort().name(COHORT_TWO_NAME).criteria(cohortCriteria);
     cohortTwo =
-        cohortsController.createCohort(workspace.getNamespace(), WORKSPACE_NAME, cohortTwo).getBody();
+        cohortsController
+            .createCohort(workspace.getNamespace(), WORKSPACE_NAME, cohortTwo)
+            .getBody();
     COHORT_TWO_ID = cohortTwo.getId();
 
     List<Concept> conceptList = new ArrayList<>();
@@ -645,7 +649,8 @@ public class DataSetControllerTest {
 
     DataSetCodeResponse response =
         dataSetController
-            .generateCode(workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.R.toString(), dataSet)
+            .generateCode(
+                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.R.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
     assertThat(response.getCode())

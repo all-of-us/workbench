@@ -227,7 +227,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
 
-
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
         generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());

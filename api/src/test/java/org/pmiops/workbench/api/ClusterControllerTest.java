@@ -221,7 +221,8 @@ public class ClusterControllerTest {
 
   @Test
   public void testListClusters() throws Exception {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName())).thenReturn(testFcCluster);
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
+        .thenReturn(testFcCluster);
 
     assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
@@ -248,7 +249,8 @@ public class ClusterControllerTest {
 
   @Test(expected = FailedPreconditionException.class)
   public void testListClustersFreeTierNotReady() throws Exception {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName())).thenReturn(testFcCluster);
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
+        .thenReturn(testFcCluster);
 
     User notReadyUser = new User();
     notReadyUser.setEmail(LOGGED_IN_USER_EMAIL);
