@@ -25,6 +25,14 @@ export const userProfileStore =
     reload: () => {},
     updateCache: (profile) => {},
   });
+export const signInStore =
+  new BehaviorSubject<{
+    signOut: Function,
+    profileImage: string,
+  }>({
+    signOut: () => {},
+    profileImage: {} as string,
+  });
 
 
 /**

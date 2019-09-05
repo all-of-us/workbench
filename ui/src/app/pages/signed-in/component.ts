@@ -1,5 +1,5 @@
 import {Location} from '@angular/common';
-import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
@@ -7,9 +7,10 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
+
 import {debouncer, hasRegisteredAccess, resettableTimeout} from 'app/utils';
-import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
-import {initializeZendeskWidget, openZendeskWidget} from 'app/utils/zendesk';
+import {cdrVersionStore, routeConfigDataStore} from 'app/utils/navigation';
+import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Authority} from 'generated';
 import Timeout = NodeJS.Timeout;
@@ -53,9 +54,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   aouAccountEmailAddress = '';
   // The researcher's preferred contact email address.
   contactEmailAddress = '';
-  profileImage = '';
-  sidenavToggle = false;
-  publicUiUrl = environment.publicUiUrl;
   minimizeChrome = false;
   // True if the user tried to open the Zendesk support widget and an error
   // occurred.
@@ -71,15 +69,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
 
   @ViewChild('sidenav') sidenav: ElementRef;
-
-  @HostListener('document:click', ['$event'])
-  onClickOutsideSideNav(event: MouseEvent) {
-    const inSidenav = this.sidenav.nativeElement.contains(event.target);
-    const inSidenavToggle = this.sidenavToggleElement.nativeElement.contains(event.target);
-    if (this.sidenavToggle && !(inSidenav || inSidenavToggle)) {
-      this.sidenavToggle = false;
-    }
-  }
 
   constructor(
     /* Ours */
@@ -111,13 +100,9 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     });
 
-    // TODO: Remove or move into CSS.
-    document.body.style.backgroundColor = '#f1f2f2';
     this.signInService.isSignedIn$.subscribe(signedIn => {
-      if (signedIn) {
-        this.profileImage = this.signInService.profileImage;
-      } else {
-        navigateSignOut();
+      if (!signedIn) {
+        this.navigateSignOut();
       }
     });
 
@@ -131,6 +116,17 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.startUserActivityTracker();
     this.startInactivityTimers();
+  }
+
+  navigateSignOut(): void {
+    // Force a hard browser reload here. We want to ensure that no local state
+    // is persisting across user sessions, as this can lead to subtle bugs.
+    window.location.assign('/');
+  }
+
+  signOut(): void {
+    this.signInService.signOut();
+    this.navigateSignOut();
   }
 
   startUserActivityTracker() {
@@ -188,11 +184,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  signOut(): void {
-    this.signInService.signOut();
-    navigateSignOut();
-  }
-
   closeInactivityModal(): void {
     this.showInactivityModal = false;
   }
@@ -211,10 +202,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       `out if there is no action in the next ${this.secondsToText(environment.inactivityWarningBeforeSeconds)}.`;
   }
 
-  get reviewWorkspaceActive(): boolean {
-    return this.locationService.path() === '/admin/review-workspace';
-  }
-
   get userAdminActive(): boolean {
     return this.locationService.path() === '/admin/user';
   }
@@ -223,21 +210,15 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.locationService.path() === '';
   }
 
+  get libraryActive(): boolean {
+    return this.locationService.path() === '/library';
+  }
+
   get workspacesActive(): boolean {
     return this.locationService.path() === '/workspaces';
   }
 
-  get createWorkspaceActive(): boolean {
-    return this.locationService.path() === '/workspaces/build';
+  get profileActive(): boolean {
+    return this.locationService.path() === '/profile';
   }
-
-  openZendesk(): void {
-    openZendeskWidget(this.givenName, this.familyName, this.aouAccountEmailAddress,
-      this.contactEmailAddress);
-  }
-
-  openHubForum(): void {
-    window.open(environment.zendeskHelpCenterUrl, '_blank');
-  }
-
 }
