@@ -42,7 +42,7 @@ function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
 }
 
-// The values will change once we have ENUM once we do DB work as part of create account 2
+// The values will change once we have ENUM as part of DB work as part of create account 2
 const Options = {
   roles: [
     {label: `Undergraduate (Bachelor level) student`, value: 'bachelor'},
@@ -182,7 +182,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     };
   }
 
-  // This will method will be modified once the story  below will be done
+  // This method will be modified once the story  below will be done
   // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
   createAccount(): void {
     const {invitationKey, setProfile} = this.props;
