@@ -521,7 +521,7 @@ public class DataSetServiceImpl implements DataSetService {
             + namedParameterValue.getType().toString()
             + "\""
             + (isArrayParameter
-                ? ", arrayType = list(type = " + namedParameterValue.getArrayType() + "),"
+                ? ", arrayType = list(type = \"" + namedParameterValue.getArrayType() + "\")"
                 : "")
             + "),\n"
             + "        parameterValue = list("
