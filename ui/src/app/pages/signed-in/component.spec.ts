@@ -42,7 +42,6 @@ describe('SignedInComponent', () => {
         SignedInComponent,
         RoutingSpinnerComponent,
         TextModalComponent,
-        SignedInNavBarComponent,
         NavBarComponent
       ],
       providers: [
