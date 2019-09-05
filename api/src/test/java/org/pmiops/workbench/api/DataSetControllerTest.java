@@ -1,14 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
@@ -27,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONArray;
@@ -62,6 +56,7 @@ import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -92,6 +87,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -144,6 +140,7 @@ public class DataSetControllerTest {
 
   String cohortCriteria;
   SearchRequest searchRequest;
+  private TestMockFactory testMockFactory;
 
   @Autowired BillingProjectBufferService billingProjectBufferService;
 
@@ -254,6 +251,7 @@ public class DataSetControllerTest {
 
   @Before
   public void setUp() throws Exception {
+    testMockFactory = new TestMockFactory();
     dataSetService =
         new DataSetServiceImpl(
             bigQueryService,
@@ -312,6 +310,15 @@ public class DataSetControllerTest {
             userRecentResourceService,
             userProvider,
             CLOCK);
+    doAnswer(
+      invocation -> {
+        BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
+        doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
+        return entry;
+      })
+      .when(billingProjectBufferService)
+      .assignBillingProject(any());
+    testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     Gson gson = new Gson();
     CdrBigQuerySchemaConfig cdrBigQuerySchemaConfig =
