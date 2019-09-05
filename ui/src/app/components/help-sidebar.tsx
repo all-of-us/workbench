@@ -99,7 +99,6 @@ export class HelpSidebar extends React.Component<Props, State> {
       sidebarOpen: false,
       searchTerm: undefined
     };
-    console.log(sidebarContent);
   }
 
   onIconClick = (icon: string) => {
