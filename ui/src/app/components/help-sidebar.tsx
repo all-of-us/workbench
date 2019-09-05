@@ -14,6 +14,7 @@ const styles = reactStyles({
     top: 0,
     right: 'calc(-0.6rem - 45px)',
     height: '100%',
+    minHeight: 'calc(100vh - 156px)',
     width: 'calc(14rem + 45px)',
     overflow: 'hidden',
     color: colors.primary,
@@ -33,6 +34,7 @@ const styles = reactStyles({
     top: 0,
     right: 'calc(-0.6rem - 45px)',
     height: '100%',
+    minHeight: 'calc(100vh - 156px)',
     width: '45px',
     background: colorWithWhiteness(colors.primary, 0.4),
     zIndex: 101
