@@ -447,7 +447,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 Last Name must be 80 character or less.
               </ErrorMessage>}
             </div>
-            <TextInput id='familyName' name='contactEmail'
+            <TextInput id='contactEmail' name='contactEmail'
                        placeholder='Email Address'
                        value={contactEmail}
                        style={{width: '12rem'}}
