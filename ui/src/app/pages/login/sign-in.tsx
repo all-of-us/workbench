@@ -12,6 +12,7 @@ import {ReactWrapperBase, withWindowSize} from 'app/utils';
 import {Profile} from 'generated/fetch';
 
 import * as React from 'react';
+import {AccountCreation} from './account-creation/account-creation';
 
 export interface SignInProps {
   onInit: () => void;
