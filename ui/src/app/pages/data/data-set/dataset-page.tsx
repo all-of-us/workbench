@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -158,7 +159,7 @@ export const styles = reactStyles({
     backgroundColor: colors.white,
     borderTop: `1px solid ${colors.light}`,
     textAlign: 'right',
-    padding: '3px 10px 50px 20px',
+    padding: '3px 55px 50px 20px',
     position: 'fixed',
     left: '0',
     bottom: '0',
@@ -640,7 +641,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         valueSets
       } = this.state;
       return <React.Fragment>
-        <FadeBox style={{marginTop: '1rem'}}>
+        <FadeBox style={{paddingTop: '1rem'}}>
           <h2 style={{paddingTop: 0, marginTop: 0}}>Data Sets{this.editing &&
             dataSet !== undefined && ' - ' + dataSet.name}</h2>
           <div style={{color: colors.primary, fontSize: '14px'}}>Build a data set by selecting the
@@ -859,6 +860,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             </Button>
           </ModalFooter>
         </Modal>}
+        <HelpSidebar location='datasetBuilder' />
       </React.Fragment>;
     }
   });
@@ -869,7 +871,7 @@ export {
 };
 
 @Component({
-  template: '<div #root></div>'
+  template: '<div #root style="position: relative; margin-right: 45px;"></div>'
 })
 export class DataSetPageComponent extends ReactWrapperBase {
   constructor() {
