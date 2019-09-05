@@ -1,11 +1,17 @@
 package org.pmiops.workbench.utils;
 
+import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 /**
  * Created by brubenst on 9/4/19.
@@ -42,5 +48,16 @@ public class TestMockFactory {
         })
         .when(fireCloudService)
         .createWorkspace(anyString(), anyString());
+  }
+
+  public void stubBufferBillingProject(BillingProjectBufferService billingProjectBufferService) {
+    doAnswer(
+        invocation -> {
+          BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
+          doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
+          return entry;
+        })
+        .when(billingProjectBufferService)
+        .assignBillingProject(any());
   }
 }

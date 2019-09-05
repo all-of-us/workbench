@@ -315,15 +315,7 @@ public class WorkspacesControllerTest {
 
     workspacesController.setWorkbenchConfigProvider(configProvider);
     fcWorkspaceAcl = createWorkspaceACL();
-
-    doAnswer(
-            invocation -> {
-              BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
-              doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
-              return entry;
-            })
-        .when(billingProjectBufferService)
-        .assignBillingProject(any());
+    testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
   }
 
