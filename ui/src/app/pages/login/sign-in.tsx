@@ -1,8 +1,8 @@
 import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 
-import {AccountCreation} from 'app/pages/login/account-creation';
-import {AccountCreationSuccess} from 'app/pages/login/account-creation-success';
+import {AccountCreation} from './account-creation/account-creation';
+import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-creation-success';
 import {InvitationKey} from 'app/pages/login/invitation-key';
 import {LoginReactComponent} from 'app/pages/login/login';
 import {SignInService} from 'app/services/sign-in.service';
@@ -12,7 +12,6 @@ import {ReactWrapperBase, withWindowSize} from 'app/utils';
 import {Profile} from 'generated/fetch';
 
 import * as React from 'react';
-import {AccountCreation} from './account-creation/account-creation';
 
 export interface SignInProps {
   onInit: () => void;

@@ -182,6 +182,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     };
   }
 
+  // This will method will be modified once the story  below will be done
+  // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
   createAccount(): void {
     const {invitationKey, setProfile} = this.props;
     const profile = this.state.profile;
@@ -204,9 +206,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     profileApi().createAccount({profile, invitationKey})
       .then((savedProfile) => {
         this.setState({profile: savedProfile, creatingAccount: false});
-        setProfile(savedProfile);
-      }
-      )
+        setProfile(savedProfile);})
       .catch(error => {
         console.log(error);
         this.setState({creatingAccount: false});
@@ -275,7 +275,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   // The strings will be changed to ENUM value once survey page is done
-  selectChange(affiliation) {
+  updateAffiliationRoles(affiliation) {
     this.setState({showAffiliationRole: false, showAffiliationOther: false,
       affiliation: affiliation});
     if (affiliation === 'industry') {
@@ -286,10 +286,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       this.setState({showAffiliationOther: true});
       return;
     }
-    this.selectAffiliationChange(this.state.affiliationRole);
+    this.selectAffiliationRoles(this.state.affiliationRole);
   }
 
-  selectAffiliationChange(role) {
+  selectAffiliationRoles(role) {
     this.setState({affiliationRole: role});
     if (role === 'freeText') {
       this.setState({showAffiliationOther: true});
@@ -298,7 +298,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     }
   }
 
-  // This will be deleted once we switch the enableCAPS is set to true for prod
+  // This will be deleted once enableAccountPages is set to true for prod
   validate() {
     const {profile} = this.state;
     const requiredFields =
@@ -387,117 +387,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 style={{'paddingTop': environment.enableAccountPages ? '1.5rem' :
                       '3rem', 'paddingRight': '3rem', 'paddingLeft': '3rem'}}>
       <Header>Create your account</Header>
-      {!environment.enableAccountPages && <div>
-        <FormSection>
-          <TextInput id='givenName' name='givenName' autoFocus
-                     placeholder='First Name'
-                     value={givenName}
-                     invalid={givenName.length > 80}
-                       style={{width: '16rem'}}
-                     onChange={v => this.updateProfile('givenName', v)}/>
-          {givenName.length > 80 &&
-          <ErrorMessage id='givenNameError'>
-              First Name must be 80 characters or less.
-          </ErrorMessage>}
-        </FormSection>
-        <FormSection>
-          <TextInput id='familyName' name='familyName' placeholder='Last Name'
-                     value={familyName}
-                     invalid={familyName.length > 80}
-                       style={{width: '16rem'}}
-                     onChange={v => this.updateProfile('familyName', v)}/>
-          {familyName.length > 80 &&
-          <ErrorMessage id='familyNameError'>
-              Last Name must be 80 character or less.
-          </ErrorMessage>}
-        </FormSection>
-        <FormSection>
-          <TextInput id='contactEmail' name='contactEmail'
-                     placeholder='Email Address'
-                     value={contactEmail}
-                       style={{width: '16rem'}}
-                       onChange={v => this.updateProfile('contactEmail', v)}/>
-          {this.state.invalidEmail &&
-          <Error id='invalidEmailError'>
-            Contact Email Id is invalid
-          </Error>}
-        </FormSection>
-        <FormSection>
-          <TextInput id='currentPosition' name='currentPosition'
-                     placeholder='Your Current Position'
-                     value={currentPosition}
-                     invalid={currentPosition.length > 255}
-                       style={{width: '16rem'}}
-                     onChange={v => this.updateProfile('currentPosition', v)}/>
-          {currentPosition.length > 255 &&
-          <ErrorMessage id='currentPositionError'>
-              Current Position must be 255 characters or less.
-          </ErrorMessage>}
-        </FormSection>
-        <FormSection>
-          <TextInput id='organization' name='organization'
-                     placeholder='Your Organization'
-                     value={organization}
-                     invalid={organization.length > 255}
-                       style={{width: '16rem'}}
-                     onChange={v => this.updateProfile('organization', v)}/>
-          {organization.length > 255 &&
-          <ErrorMessage id='organizationError'>
-              Organization must be 255 characters of less.
-          </ErrorMessage>}
-        </FormSection>
-        <FormSection style={{display: 'flex'}}>
-              <TextArea style={{height: '10em', resize: 'none', width: '16rem'}}
-                        id='areaOfResearch'
-                        name='areaOfResearch'
-                        placeholder='Describe Your Current Research'
-                        value={areaOfResearch}
-                        onChange={v => this.updateProfile('areaOfResearch', v)}/>
-          <TooltipTrigger content='You are required to describe your current research in
-                      order to help All of Us improve the Researcher Workbench.'>
-            <InfoIcon style={{
-              'height': '22px',
-              'marginTop': '2.2rem',
-              'paddingLeft': '2px'
-            }}/>
-          </TooltipTrigger>
-        </FormSection>
-        <FormSection>
-          <TextInput id='username' name='username' placeholder='New Username'
-                       value={username}
-                     onChange={v => this.usernameChanged(v)}
-                     invalid={this.state.usernameConflictError || this.usernameInvalidError()}
-                       style={{width: '16rem'}}/>
-          <div style={inputStyles.iconArea}>
-            <ValidationIcon validSuccess={this.usernameValid()}/>
-          </div>
-          <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
-            numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
-            (minimum of 3 characters and maximum of 64 characters).<br/>Usernames cannot
-            begin or end with a period (.) and may not contain more than one period (.) in a row.
-          </div>}>
-            <InfoIcon style={{'height': '22px', 'paddingLeft': '2px'}}/>
-          </TooltipTrigger>
-          <div style={{height: '1.5rem'}}>
-            {this.state.usernameConflictError &&
-            <Error id='usernameConflictError'>
-                Username is already taken.
-            </Error>}
-            {this.usernameInvalidError() &&
-            <Error id='usernameError'>
-                Username is not a valid username.
-            </Error>}
-          </div>
-        </FormSection>
-        <FormSection>
-          <Button disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
-          this.isUsernameValidationError()}
-                  style={{'height': '2rem', 'width': '10rem'}}
-                  onClick={() => this.createAccount()}>
-            Next
-          </Button>
-        </FormSection>
-      </div>}
       {environment.enableAccountPages && !showNext && <div style={{marginTop: '0.5rem'}}>
         <label style={{color: colors.primary, fontSize: 16}}>
           Please complete Step 1 of 2
@@ -611,35 +500,35 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </label>
           <div style={{paddingTop: '0.5rem'}}>
             <RadioButton onChange={() => {this.setState({showInstitution: true}); }}
-              checked={this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
+                         checked={this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
             <label style={{paddingRight: '3rem', color: colors.primary}}>
               Yes
             </label>
             <RadioButton onChange={() => {this.setState({showInstitution: false}); }}
-              checked={!this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
+                         checked={!this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
             <label style={{color: colors.primary}}>No</label>
           </div>
         </Section>
         {this.state.showInstitution &&
         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
           <TextInput style={{width: '16rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
-            value={institutionName} placeholder='Institution Name'
-            onChange={value => this.setState({institutionName: value})}></TextInput>
+                     value={institutionName} placeholder='Institution Name'
+                     onChange={value => this.setState({institutionName: value})}></TextInput>
           <Dropdown value={institutionRole}
-            onChange={(e) => this.setState({institutionRole: e.value})}
-            placeholder='Which of the following describes your role'
-            style={{width: '16rem'}} options={Options.roles}/>
+                    onChange={(e) => this.setState({institutionRole: e.value})}
+                    placeholder='Which of the following describes your role'
+                    style={{width: '16rem'}} options={Options.roles}/>
         </div>}
         {!this.state.showInstitution &&
         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
           <Dropdown style={{width: '18rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
                     value={affiliation}
-                    onChange={(e) => this.selectChange(e.value)} options={Options.affiliations}
+                    onChange={(e) => this.updateAffiliationRoles(e.value)} options={Options.affiliations}
                     placeholder='Which of the following better describes your affiliation?'/>
           {this.state.showAffiliationRole &&
           <Dropdown placeholder='Which of the following describes your role'
                     options={this.state.rolesOptions} value={affiliationRole}
-                    onChange={(e) => this.selectAffiliationChange(e.value)}
+                    onChange={(e) => this.selectAffiliationRoles(e.value)}
                     style={{width: '18rem'}}/>}
           {this.state.showAffiliationOther &&
           <TextInput value={affiliationOther}
@@ -648,8 +537,120 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </div>}
         <FormSection style={{paddingBottom: '1rem'}}>
           <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError()}
-          style={{'height': '2rem', 'width': '10rem'}}
-          onClick={() => this.validateAccountCreation()}>
+                  style={{'height': '2rem', 'width': '10rem'}}
+                  onClick={() => this.validateAccountCreation()}>
+            Next
+          </Button>
+        </FormSection>
+      </div>}
+      {/*The following will be deleted once enableAccountPages is set to true in prod*/}
+      {!environment.enableAccountPages && <div>
+        <FormSection>
+          <TextInput id='givenName' name='givenName' autoFocus
+                     placeholder='First Name'
+                     value={givenName}
+                     invalid={givenName.length > 80}
+                       style={{width: '16rem'}}
+                     onChange={v => this.updateProfile('givenName', v)}/>
+          {givenName.length > 80 &&
+          <ErrorMessage id='givenNameError'>
+              First Name must be 80 characters or less.
+          </ErrorMessage>}
+        </FormSection>
+        <FormSection>
+          <TextInput id='familyName' name='familyName' placeholder='Last Name'
+                     value={familyName}
+                     invalid={familyName.length > 80}
+                       style={{width: '16rem'}}
+                     onChange={v => this.updateProfile('familyName', v)}/>
+          {familyName.length > 80 &&
+          <ErrorMessage id='familyNameError'>
+              Last Name must be 80 character or less.
+          </ErrorMessage>}
+        </FormSection>
+        <FormSection>
+          <TextInput id='contactEmail' name='contactEmail'
+                     placeholder='Email Address'
+                     value={contactEmail}
+                       style={{width: '16rem'}}
+                       onChange={v => this.updateProfile('contactEmail', v)}/>
+          {this.state.invalidEmail &&
+          <Error id='invalidEmailError'>
+            Contact Email Id is invalid
+          </Error>}
+        </FormSection>
+        <FormSection>
+          <TextInput id='currentPosition' name='currentPosition'
+                     placeholder='Your Current Position'
+                     value={currentPosition}
+                     invalid={currentPosition.length > 255}
+                       style={{width: '16rem'}}
+                     onChange={v => this.updateProfile('currentPosition', v)}/>
+          {currentPosition.length > 255 &&
+          <ErrorMessage id='currentPositionError'>
+              Current Position must be 255 characters or less.
+          </ErrorMessage>}
+        </FormSection>
+        <FormSection>
+          <TextInput id='organization' name='organization'
+                     placeholder='Your Organization'
+                     value={organization}
+                     invalid={organization.length > 255}
+                       style={{width: '16rem'}}
+                     onChange={v => this.updateProfile('organization', v)}/>
+          {organization.length > 255 &&
+          <ErrorMessage id='organizationError'>
+              Organization must be 255 characters of less.
+          </ErrorMessage>}
+        </FormSection>
+        <FormSection style={{display: 'flex'}}>
+              <TextArea style={{height: '10em', resize: 'none', width: '16rem'}}
+                        id='areaOfResearch'
+                        name='areaOfResearch'
+                        placeholder='Describe Your Current Research'
+                        value={areaOfResearch}
+                        onChange={v => this.updateProfile('areaOfResearch', v)}/>
+          <TooltipTrigger content='You are required to describe your current research in
+                      order to help All of Us improve the Researcher Workbench.'>
+            <InfoIcon style={{
+              'height': '22px',
+              'marginTop': '2.2rem',
+              'paddingLeft': '2px'
+            }}/>
+          </TooltipTrigger>
+        </FormSection>
+        <FormSection>
+          <TextInput id='username' name='username' placeholder='New Username'
+                       value={username}
+                     onChange={v => this.usernameChanged(v)}
+                     invalid={this.state.usernameConflictError || this.usernameInvalidError()}
+                       style={{width: '16rem'}}/>
+          <div style={inputStyles.iconArea}>
+            <ValidationIcon validSuccess={this.usernameValid()}/>
+          </div>
+          <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
+            numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
+            (minimum of 3 characters and maximum of 64 characters).<br/>Usernames cannot
+            begin or end with a period (.) and may not contain more than one period (.) in a row.
+          </div>}>
+            <InfoIcon style={{'height': '22px', 'paddingLeft': '2px'}}/>
+          </TooltipTrigger>
+          <div style={{height: '1.5rem'}}>
+            {this.state.usernameConflictError &&
+            <Error id='usernameConflictError'>
+                Username is already taken.
+            </Error>}
+            {this.usernameInvalidError() &&
+            <Error id='usernameError'>
+                Username is not a valid username.
+            </Error>}
+          </div>
+        </FormSection>
+        <FormSection>
+          <Button disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
+          this.isUsernameValidationError()}
+                  style={{'height': '2rem', 'width': '10rem'}}
+                  onClick={() => this.createAccount()}>
             Next
           </Button>
         </FormSection>
