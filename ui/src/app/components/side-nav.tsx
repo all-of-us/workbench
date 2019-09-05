@@ -8,6 +8,11 @@ import {environment} from 'environments/environment';
 import * as React from 'react';
 
 const styles = reactStyles({
+  flex: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   sideNav: {
     display: 'flex',
     flexDirection: 'column',
@@ -25,9 +30,6 @@ const styles = reactStyles({
     transition: 'opacity 0.5s',
   },
   sideNavItem: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     width: '100%',
     margin: 0,
     paddingLeft: '1rem',
@@ -46,12 +48,6 @@ const styles = reactStyles({
   sideNavItemDisabled: {
     color: colors.disabled,
     cursor: 'auto',
-  },
-  sideNavItemContent: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flex: '1 0 auto',
   },
   navIcon: {
     marginRight: '12px'
@@ -123,7 +119,10 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
   }
 
   getStyles(active, hovering, disabled) {
-    let sideNavItemStyles = {...styles.sideNavItem};
+    let sideNavItemStyles = {
+      ...styles.flex,
+      ...styles.sideNavItem
+    };
     if (disabled) {
       // We want to short-circuit in this case.
       return {...sideNavItemStyles, ...styles.sideNavItemDisabled};
@@ -153,12 +152,14 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
       onMouseLeave={() => this.setState({hovering: false})}
     >
       <div
-        style={styles.sideNavItemContent}
+        style={{...styles.flex,
+          flex: '1 0 auto'
+        }}
       >
         <span
           style={
             this.props.icon || this.props.hasProfileImage
-              ? null
+              ? {...styles.flex}
               : {...styles.noIconMargin}
           }
         >
@@ -334,7 +335,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         this.props.hasAccessModuleAdmin && <SideNavItem
           content={'User Admin'}
           onToggleSideNav={() => this.props.onToggleSideNav}
-          href={"/admin/user"}
+          href={'/admin/user'}
           active={this.props.userAdminActive}
         />
       }
