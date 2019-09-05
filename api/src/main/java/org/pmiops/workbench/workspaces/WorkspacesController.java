@@ -231,9 +231,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     FirecloudWorkspaceId workspaceId =
         generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
     FirecloudWorkspaceId fcWorkspaceId = workspaceId;
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
-
-    fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
