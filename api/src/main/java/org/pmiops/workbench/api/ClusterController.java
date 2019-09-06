@@ -28,7 +28,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;

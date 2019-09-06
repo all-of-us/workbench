@@ -23,7 +23,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 

@@ -25,7 +25,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.moodle.model.BadgeDetails;

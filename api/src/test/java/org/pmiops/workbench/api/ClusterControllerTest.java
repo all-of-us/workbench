@@ -38,7 +38,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterConfig;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
@@ -155,7 +154,6 @@ public class ClusterControllerTest {
     user = new User();
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
-    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.READY);
 
     createUser(OTHER_USER_EMAIL);
 
@@ -245,8 +243,6 @@ public class ClusterControllerTest {
   public void testListClustersNullBillingProject() throws Exception {
     clusterController.listClusters(null);
   }
-
-
 
   @Test
   public void testListClustersLazyCreate() {

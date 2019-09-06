@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.List;
-import java.util.Set;
 import org.pmiops.workbench.db.model.User;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
