@@ -75,9 +75,16 @@ const styles = reactStyles({
   }
 });
 
-const activeIconStyle = {
-  ...styles.icon,
-  background: colorWithWhiteness(colors.primary, 0.55)
+const iconStyles = {
+  active: {
+    ...styles.icon,
+    background: colorWithWhiteness(colors.primary, 0.55)
+  },
+  disabled: {
+    ...styles.icon,
+    opacity: 0.4,
+    cursor: 'not-allowed'
+  }
 };
 
 interface Props {
@@ -136,16 +143,15 @@ export class HelpSidebar extends React.Component<Props, State> {
     });
     return <React.Fragment>
       <div style={styles.iconContainer}>
-        <div style={activeIcon === 'help' ? activeIconStyle : styles.icon}>
+        <div style={activeIcon === 'help' ? iconStyles.active : styles.icon}>
           <ClrIcon className='is-solid' shape='info-standard' size={28}
                    onClick={() => this.onIconClick('help')} />
         </div>
-        <div style={activeIcon === 'book' ? activeIconStyle : styles.icon}>
-          <ClrIcon className='is-solid' shape='book' size={32}
-                   onClick={() => this.onIconClick('book')} />
+        <div style={iconStyles.disabled}>
+          <ClrIcon className='is-solid' shape='book' size={32} />
         </div>
         {location === 'reviewParticipantDetail' &&
-          <div style={activeIcon === 'annotations' ? activeIconStyle : styles.icon}>
+          <div style={activeIcon === 'annotations' ? iconStyles.active : styles.icon}>
             <ClrIcon shape='note' size={32}
                      onClick={() => this.onIconClick('annotations')} />
           </div>
