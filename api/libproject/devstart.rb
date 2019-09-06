@@ -1456,7 +1456,6 @@ def deploy_gcs_artifacts(cmd_name, args)
     run_inline_or_log(op.opts.dry_run, %W{
       gsutil cp
       setup_notebook_cluster.sh
-      playground-extension.js
       activity-checker-extension.js
       aou-download-policy-extension.js
       generated/aou-snippets-menu.js
