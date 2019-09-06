@@ -19,7 +19,7 @@ import {RecentWork} from 'app/pages/homepage/recent-work';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {flexStyle} from 'app/styles/flex';
+import {Column, Row} from 'app/styles/flex';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {environment} from 'environments/environment';
 import {
@@ -29,18 +29,10 @@ import {
 
 export const styles = reactStyles({
   mainHeader: {
-    color: colors.primary, fontSize: 28, fontWeight: 400,
-    display: 'flex', letterSpacing: 'normal'
+    color: colors.primary, fontSize: 28, fontWeight: 400, letterSpacing: 'normal'
   },
   pageWrapper: {
-    marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between',
-    ...flexStyle.column
-  },
-  welcomeMessage: {
-    marginLeft: '3%', ...flexStyle.row
-  },
-  welcomeMessageIconRow: {
-    ...flexStyle.row, alignItems: 'flex-end', marginLeft: '1rem'
+    marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '16px'
   },
   welcomeMessageIcon: {
     height: '2.25rem', width: '2.75rem'
@@ -50,22 +42,18 @@ export const styles = reactStyles({
   },
   singleCard: {
     width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
-    ...flexStyle.column, borderRadius: '5px',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: '5px', backgroundColor: 'rgba(255, 255, 255, 0.15)',
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
     border: 'none', marginTop: '1rem'
   },
   contentWrapperLeft: {
-    ...flexStyle.column, paddingLeft: '3%', width: '40%'
+    paddingLeft: '3%', width: '40%'
   },
   contentWrapperRight: {
-    ...flexStyle.column, justifyContent: 'space-between', width: '60%'
-  },
-  quickTour: {
-    ...flexStyle.column, marginLeft: '3%'
+    justifyContent: 'space-between', width: '60%'
   },
   quickTourCardsRow: {
-    ...flexStyle.row, justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem'
+    justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem'
   },
   quickTourLabel: {
     fontSize: 18, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
@@ -75,15 +63,15 @@ export const styles = reactStyles({
     width: '100%', backgroundColor: colors.light, marginTop: '2%'
   },
   footerInner: {
-    ...flexStyle.column, marginLeft: '3%', marginRight: '2%',
+    marginLeft: '3%', marginRight: '2%',
   },
   footerTitle: {
     height: '34px', opacity: 0.87, color: colors.primary, fontSize: '0.75rem',
     fontWeight: 600, lineHeight: '34px', marginTop: '1rem', marginBottom: '0.5rem'
   },
   footerText: {
-    height: '176px', opacity: 0.87, color: colors.secondary, fontSize: '0.6rem',
-    fontWeight: 500, lineHeight: '30px', ...flexStyle.column, width: '100%',
+    height: '176px', opacity: 0.87, color: colors.secondary,
+    fontSize: '0.6rem', fontWeight: 500, lineHeight: '30px', width: '100%',
     flexWrap: 'nowrap', overflowY: 'auto'
   },
   footerTextTitle: {
@@ -92,7 +80,7 @@ export const styles = reactStyles({
     fontWeight: 500
   },
   linksBlock: {
-    ...flexStyle.column, marginBottom: '1rem', flexShrink: 1, minWidth: '13rem'
+    marginBottom: '1rem', flexShrink: 1, minWidth: '13rem'
   },
   bottomBanner: {
     width: '100%', display: 'flex', backgroundColor: colors.primary,
@@ -372,30 +360,32 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
     if (environment.enableHomepageRestyle) {
       return <React.Fragment>
-        <div style={styles.pageWrapper}>
-          <div style={styles.welcomeMessage}>
-            <div style={{...flexStyle.column, width: '50%'}}>
-              <div style={{...flexStyle.row}}>
-                <div style={{...flexStyle.column}}>
+        <Column style={styles.pageWrapper}>
+          <Row style={{marginLeft: '3%'}}>
+            <Column style={{width: '50%'}}>
+              <Row>
+                <Column>
                   <Header style={{fontWeight: 500, color: colors.secondary, fontSize: '0.92rem'}}>
                     Welcome to</Header>
                   <Header style={{textTransform: 'uppercase', marginTop: '0.2rem'}}>
                     Researcher Workbench</Header>
-                </div>
-                <div style={styles.welcomeMessageIconRow}>
+                </Column>
+                <Row style={{alignItems: 'flex-end', marginLeft: '1rem'}}>
                   <img style={styles.welcomeMessageIcon} src='/assets/images/workspace-icon.svg'/>
                   <img style={styles.welcomeMessageIcon} src='/assets/images/cohort-icon.svg'/>
                   <img style={styles.welcomeMessageIcon} src='/assets/images/analysis-icon.svg'/>
-                </div>
-              </div>
+                </Row>
+              </Row>
               <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
                 the secure analysis platform for All of Us data</SmallHeader>
-            </div>
+            </Column>
             <div></div>
-          </div>
+          </Row>
           <FadeBox style={styles.fadeBox}>
+            {/* The elements inside this fadeBox will be changed as part of ongoing
+            homepage redesign work*/}
             <div style={{display: 'flex', justifyContent: 'center'}}>
-              <div style={styles.singleCard}>
+              <Column style={styles.singleCard}>
                 {accessTasksLoaded ?
                   (accessTasksRemaining ?
                       (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
@@ -406,9 +396,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                               twoFactorAuthCompleted={twoFactorAuthCompleted}
                                             dataUseAgreementCompleted={dataUseAgreementCompleted}/>
                       ) : (
-                        <div style={{...flexStyle.row, paddingTop: '2rem'}}>
-                          <div style={styles.contentWrapperLeft}>
-                            <div style={styles.mainHeader}>Researcher Workbench</div>
+                        <Row style={{paddingTop: '2rem'}}>
+                          <Column style={styles.contentWrapperLeft}>
+                            <Row style={styles.mainHeader}>Researcher Workbench</Row>
                             <TooltipTrigger disabled={canCreateWorkspaces} content={<div>
                               Your Firecloud billing project is still being initialized.
                               Workspace creation will be available in a few minutes.</div>}>
@@ -420,28 +410,28 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                          style={{height: '32px', width: '32px'}}/>
                               </CardButton>
                             </TooltipTrigger>
-                          </div>
-                          <div style={styles.contentWrapperRight}>
+                          </Column>
+                          <Column style={styles.contentWrapperRight}>
                             <a onClick={() => navigate(['workspaces'])}
                                style={{fontSize: '14px', color: colors.primary}}>
                               See All Workspaces</a>
-                            <div style={{marginRight: '3%', ...flexStyle.column}}>
+                            <Column style={{marginRight: '3%'}}>
                               <div style={{color: colors.primary, height: '1.9rem'}}>
                                 <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
                               </div>
                               <RecentWork dark={true}/>
-                            </div>
-                          </div>
-                        </div>)
+                            </Column>
+                          </Column>
+                        </Row>)
                   ) :
                   <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
-              </div>
+              </Column>
             </div>
           </FadeBox>
           <div>
-            <div style={styles.quickTour}>
+            <Column style={{marginLeft: '3%'}}>
               <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
-              <div style={styles.quickTourCardsRow}>
+              <Row style={styles.quickTourCardsRow}>
                 {quickTourResources.map((thumbnail, i) => {
                   return <React.Fragment key={i}>
                     <Clickable onClick={thumbnail.onClick}
@@ -451,32 +441,32 @@ export const Homepage = withUserProfile()(class extends React.Component<
                     </Clickable>
                   </React.Fragment>;
                 })}
-              </div>
-            </div>
+              </Row>
+            </Column>
             <div>
               <div style={styles.footer}>
-                <div style={styles.footerInner}>
+                <Column style={styles.footerInner}>
                   <div style={styles.footerTitle}>
                     How to Use the All of Us Researcher Workbench</div>
-                  <div style={{...flexStyle.row, justifyContent: 'space-between'}}>
+                  <Row style={{justifyContent: 'space-between'}}>
                     {footerLinks.map((col, i) => {
                       return <React.Fragment key={i}>
-                        <div style={styles.linksBlock}>
-                          <div style={styles.footerText}>
+                        <Column style={styles.linksBlock}>
+                          <Column style={styles.footerText}>
                             <div style={styles.footerTextTitle}>{col.title}</div>
                             <ul style={{color: colors.secondary, marginLeft: '2%'}}>
                               {col.links.map((link, ii) => {
                                 return <li key={ii}>
-                                  <a href='#' style={{color: colors.secondary}}>{link}</a>
+                                  <a href='#' style={{color: colors.accent}}>{link}</a>
                                 </li>;
                               } )}
                             </ul>
-                          </div>
-                        </div>
+                          </Column>
+                        </Column>
                       </React.Fragment>;
                     })}
-                  </div>
-                </div>
+                  </Row>
+                </Column>
               </div>
             </div>
             <div style={styles.bottomBanner}>
@@ -488,7 +478,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
               <div style={styles.bottomLinks}>Terms of Service</div>
             </div>
           </div>
-        </div>
+        </Column>
         {quickTour &&
         <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
         {videoOpen && <Modal width={900}>
