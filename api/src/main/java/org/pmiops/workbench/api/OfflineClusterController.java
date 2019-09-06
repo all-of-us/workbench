@@ -146,6 +146,20 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
         new CheckClustersResponse().clusterDeletionCount(activeDeletes + unusedDeletes - errors));
   }
 
+  @Override
+  public ResponseEntity<Void> stopCluster(String googleProject, String clusterName) {
+    final ClusterApi clusterApi = clusterApiProvider.get();
+    try {
+      clusterApi.stopCluster(googleProject, clusterName);
+      return ResponseEntity.ok().build();
+    } catch (ApiException e) {
+      log.warning(e.toString());
+      return ResponseEntity
+          .status(e.getCode())
+          .build();
+    }
+  }
+
   private static String formatDuration(Duration d) {
     if ((d.toHours() % 24) == 0) {
       return String.format("%dd", d.toDays());

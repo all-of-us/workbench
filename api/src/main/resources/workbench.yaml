@@ -928,6 +928,44 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
+  /v1/admin/clusters/{googleProject}/{clusterName}/stop:
+    post:
+      summary: Stops a Dataproc cluster
+      description: |
+        Stops the instances of a Dataproc cluster, but retains any data persisted on disk. The
+        cluster may be restarted with the /start endpoint.
+      operationId: stopCluster
+      tags:
+        - offlineCluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: GCP billing project name
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+      responses:
+        '202':
+          description: Cluster stop request accepted
+        '403':
+          description: User does not have permission to perform action on cluster
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Cluster cannot be stopped
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   /v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
