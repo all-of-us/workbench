@@ -61,7 +61,6 @@ public class WorkbenchConfig {
     public Integer clusterIdleMaxAgeDays;
     public String registeredDomainName;
     public String registeredDomainGroup;
-    public boolean enforceRegistered;
     public String leoBaseUrl;
     // This value specifies the information we hand to Terra as our AppId header.
     // It is primarily used for metrics gathering information.

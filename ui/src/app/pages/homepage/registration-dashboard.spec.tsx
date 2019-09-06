@@ -19,7 +19,6 @@ describe('RegistrationDashboard', () => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     serverConfigStore.next({
       enableDataUseAgreement: true,
-      enforceRegistered: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',

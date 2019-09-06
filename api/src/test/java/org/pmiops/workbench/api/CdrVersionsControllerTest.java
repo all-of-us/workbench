@@ -61,10 +61,7 @@ public class CdrVersionsControllerTest {
 
     @Bean
     public WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
-      workbenchConfig.firecloud = new FireCloudConfig();
-      workbenchConfig.firecloud.enforceRegistered = true;
-      return workbenchConfig;
+      return new WorkbenchConfig();
     }
   }
 
