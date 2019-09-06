@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import java.time.Clock;
@@ -13,6 +14,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import javax.inject.Provider;
 import org.json.JSONArray;
@@ -46,6 +48,8 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceACL;
+import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Cohort;
@@ -82,6 +86,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -104,6 +109,7 @@ public class CohortsControllerTest {
   private static final String WORKSPACE_NAMESPACE = "ns";
   private static final String COHORT_NAME = "cohort";
   private static final String CONCEPT_SET_NAME = "concept_set";
+  private static final String CREATOR_EMAIL = "bob@gmail.com";
 
   private static final Concept CLIENT_CONCEPT_1 =
       new Concept()
@@ -135,6 +141,7 @@ public class CohortsControllerTest {
       makeConcept(CLIENT_CONCEPT_1);
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
       makeConcept(CLIENT_CONCEPT_2);
+  private static User currentUser;
 
   @Autowired WorkspacesController workspacesController;
   @Autowired CohortsController cohortsController;
@@ -199,6 +206,12 @@ public class CohortsControllerTest {
     }
 
     @Bean
+    @Scope("prototype")
+    User user() {
+      return currentUser;
+    }
+
+    @Bean
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
@@ -210,11 +223,12 @@ public class CohortsControllerTest {
   @Before
   public void setUp() throws Exception {
     User user = new User();
-    user.setEmail("bob@gmail.com");
+    user.setEmail(CREATOR_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
+    currentUser = user;
     when(userProvider.get()).thenReturn(user);
     workspacesController.setUserProvider(userProvider);
     cohortsController.setUserProvider(userProvider);
@@ -243,9 +257,9 @@ public class CohortsControllerTest {
 
     CLOCK.setInstant(NOW);
     stubGetWorkspace(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, "bob@gmail.com", WorkspaceAccessLevel.OWNER);
+        WORKSPACE_NAMESPACE, WORKSPACE_NAME, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
     stubGetWorkspace(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, "bob@gmail.com", WorkspaceAccessLevel.OWNER);
+        WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
 
     Cohort cohort = new Cohort();
     cohort.setName("demo");
@@ -276,6 +290,18 @@ public class CohortsControllerTest {
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
+    stubGetWorkspaceAcl(ns, name, creator, access);
+  }
+
+  private void stubGetWorkspaceAcl(
+      String ns, String name, String creator, WorkspaceAccessLevel access) {
+    WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
+    WorkspaceAccessEntry accessLevelEntry =
+        new WorkspaceAccessEntry().accessLevel(access.toString());
+    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
+        ImmutableMap.of(creator, accessLevelEntry);
+    workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
+    when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
   }
 
   public Cohort createDefaultCohort() {
@@ -434,6 +460,8 @@ public class CohortsControllerTest {
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setAccessLevel(owner.toString());
     when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, workspaceName)).thenReturn(fcResponse);
+    stubGetWorkspaceAcl(
+        WORKSPACE_NAMESPACE, workspaceName, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
     when(workspaceService.getWorkspaceAccessLevel(WORKSPACE_NAMESPACE, workspaceName))
         .thenThrow(new NotFoundException());
     MaterializeCohortRequest request = new MaterializeCohortRequest();

@@ -75,10 +75,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
    */
   private static final Function<CBCriteria, org.pmiops.workbench.model.Criteria>
       TO_CLIENT_CBCRITERIA =
-          new Function<CBCriteria, org.pmiops.workbench.model.Criteria>() {
-            @Override
-            public org.pmiops.workbench.model.Criteria apply(CBCriteria cbCriteria) {
-              return new org.pmiops.workbench.model.Criteria()
+          cbCriteria ->
+              new org.pmiops.workbench.model.Criteria()
                   .id(cbCriteria.getId())
                   .parentId(cbCriteria.getParentId())
                   .type(cbCriteria.getType())
@@ -102,8 +100,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                   .hasHierarchy(cbCriteria.getHierarchy())
                   .isStandard(cbCriteria.getStandard())
                   .value(cbCriteria.getValue());
-            }
-          };
 
   /**
    * Converter function from backend representation (used with Hibernate) to client representation
@@ -111,18 +107,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
    */
   private static final Function<CBCriteriaAttribute, org.pmiops.workbench.model.CriteriaAttribute>
       TO_CLIENT_CBCRITERIA_ATTRIBUTE =
-          new Function<CBCriteriaAttribute, org.pmiops.workbench.model.CriteriaAttribute>() {
-            @Override
-            public org.pmiops.workbench.model.CriteriaAttribute apply(
-                CBCriteriaAttribute cbCriteria) {
-              return new org.pmiops.workbench.model.CriteriaAttribute()
+          cbCriteria ->
+              new org.pmiops.workbench.model.CriteriaAttribute()
                   .id(cbCriteria.getId())
                   .valueAsConceptId(cbCriteria.getValueAsConceptId())
                   .conceptName(cbCriteria.getConceptName())
                   .type(cbCriteria.getType())
                   .estCount(cbCriteria.getEstCount());
-            }
-          };
 
   @Autowired
   CohortBuilderController(

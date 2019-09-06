@@ -1,5 +1,5 @@
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
-import {vocabOptions} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, vocabOptions} from 'app/cohort-review/review-state.service';
 import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
@@ -7,7 +7,6 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
-import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -259,8 +258,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     getParticipantData() {
       try {
         const {columns, domain, filterType, participantId,
-          workspace: {cdrVersionId, id, namespace}} = this.props;
-        const {cid} = urlParamsStore.getValue();
+          workspace: {id, namespace}} = this.props;
         const pageFilterRequest = {
           page: 0,
           pageSize: 10000,
@@ -273,8 +271,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         cohortReviewApi().getParticipantData(
           namespace,
           id,
-          +cid,
-          +cdrVersionId,
+          cohortReviewStore.getValue().cohortReviewId,
           participantId,
           pageFilterRequest
         ).then(response => {

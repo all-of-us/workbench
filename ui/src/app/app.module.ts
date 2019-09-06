@@ -10,6 +10,7 @@ import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
 import {InterceptedHttp} from './factory/InterceptedHttp';
+import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {CdrVersionStorageService} from './services/cdr-version-storage.service';
 import {ErrorHandlingService} from './services/error-handling.service';
 import {ErrorReporterService} from './services/error-reporter.service';
@@ -21,7 +22,6 @@ import {StatusCheckService} from './services/status-check.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
-import {BreadcrumbComponent} from './components/breadcrumb';
 import {BugReportComponent} from './components/bug-report';
 import {ErrorHandlerComponent} from './components/error-handler/component';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
@@ -60,16 +60,18 @@ import {
   ConfigService,
   Configuration,
 } from 'generated';
-
 import {Configuration as FetchConfiguration} from 'generated/fetch';
-
-import {DataPageComponent} from 'app/pages/data/data-page';
-import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
-import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
+
+import {TextModalComponent} from 'app/components/text-modal';
+import {InteractiveNotebookComponent} from 'app/pages/analysis/interactive-notebook';
+import {DataPageComponent} from 'app/pages/data/data-page';
+import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
+import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
+
 
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
@@ -125,7 +127,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AdminReviewWorkspaceComponent,
     AdminUserComponent,
     AppComponent,
-    BreadcrumbComponent,
     BugReportComponent,
     CohortActionsComponent,
     ConceptSetActionsComponent,
@@ -143,8 +144,10 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ProfilePageComponent,
     RoutingSpinnerComponent,
     SignedInComponent,
+    NavBarComponent,
     SignInComponent,
     StigmatizationPageComponent,
+    TextModalComponent,
     WorkspaceAboutComponent,
     WorkspaceEditComponent,
     WorkspaceLibraryComponent,
@@ -200,7 +203,8 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
       useValue: window
     },
     WorkbenchRouteReuseStrategy,
-    {provide: RouteReuseStrategy, useExisting: WorkbenchRouteReuseStrategy}
+    {provide: RouteReuseStrategy, useExisting: WorkbenchRouteReuseStrategy},
+    CanDeactivateGuard
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent, ErrorHandlerComponent, InitialErrorComponent]

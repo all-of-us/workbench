@@ -29,7 +29,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ENV CLOUD_SDK_VERSION 215.0.0
+ENV CLOUD_SDK_VERSION 260.0.0
 
 ENV PATH /google-cloud-sdk/bin:$PATH
 

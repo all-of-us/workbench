@@ -33,7 +33,6 @@ import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -141,8 +140,6 @@ public class CohortReviewControllerTest {
   @Autowired private BigQueryService bigQueryService;
 
   @Autowired private UserDao userDao;
-
-  @Mock private Provider<WorkbenchConfig> configProvider;
 
   @Mock private Provider<User> userProvider;
 
@@ -340,8 +337,6 @@ public class CohortReviewControllerTest {
             .cohortAnnotationDefinitionId(
                 stringAnnotationDefinition.getCohortAnnotationDefinitionId());
     participantCohortAnnotationDao.save(participantAnnotation);
-
-    cohortReviewController.setConfigProvider(configProvider);
   }
 
   @Test
@@ -532,28 +527,6 @@ public class CohortReviewControllerTest {
   }
 
   @Test
-  public void createParticipantCohortAnnotationNoAnnotationDefinitionId() throws Exception {
-    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
-
-    try {
-      cohortReviewController
-          .createParticipantCohortAnnotation(
-              WORKSPACE_NAMESPACE,
-              WORKSPACE_NAME,
-              cohort.getCohortId(),
-              cdrVersion.getCdrVersionId(),
-              participantId,
-              new ParticipantCohortAnnotation())
-          .getBody();
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Please provide a valid cohort annotation definition id.");
-    }
-  }
-
-  @Test
   public void createParticipantCohortAnnotationNoAnnotationDefinitionFound() throws Exception {
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
 
@@ -566,8 +539,7 @@ public class CohortReviewControllerTest {
           .createParticipantCohortAnnotation(
               WORKSPACE_NAMESPACE,
               WORKSPACE_NAME,
-              cohort.getCohortId(),
-              cdrVersion.getCdrVersionId(),
+              cohortReview.getCohortReviewId(),
               participantId,
               new ParticipantCohortAnnotation()
                   .cohortReviewId(cohortReview.getCohortReviewId())
@@ -580,65 +552,6 @@ public class CohortReviewControllerTest {
       // Success
       assertThat(nfe.getMessage())
           .isEqualTo("Not Found: No cohort annotation definition found for id: 9999");
-    }
-  }
-
-  @Test
-  public void createParticipantCohortAnnotationNoParticipantId() throws Exception {
-    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
-
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
-    try {
-      cohortReviewController
-          .createParticipantCohortAnnotation(
-              WORKSPACE_NAMESPACE,
-              WORKSPACE_NAME,
-              cohort.getCohortId(),
-              cdrVersion.getCdrVersionId(),
-              participantId,
-              new ParticipantCohortAnnotation()
-                  .cohortReviewId(cohortReview.getCohortReviewId())
-                  .annotationValueString("test")
-                  .cohortAnnotationDefinitionId(
-                      stringAnnotationDefinition.getCohortAnnotationDefinitionId()))
-          .getBody();
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: Please provide a valid participant id.");
-    }
-  }
-
-  @Test
-  public void createParticipantCohortAnnotationNoReviewId() throws Exception {
-    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
-
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
-    try {
-      cohortReviewController
-          .createParticipantCohortAnnotation(
-              WORKSPACE_NAMESPACE,
-              WORKSPACE_NAME,
-              cohort.getCohortId(),
-              cdrVersion.getCdrVersionId(),
-              participantId,
-              new ParticipantCohortAnnotation()
-                  .participantId(participantId)
-                  .annotationValueString("test")
-                  .cohortAnnotationDefinitionId(
-                      stringAnnotationDefinition.getCohortAnnotationDefinitionId()))
-          .getBody();
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Please provide a valid cohort review id.");
     }
   }
 
@@ -727,31 +640,12 @@ public class CohortReviewControllerTest {
     cohortReviewController.deleteParticipantCohortAnnotation(
         WORKSPACE_NAMESPACE,
         WORKSPACE_NAME,
-        cohort.getCohortId(),
-        cdrVersion.getCdrVersionId(),
+        cohortReview.getCohortReviewId(),
         participantCohortStatus1.getParticipantKey().getParticipantId(),
         annotation.getAnnotationId());
 
     assertThat(participantCohortAnnotationDao.findOne(annotation.getAnnotationId()))
         .isEqualTo(null);
-  }
-
-  @Test
-  public void deleteParticipantCohortAnnotationNullAnnotationId() throws Exception {
-    try {
-      cohortReviewController.deleteParticipantCohortAnnotation(
-          WORKSPACE_NAMESPACE,
-          WORKSPACE_NAME,
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
-          participantCohortStatus1.getParticipantKey().getParticipantId(),
-          null);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage())
-          .isEqualTo("Bad Request: Please provide a valid cohort annotation definition id.");
-    }
   }
 
   @Test
@@ -767,8 +661,7 @@ public class CohortReviewControllerTest {
       cohortReviewController.deleteParticipantCohortAnnotation(
           WORKSPACE_NAMESPACE,
           WORKSPACE_NAME,
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
+          cohortReview.getCohortReviewId(),
           participantId,
           annotationId);
       fail("Should have thrown a NotFoundException!");
@@ -786,55 +679,6 @@ public class CohortReviewControllerTest {
   }
 
   @Test
-  public void deleteParticipantCohortAnnotationNullParticipantId() throws Exception {
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
-    try {
-      cohortReviewController.deleteParticipantCohortAnnotation(
-          WORKSPACE_NAMESPACE,
-          WORKSPACE_NAME,
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
-          null,
-          1L);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // Success
-      assertThat(bre.getMessage()).isEqualTo("Bad Request: Please provide a valid participant id.");
-    }
-  }
-
-  @Test
-  public void deleteParticipantCohortAnnotationNoParticipant() throws Exception {
-    Long participantId = 9999L;
-
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
-    try {
-      cohortReviewController.deleteParticipantCohortAnnotation(
-          WORKSPACE_NAMESPACE,
-          WORKSPACE_NAME,
-          cohort.getCohortId(),
-          cdrVersion.getCdrVersionId(),
-          participantId,
-          1L);
-      fail("Should have thrown a NotFoundException!");
-    } catch (NotFoundException nfe) {
-      // Success
-      assertThat(nfe.getMessage())
-          .isEqualTo(
-              "Not Found: Participant Cohort Status does not exist for cohortReviewId: "
-                  + cohortReview.getCohortReviewId()
-                  + ", participantId: "
-                  + participantId);
-    }
-  }
-
-  @Test
   public void getParticipantCohortAnnotations() throws Exception {
     when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.READER))
@@ -845,8 +689,7 @@ public class CohortReviewControllerTest {
             .getParticipantCohortAnnotations(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId())
             .getBody();
 
@@ -868,8 +711,7 @@ public class CohortReviewControllerTest {
             .getParticipantCohortStatus(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId())
             .getBody();
 
@@ -954,8 +796,7 @@ public class CohortReviewControllerTest {
             .updateParticipantCohortAnnotation(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId(),
                 participantAnnotation.getAnnotationId(),
                 new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1"))
@@ -976,8 +817,7 @@ public class CohortReviewControllerTest {
           .updateParticipantCohortAnnotation(
               WORKSPACE_NAMESPACE,
               WORKSPACE_NAME,
-              cohort.getCohortId(),
-              cdrVersion.getCdrVersionId(),
+              cohortReview.getCohortReviewId(),
               participantCohortStatus1.getParticipantKey().getParticipantId(),
               badAnnotationId,
               new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1"))
@@ -1005,8 +845,7 @@ public class CohortReviewControllerTest {
             .updateParticipantCohortStatus(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                cohortReview.getCohortReviewId(),
                 participantCohortStatus1.getParticipantKey().getParticipantId(),
                 new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED))
             .getBody();
@@ -1032,8 +871,7 @@ public class CohortReviewControllerTest {
             .createParticipantCohortAnnotation(
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
-                cohort.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                cohortReview.getCohortReviewId(),
                 participantId,
                 request)
             .getBody();
@@ -1067,8 +905,7 @@ public class CohortReviewControllerTest {
           .createParticipantCohortAnnotation(
               WORKSPACE_NAMESPACE,
               WORKSPACE_NAME,
-              cohort.getCohortId(),
-              cdrVersion.getCdrVersionId(),
+              cohortReview.getCohortReviewId(),
               participantId,
               new ParticipantCohortAnnotation()
                   .cohortReviewId(cohortReview.getCohortReviewId())
