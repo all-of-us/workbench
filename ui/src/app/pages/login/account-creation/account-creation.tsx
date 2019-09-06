@@ -206,7 +206,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     profileApi().createAccount({profile, invitationKey})
       .then((savedProfile) => {
         this.setState({profile: savedProfile, creatingAccount: false});
-        setProfile(savedProfile);})
+        setProfile(savedProfile); })
       .catch(error => {
         console.log(error);
         this.setState({creatingAccount: false});
@@ -522,8 +522,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         {!this.state.showInstitution &&
         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
           <Dropdown style={{width: '18rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
-                    value={affiliation}
-                    onChange={(e) => this.updateAffiliationRoles(e.value)} options={Options.affiliations}
+                    value={affiliation} options={Options.affiliations}
+                    onChange={(e) => this.updateAffiliationRoles(e.value)}
                     placeholder='Which of the following better describes your affiliation?'/>
           {this.state.showAffiliationRole &&
           <Dropdown placeholder='Which of the following describes your role'
