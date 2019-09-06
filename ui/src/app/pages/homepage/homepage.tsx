@@ -19,7 +19,6 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {
-  BillingProjectStatus,
   Profile,
 } from 'generated/fetch';
 
