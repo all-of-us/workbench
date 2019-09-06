@@ -23,7 +23,9 @@
       </div>
     </ng-container>
   </ng-template>
-  <ng-template *ngIf="node.group && wizard.fullTree" [(clrIfExpanded)]="expanded">
+  <ng-template *ngIf="node.group && wizard.fullTree"
+    [(clrIfExpanded)]="expanded"
+    (clrIfExpandedChange)="trackEvent()">
     <div class="node-list">
       <crit-list-node *ngFor="let item of node.children" [node]="item" [wizard]="wizard"></crit-list-node>
     </div>

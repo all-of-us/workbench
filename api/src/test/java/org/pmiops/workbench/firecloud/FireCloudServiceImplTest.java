@@ -66,7 +66,8 @@ public class FireCloudServiceImplTest {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.firecloud.baseUrl = "https://api.firecloud.org";
     workbenchConfig.firecloud.debugEndpoints = true;
-    workbenchConfig.firecloud.billingAccountId = "test-billing-account";
+    workbenchConfig.firecloud.timeoutInSeconds = 20;
+    workbenchConfig.billing.accountId = "test-billing-account";
 
     service =
         new FireCloudServiceImpl(

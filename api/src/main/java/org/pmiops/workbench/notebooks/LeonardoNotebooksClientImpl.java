@@ -65,6 +65,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     Map<String, String> nbExtensions = new HashMap<>();
     nbExtensions.put("aou-snippets-menu", gcsPrefix + "/aou-snippets-menu.js");
+    nbExtensions.put("aou-download-extension", gcsPrefix + "/aou-download-policy-extension.js");
+    nbExtensions.put("aou-download-extension", gcsPrefix + "/activity-checker-extension.js");
     if (!config.featureFlags.enableLeoWelder) {
       // Enabling Welder automatically installs a Leo-maintained playground extension.
       nbExtensions.put("aou-playground-extension", gcsPrefix + "/playground-extension.js");
@@ -85,7 +87,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         .machineConfig(
             new MachineConfig()
                 .masterDiskSize(
-                    Optional.ofNullable(clusterOverride.masterDiskSize).orElse(20 /* GB */))
+                    Optional.ofNullable(clusterOverride.masterDiskSize).orElse(40 /* GB */))
                 .masterMachineType(
                     Optional.ofNullable(clusterOverride.machineType).orElse("n1-standard-2")));
   }

@@ -9,7 +9,8 @@ import {
   subtreeSelectedStore,
   wizardStore
 } from 'app/cohort-search/search-state.service';
-import {domainToTitle, generateId, stripHtml} from 'app/cohort-search/utils';
+import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-search/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -103,7 +104,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     autocompleteStore.next('');
     selectionsStore.next([]);
     subtreePathStore.next([]);
-    this.attributesNode = undefined;
+    attributesStore.next( undefined);
     this.hierarchyNode = undefined;
     this.loadingSubtree = false;
     this.open = false;
@@ -123,7 +124,10 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   finish() {
-    const {groupId, item, role} = this.wizard;
+    const {domain, groupId, item, role, type} = this.wizard;
+    if (domain === DomainType.PERSON) {
+      triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(type)} - Finish`);
+    }
     const searchRequest = searchRequestStore.getValue();
     if (groupId) {
       const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
@@ -197,6 +201,13 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   setMode(mode: any) {
+    if (mode === 'modifiers') {
+      triggerEvent(
+        'Cohort Builder Search',
+        'Click',
+        `Modifiers - ${domainToTitle(this.wizard.domain)} - Cohort Builder Search`
+      );
+    }
     if (this.mode !== 'attributes') {
       this.backMode = this.mode;
     }

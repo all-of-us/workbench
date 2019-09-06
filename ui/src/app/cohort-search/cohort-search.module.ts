@@ -29,12 +29,14 @@ import {TreeComponent} from './tree/tree.component';
 import {BreadcrumbType} from 'app/utils/navigation';
 
 /* Other Objects */
+import {CanDeactivateGuard} from 'app/guards/can-deactivate-guard.service';
 import {SafeHtmlPipe} from './safe-html.pipe';
 
 
 const routes: Routes = [{
   path: '',
   component: CohortSearchComponent,
+  canDeactivate: [CanDeactivateGuard],
   data: {
     title: 'Build Cohort Criteria',
     breadcrumb: BreadcrumbType.CohortAdd

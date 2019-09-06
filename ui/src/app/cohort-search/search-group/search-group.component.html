@@ -24,7 +24,7 @@
   <div class="card-block" *ngIf="temporal">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-        <span>{{formatStatus(mention)}}</span>
+        <span>{{formatOption(mention)}}</span>
         <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
@@ -34,7 +34,7 @@
           class="dropdown-item"
           type="button"
           (click)="getMentionTitle(mention)"
-          clrDropdownItem>{{formatStatus(mention)}}</button>
+          clrDropdownItem>{{formatOption(mention)}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
     <span class="of-text"> of </span>
@@ -140,7 +140,7 @@
     <div class="temporal-sub-card-header">
       <clr-dropdown>
         <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-          <span>{{formatStatus(time)}}</span>
+          <span>{{formatOption(time)}}</span>
            <clr-icon shape="caret down"></clr-icon>
         </button>
         <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
@@ -150,7 +150,7 @@
             class="dropdown-item"
             type="button"
             (click)="getTimeTitle(timeName)"
-            clrDropdownItem>{{formatStatus(timeName)}}</button>
+            clrDropdownItem>{{formatOption(timeName)}}</button>
         </clr-dropdown-menu>
       </clr-dropdown>
       <form [formGroup]="timeForm" class="form-padding">

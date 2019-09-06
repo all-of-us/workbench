@@ -50,7 +50,7 @@ ENVIRONMENTS = {
     :config_json => "config_test.json",
     :cdr_versions_json => "cdr_versions_test.json",
     :featured_workspaces_json => "featured_workspaces_test.json",
-    :gae_vars => make_gae_vars(10, 10)
+    :gae_vars => TEST_GAE_VARS
   },
   "all-of-us-rw-staging" => {
     :api_endpoint_host => "api-dot-all-of-us-rw-staging.appspot.com",
@@ -66,7 +66,7 @@ ENVIRONMENTS = {
     :config_json => "config_perf.json",
     :cdr_versions_json => "cdr_versions_perf.json",
     :featured_workspaces_json => "featured_workspaces_perf.json",
-    :gae_vars => TEST_GAE_VARS
+    :gae_vars => make_gae_vars(10, 10)
   },
   "all-of-us-rw-stable" => {
     :api_endpoint_host => "api-dot-all-of-us-rw-stable.appspot.com",
@@ -1457,6 +1457,8 @@ def deploy_gcs_artifacts(cmd_name, args)
       gsutil cp
       setup_notebook_cluster.sh
       playground-extension.js
+      activity-checker-extension.js
+      aou-download-policy-extension.js
       generated/aou-snippets-menu.js
       gs://#{gcc.project}-cluster-resources/
     })

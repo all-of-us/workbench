@@ -9,7 +9,8 @@ import {Select, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, summarizeErrors, withUrlParams} from 'app/utils/index';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {reactStyles, summarizeErrors, withUrlParams} from 'app/utils';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
 
 const styles = reactStyles({
@@ -19,6 +20,14 @@ const styles = reactStyles({
   },
   defName: {
     flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+  },
+  error: {
+    color: colors.warning,
+    marginTop: '-3px',
+  },
+  button: {
+    flex: 'none',
+    margin: '0 0.5rem'
   }
 });
 
@@ -82,23 +91,17 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
       }
     });
     return <Modal loading={saving}>
-      <ModalTitle>Create a Cohort-wide Annotation</ModalTitle>
+      <ModalTitle>Create a Review-Wide Annotation Field</ModalTitle>
       <ModalBody>
-        <div style={headerStyles.formLabel}>Name:</div>
-        <TextInput
-          maxLength={255}
-          value={name}
-          onChange={v => this.setState({name: v})}
-        />
         <div style={{...headerStyles.formLabel, marginTop: '1rem'}}>Type:</div>
         <Select
           value={annotationType}
           options={[
-            {value: AnnotationType.STRING, label: 'Text'},
-            {value: AnnotationType.ENUM, label: 'Enumeration'},
+            {value: AnnotationType.STRING, label: 'Free Text'},
+            {value: AnnotationType.ENUM, label: 'Dropdown List'},
             {value: AnnotationType.DATE, label: 'Date'},
-            {value: AnnotationType.BOOLEAN, label: 'Boolean'},
-            {value: AnnotationType.INTEGER, label: 'Integer'},
+            {value: AnnotationType.BOOLEAN, label: 'True/False Checkbox'},
+            {value: AnnotationType.INTEGER, label: 'Numeric Field'},
           ]}
           onChange={v => this.setState({annotationType: v})}
         />
@@ -124,6 +127,12 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
             <ClrIcon shape='plus-circle' /> Add a value
           </Button>
         </React.Fragment>}
+        <div style={headerStyles.formLabel}>Name:</div>
+        <TextInput
+          maxLength={255}
+          value={name}
+          onChange={v => this.setState({name: v})}
+        />
       </ModalBody>
       <ModalFooter>
         <Button type='secondary' onClick={onCancel}>Cancel</Button>
@@ -146,17 +155,19 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
     setAnnotationDefinitions: Function,
     urlParams: any
   },
-  {editId: number, editValue: string, busy: boolean}
+  {editId: number, editValue: string, busy: boolean, deleteId: number, deleteError: boolean,
+    renameError: boolean}
 > {
   constructor(props) {
     super(props);
-    this.state = {editId: undefined, editValue: '', busy: false};
+    this.state = {editId: undefined, editValue: '', busy: false, deleteId: undefined,
+      deleteError: false, renameError: false};
   }
 
   async delete(id) {
     try {
       const {
-        annotationDefinitions, setAnnotationDefinitions,
+        annotationDefinitions, onClose, setAnnotationDefinitions,
         urlParams: {ns, wsid, cid}
       } = this.props;
       this.setState({busy: true});
@@ -164,10 +175,13 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
       setAnnotationDefinitions(
         fp.remove({cohortAnnotationDefinitionId: id}, annotationDefinitions)
       );
+      onClose(true);
     } catch (error) {
       console.error(error);
+      this.setState({deleteError: true});
+      setTimeout(() => this.setState({deleteError: false}), 5000);
     } finally {
-      this.setState({busy: false});
+      this.setState({busy: false, deleteId: undefined});
     }
   }
 
@@ -181,8 +195,11 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
       const {editId, editValue} = this.state;
       if (editValue && !fp.some({columnName: editValue}, annotationDefinitions)) {
         this.setState({busy: true});
+        const {annotationType, etag} = annotationDefinitions
+          .find(annotationDef => annotationDef.cohortAnnotationDefinitionId === editId);
         const newDef = await cohortAnnotationDefinitionApi().updateCohortAnnotationDefinition(
-          ns, wsid, cid, editId, {columnName: editValue}
+          ns, wsid, cid, editId,
+          {cohortId: cid, columnName: editValue, annotationType, etag}
         );
         setAnnotationDefinitions(
           annotationDefinitions.map(oldDef => {
@@ -192,6 +209,8 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
       }
     } catch (error) {
       console.error(error);
+      this.setState({renameError: true});
+      setTimeout(() => this.setState({renameError: false}), 5000);
     } finally {
       this.setState({busy: false, editId: undefined});
     }
@@ -199,53 +218,74 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
 
   render() {
     const {onClose, annotationDefinitions} = this.props;
-    const {editId, editValue, busy} = this.state;
+    const {editId, editValue, busy, deleteError, deleteId, renameError} = this.state;
     return <Modal loading={busy}>
-      <ModalTitle>Edit Cohort-wide Annotations</ModalTitle>
+      <ModalTitle>Edit or Delete Review-Wide Annotation Fields</ModalTitle>
       <ModalBody>
-        {annotationDefinitions.map(({cohortAnnotationDefinitionId: id, columnName}) => {
-          return <div key={id} style={styles.editRow}>
-            {editId === id ?
-              <TextInput
-                maxLength={255}
-                autoFocus
-                value={editValue}
-                onChange={v => this.setState({editValue: v})}
-                onBlur={() => this.rename()}
-                onKeyPress={e => {
-                  if (e.key === 'Enter') {
-                    this.rename();
-                  }
-                }}
-              />
-            :
-              <div style={styles.defName}>
-                {columnName}
+        <div style={{maxHeight: '10rem', overflow: 'auto'}}>
+          {(deleteError || renameError) && <div>
+            <ClrIcon style={styles.error} shape='exclamation-triangle'
+              size='20' className='is-solid' />
+            <span style={{color: colorWithWhiteness(colors.dark, -1)}}>
+              {deleteError ? ' Delete' : ' Rename'} Failed
+            </span>
+          </div>}
+          {deleteId !== undefined ? <div>
+            Deleting this annotation field will remove this field (and any associated data) from ALL
+            PARTICIPANTS in this review set. Are you sure you want to delete this item?
+          </div> : <React.Fragment>
+            {annotationDefinitions.map(({cohortAnnotationDefinitionId: id, columnName}) => {
+              return <div key={id} style={styles.editRow}>
+                {editId === id ?
+                  <TextInput
+                    maxLength={255}
+                    autoFocus
+                    value={editValue}
+                    onChange={v => this.setState({editValue: v})}
+                    onBlur={() => this.rename()}
+                    onKeyPress={e => {
+                      if (e.key === 'Enter') {
+                        this.rename();
+                      }
+                    }}
+                  />
+                :
+                  <div style={styles.defName}>
+                    {columnName}
+                  </div>
+                }
+                <Button
+                  type='link'
+                  disabled={busy}
+                  style={styles.button}
+                  onClick={() => this.setState({editId: id, editValue: columnName})}
+                >Rename</Button>
+                <div>|</div>
+                <Button
+                  type='link'
+                  disabled={busy}
+                  style={styles.button}
+                  onClick={() => this.setState({deleteId: id})}
+                >Delete</Button>
+              </div>;
+            })}
+            {!annotationDefinitions.length &&
+              <div style={{fontStyle: 'italic'}}>
+                No review annotations defined.
               </div>
             }
-            <Button
-              type='link'
-              disabled={busy}
-              style={{flex: 'none', margin: '0 0.5rem'}}
-              onClick={() => this.setState({editId: id, editValue: columnName})}
-            >Rename</Button>
-            <div>|</div>
-            <Button
-              type='link'
-              disabled={busy}
-              style={{flex: 'none', marginLeft: '0.5rem'}}
-              onClick={() => this.delete(id)}
-            >Delete</Button>
-          </div>;
-        })}
-        {!annotationDefinitions.length &&
-          <div style={{fontStyle: 'italic'}}>
-            No review annotations defined.
-          </div>
-        }
+          </React.Fragment>}
+        </div>
       </ModalBody>
       <ModalFooter>
-        <Button disabled={busy} onClick={onClose}>Close</Button>
+        {deleteId === undefined
+          ? <Button disabled={busy} onClick={() => onClose(false)}>Close</Button>
+          : <React.Fragment>
+            <Button type='secondary' style={{marginRight: '0.5rem'}}
+              onClick={() => this.setState({deleteId: undefined})}>No</Button>
+            <Button type='primary' onClick={() => this.delete(deleteId)}>Yes</Button>
+          </React.Fragment>
+        }
       </ModalFooter>
     </Modal>;
   }

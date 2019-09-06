@@ -3,6 +3,7 @@
  */
 import {Injectable, NgZone} from '@angular/core';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {signInStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
@@ -67,6 +68,7 @@ export class SignInService {
     this.zone.run(() => {
       const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
       this.isSignedIn.next(isSignedIn);
+      this.nextSignInStore();
       if (isSignedIn) {
         this.clearIdToken();
       }
@@ -74,6 +76,7 @@ export class SignInService {
     gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
       this.zone.run(() => {
         this.isSignedIn.next(isSignedIn);
+        this.nextSignInStore();
         if (isSignedIn) {
           this.clearIdToken();
         }
@@ -100,5 +103,12 @@ export class SignInService {
     } else {
       return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getImageUrl();
     }
+  }
+
+  nextSignInStore() {
+    signInStore.next({
+      signOut: () => this.signOut(),
+      profileImage: this.profileImage,
+    });
   }
 }

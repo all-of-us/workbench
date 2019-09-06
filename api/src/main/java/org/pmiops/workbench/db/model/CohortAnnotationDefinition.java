@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.AnnotationType;
 
@@ -22,6 +23,7 @@ import org.pmiops.workbench.model.AnnotationType;
 public class CohortAnnotationDefinition {
 
   private long cohortAnnotationDefinitionId;
+  private int version;
   private long cohortId;
   private String columnName;
   private Short annotationType;
@@ -41,6 +43,21 @@ public class CohortAnnotationDefinition {
   public CohortAnnotationDefinition cohortAnnotationDefinitionId(
       long cohortAnnotationDefinitionId) {
     this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
+    return this;
+  }
+
+  @Version
+  @Column(name = "version")
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) {
+    this.version = version;
+  }
+
+  public CohortAnnotationDefinition version(int version) {
+    this.version = version;
     return this;
   }
 
@@ -123,20 +140,22 @@ public class CohortAnnotationDefinition {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     CohortAnnotationDefinition that = (CohortAnnotationDefinition) o;
-    return cohortId == that.cohortId
+    return version == that.version
+        && cohortId == that.cohortId
         && Objects.equals(columnName, that.columnName)
         && annotationType == that.annotationType;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(cohortId, columnName, annotationType);
+    return Objects.hash(version, cohortId, columnName, annotationType);
   }
 
   @Override
   public String toString() {
     return new ToStringBuilder(this)
         .append("cohortAnnotationDefinitionId", cohortAnnotationDefinitionId)
+        .append("version", version)
         .append("cohortId", cohortId)
         .append("columnName", columnName)
         .append("annotationType", annotationType)

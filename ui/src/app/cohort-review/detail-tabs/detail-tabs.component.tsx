@@ -3,8 +3,8 @@ import * as React from 'react';
 
 import {DetailTabTable} from 'app/cohort-review/detail-tab-table/detail-tab-table.component';
 import {IndividualParticipantsCharts} from 'app/cohort-review/individual-participants-charts/individual-participants-charts';
-import {filterStateStore} from 'app/cohort-review/review-state.service';
-import {typeToTitle} from 'app/cohort-search/utils';
+import {cohortReviewStore, filterStateStore} from 'app/cohort-review/review-state.service';
+import {domainToTitle} from 'app/cohort-search/utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
@@ -294,6 +294,7 @@ interface State {
 
 export const DetailTabs = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
+    private subscription;
     constructor(props: any) {
       super(props);
       this.state = {
@@ -307,8 +308,7 @@ export const DetailTabs = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      const {cdrVersionId} = this.props.workspace;
-      urlParamsStore.distinctUntilChanged(fp.isEqual)
+      this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(({pid}) => !!pid)
         .switchMap(({ns, wsid, cid, pid}) => {
           const chartData = {};
@@ -321,11 +321,12 @@ export const DetailTabs = withCurrentWorkspace()(
               };
               this.setState({chartData, participantId: pid});
               return from(cohortReviewApi()
-                .getParticipantChartData(ns, wsid, cid, +cdrVersionId, pid, domainName, 10))
+                .getParticipantChartData(ns, wsid,
+                  cohortReviewStore.getValue().cohortReviewId, pid, domainName, 10))
                 .do(({items}) => {
                   chartData[domainName] = {
                     loading: false,
-                    conditionTitle: typeToTitle(domainName),
+                    conditionTitle: domainToTitle(domainName),
                     items
                   };
                   this.setState({chartData});
@@ -341,6 +342,10 @@ export const DetailTabs = withCurrentWorkspace()(
         updateState++;
         this.setState({filterState, updateState});
       });
+    }
+
+    componentWillUnmount() {
+      this.subscription.unsubscribe();
     }
 
     filteredData(_domain: string, checkedItems: any) {

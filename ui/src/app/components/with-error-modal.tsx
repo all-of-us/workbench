@@ -37,7 +37,7 @@ export const withErrorModal = () => {
         return <React.Fragment>
           {this.state.show && <TextModal title={this.state.title}
                                          body={this.state.body}
-                                         onConfirm={() => this.setState({show: false})}/>
+                                         closeFunction={() => this.setState({show: false})}/>
           }
           <WrappedComponent showErrorModal={(tile, body) => this.show(tile, body)}
                             {...this.props} />

@@ -332,7 +332,7 @@ export function displayDate(time: Number): string {
 
 // Remove this when we complete RW-3065
 export function formatRecentResourceDisplayDate(time: string): string {
-  if (time) {
+  if (!time) {
     return '';
   }
 
@@ -352,4 +352,38 @@ export const toggleIncludes = fp.curry((value, arr) => {
 
 export function sliceByHalfLength(obj) {
   return Math.ceil(obj.length / 2);
+}
+
+// Returns a function which will execute `action` at most once every `sensitivityMs` milliseconds
+// if the returned function has been invoked within the last `sensitivityMs` milliseconds
+// Example : debouncing user activity events to change rate of invocation from 1000/s to 1/s
+export function debouncer(action, sensitivityMs) {
+  let t = Date.now();
+
+  const timer = setInterval(() => {
+    if (Date.now() - t < sensitivityMs) {
+      action();
+    }
+  }, sensitivityMs);
+
+  return {
+    invoke: () => {
+      t = Date.now();
+    },
+    getTimer: () => timer
+  };
+}
+
+// Starts a timer which will invoke `f` after `timeoutInSeconds` has passed
+// Calling the returned function will reset the timer to zero
+// Example : Call a logout function after 30 seconds of the returned function not being invoked
+export function resettableTimeout(f, timeoutInSeconds) {
+  let timeout;
+  return {
+    reset: () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(f, timeoutInSeconds);
+    },
+    getTimer: () => timeout
+  };
 }

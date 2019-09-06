@@ -13,6 +13,7 @@ import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortStore, currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {Cohort, TemporalTime} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
@@ -99,7 +100,8 @@ const styles = reactStyles({
 
 interface Props {
   searchRequest: any;
-  update: number;
+  updateCount: number;
+  updateSaving: Function;
 }
 
 interface State {
@@ -148,11 +150,10 @@ export const ListOverview = withCurrentWorkspace()(
       if (currentCohortStore.getValue()) {
         this.setState({cohort: currentCohortStore.getValue()});
       }
-      this.getTotalCount();
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (this.props.update > prevProps.update && !this.definitionErrors) {
+      if (this.props.updateCount > prevProps.updateCount && !this.definitionErrors) {
         this.setState({loading: true, apiError: false});
         this.getTotalCount();
       }
@@ -218,9 +219,11 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     saveCohort() {
+      triggerEvent('Click icon', 'Click', 'Icon - Save - Cohort Builder');
+      this.props.updateSaving(true);
       const {cohort} = this.state;
       cohort.criteria = this.criteria;
-      this.setState({cohort, saving: true, saveError: false});
+      this.setState({saving: true, saveError: false});
       const {ns, wsid} = urlParamsStore.getValue();
       const cid = cohort.id;
       cohortsApi().updateCohort(ns, wsid, cid, cohort).then(() => {
@@ -233,6 +236,8 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     submit() {
+      triggerEvent('Click icon', 'Click', 'Icon - Save As - Cohort Builder');
+      this.props.updateSaving(true);
       this.setState({saving: true, saveError: false});
       const {ns, wsid} = urlParamsStore.getValue();
       const {name, description} = this.state;
@@ -249,6 +254,7 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     delete = () => {
+      triggerEvent('Click icon', 'Click', 'Icon - Delete - Cohort Builder');
       const {ns, wsid} = urlParamsStore.getValue();
       const {cohort} = this.state;
       cohortsApi().deleteCohort(ns, wsid, cohort.id).then(() => {
@@ -258,8 +264,14 @@ export const ListOverview = withCurrentWorkspace()(
       });
     }
 
-    cancel = () => {
+    cancelDelete = () => {
       this.setState({deleting: false});
+    }
+
+    cancelSave = () => {
+      this.props.updateSaving(false);
+      this.setState({saveModalOpen: false, name: undefined, description: undefined,
+        saveError: false, nameTouched: false});
     }
 
     navigateTo(action: string) {
@@ -268,9 +280,11 @@ export const ListOverview = withCurrentWorkspace()(
       let url = `/workspaces/${ns}/${wsid}/`;
       switch (action) {
         case 'notebook':
+          triggerEvent('Click icon', 'Click', 'Icon - Export - Cohort Builder');
           url += 'notebooks';
           break;
         case 'review':
+          triggerEvent('Click icon', 'Click', 'Icon - Review - Cohort Builder');
           url += `data/cohorts/${cohort.id}/review`;
           break;
       }
@@ -278,6 +292,7 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     toggleChartMode() {
+      triggerEvent('Graphs', 'Click', 'Graphs - Flip - Gender Age Race - Cohort Builder');
       const {stackChart} = this.state;
       this.setState({stackChart: !stackChart});
     }
@@ -351,7 +366,11 @@ export const ListOverview = withCurrentWorkspace()(
                 <div style={styles.cardHeader}>
                   Results by Gender
                 </div>
-                <div style={{padding: '0.5rem 0.75rem'}}>
+                <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
+                  'Graphs',
+                  'Hover',
+                  'Graphs - Gender - Cohort Builder'
+                )}>
                   {!!chartData.length && <GenderChart data={chartData} />}
                 </div>
               </div>
@@ -362,7 +381,11 @@ export const ListOverview = withCurrentWorkspace()(
                     className={stackChart ? 'is-info' : ''}
                     onClick={() => this.toggleChartMode()} />
                 </div>
-                <div style={{padding: '0.5rem 0.75rem'}}>
+                <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
+                  'Graphs',
+                  'Hover',
+                  'Graphs - Gender Age Race - Cohort Builder'
+                )}>
                   {!!chartData.length &&
                     <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
                 </div>
@@ -385,17 +408,15 @@ export const ListOverview = withCurrentWorkspace()(
               onChange={(v) => this.setState({description: v})}/>
           </ModalBody>
           <ModalFooter>
-            <Button style={{color: colors.primary}} type='link' onClick={() => this.setState({
-              saveModalOpen: false, name: undefined, description: undefined, saveError: false,
-              nameTouched: false
-            })} disabled={saving}>Cancel</Button>
+            <Button style={{color: colors.primary}} type='link' onClick={() => this.cancelSave()}
+              disabled={saving}>Cancel</Button>
             <Button type='primary' disabled={!name || saving} onClick={() => this.submit()}>
               {saving && <Spinner style={{marginRight: '0.25rem'}} size={18} />}
                Save
             </Button>
           </ModalFooter>
         </Modal>}
-        {deleting && <ConfirmDeleteModal closeFunction={this.cancel}
+        {deleting && <ConfirmDeleteModal closeFunction={this.cancelDelete}
           resourceType='cohort'
           receiveDelete={this.delete}
           resourceName={cohort.name} />}
@@ -410,9 +431,10 @@ export const ListOverview = withCurrentWorkspace()(
 })
 export class OverviewComponent extends ReactWrapperBase {
   @Input('searchRequest') searchRequest: Props['searchRequest'];
-  @Input('update') update: Props['update'];
+  @Input('updateCount') updateCount: Props['updateCount'];
+  @Input('updateSaving') updateSaving: Props['updateSaving'];
 
   constructor() {
-    super(ListOverview, ['searchRequest', 'update']);
+    super(ListOverview, ['searchRequest', 'updateCount', 'updateSaving']);
   }
 }
