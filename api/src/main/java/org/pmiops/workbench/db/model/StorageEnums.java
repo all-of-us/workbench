@@ -52,14 +52,6 @@ public final class StorageEnums {
     return CLIENT_TO_STORAGE_AUTHORITY.get(authority);
   }
 
-  private static final BiMap<BillingProjectStatus, Short> CLIENT_TO_STORAGE_BILLING_PROJECT_STATUS =
-      ImmutableBiMap.<BillingProjectStatus, Short>builder()
-          .put(BillingProjectStatus.NONE, (short) 0)
-          .put(BillingProjectStatus.PENDING, (short) 1)
-          .put(BillingProjectStatus.READY, (short) 2)
-          .put(BillingProjectStatus.ERROR, (short) 3)
-          .build();
-
   private static final BiMap<BillingProjectBufferStatus, Short>
       CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS =
           ImmutableBiMap.<BillingProjectBufferStatus, Short>builder()

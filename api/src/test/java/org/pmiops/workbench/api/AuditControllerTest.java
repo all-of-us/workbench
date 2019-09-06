@@ -136,11 +136,4 @@ public class AuditControllerTest {
     stubBigQueryCalls(FC_PROJECT_ID, USER_EMAIL, 5);
     assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(0);
   }
-
-  @Test
-  public void testAuditBigQueryUnrecognizedProjectQueries() {
-    stubBigQueryCalls("my-personal-gcp-project", USER_EMAIL, 5);
-    // These stubs are hit once per CDR project, so the total number of issues is doubled.
-    assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(10);
-  }
 }
