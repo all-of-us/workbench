@@ -8,7 +8,6 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {
   queryParamsStore,
-  serverConfigStore,
   urlParamsStore
 } from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
