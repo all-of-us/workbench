@@ -131,11 +131,6 @@ public class ClusterController implements ClusterApiDelegate {
     // billing buffer projects are guaranteed to be initialized at this point.
 
     User user = this.userProvider.get();
-    if (billingProjectId.equals(user.getFreeTierBillingProjectName())
-        && user.getFreeTierBillingProjectStatusEnum() != BillingProjectStatus.READY) {
-      throw new FailedPreconditionException(
-          "User billing project is not yet initialized, cannot list/create clusters");
-    }
 
     String clusterName = clusterNameForUser(user);
 

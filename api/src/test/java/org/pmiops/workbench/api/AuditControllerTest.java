@@ -71,7 +71,6 @@ public class AuditControllerTest {
     User user = new User();
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
-    user.setFreeTierBillingProjectName(FC_PROJECT_ID);
     user.setDisabled(false);
     user = userDao.save(user);
 

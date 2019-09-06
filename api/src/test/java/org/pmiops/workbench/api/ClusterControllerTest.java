@@ -155,7 +155,6 @@ public class ClusterControllerTest {
     user = new User();
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
-    user.setFreeTierBillingProjectName(BILLING_PROJECT_ID);
     user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.READY);
 
     createUser(OTHER_USER_EMAIL);
@@ -247,21 +246,7 @@ public class ClusterControllerTest {
     clusterController.listClusters(null);
   }
 
-  @Test(expected = FailedPreconditionException.class)
-  public void testListClustersFreeTierNotReady() throws Exception {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
-        .thenReturn(testFcCluster);
 
-    User notReadyUser = new User();
-    notReadyUser.setEmail(LOGGED_IN_USER_EMAIL);
-    notReadyUser.setUserId(123L);
-    notReadyUser.setFreeTierBillingProjectName(BILLING_PROJECT_ID);
-    notReadyUser.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.PENDING);
-
-    user = notReadyUser;
-
-    clusterController.listClusters(BILLING_PROJECT_ID);
-  }
 
   @Test
   public void testListClustersLazyCreate() {

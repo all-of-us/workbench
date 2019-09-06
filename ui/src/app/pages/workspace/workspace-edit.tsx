@@ -360,7 +360,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspace: {
           name: '',
           dataAccessLevel: DataAccessLevel.Registered,
-          namespace: userProfileStore.getValue().profile.freeTierBillingProjectName,
+          namespace: '',
           cdrVersionId: '',
           researchPurpose: {
             ancestry: false,
@@ -409,10 +409,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         if (this.isMode(WorkspaceEditMode.Duplicate)) {
           this.setState({workspace: {
             ...this.props.workspace,
-            // These are the only fields which are not automatically handled/differentiated
+            // This is the only field which is not automatically handled/differentiated
             // on the API level.
-            name: 'Duplicate of ' + this.props.workspace.name,
-            namespace: userProfileStore.getValue().profile.freeTierBillingProjectName
+            name: 'Duplicate of ' + this.props.workspace.name
           }});
         }
       }

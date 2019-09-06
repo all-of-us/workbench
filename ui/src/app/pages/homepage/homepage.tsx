@@ -132,14 +132,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
   componentDidMount() {
     this.validateNihToken();
     this.callProfile();
-    this.checkBillingProjectStatus();
   }
 
   componentDidUpdate(prevProps) {
     const {profileState: {profile}} = this.props;
-    if (!this.state.billingProjectInitialized) {
-      this.checkBillingProjectStatus();
-    }
     if (!fp.isEqual(prevProps.profileState.profile, profile)) {
       this.callProfile();
     }
@@ -240,17 +236,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
     this.setState((state, props) => ({
       quickTour: state.firstVisit && state.accessTasksRemaining === false
     }));
-  }
-
-  checkBillingProjectStatus() {
-    const {profileState: {profile, reload}} = this.props;
-    if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
-      this.setState({billingProjectInitialized: true});
-    } else {
-      this.timer = setTimeout(() => {
-        reload();
-      }, 10000);
-    }
   }
 
   openVideo(videoLink: string): void {

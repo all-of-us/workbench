@@ -60,14 +60,6 @@ public final class StorageEnums {
           .put(BillingProjectStatus.ERROR, (short) 3)
           .build();
 
-  public static BillingProjectStatus billingProjectStatusFromStorage(Short s) {
-    return CLIENT_TO_STORAGE_BILLING_PROJECT_STATUS.inverse().get(s);
-  }
-
-  public static Short billingProjectStatusToStorage(BillingProjectStatus s) {
-    return CLIENT_TO_STORAGE_BILLING_PROJECT_STATUS.get(s);
-  }
-
   private static final BiMap<BillingProjectBufferStatus, Short>
       CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS =
           ImmutableBiMap.<BillingProjectBufferStatus, Short>builder()

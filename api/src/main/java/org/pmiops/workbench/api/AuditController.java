@@ -100,7 +100,6 @@ public class AuditController implements AuditApiDelegate {
         ImmutableList.copyOf(cdrVersionDao.findAll()).stream()
             .map(v -> v.getBigqueryProject())
             .collect(Collectors.toSet());
-    Set<String> whitelist = Sets.union(userDao.getAllUserProjects(), cdrProjects);
 
     Instant now = clock.instant();
     List<String> suffixes =
@@ -116,7 +115,6 @@ public class AuditController implements AuditApiDelegate {
       Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
       for (List<FieldValue> row : result.iterateAll()) {
-        String project_id = bigQueryService.getString(row, rm.get("client_project_id"));
         String email = bigQueryService.getString(row, rm.get("user_email"));
         long total = bigQueryService.getLong(row, rm.get("total"));
         if (bigQueryService.isNull(row, rm.get("client_project_id"))) {
@@ -126,12 +124,6 @@ public class AuditController implements AuditApiDelegate {
                       + "indicates an ACL misconfiguration, this user can access the CDR but is not a "
                       + "project jobUser",
                   cdrProjectId, total, email));
-          numBad += total;
-        } else if (!whitelist.contains(project_id)) {
-          log.severe(
-              String.format(
-                  "AUDIT: (CDR project '%s') %d queries in unrecognized project '%s' from user '%s'",
-                  cdrProjectId, total, project_id, email));
           numBad += total;
         }
         numQueries += total;

@@ -199,7 +199,6 @@ public class UserService {
     user.setEmail(email);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.NONE);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -234,7 +233,6 @@ public class UserService {
     user.setDisabled(false);
     user.setAboutYou(null);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.NONE);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -340,15 +338,6 @@ public class UserService {
     return updateUserWithRetries(
         (user) -> {
           user.setBillingProjectRetries(billingRetryCount);
-          return user;
-        });
-  }
-
-  public User setFreeTierBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
-    return updateUserWithRetries(
-        (user) -> {
-          user.setFreeTierBillingProjectName(name);
-          user.setFreeTierBillingProjectStatusEnum(status);
           return user;
         });
   }
