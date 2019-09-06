@@ -137,13 +137,8 @@ public class ClusterController implements ClusterApiDelegate {
           "User billing project is not yet initialized, cannot list/create clusters");
     }
 
-    String clusterName = LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME;
-    if (workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer) {
-      // With 1 project per workspace (http://broad.io/1ppw), a billing project may contain multiple
-      // clusters (up to 1 per workspace collaborator), therefore cluster names must be unique per
-      // user.
-      clusterName = clusterNameForUser(user);
-    }
+    String clusterName = clusterNameForUser(user);
+
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
       fcCluster = this.leonardoNotebooksClient.getCluster(billingProjectId, clusterName);

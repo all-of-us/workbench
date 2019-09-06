@@ -44,7 +44,7 @@ describe('WorkspaceList', () => {
     });
 
     userProfileStore.next({profile, reload, updateCache});
-    serverConfigStore.next({useBillingProjectBuffer: false, gsuiteDomain: 'abc'});
+    serverConfigStore.next({gsuiteDomain: 'abc'});
   });
 
   it('displays the correct number of workspaces', async() => {

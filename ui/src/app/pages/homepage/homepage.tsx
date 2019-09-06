@@ -259,14 +259,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
 
   render() {
-    const {billingProjectInitialized, betaAccessGranted,
-      videoOpen, accessTasksLoaded, accessTasksRemaining, eraCommonsLinked,
-      eraCommonsError, firstVisitTraining, trainingCompleted, quickTour, videoLink,
-      twoFactorAuthCompleted, dataUseAgreementCompleted
+    const {betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
+      eraCommonsLinked, eraCommonsError, firstVisitTraining, trainingCompleted, quickTour,
+      videoLink, twoFactorAuthCompleted, dataUseAgreementCompleted
     } = this.state;
-
-    const canCreateWorkspaces = billingProjectInitialized ||
-      serverConfigStore.getValue().useBillingProjectBuffer;
 
     const quickTourResources = [
       {
@@ -319,16 +315,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                     <div style={styles.contentWrapperLeft}>
                       <div style={styles.mainHeader}>Researcher Workbench</div>
-                      <TooltipTrigger content={<div>Your Firecloud billing project is still being
-                        initialized. Workspace creation will be available in a few minutes.</div>}
-                                      disabled={canCreateWorkspaces}>
-                        <CardButton disabled={!canCreateWorkspaces}
-                                    onClick={() => navigate(['workspaces/build'])}
-                                    style={{margin: '1.9rem 106px 0 3%'}}>
-                          Create a <br/> New Workspace
-                          <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
-                        </CardButton>
-                      </TooltipTrigger>
+                      <CardButton onClick={() => navigate(['workspaces/build'])}
+                                  style={{margin: '1.9rem 106px 0 3%'}}>
+                        Create a <br/> New Workspace
+                        <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
+                      </CardButton>
                     </div>
                     <div style={styles.contentWrapperRight}>
                       <a onClick={() => navigate(['workspaces'])}

@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {cdrVersionStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {cdrVersionStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -23,8 +23,6 @@ import {Authority, CdrVersion, Profile, UserRole, WorkspaceAccessLevel} from 'ge
 interface WorkspaceState {
   sharing: boolean;
   cdrVersion: CdrVersion;
-  useBillingProjectBuffer: boolean;
-  freeTierBillingProject: string;
   workspace: WorkspaceData;
   workspaceUserRoles: UserRole[];
   googleBucketModalOpen: boolean;
@@ -94,8 +92,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
     this.state = {
       sharing: false,
       cdrVersion: undefined,
-      useBillingProjectBuffer: undefined,
-      freeTierBillingProject: undefined,
       workspace: undefined,
       workspaceUserRoles: [],
       googleBucketModalOpen: false,
@@ -104,11 +100,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
   }
 
   async componentDidMount() {
-    const {profileState: {profile}} = this.props;
-    this.setState({
-      useBillingProjectBuffer: serverConfigStore.getValue().useBillingProjectBuffer,
-      freeTierBillingProject: profile.freeTierBillingProjectName
-    });
     this.setVisits();
     await this.reloadWorkspace(currentWorkspaceStore.getValue());
     this.loadUserRoles();
@@ -170,14 +161,9 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
   }
 
   workspaceClusterBillingProjectId(): string {
-    const {useBillingProjectBuffer, freeTierBillingProject, workspace} = this.state;
-    if (useBillingProjectBuffer === undefined) {
-      // The server config hasn't loaded yet, we don't yet know which billing
-      // project should be used for clusters.
+    const {workspace} = this.state;
+    if (workspace === undefined) {
       return null;
-    }
-    if (!useBillingProjectBuffer) {
-      return freeTierBillingProject;
     }
     if ([WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.OWNER].includes(workspace.accessLevel)) {
       return workspace.namespace;
