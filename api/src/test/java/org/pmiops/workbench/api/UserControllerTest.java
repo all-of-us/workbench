@@ -242,12 +242,13 @@ public class UserControllerTest {
    */
 
   private void saveFamily() {
+    saveUser("jill@lis.org", "Jill", "Robinson", false);
     saveUser("john@lis.org", "John", "Robinson", true);
-    saveUser("judy@lis.org", "Judy", "Robinson", false);
-    saveUser("maureen@lis.org", "Mauren", "Robinson", false);
-    saveUser("penny@lis.org", "Penny", "Robinson", false);
-    saveUser("will@lis.org", "Will", "Robinson", false);
-    saveUserNotInFirecloud("bob@lis.org", "Bob", "Robinson", false);
+    saveUser("judy@lis.org", "Judy", "Robinson", true);
+    saveUser("maureen@lis.org", "Mauren", "Robinson", true);
+    saveUser("penny@lis.org", "Penny", "Robinson", true);
+    saveUser("will@lis.org", "Will", "Robinson", true);
+    saveUserNotInFirecloud("bob@lis.org", "Bob", "Robinson", true);
   }
 
   @SuppressWarnings("SameParameterValue")
