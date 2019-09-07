@@ -147,6 +147,23 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
   }
 
   @Override
+  public ResponseEntity<List<org.pmiops.workbench.model.Cluster>> listClustersByProject(
+      String googleProject, String labels, Boolean includeDeleted) {
+    final ClusterApi clusterApi = clusterApiProvider.get();
+    try {
+      List<Cluster>
+      return ResponseEntity.ok(clusterApi.listClustersByProject(googleProject, labels, includeDeleted));
+    } catch (ApiException e) {
+      e.printStackTrace();
+      return ResponseEntity
+          .status(e.getCode())
+          .build();
+    }
+
+    return null;
+  }
+
+  @Override
   public ResponseEntity<Void> stopCluster(String googleProject, String clusterName) {
     final ClusterApi clusterApi = clusterApiProvider.get();
     try {

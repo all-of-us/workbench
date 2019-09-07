@@ -928,6 +928,58 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
+  # expose stuff directly from Leonardo:
+  '/v1/admin/clusters/{googleProject}':
+   # '$ref': 'https://notebooks.firecloud.org/api-docs.yaml#/paths/~1api~1clusters~1{googleProject}'
+    get:
+      summary: List all active clusters within the given Google project
+      description: List all active clusters within the given Google project, optionally filtering on a set of labels
+      operationId: listClustersByProject
+      tags:
+        - offlineCluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: query
+          name: _labels
+          description: |
+            Optional label key-value pairs to filter results by. Example: Querying by key1=val1,key2=val2
+            returns all clusters that contain the key1/val1 and key2/val2 labels (possibly among other labels).
+            Note: this string format is a workaround because Swagger doesn't support free-form
+            query string parameters. The recommended way to use this endpoint is to specify the
+            labels as top-level query string parameters. For instance: GET /api/clusters?key1=val1&key2=val2.
+          required: false
+          type: string
+        - in: query
+          name: includeDeleted
+          description: Optional filter that includes any clusters with a Deleted status.
+          required: false
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: List of clusters
+          schema:
+            type: array
+            items:
+              $ref: './notebooks.yaml/#/definitions/Cluster'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: './notebooks.yaml/#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: './notebooks.yaml/#/definitions/ErrorReport'
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+
   /v1/admin/clusters/{googleProject}/{clusterName}/stop:
     post:
       summary: Stops a Dataproc cluster
