@@ -24,7 +24,7 @@ import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-s
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-import {WorkspacesApiStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {WorkspacesApiStub, buildWorkspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
 import {findElements} from 'testing/react-testing-utility';
 import {setupModals, updateAndTick} from 'testing/test-helpers';
@@ -36,7 +36,7 @@ import {setupModals, updateAndTick} from 'testing/test-helpers';
 class FakeAppComponent {}
 
 const workspace = {
-  ...workspaceStubs[0],
+  ...buildWorkspaceStubs[0],
   accessLevel: FetchWorkspaceAccessLevel.OWNER,
 };
 

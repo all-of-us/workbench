@@ -53,15 +53,6 @@ const libraryTabEnums = {
   }
 };
 
-const libraryTabs = environment.enablePublishedWorkspaces
-  ? [
-  libraryTabEnums.FEATURED_WORKSPACES,
-  libraryTabEnums.PUBLISHED_WORKSPACES
-  ]
-  : [
-    libraryTabEnums.FEATURED_WORKSPACES
-  ];
-
 const LibraryTab: React.FunctionComponent<{
   title: string, icon: string, onClick: Function, selected: boolean}> =
   ({title, icon, onClick, selected}) => {
@@ -85,6 +76,7 @@ class CurrentTab {
 
 class Props {
   profileState: ProfileState;
+  enablePublishedWorkspaces: boolean;
 }
 
 class State {
@@ -109,6 +101,15 @@ export const WorkspaceLibrary = withUserProfile()
       workspacesLoading: true
     };
   }
+
+  libraryTabs = (this.props.enablePublishedWorkspaces || environment.enablePublishedWorkspaces)
+    ? [
+      libraryTabEnums.FEATURED_WORKSPACES,
+      libraryTabEnums.PUBLISHED_WORKSPACES
+    ]
+    : [
+      libraryTabEnums.FEATURED_WORKSPACES
+    ];
 
   async componentDidMount() {
     this.updateListedWorkspaces();
@@ -183,12 +184,12 @@ export const WorkspaceLibrary = withUserProfile()
     return <div style={{display: 'flex', flexDirection: 'row', height: '100%'}}>
       <div style={styles.navPanel}>
         <div style={{display: 'flex', flexDirection: 'column'}}>
-          {libraryTabs.map((tab, i) => {
+          {this.libraryTabs.map((tab, i) => {
             return <React.Fragment key={i}>
               <LibraryTab icon={tab.icon} title={tab.title} selected={currentTab === tab}
                           onClick={() => this.setState({currentTab: tab})}
                           data-test-id={tab.title}/>
-                {i !== libraryTabs.length - 1 &&
+                {i !== this.libraryTabs.length - 1 &&
                 <hr style={{width: '100%', margin: '0.5rem 0'}}/>}
             </React.Fragment>;
           })}

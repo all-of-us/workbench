@@ -21,12 +21,12 @@ export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_PERMISSION = WorkspaceAccessLevel.OWNER;
 }
 
-export const workspaceStubs = [
-  {
-    name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
-    id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-    namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+function buildWorkspaceStub(suffix) {
+  return {
+    name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + suffix,
+    id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + suffix,
+    namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + suffix,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID + suffix,
     creationTime: new Date().getTime(),
     lastModifiedTime: new Date().getTime(),
     researchPurpose: {
@@ -50,8 +50,12 @@ export const workspaceStubs = [
     },
     published: false,
     dataAccessLevel: DataAccessLevel.Registered
-  }
-];
+  };
+}
+
+export function buildWorkspaceStubs(suffixes: string[]) {
+  return suffixes.map(suffix => buildWorkspaceStub(suffix));
+}
 
 export const userRolesStub = [
   {
@@ -75,7 +79,7 @@ export const userRolesStub = [
 ];
 
 export const workspaceDataStub = {
-  ...workspaceStubs[0],
+  ...buildWorkspaceStubs[0],
   accessLevel: WorkspaceAccessLevel.OWNER,
 };
 
@@ -87,7 +91,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   constructor(workspaces?: Workspace[], workspaceUserRoles?: UserRole[]) {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
-    this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
+    this.workspaces = fp.defaultTo(buildWorkspaceStubs([""]), workspaces);
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.notebookList = WorkspacesApiStub.stubNotebookList();
     this.workspaceUserRoles = new Map<string, UserRole[]>();
