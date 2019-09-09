@@ -57,6 +57,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -165,6 +166,9 @@ public class ConceptSetsControllerTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static User currentUser;
+  private Workspace workspace;
+  private Workspace workspace2;
+  private TestMockFactory testMockFactory;
 
   @Autowired BillingProjectBufferService billingProjectBufferService;
 
@@ -243,13 +247,13 @@ public class ConceptSetsControllerTest {
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-      workbenchConfig.featureFlags.useBillingProjectBuffer = false;
       return workbenchConfig;
     }
   }
 
   @Before
   public void setUp() throws Exception {
+    testMockFactory = new TestMockFactory();
 
     conceptSetsController =
         new ConceptSetsController(
@@ -275,6 +279,9 @@ public class ConceptSetsControllerTest {
             userService,
             workbenchConfigProvider);
 
+    testMockFactory.stubBufferBillingProject(billingProjectBufferService);
+    testMockFactory.stubCreateFcWorkspace(fireCloudService);
+
     User user = new User();
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
@@ -291,14 +298,14 @@ public class ConceptSetsControllerTest {
     cdrVersion.setCdrDbName("");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
-    Workspace workspace = new Workspace();
+    workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
     workspace.setNamespace(WORKSPACE_NAMESPACE);
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
-    Workspace workspace2 = new Workspace();
+    workspace2 = new Workspace();
     workspace2.setName(WORKSPACE_NAME_2);
     workspace2.setNamespace(WORKSPACE_NAMESPACE);
     workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
@@ -308,20 +315,23 @@ public class ConceptSetsControllerTest {
     workspacesController.setUserProvider(userProvider);
     conceptSetsController.setUserProvider(userProvider);
 
-    stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    workspace2 = workspacesController.createWorkspace(workspace2).getBody();
+    stubGetWorkspace(
+        workspace.getNamespace(), WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
     stubGetWorkspaceAcl(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
+        workspace.getNamespace(), WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspace(
+        workspace2.getNamespace(), WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
     stubGetWorkspaceAcl(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    workspacesController.createWorkspace(workspace);
-    workspacesController.createWorkspace(workspace2);
+        workspace2.getNamespace(), WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
-    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)).thenReturn(fcResponse);
-    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2))
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), WORKSPACE_NAME))
+        .thenReturn(fcResponse);
+    when(fireCloudService.getWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2))
         .thenReturn(fcResponse);
   }
 
@@ -329,7 +339,7 @@ public class ConceptSetsControllerTest {
   public void testGetConceptSetsInWorkspaceEmpty() {
     assertThat(
             conceptSetsController
-                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
+                .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
                 .getBody()
                 .getItems())
         .isEmpty();
@@ -337,7 +347,7 @@ public class ConceptSetsControllerTest {
 
   @Test(expected = NotFoundException.class)
   public void testGetConceptSetNotExists() {
-    conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, 1L);
+    conceptSetsController.getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, 1L);
   }
 
   @Test(expected = NotFoundException.class)
@@ -349,7 +359,8 @@ public class ConceptSetsControllerTest {
     conceptSet.setId(1L);
     conceptSet.setEtag(Etags.fromVersion(1));
 
-    conceptSetsController.updateConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, 1L, conceptSet);
+    conceptSetsController.updateConceptSet(
+        workspace.getNamespace(), WORKSPACE_NAME, 1L, conceptSet);
   }
 
   @Test
@@ -361,7 +372,7 @@ public class ConceptSetsControllerTest {
     conceptSet =
         conceptSetsController
             .createConceptSet(
-                WORKSPACE_NAMESPACE,
+                workspace.getNamespace(),
                 WORKSPACE_NAME,
                 new CreateConceptSetRequest()
                     .conceptSet(conceptSet)
@@ -378,20 +389,20 @@ public class ConceptSetsControllerTest {
 
     assertThat(
             conceptSetsController
-                .getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId())
+                .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId())
                 .getBody())
         .isEqualTo(conceptSet);
     // Get concept sets will not return the full information, because concepts can have a lot of
     // information.
     assertThat(
             conceptSetsController
-                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
+                .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
                 .getBody()
                 .getItems())
         .contains(conceptSet.concepts(null));
     assertThat(
             conceptSetsController
-                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
+                .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
                 .getBody()
                 .getItems())
         .isEmpty();
@@ -402,18 +413,18 @@ public class ConceptSetsControllerTest {
     ConceptSet surveyConceptSet = makeSurveyConceptSet1();
     assertThat(
             conceptSetsController
-                .getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, surveyConceptSet.getId())
+                .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, surveyConceptSet.getId())
                 .getBody())
         .isEqualTo(surveyConceptSet);
     assertThat(
             conceptSetsController
-                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
+                .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
                 .getBody()
                 .getItems())
         .contains(surveyConceptSet.concepts(null));
     assertThat(
             conceptSetsController
-                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
+                .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
                 .getBody()
                 .getItems())
         .isEmpty();
@@ -422,7 +433,8 @@ public class ConceptSetsControllerTest {
   @Test(expected = NotFoundException.class)
   public void testGetSurveyConceptSetWrongWorkspace() {
     ConceptSet conceptSet = makeSurveyConceptSet1();
-    conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, conceptSet.getId());
+    conceptSetsController.getConceptSet(
+        workspace2.getNamespace(), WORKSPACE_NAME_2, conceptSet.getId());
   }
 
   @Test
@@ -430,20 +442,20 @@ public class ConceptSetsControllerTest {
     ConceptSet conceptSet = makeConceptSet1();
     assertThat(
             conceptSetsController
-                .getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId())
+                .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId())
                 .getBody())
         .isEqualTo(conceptSet);
     // Get concept sets will not return the full information, because concepts can have a lot of
     // information.
     assertThat(
             conceptSetsController
-                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
+                .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
                 .getBody()
                 .getItems())
         .contains(conceptSet.concepts(null));
     assertThat(
             conceptSetsController
-                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
+                .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
                 .getBody()
                 .getItems())
         .isEmpty();
@@ -452,7 +464,8 @@ public class ConceptSetsControllerTest {
   @Test(expected = NotFoundException.class)
   public void testGetConceptSetWrongWorkspace() {
     ConceptSet conceptSet = makeConceptSet1();
-    conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, conceptSet.getId());
+    conceptSetsController.getConceptSet(
+        workspace2.getNamespace(), WORKSPACE_NAME_2, conceptSet.getId());
   }
 
   @Test
@@ -464,7 +477,8 @@ public class ConceptSetsControllerTest {
     CLOCK.setInstant(newInstant);
     ConceptSet updatedConceptSet =
         conceptSetsController
-            .updateConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId(), conceptSet)
+            .updateConceptSet(
+                workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), conceptSet)
             .getBody();
     assertThat(updatedConceptSet.getCreator()).isEqualTo(USER_EMAIL);
     assertThat(updatedConceptSet.getConcepts()).isNotNull();
@@ -478,20 +492,20 @@ public class ConceptSetsControllerTest {
 
     assertThat(
             conceptSetsController
-                .getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId())
+                .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId())
                 .getBody())
         .isEqualTo(updatedConceptSet);
     // Get concept sets will not return the full information, because concepts can have a lot of
     // information.
     assertThat(
             conceptSetsController
-                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
+                .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
                 .getBody()
                 .getItems())
         .contains(updatedConceptSet.concepts(null));
     assertThat(
             conceptSetsController
-                .getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
+                .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
                 .getBody()
                 .getItems())
         .isEmpty();
@@ -504,7 +518,7 @@ public class ConceptSetsControllerTest {
     conceptSet.setName("new name");
     conceptSet.setDomain(Domain.DEATH);
     conceptSetsController.updateConceptSet(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId(), conceptSet);
+        workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), conceptSet);
   }
 
   @Test(expected = ConflictException.class)
@@ -514,7 +528,7 @@ public class ConceptSetsControllerTest {
     conceptSet.setName("new name");
     conceptSet.setEtag(Etags.fromVersion(2));
     conceptSetsController.updateConceptSet(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId(), conceptSet);
+        workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), conceptSet);
   }
 
   @Test
@@ -531,7 +545,7 @@ public class ConceptSetsControllerTest {
     ConceptSet updated =
         conceptSetsController
             .updateConceptSetConcepts(
-                WORKSPACE_NAMESPACE,
+                workspace.getNamespace(),
                 WORKSPACE_NAME,
                 conceptSet.getId(),
                 addConceptsRequest(conceptSet.getEtag(), CLIENT_CONCEPT_3.getConceptId()))
@@ -543,7 +557,7 @@ public class ConceptSetsControllerTest {
     ConceptSet removed =
         conceptSetsController
             .updateConceptSetConcepts(
-                WORKSPACE_NAMESPACE,
+                workspace.getNamespace(),
                 WORKSPACE_NAME,
                 conceptSet.getId(),
                 removeConceptsRequest(updated.getEtag(), CLIENT_CONCEPT_3.getConceptId()))
@@ -568,7 +582,7 @@ public class ConceptSetsControllerTest {
     ConceptSet updated =
         conceptSetsController
             .updateConceptSetConcepts(
-                WORKSPACE_NAMESPACE,
+                workspace.getNamespace(),
                 WORKSPACE_NAME,
                 conceptSet.getId(),
                 addConceptsRequest(
@@ -588,7 +602,7 @@ public class ConceptSetsControllerTest {
     ConceptSet removed =
         conceptSetsController
             .updateConceptSetConcepts(
-                WORKSPACE_NAMESPACE,
+                workspace.getNamespace(),
                 WORKSPACE_NAME,
                 conceptSet.getId(),
                 removeConceptsRequest(
@@ -629,7 +643,7 @@ public class ConceptSetsControllerTest {
     conceptSetsController.maxConceptsPerSet = 2;
     conceptSetsController
         .updateConceptSetConcepts(
-            WORKSPACE_NAMESPACE,
+            workspace.getNamespace(),
             WORKSPACE_NAME,
             conceptSet.getId(),
             addConceptsRequest(
@@ -645,7 +659,7 @@ public class ConceptSetsControllerTest {
     saveConcepts();
     ConceptSet conceptSet = makeConceptSet1();
     conceptSetsController.updateConceptSetConcepts(
-        WORKSPACE_NAMESPACE,
+        workspace.getNamespace(),
         WORKSPACE_NAME,
         conceptSet.getId(),
         addConceptsRequest(Etags.fromVersion(2), CLIENT_CONCEPT_1.getConceptId()));
@@ -656,7 +670,7 @@ public class ConceptSetsControllerTest {
     saveConcepts();
     ConceptSet conceptSet = makeConceptSet1();
     conceptSetsController.updateConceptSetConcepts(
-        WORKSPACE_NAMESPACE,
+        workspace.getNamespace(),
         WORKSPACE_NAME,
         conceptSet.getId(),
         addConceptsRequest(
@@ -673,7 +687,7 @@ public class ConceptSetsControllerTest {
     ConceptSet updatedConceptSet =
         conceptSetsController
             .updateConceptSetConcepts(
-                WORKSPACE_NAMESPACE,
+                workspace.getNamespace(),
                 WORKSPACE_NAME,
                 conceptSet1.getId(),
                 addConceptsRequest(
@@ -685,7 +699,7 @@ public class ConceptSetsControllerTest {
     ConceptSet updatedConceptSet2 =
         conceptSetsController
             .updateConceptSetConcepts(
-                WORKSPACE_NAMESPACE,
+                workspace.getNamespace(),
                 WORKSPACE_NAME,
                 conceptSet2.getId(),
                 addConceptsRequest(conceptSet2.getEtag(), CLIENT_CONCEPT_2.getConceptId()))
@@ -695,23 +709,24 @@ public class ConceptSetsControllerTest {
     assertThat(updatedConceptSet2.getConcepts()).containsExactly(CLIENT_CONCEPT_2);
 
     conceptSetsController.deleteConceptSet(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet1.getId());
+        workspace.getNamespace(), WORKSPACE_NAME, conceptSet1.getId());
     try {
-      conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet1.getId());
+      conceptSetsController.getConceptSet(
+          workspace.getNamespace(), WORKSPACE_NAME, conceptSet1.getId());
       fail("NotFoundException expected");
     } catch (NotFoundException e) {
       // expected
     }
     conceptSet2 =
         conceptSetsController
-            .getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet2.getId())
+            .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet2.getId())
             .getBody();
     assertThat(conceptSet2.getConcepts()).containsExactly(CLIENT_CONCEPT_2);
   }
 
   @Test(expected = NotFoundException.class)
   public void testDeleteConceptSetNotFound() {
-    conceptSetsController.deleteConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, 1L);
+    conceptSetsController.deleteConceptSet(workspace.getNamespace(), WORKSPACE_NAME, 1L);
   }
 
   private UpdateConceptSetRequest addConceptsRequest(String etag, Long... conceptIds) {
@@ -742,7 +757,7 @@ public class ConceptSetsControllerTest {
       request = request.addedIds(ImmutableList.copyOf(addedIds));
     }
     return conceptSetsController
-        .createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request)
+        .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, request)
         .getBody();
   }
 
@@ -759,7 +774,7 @@ public class ConceptSetsControllerTest {
       request = request.addedIds(ImmutableList.copyOf(addedIds));
     }
     return conceptSetsController
-        .createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request)
+        .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, request)
         .getBody();
   }
 
@@ -770,7 +785,7 @@ public class ConceptSetsControllerTest {
     conceptSet.setDomain(Domain.MEASUREMENT);
     return conceptSetsController
         .createConceptSet(
-            WORKSPACE_NAMESPACE,
+            workspace.getNamespace(),
             WORKSPACE_NAME,
             new CreateConceptSetRequest()
                 .conceptSet(conceptSet)

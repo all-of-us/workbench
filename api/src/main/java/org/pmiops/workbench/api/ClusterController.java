@@ -47,11 +47,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ClusterController implements ClusterApiDelegate {
 
-  // Writing this file to a directory on a Leonardo cluster will result in
-  // delocalization of saved files back to a given GCS location. See
-  // https://github.com/DataBiosphere/leonardo/blob/develop/jupyter-docker/jupyter_delocalize.py#L12
-  private static final String DELOCALIZE_CONFIG_FILENAME = ".delocalize.json";
-
   // This file is used by the All of Us libraries to access workspace/CDR metadata.
   private static final String AOU_CONFIG_FILENAME = ".all_of_us_config.json";
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
@@ -137,13 +132,8 @@ public class ClusterController implements ClusterApiDelegate {
           "User billing project is not yet initialized, cannot list/create clusters");
     }
 
-    String clusterName = LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME;
-    if (workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer) {
-      // With 1 project per workspace (http://broad.io/1ppw), a billing project may contain multiple
-      // clusters (up to 1 per workspace collaborator), therefore cluster names must be unique per
-      // user.
-      clusterName = clusterNameForUser(user);
-    }
+    String clusterName = clusterNameForUser(user);
+
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
       fcCluster = this.leonardoNotebooksClient.getCluster(billingProjectId, clusterName);
@@ -230,41 +220,26 @@ public class ClusterController implements ClusterApiDelegate {
     }
 
     String editDir = "workspaces/" + workspacePath;
-    // This prefix must be kept in sync with the Playground mode extension, see
-    // https://github.com/all-of-us/workbench/blob/master/api/cluster-resources/playground-extension.js
     String playgroundDir = "workspaces_playground/" + workspacePath;
     String targetDir = body.getPlaygroundMode() ? playgroundDir : editDir;
 
-    // TODO(RW-2955): Teardown playground mode and non-Welder paths.
-    boolean enableLeoWelder = workbenchConfigProvider.get().featureFlags.enableLeoWelder;
-    if (enableLeoWelder) {
-      leonardoNotebooksClient.createStorageLink(
-          projectName,
-          clusterName,
-          new StorageLink()
-              .cloudStorageDirectory(gcsNotebooksDir)
-              .localBaseDirectory(editDir)
-              .localSafeModeBaseDirectory(playgroundDir)
-              .pattern(DELOC_PATTERN));
-    }
+    leonardoNotebooksClient.createStorageLink(
+        projectName,
+        clusterName,
+        new StorageLink()
+            .cloudStorageDirectory(gcsNotebooksDir)
+            .localBaseDirectory(editDir)
+            .localSafeModeBaseDirectory(playgroundDir)
+            .pattern(DELOC_PATTERN));
 
     // Always localize config files; usually a no-op after the first call.
     Map<String, String> localizeMap = new HashMap<>();
-    String legacyDelocConfigUri =
-        jsonToDataUri(
-            new JSONObject().put("destination", gcsNotebooksDir).put("pattern", DELOC_PATTERN));
+
+    // The Welder extension offers direct links to/from playground mode; write the AoU config file
+    // to both locations so notebooks will work in either directory.
     String aouConfigUri = aouConfigDataUri(fcWorkspace, cdrVersion, projectName);
-    if (enableLeoWelder) {
-      // The Welder extension offers direct links to/from playground mode; write the AoU config file
-      // to both locations so notebooks will work in either directory.
-      localizeMap.put(editDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
-      localizeMap.put(playgroundDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
-    } else {
-      localizeMap.put(targetDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
-      if (!body.getPlaygroundMode()) {
-        localizeMap.put(editDir + "/" + DELOCALIZE_CONFIG_FILENAME, legacyDelocConfigUri);
-      }
-    }
+    localizeMap.put(editDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
+    localizeMap.put(playgroundDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
 
     // Localize the requested notebooks, if any.
     if (body.getNotebookNames() != null) {

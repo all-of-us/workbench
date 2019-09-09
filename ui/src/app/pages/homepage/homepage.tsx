@@ -141,9 +141,7 @@ export const styles = reactStyles({
     color: colors.white, fontSize: '0.7rem', height: '1rem',
     marginLeft: '2.5rem', fontWeight: 400
   }
-
 });
-
 
 export const Homepage = withUserProfile()(class extends React.Component<
   { profileState: { profile: Profile, reload: Function } },
@@ -315,14 +313,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
 
   render() {
-    const {billingProjectInitialized, betaAccessGranted,
-      videoOpen, accessTasksLoaded, accessTasksRemaining, eraCommonsLinked,
-      eraCommonsError, firstVisitTraining, trainingCompleted, quickTour, videoLink,
-      twoFactorAuthCompleted, dataUseAgreementCompleted
+    const {betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
+      eraCommonsLinked, eraCommonsError, firstVisitTraining, trainingCompleted, quickTour,
+      videoLink, twoFactorAuthCompleted, dataUseAgreementCompleted
     } = this.state;
-
-    const canCreateWorkspaces = billingProjectInitialized ||
-      serverConfigStore.getValue().useBillingProjectBuffer;
 
     const quickTourResources = [
       {
@@ -399,17 +393,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
                         <Row style={{paddingTop: '2rem'}}>
                           <Column style={styles.contentWrapperLeft}>
                             <Row style={styles.mainHeader}>Researcher Workbench</Row>
-                            <TooltipTrigger disabled={canCreateWorkspaces} content={<div>
-                              Your Firecloud billing project is still being initialized.
-                              Workspace creation will be available in a few minutes.</div>}>
-                              <CardButton disabled={!canCreateWorkspaces}
-                                          onClick={() => navigate(['workspaces/build'])}
-                                          style={{margin: '1.9rem 106px 0 3%'}}>
-                                Create a <br/> New Workspace
-                                <ClrIcon shape='plus-circle'
-                                         style={{height: '32px', width: '32px'}}/>
-                              </CardButton>
-                            </TooltipTrigger>
+                            <CardButton onClick={() => navigate(['workspaces/build'])}
+                                        style={{margin: '1.9rem 106px 0 3%'}}>
+                              Create a <br/> New Workspace
+                              <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
+                            </CardButton>
                           </Column>
                           <Column style={styles.contentWrapperRight}>
                             <a onClick={() => navigate(['workspaces'])}
@@ -515,17 +503,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
                       <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                         <div style={styles.contentWrapperLeft}>
                           <div style={styles.mainHeaderToDelete}>Researcher Workbench</div>
-                          <TooltipTrigger
-                            content={<div>Your Firecloud billing project is still being initialized
-                              . Workspace creation will be available in a few minutes.</div>}
-                            disabled={canCreateWorkspaces}>
-                            <CardButton disabled={!canCreateWorkspaces}
-                                        onClick={() => navigate(['workspaces/build'])}
-                                        style={{margin: '1.9rem 106px 0 3%'}}>
-                              Create a <br/> New Workspace
-                              <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
-                            </CardButton>
-                          </TooltipTrigger>
+                          <CardButton onClick={() => navigate(['workspaces/build'])}
+                                      style={{margin: '1.9rem 106px 0 3%'}}>
+                            Create a <br/> New Workspace
+                            <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
+                          </CardButton>
                         </div>
                         <div style={styles.contentWrapperRight}>
                           <a onClick={() => navigate(['workspaces'])}

@@ -150,8 +150,6 @@ public class ClusterControllerTest {
     config.access = new WorkbenchConfig.AccessConfig();
     config.access.enableComplianceTraining = true;
     config.featureFlags = new FeatureFlagsConfig();
-    config.featureFlags.useBillingProjectBuffer = false;
-    config.featureFlags.enableLeoWelder = false;
 
     user = new User();
     user.setEmail(LOGGED_IN_USER_EMAIL);
@@ -167,17 +165,16 @@ public class ClusterControllerTest {
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
 
-    // TODO: Update cluster names to include user IDs once useBillingProjectBuffer is the default.
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
     testFcCluster =
         new org.pmiops.workbench.notebooks.model.Cluster()
-            .clusterName("all-of-us")
+            .clusterName(getClusterName())
             .googleProject(BILLING_PROJECT_ID)
             .status(org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING)
             .createdDate(createdDate);
     testCluster =
         new Cluster()
-            .clusterName("all-of-us")
+            .clusterName(getClusterName())
             .clusterNamespace(BILLING_PROJECT_ID)
             .status(ClusterStatus.DELETING)
             .createdDate(createdDate);
@@ -217,9 +214,14 @@ public class ClusterControllerTest {
     return new JSONObject(new String(raw));
   }
 
+  private String getClusterName() {
+    return "all-of-us-".concat(Long.toString(user.getUserId()));
+  }
+
   @Test
   public void testListClusters() throws Exception {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us")).thenReturn(testFcCluster);
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
+        .thenReturn(testFcCluster);
 
     assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
@@ -227,7 +229,7 @@ public class ClusterControllerTest {
 
   @Test
   public void testListClustersUnknownStatus() throws Exception {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us"))
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
         .thenReturn(testFcCluster.status(null));
 
     assertThat(
@@ -246,7 +248,8 @@ public class ClusterControllerTest {
 
   @Test(expected = FailedPreconditionException.class)
   public void testListClustersFreeTierNotReady() throws Exception {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us")).thenReturn(testFcCluster);
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
+        .thenReturn(testFcCluster);
 
     User notReadyUser = new User();
     notReadyUser.setEmail(LOGGED_IN_USER_EMAIL);
@@ -261,23 +264,11 @@ public class ClusterControllerTest {
 
   @Test
   public void testListClustersLazyCreate() {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us"))
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
         .thenThrow(new NotFoundException());
-    when(notebookService.createCluster(eq(BILLING_PROJECT_ID), eq("all-of-us")))
+    when(notebookService.createCluster(eq(BILLING_PROJECT_ID), eq(getClusterName())))
         .thenReturn(testFcCluster);
 
-    assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
-        .isEqualTo(testCluster);
-  }
-
-  @Test
-  public void testListClustersLazyCreateUsingBillingProjectBuffer() {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us-123"))
-        .thenThrow(new NotFoundException());
-    when(notebookService.createCluster(eq(BILLING_PROJECT_ID), eq("all-of-us-123")))
-        .thenReturn(testFcCluster);
-
-    config.featureFlags.useBillingProjectBuffer = true;
     assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
   }
@@ -343,94 +334,6 @@ public class ClusterControllerTest {
 
     verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
     Map<String, String> localizeMap = mapCaptor.getValue();
-    assertThat(localizeMap)
-        .containsEntry("workspaces/wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
-    JSONObject delocJson = dataUriToJson(localizeMap.get("workspaces/wsid/.delocalize.json"));
-    assertThat(delocJson.getString("destination")).isEqualTo("gs://workspace-bucket/notebooks");
-    JSONObject aouJson = dataUriToJson(localizeMap.get("workspaces/wsid/.all_of_us_config.json"));
-    assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
-    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(BILLING_PROJECT_ID);
-    assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
-    verify(userRecentResourceService, times(1))
-        .updateNotebookEntry(anyLong(), anyLong(), anyString(), any(Timestamp.class));
-  }
-
-  @Test
-  public void testLocalize_playgroundMode() throws Exception {
-    ClusterLocalizeRequest req =
-        new ClusterLocalizeRequest()
-            .workspaceNamespace(WORKSPACE_NS)
-            .workspaceId(WORKSPACE_ID)
-            .notebookNames(ImmutableList.of("foo.ipynb"))
-            .playgroundMode(true);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    ClusterLocalizeResponse resp =
-        clusterController.localize(BILLING_PROJECT_ID, "cluster", req).getBody();
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces_playground/wsid");
-    verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
-    Map<String, String> localizeMap = mapCaptor.getValue();
-    JSONObject aouJson =
-        dataUriToJson(localizeMap.get("workspaces_playground/wsid/.all_of_us_config.json"));
-    assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
-    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(BILLING_PROJECT_ID);
-    assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
-  }
-
-  @Test
-  public void testLocalize_differentNamespace() throws Exception {
-    ClusterLocalizeRequest req =
-        new ClusterLocalizeRequest()
-            .workspaceNamespace(WORKSPACE_NS)
-            .workspaceId(WORKSPACE_ID)
-            .notebookNames(ImmutableList.of("foo.ipynb"))
-            .playgroundMode(false);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    ClusterLocalizeResponse resp =
-        clusterController.localize("other-proj", "cluster", req).getBody();
-    verify(notebookService).localize(eq("other-proj"), eq("cluster"), mapCaptor.capture());
-
-    Map<String, String> localizeMap = mapCaptor.getValue();
-    assertThat(localizeMap)
-        .containsEntry(
-            "workspaces/proj__wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/proj__wsid");
-    JSONObject aouJson =
-        dataUriToJson(localizeMap.get("workspaces/proj__wsid/.all_of_us_config.json"));
-    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo("other-proj");
-  }
-
-  @Test
-  public void testLocalize_noNotebooks() throws Exception {
-    ClusterLocalizeRequest req = new ClusterLocalizeRequest();
-    req.setWorkspaceNamespace(WORKSPACE_NS);
-    req.setWorkspaceId(WORKSPACE_ID);
-    req.setPlaygroundMode(false);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    ClusterLocalizeResponse resp =
-        clusterController.localize(BILLING_PROJECT_ID, "cluster", req).getBody();
-    verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
-
-    // Config files only.
-    assertThat(mapCaptor.getValue().size()).isEqualTo(2);
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
-  }
-
-  @Test
-  public void testLocalize_welder() throws Exception {
-    config.featureFlags.enableLeoWelder = true;
-    ClusterLocalizeRequest req =
-        new ClusterLocalizeRequest()
-            .workspaceNamespace(WORKSPACE_NS)
-            .workspaceId(WORKSPACE_ID)
-            .notebookNames(ImmutableList.of("foo.ipynb"))
-            .playgroundMode(false);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    ClusterLocalizeResponse resp =
-        clusterController.localize(BILLING_PROJECT_ID, "cluster", req).getBody();
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
-
-    verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
-    Map<String, String> localizeMap = mapCaptor.getValue();
     assertThat(localizeMap.keySet())
         .containsExactly(
             "workspaces/wsid/foo.ipynb",
@@ -447,8 +350,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testLocalize_welder_playgroundMode() throws Exception {
-    config.featureFlags.enableLeoWelder = true;
+  public void testLocalize_playgroundMode() throws Exception {
     ClusterLocalizeRequest req =
         new ClusterLocalizeRequest()
             .workspaceNamespace(WORKSPACE_NS)
@@ -472,8 +374,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testLocalize_welder_differentNamespace() throws Exception {
-    config.featureFlags.enableLeoWelder = true;
+  public void testLocalize_differentNamespace() throws Exception {
     ClusterLocalizeRequest req =
         new ClusterLocalizeRequest()
             .workspaceNamespace(WORKSPACE_NS)
@@ -501,8 +402,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testLocalize_welder_noNotebooks() throws Exception {
-    config.featureFlags.enableLeoWelder = true;
+  public void testLocalize_noNotebooks() throws Exception {
     ClusterLocalizeRequest req = new ClusterLocalizeRequest();
     req.setWorkspaceNamespace(WORKSPACE_NS);
     req.setWorkspaceId(WORKSPACE_ID);

@@ -43,7 +43,7 @@ export interface Environment {
 
   inactivityTimeoutSeconds: number;
   inactivityWarningBeforeSeconds: number;
-  // Transient client-side flags.
+  // Add transient client-side flags below here
   //
   // homepage restyling changes ; excludes DUA
   // See RW-3275

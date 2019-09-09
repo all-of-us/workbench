@@ -74,6 +74,7 @@ import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -146,11 +147,14 @@ public class CohortsControllerTest {
   @Autowired WorkspacesController workspacesController;
   @Autowired CohortsController cohortsController;
   @Autowired ConceptSetsController conceptSetsController;
+  @Autowired BillingProjectBufferService billingProjectBufferService;
 
   Workspace workspace;
+  Workspace workspace2;
   CdrVersion cdrVersion;
   SearchRequest searchRequest;
   String cohortCriteria;
+  private TestMockFactory testMockFactory;
   @Autowired WorkspaceService workspaceService;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortDao cohortDao;
@@ -215,13 +219,15 @@ public class CohortsControllerTest {
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-      workbenchConfig.featureFlags.useBillingProjectBuffer = false;
       return workbenchConfig;
     }
   }
 
   @Before
   public void setUp() throws Exception {
+    testMockFactory = new TestMockFactory();
+    testMockFactory.stubBufferBillingProject(billingProjectBufferService);
+    testMockFactory.stubCreateFcWorkspace(fireCloudService);
     User user = new User();
     user.setEmail(CREATOR_EMAIL);
     user.setUserId(123L);
@@ -248,7 +254,7 @@ public class CohortsControllerTest {
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
-    Workspace workspace2 = new Workspace();
+    workspace2 = new Workspace();
     workspace2.setName(WORKSPACE_NAME_2);
     workspace2.setNamespace(WORKSPACE_NAMESPACE);
     workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
@@ -256,10 +262,6 @@ public class CohortsControllerTest {
     workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
     CLOCK.setInstant(NOW);
-    stubGetWorkspace(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
-    stubGetWorkspace(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
 
     Cohort cohort = new Cohort();
     cohort.setName("demo");
@@ -268,7 +270,16 @@ public class CohortsControllerTest {
     cohort.setCriteria(createDemoCriteria().toString());
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    workspacesController.createWorkspace(workspace2);
+    workspace2 = workspacesController.createWorkspace(workspace2).getBody();
+
+    stubGetWorkspace(
+        workspace.getNamespace(), WORKSPACE_NAME, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspaceAcl(
+        workspace.getNamespace(), WORKSPACE_NAME, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspace(
+        workspace2.getNamespace(), WORKSPACE_NAME_2, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspaceAcl(
+        workspace2.getNamespace(), WORKSPACE_NAME_2, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
   }
 
   private JSONObject createDemoCriteria() {
@@ -394,7 +405,7 @@ public class CohortsControllerTest {
         cohortsController
             .createCohort(workspace.getNamespace(), workspace.getId(), cohort)
             .getBody();
-    cohortsController.getCohort(workspace.getNamespace(), WORKSPACE_NAME_2, cohort.getId());
+    cohortsController.getCohort(workspace2.getNamespace(), WORKSPACE_NAME_2, cohort.getId());
   }
 
   @Test(expected = ConflictException.class)
@@ -480,7 +491,7 @@ public class CohortsControllerTest {
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
     request.setCdrVersionName("badCdrVersion");
-    cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request);
+    cohortsController.materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request);
   }
 
   @Test(expected = NotFoundException.class)
@@ -493,7 +504,7 @@ public class CohortsControllerTest {
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName("badCohort");
-    cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request);
+    cohortsController.materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request);
   }
 
   @Test(expected = BadRequestException.class)
@@ -505,7 +516,7 @@ public class CohortsControllerTest {
             .getBody();
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
-    cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request);
+    cohortsController.materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request);
   }
 
   @Test(expected = BadRequestException.class)
@@ -519,7 +530,7 @@ public class CohortsControllerTest {
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
     request.setPageSize(-1);
-    cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request);
+    cohortsController.materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request);
   }
 
   @Test
@@ -542,7 +553,7 @@ public class CohortsControllerTest {
         .thenReturn(response);
     assertThat(
             cohortsController
-                .materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request)
+                .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
   }
@@ -567,7 +578,7 @@ public class CohortsControllerTest {
         .thenReturn(response);
     assertThat(
             cohortsController
-                .materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request)
+                .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
   }
@@ -586,7 +597,7 @@ public class CohortsControllerTest {
         .thenReturn(response);
     assertThat(
             cohortsController
-                .materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request)
+                .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
   }
@@ -627,7 +638,7 @@ public class CohortsControllerTest {
         .thenReturn(response);
     assertThat(
             cohortsController
-                .materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request)
+                .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
   }
@@ -659,7 +670,7 @@ public class CohortsControllerTest {
     TableQuery tableQuery =
         new TableQuery().tableName("observation").conceptSetName(CONCEPT_SET_NAME);
     request.setFieldSet(new FieldSet().tableQuery(tableQuery));
-    cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request);
+    cohortsController.materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request);
   }
 
   @Test(expected = NotFoundException.class)
@@ -674,7 +685,7 @@ public class CohortsControllerTest {
     TableQuery tableQuery =
         new TableQuery().tableName("condition_occurrence").conceptSetName(CONCEPT_SET_NAME);
     request.setFieldSet(new FieldSet().tableQuery(tableQuery));
-    cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request);
+    cohortsController.materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request);
   }
 
   @Test
@@ -699,7 +710,7 @@ public class CohortsControllerTest {
         .thenReturn(response);
     assertThat(
             cohortsController
-                .materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request)
+                .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
   }
@@ -719,7 +730,7 @@ public class CohortsControllerTest {
         .thenReturn(response);
     assertThat(
             cohortsController
-                .materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request)
+                .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
   }
@@ -745,7 +756,7 @@ public class CohortsControllerTest {
         .thenReturn(response);
     assertThat(
             cohortsController
-                .materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request)
+                .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
   }

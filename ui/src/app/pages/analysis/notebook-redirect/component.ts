@@ -8,9 +8,7 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {
   queryParamsStore,
-  serverConfigStore,
-  urlParamsStore,
-  userProfileStore
+  urlParamsStore
 } from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
@@ -111,7 +109,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   private wsId: string;
   private wsNamespace: string;
-  private jupyterLabMode = false;
   private loadingSub: Subscription;
   private cluster: Cluster;
   private progressComplete = new Map<Progress, boolean>();
@@ -128,26 +125,15 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const {ns, wsid} = urlParamsStore.getValue();
-    const {creating, playgroundMode, jupyterLabMode} = queryParamsStore.getValue();
+    const {creating, playgroundMode} = queryParamsStore.getValue();
     this.wsNamespace = ns;
     this.wsId = wsid;
     this.creating = creating || false;
     this.playground = playgroundMode === 'true';
-    this.jupyterLabMode = jupyterLabMode === 'true';
     this.setNotebookNames();
 
     let initializedProgress = false;
-    this.loadingSub = serverConfigStore.asObservable()
-      .flatMap(({useBillingProjectBuffer}) => {
-        if (useBillingProjectBuffer) {
-          return this.clusterService.listClusters(this.wsNamespace);
-        }
-        return  userProfileStore.asObservable()
-          .flatMap((profileStore) => {
-            return this.clusterService.listClusters(
-              profileStore.profile.freeTierBillingProjectName);
-          });
-      })
+    this.loadingSub = this.clusterService.listClusters(this.wsNamespace)
       .do((resp) => {
         if (initializedProgress) {
           // Only initialize progress once. This callback will re-execute as we
@@ -210,14 +196,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
           window.history.replaceState({}, 'Notebook', 'workspaces/' + this.wsNamespace +
           '/' + this.wsId + '/notebooks/' + encodeURIComponent(this.fullNotebookName));
         }
-        let url;
-        if (this.jupyterLabMode) {
-          url = this.jupyterLabUrl(this.cluster, nbName);
-        } else {
-          url = this.notebookUrl(this.cluster, nbName);
-        }
         this.leoUrl = this.sanitizer
-          .bypassSecurityTrustResourceUrl(url);
+          .bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, nbName));
 
         // Angular 2 only provides a load hook for iFrames
         // the load hook triggers on url definition, not on completion of url load
@@ -253,13 +233,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       environment.leoApiUrl + '/notebooks/'
         + cluster.clusterNamespace + '/'
         + cluster.clusterName + '/notebooks/' + nbName);
-  }
-
-  private jupyterLabUrl(cluster: Cluster, nbName: string): string {
-    return encodeURI(
-      environment.leoApiUrl + '/notebooks/'
-      + cluster.clusterNamespace + '/'
-      + cluster.clusterName + '/lab/tree/' + nbName);
   }
 
   private initializeNotebookCookies(c: Cluster): Observable<Cluster> {

@@ -69,8 +69,6 @@
     "unsafeAllowSelfBypass": false
   },
   "featureFlags": {
-    "enableLeoWelder": true,
-    "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true

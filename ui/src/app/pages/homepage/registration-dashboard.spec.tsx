@@ -23,7 +23,6 @@ describe('RegistrationDashboard', () => {
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
-      useBillingProjectBuffer: true,
       enableEraCommons: true,
     });
     props  = {
