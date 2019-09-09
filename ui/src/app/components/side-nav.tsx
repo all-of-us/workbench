@@ -2,7 +2,7 @@ import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {navigate, signInStore} from 'app/utils/navigation';
+import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import * as React from 'react';
@@ -257,9 +257,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
 
   signOut() {
     signInStore.getValue().signOut();
-    // Force a hard browser reload here. We want to ensure that no local state
-    // is persisting across user sessions, as this can lead to subtle bugs.
-    window.location.assign('/');
+    navigateSignOut();
   }
 
   render() {
