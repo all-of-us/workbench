@@ -5,5 +5,4 @@ export const environment: Environment = {
   ...testEnvironmentBase,
   displayTag: 'Test',
   debug: false,
-  enableJupyterLab: true,
 };

@@ -16,5 +16,4 @@ export const environment: Environment = {
   shibbolethUrl: 'https://shibboleth.dsde-perf.broadinstitute.org',
   inactivityTimeoutSeconds: 30 * 60,
   inactivityWarningBeforeSeconds: 5 * 60,
-  enableJupyterLab: false,
 };
