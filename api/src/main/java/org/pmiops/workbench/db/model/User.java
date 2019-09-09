@@ -23,7 +23,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 
@@ -60,8 +59,6 @@ public class User {
   private String phoneNumber;
   private String currentPosition;
   private String organization;
-  private String freeTierBillingProjectName;
-  private Short freeTierBillingProjectStatus;
   private Double freeTierCreditsLimitOverride = null;
   private Timestamp firstSignInTime;
   private Set<Short> authorities = new HashSet<>();
@@ -211,24 +208,6 @@ public class User {
     this.organization = organization;
   }
 
-  @Column(name = "free_tier_billing_project_name")
-  public String getFreeTierBillingProjectName() {
-    return freeTierBillingProjectName;
-  }
-
-  public void setFreeTierBillingProjectName(String freeTierBillingProjectName) {
-    this.freeTierBillingProjectName = freeTierBillingProjectName;
-  }
-
-  @Column(name = "free_tier_billing_project_status")
-  public Short getFreeTierBillingProjectStatus() {
-    return freeTierBillingProjectStatus;
-  }
-
-  public void setFreeTierBillingProjectStatus(Short freeTierBillingProjectStatus) {
-    this.freeTierBillingProjectStatus = freeTierBillingProjectStatus;
-  }
-
   @Column(name = "free_tier_credits_limit_override")
   public Double getFreeTierCreditsLimitOverride() {
     return freeTierCreditsLimitOverride;
@@ -236,17 +215,6 @@ public class User {
 
   public void setFreeTierCreditsLimitOverride(Double freeTierCreditsLimitOverride) {
     this.freeTierCreditsLimitOverride = freeTierCreditsLimitOverride;
-  }
-
-  @Transient
-  public BillingProjectStatus getFreeTierBillingProjectStatusEnum() {
-    return StorageEnums.billingProjectStatusFromStorage(getFreeTierBillingProjectStatus());
-  }
-
-  public void setFreeTierBillingProjectStatusEnum(
-      BillingProjectStatus freeTierBillingProjectStatus) {
-    setFreeTierBillingProjectStatus(
-        StorageEnums.billingProjectStatusToStorage(freeTierBillingProjectStatus));
   }
 
   @Column(name = "first_sign_in_time")

@@ -19,7 +19,6 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {
-  BillingProjectStatus,
   Profile,
 } from 'generated/fetch';
 
@@ -94,7 +93,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
   { accessTasksLoaded: boolean,
     accessTasksRemaining: boolean,
     betaAccessGranted: boolean,
-    billingProjectInitialized: boolean,
     dataUseAgreementCompleted: boolean,
     eraCommonsError: string,
     eraCommonsLinked: boolean,
@@ -115,7 +113,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
       accessTasksLoaded: false,
       accessTasksRemaining: undefined,
       betaAccessGranted: undefined,
-      billingProjectInitialized: false,
       dataUseAgreementCompleted: undefined,
       eraCommonsError: '',
       eraCommonsLinked: undefined,
@@ -132,14 +129,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
   componentDidMount() {
     this.validateNihToken();
     this.callProfile();
-    this.checkBillingProjectStatus();
   }
 
   componentDidUpdate(prevProps) {
     const {profileState: {profile}} = this.props;
-    if (!this.state.billingProjectInitialized) {
-      this.checkBillingProjectStatus();
-    }
     if (!fp.isEqual(prevProps.profileState.profile, profile)) {
       this.callProfile();
     }
@@ -240,17 +233,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
     this.setState((state, props) => ({
       quickTour: state.firstVisit && state.accessTasksRemaining === false
     }));
-  }
-
-  checkBillingProjectStatus() {
-    const {profileState: {profile, reload}} = this.props;
-    if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
-      this.setState({billingProjectInitialized: true});
-    } else {
-      this.timer = setTimeout(() => {
-        reload();
-      }, 10000);
-    }
   }
 
   openVideo(videoLink: string): void {

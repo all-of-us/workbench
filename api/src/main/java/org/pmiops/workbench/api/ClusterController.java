@@ -28,7 +28,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
@@ -126,11 +125,6 @@ public class ClusterController implements ClusterApiDelegate {
     // billing buffer projects are guaranteed to be initialized at this point.
 
     User user = this.userProvider.get();
-    if (billingProjectId.equals(user.getFreeTierBillingProjectName())
-        && user.getFreeTierBillingProjectStatusEnum() != BillingProjectStatus.READY) {
-      throw new FailedPreconditionException(
-          "User billing project is not yet initialized, cannot list/create clusters");
-    }
 
     String clusterName = clusterNameForUser(user);
 
