@@ -27,23 +27,13 @@ import {
 } from 'generated/fetch';
 
 export const styles = reactStyles({
-  mainHeader: {
-    color: colors.primary, fontSize: 28, fontWeight: 400, letterSpacing: 'normal'
+  bottomBanner: {
+    width: '100%', display: 'flex', backgroundColor: colors.primary,
+    paddingLeft: '3.5rem', alignItems: 'center'
   },
-  pageWrapper: {
-    marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '16px'
-  },
-  welcomeMessageIcon: {
-    height: '2.25rem', width: '2.75rem'
-  },
-  fadeBox: {
-    margin: '1rem 0 0 3%', width: '95%', padding: '0 0.1rem'
-  },
-  singleCard: {
-    width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
-    borderRadius: '5px', backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    border: 'none', marginTop: '1rem'
+  bottomLinks: {
+    color: colors.white, fontSize: '.5rem', height: '1rem',
+    marginLeft: '2.5rem', fontWeight: 400
   },
   contentWrapperLeft: {
     paddingLeft: '3%', width: '40%'
@@ -51,22 +41,14 @@ export const styles = reactStyles({
   contentWrapperRight: {
     justifyContent: 'space-between', width: '60%'
   },
-  quickTourCardsRow: {
-    justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem'
-  },
-  quickTourLabel: {
-    fontSize: 18, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
-    fontWeight: 600, marginTop: '2rem', width: '33%'
+  fadeBox: {
+    margin: '1rem 0 0 3%', width: '95%', padding: '0 0.1rem'
   },
   footer: {
     width: '100%', backgroundColor: colors.light, marginTop: '2%'
   },
   footerInner: {
     marginLeft: '3%', marginRight: '2%',
-  },
-  footerTitle: {
-    height: '34px', opacity: 0.87, color: colors.primary, fontSize: '0.75rem',
-    fontWeight: 600, lineHeight: '34px', marginTop: '1rem', marginBottom: '0.5rem'
   },
   footerText: {
     height: '176px', opacity: 0.87, color: colors.secondary,
@@ -78,19 +60,37 @@ export const styles = reactStyles({
     fontSize: '0.67rem',
     fontWeight: 500
   },
+  footerTitle: {
+    height: '34px', opacity: 0.87, color: colors.primary, fontSize: '0.75rem',
+    fontWeight: 600, lineHeight: '34px', marginTop: '1rem', marginBottom: '0.5rem'
+  },
   linksBlock: {
     marginBottom: '1rem', flexShrink: 1, minWidth: '13rem'
-  },
-  bottomBanner: {
-    width: '100%', display: 'flex', backgroundColor: colors.primary,
-    paddingLeft: '3.5rem', alignItems: 'center'
   },
   logo: {
     height: '3.5rem', width: '7rem', lineHeight: '85px'
   },
-  bottomLinks: {
-    color: colors.white, fontSize: '.5rem', height: '1rem',
-    marginLeft: '2.5rem', fontWeight: 400
+  mainHeader: {
+    color: colors.primary, fontSize: 28, fontWeight: 400, letterSpacing: 'normal'
+  },
+  pageWrapper: {
+    marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '16px'
+  },
+  quickTourCardsRow: {
+    justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem'
+  },
+  quickTourLabel: {
+    fontSize: 18, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
+    fontWeight: 600, marginTop: '2rem', width: '33%'
+  },
+  singleCard: {
+    width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
+    borderRadius: '5px', backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
+    border: 'none', marginTop: '1rem'
+  },
+  welcomeMessageIcon: {
+    height: '2.25rem', width: '2.75rem'
   },
   // once enableHomepageRestyle is enabled, delete all styles ending in 'ToDelete'
   mainHeaderToDelete: {
