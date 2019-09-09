@@ -277,9 +277,12 @@ const tabs = [
   }
 ];
 
-const domainList = [DomainType[DomainType.CONDITION],
+const domainList = [
+  DomainType[DomainType.CONDITION],
   DomainType[DomainType.PROCEDURE],
-  DomainType[DomainType.DRUG]];
+  DomainType[DomainType.DRUG]
+];
+const EVENT_CATEGORY = 'Review Individual';
 
 interface Props {
   workspace: WorkspaceData;
@@ -359,13 +362,13 @@ export const DetailTabs = withCurrentWorkspace()(
 
     tabChange = (e: any) => {
       const tab = e.index === 0 ? 'Summary' : tabs[e.index - 1].name;
-      triggerEvent('Review Individual', 'Click', `${tab} - Review Individual`);
+      triggerEvent(EVENT_CATEGORY, 'Click', `${tab} - Review Individual`);
       this.setState({activeTab: e.index});
     }
 
     chartHover = (data: any) => {
       if (data.conditionTitle) {
-        triggerEvent('Review Individual', 'hover', `${data.conditionTitle} Chart - Review Individual`);
+        triggerEvent(EVENT_CATEGORY, 'hover', `${data.conditionTitle} Chart - Review Individual`);
       }
     }
 

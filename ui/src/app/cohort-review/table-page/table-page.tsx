@@ -218,6 +218,7 @@ const reverseColumnEnum = {
   deceased: Columns.DECEASED,
   status: Columns.STATUS
 };
+const EVENT_CATEGORY = 'Review Participant List';
 
 interface Props {
   workspace: WorkspaceData;
@@ -412,7 +413,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     goBack() {
-      triggerEvent('Review Participant List', 'Click', 'Back to cohort - Review Participant List');
+      triggerEvent(EVENT_CATEGORY, 'Click', 'Back to cohort - Review Participant List');
       const {id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
       navigateByUrl(`/workspaces/${namespace}/${id}/data/cohorts/build?cohortId=${cid}`);
@@ -464,7 +465,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
 
     columnSort = (sortField: string) => {
       if (sortField === 'participantId') {
-        triggerEvent('Review Participant List', 'Click', 'Sort - ID - Review Participant List');
+        triggerEvent(EVENT_CATEGORY, 'Click', 'Sort - ID - Review Participant List');
       }
       if (this.state.sortField === sortField) {
         const sortOrder = this.state.sortOrder === 1 ? -1 : 1;
@@ -491,7 +492,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
              style={filtered ? filterIcons.active : filterIcons.default}
              onClick={(e) => {
                const {name} = fields.find(it => it.field === column);
-               triggerEvent('Review Participant List', 'Click', `Filter - ${name} - Review Participant List`);
+               triggerEvent(EVENT_CATEGORY, 'Click', `Filter - ${name} - Review Participant List`);
                fl.toggle(e);
                if (column === 'participantId') {
                  ip.focus();

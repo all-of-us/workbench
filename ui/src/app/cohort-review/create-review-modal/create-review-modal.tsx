@@ -78,7 +78,7 @@ export const CreateReviewModal = withCurrentWorkspace()(
     }
 
     componentDidMount(): void {
-      triggerEvent('Create Review Set', 'Click', 'Create Set Review');
+      triggerEvent('Create Review Set', 'Click', 'Create Set - Review');
     }
 
     createReview() {
