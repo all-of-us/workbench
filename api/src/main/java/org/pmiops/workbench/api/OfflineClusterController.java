@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -145,6 +146,24 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
     }
     return ResponseEntity.ok(
         new CheckClustersResponse().clusterDeletionCount(activeDeletes + unusedDeletes - errors));
+  }
+
+  @Override
+  public ResponseEntity<List<org.pmiops.workbench.model.Cluster>> listAllClusters() {
+    final ClusterApi clusterApi = clusterApiProvider.get();
+    try {
+      final ImmutableList<Cluster> leonardoResponse = ImmutableList.copyOf(
+          clusterApi.listClusters(null, false));
+      final ImmutableList<org.pmiops.workbench.model.Cluster> result = leonardoResponse.stream()
+          .map(OfflineClusterController::toWorkbenchCluster)
+          .collect(ImmutableList.toImmutableList());
+      return ResponseEntity.ok(result);
+    } catch (ApiException e) {
+      e.printStackTrace();
+      return ResponseEntity
+          .status(e.getCode())
+          .build();
+    }
   }
 
   @Override

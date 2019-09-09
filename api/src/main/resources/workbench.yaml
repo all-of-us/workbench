@@ -980,6 +980,35 @@ paths:
             - email
             - profile
 
+  '/v1/admin/clusters/':
+    # '$ref': 'https://notebooks.firecloud.org/api-docs.yaml#/paths/~1api~1clusters~1{googleProject}'
+    get:
+      summary: List all active clusters
+      description: List all active clusters
+      operationId: listAllClusters
+      tags:
+        - offlineCluster
+      responses:
+        '200':
+          description: List of clusters
+          schema:
+            type: array
+            items:
+              $ref: './notebooks.yaml/#/definitions/Cluster'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: './notebooks.yaml/#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: './notebooks.yaml/#/definitions/ErrorReport'
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+
   /v1/admin/clusters/{googleProject}/{clusterName}/stop:
     post:
       summary: Stops a Dataproc cluster
