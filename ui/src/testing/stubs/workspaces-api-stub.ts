@@ -82,7 +82,7 @@ export const userRolesStub = [
 ];
 
 export const workspaceDataStub = {
-  ...buildWorkspaceStubs[0],
+  ...workspaceStubs[0],
   accessLevel: WorkspaceAccessLevel.OWNER,
 };
 
