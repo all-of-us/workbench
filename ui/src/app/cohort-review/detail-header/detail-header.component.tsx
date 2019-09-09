@@ -4,6 +4,7 @@ import {DatePicker, Select, TextInput, ValidationError} from 'app/components/inp
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
@@ -200,7 +201,7 @@ export const DetailHeader = withCurrentWorkspace()(
         priorId: undefined,
         afterId: undefined,
         filterState: filterStateStore.getValue(),
-        filterTab: 'date'
+        filterTab: 'Date'
       };
     }
 
@@ -325,10 +326,20 @@ export const DetailHeader = withCurrentWorkspace()(
     }
 
     vocabChange = (event: any) => {
+      const {value} = event;
+      triggerEvent(
+        'Review Individual',
+        'Click',
+        `View ${value.charAt(0).toUpperCase() + value.slice(1)} - Review Individual`
+      );
       const {filterState} = this.state;
-      filterState.vocab = event.value;
+      filterState.vocab = value;
       filterStateStore.next(filterState);
       this.setState({filterState: filterState});
+    }
+    setFilterTab = (filterTab: string) => {
+      triggerEvent('Review Individual', 'Click', `Filter - ${filterTab} - Review Individual`);
+      this.setState({filterTab});
     }
 
     setFilter = (value: any, type: string) => {
@@ -339,6 +350,7 @@ export const DetailHeader = withCurrentWorkspace()(
     }
 
     clearFilters = () => {
+      triggerEvent('Review Individual', 'Click', 'Filter - Reset - Review Individual');
       const {filterState} = this.state;
       filterState.global = {
         dateMin: null,
@@ -399,8 +411,8 @@ export const DetailHeader = withCurrentWorkspace()(
         {errors && <div className='error-messages'>
           <ValidationError>
             {summarizeErrors(errors && (
-              (filterTab === 'age' && ((ageMin && errors.ageMin) || (ageMax && errors.ageMax))) ||
-              (filterTab === 'date' && ((dateMin && errors.dateMin) || (dateMax && errors.dateMax)))
+              (filterTab === 'Age' && ((ageMin && errors.ageMin) || (ageMax && errors.ageMax))) ||
+              (filterTab === 'Date' && ((dateMin && errors.dateMin) || (dateMax && errors.dateMax)))
             ))}
           </ValidationError>
         </div>}
@@ -433,18 +445,18 @@ export const DetailHeader = withCurrentWorkspace()(
           <div style={otherStyles.filters} className={'global-filters'}>
             <div style={styles.filterHeader}>
               <button
-                style={filterTab === 'date' ? otherStyles.tabActive : styles.filterTab}
-                onClick={() => this.setState({filterTab: 'date'})}>
+                style={filterTab === 'Date' ? otherStyles.tabActive : styles.filterTab}
+                onClick={() => this.setFilterTab('Date')}>
                 Date Range
               </button>
               <button
-                style={filterTab === 'age' ? otherStyles.tabActive : styles.filterTab}
-                onClick={() => this.setState({filterTab: 'age'})}>
+                style={filterTab === 'Age' ? otherStyles.tabActive : styles.filterTab}
+                onClick={() => this.setFilterTab('Age')}>
                 Age Range
               </button>
               <button
-                style={filterTab === 'visits' ? otherStyles.tabActive : styles.filterTab}
-                onClick={() => this.setState({filterTab: 'visits'})}>
+                style={filterTab === 'Visits' ? otherStyles.tabActive : styles.filterTab}
+                onClick={() => this.setFilterTab('Visits')}>
                 Visits
               </button>
               <button
@@ -454,7 +466,7 @@ export const DetailHeader = withCurrentWorkspace()(
               </button>
             </div>
             <div style={styles.filterBody}>
-              {filterTab === 'date' && <div>
+              {filterTab === 'Date' && <div>
                 <div style={otherStyles.filterLabel}>
                   Date Range:
                 </div>
@@ -476,7 +488,7 @@ export const DetailHeader = withCurrentWorkspace()(
                   />
                 </div>
               </div>}
-              {filterTab === 'age' && <div>
+              {filterTab === 'Age' && <div>
                 <div style={otherStyles.filterLabel}>
                   Age Range:
                 </div>
@@ -502,7 +514,7 @@ export const DetailHeader = withCurrentWorkspace()(
                   />
                 </div>
               </div>}
-              {filterTab === 'visits' && <div>
+              {filterTab === 'Visits' && <div>
                 <div style={otherStyles.filterLabel}>
                   Visits:
                 </div>
