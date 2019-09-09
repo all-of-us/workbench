@@ -24,8 +24,8 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
 
   Workspace findByWorkspaceNamespaceAndNameAndActiveStatus(
       String workspaceNamespace, String name, short activeStatus);
-  @Query(
-      "SELECT distinct w.workspaceNamespace, w from Workspace w")
+
+  @Query("SELECT distinct w.workspaceNamespace, w from Workspace w")
   Set<String> findAllWorkspaceNamespaces();
 
   @Query(

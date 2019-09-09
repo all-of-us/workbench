@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -15,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.collect.ImmutableSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -149,5 +148,4 @@ public class AuditControllerTest {
     // These stubs are hit once per CDR project, so the total number of issues is doubled.
     assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(10);
   }
-
 }

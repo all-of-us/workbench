@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -18,10 +19,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import com.google.common.collect.Sets;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.model.AuditBigQueryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +56,10 @@ public class AuditController implements AuditApiDelegate {
 
   @Autowired
   AuditController(
-      Clock clock, BigQueryService bigQueryService, CdrVersionDao cdrVersionDao, WorkspaceDao workspaceDao) {
+      Clock clock,
+      BigQueryService bigQueryService,
+      CdrVersionDao cdrVersionDao,
+      WorkspaceDao workspaceDao) {
     this.clock = clock;
     this.bigQueryService = bigQueryService;
     this.cdrVersionDao = cdrVersionDao;
