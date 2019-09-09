@@ -8,9 +8,7 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {
   queryParamsStore,
-  serverConfigStore,
-  urlParamsStore,
-  userProfileStore
+  urlParamsStore
 } from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
@@ -137,17 +135,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.setNotebookNames();
 
     let initializedProgress = false;
-    this.loadingSub = serverConfigStore.asObservable()
-      .flatMap(({useBillingProjectBuffer}) => {
-        if (useBillingProjectBuffer) {
-          return this.clusterService.listClusters(this.wsNamespace);
-        }
-        return  userProfileStore.asObservable()
-          .flatMap((profileStore) => {
-            return this.clusterService.listClusters(
-              profileStore.profile.freeTierBillingProjectName);
-          });
-      })
+    this.loadingSub = this.clusterService.listClusters(this.wsNamespace)
       .do((resp) => {
         if (initializedProgress) {
           // Only initialize progress once. This callback will re-execute as we

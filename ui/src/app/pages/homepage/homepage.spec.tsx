@@ -49,7 +49,6 @@ describe('HomepageComponent', () => {
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
-      useBillingProjectBuffer: false,
       enableEraCommons: true,
     });
   });
