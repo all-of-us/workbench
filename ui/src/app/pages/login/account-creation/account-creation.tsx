@@ -50,10 +50,10 @@ const Options = {
         program)`, value: 'trainee'},
     {label: `Research fellow (a post-doctoral fellow or medical resident in training)`,
       value: 'research'},
-    {label: `Early career tenure-track researcher`, value: 'earylCarrer'},
+    {label: `Early career tenure-track researcher`, value: 'earlyCareer'},
     {label: `Non tenure-track researcher`, value: 'nontenure'},
-    {label: `Mid-career tenured researcher`, value: 'midCarrer'},
-    {label: `Late career tenured researcher`, value: 'lateCarrer'},
+    {label: `Mid-career tenured researcher`, value: 'midCareer'},
+    {label: `Late career tenured researcher`, value: 'lateCareer'},
     {label: `Project Personnel (eg: Research Assistant, Data Analyst, Project Manager, Research
         Coordinator or other roles)`, value: 'project'}
   ],
@@ -124,15 +124,20 @@ const styles = {
     fontWeight: 600,
     lineHeight: '22px',
     paddingBottom: '1.5rem'
+  },
+  section: {
+    width: '12rem'
   }
 };
+
+const nameLength = 80;
 
 export const Section = (props) => {
   return <FormSection
       style={{display: 'flex', flexDirection: 'column', paddingTop: '1rem', ...props.style}}>
     <label style={styles.sectionLabel}>
       {props.header}
-      </label>
+    </label>
     {props.children}
   </FormSection>;
 };
@@ -196,7 +201,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     if (requiredFields.some(isBlank)) {
       this.setState({showAllFieldsRequiredError: true});
       return;
-    } else if (this.isUsernameValidationError()) {
+    } else if (this.isUsernameValidationError) {
       return;
     } else if (!emailValidRegex.test(profile.contactEmail)) {
       this.setState({invalidEmail: true});
@@ -204,23 +209,23 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     }
     this.setState({creatingAccount: true});
     profileApi().createAccount({profile, invitationKey})
-      .then((savedProfile) => {
-        this.setState({profile: savedProfile, creatingAccount: false});
-        setProfile(savedProfile); })
-      .catch(error => {
-        console.log(error);
-        this.setState({creatingAccount: false});
-      });
+        .then((savedProfile) => {
+          this.setState({profile: savedProfile, creatingAccount: false});
+          setProfile(savedProfile); })
+        .catch(error => {
+          console.log(error);
+          this.setState({creatingAccount: false});
+        });
   }
 
-  usernameValid(): boolean {
+  get usernameValid(): boolean {
     if (isBlank(this.state.profile.username) || this.state.usernameCheckInProgress) {
       return undefined;
     }
-    return !this.isUsernameValidationError();
+    return !this.isUsernameValidationError;
   }
 
-  isUsernameValidationError(): boolean {
+  get isUsernameValidationError(): boolean {
     return (this.state.usernameConflictError || this.usernameInvalidError());
   }
 
@@ -255,13 +260,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         return;
       }
       profileApi().isUsernameTaken(username)
-        .then((body) => {
-          this.setState({usernameCheckInProgress: false, usernameConflictError: body.isTaken});
-        })
-        .catch((error) => {
-          console.log(error);
-          this.setState({usernameCheckInProgress: false});
-        });
+          .then((body) => {
+            this.setState({usernameCheckInProgress: false, usernameConflictError: body.isTaken});
+          })
+          .catch((error) => {
+            console.log(error);
+            this.setState({usernameCheckInProgress: false});
+          });
     }, 300);
   }
 
@@ -290,11 +295,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   selectAffiliationRoles(role) {
-    this.setState({affiliationRole: role});
     if (role === 'freeText') {
-      this.setState({showAffiliationOther: true});
+      this.setState({affiliationRole: role, showAffiliationOther: true});
     } else {
-      this.setState({showAffiliationOther: false});
+      this.setState({affiliationRole: role, showAffiliationOther: false});
     }
   }
 
@@ -302,8 +306,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   validate() {
     const {profile} = this.state;
     const requiredFields =
-      [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
-        profile.currentPosition, profile.organization, profile.areaOfResearch];
+        [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
+          profile.currentPosition, profile.organization, profile.areaOfResearch];
     if (requiredFields.some(isBlank)) {
       this.setState({showAllFieldsRequiredError: true});
       return;
@@ -311,14 +315,14 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   validateAccountCreation() {
-    const {profile: {
-      givenName, familyName, contactEmail, username
-    },
+    const {
+      profile: {
+        givenName, familyName, contactEmail, username
+      },
       address: {
         streetAddress1, city, state, zipcode, country
       },
-      affiliation, affiliationRole, institutionName,
-      institutionRole
+      affiliation, affiliationRole, institutionName, institutionRole
     } = this.state;
     const errors = validate({
       givenName, familyName, streetAddress1, city, state, zipcode, country,
@@ -402,9 +406,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                        value={username}
                        onChange={v => this.usernameChanged(v)}
                        invalid={this.state.usernameConflictError || this.usernameInvalidError()}
-                       style={{width: '12rem', marginRight: '0.5rem'}}/>
+                       style={{...styles.section, marginRight: '0.5rem'}}/>
             <div style={inputStyles.iconArea}>
-              <ValidationIcon validSuccess={this.usernameValid()}/>
+              <ValidationIcon validSuccess={this.usernameValid}/>
             </div>
             <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
               numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
@@ -430,19 +434,19 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               <TextInput id='givenName' name='givenName' autoFocus
                          placeholder='First Name'
                          value={givenName}
-                         invalid={givenName.length > 80}
-                         style={{width: '12rem', marginRight: '2rem'}}
+                         invalid={givenName.length > nameLength}
+                         style={{...styles.section, marginRight: '2rem'}}
                          onChange={v => this.updateProfile('givenName', v)}/>
-              {givenName.length > 80 &&
+              {givenName.length > nameLength &&
               <ErrorMessage id='givenNameError'>
                 First Name must be 80 characters or less.
               </ErrorMessage>}
               <TextInput id='familyName' name='familyName' placeholder='Last Name'
                          value={familyName}
-                         invalid={familyName.length > 80}
-                         style={{width: '12rem'}}
+                         invalid={familyName.length > nameLength}
+                         style={styles.section}
                          onChange={v => this.updateProfile('familyName', v)}/>
-              {familyName.length > 80 &&
+              {familyName.length > nameLength &&
               <ErrorMessage id='familyNameError'>
                 Last Name must be 80 character or less.
               </ErrorMessage>}
@@ -450,7 +454,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             <TextInput id='contactEmail' name='contactEmail'
                        placeholder='Email Address'
                        value={contactEmail}
-                       style={{width: '12rem'}}
+                       style={styles.section}
                        onChange={v => this.updateProfile('contactEmail', v)}/>
             {this.state.invalidEmail &&
             <Error id='invalidEmailError'>
@@ -466,15 +470,15 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                        onChange={value => {
                          this.setState(fp.set(['address', 'streetAddress1'], value));
                        }}
-                       style={{width: '12rem', marginRight: '2rem', marginBottom: '0.5rem'}}/>
+                       style={{...styles.section, marginRight: '2rem', marginBottom: '0.5rem'}}/>
             <TextInput id='state' name='state' placeholder='State' value={state}
                        onChange={value => {
                          this.setState(fp.set(['address', 'state'], value));
                        }}
-                       style={{width: '12rem', marginBottom: '0.5rem'}}/>
+                       style={{...styles.section, marginBottom: '0.5rem'}}/>
             <TextInput id='streetAddress2' name='streetAddress2' placeholder='Street Address 2'
                        value={streetAddress2}
-                       style={{width: '12rem', marginRight: '2rem', marginBottom: '0.5rem'}}
+                       style={{...styles.section, marginRight: '2rem', marginBottom: '0.5rem'}}
                        onChange={value => {
                          this.setState(fp.set(['address', 'streetAddress2'], value));
                        }}/>
@@ -482,13 +486,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                        onChange={value => {
                          this.setState(fp.set(['address', 'zipcode'], value));
                        }}
-                       style={{width: '12rem', marginBottom: '0.5rem'}}/>
+                       style={{...styles.section, marginBottom: '0.5rem'}}/>
             <TextInput id='city' name='city' placeholder='City' value={city}
                        onChange={value => {
                          this.setState(fp.set(['address', 'city'], value));
                        }}
-                       style={{width: '12rem', marginRight: '2rem'}}/>
-            <TextInput id='country' placeholder='Country' value={country} style={{width: '12rem'}}
+                       style={{...styles.section, marginRight: '2rem'}}/>
+            <TextInput id='country' placeholder='Country' value={country} style={styles.section}
                        onChange={value => {
                          this.setState(fp.set(['address', 'country'], value));
                        }}/>
@@ -536,7 +540,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                      style={{marginTop: '1rem'}}/>}
         </div>}
         <FormSection style={{paddingBottom: '1rem'}}>
-          <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError()}
+          <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError}
                   style={{'height': '2rem', 'width': '10rem'}}
                   onClick={() => this.validateAccountCreation()}>
             Next
@@ -550,30 +554,30 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                      placeholder='First Name'
                      value={givenName}
                      invalid={givenName.length > 80}
-                       style={{width: '16rem'}}
+                     style={{width: '16rem'}}
                      onChange={v => this.updateProfile('givenName', v)}/>
           {givenName.length > 80 &&
           <ErrorMessage id='givenNameError'>
-              First Name must be 80 characters or less.
+            First Name must be 80 characters or less.
           </ErrorMessage>}
         </FormSection>
         <FormSection>
           <TextInput id='familyName' name='familyName' placeholder='Last Name'
                      value={familyName}
                      invalid={familyName.length > 80}
-                       style={{width: '16rem'}}
+                     style={{width: '16rem'}}
                      onChange={v => this.updateProfile('familyName', v)}/>
           {familyName.length > 80 &&
           <ErrorMessage id='familyNameError'>
-              Last Name must be 80 character or less.
+            Last Name must be 80 character or less.
           </ErrorMessage>}
         </FormSection>
         <FormSection>
           <TextInput id='contactEmail' name='contactEmail'
                      placeholder='Email Address'
                      value={contactEmail}
-                       style={{width: '16rem'}}
-                       onChange={v => this.updateProfile('contactEmail', v)}/>
+                     style={{width: '16rem'}}
+                     onChange={v => this.updateProfile('contactEmail', v)}/>
           {this.state.invalidEmail &&
           <Error id='invalidEmailError'>
             Contact Email Id is invalid
@@ -584,11 +588,11 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                      placeholder='Your Current Position'
                      value={currentPosition}
                      invalid={currentPosition.length > 255}
-                       style={{width: '16rem'}}
+                     style={{width: '16rem'}}
                      onChange={v => this.updateProfile('currentPosition', v)}/>
           {currentPosition.length > 255 &&
           <ErrorMessage id='currentPositionError'>
-              Current Position must be 255 characters or less.
+            Current Position must be 255 characters or less.
           </ErrorMessage>}
         </FormSection>
         <FormSection>
@@ -596,11 +600,11 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                      placeholder='Your Organization'
                      value={organization}
                      invalid={organization.length > 255}
-                       style={{width: '16rem'}}
+                     style={{width: '16rem'}}
                      onChange={v => this.updateProfile('organization', v)}/>
           {organization.length > 255 &&
           <ErrorMessage id='organizationError'>
-              Organization must be 255 characters of less.
+            Organization must be 255 characters of less.
           </ErrorMessage>}
         </FormSection>
         <FormSection style={{display: 'flex'}}>
@@ -621,12 +625,12 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </FormSection>
         <FormSection>
           <TextInput id='username' name='username' placeholder='New Username'
-                       value={username}
+                     value={username}
                      onChange={v => this.usernameChanged(v)}
                      invalid={this.state.usernameConflictError || this.usernameInvalidError()}
-                       style={{width: '16rem'}}/>
+                     style={{width: '16rem'}}/>
           <div style={inputStyles.iconArea}>
-            <ValidationIcon validSuccess={this.usernameValid()}/>
+            <ValidationIcon validSuccess={this.usernameValid}/>
           </div>
           <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
             numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
@@ -638,17 +642,17 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <div style={{height: '1.5rem'}}>
             {this.state.usernameConflictError &&
             <Error id='usernameConflictError'>
-                Username is already taken.
+              Username is already taken.
             </Error>}
             {this.usernameInvalidError() &&
             <Error id='usernameError'>
-                Username is not a valid username.
+              Username is not a valid username.
             </Error>}
           </div>
         </FormSection>
         <FormSection>
           <Button disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
-          this.isUsernameValidationError()}
+          this.isUsernameValidationError}
                   style={{'height': '2rem', 'width': '10rem'}}
                   onClick={() => this.createAccount()}>
             Next
@@ -657,9 +661,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       </div>}
       {!environment.enableAccountPages && this.state.showAllFieldsRequiredError &&
       <Error>
-          All fields are required.
+        All fields are required.
       </Error>}
     </div>;
   }
-
 }
