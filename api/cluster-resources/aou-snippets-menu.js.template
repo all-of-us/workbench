@@ -25,6 +25,8 @@ define([
       const menus = snippets_menu.options['menus'];
       menus[0] = {
          ...menus[0],
+         // By default, code is inserted into the currently selected cell.
+         'insert_as_new_cell': true,
          'sub-menu': [...customMenus, ...menus[0]['sub-menu']]
       };
 
