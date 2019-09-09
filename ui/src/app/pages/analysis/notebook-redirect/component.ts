@@ -109,7 +109,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   private wsId: string;
   private wsNamespace: string;
-  private jupyterLabMode = false;
   private loadingSub: Subscription;
   private cluster: Cluster;
   private progressComplete = new Map<Progress, boolean>();
@@ -126,12 +125,11 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const {ns, wsid} = urlParamsStore.getValue();
-    const {creating, playgroundMode, jupyterLabMode} = queryParamsStore.getValue();
+    const {creating, playgroundMode} = queryParamsStore.getValue();
     this.wsNamespace = ns;
     this.wsId = wsid;
     this.creating = creating || false;
     this.playground = playgroundMode === 'true';
-    this.jupyterLabMode = jupyterLabMode === 'true';
     this.setNotebookNames();
 
     let initializedProgress = false;
@@ -198,12 +196,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
           window.history.replaceState({}, 'Notebook', 'workspaces/' + this.wsNamespace +
           '/' + this.wsId + '/notebooks/' + encodeURIComponent(this.fullNotebookName));
         }
-        let url;
-        if (this.jupyterLabMode) {
-          url = this.jupyterLabUrl(this.cluster, nbName);
-        } else {
-          url = this.notebookUrl(this.cluster, nbName);
-        }
+        const url = this.notebookUrl(this.cluster, nbName);
         this.leoUrl = this.sanitizer
           .bypassSecurityTrustResourceUrl(url);
 
@@ -241,13 +234,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       environment.leoApiUrl + '/notebooks/'
         + cluster.clusterNamespace + '/'
         + cluster.clusterName + '/notebooks/' + nbName);
-  }
-
-  private jupyterLabUrl(cluster: Cluster, nbName: string): string {
-    return encodeURI(
-      environment.leoApiUrl + '/notebooks/'
-      + cluster.clusterNamespace + '/'
-      + cluster.clusterName + '/lab/tree/' + nbName);
   }
 
   private initializeNotebookCookies(c: Cluster): Observable<Cluster> {

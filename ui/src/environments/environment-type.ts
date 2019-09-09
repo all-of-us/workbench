@@ -43,10 +43,6 @@ export interface Environment {
 
   inactivityTimeoutSeconds: number;
   inactivityWarningBeforeSeconds: number;
-  // Transient client-side flags.
+  // Add transient client-side flags below here
   //
-  // Whether users should be able to use JupyterLab as an option.
-  // See RW-1966 for details.
-  // Exit criteria: remove flag for Athens release.
-  enableJupyterLab: boolean;
 }
