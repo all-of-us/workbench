@@ -8,6 +8,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -17,7 +18,6 @@ import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
-import {triggerEvent} from '../../utils/analytics';
 
 const css = `
   .name-container {
