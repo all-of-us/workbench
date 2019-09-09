@@ -94,7 +94,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   constructor(workspaces?: Workspace[], workspaceUserRoles?: UserRole[]) {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
-    this.workspaces = fp.defaultTo(buildWorkspaceStubs([""]), workspaces);
+    this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.notebookList = WorkspacesApiStub.stubNotebookList();
     this.workspaceUserRoles = new Map<string, UserRole[]>();
