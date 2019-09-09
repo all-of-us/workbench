@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -151,16 +152,33 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
       String googleProject, String labels, Boolean includeDeleted) {
     final ClusterApi clusterApi = clusterApiProvider.get();
     try {
-      List<Cluster>
-      return ResponseEntity.ok(clusterApi.listClustersByProject(googleProject, labels, includeDeleted));
+      final ImmutableList<Cluster> leonardoResponse = ImmutableList.copyOf(clusterApi.listClustersByProject(googleProject, labels, includeDeleted));
+      final ImmutableList<org.pmiops.workbench.model.Cluster> result = leonardoResponse.stream()
+          .map(OfflineClusterController::toWorkbenchCluster)
+          .collect(ImmutableList.toImmutableList());
+      return ResponseEntity.ok(result);
     } catch (ApiException e) {
       e.printStackTrace();
       return ResponseEntity
           .status(e.getCode())
           .build();
     }
+  }
 
-    return null;
+  /**
+   * I bet there's a way to add a conversion method or generate a constructor when making one of our
+   * methods from one of theirs
+   * @param leonardoCluster
+   * @return
+   */
+  private static org.pmiops.workbench.model.Cluster toWorkbenchCluster(Cluster leonardoCluster) {
+    final org.pmiops.workbench.model.Cluster result = new org.pmiops.workbench.model.Cluster();
+    result.setClusterName(leonardoCluster.getClusterName());
+    result.setCreatedDate(leonardoCluster.getCreatedDate());
+    // TODO: retrive cluster namespaces and put them into a map to pass to this function
+    result.setClusterNamespace("TODO_FIND_NAMESPACE");
+    result.setStatus(org.pmiops.workbench.model.ClusterStatus.fromValue(leonardoCluster.getStatus().getValue()));
+    return result;
   }
 
   @Override
