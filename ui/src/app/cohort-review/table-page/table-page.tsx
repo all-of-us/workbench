@@ -15,6 +15,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {
   currentCohortStore,
   navigate,
@@ -217,6 +218,7 @@ const reverseColumnEnum = {
   deceased: Columns.DECEASED,
   status: Columns.STATUS
 };
+const EVENT_CATEGORY = 'Review Participant List';
 
 interface Props {
   workspace: WorkspaceData;
@@ -411,6 +413,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     goBack() {
+      triggerEvent(EVENT_CATEGORY, 'Click', 'Back to cohort - Review Participant List');
       const {id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
       navigateByUrl(`/workspaces/${namespace}/${id}/data/cohorts/build?cohortId=${cid}`);
@@ -433,6 +436,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     showCohortDescription() {
+      triggerEvent('Cohort Description', 'Click', 'Cohort Description button - Review Participant List');
       const {id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
       navigate([
@@ -460,6 +464,9 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     columnSort = (sortField: string) => {
+      if (sortField === 'participantId') {
+        triggerEvent(EVENT_CATEGORY, 'Click', 'Sort - ID - Review Participant List');
+      }
       if (this.state.sortField === sortField) {
         const sortOrder = this.state.sortOrder === 1 ? -1 : 1;
         this.setState({loading: true, error: false, sortOrder});
@@ -484,6 +491,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
           <i className='pi pi-filter'
              style={filtered ? filterIcons.active : filterIcons.default}
              onClick={(e) => {
+               const {name} = fields.find(it => it.field === column);
+               triggerEvent(EVENT_CATEGORY, 'Click', `Filter - ${name} - Review Participant List`);
                fl.toggle(e);
                if (column === 'participantId') {
                  ip.focus();
