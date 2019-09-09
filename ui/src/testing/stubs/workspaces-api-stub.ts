@@ -57,6 +57,9 @@ export function buildWorkspaceStubs(suffixes: string[]) {
   return suffixes.map(suffix => buildWorkspaceStub(suffix));
 }
 
+
+export const workspaceStubs = buildWorkspaceStubs([""]);
+
 export const userRolesStub = [
   {
     email: 'sampleuser1@fake-research-aou.org',
