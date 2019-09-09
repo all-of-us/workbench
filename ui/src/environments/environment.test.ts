@@ -4,6 +4,5 @@ import {testEnvironmentBase} from 'environments/test-env-base';
 export const environment: Environment = {
   ...testEnvironmentBase,
   displayTag: 'Test',
-  debug: false,
-  enableHomepageRestyle: true
+  debug: false
 };
