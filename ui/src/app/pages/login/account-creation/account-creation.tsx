@@ -351,9 +351,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         presence: {allowEmpty: false}
       },
       zipcode: {
-        numericality: {
-          onlyInteger: true,
-          message: 'ZipCode must be numeric'
+        presence: {allowEmpty: false},
+        format: {
+          pattern: /^[0-9]*$/,
         }
       },
       country: {
