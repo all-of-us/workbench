@@ -15,11 +15,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.ImmutableSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.test.FakeClock;
@@ -53,7 +56,7 @@ public class AuditControllerTest {
 
   @TestConfiguration
   @Import({AuditController.class})
-  @MockBean({BigQueryService.class})
+  @MockBean({BigQueryService.class, WorkspaceDao.class})
   static class Configuration {
     @Bean
     Clock clock() {
@@ -65,6 +68,7 @@ public class AuditControllerTest {
   @Autowired UserDao userDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired AuditController auditController;
+  @Autowired WorkspaceDao workspaceDao;
 
   @Before
   public void setUp() {
@@ -80,6 +84,8 @@ public class AuditControllerTest {
     CdrVersion cdrV2 = new CdrVersion();
     cdrV2.setBigqueryProject(CDR_V2_PROJECT_ID);
     cdrV2 = cdrVersionDao.save(cdrV2);
+
+    when(workspaceDao.findAllWorkspaceNamespaces()).thenReturn(ImmutableSet.of(FC_PROJECT_ID));
 
     CLOCK.setInstant(NOW);
   }
@@ -136,4 +142,12 @@ public class AuditControllerTest {
     stubBigQueryCalls(FC_PROJECT_ID, USER_EMAIL, 5);
     assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(0);
   }
+
+  @Test
+  public void testAuditBigQueryUnrecognizedProjectQueries() {
+    stubBigQueryCalls("my-personal-gcp-project", USER_EMAIL, 5);
+    // These stubs are hit once per CDR project, so the total number of issues is doubled.
+    assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(10);
+  }
+
 }
