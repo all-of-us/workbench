@@ -13,14 +13,14 @@ export const flexStyle = reactStyles({
 });
 
 
-export const Row = (props) => {
+export const FlexRow = (props) => {
   return <div style={{...flexStyle.row, ...props.style}}>
     {props.children}
   </div>;
 };
 
 
-export const Column = (props) => {
+export const FlexColumn = (props) => {
   return <div style={{...flexStyle.column, ...props.style}}>
     {props.children}
   </div>;

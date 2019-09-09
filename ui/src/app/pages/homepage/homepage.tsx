@@ -9,6 +9,7 @@ import {
   Clickable,
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Modal} from 'app/components/modals';
@@ -19,7 +20,6 @@ import {RecentWork} from 'app/pages/homepage/recent-work';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {Column, Row} from 'app/styles/flex';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {environment} from 'environments/environment';
 import {
@@ -336,32 +336,32 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
     if (environment.enableHomepageRestyle) {
       return <React.Fragment>
-        <Column style={styles.pageWrapper}>
-          <Row style={{marginLeft: '3%'}}>
-            <Column style={{width: '50%'}}>
-              <Row>
-                <Column>
+        <FlexColumn style={styles.pageWrapper}>
+          <FlexRow style={{marginLeft: '3%'}}>
+            <FlexColumn style={{width: '50%'}}>
+              <FlexRow>
+                <FlexColumn>
                   <Header style={{fontWeight: 500, color: colors.secondary, fontSize: '0.92rem'}}>
                     Welcome to</Header>
                   <Header style={{textTransform: 'uppercase', marginTop: '0.2rem'}}>
                     Researcher Workbench</Header>
-                </Column>
-                <Row style={{alignItems: 'flex-end', marginLeft: '1rem'}}>
+                </FlexColumn>
+                <FlexRow style={{alignItems: 'flex-end', marginLeft: '1rem'}}>
                   <img style={styles.welcomeMessageIcon} src='/assets/images/workspace-icon.svg'/>
                   <img style={styles.welcomeMessageIcon} src='/assets/images/cohort-icon.svg'/>
                   <img style={styles.welcomeMessageIcon} src='/assets/images/analysis-icon.svg'/>
-                </Row>
-              </Row>
+                </FlexRow>
+              </FlexRow>
               <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
                 the secure analysis platform for All of Us data</SmallHeader>
-            </Column>
+            </FlexColumn>
             <div></div>
-          </Row>
+          </FlexRow>
           <FadeBox style={styles.fadeBox}>
             {/* The elements inside this fadeBox will be changed as part of ongoing
             homepage redesign work*/}
             <div style={{display: 'flex', justifyContent: 'center'}}>
-              <Column style={styles.singleCard}>
+              <FlexColumn style={styles.singleCard}>
                 {accessTasksLoaded ?
                   (accessTasksRemaining ?
                       (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
@@ -372,36 +372,36 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                               twoFactorAuthCompleted={twoFactorAuthCompleted}
                                             dataUseAgreementCompleted={dataUseAgreementCompleted}/>
                       ) : (
-                        <Row style={{paddingTop: '2rem'}}>
-                          <Column style={styles.contentWrapperLeft}>
-                            <Row style={styles.mainHeader}>Researcher Workbench</Row>
+                        <FlexRow style={{paddingTop: '2rem'}}>
+                          <FlexColumn style={styles.contentWrapperLeft}>
+                            <FlexRow style={styles.mainHeader}>Researcher Workbench</FlexRow>
                             <CardButton onClick={() => navigate(['workspaces/build'])}
                                         style={{margin: '1.9rem 106px 0 3%'}}>
                               Create a <br/> New Workspace
                               <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
                             </CardButton>
-                          </Column>
-                          <Column style={styles.contentWrapperRight}>
+                          </FlexColumn>
+                          <FlexColumn style={styles.contentWrapperRight}>
                             <a onClick={() => navigate(['workspaces'])}
                                style={{fontSize: '14px', color: colors.primary}}>
                               See All Workspaces</a>
-                            <Column style={{marginRight: '3%'}}>
+                            <FlexColumn style={{marginRight: '3%'}}>
                               <div style={{color: colors.primary, height: '1.9rem'}}>
                                 <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
                               </div>
                               <RecentWork dark={true}/>
-                            </Column>
-                          </Column>
-                        </Row>)
+                            </FlexColumn>
+                          </FlexColumn>
+                        </FlexRow>)
                   ) :
                   <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
-              </Column>
+              </FlexColumn>
             </div>
           </FadeBox>
           <div>
-            <Column style={{marginLeft: '3%'}}>
+            <FlexColumn style={{marginLeft: '3%'}}>
               <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
-              <Row style={styles.quickTourCardsRow}>
+              <FlexRow style={styles.quickTourCardsRow}>
                 {quickTourResources.map((thumbnail, i) => {
                   return <React.Fragment key={i}>
                     <Clickable onClick={thumbnail.onClick}
@@ -411,18 +411,18 @@ export const Homepage = withUserProfile()(class extends React.Component<
                     </Clickable>
                   </React.Fragment>;
                 })}
-              </Row>
-            </Column>
+              </FlexRow>
+            </FlexColumn>
             <div>
               <div style={styles.footer}>
-                <Column style={styles.footerInner}>
+                <FlexColumn style={styles.footerInner}>
                   <div style={styles.footerTitle}>
                     How to Use the All of Us Researcher Workbench</div>
-                  <Row style={{justifyContent: 'space-between'}}>
+                  <FlexRow style={{justifyContent: 'space-between'}}>
                     {footerLinks.map((col, i) => {
                       return <React.Fragment key={i}>
-                        <Column style={styles.linksBlock}>
-                          <Column style={styles.footerText}>
+                        <FlexColumn style={styles.linksBlock}>
+                          <FlexColumn style={styles.footerText}>
                             <div style={styles.footerTextTitle}>{col.title}</div>
                             <ul style={{color: colors.secondary, marginLeft: '2%'}}>
                               {col.links.map((link, ii) => {
@@ -431,12 +431,12 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                 </li>;
                               } )}
                             </ul>
-                          </Column>
-                        </Column>
+                          </FlexColumn>
+                        </FlexColumn>
                       </React.Fragment>;
                     })}
-                  </Row>
-                </Column>
+                  </FlexRow>
+                </FlexColumn>
               </div>
             </div>
             <div style={styles.bottomBanner}>
@@ -448,7 +448,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
               <div style={styles.bottomLinks}>Terms of Service</div>
             </div>
           </div>
-        </Column>
+        </FlexColumn>
         {quickTour &&
         <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
         {videoOpen && <Modal width={900}>
