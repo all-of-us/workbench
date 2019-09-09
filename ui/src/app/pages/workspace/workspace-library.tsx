@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {AlertDanger} from 'app/components/alert';
@@ -13,6 +14,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {ErrorResponse, Profile} from 'generated/fetch';
+import {environment} from "environments/environment";
 
 const styles = reactStyles({
   navPanel: {
@@ -51,10 +53,14 @@ const libraryTabEnums = {
   }
 };
 
-const libraryTabs = [
+const libraryTabs = environment.enablePublishedWorkspaces
+  ? [
   libraryTabEnums.FEATURED_WORKSPACES,
   libraryTabEnums.PUBLISHED_WORKSPACES
-];
+  ]
+  : [
+    libraryTabEnums.FEATURED_WORKSPACES
+  ];
 
 const LibraryTab: React.FunctionComponent<{
   title: string, icon: string, onClick: Function, selected: boolean}> =
@@ -67,47 +73,78 @@ const LibraryTab: React.FunctionComponent<{
     </Clickable>;
   };
 
+class ProfileState {
+  profile: Profile;
+  reload: Function;
+}
+
+class CurrentTab {
+  title: string;
+  icon: string;
+}
+
+class Props {
+  profileState: ProfileState;
+}
+
+class State {
+  currentTab: CurrentTab;
+  errorText: string;
+  workspaceList: WorkspacePermissions[];
+  publishedWorkspaces: WorkspacePermissions[];
+  featuredWorkspaces: WorkspacePermissions[];
+  workspacesLoading: boolean;
+}
+
 export const WorkspaceLibrary = withUserProfile()
-(class extends React.Component<
-  {profileState: { profile: Profile, reload: Function } },
-  {currentTab: {title: string, icon: string}, errorText: string,
-    workspaceList: WorkspacePermissions[], featuredWorkspaces: WorkspacePermissions[],
-    workspacesLoading: boolean}> {
+(class extends React.Component<Props, State> {
   constructor(props) {
     super(props);
     this.state = {
       currentTab: libraryTabEnums.FEATURED_WORKSPACES,
       errorText: '',
       featuredWorkspaces: [],
+      publishedWorkspaces: [],
       workspaceList: [],
       workspacesLoading: true
     };
   }
 
   async componentDidMount() {
-    this.loadPublishedWorkspaces();
-    this.loadFeaturedWorkspaces();
+    this.updateListedWorkspaces();
   }
 
   componentDidUpdate(prevProps, prevState) {
     // Reload libraries when switching tabs
     if (this.state.currentTab !== prevState.currentTab) {
-      this.updateListedWorkspaces(this.state.currentTab);
+      this.updateListedWorkspaces();
     }
   }
 
-  updateListedWorkspaces(tabEnum) {
-    switch (tabEnum) {
-      case libraryTabEnums.PUBLISHED_WORKSPACES:
-        this.loadPublishedWorkspaces();
-        break;
-      default:
-        this.loadFeaturedWorkspaces();
-        break;
+  async updateListedWorkspaces() {
+    const workspaceListLoaded = await this.loadWorkspaceList();
+    const featuredWorkspacesLoaded = await this.loadFeaturedWorkspaces(workspaceListLoaded);
+    this.updatePublishedWorkspaces(featuredWorkspacesLoaded);
+  }
+
+  async loadWorkspaceList() {
+    try {
+      const workspacesReceived = await workspacesApi().getPublishedWorkspaces();
+      workspacesReceived.items.sort(
+        (a, b) => a.workspace.name.localeCompare(b.workspace.name));
+      this.setState({
+        workspaceList: workspacesReceived.items
+          .map(w => new WorkspacePermissions(w)),
+        workspacesLoading: false
+      });
+    } catch (e) {
+      const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
+      this.setState({errorText: response.message});
     }
   }
 
-  async loadFeaturedWorkspaces() {
+
+  async loadFeaturedWorkspaces(workspaceListLoadedPromise) {
     try {
       const resp = await featuredWorkspacesConfigApi().getFeaturedWorkspacesConfig();
       const idToNamespace = new Map();
@@ -124,26 +161,25 @@ export const WorkspaceLibrary = withUserProfile()
     }
   }
 
-  async loadPublishedWorkspaces() {
-    try {
-      const workspacesReceived = await workspacesApi().getPublishedWorkspaces();
-      workspacesReceived.items.sort(
-        (a, b) => a.workspace.name.localeCompare(b.workspace.name));
-      this.setState({
-        workspaceList: workspacesReceived.items
-          .map(w => new WorkspacePermissions(w)),
-        workspacesLoading: false
-      });
-    } catch (e) {
-      const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
-      this.setState({errorText: response.message});
-    }
+  updatePublishedWorkspaces(featuredWorkspacesLoadedPromise) {
+    const publishedWorkspaces = this.state.workspaceList.filter(ws =>
+      !fp.contains(ws, this.state.featuredWorkspaces)
+    );
+    this.setState({
+      publishedWorkspaces: publishedWorkspaces
+    })
   }
 
   render() {
     const {profile: {username}} = this.props.profileState;
-    const {currentTab, errorText, featuredWorkspaces, workspaceList,
-      workspacesLoading} = this.state;
+    const {
+      currentTab,
+      errorText,
+      featuredWorkspaces,
+      publishedWorkspaces,
+      workspaceList,
+      workspacesLoading
+    } = this.state;
     return <div style={{display: 'flex', flexDirection: 'row', height: '100%'}}>
       <div style={styles.navPanel}>
         <div style={{display: 'flex', flexDirection: 'column'}}>
@@ -179,11 +215,11 @@ export const WorkspaceLibrary = withUserProfile()
             {workspacesLoading ?
               (<Spinner style={{width: '100%', marginTop: '0.5rem'}}/>) :
               (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
-                {workspaceList.map(wp => {
+                {publishedWorkspaces.map(wp => {
                   return <WorkspaceCard key={wp.workspace.name}
                                         wp={wp}
                                         userEmail={username}
-                                        reload={() => this.loadPublishedWorkspaces()}/>;
+                                        reload={() => this.updateListedWorkspaces()}/>;
                 })}
               </div>)}
           </div>}
@@ -197,7 +233,7 @@ export const WorkspaceLibrary = withUserProfile()
                     return <WorkspaceCard key={wp.workspace.name}
                                           wp={wp}
                                           userEmail={username}
-                                          reload={() => this.loadFeaturedWorkspaces()}/>;
+                                          reload={() => this.updateListedWorkspaces()}/>;
                   })}
               </div>)}
           </div>}
