@@ -18,8 +18,11 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import com.google.common.collect.Sets;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.model.AuditBigQueryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -50,16 +53,16 @@ public class AuditController implements AuditApiDelegate {
 
   private final Clock clock;
   private final BigQueryService bigQueryService;
-  private final UserDao userDao;
   private final CdrVersionDao cdrVersionDao;
+  private final WorkspaceDao workspaceDao;
 
   @Autowired
   AuditController(
-      Clock clock, BigQueryService bigQueryService, UserDao userDao, CdrVersionDao cdrVersionDao) {
+      Clock clock, BigQueryService bigQueryService, CdrVersionDao cdrVersionDao, WorkspaceDao workspaceDao) {
     this.clock = clock;
     this.bigQueryService = bigQueryService;
-    this.userDao = userDao;
     this.cdrVersionDao = cdrVersionDao;
+    this.workspaceDao = workspaceDao;
   }
 
   @VisibleForTesting
@@ -99,6 +102,7 @@ public class AuditController implements AuditApiDelegate {
         ImmutableList.copyOf(cdrVersionDao.findAll()).stream()
             .map(v -> v.getBigqueryProject())
             .collect(Collectors.toSet());
+    Set<String> whitelist = Sets.union(workspaceDao.findAllWorkspaceNamespaces(), cdrProjects);
 
     Instant now = clock.instant();
     List<String> suffixes =
@@ -114,6 +118,7 @@ public class AuditController implements AuditApiDelegate {
       Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
       for (List<FieldValue> row : result.iterateAll()) {
+        String project_id = bigQueryService.getString(row, rm.get("client_project_id"));
         String email = bigQueryService.getString(row, rm.get("user_email"));
         long total = bigQueryService.getLong(row, rm.get("total"));
         if (bigQueryService.isNull(row, rm.get("client_project_id"))) {
@@ -123,6 +128,12 @@ public class AuditController implements AuditApiDelegate {
                       + "indicates an ACL misconfiguration, this user can access the CDR but is not a "
                       + "project jobUser",
                   cdrProjectId, total, email));
+          numBad += total;
+        } else if (!whitelist.contains(project_id)) {
+          log.severe(
+              String.format(
+                  "AUDIT: (CDR project '%s') %d queries in unrecognized project '%s' from user '%s'",
+                  cdrProjectId, total, project_id, email));
           numBad += total;
         }
         numQueries += total;
