@@ -196,9 +196,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
           window.history.replaceState({}, 'Notebook', 'workspaces/' + this.wsNamespace +
           '/' + this.wsId + '/notebooks/' + encodeURIComponent(this.fullNotebookName));
         }
-        const url = this.notebookUrl(this.cluster, nbName);
         this.leoUrl = this.sanitizer
-          .bypassSecurityTrustResourceUrl(url);
+          .bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, nbName));
 
         // Angular 2 only provides a load hook for iFrames
         // the load hook triggers on url definition, not on completion of url load
