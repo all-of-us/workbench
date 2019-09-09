@@ -209,13 +209,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     }
     this.setState({creatingAccount: true});
     profileApi().createAccount({profile, invitationKey})
-        .then((savedProfile) => {
-          this.setState({profile: savedProfile, creatingAccount: false});
-          setProfile(savedProfile); })
-        .catch(error => {
-          console.log(error);
-          this.setState({creatingAccount: false});
-        });
+      .then((savedProfile) => {
+        this.setState({profile: savedProfile, creatingAccount: false});
+        setProfile(savedProfile); })
+      .catch(error => {
+        console.log(error);
+        this.setState({creatingAccount: false});
+      });
   }
 
   get usernameValid(): boolean {
@@ -306,8 +306,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   validate() {
     const {profile} = this.state;
     const requiredFields =
-        [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
-          profile.currentPosition, profile.organization, profile.areaOfResearch];
+      [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
+        profile.currentPosition, profile.organization, profile.areaOfResearch];
     if (requiredFields.some(isBlank)) {
       this.setState({showAllFieldsRequiredError: true});
       return;
