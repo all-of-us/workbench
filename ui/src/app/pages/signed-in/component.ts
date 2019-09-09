@@ -121,7 +121,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   signOut(): void {
-    signInStore.getValue().signOut();
+    this.signInService.signOut();
     navigateSignOut();
   }
 
