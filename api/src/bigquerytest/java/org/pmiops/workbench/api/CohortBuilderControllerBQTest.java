@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -90,6 +91,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
 
+  @Autowired private FireCloudService firecloudService;
+
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
   @Mock private Provider<WorkbenchConfig> configProvider;
@@ -114,6 +117,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     testConfig.elasticsearch = new WorkbenchConfig.ElasticsearchConfig();
     testConfig.elasticsearch.enableElasticsearchBackend = false;
     when(configProvider.get()).thenReturn(testConfig);
+
+    when(firecloudService.isUserMemberOfGroup(anyString(), anyString())).thenReturn(true);
 
     ElasticSearchService elasticSearchService =
         new ElasticSearchService(cbCriteriaDao, cloudStorageService, configProvider);
