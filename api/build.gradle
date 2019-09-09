@@ -333,7 +333,7 @@ dependencies {
 
   compile 'ch.qos.logback:logback-classic:1.2.3'
 
-  compile 'org.springframework.security:spring-security-web:4.2.2.RELEASE'
+  compile 'org.springframework.security:spring-security-web:4.2.13.RELEASE'
   compile 'org.hibernate:hibernate-core:5.2.10.Final'
 
   compile "com.fasterxml.jackson.core:jackson-annotations:${JACKSON_VERSION}"
