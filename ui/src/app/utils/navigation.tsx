@@ -27,8 +27,10 @@ export const userProfileStore =
   });
 export const signInStore =
   new BehaviorSubject<{
+    signOut: Function,
     profileImage: string,
   }>({
+    signOut: () => {},
     profileImage: {} as string,
   });
 

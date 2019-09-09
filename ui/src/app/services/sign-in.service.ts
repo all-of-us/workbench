@@ -107,6 +107,7 @@ export class SignInService {
 
   nextSignInStore() {
     signInStore.next({
+      signOut: () => this.signOut(),
       profileImage: this.profileImage,
     });
   }

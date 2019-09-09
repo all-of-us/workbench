@@ -256,6 +256,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
   }
 
   signOut() {
+    signInStore.getValue().signOut();
     navigateSignOut();
   }
 

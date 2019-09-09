@@ -9,7 +9,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
 import {debouncer, hasRegisteredAccess, resettableTimeout} from 'app/utils';
-import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
+import {cdrVersionStore, navigateSignOut, routeConfigDataStore, signInStore} from 'app/utils/navigation';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Authority} from 'generated';
@@ -121,6 +121,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   signOut(): void {
+    signInStore.getValue().signOut();
     navigateSignOut();
   }
 
