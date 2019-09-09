@@ -9,7 +9,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
 import {debouncer, hasRegisteredAccess, resettableTimeout} from 'app/utils';
-import {cdrVersionStore, routeConfigDataStore} from 'app/utils/navigation';
+import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Authority} from 'generated';
@@ -108,7 +108,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.signInService.isSignedIn$.subscribe(signedIn => {
       if (!signedIn) {
-        this.navigateSignOut();
+        this.signOut();
       }
     });
 
@@ -120,15 +120,8 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     this.startInactivityTimers();
   }
 
-  navigateSignOut(): void {
-    // Force a hard browser reload here. We want to ensure that no local state
-    // is persisting across user sessions, as this can lead to subtle bugs.
-    window.location.assign('/');
-  }
-
   signOut(): void {
-    this.signInService.signOut();
-    this.navigateSignOut();
+    navigateSignOut();
   }
 
   startUserActivityTracker() {
