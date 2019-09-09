@@ -25,7 +25,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
@@ -199,7 +198,6 @@ public class UserService {
     user.setEmail(email);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.NONE);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -234,7 +232,6 @@ public class UserService {
     user.setDisabled(false);
     user.setAboutYou(null);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.NONE);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -340,15 +337,6 @@ public class UserService {
     return updateUserWithRetries(
         (user) -> {
           user.setBillingProjectRetries(billingRetryCount);
-          return user;
-        });
-  }
-
-  public User setFreeTierBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
-    return updateUserWithRetries(
-        (user) -> {
-          user.setFreeTierBillingProjectName(name);
-          user.setFreeTierBillingProjectStatusEnum(status);
           return user;
         });
   }

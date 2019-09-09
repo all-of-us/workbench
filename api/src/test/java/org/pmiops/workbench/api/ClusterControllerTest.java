@@ -38,7 +38,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterConfig;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
@@ -154,8 +153,6 @@ public class ClusterControllerTest {
     user = new User();
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
-    user.setFreeTierBillingProjectName(BILLING_PROJECT_ID);
-    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.READY);
 
     createUser(OTHER_USER_EMAIL);
 
@@ -244,22 +241,6 @@ public class ClusterControllerTest {
   @Test(expected = FailedPreconditionException.class)
   public void testListClustersNullBillingProject() throws Exception {
     clusterController.listClusters(null);
-  }
-
-  @Test(expected = FailedPreconditionException.class)
-  public void testListClustersFreeTierNotReady() throws Exception {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
-        .thenReturn(testFcCluster);
-
-    User notReadyUser = new User();
-    notReadyUser.setEmail(LOGGED_IN_USER_EMAIL);
-    notReadyUser.setUserId(123L);
-    notReadyUser.setFreeTierBillingProjectName(BILLING_PROJECT_ID);
-    notReadyUser.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.PENDING);
-
-    user = notReadyUser;
-
-    clusterController.listClusters(BILLING_PROJECT_ID);
   }
 
   @Test

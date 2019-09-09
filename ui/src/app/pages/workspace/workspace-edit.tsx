@@ -12,7 +12,7 @@ import {TwoColPaddedTable} from 'app/components/tables';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
-import {currentWorkspaceStore, navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
 import {CdrVersion, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -360,7 +360,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspace: {
           name: '',
           dataAccessLevel: DataAccessLevel.Registered,
-          namespace: userProfileStore.getValue().profile.freeTierBillingProjectName,
           cdrVersionId: '',
           researchPurpose: {
             ancestry: false,
@@ -409,10 +408,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         if (this.isMode(WorkspaceEditMode.Duplicate)) {
           this.setState({workspace: {
             ...this.props.workspace,
-            // These are the only fields which are not automatically handled/differentiated
+            // This is the only field which is not automatically handled/differentiated
             // on the API level.
-            name: 'Duplicate of ' + this.props.workspace.name,
-            namespace: userProfileStore.getValue().profile.freeTierBillingProjectName
+            name: 'Duplicate of ' + this.props.workspace.name
           }});
         }
       }
