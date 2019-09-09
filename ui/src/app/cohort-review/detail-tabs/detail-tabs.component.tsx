@@ -8,6 +8,7 @@ import {domainToTitle} from 'app/cohort-search/utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, PageFilterType} from 'generated/fetch';
@@ -285,6 +286,7 @@ interface Props {
 }
 
 interface State {
+  activeTab: number;
   chartData: any;
   conditionTitle: string;
   filterState: any;
@@ -298,6 +300,7 @@ export const DetailTabs = withCurrentWorkspace()(
     constructor(props: any) {
       super(props);
       this.state = {
+        activeTab: 0,
         chartData: {},
         conditionTitle: null,
         filterState: null,
@@ -354,17 +357,29 @@ export const DetailTabs = withCurrentWorkspace()(
       filterStateStore.next(filterState);
     }
 
+    tabChange = (e: any) => {
+      const tab = e.index === 0 ? 'Summary' : tabs[e.index - 1].name;
+      triggerEvent('Review Individual', 'Click', `${tab} - Review Individual`);
+      this.setState({activeTab: e.index});
+    }
+
+    chartHover = (data: any) => {
+      if (data.conditionTitle) {
+        triggerEvent('Review Individual', 'hover', `${data.conditionTitle} Chart - Review Individual`);
+      }
+    }
+
     render() {
-      const {chartData, filterState, participantId, updateState} = this.state;
+      const {activeTab, chartData, filterState, participantId, updateState} = this.state;
       return <React.Fragment>
         <style>{css}</style>
-        <TabView style={{padding: 0}}>
+        <TabView style={{padding: 0}} activeIndex={activeTab} onTabChange={this.tabChange}>
           <TabPanel header='Summary'>
             <div style={styles.container}>
               <div style={styles.row}>
                 {domainList.map((dom, d) => {
                   return <div key={d} style={styles.col}>
-                    {chartData[dom] && <div>
+                    {chartData[dom] && <div onMouseEnter={() => this.chartHover(chartData[dom])}>
                       {chartData[dom].loading && <SpinnerOverlay/>}
                       {!chartData[dom].loading && !chartData[dom].items.length && <div>
                         There are no {chartData[dom].conditionTitle} to show for this participant.

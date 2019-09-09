@@ -1,6 +1,7 @@
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
 import {cohortReviewStore, vocabOptions} from 'app/cohort-review/review-state.service';
 import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
+import {domainToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -16,6 +17,7 @@ import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
+import {triggerEvent} from '../../utils/analytics';
 
 const css = `
   .name-container {
@@ -494,6 +496,12 @@ export const DetailTabTable = withCurrentWorkspace()(
       getFilteredData(filterState);
     }
 
+    filterEvent(column: string) {
+      const {columns, domain} = this.props;
+      const {displayName} = columns.find(col => col.name === column);
+      triggerEvent('Review Individual', 'Click', `${domainToTitle(domain)} - Filter - ${displayName} - Review Individual`);
+    }
+
     checkboxFilter(column: string) {
       const {codeResults, data} = this.state;
       const {domain, filterState, filterState: {vocab}} = this.props;
@@ -562,7 +570,10 @@ export const DetailTabTable = withCurrentWorkspace()(
       return <span>
         <i className='pi pi-filter'
            style={filtered ? filterIcons.active : filterIcons.default}
-           onClick={(e) => fl.toggle(e)}/>
+           onClick={(e) => {
+             this.filterEvent(column);
+             fl.toggle(e);
+           }}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
           {column === `${vocab}Code` && <div style={styles.textSearch}>
@@ -594,6 +605,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         <i className='pi pi-filter'
           style={filtered ? filterIcons.active : filterIcons.default}
           onClick={(e) => {
+            this.filterEvent(column);
             fl.toggle(e);
             ip.focus();
           }}/>
