@@ -182,7 +182,7 @@ const FILTER_KEYS = {
   AGE: 'Age',
   DATE: 'Date',
   VISITS: 'Visits'
-}
+};
 export interface DetailHeaderProps {
   participant: Participant;
   workspace: WorkspaceData;
