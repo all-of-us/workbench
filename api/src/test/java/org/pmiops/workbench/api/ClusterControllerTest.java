@@ -150,7 +150,6 @@ public class ClusterControllerTest {
     config.access = new WorkbenchConfig.AccessConfig();
     config.access.enableComplianceTraining = true;
     config.featureFlags = new FeatureFlagsConfig();
-    config.featureFlags.useBillingProjectBuffer = false;
     config.featureFlags.enableLeoWelder = false;
 
     user = new User();
@@ -167,17 +166,16 @@ public class ClusterControllerTest {
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
 
-    // TODO: Update cluster names to include user IDs once useBillingProjectBuffer is the default.
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
     testFcCluster =
         new org.pmiops.workbench.notebooks.model.Cluster()
-            .clusterName("all-of-us")
+            .clusterName(getClusterName())
             .googleProject(BILLING_PROJECT_ID)
             .status(org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING)
             .createdDate(createdDate);
     testCluster =
         new Cluster()
-            .clusterName("all-of-us")
+            .clusterName(getClusterName())
             .clusterNamespace(BILLING_PROJECT_ID)
             .status(ClusterStatus.DELETING)
             .createdDate(createdDate);
@@ -217,9 +215,14 @@ public class ClusterControllerTest {
     return new JSONObject(new String(raw));
   }
 
+  private String getClusterName() {
+    return "all-of-us-".concat(Long.toString(user.getUserId()));
+  }
+
   @Test
   public void testListClusters() throws Exception {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us")).thenReturn(testFcCluster);
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
+        .thenReturn(testFcCluster);
 
     assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
@@ -227,7 +230,7 @@ public class ClusterControllerTest {
 
   @Test
   public void testListClustersUnknownStatus() throws Exception {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us"))
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
         .thenReturn(testFcCluster.status(null));
 
     assertThat(
@@ -246,7 +249,8 @@ public class ClusterControllerTest {
 
   @Test(expected = FailedPreconditionException.class)
   public void testListClustersFreeTierNotReady() throws Exception {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us")).thenReturn(testFcCluster);
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
+        .thenReturn(testFcCluster);
 
     User notReadyUser = new User();
     notReadyUser.setEmail(LOGGED_IN_USER_EMAIL);
@@ -261,23 +265,11 @@ public class ClusterControllerTest {
 
   @Test
   public void testListClustersLazyCreate() {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us"))
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
         .thenThrow(new NotFoundException());
-    when(notebookService.createCluster(eq(BILLING_PROJECT_ID), eq("all-of-us")))
+    when(notebookService.createCluster(eq(BILLING_PROJECT_ID), eq(getClusterName())))
         .thenReturn(testFcCluster);
 
-    assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
-        .isEqualTo(testCluster);
-  }
-
-  @Test
-  public void testListClustersLazyCreateUsingBillingProjectBuffer() {
-    when(notebookService.getCluster(BILLING_PROJECT_ID, "all-of-us-123"))
-        .thenThrow(new NotFoundException());
-    when(notebookService.createCluster(eq(BILLING_PROJECT_ID), eq("all-of-us-123")))
-        .thenReturn(testFcCluster);
-
-    config.featureFlags.useBillingProjectBuffer = true;
     assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
   }

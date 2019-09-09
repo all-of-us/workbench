@@ -12,9 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
@@ -61,6 +63,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private CohortCloningService cohortCloningService;
   private ConceptSetService conceptSetService;
   private UserDao userDao;
+  private Provider<User> userProvider;
   private WorkspaceDao workspaceDao;
   private WorkspaceMapper workspaceMapper;
 
@@ -74,12 +77,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       ConceptSetService conceptSetService,
       FireCloudService fireCloudService,
       UserDao userDao,
+      Provider<User> userProvider,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
     this.fireCloudService = fireCloudService;
+    this.userProvider = userProvider;
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
@@ -394,8 +399,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public WorkspaceAccessLevel getWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId) {
-    String userAccess =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
+    WorkspaceACL workspaceACL = fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId);
+    WorkspaceAccessEntry workspaceAccessEntry =
+        Optional.of(workspaceACL.getAcl().get(userProvider.get().getEmail()))
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Workspace %s/%s not found", workspaceNamespace, workspaceId)));
+    final String userAccess = workspaceAccessEntry.getAccessLevel();
+
     if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
       return WorkspaceAccessLevel.OWNER;
     }

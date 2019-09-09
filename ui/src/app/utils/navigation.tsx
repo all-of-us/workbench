@@ -25,6 +25,14 @@ export const userProfileStore =
     reload: () => {},
     updateCache: (profile) => {},
   });
+export const signInStore =
+  new BehaviorSubject<{
+    signOut: Function,
+    profileImage: string,
+  }>({
+    signOut: () => {},
+    profileImage: {} as string,
+  });
 
 
 /**
@@ -77,6 +85,11 @@ export const navigateAndPreventDefaultIfNoKeysPressed = (e: React.MouseEvent, ur
     e.preventDefault();
     navigateByUrl(url);
   }
+};
+
+export const navigateSignOut = () => {
+  window.location.assign(`https://www.google.com/accounts/Logout?continue=` +
+    `https://appengine.google.com/_ah/logout?continue=${window.location.origin}/login`);
 };
 
 export enum BreadcrumbType {

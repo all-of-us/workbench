@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {cdrVersionStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {cdrVersionStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -23,8 +23,6 @@ import {Authority, CdrVersion, Profile, UserRole, WorkspaceAccessLevel} from 'ge
 interface WorkspaceState {
   sharing: boolean;
   cdrVersion: CdrVersion;
-  useBillingProjectBuffer: boolean;
-  freeTierBillingProject: string;
   workspace: WorkspaceData;
   workspaceUserRoles: UserRole[];
   googleBucketModalOpen: boolean;
@@ -94,8 +92,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
     this.state = {
       sharing: false,
       cdrVersion: undefined,
-      useBillingProjectBuffer: undefined,
-      freeTierBillingProject: undefined,
       workspace: undefined,
       workspaceUserRoles: [],
       googleBucketModalOpen: false,
@@ -104,11 +100,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
   }
 
   async componentDidMount() {
-    const {profileState: {profile}} = this.props;
-    this.setState({
-      useBillingProjectBuffer: serverConfigStore.getValue().useBillingProjectBuffer,
-      freeTierBillingProject: profile.freeTierBillingProjectName
-    });
     this.setVisits();
     await this.reloadWorkspace(currentWorkspaceStore.getValue());
     this.loadUserRoles();
@@ -170,14 +161,9 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
   }
 
   workspaceClusterBillingProjectId(): string {
-    const {useBillingProjectBuffer, freeTierBillingProject, workspace} = this.state;
-    if (useBillingProjectBuffer === undefined) {
-      // The server config hasn't loaded yet, we don't yet know which billing
-      // project should be used for clusters.
+    const {workspace} = this.state;
+    if (workspace === undefined) {
       return null;
-    }
-    if (!useBillingProjectBuffer) {
-      return freeTierBillingProject;
     }
     if ([WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.OWNER].includes(workspace.accessLevel)) {
       return workspace.namespace;
@@ -272,12 +258,12 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
         </div>
       </div>
       {googleBucketModalOpen && <Modal>
-        <ModalTitle>Note</ModalTitle>
-        <ModalBody>
-            It is All of Us data use policy that researchers should not make copies of or download
-            individual-level data (including taking screenshots or other means of viewing
+        <ModalTitle>Policy Reminder</ModalTitle>
+        <ModalBody style={{color: colors.primary}}>
+            It is <i>All of Us</i> data use policy that researchers should not make copies of or
+            download individual-level data (including taking screenshots or other means of viewing
             individual-level data) outside of the <i>All of Us</i> research environment without
-            approval from All of Us Resource Access Board (RAB).<br/>
+            approval from <i>All of Us</i> Resource Access Board (RAB).<br/><br/>
             Notebooks should rarely be downloaded directly from Google Cloud Console, as output
             cells in Notebooks may contain sensitive individual level data.
         </ModalBody>

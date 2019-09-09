@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.api.BigQueryTestService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.model.Concept;
@@ -26,7 +27,7 @@ import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({
-  BigQueryService.class,
+  BigQueryTestService.class,
   TestBigQueryCdrSchemaConfig.class,
   TestJpaConfig.class,
   CdrBigQuerySchemaConfigService.class

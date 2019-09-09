@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
-import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
 import {AlertDanger} from 'app/components/alert';
@@ -32,7 +32,6 @@ import {
 } from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {
-  BillingProjectStatus,
   ErrorResponse,
   Profile, UserRole,
 } from 'generated/fetch';
@@ -294,7 +293,6 @@ export const WorkspaceList = withUserProfile()
 (class extends React.Component<
   { profileState: { profile: Profile, reload: Function } },
   { workspacesLoading: boolean,
-    billingProjectInitialized: boolean,
     workspaceList: WorkspacePermissions[],
     errorText: string,
     firstSignIn: Date,
@@ -305,7 +303,6 @@ export const WorkspaceList = withUserProfile()
     super(props);
     this.state = {
       workspacesLoading: true,
-      billingProjectInitialized: false,
       workspaceList: [],
       errorText: '',
       firstSignIn: undefined
@@ -313,14 +310,7 @@ export const WorkspaceList = withUserProfile()
   }
 
   componentDidMount() {
-    this.checkBillingProjectStatus();
     this.reloadWorkspaces(null);
-  }
-
-  componentDidUpdate() {
-    if (!this.state.billingProjectInitialized) {
-      this.checkBillingProjectStatus();
-    }
   }
 
   componentWillUnmount() {
@@ -344,28 +334,13 @@ export const WorkspaceList = withUserProfile()
     }
   }
 
-  checkBillingProjectStatus() {
-    const {profileState: {profile, reload}} = this.props;
-    if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
-      this.setState({billingProjectInitialized: true});
-    } else {
-      this.timer = setTimeout(() => {
-        reload();
-      }, 10000);
-    }
-  }
-
   render() {
     const {profileState: {profile}} = this.props;
     const {
-      billingProjectInitialized,
       errorText,
       workspaceList,
       workspacesLoading
     } = this.state;
-
-    const canCreateWorkspaces = billingProjectInitialized ||
-      serverConfigStore.getValue().useBillingProjectBuffer;
 
     // Maps each "Filter by" dropdown element to a set of access levels to display.
     const filters = [
@@ -396,8 +371,7 @@ export const WorkspaceList = withUserProfile()
             {workspacesLoading ?
               (<Spinner style={{width: '100%', marginTop: '1.5rem'}}/>) :
               (<div style={{display: 'flex', marginTop: '1.5rem', flexWrap: 'wrap'}}>
-                <CardButton disabled={!canCreateWorkspaces}
-                            onClick={() => navigate(['workspaces/build'])}
+                <CardButton onClick={() => navigate(['workspaces/build'])}
                             style={styles.addCard}>
                   Create a <br/> New Workspace
                   <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>

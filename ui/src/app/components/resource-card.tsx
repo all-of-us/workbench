@@ -391,13 +391,13 @@ export class ResourceCard extends React.Component<Props, State> {
         <TextModal
           title='Invalid Resource Type'
           body='Please Report a Bug.'
-          onConfirm={() => this.setState({invalidResourceError: false})}/>
+          closeFunction={() => this.setState({invalidResourceError: false})}/>
       }
       {this.state.showErrorModal &&
         <TextModal
           title={this.state.errorModalTitle}
           body={this.state.errorModalBody}
-          onConfirm={() => this.setState({showErrorModal: false})}/>
+          closeFunction={() => this.setState({showErrorModal: false})}/>
       }
       <ResourceCardBase style={styles.card}
                         data-test-id='card'>

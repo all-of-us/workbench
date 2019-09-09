@@ -20,6 +20,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
+import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {
   DataSet,
   DataSetRequest,
@@ -163,11 +164,13 @@ class NewDataSetModal extends React.Component<Props, State> {
             newNotebook: this.state.newNotebook
           });
         // Open notebook in a new tab and return back to the Data tab
-        const notebookUrl = '/workspaces/' + workspaceNamespace + '/' + workspaceId +
-            '/notebooks/' + appendNotebookFileSuffix(encodeURIComponent(this.state.notebookName));
-        window.open(notebookUrl, '_blank');
+        const notebookUrl = `/workspaces/${workspaceNamespace}/${workspaceId}` +
+            `/notebooks/preview/${appendNotebookFileSuffix(
+              encodeURIComponentStrict(this.state.notebookName))}`;
+        navigateByUrl(notebookUrl);
+      } else {
+        window.history.back();
       }
-      window.history.back();
     } catch (e) {
       if (e.status === 409) {
         this.setState({conflictDataSetName: true, loading: false});
