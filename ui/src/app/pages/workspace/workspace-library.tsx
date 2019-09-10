@@ -112,23 +112,24 @@ export const WorkspaceLibrary = withUserProfile()
     ];
 
   async componentDidMount() {
-    this.updateListedWorkspaces();
+    this.updateWorkspaces();
   }
 
   componentDidUpdate(prevProps, prevState) {
     // Reload libraries when switching tabs
     if (this.state.currentTab !== prevState.currentTab) {
-      this.updateListedWorkspaces();
+      this.updateWorkspaces();
     }
   }
 
-  async updateListedWorkspaces() {
-    const workspaceListLoaded = await this.loadWorkspaceList();
-    const featuredWorkspacesLoaded = await this.loadFeaturedWorkspaces(workspaceListLoaded);
-    this.updatePublishedWorkspaces(featuredWorkspacesLoaded);
+  async updateWorkspaces() {
+    const workspaceListLoaded = await this.getAllPublishedWorkspaces();
+    const featuredWorkspacesLoaded = await this.getFeaturedWorkspaces(workspaceListLoaded);
+    this.filterPublishedWorkspaces(featuredWorkspacesLoaded);
   }
 
-  async loadWorkspaceList() {
+  // Gets all published workspaces, including those configured as 'featured'
+  async getAllPublishedWorkspaces() {
     try {
       const workspacesReceived = await workspacesApi().getPublishedWorkspaces();
       workspacesReceived.items.sort(
@@ -144,8 +145,9 @@ export const WorkspaceLibrary = withUserProfile()
     }
   }
 
-
-  async loadFeaturedWorkspaces(workspaceListLoadedPromise) {
+  // Gets the 'featured workspaces' config and filters the list of published workspaces to
+  // find the 'featured' ones
+  async getFeaturedWorkspaces(workspaceListLoadedPromise) {
     try {
       const resp = await featuredWorkspacesConfigApi().getFeaturedWorkspacesConfig();
       const idToNamespace = new Map();
@@ -162,7 +164,8 @@ export const WorkspaceLibrary = withUserProfile()
     }
   }
 
-  updatePublishedWorkspaces(featuredWorkspacesLoadedPromise) {
+  // Filter the list of published workspaces to find the ones that are not configured as 'featured'
+  filterPublishedWorkspaces(featuredWorkspacesLoadedPromise) {
     const publishedWorkspaces = this.state.workspaceList.filter(ws =>
       !fp.contains(ws, this.state.featuredWorkspaces)
     );
@@ -219,7 +222,7 @@ export const WorkspaceLibrary = withUserProfile()
                   return <WorkspaceCard key={wp.workspace.name}
                                         wp={wp}
                                         userEmail={username}
-                                        reload={() => this.updateListedWorkspaces()}/>;
+                                        reload={() => this.updateWorkspaces()}/>;
                 })}
               </div>)}
           </div>}
@@ -233,7 +236,7 @@ export const WorkspaceLibrary = withUserProfile()
                     return <WorkspaceCard key={wp.workspace.name}
                                           wp={wp}
                                           userEmail={username}
-                                          reload={() => this.updateListedWorkspaces()}/>;
+                                          reload={() => this.updateWorkspaces()}/>;
                   })}
               </div>)}
           </div>}
