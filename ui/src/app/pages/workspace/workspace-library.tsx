@@ -13,8 +13,8 @@ import {featuredWorkspacesConfigApi, workspacesApi} from 'app/services/swagger-f
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
+import {environment} from 'environments/environment';
 import {ErrorResponse, Profile} from 'generated/fetch';
-import {environment} from "environments/environment";
 
 const styles = reactStyles({
   navPanel: {
@@ -168,7 +168,7 @@ export const WorkspaceLibrary = withUserProfile()
     );
     this.setState({
       publishedWorkspaces: publishedWorkspaces
-    })
+    });
   }
 
   render() {

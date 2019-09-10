@@ -58,7 +58,7 @@ export function buildWorkspaceStubs(suffixes: string[]) {
 }
 
 
-export const workspaceStubs = buildWorkspaceStubs([""]);
+export const workspaceStubs = buildWorkspaceStubs(['']);
 
 export const userRolesStub = [
   {
