@@ -102,6 +102,11 @@ export const WorkspaceLibrary = withUserProfile()
     };
   }
 
+  // Defaulting to the environment variable value here, but allowing it to be overridden by props.
+  // This is to make our testing easier. We don't use environment variable injection anywhere in
+  // our unit testing framework, so we have to pass it in via props. We also don't create this
+  // component in any way except for legacy Angular magic, so we have to get this information via
+  // environment variable.
   libraryTabs = (this.props.enablePublishedWorkspaces || environment.enablePublishedWorkspaces)
     ? [
       libraryTabEnums.FEATURED_WORKSPACES,
