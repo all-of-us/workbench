@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
@@ -185,6 +186,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     currentUser = user;
     when(userProvider.get()).thenReturn(user);
     controller.setUserProvider(userProvider);
+
+    when(mockFireCloudService.getWorkspaceAcl(anyString(), anyString()))
+        .thenReturn(
+            new WorkspaceACL()
+                .acl(
+                    ImmutableMap.of(
+                        currentUser.getEmail(), new WorkspaceAccessEntry().accessLevel("OWNER"))));
 
     cdrVersion = new CdrVersion();
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);

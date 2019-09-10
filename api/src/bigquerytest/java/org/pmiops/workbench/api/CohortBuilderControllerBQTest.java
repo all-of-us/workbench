@@ -29,6 +29,7 @@ import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -53,7 +54,9 @@ import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
@@ -61,17 +64,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({
-  BigQueryTestService.class,
-  CloudStorageServiceImpl.class,
-  CohortQueryBuilder.class,
-  SearchGroupItemQueryBuilder.class,
-  TestJpaConfig.class,
-  CdrVersionService.class
-})
-@MockBean({FireCloudService.class})
+@Import({TestJpaConfig.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
+
+  @TestConfiguration
+  @Import({
+    BigQueryTestService.class,
+    CloudStorageServiceImpl.class,
+    CohortQueryBuilder.class,
+    SearchGroupItemQueryBuilder.class,
+    CdrVersionService.class
+  })
+  @MockBean({FireCloudService.class})
+  static class Configuration {
+    @Bean
+    public User user() {
+      User user = new User();
+      user.setEmail("bob@gmail.com");
+      return user;
+    }
+  }
 
   private CohortBuilderController controller;
 
