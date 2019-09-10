@@ -166,7 +166,7 @@ export const ListOverview = withCurrentWorkspace()(
         this.setState({apiCallCheck: localCheck});
         const {cdrVersionId} = currentWorkspaceStore.getValue();
         const request = mapRequest(searchRequest);
-        cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
+        cohortBuilderApi().getDemoChartInfo(+cdrVersionId, null).then(response => {
           if (localCheck === this.state.apiCallCheck) {
             this.setState({
               chartData: response.items,
@@ -353,12 +353,12 @@ export const ListOverview = withCurrentWorkspace()(
                   <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
                 </TooltipTrigger>
               </span>
-              : loading ? <Spinner size={18} /> : <span>{total.toLocaleString()}</span>}
+              : loading ? <Spinner size={18} /> : <span>{!!total && total.toLocaleString()}</span>}
             </h2>
           </div>
           {apiError && !this.definitionErrors && <div style={styles.totalError}>
             <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
-            Sorry, the request cannot be completed.
+            Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
           </div>}
           {!!total && !this.definitionErrors && !loading && !!chartData &&
             <div style={styles.cardContainer}>
