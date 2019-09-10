@@ -49,4 +49,7 @@ export interface Environment {
   // See RW-3275
   // Exit criteria: once the epic is completed and fully reviewed
   enableHomepageRestyle: boolean;
+  // Whether users should be able to see the Published Workspaces
+  // tab in the Workspace Library.
+  enablePublishedWorkspaces: boolean;
 }
