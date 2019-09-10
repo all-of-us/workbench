@@ -108,7 +108,7 @@ export class HelpSidebar extends React.Component<Props, State> {
     };
   }
 
-  onIconClick = (icon: string) => {
+  onIconClick(icon: string) {
     let {activeIcon, sidebarOpen} = this.state;
     sidebarOpen = !(icon === activeIcon && sidebarOpen);
     if (sidebarOpen) {
@@ -118,7 +118,7 @@ export class HelpSidebar extends React.Component<Props, State> {
     }
   }
 
-  hideSidebar = () => {
+  hideSidebar() {
     this.setState({sidebarOpen: false});
     // keep activeIcon set while the sidebar transition completes
     setTimeout(() => {
@@ -170,7 +170,7 @@ export class HelpSidebar extends React.Component<Props, State> {
               {section.content.map((content, c) => {
                 return typeof content === 'string'
                   ? <p key={c} style={styles.contentItem}>{content}</p>
-                  : <div>
+                  : <div key={c}>
                     <h4 style={styles.contentTitle}>{content.title}</h4>
                     {content.content.map((item, i) =>
                       <p key={i} style={styles.contentItem}>{item}</p>)
@@ -181,7 +181,7 @@ export class HelpSidebar extends React.Component<Props, State> {
           </div>
           <div style={contentStyle('annotations')}>
             {!!participant &&
-              <SidebarContent participant={participant} setParticipant={setParticipant} />
+              <SidebarContent participant={participant} setParticipant={() => setParticipant} />
             }
           </div>
         </div>

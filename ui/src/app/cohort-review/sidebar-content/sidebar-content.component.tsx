@@ -311,14 +311,14 @@ export const SidebarContent = fp.flow(
     }
   }
 
-  closeEditDefinitionsModal = (deleted: boolean = false) => {
+  closeEditDefinitionsModal(deleted: boolean = false) {
     this.setState({editingDefinitions: false, annotationDeleted: deleted});
     if (deleted) {
       setTimeout(() => this.setState({annotationDeleted: false}), 5000);
     }
   }
 
-  definitionCreated = (ad) => {
+  definitionCreated(ad) {
     const annotationDefinitions = this.state.annotationDefinitions.concat([ad]);
     this.setState({annotationDefinitions, creatingDefinition: false});
   }
@@ -390,14 +390,14 @@ export const SidebarContent = fp.flow(
         />;
       })}
       {editingDefinitions && <EditAnnotationDefinitionsModal
-          onClose={this.closeEditDefinitionsModal}
+          onClose={() => this.closeEditDefinitionsModal}
           annotationDefinitions={annotationDefinitions}
           setAnnotationDefinitions={(v) => this.setState({annotationDefinitions: v})}>
       </EditAnnotationDefinitionsModal>}
       {creatingDefinition && <AddAnnotationDefinitionModal
           annotationDefinitions={annotationDefinitions}
           onCancel={() => this.setState({creatingDefinition: false})}
-          onCreate={this.definitionCreated}>
+          onCreate={() => this.definitionCreated}>
       </AddAnnotationDefinitionModal>}
     </React.Fragment>;
   }

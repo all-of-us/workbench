@@ -29,7 +29,6 @@ export const DetailPage = withCurrentWorkspace()(
     constructor(props: any) {
       super(props);
       this.state = {participant: null};
-      this.setParticipant = this.setParticipant.bind(this);
     }
 
     componentDidMount() {
@@ -62,14 +61,17 @@ export const DetailPage = withCurrentWorkspace()(
     render() {
       const {participant} = this.state;
       return <React.Fragment>
-        {!participant ? <SpinnerOverlay /> : <React.Fragment>
-          <div className='detail-page '>
-            <DetailHeader participant={participant} />
-            <DetailTabs />
-          </div>
-          <HelpSidebar location='reviewParticipantDetail' participant={participant}
-            setParticipant={this.setParticipant} />
-        </React.Fragment>}
+        {!!participant
+          ? <React.Fragment>
+            <div className='detail-page '>
+              <DetailHeader participant={participant} />
+              <DetailTabs />
+            </div>
+            <HelpSidebar location='reviewParticipantDetail' participant={participant}
+              setParticipant={() => this.setParticipant} />
+          </React.Fragment>
+          : <SpinnerOverlay />
+        }
       </React.Fragment>;
     }
   }
