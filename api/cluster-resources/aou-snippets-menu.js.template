@@ -25,8 +25,6 @@ define([
       const menus = snippets_menu.options['menus'];
       menus[0] = {
          ...menus[0],
-         // By default, code is inserted into the currently selected cell.
-         'insert_as_new_cell': true,
          'sub-menu': [...customMenus, ...menus[0]['sub-menu']]
       };
 
@@ -44,6 +42,9 @@ define([
         };
       }
     };
+
+    // By default, code is inserted into the currently selected cell.
+    Jupyter.notebook.config.data.snippets['insert_as_new_cell'] = true;
 
     // Session may be null at this point, e.g. for large notebooks, while the
     // Jupyter UI is still doing initial rendering.
