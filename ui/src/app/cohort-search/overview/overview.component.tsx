@@ -166,7 +166,7 @@ export const ListOverview = withCurrentWorkspace()(
         this.setState({apiCallCheck: localCheck});
         const {cdrVersionId} = currentWorkspaceStore.getValue();
         const request = mapRequest(searchRequest);
-        cohortBuilderApi().getDemoChartInfo(+cdrVersionId, null).then(response => {
+        cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
           if (localCheck === this.state.apiCallCheck) {
             this.setState({
               chartData: response.items,
