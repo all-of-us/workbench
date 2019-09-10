@@ -92,38 +92,6 @@ import org.springframework.context.annotation.Scope;
     basePackages = {"org.pmiops.workbench.cohortreview.*", "org.pmiops.workbench.cohortbuilder.*"})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
-  private static final String NAMESPACE = "aou-test";
-  private static final String NAME = "test";
-  private static final Long PARTICIPANT_ID = 102246L;
-  private static final Long PARTICIPANT_ID2 = 102247L;
-  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
-  private CdrVersion cdrVersion;
-  private Workspace workspace;
-
-  @Autowired private CohortReviewController controller;
-
-  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
-
-  @Autowired private CohortDao cohortDao;
-
-  @Autowired private CohortReviewDao cohortReviewDao;
-
-  @Autowired private WorkspaceDao workspaceDao;
-
-  @Autowired private CdrVersionDao cdrVersionDao;
-
-  @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
-
-  @Autowired private FireCloudService mockFireCloudService;
-
-  @Autowired private UserDao userDao;
-
-  @Mock private Provider<User> userProvider;
-
-  private Cohort cohort;
-  private CohortReview review;
-  private static User currentUser;
-
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
@@ -163,6 +131,38 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       return CLOCK;
     }
   }
+
+  private static final String NAMESPACE = "aou-test";
+  private static final String NAME = "test";
+  private static final Long PARTICIPANT_ID = 102246L;
+  private static final Long PARTICIPANT_ID2 = 102247L;
+  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
+  private CdrVersion cdrVersion;
+  private Workspace workspace;
+
+  @Autowired private CohortReviewController controller;
+
+  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
+
+  @Autowired private CohortDao cohortDao;
+
+  @Autowired private CohortReviewDao cohortReviewDao;
+
+  @Autowired private WorkspaceDao workspaceDao;
+
+  @Autowired private CdrVersionDao cdrVersionDao;
+
+  @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
+
+  @Autowired private FireCloudService mockFireCloudService;
+
+  @Autowired private UserDao userDao;
+
+  @Mock private Provider<User> userProvider;
+
+  private Cohort cohort;
+  private CohortReview review;
+  private static User currentUser;
 
   @Override
   public List<String> getTableNames() {
