@@ -23,7 +23,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.User.ClusterConfig;
-import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -117,12 +117,8 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<ClusterListResponse> listClusters(String billingProjectId) {
     if (billingProjectId == null) {
-      throw new FailedPreconditionException("Must specify billing project");
+      throw new BadRequestException("Must specify billing project");
     }
-
-    // future-proofing the transition from using free-tier projects to using the billing buffer:
-    // verify that the project has been properly initialized if it's the user's free tier project.
-    // billing buffer projects are guaranteed to be initialized at this point.
 
     User user = this.userProvider.get();
 
