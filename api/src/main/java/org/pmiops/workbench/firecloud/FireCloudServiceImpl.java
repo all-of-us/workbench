@@ -130,11 +130,9 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   private void checkAndAddRegistered(WorkspaceIngest workspaceIngest) {
     // TODO: add concept of controlled auth domain.
-    if (configProvider.get().firecloud.enforceRegistered) {
-      ManagedGroupRef registeredDomain = new ManagedGroupRef();
-      registeredDomain.setMembersGroupName(configProvider.get().firecloud.registeredDomainName);
-      workspaceIngest.setAuthorizationDomain(ImmutableList.of(registeredDomain));
-    }
+    ManagedGroupRef registeredDomain = new ManagedGroupRef();
+    registeredDomain.setMembersGroupName(configProvider.get().firecloud.registeredDomainName);
+    workspaceIngest.setAuthorizationDomain(ImmutableList.of(registeredDomain));
   }
 
   @Override

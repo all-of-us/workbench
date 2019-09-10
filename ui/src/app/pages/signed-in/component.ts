@@ -86,14 +86,12 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.serverConfigService.getConfig().subscribe((config) => {
       this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
-        const profileHasRegisteredAccess = hasRegisteredAccess(profile.dataAccessLevel);
-        if (profileHasRegisteredAccess) {
+        this.hasDataAccess = hasRegisteredAccess(profile.dataAccessLevel);
+        if (this.hasDataAccess) {
           cdrVersionsApi().getCdrVersions().then(resp => {
             cdrVersionStore.next(resp.items);
           });
         }
-
-        this.hasDataAccess = !config.enforceRegistered || profileHasRegisteredAccess;
 
         this.hasReviewResearchPurpose =
           profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);

@@ -45,7 +45,6 @@ describe('HomepageComponent', () => {
     userProfileStore.next({profile, reload, updateCache: () => {}});
     serverConfigStore.next({
       enableDataUseAgreement: true,
-      enforceRegistered: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
@@ -86,7 +85,7 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
-    serverConfigStore.next({...serverConfigStore.getValue(), enforceRegistered: true});
+    serverConfigStore.next({...serverConfigStore.getValue()});
     userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -98,7 +97,7 @@ describe('HomepageComponent', () => {
       ...profile,
       dataAccessLevel: DataAccessLevel.Unregistered
     };
-    serverConfigStore.next({...serverConfigStore.getValue(), enforceRegistered: true});
+    serverConfigStore.next({...serverConfigStore.getValue()});
     userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

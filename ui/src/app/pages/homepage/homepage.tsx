@@ -270,18 +270,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
       if (workbenchAccessTasks) {
         this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
       } else {
-        try {
-          if (serverConfigStore.getValue().enforceRegistered) {
-            this.setState({
-              accessTasksRemaining: !hasRegisteredAccess,
-              accessTasksLoaded: true
-            });
-          } else {
-            this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
-          }
-        } catch (ex) {
-          console.error('error fetching config: ' + ex.toString());
-        }
+        this.setState({
+          accessTasksRemaining: !hasRegisteredAccess,
+          accessTasksLoaded: true
+        });
       }
     }
     this.setState((state, props) => ({
