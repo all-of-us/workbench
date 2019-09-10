@@ -21,7 +21,7 @@ export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_PERMISSION = WorkspaceAccessLevel.OWNER;
 }
 
-function buildWorkspaceStub(suffix) {
+function buildWorkspaceStub(suffix): Workspace {
   return {
     name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + suffix,
     id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + suffix,
@@ -53,7 +53,7 @@ function buildWorkspaceStub(suffix) {
   };
 }
 
-export function buildWorkspaceStubs(suffixes: string[]) {
+export function buildWorkspaceStubs(suffixes: string[]): Workspace[] {
   return suffixes.map(suffix => buildWorkspaceStub(suffix));
 }
 

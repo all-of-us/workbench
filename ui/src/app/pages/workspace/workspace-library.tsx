@@ -64,18 +64,18 @@ const LibraryTab: React.FunctionComponent<{
     </Clickable>;
   };
 
-class ProfileState {
+interface ReloadableProfile {
   profile: Profile;
   reload: Function;
 }
 
-class CurrentTab {
+interface CurrentTab {
   title: string;
   icon: string;
 }
 
 class Props {
-  profileState: ProfileState;
+  profileState: ReloadableProfile;
   enablePublishedWorkspaces: boolean;
 }
 
@@ -178,7 +178,6 @@ export const WorkspaceLibrary = withUserProfile()
       errorText,
       featuredWorkspaces,
       publishedWorkspaces,
-      workspaceList,
       workspacesLoading
     } = this.state;
     return <div style={{display: 'flex', flexDirection: 'row', height: '100%'}}>
