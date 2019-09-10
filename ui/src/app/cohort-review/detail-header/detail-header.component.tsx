@@ -4,6 +4,7 @@ import {DatePicker, Select, TextInput, ValidationError} from 'app/components/inp
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
@@ -40,6 +41,7 @@ const css = `
     width: 50%;
   }
 `;
+const EVENT_CATEGORY = 'Review Individual';
 
 const styles = reactStyles({
   backBtn: {
@@ -176,6 +178,11 @@ const otherStyles = {
     marginTop: '4px ',
   }
 };
+const FILTER_KEYS = {
+  AGE: 'Age',
+  DATE: 'Date',
+  VISITS: 'Visits'
+};
 export interface DetailHeaderProps {
   participant: Participant;
   workspace: WorkspaceData;
@@ -200,7 +207,7 @@ export const DetailHeader = withCurrentWorkspace()(
         priorId: undefined,
         afterId: undefined,
         filterState: filterStateStore.getValue(),
-        filterTab: 'date'
+        filterTab: FILTER_KEYS.DATE
       };
     }
 
@@ -325,10 +332,20 @@ export const DetailHeader = withCurrentWorkspace()(
     }
 
     vocabChange = (event: any) => {
+      const {value} = event;
+      triggerEvent(
+        EVENT_CATEGORY,
+        'Click',
+        `View ${value.charAt(0).toUpperCase() + value.slice(1)} - Review Individual`
+      );
       const {filterState} = this.state;
-      filterState.vocab = event.value;
+      filterState.vocab = value;
       filterStateStore.next(filterState);
       this.setState({filterState: filterState});
+    }
+    setFilterTab = (filterTab: string) => {
+      triggerEvent(EVENT_CATEGORY, 'Click', `Filter - ${filterTab} - Review Individual`);
+      this.setState({filterTab});
     }
 
     setFilter = (value: any, type: string) => {
@@ -339,6 +356,7 @@ export const DetailHeader = withCurrentWorkspace()(
     }
 
     clearFilters = () => {
+      triggerEvent(EVENT_CATEGORY, 'Click', 'Filter - Reset - Review Individual');
       const {filterState} = this.state;
       filterState.global = {
         dateMin: null,
@@ -399,8 +417,8 @@ export const DetailHeader = withCurrentWorkspace()(
         {errors && <div className='error-messages'>
           <ValidationError>
             {summarizeErrors(errors && (
-              (filterTab === 'age' && ((ageMin && errors.ageMin) || (ageMax && errors.ageMax))) ||
-              (filterTab === 'date' && ((dateMin && errors.dateMin) || (dateMax && errors.dateMax)))
+              (filterTab === FILTER_KEYS.AGE && ((ageMin && errors.ageMin) || (ageMax && errors.ageMax))) ||
+              (filterTab === FILTER_KEYS.DATE && ((dateMin && errors.dateMin) || (dateMax && errors.dateMax)))
             ))}
           </ValidationError>
         </div>}
@@ -433,18 +451,18 @@ export const DetailHeader = withCurrentWorkspace()(
           <div style={otherStyles.filters} className={'global-filters'}>
             <div style={styles.filterHeader}>
               <button
-                style={filterTab === 'date' ? otherStyles.tabActive : styles.filterTab}
-                onClick={() => this.setState({filterTab: 'date'})}>
+                style={filterTab === FILTER_KEYS.DATE ? otherStyles.tabActive : styles.filterTab}
+                onClick={() => this.setFilterTab(FILTER_KEYS.DATE)}>
                 Date Range
               </button>
               <button
-                style={filterTab === 'age' ? otherStyles.tabActive : styles.filterTab}
-                onClick={() => this.setState({filterTab: 'age'})}>
+                style={filterTab === FILTER_KEYS.AGE ? otherStyles.tabActive : styles.filterTab}
+                onClick={() => this.setFilterTab(FILTER_KEYS.AGE)}>
                 Age Range
               </button>
               <button
-                style={filterTab === 'visits' ? otherStyles.tabActive : styles.filterTab}
-                onClick={() => this.setState({filterTab: 'visits'})}>
+                style={filterTab === FILTER_KEYS.VISITS ? otherStyles.tabActive : styles.filterTab}
+                onClick={() => this.setFilterTab(FILTER_KEYS.VISITS)}>
                 Visits
               </button>
               <button
@@ -454,7 +472,7 @@ export const DetailHeader = withCurrentWorkspace()(
               </button>
             </div>
             <div style={styles.filterBody}>
-              {filterTab === 'date' && <div>
+              {filterTab === FILTER_KEYS.DATE && <div>
                 <div style={otherStyles.filterLabel}>
                   Date Range:
                 </div>
@@ -476,7 +494,7 @@ export const DetailHeader = withCurrentWorkspace()(
                   />
                 </div>
               </div>}
-              {filterTab === 'age' && <div>
+              {filterTab === FILTER_KEYS.AGE && <div>
                 <div style={otherStyles.filterLabel}>
                   Age Range:
                 </div>
@@ -502,7 +520,7 @@ export const DetailHeader = withCurrentWorkspace()(
                   />
                 </div>
               </div>}
-              {filterTab === 'visits' && <div>
+              {filterTab === FILTER_KEYS.VISITS && <div>
                 <div style={otherStyles.filterLabel}>
                   Visits:
                 </div>

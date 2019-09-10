@@ -3175,15 +3175,6 @@ definitions:
       firstSignInTime:
         type: integer
         format: int64
-      freeTierBillingProjectName:
-        description: name of the AllOfUs free tier billing project created for this user
-        type: string
-      freeTierBillingProjectStatus:
-        description: >
-          the initialization status of the free tier billing project, some
-          workbench functionality may not work fully with this project until it
-          is fully initialized
-        $ref: "#/definitions/BillingProjectStatus"
       dataAccessLevel:
         description: what level of data access the user has
         $ref: "#/definitions/DataAccessLevel"

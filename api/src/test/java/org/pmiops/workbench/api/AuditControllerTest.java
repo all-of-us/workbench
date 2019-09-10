@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -20,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.test.FakeClock;
@@ -53,7 +55,7 @@ public class AuditControllerTest {
 
   @TestConfiguration
   @Import({AuditController.class})
-  @MockBean({BigQueryService.class})
+  @MockBean({BigQueryService.class, WorkspaceDao.class})
   static class Configuration {
     @Bean
     Clock clock() {
@@ -65,13 +67,13 @@ public class AuditControllerTest {
   @Autowired UserDao userDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired AuditController auditController;
+  @Autowired WorkspaceDao workspaceDao;
 
   @Before
   public void setUp() {
     User user = new User();
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
-    user.setFreeTierBillingProjectName(FC_PROJECT_ID);
     user.setDisabled(false);
     user = userDao.save(user);
 
@@ -81,6 +83,8 @@ public class AuditControllerTest {
     CdrVersion cdrV2 = new CdrVersion();
     cdrV2.setBigqueryProject(CDR_V2_PROJECT_ID);
     cdrV2 = cdrVersionDao.save(cdrV2);
+
+    when(workspaceDao.findAllWorkspaceNamespaces()).thenReturn(ImmutableSet.of(FC_PROJECT_ID));
 
     CLOCK.setInstant(NOW);
   }
