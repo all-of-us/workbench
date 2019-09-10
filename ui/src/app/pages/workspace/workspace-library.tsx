@@ -128,9 +128,9 @@ export const WorkspaceLibrary = withUserProfile()
   }
 
   async updateWorkspaces() {
-    const workspaceListLoaded = await this.getAllPublishedWorkspaces();
-    const featuredWorkspacesLoaded = await this.getFeaturedWorkspaces(workspaceListLoaded);
-    this.filterPublishedWorkspaces(featuredWorkspacesLoaded);
+    await this.getAllPublishedWorkspaces();
+    await this.getFeaturedWorkspaces();
+    this.filterPublishedWorkspaces();
   }
 
   // Gets all published workspaces, including those configured as 'featured'
@@ -152,7 +152,7 @@ export const WorkspaceLibrary = withUserProfile()
 
   // Gets the 'featured workspaces' config and filters the list of published workspaces to
   // find the 'featured' ones
-  async getFeaturedWorkspaces(workspaceListLoadedPromise) {
+  async getFeaturedWorkspaces() {
     try {
       const resp = await featuredWorkspacesConfigApi().getFeaturedWorkspacesConfig();
       const idToNamespace = new Map();
@@ -170,7 +170,7 @@ export const WorkspaceLibrary = withUserProfile()
   }
 
   // Filter the list of published workspaces to find the ones that are not configured as 'featured'
-  filterPublishedWorkspaces(featuredWorkspacesLoadedPromise) {
+  filterPublishedWorkspaces() {
     const publishedWorkspaces = this.state.workspaceList.filter(ws =>
       !fp.contains(ws, this.state.featuredWorkspaces)
     );
