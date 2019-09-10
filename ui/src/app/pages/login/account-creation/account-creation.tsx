@@ -439,7 +439,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                          onChange={v => this.updateProfile('givenName', v)}/>
               {givenName.length > nameLength &&
               <ErrorMessage id='givenNameError'>
-                First Name must be 80 characters or less.
+                First Name must be {nameLength} characters or less.
               </ErrorMessage>}
               <TextInput id='familyName' name='familyName' placeholder='Last Name'
                          value={familyName}
@@ -448,7 +448,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                          onChange={v => this.updateProfile('familyName', v)}/>
               {familyName.length > nameLength &&
               <ErrorMessage id='familyNameError'>
-                Last Name must be 80 character or less.
+                Last Name must be {nameLength} character or less.
               </ErrorMessage>}
             </div>
             <TextInput id='contactEmail' name='contactEmail'
