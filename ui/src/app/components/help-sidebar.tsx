@@ -18,6 +18,10 @@ const styles = reactStyles({
     width: 'calc(14rem + 45px)',
     overflow: 'hidden',
     color: colors.primary,
+    zIndex: -1,
+  },
+  sidebarContainerActive: {
+    zIndex: 100,
   },
   sidebar: {
     position: 'absolute',
@@ -26,8 +30,12 @@ const styles = reactStyles({
     height: '100%',
     width: '14rem',
     overflow: 'auto',
+    marginRight: 'calc(-14rem - 40px)',
     background: colorWithWhiteness(colors.primary, .87),
     transition: 'margin-right 0.5s ease-out'
+  },
+  sidebarOpen: {
+    marginRight: 0,
   },
   iconContainer: {
     position: 'absolute',
@@ -109,10 +117,10 @@ export class HelpSidebar extends React.Component<Props, State> {
   }
 
   onIconClick(icon: string) {
-    let {activeIcon, sidebarOpen} = this.state;
-    sidebarOpen = !(icon === activeIcon && sidebarOpen);
-    if (sidebarOpen) {
-      this.setState({activeIcon: icon, sidebarOpen});
+    const {activeIcon, sidebarOpen} = this.state;
+    const newSidebarOpen = !(icon === activeIcon && sidebarOpen);
+    if (newSidebarOpen) {
+      this.setState({activeIcon: icon, sidebarOpen: newSidebarOpen});
     } else {
       this.hideSidebar();
     }
@@ -133,8 +141,6 @@ export class HelpSidebar extends React.Component<Props, State> {
   render() {
     const {location, participant, setParticipant} = this.props;
     const {activeIcon, sidebarOpen} = this.state;
-    const sidebarContainerStyles = {...styles.sidebarContainer, zIndex: activeIcon ? 100 : -1};
-    const sidebarStyles = {...styles.sidebar, marginRight: sidebarOpen ? 0 : 'calc(-14rem - 40px)'};
     const contentStyle = (tab: string) => ({
       display: activeIcon === tab ? 'block' : 'none',
       height: 'calc(100% - 1rem)',
@@ -157,8 +163,8 @@ export class HelpSidebar extends React.Component<Props, State> {
           </div>
         }
       </div>
-      <div style={sidebarContainerStyles}>
-        <div style={sidebarStyles}>
+      <div style={activeIcon ? {...styles.sidebarContainer, ...styles.sidebarContainerActive} : styles.sidebarContainer}>
+        <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar}>
           <div style={styles.topBar}>
             <ClrIcon shape='caret right' size={22} style={styles.closeIcon}
               onClick={() => this.hideSidebar()} />
