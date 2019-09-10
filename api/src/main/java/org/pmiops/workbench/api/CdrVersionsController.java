@@ -37,9 +37,7 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
   private Provider<User> userProvider;
 
   @Autowired
-  CdrVersionsController(
-      CdrVersionService cdrVersionService,
-      Provider<User> userProvider) {
+  CdrVersionsController(CdrVersionService cdrVersionService, Provider<User> userProvider) {
     this.cdrVersionService = cdrVersionService;
     this.userProvider = userProvider;
   }
