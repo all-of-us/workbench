@@ -160,7 +160,7 @@ const styles = reactStyles({
     cursor: 'pointer',
   },
   error: {
-    width: '50%',
+    width: '100%',
     background: colors.warning,
     color: colors.white,
     fontSize: '12px',
@@ -464,7 +464,8 @@ export const DetailTabTable = withCurrentWorkspace()(
       } else if (data && data.length > 0 && filteredData && filteredData.length === 0) {
         message = 'Data cannot be found. Please review your filters and try again.';
       } else if (error) {
-        message = 'Sorry, the request cannot be completed.';
+        message = `Sorry, the request cannot be completed. Please try refreshing the page or
+           contact Support in the left hand navigation.`;
       }
       return <div style={styles.error}>
         <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'

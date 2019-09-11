@@ -567,10 +567,10 @@ export const ParticipantsTable = withCurrentWorkspace()(
       }
       let message: string;
       if (data && data.length === 0) {
-        // TODO verify correct text here: changed 'the selected criteria' to 'your filters'
         message = 'Data cannot be found. Please review your filters and try again.';
       } else if (!data && error) {
-        message = 'Sorry, the request cannot be completed.';
+        message = `Sorry, the request cannot be completed. Please try refreshing the page or
+           contact Support in the left hand navigation.`;
       }
       return <div style={styles.error}>
         <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
