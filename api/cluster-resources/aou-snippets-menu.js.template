@@ -44,6 +44,9 @@ define([
     };
 
     // By default, code is inserted into the currently selected cell.
+    if (!Jupyter.notebook.config.data.snippets) {
+      Jupyter.notebook.config.data.snippets = {};
+    }
     Jupyter.notebook.config.data.snippets['insert_as_new_cell'] = true;
 
     // Session may be null at this point, e.g. for large notebooks, while the
