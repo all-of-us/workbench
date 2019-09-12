@@ -655,7 +655,7 @@ public class DataSetControllerTest {
     verify(bigQueryService, times(1)).executeQuery(any());
     assertThat(response.getCode())
         .isEqualTo(
-            "ifelse(\"reticulate\" %in% installed.packages(), \"reticulate is already installed\", install.packages(\"reticulate\"))\n"
+            "if(! \"reticulate\" %in% installed.packages()) { install.packages(\"reticulate\") }\n"
                 + "library(reticulate)\n"
                 + "pd <- reticulate::import(\"pandas\")\n\n"
                 + "blah_condition_sql <- \"SELECT PERSON_ID FROM `"
