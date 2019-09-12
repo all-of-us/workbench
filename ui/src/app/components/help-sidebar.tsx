@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {SidebarContent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
@@ -118,17 +119,54 @@ interface Props {
 
 interface State {
   activeIcon: string;
+  filteredContent: any;
   sidebarOpen: boolean;
   searchTerm: string;
 }
 export class HelpSidebar extends React.Component<Props, State> {
+  debounceInput: Function;
   constructor(props: Props) {
     super(props);
     this.state = {
       activeIcon: undefined,
+      filteredContent: undefined,
       sidebarOpen: false,
       searchTerm: ''
     };
+    this.debounceInput = fp.debounce(300, (input: string) => {
+      if (input === '') {
+        this.setState({filteredContent: undefined});
+      } else {
+        this.searchHelpTips(input.toLowerCase());
+      }
+    });
+  }
+
+  searchHelpTips(input: string) {
+    const filteredContent = fp.values(JSON.parse(JSON.stringify(sidebarContent))).reduce((acc, section) => {
+      const content = section.reduce((ac, item) => {
+        if (!item.title.toLowerCase().includes(input)) {
+          item.content = item.content.reduce((a, ic) => {
+            if (typeof ic === 'string') {
+              if (ic.toLowerCase().includes(input)) {
+                a.push(ic);
+              }
+            } else if (ic.title.toLowerCase().includes(input)) {
+              a.push(ic);
+            } else {
+              ic.content = ic.content.filter(i => i.toLowerCase().includes(input));
+              if (ic.content.length) {
+                a.push(ic);
+              }
+            }
+            return a;
+          }, []);
+        }
+        return item.content.length ? [...ac, item] : ac;
+      }, []);
+      return [...acc, ...content];
+    }, []);
+    this.setState({filteredContent});
   }
 
   onIconClick(icon: string) {
@@ -139,6 +177,11 @@ export class HelpSidebar extends React.Component<Props, State> {
     } else {
       this.hideSidebar();
     }
+  }
+
+  onInputChange(value: string) {
+    this.setState({searchTerm: value});
+    this.debounceInput(value);
   }
 
   hideSidebar() {
@@ -155,7 +198,8 @@ export class HelpSidebar extends React.Component<Props, State> {
 
   render() {
     const {location, participant, setParticipant} = this.props;
-    const {activeIcon, searchTerm, sidebarOpen} = this.state;
+    const {activeIcon, filteredContent, searchTerm, sidebarOpen} = this.state;
+    const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[location];
     const contentStyle = (tab: string) => ({
       display: activeIcon === tab ? 'block' : 'none',
       height: 'calc(100% - 1rem)',
@@ -192,10 +236,10 @@ export class HelpSidebar extends React.Component<Props, State> {
                 type='text'
                 style={styles.textInput}
                 value={searchTerm}
-                onChange={(e) => this.setState({searchTerm: e.target.value})}
+                onChange={(e) => this.onInputChange(e.target.value)}
                 placeholder={'Search'} />
             </div>
-            {sidebarContent[location].map((section, s) => <div key={s}>
+            {displayContent.map((section, s) => <div key={s}>
               <h3 style={styles.sectionTitle}>{section.title}</h3>
               {section.content.map((content, c) => {
                 return typeof content === 'string'
