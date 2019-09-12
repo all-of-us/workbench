@@ -1,15 +1,20 @@
 package org.pmiops.workbench.db.dao;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,14 +23,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.ConceptSet;
@@ -43,32 +46,7 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/*
- * A subclass to store the associated set of selects and joins for values for the data set builder.
- *
- * This is used to store the data pulled out of the linking table in bigquery.
- */
 
-/*
- * A subclass used to store a source and a standard concept ID column name.
- */
-class DomainConceptIds {
-  private String sourceConceptIdColumn;
-  private String standardConceptIdColumn;
-
-  DomainConceptIds(String sourceConceptIdColumn, String standardConceptIdColumn) {
-    this.sourceConceptIdColumn = sourceConceptIdColumn;
-    this.standardConceptIdColumn = standardConceptIdColumn;
-  }
-
-  public String getSourceConceptIdColumn() {
-    return this.sourceConceptIdColumn;
-  }
-
-  public String getStandardConceptIdColumn() {
-    return this.standardConceptIdColumn;
-  }
-}
 
 @Service
 public class DataSetServiceImpl implements DataSetService {
@@ -101,11 +79,9 @@ public class DataSetServiceImpl implements DataSetService {
   private BigQueryService bigQueryService;
   private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
 
-  @Autowired DataSetDao dataSetDao;
-
-  @Autowired ConceptSetDao conceptSetDao;
-
-  @Autowired CohortDao cohortDao;
+  private final DataSetDao dataSetDao;
+  private final ConceptSetDao conceptSetDao;
+  private final CohortDao cohortDao;
 
   @Autowired
   @VisibleForTesting
@@ -115,13 +91,15 @@ public class DataSetServiceImpl implements DataSetService {
       CohortDao cohortDao,
       ConceptBigQueryService conceptBigQueryService,
       ConceptSetDao conceptSetDao,
-      CohortQueryBuilder cohortQueryBuilder) {
+      CohortQueryBuilder cohortQueryBuilder,
+      DataSetDao dataSetDao) {
     this.bigQueryService = bigQueryService;
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.cohortDao = cohortDao;
     this.conceptBigQueryService = conceptBigQueryService;
     this.conceptSetDao = conceptSetDao;
     this.cohortQueryBuilder = cohortQueryBuilder;
+    this.dataSetDao = dataSetDao;
   }
 
   @Override
@@ -136,21 +114,21 @@ public class DataSetServiceImpl implements DataSetService {
       PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime) {
-    final DataSet dataSetToSave = new DataSet();
-    dataSetToSave.setName(name);
-    dataSetToSave.setVersion(1);
-    dataSetToSave.setIncludesAllParticipants(includesAllParticipants);
-    dataSetToSave.setDescription(description);
-    dataSetToSave.setWorkspaceId(workspaceId);
-    dataSetToSave.setInvalid(false);
-    dataSetToSave.setCreatorId(creatorId);
-    dataSetToSave.setCreationTime(creationTime);
-    dataSetToSave.setCohortSetId(cohortIdList);
-    dataSetToSave.setConceptSetId(conceptIdList);
-    dataSetToSave.setValues(values);
-    dataSetToSave.setPrePackagedConceptSetEnum(prePackagedConceptSetEnum);
+    final DataSet dataSet = new DataSet();
+    dataSet.setName(name);
+    dataSet.setVersion(1);
+    dataSet.setIncludesAllParticipants(includesAllParticipants);
+    dataSet.setDescription(description);
+    dataSet.setWorkspaceId(workspaceId);
+    dataSet.setInvalid(false);
+    dataSet.setCreatorId(creatorId);
+    dataSet.setCreationTime(creationTime);
+    dataSet.setCohortSetId(cohortIdList);
+    dataSet.setConceptSetId(conceptIdList);
+    dataSet.setValues(values);
+    dataSet.setPrePackagedConceptSetEnum(prePackagedConceptSetEnum);
 
-    return dataSetDao.save(dataSetToSave);
+    return dataSetDao.save(dataSet);
   }
 
   @Override
@@ -161,15 +139,9 @@ public class DataSetServiceImpl implements DataSetService {
     final List<org.pmiops.workbench.db.model.ConceptSet> conceptSetsSelected =
         this.conceptSetDao.findAllByConceptSetIdIn(dataSet.getConceptSetIds());
 
-    if (((cohortsSelected == null || cohortsSelected.size() == 0) && !includesAllParticipants)
-        || conceptSetsSelected == null
-        || ((conceptSetsSelected.size() == 0
-                && dataSet.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.NONE))
-            && dataSet.getValues().size() == 0)) {
-      throw new BadRequestException("Data Sets must include at least one cohort and concept.");
-    }
+    validateSelections(dataSet, includesAllParticipants, cohortsSelected, conceptSetsSelected);
 
-    Map<String, QueryParameterValue> cohortParameters = new HashMap<>();
+    final ImmutableMap.Builder<String, QueryParameterValue> cohortParametersBuilder = new ImmutableMap.Builder<>();
     // Below constructs the union of all cohort queries
     String cohortQueries =
         Objects.requireNonNull(cohortsSelected).stream()
@@ -201,13 +173,15 @@ public class DataSetServiceImpl implements DataSetService {
                                 participantQuery
                                     .get()
                                     .replaceAll("\\b".concat(npKey).concat("\\b"), newKey));
-                            cohortParameters.put(newKey, npValue);
+                            cohortParametersBuilder.put(newKey, npValue);
                           });
                   return participantQuery.get();
                 })
             .collect(Collectors.joining(" UNION DISTINCT "));
-    List<Domain> domainList =
-        dataSet.getValues().stream().map(value -> value.getDomain()).collect(Collectors.toList());
+
+    final ImmutableList<Domain> domainList = dataSet.getValues().stream()
+            .map(DomainValuePair::getDomain)
+            .collect(toImmutableList());
 
     // If pre packaged all survey concept set is selected create a temp concept set with concept ids
     // of all survey question
@@ -216,23 +190,35 @@ public class DataSetServiceImpl implements DataSetService {
       conceptSetsSelected.add(handlePrePackagedSurveyConceptSet());
     }
 
-    // TODO: MAKE CLEARER
-    final Map<String, QueryJobConfiguration> result = new HashMap<>();
+    return processDomains(domainList, dataSet, bigQuerySchemaConfig, includesAllParticipants,
+        conceptSetsSelected, cohortParametersBuilder, cohortQueries);
+  }
+
+  // TODO(jaycarlton) Convert to its own class or owherwise consolidate argument list
+  private Map<String, QueryJobConfiguration> processDomains(
+      List<Domain> domainList,
+      DataSetRequest dataSet,
+      CdrBigQuerySchemaConfig bigQuerySchemaConfig,
+      boolean includesAllParticipants,
+      List<ConceptSet> conceptSetsSelected,
+      Builder<String, QueryParameterValue> cohortParametersBuilder,
+      String cohortQueries) {
+
+    final ImmutableMap.Builder<String, QueryJobConfiguration> resultBuilder = new ImmutableBiMap.Builder<>();
 
     for (Domain domain : domainList) {
-      // TODO: unused?
-      final Map<String, Map<String, QueryParameterValue>> queryParameterMapsbyString = new HashMap<>();
       final StringBuilder queryBuilder = new StringBuilder("SELECT ");
 
       final List<DomainValuePair> valuePairsForCurrentDomain = dataSet.getValues().stream()
           .filter(valueSet -> valueSet.getDomain() == domain)
           .collect(Collectors.toList());
 
-      final ValuesLinkingPair valuesLinkingPair = getValueSelectsAndJoins(valuePairsForCurrentDomain);
+      final ValuesLinkingPair valuesLinkingPair = getValueSelectsAndJoins(
+          valuePairsForCurrentDomain);
 
-      queryBuilder.append(String.join(", ", valuesLinkingPair.getSelects()));
-      queryBuilder.append(" ");
-      queryBuilder.append(formatValuesLinkingPair(valuesLinkingPair));
+      queryBuilder.append(String.join(", ", valuesLinkingPair.getSelects()))
+          .append(" ")
+          .append(formatValuesLinkingPair(valuesLinkingPair));
 
       validateSelectedConceptSetsForDomain(conceptSetsSelected, domain);
 
@@ -245,26 +231,26 @@ public class DataSetServiceImpl implements DataSetService {
       String conceptSetListQuery = " IN (" + conceptSetQueries + ")";
 
       if (domain != Domain.PERSON) {
-        Optional<DomainConceptIds> domainConceptIdsMaybe =
+        Optional<DomainConceptIdInfo> domainConceptIdsMaybe =
             bigQuerySchemaConfig.cohortTables.values().stream()
                 .filter(config -> domain.toString().equals(config.domain))
                 .map(
                     tableConfig ->
-                        new DomainConceptIds(
+                        new DomainConceptIdInfo(
                             getColumnName(tableConfig, "source"),
                             getColumnName(tableConfig, "standard")))
                 .findFirst();
 
-        final DomainConceptIds domainConceptIds = domainConceptIdsMaybe.orElseThrow(
+        final DomainConceptIdInfo domainConceptIdInfo = domainConceptIdsMaybe.orElseThrow(
             () -> new ServerErrorException(String.format(
-                    "Couldn't find source and standard columns for domain: %s",
-                    domain.toString())));
+                "Couldn't find source and standard columns for domain: %s",
+                domain.toString())));
 
         // This adds the where clauses for cohorts and concept sets.
         queryBuilder.append(
             formatWhereClause(conceptSetListQuery, " WHERE \n(",
-                domainConceptIds.getStandardConceptIdColumn(), " OR \n",
-                domainConceptIds.getSourceConceptIdColumn(),
+                domainConceptIdInfo.getStandardConceptIdColumn(), " OR \n",
+                domainConceptIdInfo.getSourceConceptIdColumn(),
                 conceptSetListQuery, ")"));
         if (!includesAllParticipants) {
           queryBuilder
@@ -280,7 +266,8 @@ public class DataSetServiceImpl implements DataSetService {
       }
 
       final String completeQuery = queryBuilder.toString();
-      queryParameterMapsbyString.put(completeQuery, cohortParameters);
+      final ImmutableMap<String, QueryParameterValue> cohortParameters = cohortParametersBuilder
+          .build();
 
       final QueryJobConfiguration queryJobConfiguration =
           bigQueryService.filterBigQueryConfig(
@@ -288,9 +275,19 @@ public class DataSetServiceImpl implements DataSetService {
                   .setNamedParameters(cohortParameters)
                   .setUseLegacySql(false)
                   .build());
-      result.put(domain.toString(), queryJobConfiguration);
+      resultBuilder.put(domain.toString(), queryJobConfiguration);
     }
-    return result;
+    return resultBuilder.build();
+  }
+
+  private void validateSelections(DataSetRequest dataSet, boolean includesAllParticipants,
+      List<Cohort> cohortsSelected, List<ConceptSet> conceptSetsSelected) {
+    if ((cohortsSelected.size() == 0 && !includesAllParticipants)
+        || ((conceptSetsSelected.size() == 0
+                && dataSet.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.NONE))
+            && dataSet.getValues().size() == 0)) {
+      throw new BadRequestException("Data Sets must include at least one cohort and concept.");
+    }
   }
 
   private static String formatWhereClause(String conceptSetListQuery, String s,
@@ -572,13 +569,38 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   private ConceptSet handlePrePackagedSurveyConceptSet() {
-    List<Long> conceptIds = conceptBigQueryService.getSurveyQuestionConceptIds();
-    ConceptSet surveyConceptSets = new ConceptSet();
-    surveyConceptSets.setName("All Surveys");
-    surveyConceptSets.setDomain(CommonStorageEnums.domainToStorage(Domain.SURVEY));
-    Set<Long> conceptIdsSet = new HashSet<Long>();
-    conceptIdsSet.addAll(conceptIds);
-    surveyConceptSets.setConceptIds(conceptIdsSet);
-    return surveyConceptSets;
+    final ImmutableList<Long> conceptIds = ImmutableList.copyOf(conceptBigQueryService.getSurveyQuestionConceptIds());
+    final ConceptSet surveyConceptSet = new ConceptSet();
+    surveyConceptSet.setName("All Surveys");
+    surveyConceptSet.setDomain(CommonStorageEnums.domainToStorage(Domain.SURVEY));
+    surveyConceptSet.setConceptIds(ImmutableSet.copyOf(conceptIds));
+    return surveyConceptSet;
+  }
+
+  /*
+   * A subclass to store the associated set of selects and joins for values for the data set builder.
+   *
+   * This is used to store the data pulled out of the linking table in bigquery.
+   */
+
+  /*
+   * A subclass used to store a source and a standard concept ID column name.
+   */
+  private static class DomainConceptIdInfo {
+    private String sourceConceptIdColumn;
+    private String standardConceptIdColumn;
+
+    DomainConceptIdInfo(String sourceConceptIdColumn, String standardConceptIdColumn) {
+      this.sourceConceptIdColumn = sourceConceptIdColumn;
+      this.standardConceptIdColumn = standardConceptIdColumn;
+    }
+
+    String getSourceConceptIdColumn() {
+      return this.sourceConceptIdColumn;
+    }
+
+    String getStandardConceptIdColumn() {
+      return this.standardConceptIdColumn;
+    }
   }
 }

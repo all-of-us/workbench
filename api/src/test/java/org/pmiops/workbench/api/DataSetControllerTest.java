@@ -260,7 +260,8 @@ public class DataSetControllerTest {
             cohortDao,
             conceptBigQueryService,
             conceptSetDao,
-            cohortQueryBuilder);
+            cohortQueryBuilder,
+            dataSetDao);
     dataSetController =
         new DataSetController(
             bigQueryService,
