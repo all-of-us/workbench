@@ -25,9 +25,9 @@ public interface DataSetService {
       long creatorId,
       Timestamp creationTime);
 
-  Map<String, QueryJobConfiguration> generateQuery(DataSetRequest dataSet);
+  Map<String, QueryJobConfiguration> generateQueriesByDomain(DataSetRequest dataSet);
 
-  List<String> generateCodeCellPerDomainFromQueryAndKernelType(
+  List<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,
       String dataSetName,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);

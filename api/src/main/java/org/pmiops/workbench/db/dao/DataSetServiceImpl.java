@@ -55,6 +55,11 @@ public class DataSetServiceImpl implements DataSetService {
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
       + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
 
+  /*
+   * A subclass to store the associated set of selects and joins for values for the data set builder.
+   *
+   * This is used to store the data pulled out of the linking table in bigquery.
+   */
   @VisibleForTesting
   private static class ValuesLinkingPair {
     private List<String> selects;
@@ -71,6 +76,33 @@ public class DataSetServiceImpl implements DataSetService {
 
     private List<String> getJoins() {
       return this.joins;
+    }
+
+    public static ValuesLinkingPair emptyPair() {
+      return new ValuesLinkingPair(Collections.emptyList(), Collections.emptyList());
+    }
+
+    static final String JOIN_VALUE_KEY = "JOIN_VALUE";
+  }
+
+  /*
+   * A subclass used to store a source and a standard concept ID column name.
+   */
+  private static class DomainConceptIdInfo {
+    private String sourceConceptIdColumn;
+    private String standardConceptIdColumn;
+
+    DomainConceptIdInfo(String sourceConceptIdColumn, String standardConceptIdColumn) {
+      this.sourceConceptIdColumn = sourceConceptIdColumn;
+      this.standardConceptIdColumn = standardConceptIdColumn;
+    }
+
+    String getSourceConceptIdColumn() {
+      return this.sourceConceptIdColumn;
+    }
+
+    String getStandardConceptIdColumn() {
+      return this.standardConceptIdColumn;
     }
   }
 
@@ -132,7 +164,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public Map<String, QueryJobConfiguration> generateQuery(DataSetRequest dataSet) {
+  public Map<String, QueryJobConfiguration> generateQueriesByDomain(DataSetRequest dataSet) {
     final CdrBigQuerySchemaConfig bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
     final boolean includesAllParticipants = dataSet.getIncludesAllParticipants();
     final List<Cohort> cohortsSelected = this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds());
@@ -327,7 +359,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public List<String> generateCodeCellPerDomainFromQueryAndKernelType(
+  public List<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,
       String dataSetName,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
@@ -368,13 +400,12 @@ public class DataSetServiceImpl implements DataSetService {
     return conceptColumn.get().name;
   }
 
-  @VisibleForTesting
-  public ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> valueSetList) {
+  private ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> valueSetList) {
     final Optional<Domain> domainMaybe = valueSetList.stream()
         .map(DomainValuePair::getDomain)
         .findFirst();
     if (!domainMaybe.isPresent()) {
-      return new ValuesLinkingPair(Collections.emptyList(), Collections.emptyList());
+      return ValuesLinkingPair.emptyPair();
     }
 
     final List<String> valuesUppercase =
@@ -383,14 +414,14 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(Collectors.toList());
     valuesUppercase.add(0, "CORE_TABLE_FOR_DOMAIN");
 
-    final String domainName = domainMaybe.toString();
+    final String domainName = domainMaybe.get().toString();
     final String domainTitleCase = toTitleCase(domainName);
 
     final ImmutableMap<String, QueryParameterValue> queryParameterValuesByDomain = ImmutableMap.of(
         "pDomain", QueryParameterValue.string(domainTitleCase),
         "pValuesList", QueryParameterValue.array(valuesUppercase.toArray(new String[0]), String.class));
 
-    TableResult valuesLinking =
+    final TableResult valuesLinking =
         bigQueryService.executeQuery(
             bigQueryService.filterBigQueryConfig(
                 QueryJobConfiguration.newBuilder(
@@ -399,13 +430,12 @@ public class DataSetServiceImpl implements DataSetService {
                     .setUseLegacySql(false)
                     .build()));
 
-    List<String> valueJoins = new ArrayList<>();
-    List<String> valueSelects = new ArrayList<>();
+    final List<String> valueJoins = new ArrayList<>();
+    final List<String> valueSelects = new ArrayList<>();
     valuesLinking
         .getValues()
-        .forEach(
-            (value) -> {
-              valueJoins.add(value.get("JOIN_VALUE").getStringValue());
+        .forEach(value -> {
+              valueJoins.add(value.get(ValuesLinkingPair.JOIN_VALUE_KEY).getStringValue());
               if (!value.get("OMOP_SQL").getStringValue().equals("CORE_TABLE_FOR_DOMAIN")) {
                 valueSelects.add(value.get("OMOP_SQL").getStringValue());
               }
@@ -513,34 +543,13 @@ public class DataSetServiceImpl implements DataSetService {
     if (namedParameterValue == null) {
       return "";
     }
-    boolean isArrayParameter = namedParameterValue.getArrayType() != null;
+    final boolean isArrayParameter = namedParameterValue.getArrayType() != null;
 
-    List<QueryParameterValue> arrayValues =
-        Optional.ofNullable(namedParameterValue.getArrayValues()).orElse(new ArrayList<>());
+    final List<QueryParameterValue> arrayValues = nullableListToEmpty(namedParameterValue.getArrayValues());
 
     switch (kernelTypeEnum) {
       case PYTHON:
-        return "      {\n"
-            + "        'name': \""
-            + key
-            + "\",\n"
-            + "        'parameterType': {'type': \""
-            + namedParameterValue.getType().toString()
-            + "\""
-            + (isArrayParameter
-                ? ",'arrayType': {'type': \"" + namedParameterValue.getArrayType() + "\"},"
-                : "")
-            + "},\n"
-            + "        \'parameterValue\': {"
-            + (isArrayParameter
-                ? "\'arrayValues\': ["
-                    + arrayValues.stream()
-                        .map(arrayValue -> "{\'value\': " + arrayValue.getValue() + "}")
-                        .collect(Collectors.joining(","))
-                    + "]"
-                : "'value': \"" + namedParameterValue.getValue() + "\"")
-            + "}\n"
-            + "      }";
+        return buildPythonNamedParameterQuery(key, namedParameterValue, isArrayParameter, arrayValues);
       case R:
         return "      list(\n"
             + "        name = \""
@@ -568,6 +577,39 @@ public class DataSetServiceImpl implements DataSetService {
     }
   }
 
+  // TODO(jaycarlton) use external query builder or build high-level tooling for constructing this.
+  private static String buildPythonNamedParameterQuery(String key,
+      QueryParameterValue namedParameterValue, boolean isArrayParameter,
+      List<QueryParameterValue> arrayValues) {
+    return "      {\n"
+        + "        'name': \""
+        + key
+        + "\",\n"
+        + "        'parameterType': {'type': \""
+        + namedParameterValue.getType().toString()
+        + "\""
+        + (isArrayParameter
+            ? ",'arrayType': {'type': \"" + namedParameterValue.getArrayType() + "\"},"
+            : "")
+        + "},\n"
+        + "        \'parameterValue\': {"
+        + (isArrayParameter
+            ? "\'arrayValues\': ["
+                + arrayValues.stream()
+                    .map(arrayValue -> "{\'value\': " + arrayValue.getValue() + "}")
+                    .collect(Collectors.joining(","))
+                + "]"
+            : "'value': \"" + namedParameterValue.getValue() + "\"")
+        + "}\n"
+        + "      }";
+  }
+
+  private static <T> List<T> nullableListToEmpty(
+      List<T> nullableList) {
+    return Optional.ofNullable(nullableList)
+        .orElse(new ArrayList<>());
+  }
+
   private ConceptSet handlePrePackagedSurveyConceptSet() {
     final ImmutableList<Long> conceptIds = ImmutableList.copyOf(conceptBigQueryService.getSurveyQuestionConceptIds());
     final ConceptSet surveyConceptSet = new ConceptSet();
@@ -575,32 +617,5 @@ public class DataSetServiceImpl implements DataSetService {
     surveyConceptSet.setDomain(CommonStorageEnums.domainToStorage(Domain.SURVEY));
     surveyConceptSet.setConceptIds(ImmutableSet.copyOf(conceptIds));
     return surveyConceptSet;
-  }
-
-  /*
-   * A subclass to store the associated set of selects and joins for values for the data set builder.
-   *
-   * This is used to store the data pulled out of the linking table in bigquery.
-   */
-
-  /*
-   * A subclass used to store a source and a standard concept ID column name.
-   */
-  private static class DomainConceptIdInfo {
-    private String sourceConceptIdColumn;
-    private String standardConceptIdColumn;
-
-    DomainConceptIdInfo(String sourceConceptIdColumn, String standardConceptIdColumn) {
-      this.sourceConceptIdColumn = sourceConceptIdColumn;
-      this.standardConceptIdColumn = standardConceptIdColumn;
-    }
-
-    String getSourceConceptIdColumn() {
-      return this.sourceConceptIdColumn;
-    }
-
-    String getStandardConceptIdColumn() {
-      return this.standardConceptIdColumn;
-    }
   }
 }
