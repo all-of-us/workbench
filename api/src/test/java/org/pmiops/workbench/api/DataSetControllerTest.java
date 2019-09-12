@@ -19,6 +19,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -259,8 +260,7 @@ public class DataSetControllerTest {
             cohortDao,
             conceptBigQueryService,
             conceptSetDao,
-            cohortQueryBuilder,
-            workbenchConfigProvider);
+            cohortQueryBuilder);
     dataSetController =
         new DataSetController(
             bigQueryService,
@@ -872,5 +872,23 @@ public class DataSetControllerTest {
     // java equivalence didn't handle it well.
     verify(notebooksService, times(1))
         .saveNotebook(eq(WORKSPACE_BUCKET_NAME), eq(notebookName), any(JSONObject.class));
+  }
+
+  @Test
+  public void testFunnyOptional() {
+    Boolean b = true;
+    final boolean result1 = Optional.of(b).orElse(false); // IDE says always true
+    assertThat(result1).isTrue();
+
+    Boolean b1 = false;
+    final boolean result2 = Optional.of(b1).orElse(false); // IDE says always false
+    assertThat(result2).isTrue();
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testNullThrows() {
+    Boolean b3 = null;
+    final boolean result3 = Optional.of(b3).orElse(false);
+    assertThat(result3).isFalse();
   }
 }
