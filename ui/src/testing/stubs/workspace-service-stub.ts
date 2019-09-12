@@ -7,7 +7,6 @@ import {
   FileDetail,
   NotebookRename,
   ShareWorkspaceRequest,
-  ShareWorkspaceResponse,
   UpdateWorkspaceRequest,
   UserRole,
   Workspace,
@@ -15,10 +14,13 @@ import {
   WorkspaceListResponse,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
+  WorkspaceUserRolesResponse
 } from 'generated';
 import {UserServiceStub} from './user-service-stub';
 
-import {WorkspaceData} from 'app/services/workspace-storage.service';
+import {WorkspaceAccessLevel as WorkspaceAccessLevelFetch} from 'generated/fetch';
+
+import {WorkspaceData} from 'app/utils/workspace-data';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
@@ -61,6 +63,7 @@ export class WorkspacesServiceStub {
     }
   ];
   notebookList: FileDetail[];
+  workspaceUserRoles: Map< string, UserRole[]>;
 
   constructor() {
     this.userService = new UserServiceStub();
@@ -68,6 +71,9 @@ export class WorkspacesServiceStub {
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.workspacesForReview = WorkspacesServiceStub.stubWorkspacesForReview();
     this.notebookList = WorkspacesServiceStub.stubNotebookList();
+    this.workspaceUserRoles = new Map<string, UserRole[]>();
+    this.workspaceUserRoles
+      .set(this.workspaces[0].id, WorkspacesServiceStub.stubWorkspaceUserRoles());
   }
 
   static stubWorkspace(): Workspace {
@@ -75,48 +81,58 @@ export class WorkspacesServiceStub {
       name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
       id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
       namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      description: WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION,
       cdrVersionId: WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
       creationTime: new Date().getTime(),
       lastModifiedTime: new Date().getTime(),
       researchPurpose: {
-        diseaseFocusedResearch: false,
-        methodsDevelopment: true,
-        controlSet: true,
-        aggregateAnalysis: false,
         ancestry: false,
+        anticipatedFindings: '',
         commercialPurpose: false,
+        controlSet: false,
+        diseaseFocusedResearch: false,
+        drugDevelopment: false,
+        educational: false,
+        intendedStudy: '',
+        methodsDevelopment: false,
+        otherPurpose: false,
+        otherPurposeDetails: '',
         population: false,
+        populationDetails: [],
+        populationHealth: false,
         reviewRequested: false,
-        containsUnderservedPopulation: false
+        socialBehavioral: false,
+        reasonForAllOfUs: '',
       },
-      userRoles: [
-        {
-          email: 'sampleuser1@fake-research-aou.org',
-          givenName: 'Sample',
-          familyName: 'User1',
-          role: WorkspaceAccessLevel.OWNER
-        },
-        {
-          email: 'sampleuser2@fake-research-aou.org',
-          givenName: 'Sample',
-          familyName: 'User2',
-          role: WorkspaceAccessLevel.WRITER
-        },
-        {
-          email: 'sampleuser3@fake-research-aou.org',
-          givenName: 'Sample',
-          familyName: 'User3',
-          role: WorkspaceAccessLevel.READER
-        },
-      ]
     };
+  }
+
+  static stubWorkspaceUserRoles(): UserRole[] {
+    return [
+      {
+        email: 'sampleuser1@fake-research-aou.org',
+        givenName: 'Sample',
+        familyName: 'User1',
+        role: WorkspaceAccessLevel.OWNER
+      },
+      {
+        email: 'sampleuser2@fake-research-aou.org',
+        givenName: 'Sample',
+        familyName: 'User2',
+        role: WorkspaceAccessLevel.WRITER
+      },
+      {
+        email: 'sampleuser3@fake-research-aou.org',
+        givenName: 'Sample',
+        familyName: 'User3',
+        role: WorkspaceAccessLevel.READER
+      },
+    ];
   }
 
   static stubWorkspaceData(): WorkspaceData {
     return {
       name: WorkspacesServiceStub.stubWorkspace().name,
-      accessLevel: WorkspaceAccessLevel.OWNER
+      accessLevel: WorkspaceAccessLevelFetch.OWNER
     };
   }
 
@@ -136,7 +152,7 @@ export class WorkspacesServiceStub {
     ];
   }
 
-  private clone(w: Workspace): Workspace {
+  private duplicate(w: Workspace): Workspace {
     if (w == null) {
       return w;
     }
@@ -154,8 +170,8 @@ export class WorkspacesServiceStub {
                                    + `id: ${newWorkspace.id} already exists.`));
           return;
         }
-        this.workspaces.push(this.clone(newWorkspace));
-        observer.next(this.clone(newWorkspace));
+        this.workspaces.push(this.duplicate(newWorkspace));
+        observer.next(this.duplicate(newWorkspace));
         observer.complete();
       }, 0);
     });
@@ -164,7 +180,7 @@ export class WorkspacesServiceStub {
   deleteWorkspace(workspaceNamespace: string, workspaceId: string): Observable<EmptyResponse> {
     return new Observable<EmptyResponse>(observer => {
       setTimeout(() => {
-        const deletionIndex = this.workspaces.findIndex(function(workspace: Workspace) {
+        const deletionIndex = this.workspaces.findIndex((workspace: Workspace) => {
           if (workspace.id === workspaceId) {
             return true;
           }
@@ -183,7 +199,7 @@ export class WorkspacesServiceStub {
   getWorkspace(workspaceNamespace: string, workspaceId: string): Observable<WorkspaceResponse> {
     return new Observable<WorkspaceResponse>(observer => {
       setTimeout(() => {
-        const workspaceReceived = this.workspaces.find(function(workspace: Workspace) {
+        const workspaceReceived = this.workspaces.find((workspace: Workspace) => {
           if (workspace.id === workspaceId) {
             return true;
           }
@@ -193,7 +209,7 @@ export class WorkspacesServiceStub {
           accessLevel = this.workspaceAccess.get(workspaceId);
         }
         const response: WorkspaceResponse = {
-          workspace: this.clone(workspaceReceived),
+          workspace: this.duplicate(workspaceReceived),
           accessLevel: accessLevel
         };
         observer.next(response);
@@ -212,7 +228,7 @@ export class WorkspacesServiceStub {
               accessLevel = this.workspaceAccess.get(workspace.id);
             }
             return {
-              workspace: this.clone(workspace),
+              workspace: this.duplicate(workspace),
               accessLevel: accessLevel
             };
           })
@@ -231,11 +247,11 @@ export class WorkspacesServiceStub {
   }
 
   updateWorkspace(workspaceNamespace: string,
-                  workspaceId: string,
-                  newWorkspace: UpdateWorkspaceRequest): Observable<Workspace> {
+    workspaceId: string,
+    newWorkspace: UpdateWorkspaceRequest): Observable<Workspace> {
     return new Observable<Workspace>(observer => {
       setTimeout(() => {
-        const updateIndex = this.workspaces.findIndex(function(workspace: Workspace) {
+        const updateIndex = this.workspaces.findIndex((workspace: Workspace) => {
           if (workspace.id === workspaceId) {
             return true;
           }
@@ -245,15 +261,15 @@ export class WorkspacesServiceStub {
           observer.error(new Error(msg));
           return;
         }
-        this.workspaces.splice(updateIndex, 1, this.clone(newWorkspace.workspace));
+        this.workspaces.splice(updateIndex, 1, this.duplicate(newWorkspace.workspace));
         observer.complete();
       }, 0);
     });
   }
 
   cloneWorkspace(workspaceNamespace: string,
-                 workspaceId: string,
-                 cloneReq: CloneWorkspaceRequest): Observable<CloneWorkspaceResponse> {
+    workspaceId: string,
+    cloneReq: CloneWorkspaceRequest): Observable<CloneWorkspaceResponse> {
     return new Observable<CloneWorkspaceResponse>(observer => {
       setTimeout(() => {
         if (cloneReq.workspace.name === WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME) {
@@ -267,7 +283,7 @@ export class WorkspacesServiceStub {
           observer.error(new Error(msg));
           return;
         }
-        const cloned = this.clone(cloneReq.workspace);
+        const cloned = this.duplicate(cloneReq.workspace);
         cloned.id = 'id-' + cloned.name;
         this.workspaces.push(cloned);
         observer.next({workspace: cloned});
@@ -277,11 +293,11 @@ export class WorkspacesServiceStub {
   }
 
   shareWorkspace(workspaceNamespace: string,
-                 workspaceId: string,
-                 request: ShareWorkspaceRequest): Observable<ShareWorkspaceResponse> {
-    return new Observable<ShareWorkspaceResponse>(observer => {
+    workspaceId: string,
+    request: ShareWorkspaceRequest): Observable<WorkspaceUserRolesResponse> {
+    return new Observable<WorkspaceUserRolesResponse>(observer => {
       setTimeout(() => {
-        const updateIndex = this.workspaces.findIndex(function(workspace: Workspace) {
+        const updateIndex = this.workspaces.findIndex((workspace: Workspace) => {
           if (workspace.id === workspaceId) {
             return true;
           }
@@ -306,7 +322,7 @@ export class WorkspacesServiceStub {
   }
 
   getNoteBookList(workspaceNamespace: string,
-      workspaceId: string, extraHttpRequestParams?: any): Observable<Array<FileDetail>> {
+    workspaceId: string, extraHttpRequestParams?: any): Observable<Array<FileDetail>> {
     return new Observable<Array<FileDetail>>(observer => {
       setTimeout(() => {
         observer.next(this.notebookList);
@@ -316,7 +332,7 @@ export class WorkspacesServiceStub {
   }
 
   renameNotebook(workspaceNamespace: string, workspaceId: string,
-      rename: NotebookRename): Observable<FileDetail> {
+    rename: NotebookRename): Observable<FileDetail> {
     return new Observable<FileDetail>(observer => {
       setTimeout(() => {
         const responseItems: FileDetail = {
@@ -331,10 +347,10 @@ export class WorkspacesServiceStub {
   }
 
   cloneNotebook(workspaceNamespace: string, workspaceId: string,
-      notebookName: String): Observable<any> {
+    notebookName: String): Observable<any> {
     return new Observable<any>(observer => {
       setTimeout(() => {
-        const cloneName = notebookName.replace('.ipynb', '') + ' Clone.ipynb';
+        const cloneName = 'Duplicate of ' + notebookName;
         this.notebookList.push({
           'name': cloneName,
           'path': 'gs://bucket/notebooks/' + cloneName,
@@ -346,7 +362,7 @@ export class WorkspacesServiceStub {
   }
 
   deleteNotebook(workspaceNamespace: string, workspaceId: string,
-      notebookName: String): Observable<any> {
+    notebookName: String): Observable<any> {
     return new Observable<any>(observer => {
       setTimeout(() => {
         this.notebookList.pop();
@@ -357,7 +373,7 @@ export class WorkspacesServiceStub {
   }
 
   localizeAllFiles(workspaceNamespace: string, workspaceId: string,
-      extraHttpRequestParams?: any): Observable<{}> {
+    extraHttpRequestParams?: any): Observable<{}> {
     return new Observable<{}>(observer => {
       setTimeout(() => {
         observer.next(null);
@@ -365,5 +381,14 @@ export class WorkspacesServiceStub {
       }, 0);
     });
 
+  }
+
+  getFirecloudWorkspaceUserRoles(workspaceNamespace: string, workspaceId: string): Observable<any> {
+    return new Observable<any>(observer => {
+      setTimeout(() => {
+        observer.next(this.workspaceUserRoles.get(workspaceId));
+        observer.complete();
+      });
+    });
   }
 }

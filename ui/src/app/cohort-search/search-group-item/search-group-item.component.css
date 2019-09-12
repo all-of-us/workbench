@@ -45,3 +45,19 @@ clr-icon[shape^=error-standard] {
 .selection-or {
   font-size: 14px;
 }
+
+.undo-container {
+  color: #E28327
+}
+
+.undo-text {
+  font-size: 12px;
+  margin: 0 0 2px 2px;
+}
+
+.undo-text > .btn.btn-link {
+  font-weight: 600;
+  letter-spacing: 0;
+  height: 18px;
+  line-height: 16px;
+}

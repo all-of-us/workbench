@@ -36,9 +36,12 @@ public class CronInterceptor extends HandlerInterceptorAdapter {
     }
     boolean hasCronHeader = "true".equals(request.getHeader(GAE_CRON_HEADER));
     if (requireCronHeader && !hasCronHeader) {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN,
-          String.format("cronjob endpoints are only invocable via app engine cronjob, and " +
-              "require the '%s' header", GAE_CRON_HEADER));
+      response.sendError(
+          HttpServletResponse.SC_FORBIDDEN,
+          String.format(
+              "cronjob endpoints are only invocable via app engine cronjob, and "
+                  + "require the '%s' header",
+              GAE_CRON_HEADER));
       return false;
     }
     return true;

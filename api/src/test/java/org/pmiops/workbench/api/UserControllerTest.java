@@ -1,35 +1,45 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
+import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UserResponse;
-import org.pmiops.workbench.test.Providers;
+import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -39,56 +49,68 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserControllerTest {
 
-  @Autowired
-  private UserDao userDao;
-  @Mock
-  private AdminActionHistoryDao adminActionHistoryDao;
-  @Mock
-  private Provider<WorkbenchConfig> configProvider;
-  @Mock
-  private Provider<User> userProvider;
-  @Mock
-  private FireCloudService fireCloudService;
-  @Mock
-  private Clock clock;
-  private UserController userController;
-  private UserService userService;
-  private Long incrementedUserId = 1L;
+  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
+  private static WorkbenchConfig config = new WorkbenchConfig();
+  private static User user = new User();
+  private static long incrementedUserId = 1;
+
+  @TestConfiguration
+  @Import({UserController.class, UserService.class})
+  @MockBean({
+    FireCloudService.class,
+    ComplianceService.class,
+    DirectoryService.class,
+    AdminActionHistoryDao.class
+  })
+  static class Configuration {
+
+    @Bean
+    @Scope("prototype")
+    public WorkbenchConfig workbenchConfig() {
+      return config;
+    }
+
+    @Bean
+    Clock clock() {
+      return CLOCK;
+    }
+
+    @Bean
+    @Scope("prototype")
+    User user() {
+      return user;
+    }
+
+    @Bean
+    Random random() {
+      return new FakeLongRandom(123);
+    }
+  }
+
+  @Autowired UserController userController;
+  @Autowired UserDao userDao;
+  @Autowired FireCloudService fireCloudService;
 
   @Before
   public void setUp() {
-    WorkbenchConfig config =  new WorkbenchConfig();
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
-    config.firecloud.enforceRegistered = false;
-    configProvider = Providers.of(config);
-    this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, new Random(), fireCloudService, configProvider);
-    this.userController = new UserController(userService);
+    config.featureFlags = new FeatureFlagsConfig();
+
     saveFamily();
   }
 
-  @After
-  public void tearDown() {
-    userDao.deleteAll();
-  }
-
-  @Test
-  public void testEnforceRegistered() {
-    configProvider.get().firecloud.enforceRegistered = true;
-    this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, new Random(), fireCloudService, configProvider);
-    this.userController = new UserController(userService);
-    User john = userDao.findUserByEmail("john@lis.org");
-
-    UserResponse response = userController.user("Robinson", null, null, null).getBody();
-    // Test data contains a single registered user, John Robinson.
-    assertThat(response.getUsers()).hasSize(1);
-    assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getEmail());
+  @Test(expected = ForbiddenException.class)
+  public void testUnregistered() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(false);
+    userController.user("Robinson", null, null, null).getBody();
   }
 
   @Test
   public void testUserSearch() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     User john = userDao.findUserByEmail("john@lis.org");
 
     UserResponse response = userController.user("John", null, null, null).getBody();
@@ -98,60 +120,68 @@ public class UserControllerTest {
 
   @Test
   public void testUserPartialStringSearch() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     List<User> allUsers = Lists.newArrayList(userDao.findAll());
 
     UserResponse response = userController.user("obin", null, null, null).getBody();
 
-    // We only want to include users that have active billing projects to avoid users not initialized in FC.
-    assertThat(response.getUsers()).hasSize(
-        allUsers
-            .stream()
-            .filter(user -> user.getFreeTierBillingProjectName() != null)
-            .collect(Collectors.toList())
-            .size());
+    // We only want to include users that have active billing projects to avoid users not
+    // initialized in FC.
+    assertThat(response.getUsers()).hasSize(5);
   }
 
   @Test
   public void testUserEmptyResponse() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     UserResponse response = userController.user("", null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(0);
   }
 
   @Test
   public void testUserNoUsersResponse() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     UserResponse response = userController.user("Smith", null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(0);
   }
 
   @Test
   public void testInvalidPageTokenCharacters() {
-    ResponseEntity<UserResponse> response = userController.user("Robinson", "Inv@l!dT0k3n#", null, null);
+    ResponseEntity<UserResponse> response =
+        userController.user("Robinson", "Inv@l!dT0k3n#", null, null);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(response.getBody().getUsers()).hasSize(0);
   }
 
   @Test
   public void testInvalidPageToken() {
-    ResponseEntity<UserResponse> response = userController.user("Robinson", "eyJvZmZzZXQBhcmFtZF9", null, null);
+    ResponseEntity<UserResponse> response =
+        userController.user("Robinson", "eyJvZmZzZXQBhcmFtZF9", null, null);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(response.getBody().getUsers()).hasSize(0);
   }
 
   @Test
   public void testNegativePageOffset() {
-    ResponseEntity<UserResponse> response = userController.user("Robinson", PaginationToken.of(-1).toBase64(), null, null);
+    ResponseEntity<UserResponse> response =
+        userController.user("Robinson", PaginationToken.of(-1).toBase64(), null, null);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(response.getBody().getUsers()).hasSize(0);
   }
 
   @Test
   public void testUserPageSize() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     int size = 1;
-    UserResponse robinsons_0 = userController.user("Robinson", PaginationToken.of(0).toBase64(), size, null).getBody();
-    UserResponse robinsons_1 = userController.user("Robinson", PaginationToken.of(1).toBase64(), size, null).getBody();
-    UserResponse robinsons_2 = userController.user("Robinson", PaginationToken.of(2).toBase64(), size, null).getBody();
-    UserResponse robinsons_3 = userController.user("Robinson", PaginationToken.of(3).toBase64(), size, null).getBody();
-    UserResponse robinsons_4 = userController.user("Robinson", PaginationToken.of(4).toBase64(), size, null).getBody();
+    UserResponse robinsons_0 =
+        userController.user("Robinson", PaginationToken.of(0).toBase64(), size, null).getBody();
+    UserResponse robinsons_1 =
+        userController.user("Robinson", PaginationToken.of(1).toBase64(), size, null).getBody();
+    UserResponse robinsons_2 =
+        userController.user("Robinson", PaginationToken.of(2).toBase64(), size, null).getBody();
+    UserResponse robinsons_3 =
+        userController.user("Robinson", PaginationToken.of(3).toBase64(), size, null).getBody();
+    UserResponse robinsons_4 =
+        userController.user("Robinson", PaginationToken.of(4).toBase64(), size, null).getBody();
 
     assertThat(robinsons_0.getUsers()).hasSize(size);
     assertThat(robinsons_0.getNextPageToken()).isEqualTo(PaginationToken.of(1).toBase64());
@@ -167,9 +197,13 @@ public class UserControllerTest {
 
   @Test
   public void testUserPagedResponses() {
-    UserResponse robinsons_0_1 = userController.user("Robinson", PaginationToken.of(0).toBase64(), 2, null).getBody();
-    UserResponse robinsons_2_3 = userController.user("Robinson", PaginationToken.of(1).toBase64(), 2, null).getBody();
-    UserResponse robinsons_4 = userController.user("Robinson", PaginationToken.of(3).toBase64(), 1, null).getBody();
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
+    UserResponse robinsons_0_1 =
+        userController.user("Robinson", PaginationToken.of(0).toBase64(), 2, null).getBody();
+    UserResponse robinsons_2_3 =
+        userController.user("Robinson", PaginationToken.of(1).toBase64(), 2, null).getBody();
+    UserResponse robinsons_4 =
+        userController.user("Robinson", PaginationToken.of(3).toBase64(), 1, null).getBody();
 
     // Assert the expected size for each page
     assertThat(robinsons_0_1.getUsers()).hasSize(2);
@@ -184,6 +218,7 @@ public class UserControllerTest {
 
   @Test
   public void testUserSort() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     UserResponse robinsonsAsc = userController.user("Robinson", null, null, "asc").getBody();
     UserResponse robinsonsDesc = userController.user("Robinson", null, null, "desc").getBody();
 
@@ -191,11 +226,13 @@ public class UserControllerTest {
     assertThat(robinsonsAsc.getUsers()).containsAllIn(robinsonsDesc.getUsers());
 
     // Now reverse one and assert both in the same order
-    List<org.pmiops.workbench.model.User> descendingReversed = Lists.reverse(robinsonsDesc.getUsers());
+    List<org.pmiops.workbench.model.User> descendingReversed =
+        Lists.reverse(robinsonsDesc.getUsers());
     assertThat(robinsonsAsc.getUsers()).containsAllIn(descendingReversed).inOrder();
 
     // Test that JPA sorting is really what we expected it to be by re-sorting one into a new list
-    List<org.pmiops.workbench.model.User> newAscending = Lists.newArrayList(robinsonsAsc.getUsers());
+    List<org.pmiops.workbench.model.User> newAscending =
+        Lists.newArrayList(robinsonsAsc.getUsers());
     newAscending.sort(Comparator.comparing(org.pmiops.workbench.model.User::getEmail));
     assertThat(robinsonsAsc.getUsers()).containsAllIn(newAscending).inOrder();
   }
@@ -205,12 +242,13 @@ public class UserControllerTest {
    */
 
   private void saveFamily() {
+    saveUser("jill@lis.org", "Jill", "Robinson", false);
     saveUser("john@lis.org", "John", "Robinson", true);
-    saveUser("judy@lis.org", "Judy", "Robinson", false);
-    saveUser("maureen@lis.org", "Mauren", "Robinson", false);
-    saveUser("penny@lis.org", "Penny", "Robinson", false);
-    saveUser("will@lis.org", "Will", "Robinson", false);
-    saveUserNotInFirecloud("bob@lis.org", "Bob", "Robinson", false);
+    saveUser("judy@lis.org", "Judy", "Robinson", true);
+    saveUser("maureen@lis.org", "Mauren", "Robinson", true);
+    saveUser("penny@lis.org", "Penny", "Robinson", true);
+    saveUser("will@lis.org", "Will", "Robinson", true);
+    saveUserNotInFirecloud("bob@lis.org", "Bob", "Robinson", true);
   }
 
   @SuppressWarnings("SameParameterValue")
@@ -220,29 +258,33 @@ public class UserControllerTest {
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
-    user.setFreeTierBillingProjectName(givenName + familyName);
+    user.setFirstSignInTime(new Timestamp(CLOCK.instant().toEpochMilli()));
     if (registered) {
-      user.setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+      user.setDataAccessLevel(
+          CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
     } else {
-      user.setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
+      user.setDataAccessLevel(
+          CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
     }
     incrementedUserId++;
     userDao.save(user);
   }
 
-  private void saveUserNotInFirecloud(String email, String givenName, String familyName, boolean registered) {
+  private void saveUserNotInFirecloud(
+      String email, String givenName, String familyName, boolean registered) {
     User user = new User();
     user.setEmail(email);
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
     if (registered) {
-      user.setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+      user.setDataAccessLevel(
+          CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
     } else {
-      user.setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
+      user.setDataAccessLevel(
+          CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
     }
     incrementedUserId++;
     userDao.save(user);
   }
-
 }

@@ -1,7 +1,8 @@
+// Typescript compile settings for the Angular runtime app.
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../out-tsc/app",
+    "outDir": "../tsc-app",
     "baseUrl": "./",
     "module": "es2015",
     "types": ["node"],
@@ -9,7 +10,8 @@
   },
   "exclude": [
     "test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
   ],
   "resolve": {
     "extensions": [".js", ".json", ".ts", ".tsx"]

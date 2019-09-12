@@ -1,127 +1,86 @@
-<form class="form-container" [formGroup]="demoForm">
+<form *ngIf="wizard" class="form-container" [class.age]="wizard.type === criteriaType.AGE" [formGroup]="demoForm" [ngSwitch]="wizard.type">
   <!-- Age -->
-  <div class="age-label">
-    Current Age
-  </div>
-  <div class="control-wrapper slider-wrapper" [ngClass]="[deceasedClicked? 'deceaseNoCursor':'deceaseCursor']">
-    <input type="number"
-           id="min-age"
-           [min]="minAge" [max]="maxAge"
-           formControlName="ageMin"
-           class="number-display"
-           (blur)="checkMin()">
-    <div class="slider">
-      <div id="count-wrapper">
-          <span id="age-count" class="badge badge-info">
-            {{ ageCount | number }}
-          </span>
+  <div *ngSwitchCase="criteriaType.AGE">
+    <ng-container *ngIf="!loading">
+      <div class="age-label">
+        Age Range
       </div>
-      <nouislider
-              [min]="minAge" [max]="maxAge" [step]="1"
-              [behaviour]="'drag'"
-              [connect]="true"
-              (slide)="centerAgeCount()"
-              [formControl]="demoForm.controls.ageRange">
-      </nouislider>
-    </div>
-    <input type="number"
-           id="max-age"
-           [min]="minAge" [max]="maxAge"
-           formControlName="ageMax"
-           class="number-display"
-           (blur)="checkMax()">
-    <clr-icon *ngIf= "!ageClicked" class="selection-icon" shape="plus-circle" size = '39' (click)="getAgeValue()"></clr-icon>
-    <clr-icon *ngIf= "ageClicked" class="selection-icon selection-check-icon" shape="check-circle" size = '39'></clr-icon>
+      <div class="control-wrapper slider-wrapper" [class.disabled]="deceased.value">
+        <input type="number"
+          id="min-age"
+          [min]="minAge" [max]="maxAge"
+          [disabled]="loading"
+          formControlName="ageMin"
+          class="number-display"
+          (blur)="checkMin()">
+        <div class="slider">
+          <div id="count-wrapper">
+            <span *ngIf="ageCount !== null" id="age-count" class="badge badge-info">
+              {{ ageCount | number }}
+            </span>
+          </div>
+          <nouislider
+            [min]="minAge" [max]="maxAge" [step]="1"
+            [behaviour]="'drag'"
+            [connect]="true"
+            (slide)="centerAgeCount()"
+            [formControl]="demoForm.controls.ageRange">
+          </nouislider>
+        </div>
+        <input type="number"
+          id="max-age"
+          [min]="minAge" [max]="maxAge"
+          [disabled]="loading"
+          formControlName="ageMax"
+          class="number-display"
+          (blur)="checkMax()">
+      </div>
+
+      <clr-checkbox formControlName="deceased" [clrDisabled]="loading">
+        Is Deceased
+        <span *ngIf="deceasedNode" class="badge badge-info">
+          {{ deceasedNode.count | number }}
+        </span>
+      </clr-checkbox>
+    </ng-container>
+    <div *ngIf="loading" class="spinner" style="left: 45%"></div>
   </div>
 
-  <!-- Genders -->
-  <div class="demo-container test-container">
-    <div>
-      <div class="demo-title">
-        Gender
-      </div>
+  <!-- Gender/Race/Ethnicity -->
+    <div *ngSwitchDefault>
       <div class="control-wrapper">
-        <crit-multi-select
-                (addedItems)="getItems($event)"
-                [options]="genderNodes"
-                [getParamId]="selectedParamId"
-                [includeSearchBox]="false"
-                [initialSelection]="initialGenders"
-                [loading]="loading.GEN">
-        </crit-multi-select>
+        <div class="ds-wrapper">
+          <div class="ds-options">
+            <div class="select-box">
+              <div class="option-list" >
+                <span *ngIf="loading" class="spinner spinner-md"></span>
+                <div *ngFor="let opt of nodes; let i = index" class="option" (click)="selectOption(opt)">
+                  <clr-icon  *ngIf="!selections.includes(opt.parameterId)"  shape="plus-circle"  size="20" class="selection-icon items-selection-icon" ></clr-icon>
+                  <clr-icon  *ngIf="selections.includes(opt.parameterId)" shape="check-circle" size="20"  class="selection-icon items-disabled-icon"></clr-icon>
+                  {{ opt.name | titlecase }}
+                  <span *ngIf="opt.count" class="badge badge-info">
+                    {{ opt.count | number }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- Races -->
-    <div>
-      <div class="demo-title">
-        Race
-      </div>
-      <div class="control-wrapper">
-        <crit-multi-select
-                (addedItems)="getItems($event)"
-                [options]="raceNodes"
-                [includeSearchBox]="false"
-                [getParamId]="selectedParamId"
-                [initialSelection]="initialRaces"
-                [loading]="loading.RACE">
-        </crit-multi-select>
-      </div>
-    </div>
-
-    <!-- Ethnicities -->
-    <div>
-      <div class="demo-title">
-        Ethnicity
-      </div>
-      <div class="control-wrapper">
-        <crit-multi-select
-                (addedItems)="getItems($event)"
-                [includeSearchBox]="false"
-                [options]="ethnicityNodes"
-                [getParamId]="selectedParamId"
-                [initialSelection]="initialEthnicities"
-                [loading]="loading.ETH">
-        </crit-multi-select>
-      </div>
-    </div>
-  </div>
-  <div>
-    <div class="deceased-title">
-      Deceased
-    </div>
-    <div class="control-wrapper">
-      <div (click)="selectedDeasease()" [ngClass]="[ageClicked? 'deceaseNoCursor':'deceaseCursor']">
-        <clr-icon *ngIf= "!deceasedClicked" class="decease-selection-icon" shape="plus-circle" size = '39'  ></clr-icon>
-        <clr-icon *ngIf= "deceasedClicked" class="decease-selection-icon selection-check-icon" shape="check-circle" size = '39'></clr-icon>
-        Is Deceased</div>
-    </div>
-  </div>
 </form>
-<div class="container count-preview" *ngIf="!noSelection">
+<div class="container count-preview" *ngIf="(selections && selections.length) && wizard.type !== criteriaType.AGE">
   <div class="row">
-    <div class="col-lg-1 " *ngIf="showCalculateContainer || preview.get('requesting')">
-       <span class="spinner spinner-md">
-    </span>
-    </div>
-    <div class="col-lg-2 calculate-button" *ngIf="showCalculateContainer || preview.get('requesting')">
-      Calculating ...
-    </div>
-    <ng-container *ngIf="!preview.get('requesting') && !showCalculateContainer">
-      <div class="col-lg-6 text-padding" *ngIf="preview.get('count') >= 0 || count">
+    <ng-container>
+      <div class="col-lg-12 text-padding" *ngIf="count">
         <div class="result-text">
           Results
         </div>
         <div>
           Number Participants:
-          <span class="text-bold" *ngIf="preview.get('count') >= 0;else totalcount">
-       {{ preview.get('count', 0) | number }}
-        </span>
-          <ng-template #totalcount>
-            <span class="text-bold">
-                {{count | number}}
-            </span>
-          </ng-template>
+          <span class="text-bold">
+            {{count | number}}
+          </span>
         </div>
       </div>
     </ng-container>

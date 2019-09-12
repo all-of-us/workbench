@@ -12,6 +12,7 @@ public class CdrBigQuerySchemaConfig {
   public Map<String, TableConfig> cohortTables;
 
   public static class TableConfig {
+    public String domain;
     public List<ColumnConfig> columns;
   }
 
@@ -26,16 +27,22 @@ public class CdrBigQuerySchemaConfig {
   }
 
   public static enum ColumnMode {
-    @SerializedName("nullable") NULLABLE,
-    @SerializedName("required") REQUIRED
+    @SerializedName("nullable")
+    NULLABLE,
+    @SerializedName("required")
+    REQUIRED
   }
 
   public static enum ColumnType {
-    @SerializedName("string") STRING,
-    @SerializedName("integer") INTEGER,
-    @SerializedName("date") DATE,
-    @SerializedName("timestamp") TIMESTAMP,
-    @SerializedName("float") FLOAT
+    @SerializedName("string")
+    STRING,
+    @SerializedName("integer")
+    INTEGER,
+    @SerializedName("date")
+    DATE,
+    @SerializedName("timestamp")
+    TIMESTAMP,
+    @SerializedName("float")
+    FLOAT
   }
-
 }

@@ -1,51 +1,65 @@
-import { Operator, TreeSubType, TreeType } from 'generated';
+import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
-export const PROGRAM_TYPES = [
-  { name: 'Surveys',    type: TreeType.PPI },
-  { name: 'Physical Measurements',    type: TreeType.PM, fullTree: true },
+export const LIST_PROGRAM_TYPES = [
+  {
+    name: 'Surveys',
+    domain: DomainType.SURVEY,
+    type: CriteriaType.PPI,
+    standard: false
+  },
+  {
+    name: 'Physical Measurements',
+    domain: DomainType.PHYSICALMEASUREMENT,
+    type: CriteriaType.PPI,
+    standard: false,
+    fullTree: true
+  },
 ];
 
-export const DOMAIN_TYPES = [
-  {name: 'Demographics', type: TreeType.DEMO},
+export const LIST_DOMAIN_TYPES = [
   {
-    name: 'Conditions', type: TreeType.CONDITION, codes: [
-      {name: 'ICD9 Codes', type: TreeType.ICD9, subtype: TreeSubType.CM},
-      {name: 'ICD10 Codes', type: TreeType.ICD10, subtype: TreeSubType.CM}
+    name: 'Demographics', domain: DomainType.PERSON, children: [
+      {name: 'Current Age/Deceased', domain: DomainType.PERSON, type: CriteriaType.AGE},
+      {name: 'Gender', domain: DomainType.PERSON, type: CriteriaType.GENDER},
+      {name: 'Race', domain: DomainType.PERSON, type: CriteriaType.RACE},
+      {name: 'Ethnicity', domain: DomainType.PERSON, type: CriteriaType.ETHNICITY},
     ]
   },
+  {name: 'Conditions', domain: DomainType.CONDITION},
+  {name: 'Procedures', domain: DomainType.PROCEDURE},
+  {name: 'Drugs', domain: DomainType.DRUG},
+  {name: 'Measurements', domain: DomainType.MEASUREMENT},
   {
-    name: 'Procedures', type: TreeType.PROCEDURE, codes: [
-      {name: 'ICD9 Codes', type: TreeType.ICD9, subtype: TreeSubType.PROC},
-      {name: 'ICD10 Codes', type: TreeType.ICD10, subtype: TreeSubType.PCS},
-      {name: 'CPT Codes', type: TreeType.CPT, subtype: null}
-    ]
-  },
-  {name: 'Drugs', type: TreeType.DRUG},
-  {name: 'Measurements', type: TreeType.MEAS},
-  {name: 'Visits', type: TreeType.VISIT, fullTree: true}
+    name: 'Visits',
+    domain: DomainType.VISIT,
+    type: CriteriaType.VISIT,
+    standard: true,
+    fullTree: true
+  }
 ];
 
 export const PM_UNITS = {
-    'HEIGHT': 'cm',
-    'WEIGHT': 'kg' ,
-    'BMI': '',
-    'WC': 'cm',
-    'HC': 'cm',
-    'BP': '',
-    'HR-DETAIL': 'beats/min'
+  'HEIGHT': 'cm',
+  'WEIGHT': 'kg' ,
+  'BMI': '',
+  'WC': 'cm',
+  'HC': 'cm',
+  'BP': '',
+  'HR-DETAIL': 'beats/min'
 };
 
+/* Systolic (conceptId: 903118) should always be the first element in the attributes array */
 export const PREDEFINED_ATTRIBUTES = {
   'Hypotensive': [
     {
       conceptId: 903118,
-      name: 'Systolic',
+      name: AttrName.NUM,
       operands: ['90'],
       operator: Operator.LESSTHANOREQUALTO
     },
     {
       conceptId: 903115,
-      name: 'Diastolic',
+      name: AttrName.NUM,
       operands: ['60'],
       operator: Operator.LESSTHANOREQUALTO
     }
@@ -53,13 +67,13 @@ export const PREDEFINED_ATTRIBUTES = {
   'Normal': [
     {
       conceptId: 903118,
-      name: 'Systolic',
+      name: AttrName.NUM,
       operands: ['120'],
       operator: Operator.LESSTHANOREQUALTO
     },
     {
       conceptId: 903115,
-      name: 'Diastolic',
+      name: AttrName.NUM,
       operands: ['80'],
       operator: Operator.LESSTHANOREQUALTO
     }
@@ -67,13 +81,13 @@ export const PREDEFINED_ATTRIBUTES = {
   'Pre-Hypertensive': [
     {
       conceptId: 903118,
-      name: 'Systolic',
+      name: AttrName.NUM,
       operands: ['121', '139'],
       operator: Operator.BETWEEN
     },
     {
       conceptId: 903115,
-      name: 'Diastolic',
+      name: AttrName.NUM,
       operands: ['81', '89'],
       operator: Operator.BETWEEN
     }
@@ -81,13 +95,13 @@ export const PREDEFINED_ATTRIBUTES = {
   'Hypertensive': [
     {
       conceptId: 903118,
-      name: 'Systolic',
+      name: AttrName.NUM,
       operands: ['140'],
       operator: Operator.GREATERTHANOREQUALTO
     },
     {
       conceptId: 903115,
-      name: 'Diastolic',
+      name: AttrName.NUM,
       operands: ['90'],
       operator: Operator.GREATERTHANOREQUALTO
     }
@@ -96,16 +110,16 @@ export const PREDEFINED_ATTRIBUTES = {
     {
       conceptId: 903118,
       name: 'Systolic',
-      operands: [null],
-      operator: null,
+      operands: [],
+      operator: AttrName.ANY,
       MIN: 0,
       MAX: 1000
     },
     {
       conceptId: 903115,
       name: 'Diastolic',
-      operands: [null],
-      operator: null,
+      operands: [],
+      operator: AttrName.ANY,
       MIN: 0,
       MAX: 1000
     }

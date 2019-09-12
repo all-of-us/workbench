@@ -4,38 +4,39 @@ import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
-import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
-import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
-import {CohortListComponent} from './views/cohort-list/component';
-import {ConceptHomepageComponent} from './views/concept-homepage/component';
-import {ConceptSetDetailsComponent} from './views/concept-set-details/component';
-import {ConceptSetListComponent} from './views/concept-set-list/component';
-import {HomepageComponent} from './views/homepage/component';
-import {LoginComponent} from './views/login/component';
-import {NotebookListComponent} from './views/notebook-list/component';
-import {NotebookRedirectComponent} from './views/notebook-redirect/component';
-import {ProfilePageComponent} from './views/profile-page/component';
-import {SettingsComponent} from './views/settings/component';
-import {SignedInComponent} from './views/signed-in/component';
-import {StigmatizationPageComponent} from './views/stigmatization-page/component';
-import {UnregisteredComponent} from './views/unregistered/component';
-import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
-import {WorkspaceListComponent} from './views/workspace-list/component';
-import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
-import {WorkspaceComponent} from './views/workspace/component';
-
-import {CohortResolver} from './resolvers/cohort';
-import {ConceptSetResolver} from './resolvers/concept-set';
-import {WorkspaceResolver} from './resolvers/workspace';
+import {DataPageComponent} from 'app/pages/data/data-page';
+import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
+import {DataUseAgreementComponent} from 'app/pages/profile/data-use-agreement';
+import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
+import {AdminUserComponent} from './pages/admin/admin-user';
+import {NotebookListComponent} from './pages/analysis/notebook-list';
+import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect/component';
+import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
+import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
+import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
+import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
+import {HomepageComponent} from './pages/homepage/homepage';
+import {SignInComponent} from './pages/login/sign-in';
+import {ProfilePageComponent} from './pages/profile/profile-page';
+import {SignedInComponent} from './pages/signed-in/component';
+import {StigmatizationPageComponent} from './pages/workspace/stigmatization-page';
+import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
+import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
+import {WorkspaceLibraryComponent} from './pages/workspace/workspace-library';
+import {WorkspaceListComponent} from './pages/workspace/workspace-list';
+import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
+import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
+import {BreadcrumbType, NavStore} from './utils/navigation';
+
 
 declare let gtag: Function;
 
 const routes: Routes = [
   {
     path: 'login',
-    component: LoginComponent,
+    component: SignInComponent,
     data: {title: 'Sign In'}
   }, {
     path: '',
@@ -49,199 +50,188 @@ const routes: Routes = [
         component: HomepageComponent,
         data: {title: 'Homepage'},
       }, {
-        path: 'unregistered',
-        component: UnregisteredComponent,
-        data: {
-          title: 'Awaiting ID Verification'
-        }
-      }, {
         path: 'definitions/stigmatization',
         component: StigmatizationPageComponent,
         data: {
           title: 'Stigmatization Definition'
         }
       }, {
-      path: 'workspaces',
-      data: {
-        breadcrumb: {
-          value: 'Workspaces',
-          intermediate: true
-        }
-      },
-      children: [
-        {
-          path: '',
-          component: WorkspaceListComponent,
-          data: {title: 'View Workspaces'}
-        },
-        {
-          /* TODO The children under ./views need refactoring to use the data
-           * provided by the route rather than double-requesting it.
-           */
-          path: ':ns/:wsid',
-          component: WorkspaceNavBarComponent,
-          data: {
-            title: 'View Workspace Details',
-            breadcrumb: {
-              value: 'Param: Workspace Name',
+        path: 'nih-callback',
+        component: HomepageComponent,
+        data: {title: 'Homepage'},
+      }, {
+        path: 'data-use-agreement',
+        component: DataUseAgreementComponent,
+        data: {title: 'Data Use Agreement'}
+      }, {
+        path: 'library',
+        component: WorkspaceLibraryComponent,
+        data: {title: 'Workspace Library'}
+      }, {
+        path: 'workspaces',
+        children: [
+          {
+            path: '',
+            component: WorkspaceListComponent,
+            data: {
+              title: 'View Workspaces',
+              breadcrumb: BreadcrumbType.Workspaces
             }
           },
-          runGuardsAndResolvers: 'always',
-          resolve: {
-            workspace: WorkspaceResolver,
-          },
-          children: [
-            {
-              path: '',
-              component: WorkspaceComponent,
-              data: {
-                title: 'View Workspace Details',
-              }
-            }, {
-              path: 'edit',
-              component: WorkspaceEditComponent,
-              data: {
-                title: 'Edit Workspace',
-                mode: WorkspaceEditMode.Edit,
-                breadcrumb: {
-                  value: 'Edit Workspace',
-                }
-              }
-            }, {
-              path: 'clone',
-              component: WorkspaceEditComponent,
-              data: {
-                title: 'Clone Workspace',
-                mode: WorkspaceEditMode.Clone,
-                breadcrumb: {
-                  value: 'Clone Workspace',
-                }
-              }
-            },
-            {
-              path: 'notebooks',
-              data: {
-                breadcrumb: {
-                  value: 'Notebooks',
-                  intermediate: true
-                }
-              },
-              children: [
-                {
-                  path: '',
-                  component: NotebookListComponent,
-                  data: {
-                    title: 'View Notebooks'
-                  }
-                }, {
-                  path: ':nbName',
-                  component: NotebookRedirectComponent,
-                  data: {
-                    title: 'Notebook',
-                    breadcrumb: {
-                        value: 'Param: Notebook Name'
-                    },
-                    minimizeChrome: true
-                  }
-                }
-              ]
-            }, {
-              path: 'cohorts',
-              data: {
-                breadcrumb: {
-                  value: 'Cohorts',
-                  intermediate: true
-                }
-              },
-              children: [
-                {
-                  path: '',
-                  component: CohortListComponent,
-                  data: {
-                    title: 'View Cohorts',
-                  },
-                },
-                {
-                  path: 'build',
-                  loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
-                  data: {
-                    breadcrumb: {
-                      value: 'Add a Cohort',
-                    }
-                  }
-                },
-                {
-                  path: ':cid/review',
-                  loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
-                  data: {
-                    title: 'Cohort',
-                    breadcrumb: {
-                      value: 'Param: Cohort Name',
-                    }
-                  },
-                  resolve: {
-                    cohort: CohortResolver,
-                  }
-                }
-              ]
-            },
-            {
-              path: 'concepts',
-              component: ConceptHomepageComponent,
-              data: {
-                title: 'Search Concepts',
-                breadcrumb: {
-                  value: 'Concepts',
-                  intermediate: true
-                }
-              }
-            },
-            {
-              path: 'concepts/sets',
-              data: {
-                breadcrumb: {
-                  value: 'Concept Sets',
-                  intermediate: true
-                }
-              },
-              children: [{
-                path: '',
-                component: ConceptSetListComponent,
+          {
+            /* TODO The children under ./views need refactoring to use the data
+             * provided by the route rather than double-requesting it.
+             */
+            path: ':ns/:wsid',
+            component: WorkspaceWrapperComponent,
+            runGuardsAndResolvers: 'always',
+            children: [
+              {
+                path: 'about',
+                component: WorkspaceAboutComponent,
                 data: {
-                  title: 'View Concept Sets',
+                  title: 'View Workspace Details',
+                  breadcrumb: BreadcrumbType.Workspace
                 }
               }, {
-                path: ':csid',
-                component: ConceptSetDetailsComponent,
+                path: 'edit',
+                component: WorkspaceEditComponent,
                 data: {
-                  title: 'Concept Set',
-                  breadcrumb: {
-                    value: 'Param: Concept Set Name',
-                  }
-                },
-                resolve: {
-                  conceptSet: ConceptSetResolver,
+                  title: 'Edit Workspace',
+                  mode: WorkspaceEditMode.Edit,
+                  breadcrumb: BreadcrumbType.WorkspaceEdit
                 }
+              }, {
+                path: 'duplicate',
+                component: WorkspaceEditComponent,
+                data: {
+                  title: 'Duplicate Workspace',
+                  mode: WorkspaceEditMode.Duplicate,
+                  breadcrumb: BreadcrumbType.WorkspaceDuplicate
+                }
+              },
+              {
+                path: 'notebooks',
+                children: [
+                  {
+                    path: '',
+                    component: NotebookListComponent,
+                    data: {
+                      title: 'View Notebooks',
+                      breadcrumb: BreadcrumbType.Workspace
+                    }
+                  }, {
+                    path: ':nbName',
+                    component: NotebookRedirectComponent,
+                    data: {
+                      // use the (urldecoded) captured value nbName
+                      pathElementForTitle: 'nbName',
+                      breadcrumb: BreadcrumbType.Notebook,
+                      minimizeChrome: true
+                    }
+                  }, {
+                    path: 'preview/:nbName',
+                    component: InteractiveNotebookComponent,
+                    data: {
+                      pathElementForTitle: 'nbName',
+                      breadcrumb: BreadcrumbType.Notebook,
+                      minimizeChrome: true
+                    }
+                  }
+                ]
+              },
+              {
+                path: 'data',
+                children: [
+                  {
+                    path: '',
+                    component: DataPageComponent,
+                    data: {
+                      title: 'Data Page',
+                      breadcrumb: BreadcrumbType.Workspace
+                    }
+                  },
+                  {
+                    path: 'data-sets',
+                    component: DataSetPageComponent,
+                    data: {
+                      title: 'Data Set Page',
+                      breadcrumb: BreadcrumbType.Dataset
+                    }
+                  },
+                  {
+                    path: 'data-sets/:dataSetId',
+                    component: DataSetPageComponent,
+                    data: {
+                      title: 'Edit Data Set',
+                      breadcrumb: BreadcrumbType.Dataset
+                    }
+                  }, {
+                    path: 'cohorts',
+                    children: [
+                      {
+                        path: ':cid/actions',
+                        component: CohortActionsComponent,
+                        data: {
+                          title: 'Cohort Actions',
+                          breadcrumb: BreadcrumbType.Cohort
+                        },
+                      },
+                      {
+                        path: 'build',
+                        loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
+                      },
+                      {
+                        path: ':cid/review',
+                        loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
+                        data: {
+                          title: 'Cohort',
+                        },
+                      }
+                    ]
+                  },
+                  {
+                    path: 'concepts',
+                    component: ConceptHomepageComponent,
+                    data: {
+                      title: 'Search Concepts',
+                      breadcrumb: BreadcrumbType.SearchConcepts
+                    }
+                  },
+                  {
+                    path: 'concepts/sets',
+                    children: [{
+                      path: ':csid',
+                      component: ConceptSetDetailsComponent,
+                      data: {
+                        title: 'Concept Set',
+                        breadcrumb: BreadcrumbType.ConceptSet
+                      },
+                    }, {
+                      path: ':csid/actions',
+                      component: ConceptSetActionsComponent,
+                      data: {
+                        title: 'Concept Set Actions',
+                        breadcrumb: BreadcrumbType.ConceptSet
+                      },
+                    }, ]
+                  }
+                ]
               }]
-            }]
-        }]
+          }]
       },
       {
         path: 'admin/review-workspace',
         component: AdminReviewWorkspaceComponent,
         data: {title: 'Review Workspaces'}
       }, {
-        path: 'admin/review-id-verification',
-        component: AdminReviewIdVerificationComponent,
-        data: {title: 'Review ID Verifications'}
+        path: 'admin/user',
+        component: AdminUserComponent,
+        data: {title: 'User Admin Table'}
       }, {
         path: 'profile',
         component: ProfilePageComponent,
         data: {title: 'Profile'}
-      }, {
-        path: 'settings',
-        component: SettingsComponent,
-        data: {title: 'Settings'}
       }, {
         path: 'workspaces/build',
         component: WorkspaceEditComponent,
@@ -256,15 +246,15 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
-    ConceptSetResolver,
     RegistrationGuard,
     SignInGuard,
-    WorkspaceResolver,
   ]
 })
 export class AppRoutingModule {
 
- constructor(public router: Router) {
+  constructor(public router: Router) {
+    NavStore.navigate = (commands, extras) => this.router.navigate(commands, extras);
+    NavStore.navigateByUrl = (url, extras) => this.router.navigateByUrl(url, extras);
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', environment.gaId, { 'page_path': event.urlAfterRedirects });

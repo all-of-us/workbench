@@ -1,49 +1,58 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
-import {CohortReview} from 'generated';
-import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 
-import {CreateReviewPage} from '../create-review-page/create-review-page';
-import {ReviewStateService} from '../review-state.service';
+import {CreateReviewModalComponent} from 'app/cohort-review/create-review-modal/create-review-modal';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
+import {CohortBuilderService} from 'generated';
+import {CohortBuilderApi, CohortReviewApi, CohortsApi, CriteriaListResponse} from 'generated/fetch';
+import {Observable} from 'rxjs/Observable';
+import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
+import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
+import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {PageLayout} from './page-layout';
+class BuilderApiStub {
+  getCriteriaBy(): Observable<CriteriaListResponse> {
+    return Observable.of({items: []});
+  }
+}
 
 describe('PageLayout', () => {
   let component: PageLayout;
   let fixture: ComponentFixture<PageLayout>;
-  const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-  const activatedRouteStub = {
-    snapshot: {
-      data: {
-        review: <CohortReview> {}
-      }
-    }
-  };
-  let route;
 
   beforeEach(async(() => {
-
     TestBed.configureTestingModule({
       declarations: [
-        CreateReviewPage,
+        CreateReviewModalComponent,
         PageLayout,
       ],
       imports: [ClarityModule, ReactiveFormsModule, RouterTestingModule],
       providers: [
-        {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
-        {provide: ActivatedRoute, useValue: activatedRouteStub},
-        {provide: Router, useValue: routerSpy},
+        {provide: CohortBuilderService, useValue: new BuilderApiStub()}
       ],
     })
       .compileComponents();
+    NavStore.navigate = jasmine.createSpy('navigate');
+    cohortReviewStore.next(cohortReviewStubs[0]);
+    currentWorkspaceStore.next(workspaceDataStub);
+    urlParamsStore.next({
+      ns: 'workspaceNamespace',
+      wsid: 'workspaceId',
+      cid: 1
+    });
   }));
 
   beforeEach(() => {
+    registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
+    registerApiClient(CohortsApi, new CohortsApiStub());
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     fixture = TestBed.createComponent(PageLayout);
     component = fixture.componentInstance;
-    route = new ActivatedRoute();
     fixture.detectChanges();
   });
 

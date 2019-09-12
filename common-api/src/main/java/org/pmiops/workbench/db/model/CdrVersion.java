@@ -26,7 +26,7 @@ public class CdrVersion {
   private Timestamp creationTime;
   private int numParticipants;
   private String cdrDbName;
-  private String publicDbName;
+  private String elasticIndexBaseName;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -121,19 +121,37 @@ public class CdrVersion {
   }
 
   @Column(name = "cdr_db_name")
-  public String getCdrDbName() { return cdrDbName; }
+  public String getCdrDbName() {
+    return cdrDbName;
+  }
 
-  public void setCdrDbName(String cdrDbName) { this.cdrDbName = cdrDbName; }
+  public void setCdrDbName(String cdrDbName) {
+    this.cdrDbName = cdrDbName;
+  }
 
-  @Column(name = "public_db_name")
-  public String getPublicDbName() { return publicDbName; }
+  @Column(name = "elastic_index_base_name")
+  public String getElasticIndexBaseName() {
+    return elasticIndexBaseName;
+  }
 
-  public void setPublicDbName(String publicDbName) { this.publicDbName = publicDbName; }
+  public void setElasticIndexBaseName(String elasticIndexBaseName) {
+    this.elasticIndexBaseName = elasticIndexBaseName;
+  }
 
   @Override
   public int hashCode() {
-    return Objects.hash(cdrVersionId, isDefault, name, dataAccessLevel, releaseNumber,
-        bigqueryProject, bigqueryDataset, creationTime, numParticipants, publicDbName, cdrDbName);
+    return Objects.hash(
+        cdrVersionId,
+        isDefault,
+        name,
+        dataAccessLevel,
+        releaseNumber,
+        bigqueryProject,
+        bigqueryDataset,
+        creationTime,
+        numParticipants,
+        cdrDbName,
+        elasticIndexBaseName);
   }
 
   @Override
@@ -142,7 +160,8 @@ public class CdrVersion {
       return false;
     }
     CdrVersion that = (CdrVersion) obj;
-    return new EqualsBuilder().append(this.cdrVersionId, that.cdrVersionId)
+    return new EqualsBuilder()
+        .append(this.cdrVersionId, that.cdrVersionId)
         .append(this.isDefault, that.isDefault)
         .append(this.name, that.name)
         .append(this.dataAccessLevel, that.dataAccessLevel)
@@ -150,8 +169,8 @@ public class CdrVersion {
         .append(this.bigqueryProject, that.bigqueryProject)
         .append(this.creationTime, that.creationTime)
         .append(this.numParticipants, that.numParticipants)
-        .append(this.publicDbName, that.publicDbName)
         .append(this.cdrDbName, that.cdrDbName)
+        .append(this.elasticIndexBaseName, that.elasticIndexBaseName)
         .build();
   }
 }

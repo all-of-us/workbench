@@ -24,6 +24,7 @@ public class CacheSpringConfiguration {
   static {
     CONFIG_CLASS_MAP.put(Config.MAIN_CONFIG_ID, WorkbenchConfig.class);
     CONFIG_CLASS_MAP.put(Config.CDR_BIGQUERY_SCHEMA_CONFIG_ID, CdrBigQuerySchemaConfig.class);
+    CONFIG_CLASS_MAP.put(Config.FEATURED_WORKSPACES_CONFIG_ID, FeaturedWorkspacesConfig.class);
   }
 
   @Bean
@@ -32,25 +33,26 @@ public class CacheSpringConfiguration {
     // Cache configuration in memory for ten minutes.
     return CacheBuilder.newBuilder()
         .expireAfterWrite(10, TimeUnit.MINUTES)
-        .build(new CacheLoader<String, Object>() {
-          @Override
-          public Object load(String key) {
-            Class<?> configClass = CONFIG_CLASS_MAP.get(key);
-            if (configClass == null) {
-              throw new IllegalArgumentException("Invalid config key: " + key);
-            }
-            Config config = configDao.findOne(key);
-            if (config == null) {
-              return null;
-            }
-            Gson gson = new Gson();
-            return gson.fromJson(config.getConfiguration(), configClass);
-          }
-        });
+        .build(
+            new CacheLoader<String, Object>() {
+              @Override
+              public Object load(String key) {
+                Class<?> configClass = CONFIG_CLASS_MAP.get(key);
+                if (configClass == null) {
+                  throw new IllegalArgumentException("Invalid config key: " + key);
+                }
+                Config config = configDao.findOne(key);
+                if (config == null) {
+                  return null;
+                }
+                Gson gson = new Gson();
+                return gson.fromJson(config.getConfiguration(), configClass);
+              }
+            });
   }
 
-  public static WorkbenchConfig lookupWorkbenchConfig(
-          LoadingCache<String, Object> configCache) throws ExecutionException {
+  public static WorkbenchConfig lookupWorkbenchConfig(LoadingCache<String, Object> configCache)
+      throws ExecutionException {
     return (WorkbenchConfig) configCache.get(Config.MAIN_CONFIG_ID);
   }
 
@@ -59,16 +61,31 @@ public class CacheSpringConfiguration {
     return (CdrBigQuerySchemaConfig) configCache.get(Config.CDR_BIGQUERY_SCHEMA_CONFIG_ID);
   }
 
+  public static FeaturedWorkspacesConfig lookupFeaturedWorkspacesConfig(
+      LoadingCache<String, Object> configCache) throws ExecutionException {
+    return (FeaturedWorkspacesConfig) configCache.get(Config.FEATURED_WORKSPACES_CONFIG_ID);
+  }
+
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  WorkbenchConfig getWorkbenchConfig(@Qualifier("configCache") LoadingCache<String, Object> configCache)
+  WorkbenchConfig getWorkbenchConfig(
+      @Qualifier("configCache") LoadingCache<String, Object> configCache)
       throws ExecutionException {
     return lookupWorkbenchConfig(configCache);
   }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  CdrBigQuerySchemaConfig getCdrSchemaConfig(@Qualifier("configCache") LoadingCache<String, Object> configCache)
+  FeaturedWorkspacesConfig getFeaturedWorkspacesConfig(
+      @Qualifier("configCache") LoadingCache<String, Object> configCache)
+      throws ExecutionException {
+    return lookupFeaturedWorkspacesConfig(configCache);
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  CdrBigQuerySchemaConfig getCdrSchemaConfig(
+      @Qualifier("configCache") LoadingCache<String, Object> configCache)
       throws ExecutionException {
     return lookupBigQueryCdrSchemaConfig(configCache);
   }

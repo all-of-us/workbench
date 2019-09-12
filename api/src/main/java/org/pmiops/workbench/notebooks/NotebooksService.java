@@ -1,49 +1,43 @@
 package org.pmiops.workbench.notebooks;
 
 import java.util.List;
-import java.util.Map;
-import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.notebooks.model.Cluster;
+import java.util.regex.Pattern;
+import org.json.JSONObject;
+import org.pmiops.workbench.model.FileDetail;
 
-/**
- * Encapsulate Notebooks API interaction details and provide a simple/mockable interface
- * for internal use.
- */
 public interface NotebooksService {
-  String DEFAULT_CLUSTER_NAME = "all-of-us";
 
-  /**
-   * Creates a notebooks cluster.
-   * @param googleProject the google project that will be used for this notebooks cluster
-   * @param clusterName the user assigned/auto-generated name for this notebooks cluster
-   * @param userEmail a string containing the user who is creating the cluster's email
-   */
-  Cluster createCluster(String googleProject, String clusterName, String userEmail)
-      throws WorkbenchException;
+  String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
+  String NOTEBOOK_EXTENSION = ".ipynb";
+  Pattern NOTEBOOK_PATTERN =
+      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 
-  /**
-   * Deletes a notebook cluster
-   */
-  void deleteCluster(String googleProject, String clusterName) throws WorkbenchException;
+  static String withNotebookExtension(String notebookName) {
+    return notebookName.endsWith(NOTEBOOK_EXTENSION)
+        ? notebookName
+        : notebookName.concat(NOTEBOOK_EXTENSION);
+  }
 
-  /**
-   * Lists all existing clusters
-   */
-  List<Cluster> listClusters(String labels, boolean includeDeleted) throws WorkbenchException;
+  List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName);
 
-  /**
-   * Gets information about a notebook cluster
-   */
-  Cluster getCluster(String googleProject, String clusterName) throws WorkbenchException;
+  FileDetail copyNotebook(
+      String fromWorkspaceNamespace,
+      String fromWorkspaceName,
+      String fromNotebookName,
+      String toWorkspaceNamespace,
+      String toWorkspaceName,
+      String newNotebookName);
 
-  /**
-   * Send files over to notebook Cluster
-   */
-  void localize(String googleProject, String clusterName, Map<String, String> fileList)
-      throws WorkbenchException;
+  FileDetail cloneNotebook(String workspaceNamespace, String workspaceName, String notebookName);
 
-  /**
-   * @return true if notebooks is okay, false if notebooks are down.
-   */
-  boolean getNotebooksStatus();
+  void deleteNotebook(String workspaceNamespace, String workspaceName, String notebookName);
+
+  FileDetail renameNotebook(
+      String workspaceNamespace, String workspaceName, String notebookName, String newName);
+
+  JSONObject getNotebookContents(String bucketName, String notebookName);
+
+  void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents);
+
+  String getReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
 }

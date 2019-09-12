@@ -1,57 +1,74 @@
-<div class="flex-container">
-
-  <div class="line-item">
-    <button
-      type="button"
-      class="btn btn-link btn-sm"
-      (click)="launchWizard()">
-      <clr-icon shape="pencil"></clr-icon>
-    </button>
-
+<div *ngIf="status !== 'deleted'" class="flex-container">
+  <div *ngIf="status === 'active' || !status" class="line-item">
+    <clr-dropdown>
+      <button type="button" clrDropdownTrigger>
+        <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen>
+        <button
+          type="button"
+          (click)="launchWizard()"
+          clrDropdownItem>
+          Edit criteria
+        </button>
+        <button
+          type="button"
+          (click)="suppress()"
+          clrDropdownItem>
+          Suppress criteria from total count
+        </button>
+        <button
+          type="button"
+          (click)="remove()"
+          clrDropdownItem>
+          Delete criteria
+        </button>
+      </clr-dropdown-menu>
+    </clr-dropdown>
     <small
       [popper]="codesPopper"
       [popperTrigger]="'hover'"
       [popperPlacement]="'bottom'"
       class="trigger padding-right">
-      <span *ngIf="itemIndex > 0" class="font-weight-bold">OR </span>
       <span class="code-text">Contains </span>
-      <span class="code-text">{{ codeTypeDisplay }}</span>
+      <span class="code-text">{{codeTypeDisplay}}</span>
     </small>
-
-    <small class="code-text padding-right">|</small>
-
-    <span *ngIf="isRequesting" class="spinner spinner-inline">
+    <small *ngIf="status !== 'hidden'" class="code-text padding-right">|</small>
+    <span *ngIf="loading" class="spinner spinner-inline">
       Loading...
     </span>
-    <small *ngIf="!isRequesting" class="code-text">
-      {{ item.get('count') | number }}
+    <small *ngIf="!loading && status !== 'hidden'" class="code-text">
+      {{count | number}}
     </small>
     <span *ngIf="error">
       <clr-icon
         [popper]="errorPopper"
         [popperTrigger]="'hover'"
-        shape="error-standard"
-        size="16"></clr-icon>
+        class="is-solid"
+        style="color: #f7981c"
+        shape="exclamation-triangle"
+        size="22"></clr-icon>
     </span>
   </div>
-
-  <div>
-    <button
-      type="button"
-      type="button"
-      class="btn btn-link btn-sm"
-      id="close-button"
-      (click)="remove()">
-      <clr-icon shape="close" size="24"></clr-icon>
-    </button>
+  <div *ngIf="status === 'pending'" class="undo-container">
+    <clr-icon shape="exclamation-triangle" class="is-solid" size="23"></clr-icon>
+    <span class="undo-text">
+      This criteria has been deleted
+      <button class="btn btn-link" (click)="undo()">UNDO</button>
+    </span>
+  </div>
+  <div *ngIf="status === 'hidden'" class="undo-container">
+    <clr-icon shape="eye-hide" class="is-solid" size="23"></clr-icon>
+    <span class="undo-text">
+      This criteria has been suppressed
+      <button class="btn btn-link" (click)="enable()">ENABLE</button>
+    </span>
   </div>
 </div>
-
 <popper-content #codesPopper>
-  <h3 [style.margin]="'0'">{{ codeTypeDisplay }}</h3>
-  <p  [style.margin]="'0'">{{ codes }}</p>
+  <h3 [style.margin]="'0'">{{codeTypeDisplay}}</h3>
+  <p  [style.margin]="'0'">{{codes}}</p>
 </popper-content>
-
 <popper-content #errorPopper>
-  <p  [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p  [style.margin]="'0'">Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.</p>
 </popper-content>

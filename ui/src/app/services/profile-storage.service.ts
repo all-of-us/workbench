@@ -1,3 +1,4 @@
+import {userProfileStore} from 'app/utils/navigation';
 import {Observable} from 'rxjs/Observable';
 import {timer} from 'rxjs/observable/timer';
 import 'rxjs/Rx';
@@ -20,7 +21,7 @@ export class ProfileStorageService {
   public profile$ = this.profile.asObservable();
 
   constructor(private profileService: ProfileService,
-              private errorHandlingService: ErrorHandlingService) {
+    private errorHandlingService: ErrorHandlingService) {
     this.reload();
   }
 
@@ -57,10 +58,24 @@ export class ProfileStorageService {
       .retryWhen(ProfileStorageService.conflictRetryPolicy())
       .subscribe((profile) => {
         this.profile.next(profile);
+        this.nextUserProfileStore(profile);
         this.activeCall = false;
       }, (err) => {
         this.errorHandlingService.profileLoadError = true;
         this.activeCall = false;
       });
+  }
+
+  nextUserProfileStore(profile) {
+    userProfileStore.next({
+      profile,
+      reload: () => this.reload(),
+      updateCache: p => this.updateCache(p)
+    });
+  }
+
+  updateCache(profile) {
+    this.profile.next(profile);
+    this.nextUserProfileStore(profile);
   }
 }

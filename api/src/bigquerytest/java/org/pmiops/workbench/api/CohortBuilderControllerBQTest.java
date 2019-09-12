@@ -1,84 +1,124 @@
 package org.pmiops.workbench.api;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.inject.Provider;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.cdr.dao.CriteriaDao;
-import org.pmiops.workbench.cdr.model.Criteria;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
-import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageServiceImpl;
+import org.pmiops.workbench.model.AttrName;
+import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.CriteriaSubType;
+import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.DemoChartInfoListResponse;
+import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Modifier;
+import org.pmiops.workbench.model.ModifierType;
+import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchGroupItem;
+import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.TemporalMention;
+import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, BigQueryService.class, CohortBuilderController.class,
-  ParticipantCounter.class, DomainLookupService.class, CohortQueryBuilder.class,
-  TestJpaConfig.class, CdrVersionService.class})
-@MockBean({FireCloudService.class})
+// Note: normally we shouldn't need to explicitly import our own @TestConfiguration. This might be
+// a bad interaction with BeforeAfterSpringTestRunner.
+@Import({TestJpaConfig.class, CohortBuilderControllerBQTest.Configuration.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
-  @Autowired
+  @TestConfiguration
+  @Import({
+    BigQueryTestService.class,
+    CloudStorageServiceImpl.class,
+    CohortQueryBuilder.class,
+    SearchGroupItemQueryBuilder.class,
+    CdrVersionService.class
+  })
+  @MockBean({FireCloudService.class})
+  static class Configuration {
+    @Bean
+    public User user() {
+      User user = new User();
+      user.setEmail("bob@gmail.com");
+      return user;
+    }
+  }
+
   private CohortBuilderController controller;
 
   private CdrVersion cdrVersion;
 
-  @Autowired
-  private BigQueryService bigQueryService;
+  @Autowired private BigQueryService bigQueryService;
 
-  @Autowired
-  private CriteriaDao criteriaDao;
+  @Autowired private CloudStorageService cloudStorageService;
 
-  @Autowired
-  private CdrVersionDao cdrVersionDao;
+  @Autowired private CohortQueryBuilder cohortQueryBuilder;
 
-  @Autowired
-  private TestWorkbenchConfig testWorkbenchConfig;
+  @Autowired private CdrVersionDao cdrVersionDao;
+
+  @Autowired private CBCriteriaDao cbCriteriaDao;
+
+  @Autowired private CdrVersionService cdrVersionService;
+
+  @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
+
+  @Autowired private FireCloudService firecloudService;
+
+  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
+
+  @Mock private Provider<WorkbenchConfig> configProvider;
+
+  @Mock private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
+
+  @Autowired private JdbcTemplate jdbcTemplate;
 
   @Override
   public List<String> getTableNames() {
-    return Arrays.asList(
-      "person",
-      "concept",
-      "condition_occurrence",
-      "procedure_occurrence",
-      "measurement",
-      "observation",
-      "drug_exposure",
-      "phecode_criteria_icd",
-      "criteria_relationship",
-      "death",
-      "visit_occurrence",
-      "criteria_ancestor",
-      "criteria");
+    return Arrays.asList("person", "death", "cb_search_person", "cb_search_all_events");
   }
 
   @Override
@@ -88,6 +128,28 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
+    WorkbenchConfig testConfig = new WorkbenchConfig();
+    testConfig.elasticsearch = new WorkbenchConfig.ElasticsearchConfig();
+    testConfig.elasticsearch.enableElasticsearchBackend = false;
+    when(configProvider.get()).thenReturn(testConfig);
+
+    when(firecloudService.isUserMemberOfGroup(anyString(), anyString())).thenReturn(true);
+
+    ElasticSearchService elasticSearchService =
+        new ElasticSearchService(cbCriteriaDao, cloudStorageService, configProvider);
+
+    controller =
+        new CohortBuilderController(
+            bigQueryService,
+            cohortQueryBuilder,
+            cbCriteriaDao,
+            cbCriteriaAttributeDao,
+            cdrVersionDao,
+            genderRaceEthnicityConceptProvider,
+            cdrVersionService,
+            elasticSearchService,
+            configProvider);
+
     cdrVersion = new CdrVersion();
     cdrVersion.setCdrVersionId(1L);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
@@ -97,1433 +159,1585 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     cdrVersionDao.save(cdrVersion);
   }
 
-  @Test
-  public void countSubjectsEmptyMessageException() throws Exception {
-    //icd9 no search parameters
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+  private static SearchParameter icd9() {
+    return new SearchParameter()
+        .domain(DomainType.CONDITION.toString())
+        .type(CriteriaType.ICD9CM.toString())
+        .standard(false)
+        .ancestorData(false)
+        .group(false)
+        .conceptId(1L);
+  }
 
-    //procedure no search parameters
-    searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+  private static SearchParameter icd10() {
+    return new SearchParameter()
+        .domain(DomainType.CONDITION.toString())
+        .type(CriteriaType.ICD10CM.toString())
+        .standard(false)
+        .ancestorData(false)
+        .group(false)
+        .conceptId(9L);
+  }
 
-    //demo no search parameters
-    searchRequest = createSearchRequests(TreeType.DEMO.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+  private static SearchParameter snomed() {
+    return new SearchParameter()
+        .domain(DomainType.CONDITION.toString())
+        .type(CriteriaType.SNOMED.toString())
+        .standard(false)
+        .ancestorData(false)
+        .group(false)
+        .conceptId(4L);
+  }
 
-    //demo no attributes
-    Criteria demoAge =
-      createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
-    SearchParameter demo = createSearchParameter(demoAge, null);
-    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, ATTRIBUTES);
+  private static SearchParameter drug() {
+    return new SearchParameter()
+        .domain(DomainType.DRUG.toString())
+        .type(CriteriaType.ATC.toString())
+        .group(false)
+        .ancestorData(true)
+        .standard(true)
+        .conceptId(11L);
+  }
 
-    //demo no attribute operands
-    Attribute attr = new Attribute().operator(Operator.BETWEEN);
-    demo.attributes(Arrays.asList(attr));
-    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, OPERANDS);
+  private static SearchParameter measurement() {
+    return new SearchParameter()
+        .domain(DomainType.MEASUREMENT.toString())
+        .type(CriteriaType.LOINC.toString())
+        .subtype(CriteriaSubType.LAB.toString())
+        .group(false)
+        .ancestorData(false)
+        .standard(true)
+        .conceptId(3L);
+  }
 
-    //drug no search parameters
-    searchRequest = createSearchRequests(TreeType.DRUG.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+  private static SearchParameter visit() {
+    return new SearchParameter()
+        .domain(DomainType.VISIT.toString())
+        .type(CriteriaType.VISIT.toString())
+        .group(false)
+        .ancestorData(false)
+        .standard(true)
+        .conceptId(1L);
+  }
 
-    //measurement no search parameters
-    searchRequest = createSearchRequests(TreeType.MEAS.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+  private static SearchParameter procedure() {
+    return new SearchParameter()
+        .domain(DomainType.PROCEDURE.toString())
+        .type(CriteriaType.CPT4.toString())
+        .group(false)
+        .ancestorData(false)
+        .standard(false)
+        .conceptId(10L);
+  }
 
-    //measurement no attributes
-    Criteria meas =
-      createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, null, null, "1");
-    SearchParameter measParam = createSearchParameter(meas, null);
-    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, ATTRIBUTES);
+  private static SearchParameter bloodPressure() {
+    return new SearchParameter()
+        .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.BP.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(false);
+  }
 
-    //measurement no attribute operands
-    measParam.attributes(Arrays.asList(new Attribute().operator(Operator.IN).name("name")));
-    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, OPERANDS);
+  private static SearchParameter hrDetail() {
+    return new SearchParameter()
+        .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.HR_DETAIL.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(false)
+        .conceptId(903126L);
+  }
 
-    //pm no search parameters
-    searchRequest = createSearchRequests(TreeType.PM.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+  private static SearchParameter hr() {
+    return new SearchParameter()
+        .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.HR.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(false)
+        .conceptId(1586218L);
+  }
 
-    //pm no attributes
-    Criteria pm =
-      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null, null, null);
-    SearchParameter pmParam = createSearchParameter(pm, null);
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, ATTRIBUTES);
+  private static SearchParameter height() {
+    return new SearchParameter()
+        .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.HEIGHT.toString())
+        .group(false)
+        .conceptId(903133L)
+        .ancestorData(false)
+        .standard(false);
+  }
 
-    //pm no attribute operands
-    pmParam.attributes(Arrays.asList(new Attribute().operator(Operator.IN).name("name")));
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, OPERANDS);
+  private static SearchParameter weight() {
+    return new SearchParameter()
+        .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.WEIGHT.toString())
+        .group(false)
+        .conceptId(903121L)
+        .ancestorData(false)
+        .standard(false);
+  }
 
-    //visit no search parameters
-    searchRequest = createSearchRequests(TreeType.VISIT.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+  private static SearchParameter bmi() {
+    return new SearchParameter()
+        .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.BMI.toString())
+        .group(false)
+        .conceptId(903124L)
+        .ancestorData(false)
+        .standard(false);
+  }
 
-    //ppi no search parameters
-    searchRequest = createSearchRequests(TreeType.PPI.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+  private static SearchParameter waistCircumference() {
+    return new SearchParameter()
+        .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.WC.toString())
+        .group(false)
+        .conceptId(903135L)
+        .ancestorData(false)
+        .standard(false);
+  }
+
+  private static SearchParameter hipCircumference() {
+    return new SearchParameter()
+        .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.HC.toString())
+        .group(false)
+        .conceptId(903136L)
+        .ancestorData(false)
+        .standard(false);
+  }
+
+  private static SearchParameter pregnancy() {
+    return new SearchParameter()
+        .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.PREG.toString())
+        .group(false)
+        .conceptId(903120L)
+        .ancestorData(false)
+        .standard(false);
+  }
+
+  private static SearchParameter wheelchair() {
+    return new SearchParameter()
+        .domain(DomainType.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.WHEEL.toString())
+        .group(false)
+        .conceptId(903111L)
+        .ancestorData(false)
+        .standard(false);
+  }
+
+  private static SearchParameter age() {
+    return new SearchParameter()
+        .domain(DomainType.PERSON.toString())
+        .type(CriteriaType.AGE.toString())
+        .group(false)
+        .ancestorData(false)
+        .standard(true);
+  }
+
+  private static SearchParameter male() {
+    return new SearchParameter()
+        .domain(DomainType.PERSON.toString())
+        .type(CriteriaType.GENDER.toString())
+        .group(false)
+        .standard(true)
+        .ancestorData(false)
+        .conceptId(8507L);
+  }
+
+  private static SearchParameter race() {
+    return new SearchParameter()
+        .domain(DomainType.PERSON.toString())
+        .type(CriteriaType.RACE.toString())
+        .group(false)
+        .standard(true)
+        .ancestorData(false)
+        .conceptId(1L);
+  }
+
+  private static SearchParameter ethnicity() {
+    return new SearchParameter()
+        .domain(DomainType.PERSON.toString())
+        .type(CriteriaType.ETHNICITY.toString())
+        .group(false)
+        .standard(true)
+        .ancestorData(false)
+        .conceptId(9898L);
+  }
+
+  private static SearchParameter deceased() {
+    return new SearchParameter()
+        .domain(DomainType.PERSON.toString())
+        .type(CriteriaType.DECEASED.toString())
+        .group(false)
+        .standard(true)
+        .ancestorData(false)
+        .value("Deceased");
+  }
+
+  private static SearchParameter survey() {
+    return new SearchParameter()
+        .domain(DomainType.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.SURVEY.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(22L);
+  }
+
+  private static Modifier ageModifier() {
+    return new Modifier()
+        .name(ModifierType.AGE_AT_EVENT)
+        .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+        .operands(Arrays.asList("25"));
+  }
+
+  private static Modifier visitModifier() {
+    return new Modifier()
+        .name(ModifierType.ENCOUNTERS)
+        .operator(Operator.IN)
+        .operands(Arrays.asList("1"));
+  }
+
+  private static Modifier occurrencesModifier() {
+    return new Modifier()
+        .name(ModifierType.NUM_OF_OCCURRENCES)
+        .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+        .operands(Arrays.asList("1"));
+  }
+
+  private static Modifier eventDateModifier() {
+    return new Modifier()
+        .name(ModifierType.EVENT_DATE)
+        .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+        .operands(Arrays.asList("2009-12-03"));
+  }
+
+  private static List<Attribute> wheelchairAttributes() {
+    return Arrays.asList(
+        new Attribute()
+            .name(AttrName.CAT)
+            .operator(Operator.IN)
+            .operands(Arrays.asList("4023190")));
+  }
+
+  private static List<Attribute> bpAttributes() {
+    return Arrays.asList(
+        new Attribute()
+            .name(AttrName.NUM)
+            .operator(Operator.LESS_THAN_OR_EQUAL_TO)
+            .operands(Arrays.asList("90"))
+            .conceptId(903118L),
+        new Attribute()
+            .name(AttrName.NUM)
+            .operator(Operator.BETWEEN)
+            .operands(Arrays.asList("60", "80"))
+            .conceptId(903115L));
+  }
+
+  private static CBCriteria drugCriteriaParent() {
+    return new CBCriteria()
+        .parentId(99999)
+        .domainId(DomainType.DRUG.toString())
+        .type(CriteriaType.ATC.toString())
+        .conceptId("21600932")
+        .group(true)
+        .standard(true)
+        .selectable(true);
+  }
+
+  private static CBCriteria drugCriteriaChild(long parentId) {
+    return new CBCriteria()
+        .parentId(parentId)
+        .domainId(DomainType.DRUG.toString())
+        .type(CriteriaType.RXNORM.toString())
+        .conceptId("1520218")
+        .group(false)
+        .selectable(true);
+  }
+
+  private static CBCriteria icd9CriteriaParent() {
+    return new CBCriteria()
+        .parentId(99999)
+        .domainId(DomainType.CONDITION.toString())
+        .type(CriteriaType.ICD9CM.toString())
+        .standard(false)
+        .code("001")
+        .name("Cholera")
+        .count("19")
+        .group(true)
+        .selectable(true)
+        .ancestorData(false)
+        .conceptId("2")
+        .synonyms("[CONDITION_rank1]");
+  }
+
+  private static CBCriteria icd9CriteriaChild(long parentId) {
+    return new CBCriteria()
+        .parentId(parentId)
+        .domainId(DomainType.CONDITION.toString())
+        .type(CriteriaType.ICD9CM.toString())
+        .standard(false)
+        .code("001.1")
+        .name("Cholera")
+        .count("19")
+        .group(false)
+        .selectable(true)
+        .ancestorData(false)
+        .conceptId("1");
   }
 
   @Test
-  public void countSubjectsNotValidMessageException() throws Exception {
-    //icd9 no type
-    Criteria icd9ConditionChild =
-      createCriteriaChild(null, null, 0, "001", null, null);
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, icd9.getType());
+  public void validateAttribute() throws Exception {
+    SearchParameter demo = age();
+    Attribute attribute = new Attribute().name(AttrName.NUM);
+    demo.attributes(Arrays.asList(attribute));
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(demo), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: attribute operator null is not valid.", bre.getMessage());
+    }
 
-    //icd9 bad type
-    icd9.type(TreeType.VISIT.name());
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, icd9.getType());
+    attribute.operator(Operator.BETWEEN);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: attribute operands are empty.", bre.getMessage());
+    }
 
-    //icd9 no subtype
-    icd9.type(TreeType.ICD9.name());
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, SUBTYPE, icd9.getSubtype());
+    attribute.operands(Arrays.asList("20"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator",
+          bre.getMessage());
+    }
 
-    //icd9 bad subtype
-    icd9.subtype("badsubtype");
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, SUBTYPE, icd9.getSubtype());
+    attribute.operands(Arrays.asList("s", "20"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: attribute NUM operands must be numeric.", bre.getMessage());
+    }
 
-    //icd9 no domain
-    icd9.subtype(TreeSubType.CM.name());
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, icd9.getDomainId());
-
-    //icd9 bad domain
-    icd9.domainId("baddomain");
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, icd9.getDomainId());
-
-    //icd9 child no concept id
-    icd9.domainId(DomainType.CONDITION.name());
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, icd9.getConceptId());
-
-    //icd9 parent no code
-    icd9.group(true).value(null);
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CODE, icd9.getValue());
-
-    //icd9 parent empty code
-    icd9.group(true).value("");
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CODE, icd9.getValue());
-
-    //snomed no type
-    Criteria snomedCrtieria =
-      createCriteriaChild(null, null, 0, "", null, null);
-    SearchParameter snomed = createSearchParameter(snomedCrtieria, "");
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, snomed.getType());
-
-    //snomed bad type
-    snomed.type(TreeType.VISIT.name());
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, snomed.getType());
-
-    //snomed no domain
-    snomed.type(TreeType.SNOMED.name()).subtype(TreeSubType.CM.name());
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, snomed.getDomainId());
-
-    //snomed bad domain
-    snomed.domainId("baddomain");
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, snomed.getDomainId());
-
-    //snomed child no concept id
-    snomed.domainId(DomainType.CONDITION.name());
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, snomed.getConceptId());
-
-    //demo no type
-    Criteria demo =
-      createCriteriaChild(null, null, 0, null, null, null);
-    SearchParameter demoParam = createSearchParameter(demo, null);
-    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, demoParam.getType());
-
-    //demo bad type
-    demoParam.type(TreeType.VISIT.name());
-    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, demoParam.getType());
-
-    //demo no subtype
-    demoParam.type(TreeType.DEMO.name());
-    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, SUBTYPE, demoParam.getSubtype());
-
-    //demo bad subtype
-    demoParam.subtype(TreeSubType.HEIGHT.name());
-    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, SUBTYPE, demoParam.getSubtype());
-
-    //demo no concept id for gender
-    demoParam.subtype(TreeSubType.GEN.name());
-    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, demoParam.getConceptId());
-
-    //demo no concept id for gender
-    Attribute age = new Attribute().name("Age");
-    demoParam.subtype(TreeSubType.AGE.name()).attributes(Arrays.asList(age));
-    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      ATTRIBUTE, OPERATOR, age.getOperator());
-
-    //drug no type
-    Criteria drug =
-      createCriteriaChild(null, null, 0, null, null, null);
-    SearchParameter drugParam = createSearchParameter(drug, null);
-    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, drugParam.getType());
-
-    //drug bad type
-    drugParam.type("blah");
-    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, drugParam.getType());
-
-    //drug no concept id
-    drugParam.type(TreeType.DRUG.name());
-    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, drugParam.getConceptId());
-
-    //meas no type
-    Criteria meas =
-      createCriteriaChild(null, null, 0, null, null, null);
-    Attribute measAttr = new Attribute();
-    SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
-    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, measParam.getType());
-
-    //meas bad type
-    measParam.type("blah");
-    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, measParam.getType());
-
-    //meas no concept id
-    measParam.type(TreeType.MEAS.name());
-    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, measParam.getConceptId());
-
-    //meas no attr name
-    measParam.conceptId(1L);
-    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      ATTRIBUTE, NAME, measAttr.getName());
-
-    //meas no operator
-    measParam.attributes(Arrays.asList(measAttr.name("name")));
-    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      ATTRIBUTE, OPERATOR, measAttr.getOperator());
-
-    //pm no type
-    Criteria pm =
-      createCriteriaChild(null, null, 0, null, null, null);
-    SearchParameter pmParam = createSearchParameter(pm, null);
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, pmParam.getType());
-
-    //pm bad type
-    pmParam.type("blah");
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, pmParam.getType());
-
-    //pm no subtype
-    pmParam.type(TreeType.PM.name());
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, SUBTYPE, pmParam.getSubtype());
-
-    //pm bad subtype
-    pmParam.subtype("blah");
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, SUBTYPE, pmParam.getSubtype());
-
-    //pm no domain
-    pmParam.subtype(TreeSubType.PREG.name());
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, pmParam.getDomainId());
-
-    //pm bad domain
-    pmParam.domainId("blah");
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, pmParam.getDomainId());
-
-    //pm no value
-    pmParam.domainId(DomainType.MEASUREMENT.toString());
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, VALUE, pmParam.getValue());
-
-    //pm value not a number
-    pmParam.value("z");
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, VALUE, pmParam.getValue());
-
-    //pm no concept id
-    pmParam.value("10");
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, pmParam.getConceptId());
-
-    //pm no attribute name
-    Attribute pmAttr = new Attribute();
-    pmParam.subtype(TreeSubType.HEIGHT.name()).attributes(Arrays.asList(pmAttr));
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      ATTRIBUTE, NAME, pmAttr.getName());
-
-    //pm no operator
-    pmAttr.name("HEIGHT");
-    pmParam.attributes(Arrays.asList(pmAttr));
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      ATTRIBUTE, OPERATOR, pmAttr.getOperator());
-
-    //pm no attr concept id
-    pmAttr.name("HEIGHT").operator(Operator.EQUAL).operands(Arrays.asList("1"));
-    pmParam.attributes(Arrays.asList(pmAttr));
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      ATTRIBUTE, CONCEPT_ID, pmAttr.getConceptId());
-
-    //visit no type
-    Criteria visit =
-      createCriteriaChild(null, null, 0, null, null, null);
-    SearchParameter visitParam = createSearchParameter(visit, null);
-    searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, visitParam.getType());
-
-    //visit bad type
-    visitParam.type("blah");
-    searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, visitParam.getType());
-
-    //visit no concept id
-    visitParam.type(TreeType.VISIT.name());
-    searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, visitParam.getConceptId());
-
-    //ppi no type
-    Criteria ppi =
-      createCriteriaChild(null, null, 0, null, null, null);
-    SearchParameter ppiParam = createSearchParameter(ppi, null);
-    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, ppiParam.getType());
-
-    //ppi bad type
-    ppiParam.type("blah");
-    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, ppiParam.getType());
-
-    //ppi no domain
-    ppiParam.type(TreeType.PPI.name());
-    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, ppiParam.getDomainId());
-
-    //ppi bad domain
-    ppiParam.domainId(DomainType.CONDITION.name());
-    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, ppiParam.getDomainId());
-
-    //ppi no concept id
-    ppiParam.domainId(DomainType.OBSERVATION.name());
-    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, ppiParam.getConceptId());
-
-    //ppi no value as number
-    ppiParam.conceptId(1L);
-    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, NAME, ppiParam.getName());
-
-    //ppi value not a number
-    ppiParam.value("name");
-    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, VALUE, ppiParam.getValue());
+    attribute.operands(Arrays.asList("10", "20"));
+    attribute.operator(Operator.EQUAL);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: attribute NUM must have one operand when using the EQUAL operator.",
+          bre.getMessage());
+    }
   }
 
   @Test
-  public void countSubjectsOneOperandMessageException() throws Exception {
-    //demo operands not one
-    Attribute demoAttr = new Attribute().name("Age").operator(Operator.EQUAL).operands(Arrays.asList("1", "2"));
-    Criteria demo =
-      createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
-    SearchParameter demoParam = createSearchParameter(demo, null).attributes(Arrays.asList(demoAttr));
-    SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, ONE_OPERAND_MESSAGE, ATTRIBUTE, demoAttr.getName(),
-      operatorText.get(demoAttr.getOperator()));
+  public void validateModifiers() throws Exception {
+    Modifier modifier = ageModifier().operator(null).operands(new ArrayList<>());
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(modifier));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: modifier operator null is not valid.", bre.getMessage());
+    }
 
-    //pm operands not one
-    Attribute pmAttr = new Attribute().name("Height").operator(Operator.EQUAL).operands(Arrays.asList("1", "2")).conceptId(1L);
-    Criteria pm =
-      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null, null, null);
-    SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(pmAttr));
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, ONE_OPERAND_MESSAGE, ATTRIBUTE, pmAttr.getName(),
-      operatorText.get(pmAttr.getOperator()));
+    modifier.operator(Operator.BETWEEN);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: modifier operands are empty.", bre.getMessage());
+    }
 
-    //modifier operands not one
-    Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.EQUAL).operands(Arrays.asList("1", "2"));
-    Criteria drug =
-      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
-    SearchParameter drugParam = createSearchParameter(drug, null);
-    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(searchRequest, ONE_OPERAND_MESSAGE, MODIFIER,
-      modifierText.get(modifier.getName()),
-      operatorText.get(pmAttr.getOperator()));
-  }
+    modifier.operands(Arrays.asList("20"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: modifier AGE_AT_EVENT can only have 2 operands when using the BETWEEN operator",
+          bre.getMessage());
+    }
 
-  @Test
-  public void countSubjectsTwoOperandMessageException() throws Exception {
-    //demo operands not two
-    Attribute demoAttr = new Attribute().name("Age").operator(Operator.BETWEEN).operands(Arrays.asList("1"));
-    Criteria demo =
-      createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
-    SearchParameter demoParam = createSearchParameter(demo, null).attributes(Arrays.asList(demoAttr));
-    SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, ATTRIBUTE,
-      demoAttr.getName(), operatorText.get(demoAttr.getOperator()));
+    modifier.operands(Arrays.asList("s", "20"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: modifier AGE_AT_EVENT operands must be numeric.", bre.getMessage());
+    }
 
-    //pm operands not two
-    Attribute pmAttr = new Attribute().name("Height").operator(Operator.BETWEEN).operands(Arrays.asList("1")).conceptId(1L);
-    Criteria pm =
-      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null, null, null);
-    SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(pmAttr));
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, ATTRIBUTE,
-      pmAttr.getName(), operatorText.get(pmAttr.getOperator()));
+    modifier.operands(Arrays.asList("10", "20"));
+    modifier.operator(Operator.EQUAL);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: modifier AGE_AT_EVENT must have one operand when using the EQUAL operator.",
+          bre.getMessage());
+    }
 
-    //meas operands not two
-    Attribute measAttr = new Attribute().name("Meas").operator(Operator.BETWEEN).operands(Arrays.asList("1"));
-    Criteria meas =
-      createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, null, null, "1");
-    SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
-    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, ATTRIBUTE,
-      measAttr.getName(), operatorText.get(measAttr.getOperator()));
-
-    //modifier operands not two
-    Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.BETWEEN).operands(Arrays.asList("1"));
-    Criteria drug =
-      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
-    SearchParameter drugParam = createSearchParameter(drug, null);
-    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, MODIFIER,
-      modifierText.get(modifier.getName()), operatorText.get(modifier.getOperator()));
-  }
-
-  @Test
-  public void countSubjectsOperandsNumericMessageException() throws Exception {
-    //demo operands not a number
-    Attribute demoAttr = new Attribute().name("Age").operator(Operator.EQUAL).operands(Arrays.asList("z"));
-    Criteria demo =
-      createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
-    SearchParameter demoParam = createSearchParameter(demo, null).attributes(Arrays.asList(demoAttr));
-    SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE,
-      demoAttr.getName());
-
-    //pm operands not a number
-    Attribute pmAttr = new Attribute().name("Height").operator(Operator.EQUAL).operands(Arrays.asList("z")).conceptId(1L);
-    Criteria pm =
-      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null, null, null);
-    SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(pmAttr));
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE,
-      pmAttr.getName());
-
-    //meas operands not a number
-    Attribute measAttr = new Attribute().name("Meas").operator(Operator.EQUAL).operands(Arrays.asList("z"));
-    Criteria meas =
-      createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, null, null, "1");
-    SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
-    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE,
-      measAttr.getName());
-
-    //encounters operands not a number
-    Modifier modifier = new Modifier().name(ModifierType.ENCOUNTERS).operator(Operator.IN).operands(Arrays.asList("z"));
-    Criteria drug =
-      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
-    SearchParameter drugParam = createSearchParameter(drug, null);
-    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, MODIFIER,
-      modifierText.get(modifier.getName()));
-
-    //age at event operands not a number
-    modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.EQUAL).operands(Arrays.asList("z"));
-    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, MODIFIER,
-      modifierText.get(modifier.getName()));
-  }
-
-  @Test
-  public void countSubjectsOneModifierMessageException() throws Exception {
-    Modifier modifier1 = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.EQUAL).operands(Arrays.asList("1"));
-    Modifier modifier2 = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.EQUAL).operands(Arrays.asList("1"));
-    Criteria drug =
-      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
-    SearchParameter drugParam = createSearchParameter(drug, null);
-    SearchRequest searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier1, modifier2));
-    assertMessageException(searchRequest, ONE_MODIFIER_MESSAGE, modifierText.get(modifier1.getName()));
-  }
-
-  @Test
-  public void countSubjectsDateModifierMessageException() throws Exception {
-    Modifier modifier = new Modifier().name(ModifierType.EVENT_DATE).operator(Operator.EQUAL).operands(Arrays.asList("1"));
-    Criteria drug =
-      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
-    SearchParameter drugParam = createSearchParameter(drug, null);
-    SearchRequest searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(searchRequest, DATE_MODIFIER_MESSAGE, MODIFIER,
-      modifierText.get(modifier.getName()));
-  }
-
-  @Test
-  public void countSubjectsNotInModifierMessageException() throws Exception {
-    Modifier modifier = new Modifier().name(ModifierType.ENCOUNTERS).operator(Operator.EQUAL).operands(Arrays.asList("1"));
-    Criteria drug =
-      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
-    SearchParameter drugParam = createSearchParameter(drug, null);
-    SearchRequest searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(searchRequest, NOT_IN_MODIFIER_MESSAGE, modifierText.get(modifier.getName()),
-      operatorText.get(Operator.IN));
-  }
-
-  @Test
-  public void countSubjectsAgeAndDecMessageException() throws Exception {
-    Attribute demoAttr = new Attribute().name("Age").operator(Operator.EQUAL).operands(Arrays.asList("1"));
-    Criteria demo =
-      createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
-    Criteria dec =
-      createCriteriaChild(TreeType.DEMO.name(), TreeSubType.DEC.name(), 0, null, null, null);
-    SearchParameter demoParam = createSearchParameter(demo, null).attributes(Arrays.asList(demoAttr));
-    SearchParameter decParam = createSearchParameter(dec, null);
-    SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam, decParam), new ArrayList<>());
-    assertMessageException(searchRequest, AGE_DEC_MESSAGE);
-  }
-
-  @Test
-  public void countSubjectsCategoricalMessageException() throws Exception {
-    Attribute measAttr = new Attribute().name(CATEGORICAL).operator(Operator.EQUAL).operands(Arrays.asList("1"));
-    Criteria meas =
-      createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, null, null, "1");
-    SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
-    SearchRequest searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, CATEGORICAL_MESSAGE);
-  }
-
-  @Test
-  public void countSubjectsBPMessageException() throws Exception {
-    Attribute sysAttr = new Attribute().name("Systolic").operator(Operator.EQUAL).operands(Arrays.asList("90"));
-    Attribute nonDiaAttr = new Attribute().name("NotDiastolic").operator(Operator.EQUAL).operands(Arrays.asList("90"));
-
-    //only 1 attribute
-    Criteria pm =
-      createCriteriaChild(TreeType.PM.name(), TreeSubType.BP.name(), 0, null, null, null);
-    SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(sysAttr));
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, BP_TWO_ATTRIBUTE_MESSAGE);
-
-    //2 but not systolic and diastolic
-    pmParam.attributes(Arrays.asList(sysAttr, nonDiaAttr));
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, BP_TWO_ATTRIBUTE_MESSAGE);
+    modifier.name(ModifierType.EVENT_DATE);
+    modifier.operands(Arrays.asList("10"));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals("Bad Request: modifier EVENT_DATE must be a valid date.", bre.getMessage());
+    }
   }
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChild() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildrenAgeAtEvent() throws Exception {
-    Criteria icd9ProcedureChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name(), "2");
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    SearchParameter icd9Proc = createSearchParameter(icd9ProcedureChild, "001.1");
-    Modifier modifier = new Modifier()
-      .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("25"));
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
-      Arrays.asList(icd9, icd9Proc), Arrays.asList(modifier));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildrenEncounter() throws Exception {
-    Criteria icd9ProcedureChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name(), "2");
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    SearchParameter icd9Proc = createSearchParameter(icd9ProcedureChild, "001.1");
-    Modifier modifier = new Modifier()
-      .name(ModifierType.ENCOUNTERS)
-      .operator(Operator.IN)
-      .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
-      Arrays.asList(icd9, icd9Proc), Arrays.asList(modifier));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventBetween() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    DateTime birthDate = new DateTime(1980, 2, 17, 0, 0, 0, 0);
-    DateTime eventDate = new DateTime(2008, 7, 22, 0, 0, 0, 0);
-
-    Period period = new Period(birthDate, eventDate);
-    period.getYears();
-
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    String operand1 = Integer.toString(period.getYears() - 1);
-    String operand2 = Integer.toString(period.getYears() + 1);
-    Modifier modifier = new Modifier()
-      .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.BETWEEN)
-      .operands(Arrays.asList(operand1, operand2));
     SearchRequest searchRequest =
-      createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), Arrays.asList(modifier));
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  @Test
+  public void temporalGroupExceptions() throws Exception {
+    SearchGroupItem icd9SGI =
+        new SearchGroupItem().type(DomainType.CONDITION.toString()).addSearchParametersItem(icd9());
+
+    SearchGroup temporalGroup = new SearchGroup().items(Arrays.asList(icd9SGI)).temporal(true);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: search group item temporal group null is not valid.", bre.getMessage());
+    }
+
+    icd9SGI.temporalGroup(0);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      assertEquals(
+          "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).",
+          bre.getMessage());
+    }
+  }
+
+  @Test
+  public void firstMentionOfICD9WithModifiersOrSnomed5DaysAfterICD10WithModifiers()
+      throws Exception {
+    SearchGroupItem icd9SGI =
+        new SearchGroupItem()
+            .type(DomainType.CONDITION.toString())
+            .addSearchParametersItem(icd9())
+            .temporalGroup(0)
+            .addModifiersItem(ageModifier());
+    SearchGroupItem icd10SGI =
+        new SearchGroupItem()
+            .type(DomainType.CONDITION.toString())
+            .addSearchParametersItem(icd10())
+            .temporalGroup(1)
+            .addModifiersItem(visitModifier());
+    SearchGroupItem snomedSGI =
+        new SearchGroupItem()
+            .type(DomainType.CONDITION.toString())
+            .addSearchParametersItem(snomed())
+            .temporalGroup(0);
+
+    // First Mention Of (ICD9 w/modifiers or Snomed) 5 Days After ICD10 w/modifiers
+    SearchGroup temporalGroup =
+        new SearchGroup()
+            .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
+            .temporal(true)
+            .mention(TemporalMention.FIRST_MENTION)
+            .time(TemporalTime.X_DAYS_AFTER)
+            .timeValue(5L);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    // matches icd9SGI in group 0 and icd10SGI in group 1
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() throws Exception {
+    CBCriteria drugNode1 = drugCriteriaParent();
+    saveCriteriaWithPath("0", drugNode1);
+    CBCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
+    saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
+    insertCriteriaAncestor(1520218, 1520218);
+    SearchGroupItem drugSGI =
+        new SearchGroupItem()
+            .type(DomainType.DRUG.toString())
+            .addSearchParametersItem(drug().conceptId(21600932L))
+            .temporalGroup(0);
+    SearchGroupItem icd10SGI =
+        new SearchGroupItem()
+            .type(DomainType.CONDITION.toString())
+            .addSearchParametersItem(icd10())
+            .temporalGroup(1)
+            .addModifiersItem(visitModifier());
+
+    // First Mention Of Drug 5 Days Before ICD10 w/modifiers
+    SearchGroup temporalGroup =
+        new SearchGroup()
+            .items(Arrays.asList(drugSGI, icd10SGI))
+            .temporal(true)
+            .mention(TemporalMention.FIRST_MENTION)
+            .time(TemporalTime.X_DAYS_BEFORE)
+            .timeValue(5L);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(drugNode1.getId());
+    cbCriteriaDao.delete(drugNode2.getId());
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
+  }
+
+  @Test
+  public void anyMentionOfCPTParent5DaysAfterICD10Child() throws Exception {
+    CBCriteria icd9Parent =
+        new CBCriteria()
+            .ancestorData(false)
+            .code("001")
+            .conceptId("0")
+            .domainId(DomainType.CONDITION.toString())
+            .group(true)
+            .selectable(true)
+            .standard(false)
+            .synonyms("+[CONDITION_rank1]");
+    saveCriteriaWithPath("0", icd9Parent);
+    CBCriteria icd9Child =
+        new CBCriteria()
+            .ancestorData(false)
+            .code("001.1")
+            .conceptId("1")
+            .domainId(DomainType.CONDITION.toString())
+            .group(false)
+            .selectable(true)
+            .standard(false)
+            .synonyms("+[CONDITION_rank1]");
+    saveCriteriaWithPath(icd9Parent.getPath(), icd9Child);
+
+    SearchGroupItem icd9SGI =
+        new SearchGroupItem()
+            .type(DomainType.CONDITION.toString())
+            .addSearchParametersItem(
+                icd9().type(CriteriaType.CPT4.toString()).group(true).conceptId(0L))
+            .temporalGroup(0)
+            .addModifiersItem(visitModifier());
+    SearchGroupItem icd10SGI =
+        new SearchGroupItem()
+            .type(DomainType.CONDITION.toString())
+            .addSearchParametersItem(icd10())
+            .temporalGroup(1);
+
+    // Any Mention Of ICD9 5 Days After ICD10
+    SearchGroup temporalGroup =
+        new SearchGroup()
+            .items(Arrays.asList(icd9SGI, icd10SGI))
+            .temporal(true)
+            .mention(TemporalMention.ANY_MENTION)
+            .time(TemporalTime.X_DAYS_AFTER)
+            .timeValue(5L);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(icd9Parent.getId());
+    cbCriteriaDao.delete(icd9Child.getId());
+  }
+
+  @Test
+  public void anyMentionOfCPTWithIn5DaysOfVisit() throws Exception {
+    SearchGroupItem cptSGI =
+        new SearchGroupItem()
+            .type(DomainType.PROCEDURE.toString())
+            .addSearchParametersItem(procedure())
+            .temporalGroup(0);
+    SearchGroupItem visitSGI =
+        new SearchGroupItem()
+            .type(DomainType.VISIT.toString())
+            .addSearchParametersItem(visit())
+            .temporalGroup(1);
+
+    // Any Mention Of ICD10 Parent within 5 Days of visit
+    SearchGroup temporalGroup =
+        new SearchGroup()
+            .items(Arrays.asList(visitSGI, cptSGI))
+            .temporal(true)
+            .mention(TemporalMention.ANY_MENTION)
+            .time(TemporalTime.WITHIN_X_DAYS_OF)
+            .timeValue(5L);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void firstMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
+    CBCriteria drugCriteria = drugCriteriaChild(1).conceptId("11");
+    saveCriteriaWithPath("0", drugCriteria);
+    insertCriteriaAncestor(11, 11);
+
+    SearchGroupItem drugSGI =
+        new SearchGroupItem()
+            .type(DomainType.DRUG.toString())
+            .addSearchParametersItem(drug())
+            .temporalGroup(0);
+    SearchGroupItem measurementSGI =
+        new SearchGroupItem()
+            .type(DomainType.MEASUREMENT.toString())
+            .addSearchParametersItem(measurement())
+            .temporalGroup(1);
+
+    // First Mention Of Drug during same encounter as measurement
+    SearchGroup temporalGroup =
+        new SearchGroup()
+            .items(Arrays.asList(drugSGI, measurementSGI))
+            .temporal(true)
+            .mention(TemporalMention.FIRST_MENTION)
+            .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(drugCriteria.getId());
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
+  }
+
+  @Test
+  public void lastMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
+    CBCriteria drugCriteria = drugCriteriaChild(1).conceptId("11");
+    saveCriteriaWithPath("0", drugCriteria);
+    insertCriteriaAncestor(11, 11);
+
+    SearchGroupItem drugSGI =
+        new SearchGroupItem()
+            .type(DomainType.DRUG.toString())
+            .addSearchParametersItem(drug())
+            .temporalGroup(0);
+    SearchGroupItem measurementSGI =
+        new SearchGroupItem()
+            .type(DomainType.MEASUREMENT.toString())
+            .addSearchParametersItem(measurement())
+            .temporalGroup(1);
+
+    // Last Mention Of Drug during same encounter as measurement
+    SearchGroup temporalGroup =
+        new SearchGroup()
+            .items(Arrays.asList(drugSGI, measurementSGI))
+            .temporal(true)
+            .mention(TemporalMention.LAST_MENTION)
+            .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(drugCriteria.getId());
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
+  }
+
+  @Test
+  public void lastMentionOfDrugDuringSameEncounterAsMeasurementOrVisit() throws Exception {
+    CBCriteria drugCriteria =
+        new CBCriteria()
+            .domainId(DomainType.DRUG.toString())
+            .type(CriteriaType.ATC.toString())
+            .group(false)
+            .ancestorData(true)
+            .standard(true)
+            .conceptId("11");
+    saveCriteriaWithPath("0", drugCriteria);
+    insertCriteriaAncestor(11, 11);
+
+    SearchGroupItem drugSGI =
+        new SearchGroupItem()
+            .type(DomainType.DRUG.toString())
+            .addSearchParametersItem(drug())
+            .temporalGroup(0);
+    SearchGroupItem measurementSGI =
+        new SearchGroupItem()
+            .type(DomainType.MEASUREMENT.toString())
+            .addSearchParametersItem(measurement())
+            .temporalGroup(1);
+    SearchGroupItem visitSGI =
+        new SearchGroupItem()
+            .type(DomainType.VISIT.toString())
+            .addSearchParametersItem(visit())
+            .temporalGroup(1);
+
+    // Last Mention Of Drug during same encounter as measurement
+    SearchGroup temporalGroup =
+        new SearchGroup()
+            .items(Arrays.asList(drugSGI, measurementSGI, visitSGI))
+            .temporal(true)
+            .mention(TemporalMention.LAST_MENTION)
+            .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(drugCriteria.getId());
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
+  }
+
+  @Test
+  public void lastMentionOfMeasurementOrVisit5DaysAfterDrug() throws Exception {
+    CBCriteria drugCriteria1 = drugCriteriaParent();
+    saveCriteriaWithPath("0", drugCriteria1);
+    CBCriteria drugCriteria2 = drugCriteriaChild(drugCriteria1.getId());
+    saveCriteriaWithPath(drugCriteria1.getPath(), drugCriteria2);
+    insertCriteriaAncestor(1520218, 1520218);
+
+    SearchGroupItem measurementSGI =
+        new SearchGroupItem()
+            .type(DomainType.MEASUREMENT.toString())
+            .addSearchParametersItem(measurement())
+            .temporalGroup(0);
+    SearchGroupItem visitSGI =
+        new SearchGroupItem()
+            .type(DomainType.VISIT.toString())
+            .addSearchParametersItem(visit())
+            .temporalGroup(0);
+    SearchGroupItem drugSGI =
+        new SearchGroupItem()
+            .type(DomainType.DRUG.toString())
+            .addSearchParametersItem(drug().group(true).conceptId(21600932L))
+            .temporalGroup(1);
+
+    // Last Mention Of Measurement or Visit 5 days after Drug
+    SearchGroup temporalGroup =
+        new SearchGroup()
+            .items(Arrays.asList(drugSGI, measurementSGI, visitSGI))
+            .temporal(true)
+            .mention(TemporalMention.LAST_MENTION)
+            .time(TemporalTime.X_DAYS_AFTER)
+            .timeValue(5L);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(drugCriteria1.getId());
+    cbCriteriaDao.delete(drugCriteria2.getId());
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
+  }
+
+  @Test
+  public void countSubjectsICD9ConditionChildAgeAtEvent() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(ageModifier()));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsICD9ConditionChildEncounter() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(visitModifier()));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsICD9ConditionChildAgeAtEventBetween() throws Exception {
+    Modifier modifier =
+        ageModifier().operator(Operator.BETWEEN).operands(Arrays.asList("37", "39"));
+
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(modifier));
+
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrences() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    Modifier modifier1 = new Modifier()
-      .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("25"));
-    Modifier modifier2 = new Modifier()
-      .name(ModifierType.NUM_OF_OCCURRENCES)
-      .operator(Operator.EQUAL)
-      .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
-      Arrays.asList(icd9), Arrays.asList(modifier1, modifier2));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(),
+            Arrays.asList(icd9()),
+            Arrays.asList(ageModifier(), occurrencesModifier().operands(Arrays.asList("2"))));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrencesAndEventDate() throws Exception {
-    Criteria icd9ProcedureChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name(), "2");
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    SearchParameter icd9Proc = createSearchParameter(icd9ProcedureChild, "001.1");
-    Modifier modifier1 = new Modifier()
-      .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("25"));
-    Modifier modifier2 = new Modifier()
-      .name(ModifierType.NUM_OF_OCCURRENCES)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("1"));
-    Modifier modifier3 = new Modifier()
-      .name(ModifierType.EVENT_DATE)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("2009-12-03"));
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
-      Arrays.asList(icd9,icd9Proc), Arrays.asList(modifier1, modifier2, modifier3));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  public void countSubjectsICD9ConditioChildAgeAtEventAndOccurrencesAndEventDate()
+      throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(),
+            Arrays.asList(icd9(), icd9().conceptId(2L)),
+            Arrays.asList(ageModifier(), occurrencesModifier(), eventDateModifier()));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildEventDate() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    Modifier modifier = new Modifier()
-      .name(ModifierType.EVENT_DATE)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("2009-12-03"));
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
-      Arrays.asList(icd9), Arrays.asList(modifier));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  public void countSubjectsICD9ConditionChildEventDate() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(),
+            Arrays.asList(icd9()),
+            Arrays.asList(eventDateModifier()));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildOccurrences() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    Modifier modifier2 = new Modifier()
-      .name(ModifierType.NUM_OF_OCCURRENCES)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
-      Arrays.asList(icd9), Arrays.asList(modifier2));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  public void countSubjectsICD9ConditionNumOfOccurrences() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(),
+            Arrays.asList(icd9()),
+            Arrays.asList(occurrencesModifier()));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceParent() throws Exception {
-    Criteria icd9ConditionParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), "001"));
-    Criteria icd9ConditionChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9ConditionParent.getId(), "001", DomainType.CONDITION.name(), "1"));
-    SearchParameter icd9 = createSearchParameter(icd9ConditionParent, "001");
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    criteriaDao.delete(icd9ConditionChild);
-    criteriaDao.delete(icd9ConditionParent);
+  public void countSubjectsICD9Child() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(icd9()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ProcedureOccurrenceChild() throws Exception {
-    Criteria icd9ProcedureChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name(), "2");
-    SearchParameter icd9 = createSearchParameter(icd9ProcedureChild, "002.1");
-    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
+  public void countSubjectsICD9ConditionParent() throws Exception {
+    CBCriteria criteriaParent = icd9CriteriaParent();
+    saveCriteriaWithPath("0", criteriaParent);
+    CBCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
+    saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
 
-  @Test
-  public void countSubjectsICD9ProcedureOccurrenceParent() throws Exception {
-    Criteria icd9ProcedureParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), TreeSubType.PROC.name(), "002"));
-    Criteria icd9ProcedureChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), icd9ProcedureParent.getId(), "002", DomainType.PROCEDURE.name(), "2"));
-    SearchParameter icd9 = createSearchParameter(icd9ProcedureParent, "002");
-    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    criteriaDao.delete(icd9ProcedureChild);
-    criteriaDao.delete(icd9ProcedureParent);
-  }
-
-  @Test
-  public void countSubjectsICD9MeasurementChild() throws Exception {
-    Criteria icd9MeasurementChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "003", DomainType.MEASUREMENT.name(), "3");
-    SearchParameter icd9 = createSearchParameter(icd9MeasurementChild, "003.1");
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9MeasurementParent() throws Exception {
-    Criteria icd9MeasurementParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), "003"));
-    Criteria icd9MeasurementChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9MeasurementParent.getId(), "003", DomainType.MEASUREMENT.name(), "3"));
-    SearchParameter icd9 = createSearchParameter(icd9MeasurementParent, "003");
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    criteriaDao.delete(icd9MeasurementChild);
-    criteriaDao.delete(icd9MeasurementParent);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(),
+            Arrays.asList(icd9().group(true).conceptId(2L)),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(criteriaParent.getId());
+    cbCriteriaDao.delete(criteriaChild.getId());
   }
 
   @Test
   public void countSubjectsDemoGender() throws Exception {
-    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
-    SearchParameter demo = createSearchParameter(demoGender, null);
-    SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PERSON.toString(), Arrays.asList(male()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsDemoRace() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PERSON.toString(), Arrays.asList(race()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsDemoEthnicity() throws Exception {
-    Criteria demoEthnicity = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.ETH.name(), "9898");
-    SearchParameter demo = createSearchParameter(demoEthnicity, null);
-    SearchRequest searchRequest = createSearchRequests(demoEthnicity.getType(), Arrays.asList(demo), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PERSON.toString(), Arrays.asList(ethnicity()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsDemoDec() throws Exception {
-    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.DEC.name(), null);
-    SearchParameter demo = createSearchParameter(demoGender, "Deceased");
-    SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PERSON.toString(), Arrays.asList(deceased()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsDemoAge() throws Exception {
-    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
-    DateTime now = new DateTime();
-    Period period = new Period(birthDate, now);
-    Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
-    SearchParameter demo = createSearchParameter(demoAge, null);
-    demo.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
-    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
-  }
-
-  @Test
-  public void countSubjectsDemoAgeBetween() throws Exception {
-    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
-    SearchParameter demo = createSearchParameter(demoAge, null);
-    demo.attributes(Arrays.asList(
-      new Attribute().operator(Operator.BETWEEN).operands(Arrays.asList("15","99"))
-    ));
-    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
-  }
-
-  @Test
-  public void countSubjectsDemoGenderAndAge() throws Exception {
-    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
-    SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
-
-    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
-    DateTime now = new DateTime();
-    Period period = new Period(birthDate, now);
-    Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
-    SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
-    demoAgeSearchParam.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
-
-    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+    Integer lo = getTestPeriod().getYears() - 1;
+    Integer hi = getTestPeriod().getYears() + 1;
+    SearchParameter demo = age();
+    demo.attributes(
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.AGE)
+                .operator(Operator.BETWEEN)
+                .operands(Arrays.asList(lo.toString(), hi.toString()))));
+    SearchRequest searchRequests =
+        createSearchRequests(DomainType.PERSON.toString(), Arrays.asList(demo), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
   }
 
   @Test
   public void countSubjectsICD9AndDemo() throws Exception {
-    Criteria icd9MeasurementChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "003", DomainType.MEASUREMENT.name(), "3");
-    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
-    SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
+    SearchParameter demoAgeSearchParam = age();
+    Integer lo = getTestPeriod().getYears() - 1;
+    Integer hi = getTestPeriod().getYears() + 1;
 
-    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
-    DateTime now = new DateTime();
-    Period period = new Period(birthDate, now);
-    Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
-    SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
-    demoAgeSearchParam.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
+    demoAgeSearchParam.attributes(
+        Arrays.asList(
+            new Attribute()
+                .operator(Operator.BETWEEN)
+                .operands(Arrays.asList(lo.toString(), hi.toString()))));
 
-    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam), new ArrayList<>());
+    SearchRequest searchRequests =
+        createSearchRequests(
+            DomainType.PERSON.toString(), Arrays.asList(male()), new ArrayList<>());
 
-    SearchParameter icd9 = createSearchParameter(icd9MeasurementChild, "003.1");
-    SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type(TreeType.CONDITION.name()).searchParameters(Arrays.asList(icd9)).modifiers(new ArrayList<>());
+    SearchGroupItem anotherSearchGroupItem =
+        new SearchGroupItem()
+            .type(DomainType.CONDITION.toString())
+            .searchParameters(Arrays.asList(icd9().conceptId(3L)))
+            .modifiers(new ArrayList<>());
+
+    SearchGroupItem anotherNewSearchGroupItem =
+        new SearchGroupItem()
+            .type(DomainType.PERSON.toString())
+            .searchParameters(Arrays.asList(demoAgeSearchParam))
+            .modifiers(new ArrayList<>());
 
     searchRequests.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
+    searchRequests.getIncludes().get(0).addItemsItem(anotherNewSearchGroupItem);
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
   }
 
   @Test
   public void countSubjectsDemoExcluded() throws Exception {
-    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
-    SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
-
-    SearchParameter demoGenderSearchParamExclude = createSearchParameter(demoGender, null);
-
-    SearchGroupItem excludeSearchGroupItem = new SearchGroupItem().type(demoGender.getType())
-      .searchParameters(Arrays.asList(demoGenderSearchParamExclude));
+    SearchGroupItem excludeSearchGroupItem =
+        new SearchGroupItem()
+            .type(DomainType.PERSON.toString())
+            .searchParameters(Arrays.asList(male()));
     SearchGroup excludeSearchGroup = new SearchGroup().addItemsItem(excludeSearchGroupItem);
 
-    SearchRequest searchRequests = createSearchRequests(demoGender.getType(), Arrays.asList(demoGenderSearchParam), new ArrayList<>());
+    SearchRequest searchRequests =
+        createSearchRequests(
+            DomainType.PERSON.toString(), Arrays.asList(male()), new ArrayList<>());
     searchRequests.getExcludes().add(excludeSearchGroup);
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 0);
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 0);
   }
 
   @Test
-  public void countSubjectsICD10ConditionOccurrenceChildEncounter() throws Exception {
-    Criteria icd10ConditionChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
-    SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
-    Modifier modifier = new Modifier().name(ModifierType.ENCOUNTERS).operator(Operator.IN).operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), Arrays.asList(modifier));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  public void countSubjectsICD9ParentAndICD10ChildCondition() throws Exception {
+    CBCriteria criteriaParent = icd9CriteriaParent();
+    saveCriteriaWithPath("0", criteriaParent);
+    CBCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
+    saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
+
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(),
+            Arrays.asList(icd9().group(true).conceptId(2L), icd10().conceptId(6L)),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+    cbCriteriaDao.delete(criteriaParent.getId());
+    cbCriteriaDao.delete(criteriaChild.getId());
   }
 
   @Test
-  public void countSubjectsICD10ConditionOccurrenceChild() throws Exception {
-    Criteria icd10ConditionChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
-    SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  public void countSubjectsCPTProcedure() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PROCEDURE.toString(),
+            Arrays.asList(procedure().conceptId(4L)),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildICD10ConditionOccurrenceChild() throws Exception {
-    Criteria icd9ConditionParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), "001"));
-    Criteria icd9ConditionChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9ConditionParent.getId(), "001", DomainType.CONDITION.name(), "1"));
-    Criteria icd10ConditionChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
-    SearchParameter icd9P = createSearchParameter(icd9ConditionParent, "001");
-    SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9P, icd10), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-    criteriaDao.delete(icd9ConditionChild);
-    criteriaDao.delete(icd9ConditionParent);
+  public void countSubjectsSnomedChildCondition() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(),
+            Arrays.asList(snomed().standard(true).conceptId(6L)),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD10ConditionOccurrenceParent() throws Exception {
-    Criteria icd10ConditionParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.CM.name(), "A"));
-    Criteria icd10ConditionChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), icd10ConditionParent.getId(), "A09", DomainType.CONDITION.name(), "6"));
-    SearchParameter icd10 = createSearchParameter(icd10ConditionParent, "A");
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    criteriaDao.delete(icd10ConditionChild);
-    criteriaDao.delete(icd10ConditionParent);
+  public void countSubjectsSnomedParentProcedure() throws Exception {
+    SearchParameter snomed = snomed().group(true).standard(true).conceptId(4302541L);
+
+    CBCriteria criteriaParent =
+        new CBCriteria()
+            .parentId(99999)
+            .domainId(DomainType.PROCEDURE.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .standard(true)
+            .code("386637004")
+            .name("Obstetric procedure")
+            .count("36673")
+            .group(true)
+            .selectable(true)
+            .ancestorData(false)
+            .conceptId("4302541")
+            .synonyms("+[PROCEDURE_rank1]");
+    saveCriteriaWithPath("0", criteriaParent);
+    CBCriteria criteriaChild =
+        new CBCriteria()
+            .parentId(criteriaParent.getId())
+            .domainId(DomainType.PROCEDURE.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .standard(true)
+            .code("386639001")
+            .name("Termination of pregnancy")
+            .count("50")
+            .group(false)
+            .selectable(true)
+            .ancestorData(false)
+            .conceptId("4")
+            .synonyms("+[PROCEDURE_rank1]");
+    saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
+
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), Arrays.asList(snomed), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    cbCriteriaDao.delete(criteriaParent.getId());
+    cbCriteriaDao.delete(criteriaChild.getId());
   }
 
   @Test
-  public void countSubjectsICD10ProcedureOccurrenceChild() throws Exception {
-    Criteria icd10ProcedureChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.PCS.name(), 0, "16070", DomainType.PROCEDURE.name(), "8");
-    SearchParameter icd10 = createSearchParameter(icd10ProcedureChild, "16070");
-    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  public void countSubjectsVisit() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.VISIT.toString(), Arrays.asList(visit().conceptId(10L)), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
-  public void countSubjectsICD10ProcedureOccurrenceParent() throws Exception {
-    Criteria icd10ProcedureParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.PCS.name(), "16"));
-    Criteria icd10ProcedureChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.PCS.name(), icd10ProcedureParent.getId(), "16070", DomainType.PROCEDURE.name(), "8"));
-    SearchParameter icd10 = createSearchParameter(icd10ProcedureParent, "16");
-    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    criteriaDao.delete(icd10ProcedureChild);
-    criteriaDao.delete(icd10ProcedureParent);
-  }
-
-  @Test
-  public void countSubjectsICD10MeasurementChild() throws Exception {
-    Criteria icd10MeasurementChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "R92.2", DomainType.MEASUREMENT.name(), "9");
-    SearchParameter icd10 = createSearchParameter(icd10MeasurementChild, "R92.2");
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD10MeasurementParent() throws Exception {
-    Criteria icd10MeasurementParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.CM.name(), "R92"));
-    Criteria icd10MeasurementChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), icd10MeasurementParent.getId(), "R92.2", DomainType.MEASUREMENT.name(), "9"));
-    SearchParameter icd10 = createSearchParameter(icd10MeasurementParent, "R92");
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    criteriaDao.delete(icd10MeasurementChild);
-    criteriaDao.delete(icd10MeasurementParent);
-  }
-
-  @Test
-  public void countSubjectsCPTProcedureOccurrence() throws Exception {
-    Criteria cptProcedure =
-      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001T", DomainType.PROCEDURE.name(), "4");
-    SearchParameter cpt = createSearchParameter(cptProcedure, "0001T");
-    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsCPTProcedureOccurrenceEncounter() throws Exception {
-    Criteria cptProcedure =
-      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001T", DomainType.PROCEDURE.name(), "4");
-    SearchParameter cpt = createSearchParameter(cptProcedure, "0001T");
-    Modifier modifier = new Modifier().name(ModifierType.ENCOUNTERS).operator(Operator.IN).operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), Arrays.asList(modifier));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsCPTObservation() throws Exception {
-    Criteria cptObservation =
-      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001Z", DomainType.OBSERVATION.name(), "5");
-    SearchParameter cpt = createSearchParameter(cptObservation, "0001Z");
-    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsCPTMeasurement() throws Exception {
-    Criteria cptMeasurement =
-      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001Q", DomainType.MEASUREMENT.name(), "10");
-    SearchParameter cpt = createSearchParameter(cptMeasurement, "0001Q");
-    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsConditionsSnomed() throws Exception {
-    Criteria snomedCriteria =
-      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.CM.name(), 0, "", DomainType.CONDITION.name(), "6");
-    SearchParameter snomed = createSearchParameter(snomedCriteria, "");
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsProceduresSnomed() throws Exception {
-    Criteria snomedCriteria =
-      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.PCS.name(), 0, "", DomainType.PROCEDURE.name(), "4");
-    SearchParameter snomed = createSearchParameter(snomedCriteria, "");
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsCPTDrugExposure() throws Exception {
-    Criteria cptDrug =
-      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "90703", DomainType.DRUG.name(), "11");
-    SearchParameter cpt = createSearchParameter(cptDrug, "90703");
-    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsVisitChild() throws Exception {
-    Criteria visitCriteria = new Criteria().type(TreeType.VISIT.name()).group(false).conceptId("10");
-    SearchParameter visit = createSearchParameter(visitCriteria, null);
-    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsVisitParent() throws Exception {
-    Criteria visitCriteria = new Criteria().type(TreeType.VISIT.name()).group(true).conceptId("1");
-    SearchParameter visit = createSearchParameter(visitCriteria, null);
-    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-  }
-
-  @Test
-  public void countSubjectsVisitChildOrParent() throws Exception {
-    Criteria visitChildCriteria = new Criteria().type(TreeType.VISIT.name()).group(false).conceptId("1");
-    Criteria visitParentCriteria = new Criteria().type(TreeType.VISIT.name()).group(true).conceptId("1");
-    SearchParameter visitChild = createSearchParameter(visitChildCriteria, null);
-    SearchParameter visitParent = createSearchParameter(visitParentCriteria, null);
-    SearchRequest searchRequest = createSearchRequests(visitChild.getType(), Arrays.asList(visitChild, visitParent), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-  }
-
-  @Test
-  public void countSubjectsVisitChildModifiers() throws Exception {
-    Criteria visitCriteria = new Criteria().type(TreeType.VISIT.name()).group(false).conceptId("10");
-    SearchParameter visit = createSearchParameter(visitCriteria, null);
-    Modifier modifier = new Modifier()
-    .name(ModifierType.NUM_OF_OCCURRENCES)
-    .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-    .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), Arrays.asList(modifier));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  public void countSubjectsVisitModifiers() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.VISIT.toString(),
+            Arrays.asList(visit().conceptId(10L)),
+            Arrays.asList(occurrencesModifier()));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
   public void countSubjectsDrugChild() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
-    SearchParameter drug = createSearchParameter(drugCriteria, null);
-    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    insertCriteriaAncestor(11, 11);
+    SearchRequest searchRequest =
+        createSearchRequests(DomainType.DRUG.toString(), Arrays.asList(drug()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
   public void countSubjectsDrugParent() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(true).conceptId("21600932");
-    SearchParameter drug = createSearchParameter(drugCriteria, null);
-    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    CBCriteria drugNode1 = drugCriteriaParent();
+    saveCriteriaWithPath("0", drugNode1);
+    CBCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
+    saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
+
+    insertCriteriaAncestor(1520218, 1520218);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.DRUG.toString(),
+            Arrays.asList(drug().group(true).conceptId(21600932L)),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    cbCriteriaDao.delete(drugNode1.getId());
+    cbCriteriaDao.delete(drugNode2.getId());
   }
 
   @Test
   public void countSubjectsDrugParentAndChild() throws Exception {
-    Criteria drugCriteriaChild = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
-    Criteria drugCriteriaParent = new Criteria().type(TreeType.DRUG.name()).group(true).conceptId("21600932");
-    SearchParameter drugParent = createSearchParameter(drugCriteriaParent, null);
-    SearchParameter drugChild = createSearchParameter(drugCriteriaChild, null);
-    SearchRequest searchRequest = createSearchRequests(drugParent.getType(), Arrays.asList(drugParent,drugChild), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    CBCriteria drugNode1 = drugCriteriaParent();
+    saveCriteriaWithPath("0", drugNode1);
+    CBCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
+    saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
+
+    insertCriteriaAncestor(1520218, 1520218);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.DRUG.toString(),
+            Arrays.asList(drug().group(true).conceptId(21600932L), drug()),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    cbCriteriaDao.delete(drugNode1.getId());
+    cbCriteriaDao.delete(drugNode2.getId());
   }
 
   @Test
   public void countSubjectsDrugChildEncounter() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
-    SearchParameter drug = createSearchParameter(drugCriteria, null);
-    Modifier modifier = new Modifier()
-      .name(ModifierType.ENCOUNTERS)
-      .operator(Operator.IN)
-      .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), Arrays.asList(modifier));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    insertCriteriaAncestor(11, 11);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.DRUG.toString(), Arrays.asList(drug()), Arrays.asList(visitModifier()));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
-  public void countSubjectsDrugChildModifiers() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
-    SearchParameter drug = createSearchParameter(drugCriteria, null);
-    Modifier modifier = new Modifier()
-      .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("25"));
-    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), Arrays.asList(modifier));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  public void countSubjectsDrugChildAgeAtEvent() throws Exception {
+    insertCriteriaAncestor(11, 11);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.DRUG.toString(), Arrays.asList(drug()), Arrays.asList(ageModifier()));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
   @Test
-  public void countSubjectsLabTextAnyEncounter() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
-    Modifier modifier = new Modifier()
-      .name(ModifierType.ENCOUNTERS)
-      .operator(Operator.IN)
-      .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), Arrays.asList(modifier));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabTextAny() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabNumericalAny() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  public void countSubjectsLabEncounter() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.MEASUREMENT.toString(),
+            Arrays.asList(measurement()),
+            Arrays.asList(visitModifier()));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsLabNumericalBetween() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(NUMERICAL).operator(Operator.BETWEEN).operands(Arrays.asList("0", "1"))));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabCategoricalAny() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    SearchParameter lab = measurement();
+    lab.attributes(
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.BETWEEN)
+                .operands(Arrays.asList("0", "1"))));
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.MEASUREMENT.toString(), Arrays.asList(lab), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsLabCategoricalIn() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(CATEGORICAL).operator(Operator.IN).operands(Arrays.asList("1"))));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabBothAny() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    SearchParameter lab = measurement();
+    lab.attributes(
+        Arrays.asList(
+            new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("1"))));
+    SearchRequest searchRequest =
+        createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsLabBothNumericalAndCategorical() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    Attribute numerical = new Attribute().name(BOTH).operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
-    Attribute categorical = new Attribute().name(BOTH).operator(Operator.IN).operands(Arrays.asList("1"));
+    SearchParameter lab = measurement();
+    Attribute numerical =
+        new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
+    Attribute categorical =
+        new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("1", "2"));
     lab.attributes(Arrays.asList(numerical, categorical));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    SearchRequest searchRequest =
+        createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsLabBothNumericalAndCategoricalSpecificName() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    Attribute numerical = new Attribute().name(NUMERICAL).operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
-    Attribute categorical = new Attribute().name(CATEGORICAL).operator(Operator.IN).operands(Arrays.asList("1"));
-    lab.attributes(Arrays.asList(numerical, categorical));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabBothCategorical() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    Attribute categorical = new Attribute().name(BOTH).operator(Operator.IN).operands(Arrays.asList("1"));
-    lab.attributes(Arrays.asList(categorical));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabBothNumerical() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    Attribute numerical = new Attribute().name(BOTH).operator(Operator.EQUAL).operands(Arrays.asList("1.0"));
-    lab.attributes(Arrays.asList(numerical));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabNumericalAnyAgeAtEvent() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
-    Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.GREATER_THAN_OR_EQUAL_TO).operands(Arrays.asList("25"));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), Arrays.asList(modifier));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  public void countSubjectsLabCategoricalAgeAtEvent() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.MEASUREMENT.toString(),
+            Arrays.asList(measurement()),
+            Arrays.asList(ageModifier()));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsLabMoreThanOneSearchParameter() throws Exception {
-    Criteria labCriteria1 = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    Criteria labCriteria2 = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("9");
-    Criteria labCriteria3 = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("9");
-    SearchParameter lab1 = createSearchParameter(labCriteria1, null);
-    SearchParameter lab2 = createSearchParameter(labCriteria2, null);
-    SearchParameter lab3 = createSearchParameter(labCriteria3, null);
-    Attribute labText = new Attribute().name(ANY);
-    Attribute labNumerical = new Attribute().name(ANY);
-    Attribute labCategorical = new Attribute().name(CATEGORICAL).operator(Operator.IN).operands(Arrays.asList("77"));
-    lab1.attributes(Arrays.asList(labText));
-    lab2.attributes(Arrays.asList(labNumerical));
+    SearchParameter lab1 = measurement();
+    SearchParameter lab2 = measurement().conceptId(9L);
+    SearchParameter lab3 = measurement().conceptId(9L);
+    Attribute labCategorical =
+        new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("77"));
     lab3.attributes(Arrays.asList(labCategorical));
-    SearchRequest searchRequest = createSearchRequests(lab1.getType(), Arrays.asList(lab1, lab2, lab3), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
+    SearchRequest searchRequest =
+        createSearchRequests(lab1.getDomain(), Arrays.asList(lab1, lab2, lab3), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
   public void countSubjectsBloodPressure() throws Exception {
-    List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L),
-      new Attribute().name("Diastolic").operator(Operator.BETWEEN).operands(Arrays.asList("60","80")).conceptId(903115L)
-    );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.BP.name(), "BP Name", attributes);
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    SearchParameter pm = bloodPressure().attributes(bpAttributes());
+    SearchRequest searchRequest =
+        createSearchRequests(pm.getType(), Arrays.asList(pm), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsBloodPressureAny() throws Exception {
-    List<Attribute> attributes = Arrays.asList(
-      new Attribute().name(ANY).operands(new ArrayList<>()).conceptId(903118L),
-      new Attribute().name(ANY).operands(new ArrayList<>()).conceptId(903115L)
-    );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.BP.name(), "BP Name", attributes);
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    List<Attribute> attributes =
+        Arrays.asList(
+            new Attribute().name(AttrName.ANY).operands(new ArrayList<>()).conceptId(903118L),
+            new Attribute().name(AttrName.ANY).operands(new ArrayList<>()).conceptId(903115L));
+    SearchParameter pm = bloodPressure().attributes(attributes);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsBloodPressureOrHeartRateDetail() throws Exception {
+    SearchParameter bpPm = bloodPressure().attributes(bpAttributes());
+
+    List<Attribute> hrAttributes =
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.EQUAL)
+                .operands(Arrays.asList("71")));
+    SearchParameter hrPm = hrDetail().attributes(hrAttributes);
+
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(),
+            Arrays.asList(bpPm, hrPm),
+            new ArrayList<>());
+
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
   public void countSubjectsBloodPressureOrHeartRateDetailOrHeartRateIrr() throws Exception {
-    List<Attribute> bpAttributes = Arrays.asList(
-      new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L),
-      new Attribute().name("Diastolic").operator(Operator.BETWEEN).operands(Arrays.asList("60","80")).conceptId(903115L)
-    );
-    SearchParameter bpSearchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.BP.name(), "BP Name", bpAttributes);
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(bpSearchParameter), new ArrayList<>());
+    SearchParameter bpPm = bloodPressure().attributes(bpAttributes());
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(bpPm), new ArrayList<>());
 
-    List<Attribute> hrAttributes = Arrays.asList(
-      new Attribute().name("Heart Rate").operator(Operator.EQUAL).operands(Arrays.asList("71")).conceptId(903126L)
-    );
-    SearchParameter hrSearchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.HR_DETAIL.toString(), "Heart Rate Detail", hrAttributes);
-    SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type(TreeType.PM.name()).searchParameters(Arrays.asList(hrSearchParameter)).modifiers(new ArrayList<>());
+    List<Attribute> hrAttributes =
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.EQUAL)
+                .operands(Arrays.asList("71")));
+    SearchParameter hrPm = hrDetail().attributes(hrAttributes);
+    SearchGroupItem anotherSearchGroupItem =
+        new SearchGroupItem()
+            .type(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .searchParameters(Arrays.asList(hrPm))
+            .modifiers(new ArrayList<>());
 
     searchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
-    SearchParameter heartRateIrr = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.HR.name(), "Heart Rate Irr", "1586218", "4262985");
-    SearchGroupItem heartRateIrrSearchGroupItem = new SearchGroupItem().type(TreeType.PM.name()).searchParameters(Arrays.asList(heartRateIrr)).modifiers(new ArrayList<>());
+    List<Attribute> irrAttributes =
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.CAT)
+                .operator(Operator.IN)
+                .operands(Arrays.asList("4262985")));
+    SearchParameter hrIrrPm = hr().attributes(irrAttributes);
+    SearchGroupItem heartRateIrrSearchGroupItem =
+        new SearchGroupItem()
+            .type(DomainType.PHYSICAL_MEASUREMENT.toString())
+            .searchParameters(Arrays.asList(hrIrrPm))
+            .modifiers(new ArrayList<>());
 
     searchRequest.getIncludes().get(0).addItemsItem(heartRateIrrSearchGroupItem);
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
   }
 
   @Test
-  public void countSubjectsHeartRateNoIrr() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.HR.name(), "Heart Rate Irr", "1586218", "4297303");
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
+  public void countSubjectsHeartRateAny() throws Exception {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(),
+            Arrays.asList(hrDetail().conceptId(1586218L)),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+  }
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  @Test
+  public void countSubjectsHeartRate() throws Exception {
+    List<Attribute> attributes =
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+                .operands(Arrays.asList("45")));
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(),
+            Arrays.asList(hrDetail().conceptId(1586218L).attributes(attributes)),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
   public void countSubjectsHeight() throws Exception {
-    List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("Height").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("168")).conceptId(903133L)
-    );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.HEIGHT.name(), "Height", attributes);
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
+    List<Attribute> attributes =
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.LESS_THAN_OR_EQUAL_TO)
+                .operands(Arrays.asList("168")));
+    SearchParameter pm = height().attributes(attributes);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsWeight() throws Exception {
-    List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("Weight").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("201")).conceptId(903121L)
-    );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.WEIGHT.name(), "Weight", attributes);
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
+    List<Attribute> attributes =
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.LESS_THAN_OR_EQUAL_TO)
+                .operands(Arrays.asList("201")));
+    SearchParameter pm = weight().attributes(attributes);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsBMI() throws Exception {
-    List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("BMI").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("263")).conceptId(903124L)
-    );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.BMI.name(), "BMI", attributes);
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
+    List<Attribute> attributes =
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.LESS_THAN_OR_EQUAL_TO)
+                .operands(Arrays.asList("263")));
+    SearchParameter pm = bmi().attributes(attributes);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectWaistCircumference() throws Exception {
-    List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("Waist").operator(Operator.EQUAL).operands(Arrays.asList("31")).conceptId(903135L)
-    );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.WC.name(), "Waist", attributes);
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
+  public void countSubjectWaistCircumferenceAndHipCircumference() throws Exception {
+    List<Attribute> attributes =
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.EQUAL)
+                .operands(Arrays.asList("31")));
+    SearchParameter pm = waistCircumference().attributes(attributes);
+    SearchParameter pm1 = hipCircumference().attributes(attributes);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm, pm1), new ArrayList<>());
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectHipCircumference() throws Exception {
-    List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("Hip").operator(Operator.EQUAL).operands(Arrays.asList("33")).conceptId(903136L)
-    );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.HC.name(), "Hip", attributes);
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
-
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectPregnant() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.PREG.name(), "Pregnancy", "903120", "45877994");
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
+    List<Attribute> attributes =
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.CAT)
+                .operator(Operator.IN)
+                .operands(Arrays.asList("45877994")));
+    SearchParameter pm = pregnancy().attributes(attributes);
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectWheelChairUser() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.WHEEL.name(), "Wheel Chair User", "903111", "4023190");
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
   public void countSubjectsPPI() throws Exception {
-    //value as concept id
-    Criteria ppiCriteria =
-      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, "7", DomainType.OBSERVATION.name(), "5").name(null);
-    SearchParameter ppi = createSearchParameter(ppiCriteria, "7");
-    SearchRequest searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    CBCriteria surveyNode =
+        new CBCriteria()
+            .parentId(0)
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.SURVEY.toString())
+            .group(true)
+            .selectable(true)
+            .standard(false)
+            .conceptId("22");
+    saveCriteriaWithPath("0", surveyNode);
+    CBCriteria questionNode =
+        new CBCriteria()
+            .parentId(surveyNode.getId())
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.QUESTION.toString())
+            .group(true)
+            .selectable(true)
+            .standard(false)
+            .name("In what country were you born?")
+            .conceptId("1585899")
+            .synonyms("[SURVEY_rank1]");
+    saveCriteriaWithPath(surveyNode.getPath(), questionNode);
+    CBCriteria answerNode =
+        new CBCriteria()
+            .parentId(questionNode.getId())
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.ANSWER.toString())
+            .group(false)
+            .selectable(true)
+            .standard(false)
+            .name("USA")
+            .conceptId("5");
+    saveCriteriaWithPath(questionNode.getPath(), answerNode);
 
-    //value as number
-    ppiCriteria =
-      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, null, DomainType.OBSERVATION.name(), "5").name("7");
-    ppi = createSearchParameter(ppiCriteria, null);
-    searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    // Survey
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.SURVEY.toString(), Arrays.asList(survey()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    // Question
+    SearchParameter ppiQuestion =
+        survey().subtype(CriteriaSubType.QUESTION.toString()).conceptId(1585899L);
+    searchRequest =
+        createSearchRequests(ppiQuestion.getType(), Arrays.asList(ppiQuestion), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    // value source concept id
+    List<Attribute> attributes =
+        Arrays.asList(
+            new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("7")));
+    SearchParameter ppiValueAsConceptId =
+        survey().subtype(CriteriaSubType.ANSWER.toString()).conceptId(5L).attributes(attributes);
+    searchRequest =
+        createSearchRequests(
+            ppiValueAsConceptId.getType(), Arrays.asList(ppiValueAsConceptId), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    // value as number
+    attributes =
+        Arrays.asList(
+            new Attribute()
+                .name(AttrName.NUM)
+                .operator(Operator.EQUAL)
+                .operands(Arrays.asList("7")));
+    SearchParameter ppiValueAsNumer =
+        survey().subtype(CriteriaSubType.ANSWER.toString()).conceptId(5L).attributes(attributes);
+    searchRequest =
+        createSearchRequests(
+            ppiValueAsNumer.getType(), Arrays.asList(ppiValueAsNumer), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    cbCriteriaDao.delete(surveyNode.getId());
+    cbCriteriaDao.delete(questionNode.getId());
+    cbCriteriaDao.delete(answerNode.getId());
   }
 
   @Test
   public void getDemoChartInfo() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.WHEEL.name(), "Wheel Chair User", "903111", "4023190");
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
-    DemoChartInfoListResponse response = controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
+    DemoChartInfoListResponse response =
+        controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
     assertEquals(2, response.getItems().size());
-    assertEquals(new DemoChartInfo().gender("M").race("Unknown").ageRange("19-44").count(1L), response.getItems().get(0));
-    assertEquals(new DemoChartInfo().gender("No matching concept").race("Unknown").ageRange("> 65").count(1L), response.getItems().get(1));
+    assertEquals(
+        new DemoChartInfo().gender("MALE").race("Asian").ageRange("45-64").count(1L),
+        response.getItems().get(0));
+    assertEquals(
+        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("19-44").count(1L),
+        response.getItems().get(1));
   }
 
   @Test
   public void filterBigQueryConfig_WithoutTableName() throws Exception {
     final String statement = "my statement ${projectId}.${dataSetId}.myTableName";
-    QueryJobConfiguration queryJobConfiguration = QueryJobConfiguration.newBuilder(statement).setUseLegacySql(false).build();
+    QueryJobConfiguration queryJobConfiguration =
+        QueryJobConfiguration.newBuilder(statement).setUseLegacySql(false).build();
     final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
-    assertThat(expectedResult).isEqualTo(bigQueryService.filterBigQueryConfig(queryJobConfiguration).getQuery());
+    assertThat(expectedResult)
+        .isEqualTo(bigQueryService.filterBigQueryConfig(queryJobConfiguration).getQuery());
   }
 
   protected String getTablePrefix() {
@@ -1531,68 +1745,27 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     return cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset();
   }
 
-  private void assertMessageException(SearchRequest searchRequest, String message, Object... messageParams) {
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      //Success
-      String expected = new MessageFormat(message).format(messageParams);
-      assertEquals(expected, bre.getMessage());
-    }
+  private void insertCriteriaAncestor(int ancestorId, int descendentId) {
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values ("
+            + ancestorId
+            + ", "
+            + descendentId
+            + ")");
   }
 
-  private Criteria createCriteriaParent(String type, String subtype, String code) {
-    return new Criteria().parentId(0).type(type).subtype(subtype)
-      .code(code).name("Cholera").group(true).selectable(true)
-      .count("28").path("1.2");
+  private Period getTestPeriod() {
+    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
+    DateTime now = new DateTime();
+    return new Period(birthDate, now);
   }
 
-  private Criteria createCriteriaChild(String type, String subtype, long parentId, String code, String domain, String conceptId) {
-    return new Criteria().parentId(parentId).type(type).subtype(subtype)
-      .code(code).name("Cholera").group(false).selectable(true)
-      .count("16").domainId(domain).conceptId(conceptId).path("1.2." + parentId);
-  }
-
-  private Criteria createDemoCriteria(String type, String subtype, String conceptId) {
-    return new Criteria().type(type).subtype(subtype).conceptId(conceptId);
-  }
-
-  private SearchParameter createPMSearchCriteriaWithAttributes(String type, String subtype, String criteriaName, List<Attribute> attributes) {
-    Criteria criteria = new Criteria().type(type).subtype(subtype)
-      .name(criteriaName).group(false).selectable(true)
-      .count("16").domainId(DomainType.MEASUREMENT.name());
-    SearchParameter searchParameter = createSearchParameter(criteria, null);
-    searchParameter.attributes(attributes);
-    return searchParameter;
-  }
-
-  private SearchParameter createPMSearchCriteria(String type, String subtype, String criteriaName, String conceptId, String code) {
-    Criteria criteria = new Criteria().type(type).subtype(subtype)
-      .name(criteriaName).group(false).selectable(true)
-      .count("16").domainId(DomainType.MEASUREMENT.name()).conceptId(conceptId);
-    SearchParameter searchParameter = createSearchParameter(criteria, code);
-    return searchParameter;
-  }
-
-  private SearchParameter createSearchParameter(Criteria criteria, String code) {
-    return new SearchParameter()
-      .name(criteria.getName())
-      .type(criteria.getType())
-      .subtype(criteria.getSubtype())
-      .group(criteria.getGroup())
-      .value(code)
-      .domainId(criteria.getDomainId())
-      .conceptId(criteria.getConceptId() == null ? null : new Long(criteria.getConceptId()));
-  }
-
-  private SearchRequest createSearchRequests(String type,
-                                             List<SearchParameter> parameters,
-                                             List<Modifier> modifiers) {
-    final SearchGroupItem searchGroupItem = new SearchGroupItem()
-      .type(type)
-      .searchParameters(parameters)
-      .modifiers(modifiers);
+  private SearchRequest createSearchRequests(
+      String type, List<SearchParameter> parameters, List<Modifier> modifiers) {
+    final SearchGroupItem searchGroupItem =
+        new SearchGroupItem().type(type).searchParameters(parameters).modifiers(modifiers);
 
     final SearchGroup searchGroup = new SearchGroup().addItemsItem(searchGroupItem);
 
@@ -1606,5 +1779,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     Long participantCount = (Long) response.getBody();
     assertThat(participantCount).isEqualTo(expectedCount);
+  }
+
+  private void saveCriteriaWithPath(String path, CBCriteria criteria) {
+    cbCriteriaDao.save(criteria);
+    String pathEnd = String.valueOf(criteria.getId());
+    criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);
+    cbCriteriaDao.save(criteria);
   }
 }

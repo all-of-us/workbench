@@ -8,9 +8,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-/**
- * Parses and formats SQL timestamps when using GSON.
- */
+/** Parses and formats SQL timestamps when using GSON. */
 public class TimestampGsonAdapter extends TypeAdapter<Timestamp> {
 
   private static final SimpleDateFormat TIME_FORMAT =

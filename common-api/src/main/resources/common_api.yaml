@@ -36,12 +36,21 @@ definitions:
   DataAccessLevel:
     type: string
     description: levels of access to data in the curated data repository
-    enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected, revoked]
+    enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected]
 
   Domain:
     type: string
     description: a domain for concepts corresponding to a table in the OMOP schema
-    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT]
+    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT, SURVEY, PERSON]
+
+  Surveys:
+    type: string
+    description: a survey for concepts
+    enum: &SURVEYS [THE BASICS, LIFESTYLE, OVERALL HEALTH]
+
+  PrePackagedConceptSetEnum:
+      type: string
+      enum: &PrePackagedConceptSetEnum [NONE, DEMOGRAPHICS, SURVEY, BOTH]
 
   CdrVersionListResponse:
     type: object
@@ -116,6 +125,7 @@ definitions:
       - description
       - questionCount
       - participantCount
+      - orderNumber
     properties:
       conceptId:
         description: the concept ID for the survey module
@@ -135,6 +145,23 @@ definitions:
         description: number of participants with data in the CDR for questions in this module
         type: integer
         format: int64
+      orderNumber:
+        description: survey release order number
+        type: integer
+        format: int32
+
+  FeaturedWorkspace:
+    type: object
+    properties:
+      name:
+        type: string
+        description: the name of the workspace
+      namespace:
+        type: string
+        description: the namespace of the workspace
+      id:
+        type: string
+        description: the Firecloud id of the workspace
 
   ErrorResponse:
     type: object

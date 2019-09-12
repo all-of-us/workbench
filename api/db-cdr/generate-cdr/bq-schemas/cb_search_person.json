@@ -1,0 +1,27 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "person_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "gender",
+    "type": "string"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "race",
+    "type": "string"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "ethnicity",
+    "type": "string"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "dob",
+    "type": "timestamp"
+  }
+]

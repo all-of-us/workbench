@@ -1,0 +1,421 @@
+[
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 1,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 12,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-01",
+    "concept_id": 1,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 2,
+    "domain": "Procedure",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 3,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 12,
+    "visit_occurrence_id": 1,
+    "is_standard": 1
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-11-03",
+    "concept_id": 4,
+    "domain": "Procedure",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 1
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 5,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 12,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 2,
+    "entry_date": "2009-12-03",
+    "concept_id": 6,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 7,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 12,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 8,
+    "domain": "Procedure",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-11-03",
+    "concept_id": 9,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 10,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 1
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 11,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 12,
+    "visit_occurrence_id": 1,
+    "is_standard": 1
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-10-29",
+    "concept_id": 1520218,
+    "domain": "Drug",
+    "age_at_event": 38,
+    "visit_concept_id": 12,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-11-03",
+    "concept_id": 11,
+    "domain": "Drug",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 1
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-10-29",
+    "concept_id": 1520218,
+    "domain": "Drug",
+    "age_at_event": 38,
+    "visit_concept_id": 12,
+    "visit_occurrence_id": 1,
+    "is_standard": 1
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 3,
+    "domain": "Measurement",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "value_as_number": 1.0,
+    "value_as_concept_id": 1,
+    "is_standard": 1
+  },
+  {
+    "person_id": 99,
+    "entry_date": "2009-12-03",
+    "concept_id": 9,
+    "domain": "Measurement",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "value_as_number": 1.0,
+    "value_as_concept_id": 77,
+    "is_standard": 0
+  },
+  {
+    "person_id": 102246,
+    "entry_date": "2009-12-03",
+    "concept_id": 9,
+    "domain": "Measurement",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "value_as_number": 1.0,
+    "value_as_concept_id": 4262985,
+    "is_standard": 0
+  },
+  {
+    "person_id": 102246,
+    "entry_date": "2009-12-03",
+    "concept_id": 9,
+    "domain": "Measurement",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "value_as_number": 1.0,
+    "value_as_concept_id": 77,
+    "is_standard": 1
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 1,
+    "domain": "Visit",
+    "age_at_event": 38,
+    "visit_occurrence_id": 1,
+    "visit_concept_id": 1,
+    "is_standard": 1
+  },
+  {
+    "person_id": 2,
+    "entry_date": "2009-12-03",
+    "concept_id": 10,
+    "domain": "Visit",
+    "age_at_event": 38,
+    "visit_occurrence_id": 1,
+    "visit_concept_id": 1,
+    "is_standard": 1
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 903118,
+    "domain": "Measurement",
+    "value_as_number": 89,
+    "value_as_concept_id": 10,
+    "is_standard": 0,
+    "systolic": 89,
+    "diastolic": 60
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 903115,
+    "domain": "Measurement",
+    "value_as_number": 60,
+    "value_as_concept_id": 10,
+    "is_standard": 0,
+    "systolic": 89,
+    "diastolic": 60
+  },
+  {
+    "person_id": 2,
+    "entry_date": "2009-12-03",
+    "concept_id": 903126,
+    "domain": "Measurement",
+    "value_as_number": 71.0,
+    "value_as_concept_id": 10,
+    "is_standard": 0
+  },
+  {
+    "person_id": 102246,
+    "entry_date": "2009-12-03",
+    "concept_id": 1586218,
+    "domain": "Measurement",
+    "value_as_number": 47.0,
+    "value_as_concept_id": 4262985,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 903124,
+    "domain": "Measurement",
+    "value_as_number": 200.354276,
+    "value_as_concept_id": 9,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 1586218,
+    "domain": "Measurement",
+    "value_as_number": 51.0,
+    "value_as_concept_id": 4297303,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "concept_id": 903136,
+    "entry_date": "2009-12-03",
+    "domain": "Measurement",
+    "value_as_number": 33,
+    "value_as_concept_id": 0,
+    "is_standard": 0
+  },
+  {
+    "person_id": 99,
+    "concept_id": 903111,
+    "entry_date": "2009-12-03",
+    "domain": "Measurement",
+    "value_as_number": 33,
+    "value_as_concept_id": 4023190,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "concept_id": 903111,
+    "entry_date": "2009-12-03",
+    "domain": "Measurement",
+    "value_as_number": 33,
+    "value_as_concept_id": 4023190,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "concept_id": 903133,
+    "entry_date": "2009-12-03",
+    "domain": "Measurement",
+    "value_as_number": 168.0,
+    "value_as_concept_id": 9,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "concept_id": 903121,
+    "entry_date": "2009-12-03",
+    "domain": "Measurement",
+    "value_as_number": 200.0,
+    "value_as_concept_id": 77,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "concept_id": 903135,
+    "entry_date": "2009-12-03",
+    "domain": "Measurement",
+    "value_as_number": 31,
+    "value_as_concept_id": 9,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "concept_id": 903120,
+    "entry_date": "2009-12-03",
+    "domain": "Measurement",
+    "value_as_number": 20,
+    "value_as_concept_id": 45877994,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 5,
+    "domain": "Observation",
+    "value_as_number": 7,
+    "value_as_concept_id": 7,
+    "value_source_concept_id": 7,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 1585899,
+    "domain": "Observation",
+    "value_as_number": 7,
+    "value_as_concept_id": 7,
+    "value_source_concept_id": 7,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 3,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 12,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-11-03",
+    "concept_id": 11,
+    "domain": "Drug",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-12-03",
+    "concept_id": 10,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 2,
+    "entry_date": "2009-12-03",
+    "concept_id": 10,
+    "domain": "Visit",
+    "age_at_event": 38,
+    "visit_occurrence_id": 1,
+    "visit_concept_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 1,
+    "entry_date": "2009-11-03",
+    "concept_id": 4,
+    "domain": "Procedure",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 0
+  },
+  {
+    "person_id": 2,
+    "entry_date": "2009-12-03",
+    "concept_id": 6,
+    "domain": "Condition",
+    "age_at_event": 38,
+    "visit_concept_id": 1,
+    "visit_occurrence_id": 1,
+    "is_standard": 1
+  }
+]

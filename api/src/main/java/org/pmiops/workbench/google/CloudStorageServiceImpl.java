@@ -1,24 +1,26 @@
 package org.pmiops.workbench.google;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import javax.inject.Provider;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,19 +28,6 @@ import org.springframework.stereotype.Service;
 public class CloudStorageServiceImpl implements CloudStorageService {
 
   final Provider<WorkbenchConfig> configProvider;
-
-  private List<JSONObject> readJSONObjects(String filterType, String filterField) {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-    Bucket demoBucket = storage.get(getDemosBucketName());
-
-    return StreamSupport
-            .stream(demoBucket.list().getValues().spliterator(), false)
-            .filter(blob -> blob.getBlobId().getName().endsWith(".json"))
-            .map(blob -> new JSONObject(new String(blob.getContent()).trim()))
-            .filter(jsonObject -> jsonObject.getString("type").equalsIgnoreCase(filterType))
-            .map(jsonObject -> jsonObject.getJSONObject(filterField))
-            .collect(Collectors.toList());
-  }
 
   @Autowired
   public CloudStorageServiceImpl(Provider<WorkbenchConfig> configProvider) {
@@ -52,8 +41,14 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public String readMandrillApiKey() {
-    JSONObject mandrillKeys = new JSONObject(readToString(getCredentialsBucketName(), "mandrill-keys.json"));
+    JSONObject mandrillKeys =
+        new JSONObject(readToString(getCredentialsBucketName(), "mandrill-keys.json"));
     return mandrillKeys.getString("api-key");
+  }
+
+  @Override
+  public String getMoodleApiKey() {
+    return readToString(getCredentialsBucketName(), "moodle-key.txt");
   }
 
   @Override
@@ -62,32 +57,10 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public void copyAllDemoNotebooks(String workspaceBucket)  {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-    Bucket demoBucket = storage.get(getDemosBucketName());
-    StreamSupport
-        .stream(demoBucket.list().getValues().spliterator(), false)
-        .filter(blob -> blob.getBlobId().getName().endsWith(".ipynb"))
-        .map(blob -> ImmutablePair
-            .of(blob.getBlobId(), BlobId.of(workspaceBucket, "notebooks/" + blob.getBlobId().getName())))
-        .forEach(pair -> copyBlob(pair.getLeft(), pair.getRight()));
-  }
-
-  @Override
-  public List<JSONObject> readAllDemoCohorts() {
-    return readJSONObjects("cohort", "cohort");
-  }
-
-  @Override
-  public List<JSONObject> readAllDemoConceptSets() {
-    return readJSONObjects("concept_set", "concept_set");
-  }
-
-  @Override
   public List<Blob> getBlobList(String bucketName, String directory) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
-    Iterable<Blob> blobList = storage.get(bucketName)
-        .list(Storage.BlobListOption.prefix(directory)).getValues();
+    Iterable<Blob> blobList =
+        storage.get(bucketName).list(Storage.BlobListOption.prefix(directory)).getValues();
     return ImmutableList.copyOf(blobList);
   }
 
@@ -99,22 +72,26 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return configProvider.get().googleCloudStorageService.emailImagesBucketName;
   }
 
-  private String getDemosBucketName() {
-    return configProvider.get().googleCloudStorageService.demosBucketName;
+  private String readToString(String bucketName, String objectPath) {
+    return new String(getBlob(bucketName, objectPath).getContent()).trim();
   }
 
-  private String readToString(String bucketName, String objectPath) {
+  // wrapper for storage.get() which throws NotFoundException instead of NullPointerException
+  private Blob getBlob(String bucketName, String objectPath) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
-    return new String(storage.get(bucketName, objectPath).getContent()).trim();
+    Blob result = storage.get(bucketName, objectPath);
+    if (result == null) {
+      throw new NotFoundException(String.format("Bucket %s, Object %s", bucketName, objectPath));
+    }
+    return result;
   }
 
   @Override
   public void copyBlob(BlobId from, BlobId to) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
-    CopyWriter w = storage.copy(CopyRequest.newBuilder()
-        .setSource(from)
-        .setTarget(to)
-        .build());
+    // Clears user-defined metadata, e.g. locking information on notebooks.
+    BlobInfo toInfo = BlobInfo.newBuilder(to).build();
+    CopyWriter w = storage.copy(CopyRequest.newBuilder().setSource(from).setTarget(toInfo).build());
     while (!w.isDone()) {
       w.copyChunk();
     }
@@ -134,6 +111,45 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
+  public JSONObject getElasticCredentials() {
+    return new JSONObject(readToString(getCredentialsBucketName(), "elastic-cloud.json"));
+  }
+
+  @Override
+  public GoogleCredential getGSuiteAdminCredentials() throws IOException {
+    String json = readToString(getCredentialsBucketName(), "gsuite-admin-sa.json");
+    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
+  }
+
+  @Override
+  public GoogleCredential getFireCloudAdminCredentials() throws IOException {
+    String json = readToString(getCredentialsBucketName(), "firecloud-admin-sa.json");
+    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
+  }
+
+  @Override
+  public GoogleCredential getCloudResourceManagerAdminCredentials() throws IOException {
+    String json = readToString(getCredentialsBucketName(), "cloud-resource-manager-admin-sa.json");
+    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
+  }
+
+  @Override
+  public GoogleCredential getDefaultServiceAccountCredentials() throws IOException {
+    String json = readToString(getCredentialsBucketName(), "app-engine-default-sa.json");
+    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
+  }
+
+  @Override
+  public JSONObject getFileAsJson(String bucketName, String fileName) {
+    return new JSONObject(readToString(bucketName, fileName));
+  }
+
+  @Override
+  public Map<String, String> getMetadata(String bucketName, String objectPath) {
+    return getBlob(bucketName, objectPath).getMetadata();
+  }
+
+  @Override
   public void deleteBlob(BlobId blobId) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     storage.delete(blobId);
@@ -144,12 +160,10 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     if (ids.isEmpty()) {
       return ImmutableSet.of();
     }
-    return StorageOptions.getDefaultInstance().getService().get(ids)
-      .stream()
-      .filter(Objects::nonNull)
-      // Clear the "generation" of the blob ID for better symmetry to the input.
-      .map(b -> BlobId.of(b.getBucket(), b.getName()))
-      .collect(Collectors.toSet());
-    }
-
+    return StorageOptions.getDefaultInstance().getService().get(ids).stream()
+        .filter(Objects::nonNull)
+        // Clear the "generation" of the blob ID for better symmetry to the input.
+        .map(b -> BlobId.of(b.getBucket(), b.getName()))
+        .collect(Collectors.toSet());
+  }
 }

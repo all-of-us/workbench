@@ -1,6 +1,5 @@
 package org.pmiops.workbench.db.model;
 
-
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,34 +17,42 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.Surveys;
 
 @Entity
 @Table(name = "concept_set")
 public class ConceptSet {
+  private static final int INITIAL_VERSION = 1;
 
   private long conceptSetId;
   private int version;
   private String name;
   private short domain;
+  private Short survey;
   private String description;
   private long workspaceId;
   private User creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private int participantCount;
-  private Set<Long> conceptIds = new HashSet<Long>();
+  private Set<Long> conceptIds = new HashSet<>();
 
-  public ConceptSet() {}
+  public ConceptSet() {
+    setVersion(ConceptSet.INITIAL_VERSION);
+  }
 
   public ConceptSet(ConceptSet cs) {
     setDescription(cs.getDescription());
     setName(cs.getName());
     setDomain(cs.getDomain());
+    setSurvey(cs.getSurvey());
     setCreator(cs.getCreator());
+    setVersion(ConceptSet.INITIAL_VERSION);
     setWorkspaceId(cs.getWorkspaceId());
     setCreationTime(cs.getCreationTime());
     setLastModifiedTime(cs.getLastModifiedTime());
     setParticipantCount(cs.getParticipantCount());
+    setConceptIds(new HashSet<>(cs.getConceptIds()));
   }
 
   @Id
@@ -65,7 +72,9 @@ public class ConceptSet {
     return version;
   }
 
-  public void setVersion(int version) { this.version = version; }
+  public void setVersion(int version) {
+    this.version = version;
+  }
 
   @Column(name = "name")
   public String getName() {
@@ -92,6 +101,24 @@ public class ConceptSet {
 
   public void setDomainEnum(Domain domain) {
     this.domain = CommonStorageEnums.domainToStorage(domain);
+  }
+
+  @Column(name = "survey")
+  public Short getSurvey() {
+    return survey;
+  }
+
+  public void setSurvey(Short survey) {
+    this.survey = survey;
+  }
+
+  @Transient
+  public Surveys getSurveysEnum() {
+    return CommonStorageEnums.surveysFromStorage(survey);
+  }
+
+  public void setSurveysEnum(Surveys survey) {
+    this.survey = CommonStorageEnums.surveysToStorage(survey);
   }
 
   @Column(name = "description")
@@ -150,7 +177,9 @@ public class ConceptSet {
   }
 
   @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "concept_set_concept_id", joinColumns = @JoinColumn(name = "concept_set_id"))
+  @CollectionTable(
+      name = "concept_set_concept_id",
+      joinColumns = @JoinColumn(name = "concept_set_id"))
   @Column(name = "concept_id")
   public Set<Long> getConceptIds() {
     return conceptIds;

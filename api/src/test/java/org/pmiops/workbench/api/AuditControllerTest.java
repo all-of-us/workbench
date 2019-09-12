@@ -1,13 +1,14 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -20,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.test.FakeClock;
@@ -40,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class AuditControllerTest {
@@ -53,7 +55,7 @@ public class AuditControllerTest {
 
   @TestConfiguration
   @Import({AuditController.class})
-  @MockBean({BigQueryService.class})
+  @MockBean({BigQueryService.class, WorkspaceDao.class})
   static class Configuration {
     @Bean
     Clock clock() {
@@ -61,21 +63,17 @@ public class AuditControllerTest {
     }
   }
 
-  @Autowired
-  BigQueryService bigQueryService;
-  @Autowired
-  UserDao userDao;
-  @Autowired
-  CdrVersionDao cdrVersionDao;
-  @Autowired
-  AuditController auditController;
+  @Autowired BigQueryService bigQueryService;
+  @Autowired UserDao userDao;
+  @Autowired CdrVersionDao cdrVersionDao;
+  @Autowired AuditController auditController;
+  @Autowired WorkspaceDao workspaceDao;
 
   @Before
   public void setUp() {
     User user = new User();
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
-    user.setFreeTierBillingProjectName(FC_PROJECT_ID);
     user.setDisabled(false);
     user = userDao.save(user);
 
@@ -86,25 +84,29 @@ public class AuditControllerTest {
     cdrV2.setBigqueryProject(CDR_V2_PROJECT_ID);
     cdrV2 = cdrVersionDao.save(cdrV2);
 
+    when(workspaceDao.findAllWorkspaceNamespaces()).thenReturn(ImmutableSet.of(FC_PROJECT_ID));
+
     CLOCK.setInstant(NOW);
   }
 
   // TODO(RW-350): This stubbing is awful, improve this.
   private void stubBigQueryCalls(String projectId, String email, long total) {
     TableResult queryResult = mock(TableResult.class);
-    Iterable testIterable = new Iterable() {
-        @Override
-        public Iterator iterator() {
-          List<FieldValue> list = new ArrayList<>();
-          list.add(null);
-          return list.iterator();
-        }
-      };
-    Map<String, Integer> rm = ImmutableMap.<String, Integer>builder()
-        .put("client_project_id", 0)
-        .put("user_email", 1)
-        .put("total", 2)
-        .build();
+    Iterable testIterable =
+        new Iterable() {
+          @Override
+          public Iterator iterator() {
+            List<FieldValue> list = new ArrayList<>();
+            list.add(null);
+            return list.iterator();
+          }
+        };
+    Map<String, Integer> rm =
+        ImmutableMap.<String, Integer>builder()
+            .put("client_project_id", 0)
+            .put("user_email", 1)
+            .put("total", 2)
+            .build();
 
     when(bigQueryService.executeQuery(any())).thenReturn(queryResult);
     when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);

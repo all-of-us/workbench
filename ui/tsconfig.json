@@ -1,8 +1,10 @@
+// The root project TypeScript compiler config. This defines common compiler options
+// used across Angular, Jest, and default builds.
 {
   "compileOnSave": false,
   "compilerOptions": {
     "importHelpers": true,
-    "outDir": "./dist/out-tsc",
+    "outDir": "./tsc-out",
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",
@@ -14,9 +16,12 @@
     ],
     "lib": [
       "es2016",
+      "es2018.promise",
       "dom"
     ],
     "module": "es2015",
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "jsx": "react",
+    "resolveJsonModule": true
   }
 }

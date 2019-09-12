@@ -1,0 +1,35 @@
+body {
+  background-color: #f1f2f2;
+}
+
+.content-container {
+  display: flex;
+  /*View height minus top bar.*/
+  min-height: calc(100vh - 4rem);
+}
+
+.app-container {
+  width: 100%;
+  padding-right: 0.6rem;
+  padding-left: 0.6rem;
+  flex-grow: 1;
+  /* Needed for absolute positioned child elements, e.g. spinner. */
+  position: relative;
+}
+
+.background-image {
+  background-image: url('/assets/images/hex-background@2x.png');
+  background-repeat: no-repeat;
+  z-index: -1;
+  background-size: cover;
+  right: 0rem;
+  top: 3.3rem;
+  width: 50%;
+  position: absolute;
+  height: calc(100vh - 3.3rem);
+}
+
+.minimize-chrome {
+  padding-left: 0;
+  padding-right: 0;
+}

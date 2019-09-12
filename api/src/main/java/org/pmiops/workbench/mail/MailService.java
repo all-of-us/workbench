@@ -1,15 +1,13 @@
 package org.pmiops.workbench.mail;
 
-import javax.mail.MessagingException;
-
 import com.google.api.services.admin.directory.model.User;
-import org.pmiops.workbench.model.IdVerificationStatus;
+import javax.mail.MessagingException;
 
 public interface MailService {
 
-  void sendIdVerificationRequestEmail(String userName) throws MessagingException;
+  void sendBetaAccessRequestEmail(String userName) throws MessagingException;
 
   void sendWelcomeEmail(String contactEmail, String password, User user) throws MessagingException;
 
-  void sendIdVerificationCompleteEmail(String contactEmail, IdVerificationStatus status, String username) throws MessagingException;
+  void sendBetaAccessCompleteEmail(String contactEmail, String username) throws MessagingException;
 }

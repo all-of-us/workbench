@@ -1,6 +1,32 @@
 {
   "extends": "../common-ui/tslint.json",
   "rulesDirectory": [
-    "../ui/node_modules/codelyzer"
-  ]
+    "node_modules/codelyzer",
+    "node_modules/tslint-microsoft-contrib",
+    "node_modules/tslint-eslint-rules/dist/rules"
+  ],
+  "rules": {
+    "no-unused-variable": [true, {"ignore-pattern": "^_$"}],
+    "no-relative-imports": [
+      true,
+      "allow-siblings"
+    ],
+    "ter-indent": [
+      true,
+      2,
+      {
+        "SwitchCase": 1,
+        "MemberExpression": 1,
+        "FunctionDeclaration": {
+          "parameters": 1
+        },
+        "FunctionExpression": {
+          "parameters": 1
+        },
+        "CallExpression": {
+          "arguments": 1
+        }
+      }
+    ]
+  }
 }

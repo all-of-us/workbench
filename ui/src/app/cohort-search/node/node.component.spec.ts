@@ -1,46 +1,27 @@
-import {dispatch, NgRedux} from '@angular-redux/store';
-import {MockNgRedux} from '@angular-redux/store/testing';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
-import {fromJS} from 'immutable';
+import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
+import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
+import {wizardStore} from 'app/cohort-search/search-state.service';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {CohortBuilderApi} from 'generated/fetch';
 import {NgxPopperModule} from 'ngx-popper';
-import {NodeInfoComponent} from '../node-info/node-info.component';
-import {
-  activeCriteriaTreeType,
-  CohortSearchActions,
-  criteriaChildren,
-  criteriaError,
-  criteriaSearchTerms,
-  isCriteriaLoading,
-} from '../redux';
-import {SafeHtmlPipe} from '../safe-html.pipe';
+import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {NodeComponent} from './node.component';
-
-class MockActions {
-  @dispatch() activeCriteriaTreeType = activeCriteriaTreeType;
-  @dispatch() criteriaChildren = criteriaChildren;
-  @dispatch() criteriaError = criteriaError;
-  @dispatch() criteriaSearchTerms = criteriaSearchTerms;
-  @dispatch() isCriteriaLoading = isCriteriaLoading;
-}
 
 describe('NodeComponent', () => {
   let component: NodeComponent;
   let fixture: ComponentFixture<NodeComponent>;
-  let mockReduxInst;
 
   beforeEach(async(() => {
-    mockReduxInst = MockNgRedux.getInstance();
-    const _old = mockReduxInst.getState;
-    const _wrapped = () => fromJS(_old());
-    mockReduxInst.getState = _wrapped;
-
     TestBed.configureTestingModule({
       declarations: [
-        NodeComponent,
         NodeInfoComponent,
+        NodeComponent,
         SafeHtmlPipe,
       ],
       imports: [
@@ -49,18 +30,21 @@ describe('NodeComponent', () => {
         NgxPopperModule,
         ReactiveFormsModule,
       ],
-      providers: [
-        {provide: NgRedux, useValue: mockReduxInst},
-        {provide: CohortSearchActions, useValue: new MockActions()},
-      ],
+      providers: [],
     })
       .compileComponents();
+    currentWorkspaceStore.next({
+      ...workspaceDataStub,
+      cdrVersionId: '1',
+    });
+    wizardStore.next({});
   }));
 
   beforeEach(() => {
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     fixture = TestBed.createComponent(NodeComponent);
     component = fixture.componentInstance;
-    component.node = fromJS({
+    component.node = {
       code: '',
       conceptId: 903133,
       count: 0,
@@ -74,7 +58,8 @@ describe('NodeComponent', () => {
       selectable: true,
       subtype: 'HEIGHT',
       type: 'PM'
-    });
+    };
+    component.wizard = {};
     fixture.detectChanges();
   });
 

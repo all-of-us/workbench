@@ -39,6 +39,7 @@ buildscript {    // Configuration for building
     classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
     classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
     classpath 'io.swagger:swagger-codegen:2.2.3'
+    classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
   }
 }
 
@@ -49,6 +50,19 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'org.hidetake.swagger.generator'
+apply plugin: 'com.diffplug.gradle.spotless'
+
+spotless {
+  java {
+    googleJavaFormat()
+    target fileTree('.') {
+      include '**/*.java'
+
+      exclude 'src/generated/**'
+      exclude 'build/**'
+    }
+  }
+}
 
 configurations {
   generatedCompile

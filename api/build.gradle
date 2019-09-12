@@ -1,5 +1,6 @@
 import io.swagger.codegen.config.CodegenConfigurator
 import io.swagger.codegen.DefaultGenerator
+import org.gradle.api.tasks.JavaExec
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
@@ -132,9 +133,33 @@ task generateMandrillClient {
   }
 }
 
+def moodleApiFile = 'src/main/resources/moodle.yaml'
+
+task generateMoodleClient {
+  inputs.file("$projectDir/$moodleApiFile")
+  outputs.dir("$projectDir/$swaggerTargetFolder")
+  doLast {
+    def config = new CodegenConfigurator()
+    config.setInputSpec("file:///$projectDir/$moodleApiFile")
+    config.setOutputDir("$projectDir")
+    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
+    config.setLang('java')
+    config.setAdditionalProperties([
+            'invokerPackage'   : 'org.pmiops.workbench.moodle',
+            'modelPackage'     : 'org.pmiops.workbench.moodle.model',
+            'apiPackage'       : 'org.pmiops.workbench.moodle.api',
+            'sourceFolder'     : swaggerTargetFolder,
+            'library'          : 'okhttp-gson',
+            'serializableModel': 'true',
+            'dateLibrary'      : 'java8'
+    ])
+    new DefaultGenerator().opts(config.toClientOptInput()).generate()
+  }
+}
+
 task generate_local_appengine_web_xml(type: Exec) {
-  executable "bash"
-  args "libproject/generate_appengine_web_xml.sh"
+  executable "ruby"
+  args "libproject/generate_appengine_web_xml.rb"
 }
 
 configurations {
@@ -144,8 +169,6 @@ configurations {
   }
 }
 
-project.ext.GAE_VERSION = '1.9.64'
-
 buildscript {    // Configuration for building
   repositories {
     jcenter()    // Bintray's repository - a fast Maven Central mirror & more
@@ -154,11 +177,12 @@ buildscript {    // Configuration for building
     }
   }
   dependencies {
-    classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
+    classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.22.RELEASE'
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
     classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
     classpath 'io.swagger:swagger-codegen:2.2.3'
-    classpath 'org.owasp:dependency-check-gradle:3.1.0'
+    classpath 'org.owasp:dependency-check-gradle:5.1.0'
+    classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
   }
 }
 
@@ -172,12 +196,28 @@ apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'org.springframework.boot'
 apply plugin: 'org.hidetake.swagger.generator'
 apply plugin: 'org.owasp.dependencycheck'
+apply plugin: 'com.diffplug.gradle.spotless'
+
+spotless {
+  java {
+    googleJavaFormat()
+    target fileTree('.') {
+      include '**/*.java'
+
+      exclude 'src/generated/**'
+      exclude 'build/**'
+    }
+  }
+}
 
 configurations {
   integrationCompile.extendsFrom testCompile
   integrationRuntime.extendsFrom testRuntime
   bigquerytestCompile.extendsFrom testCompile
   bigquerytestRuntime.extendsFrom testRuntime
+
+  toolsImplementation.extendsFrom implementation
+  toolsRuntimeOnly.extendsFrom runtimeOnly
 }
 
 // Required for the swagger plugin's `validateSwagger` task
@@ -202,6 +242,17 @@ sourceSets {
       compileClasspath += main.output + test.output + generated.output
       runtimeClasspath += main.output + test.output + generated.output
       srcDir file('src/integration/java')
+    }
+  }
+  tools {
+    compileClasspath += main.output + generated.output
+    runtimeClasspath += main.output + generated.output
+
+    resources {
+      srcDir "tools/src/main/resources"
+    }
+    java {
+      srcDirs = ['tools/src/main/java']
     }
   }
   bigquerytest {
@@ -231,9 +282,12 @@ ideaModule.dependsOn generateJiraClient
 compileGeneratedJava.dependsOn generateJiraClient
 ideaModule.dependsOn generateMandrillClient
 compileGeneratedJava.dependsOn generateMandrillClient
+ideaModule.dependsOn generateMoodleClient
+compileGeneratedJava.dependsOn generateMoodleClient
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
 
+war.dependsOn compileGeneratedJava
 war.dependsOn generate_local_appengine_web_xml
 
 clean.doFirst {
@@ -244,59 +298,85 @@ repositories {   // repositories for Jar's you access in your code
   jcenter()
 }
 
+project.ext.GAE_VERSION = '1.9.64'
+project.ext.SPRING_BOOT_VERSION = '1.5.22.RELEASE'
+project.ext.JACKSON_VERSION = '2.9.9'
+
 dependencies {
 
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
 
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+
   compile project(":common-api")
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
+  compile 'com.google.http-client:google-http-client-apache:1.28.0'
+  compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0'
   compile 'mysql:mysql-connector-java:8.0.11'
   compile 'com.google.cloud.sql:mysql-socket-factory:1.0.10'
+
   compile "com.google.appengine:appengine:${GAE_VERSION}"
   compile "com.google.appengine:appengine-api-1.0-sdk:${GAE_VERSION}"
-  compile('org.springframework.boot:spring-boot-starter-web') {
+
+  compile("org.springframework.boot:spring-boot-starter-web:${SPRING_BOOT_VERSION}") {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile('org.springframework.boot:spring-boot-starter-data-jpa') {
+  compile("org.springframework.boot:spring-boot-starter-data-jpa:${SPRING_BOOT_VERSION}") {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile('org.springframework.boot:spring-boot-starter-actuator') {
+  compile("org.springframework.boot:spring-boot-starter-actuator:${SPRING_BOOT_VERSION}") {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
+
+  compile 'ch.qos.logback:logback-classic:1.2.3'
+
   compile 'org.springframework.security:spring-security-web:4.2.2.RELEASE'
   compile 'org.hibernate:hibernate-core:5.2.10.Final'
 
-  compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
-  compile 'com.fasterxml.jackson.core:jackson-core:2.9.5'
-  compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
+  compile "com.fasterxml.jackson.core:jackson-annotations:${JACKSON_VERSION}"
+  compile "com.fasterxml.jackson.core:jackson-core:${JACKSON_VERSION}"
+  compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_VERSION}"
+
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
   compile 'com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0'
   compile 'com.google.cloud:google-cloud-bigquery:1.51.0'
   compile 'com.google.cloud:google-cloud-storage:1.51.0'
   compile 'com.google.code.gson:gson:2.8.5'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
+  compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1'
   compile 'com.squareup.okhttp:okhttp:2.7.5'
   compile 'com.squareup.okhttp:logging-interceptor:2.7.5'
   compile 'joda-time:joda-time:2.10'
   compile 'javax.inject:javax.inject:1'
+  compile 'io.opencensus:opencensus-api:0.23.0'
+  compile 'io.opencensus:opencensus-exporter-trace-stackdriver:0.23.0'
+  compile 'io.opencensus:opencensus-impl:0.23.0'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
   compile 'com.google.guava:guava:26.0-jre'
+  compile 'com.github.rholder:guava-retrying:2.0.0'
   compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
+
+  // Elasticsearch client
+  compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:6.6.0'
+  compile 'org.elasticsearch:elasticsearch:6.6.0'
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'
 
+  compile 'com.github.fge:json-patch:1.9'
+
+  toolsCompile 'commons-cli:commons-cli:1.4'
+
   testCompile 'junit:junit:4.12'
-  testCompile 'org.mockito:mockito-core:1.10.19'
+  testCompile 'org.mockito:mockito-core:2.18.3'
   testCompile "com.google.appengine:appengine-api-stubs:${GAE_VERSION}"
   testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"
   testCompile 'com.google.truth:truth:0.42'
-  testCompile 'org.springframework.boot:spring-boot-starter-test'
+  testCompile "org.springframework.boot:spring-boot-starter-test:${SPRING_BOOT_VERSION}"
   testCompile 'com.h2database:h2:1.4.194'
   testCompile 'org.liquibase:liquibase-core:3.5.3'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
@@ -304,14 +384,14 @@ dependencies {
   // For Swagger generation. These should include dependencies found in the Swagger codegen
   // example here:
   // https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml
-  generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'
+  generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:${SPRING_BOOT_VERSION}"
   generatedCompile 'io.springfox:springfox-swagger2:2.6.1'
   generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
   generatedCompile 'com.squareup.okhttp:okhttp:2.7.5'
   generatedCompile 'com.squareup.okhttp:logging-interceptor:2.7.5'
   generatedCompile 'com.google.code.gson:gson:2.8.5'
   generatedCompile 'joda-time:joda-time:2.10'
-  generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
+  generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${JACKSON_VERSION}"
 }
 
 swaggerSources {
@@ -387,6 +467,8 @@ appengine {  // App Engine tasks configuration
     // Give dev_appserver 2 minutes to start up when running appengineStart; by
     // default it will fail after 1 minute. (This is particularly a problem in CircleCI.)
     startSuccessTimeout = 120
+
+    environment = [GOOGLE_APPLICATION_CREDENTIALS: file("$rootDir/sa-key.json").getAbsolutePath()]
   }
 
   // dmohs: You may see this message [1], but don't implement the suggested fix because it breaks
@@ -405,6 +487,23 @@ appengine {  // App Engine tasks configuration
   }
 }
 
+task startCronEmulator(dependsOn: ':appengine-cron-emulator:jar') {
+  doFirst {
+    ext.process = new ProcessBuilder()
+            .redirectOutput(ProcessBuilder.Redirect.to(new File("cron-emulator.log")))
+            .directory(projectDir)
+            .command("java", "-jar",
+                    project(":appengine-cron-emulator").jar.archivePath.getPath(),
+                    "$projectDir/src/main/webapp/WEB-INF/cron.xml"
+            ).start()
+
+    println "Started Cron Emulator"
+  }
+}
+
+appengineRun.dependsOn startCronEmulator
+appengineStart.dependsOn startCronEmulator
+
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
 
@@ -418,3 +517,111 @@ task incrementalHotSwap(type: IncrementalHotSwapTask) {
 incrementalHotSwap.dependsOn compileJava
 
 task listProjectAPIs(type: GenerateAPIListingTask, dependsOn: generateMergedSwagger)
+
+
+//
+// COMMAND-LINE TOOLS
+//
+// All tasks below represent scripts meant to be run via Gradle command-line invocations.
+//
+// This gives us a natural place to put one-off scripts, deployment tasks, or any other
+// code that should be run outside the context of a HTTP request or a cron job.
+
+
+// Define database-related Spring Boot properties required for running
+// command-line tools. These are set up elsewhere for the main App Engine
+// runtime.
+//
+// These system variables will have been set by the project.rb script before
+// this task is executed.
+//
+// N.B. these properties should be kept roughly in sync with the App Engine configuration
+// XML file under src/main/webapp/WEB-INF/appengine-web.xml
+def db_host = System.getenv("DB_HOST")
+def db_port = System.getenv("DB_PORT")
+
+def commandLineSpringProperties = [
+  'spring.datasource.driver-class-name': 'com.mysql.jdbc.Driver',
+  // Our database isn't configured to allow outside connections (which is good),
+  // so our connections are either local or through the encrypted proxy.
+  'spring.datasource.url': "jdbc:mysql://${db_host}:${db_port}/workbench?useSSL=false",
+  'spring.datasource.username': System.getenv("WORKBENCH_DB_USER"),
+  'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
+]
+
+// See project.rb command: load-es-index
+task elasticSearchIndexer(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.elastic.ElasticSearchIndexer"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// See project.rb command: backfill-billing-project-users
+task backfillBillingProjectUsers(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.BackfillBillingProjectUsers"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// See project.rb command: fetch-firecloud-user-profiles
+task fetchFireCloudUserProfile(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.FetchFireCloudUserProfile"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// This task is called from a few different places:
+// - devstart.rb > load_config (used by "deploy" and "update_cloud_config" commands)
+// - directly via gradlew (used by "run-local-migrations" command)
+// - docker-compose.yaml#updateConfig (used by "dev-up" command)
+task loadConfig(type: JavaExec) {
+  classpath sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.ConfigLoader"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("config_key") && project.hasProperty("config_file")) {
+    args config_key, config_file
+  }
+}
+
+// Called by devs from the command-line:
+// - devstart.rb > list_clusters
+task manageClusters(type: JavaExec) {
+  classpath sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.ManageClusters"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// Called by devs from the command-line:
+// - devstart.rb > set_authority
+task setAuthority(type: JavaExec) {
+  classpath sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.SetAuthority"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// This task is called from:
+// - docker-compose.yaml#update-cdr-versions
+// - devstart.rb > update_cdr_versions_for_project (called by run-local-migrations)
+task updateCdrVersions(type: JavaExec) {
+  classpath sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.UpdateCdrVersions"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}

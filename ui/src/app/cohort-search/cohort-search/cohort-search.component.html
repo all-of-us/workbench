@@ -1,28 +1,50 @@
 <div #wrapper class="cohort-search-wrapper">
   <div class="row">
-    <div class="col-xl-4 col-lg-6" id="include-groups">
-      <app-search-group-list
-        [role]="'includes'"
-        [groups$]="includeGroups$">
-      </app-search-group-list>
-    </div>
+    <div class="col-xl-8 col-lg-12">
+      <div class="row">
+        <div class="col-xs-12" style="height: 1.5rem">
+          <span *ngIf="cohort" class="cohort-name">{{cohort.name}}</span>
+        </div>
+        <div class="col-xl-6 col-lg-12" id="list-include-groups">
+          <app-list-search-group-list
+            [role]="'includes'"
+            [groups]="criteria.includes"
+            [updateRequest]="updateRequest">
+          </app-list-search-group-list>
+        </div>
 
-    <div class="col-xl-4 col-lg-6" id="exclude-groups">
-      <app-search-group-list
-        *ngIf="(initShowChart$ | async)"
-        [role]="'excludes'"
-        [groups$]="excludeGroups$">
-      </app-search-group-list>
+        <div class="col-xl-6 col-lg-12" id="list-exclude-groups">
+          <app-list-search-group-list
+            *ngIf="includeSize > 0"
+            [role]="'excludes'"
+            [groups]="criteria.excludes"
+            [updateRequest]="updateRequest">
+          </app-list-search-group-list>
+        </div>
+      </div>
     </div>
-
-    <div class="col-xl-4 col-lg-12" id="charts">
-      <app-overview
-        *ngIf="(initShowChart$ | async)"
-        [total$]="total$"
-        [chartData$]="chartData$"
-        [isRequesting$]="isRequesting$">
-      </app-overview>
+    <div class="col-xl-4 col-lg-12" id="list-charts">
+      <app-list-overview
+        *ngIf="overview"
+        [searchRequest]="criteria"
+        [updateCount]="triggerUpdate"
+        [updateSaving]="updateSaving"></app-list-overview>
+    </div>
+    <div *ngIf="loading" class="spinner root-spinner">
+      Loading...
     </div>
   </div>
+  <app-help-sidebar location="cohortBuilder"></app-help-sidebar>
 </div>
-<app-modal></app-modal>
+<app-list-modal></app-list-modal>
+<clr-modal [(clrModalOpen)]="modalOpen" [clrModalClosable]="false">
+  <h3 class="modal-title">Warning! </h3>
+  <div class="modal-body">
+    Your cohort has not been saved. If you’d like to save your cohort criteria, please click CANCEL
+    and {{cohort && cohort.id ? 'use Save or Save As' : 'click CREATE COHORT'}} to save your criteria.
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-link" (click)="getModalResponse(false)">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="getModalResponse(true)">Discard Changes</button>
+  </div>
+</clr-modal>

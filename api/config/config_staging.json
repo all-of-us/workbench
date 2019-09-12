@@ -1,28 +1,36 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/api.firecloud.org",
-    "billingAccountId": "014D91-FCB792-33D2C0",
-    "billingProjectPrefix": "aou-rw-staging-",
     "clusterMaxAgeDays": 7,
     "clusterIdleMaxAgeDays": 3,
     "debugEndpoints": false,
-    "enforceRegistered": true,
-    "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-staging-cluster-resources/setup_notebook_cluster.sh",
-    "jupyterPlaygroundExtensionUri": "gs:\/\/all-of-us-rw-staging-cluster-resources/playground-extension.js",
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-staging",
-    "billingRetryCount": 2
+    "registeredDomainGroup": "GROUP_all-of-us-registered-staging@firecloud.org",
+    "xAppIdValue": "staging-AoU-RW",
+    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
+    "timeoutInSeconds": 40
+  },
+  "billing": {
+    "accountId": "014D91-FCB792-33D2C0",
+    "projectNamePrefix": "aou-rw-staging-",
+    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0",
+    "retryCount": 2,
+    "bufferCapacity": 10,
+    "defaultFreeCreditsLimit": 300.0
   },
   "auth": {
-    "serviceAccountApiUsers": [ "all-of-us-rw-staging@appspot.gserviceaccount.com" ]
+    "serviceAccountApiUsers": [
+      "all-of-us-rw-staging@appspot.gserviceaccount.com"
+    ]
   },
   "cdr": {
     "debugQueries": true
   },
   "googleCloudStorageService": {
+    "clusterResourcesBucketName": "all-of-us-rw-staging-cluster-resources",
     "credentialsBucketName": "all-of-us-rw-staging-credentials",
-    "emailImagesBucketName": "all-of-us-workbench-test-email-images",
-    "demosBucketName": "all-of-us-rw-staging-demos"
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "staging.fake-research-aou.org"
@@ -32,7 +40,8 @@
     "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
     "projectId": "all-of-us-rw-staging",
     "shortName": "Staging",
-    "oauthClientId": "657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com"
+    "oauthClientId": "657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com",
+    "traceAllRequests": false
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-staging.appspot.com/login",
@@ -41,5 +50,26 @@
   "mandrill": {
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3
+  },
+  "elasticsearch": {
+    "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
+    "enableBasicAuth": true,
+    "enableElasticsearchBackend": false
+  },
+  "moodle": {
+    "host": "aoudev.nnlm.gov",
+    "enableMoodleBackend": true
+  },
+  "access": {
+    "enableComplianceTraining": true,
+    "enableEraCommons": true,
+    "enableDataUseAgreement": false,
+    "enableBetaAccess": true,
+    "unsafeAllowSelfBypass": false
+  },
+  "featureFlags": {
+    "unsafeAllowDeleteUser": false,
+    "enableVpcFlowLogs": true,
+    "enableVpcServicePerimeter": true
   }
 }

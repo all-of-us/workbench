@@ -1,52 +1,39 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {DetailPage} from '../detail-page/detail-page';
-import {PageLayout} from '../page-layout/page-layout';
-import {TablePage} from '../table-page/table-page';
+import {DetailPageComponent} from 'app/cohort-review/detail-page/detail-page';
+import {PageLayout} from 'app/cohort-review/page-layout/page-layout';
+import {QueryReportComponent} from 'app/cohort-review/query-report/query-report.component';
+import {TablePage} from 'app/cohort-review/table-page/table-page';
 
-import {DemographicConceptMapsResolver} from './demographic-concept-maps.resolver';
-import {ParticipantAnnotationsResolver} from './participant-annotations.resolver';
-import {ParticipantResolver} from './participant.resolver';
-
-import {AnnotationDefinitionsResolver} from '../../resolvers/annotation-definitions';
-import {ReviewResolver} from '../../resolvers/review';
+import {BreadcrumbType} from 'app/utils/navigation';
 
 
 const routes: Routes = [{
   path: '',
   component: PageLayout,
   data: {
-    title: 'Review Cohort Participants'
-  },
-  resolve: {
-    review: ReviewResolver,
+    title: 'Review Cohort Participants',
+    breadcrumb: BreadcrumbType.Cohort
   },
   children: [{
     path: 'participants',
     component: TablePage,
-      resolve: {
-          concepts: DemographicConceptMapsResolver,
-      },
-      data: {
-          breadcrumb: {
-            value: 'Participants',
-            intermediate: true
-          },
-      }
+    data: {
+      breadcrumb: BreadcrumbType.Cohort
+    }
+  }, {
+    path: 'cohort-description',
+    component: QueryReportComponent,
+    data: {
+      breadcrumb: BreadcrumbType.Cohort
+    }
   }, {
     path: 'participants/:pid',
-    component: DetailPage,
-    resolve: {
-      annotationDefinitions: AnnotationDefinitionsResolver,
-      participant: ParticipantResolver,
-      annotations: ParticipantAnnotationsResolver,
-    },
+    component: DetailPageComponent,
     data: {
-      breadcrumb: {
-        value: 'Participant :pid',
-        intermediate: false
-      }
+      breadcrumb: BreadcrumbType.Participant,
+      shouldReuse: true
     }
   }],
 }];
@@ -54,12 +41,6 @@ const routes: Routes = [{
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
-  providers: [
-    AnnotationDefinitionsResolver,
-    DemographicConceptMapsResolver,
-    ParticipantResolver,
-    ParticipantAnnotationsResolver,
-    ReviewResolver,
-  ],
+  providers: [],
 })
 export class CohortReviewRoutingModule {}

@@ -39,34 +39,66 @@ security:
 paths:
 
   # Cohort Builder #######################################################################
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/{id}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/term:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
       tags:
         - cohortBuilder
       description: >
-        Returns a criteria
-      operationId: "getCriteriaByTypeAndId"
+        Returns a collection of criteria per search term
+      operationId: "findCriteriaByDomainAndSearchTerm"
       parameters:
         - in: path
-          name: type
+          name: domain
           type: string
           required: true
-          description: the specific type of criteria to get
+          description: the specific type of domain
+        - in: query
+          name: term
+          type: string
+          required: true
+          description: the term to search for
+        - in: query
+          name: limit
+          type: integer
+          format: int64
+          required: false
+          description: number of criteria matches to return
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/{conceptId}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: >
+        Returns a collection of criteria per concept id
+      operationId: "getStandardCriteriaByDomainAndConceptId"
+      parameters:
         - in: path
-          name: id
+          name: domain
+          type: string
+          required: true
+          description: the specific type of domain
+        - in: path
+          name: conceptId
           type: integer
           format: int64
           required: true
-          description: the id
+          description: the concept id to search for
       responses:
         200:
-          description: A criteria
+          description: A collection of criteria
           schema:
-            $ref: "#/definitions/Criteria"
+            $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
@@ -78,33 +110,33 @@ paths:
       operationId: "getCriteriaBy"
       parameters:
         - in: path
-          name: type
+          name: domain
           type: string
           required: true
-          description: the specific type of criteria to get
+          description: the specific domain of criteria to get
         - in: query
-          name: subtype
+          name: type
           type: string
           required: false
-          description: the specific subtype of criteria to get
+          description: the specific type of criteria to get
+        - in: query
+          name: standard
+          type: boolean
+          required: false
+          description: reveals if source or standard
         - in: query
           name: parentId
           type: integer
           format: int64
           required: false
           description: fetch direct children of parentId
-        - in: query
-          name: allChildren
-          type: boolean
-          required: false
-          description: fetch all children of parentId
       responses:
         200:
           description: A collection of criteria
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/search:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
@@ -114,20 +146,25 @@ paths:
       operationId: "getCriteriaAutoComplete"
       parameters:
         - in: path
+          name: domain
+          type: string
+          required: true
+          description: the specific domain of criteria to get
+        - in: query
           name: type
           type: string
-          required: true
-          description: the specific type of criteria to get
-        - in: query
-          name: subtype
-          type: string
           required: false
-          description: the subtype of the criteria were search for
+          description: the type of the criteria were search for
         - in: query
-          name: value
+          name: standard
+          type: boolean
+          required: false
+          description: the type of the criteria were search for
+        - in: query
+          name: term
           type: string
           required: true
-          description: the value to search for
+          description: the term to search for
         - in: query
           name: limit
           type: integer
@@ -255,31 +292,6 @@ paths:
           schema:
             $ref: "#/definitions/DemoChartInfoListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/quicksearch/{type}/{value}:
-    parameters:
-      - $ref: '#/parameters/cdrVersionId'
-    get:
-      tags:
-        - cohortBuilder
-      description: Quick search for criteria that matches on code and name.
-      operationId: "getCriteriaTreeQuickSearch"
-      parameters:
-        - in: path
-          name: type
-          type: string
-          required: true
-          description: the specific type of criteria to get
-        - in: path
-          name: value
-          type: string
-          required: true
-          description: value that should match code or name
-      responses:
-        200:
-          description: A collection of criteria
-          schema:
-            $ref: "#/definitions/CriteriaListResponse"
-
   /v1/cohortbuilder/{cdrVersionId}/demographics:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
@@ -315,64 +327,110 @@ definitions:
       - id
       - parentId
       - type
-      - code
       - name
       - group
       - selectable
       - hasAttribute
     properties:
       id:
-        description: id of the criteria
+        description: >
+          Primary identifier which is unique within a CDR version. Value may
+          not be stable across different CDR versions.
         type: integer
         format: int64
       parentId:
-        description: parent id of the criteria
+        description: >
+          The parent id of the criteria. 0 if this is the root node of a
+          criteria tree.
         type: integer
         format: int64
       type:
-        description: type of criteria
+        description: >
+          The tree type of this criteria, see TreeType. This will need to change to CriteriaType
+          with the new implementation(change type below to ref CriteriaType)
         type: string
       subtype:
-        description: subtype of this criteria
+        description: >
+          The subtype of this criteria, see TreeSubType. This will need to change to CriteriaSubType
+          with the new implementation(change type below to ref CriteriaSubType)
         type: string
       code:
         description: >
-          code that identifies this criteria, ex: icd9, icd10 or cpt all
-          have codes that map to the concept_code column in the concept
-          table.
+          Code that identifies this criteria. In some vocabularies such as ICD9
+          and ICD10, this code captures the tree hierarchy, e.g. '001.002.003'.
+          Multiple criteria may exist for the same code within a CDR version if
+          a given concept has multiple entries at different locations in the
+          criteria tree (this is common in SNOMED).
+
+          Criteria codes should generally be stable across CDR versions.
         type: string
       name:
         description: description of criteria
         type: string
       count:
-        description: est. count in the cdr
+        description: >
+          Estimated number of participants in a particular CDR version which
+          have a least one event matching this criteria.
         type: integer
         format: int64
       group:
         description: specifies if child or parent
         type: boolean
       selectable:
-        description: specifies if user can search with
+        description: >
+          Whether or not a client can specify this criteria in a search request.
+          Selecting a group implies selecting all criteria contained within that
+          group.
         type: boolean
       conceptId:
         description: >
-          concept ids are ids associated with a specific vocabulary item,
-          in the concept table and allow you to search for that code in
-          its domain table.
+          The OMOP concept id associated with this criteria. May be null if this
+          criteria does not match an OMOP concept, e.g. for intermediate nodes
+          (groups) in the criteria tree. Concept ids are ids associated with a
+          specific vocabulary item in the concept table and allow you to search
+          for that code in its domain table. This may be a source or standard
+          concept ID, depending on the tree for the criteria.
+
+          Similar to a code, multiple criteria may reference the same concept
+          ID due to multiple occurrences of a concept in the criteria tree. In
+          other cases a criteria may share the concept ID of its parent, e.g. in
+          the PPI tree a question and child answer share a concept id.
+
+          Concept IDs should generally be stable across CDR versions.
         type: integer
         format: int64
       domainId:
         description: >
-          clue to determine which tables to search, but these only exist
-          for leaves in the tree. Parents don't have domain ids and concept
-          id will be used in the case that a parent is selectable.
+          # TODO: Remove this field.
+          Deprecated. Clue to determine which OMOP tables to search, but these
+          only exist for leaves in the tree. Parents don't have domain ids and
+          concept id will be used in the case that a parent is selectable.
         type: string
       hasAttributes:
-        description: specifies if extra attributes are needed
+        description: >
+          Whether this criteria has associated attributes which can be filtered
+          by value during a search, for example a blood pressure measurement
+          criteria might have an associated measurement value attribute.
         type: boolean
       path:
-        description: full path from parent to this node with ids
+        description: >
+          A "." delimited path of all parent criteria IDs. Does not include the
+          id for this criteria; root criteria nodes have a null path.
         type: string
+      value:
+        description: >
+          A helper property to fully describe PPI/AGE data. Age holds the value of
+          the age and for PPI it holds value as number or value as concept id.
+        type: string
+      hasHierarchy:
+        description: Whether criteria is linked to a tree.
+        type: boolean
+      hasAncestorData:
+        description: Whether criteria needs lookup in the criteria_ancestor table.
+        type: boolean
+      isStandard:
+        description: Reveals if this criteria is standard or source.
+        type: boolean
 
   CriteriaAttributeListResponse:
     type: object
@@ -388,7 +446,6 @@ definitions:
     type: object
     required:
       - id
-      - conceptId
       - valueAsConceptId
       - conceptName
       - type
@@ -396,10 +453,6 @@ definitions:
     properties:
       id:
         description: id of the criteria
-        type: integer
-        format: int64
-      conceptId:
-        description: conceptId of the concept
         type: integer
         format: int64
       valueAsConceptId:
@@ -440,13 +493,13 @@ definitions:
         {
           include: [
             # SearchGroups
-            [
-              # SearchGroupItems
-              {type: "ICD9", searchParameters: [{value: "Foo", domainId: "Bar"}, {value: "C"}]},
-              {type: "ICD9", searchParameters: [{value: "Baz"}]}
-            ], [
-              {type: "ICD10", searchParameters: [{value: "Baz", domainId: "Bar"}], modifiers: []},
-            ]
+          [
+            # SearchGroupItems
+          {type: "ICD9", searchParameters: [{value: "Foo", domainId: "Bar"}, {value: "C"}]},
+          {type: "ICD9", searchParameters: [{value: "Baz"}]}
+          ], [
+          {type: "ICD10", searchParameters: [{value: "Baz", domainId: "Bar"}], modifiers: []},
+          ]
           ],
           exclude: []
         }
@@ -457,7 +510,7 @@ definitions:
 
   SearchGroup:
     description: >
-      A SearchGroup is a container for groups of criteria which are `AND`ed together.
+      A SearchGroup is a container for groups of criteria which are `OR`ed together.
     type: object
     required:
       - temporal
@@ -472,10 +525,10 @@ definitions:
         default: false
       mention:
         description: first, last or any mention(used in temporal realtionships)
-        type: string
+        $ref: "#/definitions/TemporalMention"
       time:
         description: time frame between temporal items
-        type: string
+        $ref: "#/definitions/TemporalTime"
       timeValue:
         description: time value between temporal items
         type: integer
@@ -515,7 +568,31 @@ definitions:
         items:
           $ref: "#/definitions/SearchParameter"
       modifiers:
-        description: criteria by operation or predicate
+        description: >
+          Predicates to apply to the search parameters. Aggregate modifiers
+          (i.e. NUM_OF_OCCURRENCES) are applied independently to each
+          SearchParameter and furthermore, are applied independently to any
+          group elements within those SearchParameters.
+
+          Consider the following example query scenario.
+
+          Example criteria tree:
+          - parent
+            - child1
+            - child2
+
+          Curated dataset contains 1 participant with 1 event each of concepts
+          child1 and child2. Search request is made on "parent", with a modifier of
+          {type: NUM_OF_OCCURRENCES, operands: [2]}.
+
+          This does not match - the participant would need to have at least 2
+          events of type child1 and/or of child2 and/or of parent (in the event
+          that "parent" corresponds to a real concept in the data).
+
+          Additionally, aggregate modifiers are applied secondarily to other
+          modifiers. For example, combining the AGE_AT_EVENT with
+          NUM_OF_OCCURRENCES - first we filter down all events by the age
+          predicate, then we count occurrences.
         type: "array"
         items:
           $ref: "#/definitions/Modifier"
@@ -523,11 +600,11 @@ definitions:
       {
         type: "ICD9",
         searchParameters: [
-          { value: "E9293", domainId: "Condition", conceptId: null },
-          { value: "E979-E979.9", domainId: null, conceptId: null }
+        { value: "E9293", domainId: "Condition", conceptId: null },
+        { value: "E979-E979.9", domainId: null, conceptId: null }
         ],
         modifiers: [
-          { name: "age_at_event", operator: "GTE >=", operands: [ "Arg1", "Arg2" ] }
+        { name: "age_at_event", operator: "GTE >=", operands: [ "Arg1", "Arg2" ] }
         ]
       }
 
@@ -536,9 +613,11 @@ definitions:
     required:
       - parameterId
       - name
+      - domain
       - type
-      - subtype
       - group
+      - ancestorData
+      - standard
       - attributes
     properties:
       parameterId:
@@ -548,7 +627,10 @@ definitions:
         description: The name of the generating Criterion
         type: string
       value:
-        description: The Value of the Criteria within its Category Tree
+        description: The Criteria code (or name if querying for Deceased)
+        type: string
+      domain:
+        description: The omop domain that this criteria belongs to
         type: string
       type:
         description: The type of the generating Criterion
@@ -559,15 +641,63 @@ definitions:
       group:
         description: Specifies if the generating Criterion is a leaf or node in its Criteria tree
         type: boolean
-      domainId:
-        description: clue to determine which tables to search
-        type: string
+      ancestorData:
+        description: flag that determines if concept ids need to be looked up in the ancestor table
+        type: boolean
+      standard:
+        description: flag that determines standard or source
+        type: boolean
       conceptId:
-        description: The concept id that maps to concept table.
+        description: The concept id that maps to concept table, if any.
         type: integer
         format: int64
       attributes:
-        description: Any applicable arguments that complete the sense of the parameter
+        description: >
+          Attributes are extra inputs provided by users through the UX. Currently used by Demographics(Age),
+          Measurements(Body Height, Weight.. etc) and Physical Measurements(Blood Pressure, Body Weight.. etc).
+          Measurements and Physical Measurements have overlap in many areas such as body weight, but the
+          difference is standard(measurements) and source(physical measurements).
+
+           Example demo age search parameter:
+           {
+             "type": "DEMO",
+             "searchParameters": [
+               {
+                 "type": "DEMO",
+                 "subtype": "AGE",
+                 "group": false,
+                 "attributes": [{"name": "Age", "operator": "BETWEEN", "operands": [23, 31]}]
+               }
+             ],
+             "modifiers": []
+           }
+
+           Example physical measurement blood pressure(Hypotensive (Systolic <= 90 / Diastolic <= 60))
+           {
+             "type": "PM",
+             "searchParameters": [
+               {
+                 "type": "PM",
+                 "subtype": "BP",
+                 "group": false,
+                 "attributes": [
+                   {
+                     "conceptId": 903118,
+                     "name": "Systolic",
+                     "operands": ["90"],
+                     "operator":"LESS_THAN_OR_EQUAL_TO"
+                   },
+                   {
+                     "conceptId": 903115,
+                     "name": "Diastolic",
+                     "operands": ["60"],
+                      "operator": "LESS_THAN_OR_EQUAL_TO"
+                    }
+                  ]
+                }
+              ],
+              "modifiers": []
+            }
         type: "array"
         items:
           $ref: "#/definitions/Attribute"
@@ -584,11 +714,12 @@ definitions:
   Attribute:
     type: object
     required:
+      - name
       - operands
     properties:
       name:
-        type: string
         description: the name of the attribute
+        $ref: "#/definitions/AttrName"
       operator:
         $ref: "#/definitions/Operator"
       operands:
@@ -618,9 +749,6 @@ definitions:
       name:
         description: name/type of modifier
         $ref: "#/definitions/ModifierType"
-      encounterType:
-        type: string
-        description: If encounter then this prop will hold the type
       operator:
         description: Machine name of the operator
         $ref: "#/definitions/Operator"
@@ -639,17 +767,30 @@ definitions:
     description: possible types of modifiers
     enum: [AGE_AT_EVENT, NUM_OF_OCCURRENCES, EVENT_DATE, ENCOUNTERS]
 
-  TreeType:
+  CriteriaType:
     type: string
-    description: possible types of trees
-    enum: [ICD9, ICD10, CPT, DEMO, VISIT, PM, DRUG, MEAS, CONDITION, PROCEDURE, PPI, SNOMED]
+    description: possible criteria types
+    enum: [AGE, ATC, BRAND, CPT4, DECEASED, ETHNICITY, GENDER, HCPCS, ICD10CM, ICD10PCS, ICD9CM, ICD9Proc, LOINC, PPI, RACE, RXNORM, SNOMED, VISIT]
 
-  TreeSubType:
-      type: string
-      description: possible subtypes of trees
-      enum: [CM, PROC, PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR,
-      HR-DETAIL, HR-IRR, HR-NOIRR, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC,
-      BRAND, CLIN, LAB, BASICS, LIFESTYLE, OVERALLHEALTH]
+  CriteriaSubType:
+    type: string
+    description: possible criteria types
+    enum: [ANSWER, BMI, BP, CLIN, HC, HEIGHT, HR, HR-DETAIL, HR-IRR, HR-NOIRR, LAB, PREG, QUESTION, SURVEY, WC, WEIGHT, WHEEL]
+
+  TemporalMention:
+    type: string
+    description: Mentions refer to occurrences of entry date per person
+    enum: [ANY_MENTION, FIRST_MENTION, LAST_MENTION]
+
+  TemporalTime:
+    type: string
+    description: time refers to the amount of time in reference to temporal mentions
+    enum: [DURING_SAME_ENCOUNTER_AS, X_DAYS_BEFORE, X_DAYS_AFTER, WITHIN_X_DAYS_OF]
+
+  AttrName:
+    type: string
+    description: Name that descibes the type of attribute
+    enum: [ANY, NUM, CAT, AGE]
 
   DemoChartInfoListResponse:
     type: object

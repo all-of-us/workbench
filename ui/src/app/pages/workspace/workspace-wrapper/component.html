@@ -1,0 +1,30 @@
+<app-workspace-nav-bar *ngIf="displayNavBar"
+                       [shareFunction]="handleShareAction"
+                       [deleteFunction]="openConfirmDelete"
+                       [tabPath]="tabPath"></app-workspace-nav-bar>
+<span *ngIf="menuDataLoading" class="spinner spinner-lg" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"></span>
+<ng-container *ngIf="workspace">
+  <clr-modal [(clrModalOpen)]="workspaceDeletionError">
+    <h3 class="modal-title">Error:</h3>
+    <div class="modal-body">Could not delete workspace '{{workspace.name}}'. Please <a (click)="submitWorkspaceDeleteBugReport()">submit a bug report.</a></div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="workspaceDeletionError = false">Ok</button>
+    </div>
+  </clr-modal>
+
+  <app-workspace-share *ngIf="sharing" [onClose]="closeShare"
+                       [workspace]="workspace"
+                       [accessLevel]="accessLevel"
+                       [userRoles]="userRoles"
+                       [userEmail]="username"></app-workspace-share>
+  <app-confirm-delete-modal *ngIf="confirmDeleting"
+                            [resourceType]="'workspace'"
+                            [resourceName]="workspace.name"
+                            [receiveDelete]="receiveDelete"
+                            [closeFunction]="closeConfirmDelete"></app-confirm-delete-modal>
+  <app-bug-report *ngIf="bugReportOpen"
+                  [bugReportDescription]="bugReportDescription"
+                  [onClose]="closeBugReport"></app-bug-report>
+  <router-outlet *ngIf="workspace"></router-outlet>
+</ng-container>
+<div *ngIf="!workspace" style="position: absolute; top: 50%; left: 50%;" class="spinner"></div>

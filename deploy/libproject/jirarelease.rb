@@ -93,7 +93,7 @@ class JiraReleaseClient
       raise RuntimeError.new "failed to read JIRA login from '#{gcs_uri}'"
     end
     jira_json = JSON.parse(jira_creds)
-    return JiraReleaseClient.new(jira_json['username'], jira_json['password'])
+    return JiraReleaseClient.new(jira_json['username'], jira_json['apiToken'])
   end
 
   def ticket_summary(tag)

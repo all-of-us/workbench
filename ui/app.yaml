@@ -4,19 +4,72 @@ threadsafe: true
 default_expiration: "2m"
 
 handlers:
-- url: /(.*\.(css|eot|gz|html|ico|jpg|jpeg|js|map|png|svg|ttf|woff|woff2))
+- url: /(.*\.(css|eot|gz|html|ico|jpg|jpeg|js|map|mp4|png|svg|ttf|woff|woff2))
   static_files: dist/\1
   upload: dist/(.*)
   secure: always
-  # TODO(calbach): Bump max-age to 1y once we've verified this is correct.
   http_headers:
-    Strict-Transport-Security: "max-age=86400; includeSubDomains; preload"
+    Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
+    X-XSS-Protection: 1
+    X-Content-Type-Options: "nosniff"
+    Content-Security-Policy: "default-src 'none'; report-uri /content-security-report"
 - url: /.*
   static_files: dist/index.html
   upload: dist/index.html
   secure: always
   http_headers:
-    Strict-Transport-Security: "max-age=86400; includeSubDomains; preload"
+    Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
+    X-XSS-Protection: 1
+    X-Content-Type-Options: "nosniff"
+    # unsafe-inline is unfortunately required as the Incapsula WAF injects a
+    # script onto the page when we're serving in production, for which we'd be
+    # unable to precompute a hash.
+    Content-Security-Policy-Report-Only: "
+      default-src 'none';
+      script-src
+        'self'
+        'unsafe-inline'
+        https://apis.google.com
+        https://*.googleapis.com
+        https://static.zdassets.com
+        https://www.googletagmanager.com
+        https://www.google-analytics.com;
+      style-src
+        'self'
+        'unsafe-inline'
+        https://fonts.googleapis.com;
+      img-src
+        'self'
+        data:
+        https://*.googleusercontent.com
+        https://www.google-analytics.com;
+      font-src
+        'self'
+        data:
+        https://fonts.gstatic.com;
+      connect-src
+        'self'
+        https://api-dot-all-of-us-workbench-test.appspot.com
+        https://api-dot-all-of-us-rw-staging.appspot.com
+        https://api-dot-all-of-us-rw-perf.appspot.com
+        https://api-dot-all-of-us-rw-stable.appspot.com
+        https://api.stable.fake-research-aou.org
+        https://api.workbench.researchallofus.org
+        https://leonardo.dsde-dev.broadinstitute.org
+        https://leonardo.dsde-perf.broadinstitute.org
+        https://notebooks.firecloud.org
+        https://firecloud-orchestration.dsde-dev.broadinstitute.org
+        https://firecloud-orchestration.dsde-perf.broadinstitute.org
+        https://api.firecloud.org
+        https://*.googleapis.com
+        https://*.zdassets.com
+        https://aousupporthelp.zendesk.com
+        https://www.google-analytics.com;
+      child-src
+        https://accounts.google.com
+        https://leonardo.dsde-dev.broadinstitute.org
+        https://notebooks.firecloud.org;
+      report-uri /content-security-index-report"
 
 # If a file (relative path under ui/) matches this regex, do not upload it.
 # Skip everything not starting with "dist".

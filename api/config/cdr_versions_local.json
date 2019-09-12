@@ -4,12 +4,12 @@
     "isDefault": true,
     "name": "Synthetic Dataset v1",
     "dataAccessLevel": 1,
-    "bigqueryProject": "all-of-us-ehr-dev",
+    "bigqueryProject": "fc-aou-cdr-synth-test",
     "bigqueryDataset": "synthetic_cdr20180606",
     "creationTime": "2017-12-26 00:00:00Z",
     "releaseNumber": 1,
     "numParticipants": 946237,
     "cdrDbName": "cdr",
-    "publicDbName": "public"
+    "elasticIndexBaseName": "cdr"
   }
 ]

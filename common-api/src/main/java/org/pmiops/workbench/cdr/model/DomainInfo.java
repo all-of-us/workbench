@@ -15,14 +15,16 @@ import org.pmiops.workbench.model.Domain;
 @Table(name = "domain_info")
 public class DomainInfo {
 
-  public static final Function<DomainInfo, org.pmiops.workbench.model.DomainInfo> TO_CLIENT_DOMAIN_INFO =
-      (domain) -> new org.pmiops.workbench.model.DomainInfo()
-          .domain(domain.getDomainEnum())
-          .name(domain.getName())
-          .description(domain.getDescription())
-          .allConceptCount(domain.getAllConceptCount())
-          .standardConceptCount(domain.getStandardConceptCount())
-          .participantCount(domain.getParticipantCount());
+  public static final Function<DomainInfo, org.pmiops.workbench.model.DomainInfo>
+      TO_CLIENT_DOMAIN_INFO =
+          (domain) ->
+              new org.pmiops.workbench.model.DomainInfo()
+                  .domain(domain.getDomainEnum())
+                  .name(domain.getName())
+                  .description(domain.getDescription())
+                  .allConceptCount(domain.getAllConceptCount())
+                  .standardConceptCount(domain.getStandardConceptCount())
+                  .participantCount(domain.getParticipantCount());
 
   private long conceptId;
   private short domain;
@@ -33,12 +35,18 @@ public class DomainInfo {
   private long standardConceptCount;
   private long participantCount;
 
-  public DomainInfo() {
-  }
+  public DomainInfo() {}
 
   // Used from JQL queries in DomainInfoDao
-  public DomainInfo(short domain, String domainId, String name, String description,
-      long conceptId, long allConceptCount, long standardConceptCount, long participantCount) {
+  public DomainInfo(
+      short domain,
+      String domainId,
+      String name,
+      String description,
+      long conceptId,
+      long allConceptCount,
+      long standardConceptCount,
+      long participantCount) {
     this.conceptId = conceptId;
     this.domain = domain;
     this.domainId = domainId;
@@ -130,7 +138,7 @@ public class DomainInfo {
     return this;
   }
 
-  @Column(name="all_concept_count")
+  @Column(name = "all_concept_count")
   public long getAllConceptCount() {
     return allConceptCount;
   }
@@ -144,7 +152,7 @@ public class DomainInfo {
     return this;
   }
 
-  @Column(name="standard_concept_count")
+  @Column(name = "standard_concept_count")
   public long getStandardConceptCount() {
     return standardConceptCount;
   }
@@ -158,16 +166,16 @@ public class DomainInfo {
     return this;
   }
 
-  @Column(name="participant_count")
-  public long getParticipantCount(){
+  @Column(name = "participant_count")
+  public long getParticipantCount() {
     return participantCount;
   }
 
-  public void setParticipantCount(Long participantCount){
+  public void setParticipantCount(Long participantCount) {
     this.participantCount = participantCount == null ? 0L : participantCount;
   }
 
-  public DomainInfo participantCount(long participantCount){
+  public DomainInfo participantCount(long participantCount) {
     this.participantCount = participantCount;
     return this;
   }
@@ -177,23 +185,29 @@ public class DomainInfo {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     DomainInfo domainInfo = (DomainInfo) o;
-    return Objects.equals(domain, domainInfo.domain) &&
-        Objects.equals(name, domainInfo.name) &&
-        Objects.equals(description, domainInfo.description) &&
-        Objects.equals(conceptId, domainInfo.conceptId) &&
-        Objects.equals(allConceptCount, domainInfo.allConceptCount) &&
-        Objects.equals(standardConceptCount, domainInfo.standardConceptCount) &&
-        Objects.equals(participantCount, domainInfo.participantCount);
+    return Objects.equals(domain, domainInfo.domain)
+        && Objects.equals(name, domainInfo.name)
+        && Objects.equals(description, domainInfo.description)
+        && Objects.equals(conceptId, domainInfo.conceptId)
+        && Objects.equals(allConceptCount, domainInfo.allConceptCount)
+        && Objects.equals(standardConceptCount, domainInfo.standardConceptCount)
+        && Objects.equals(participantCount, domainInfo.participantCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(domain, name, description, conceptId, allConceptCount, standardConceptCount, participantCount);
+    return Objects.hash(
+        domain,
+        name,
+        description,
+        conceptId,
+        allConceptCount,
+        standardConceptCount,
+        participantCount);
   }
 
   @Override
   public String toString() {
-    return  ToStringBuilder.reflectionToString(this);
+    return ToStringBuilder.reflectionToString(this);
   }
-
 }

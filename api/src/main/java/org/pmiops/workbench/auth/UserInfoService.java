@@ -19,8 +19,8 @@ public class UserInfoService {
   private final GoogleRetryHandler retryHandler;
 
   @Autowired
-  UserInfoService(HttpTransport httpTransport, JsonFactory jsonFactory,
-                  GoogleRetryHandler retryHandler) {
+  UserInfoService(
+      HttpTransport httpTransport, JsonFactory jsonFactory, GoogleRetryHandler retryHandler) {
     this.httpTransport = httpTransport;
     this.jsonFactory = jsonFactory;
     this.retryHandler = retryHandler;
@@ -28,8 +28,10 @@ public class UserInfoService {
 
   public Userinfoplus getUserInfo(String token) {
     GoogleCredential credential = new GoogleCredential().setAccessToken(token);
-    Oauth2 oauth2 = new Oauth2.Builder(httpTransport, jsonFactory, credential)
-        .setApplicationName(APPLICATION_NAME).build();
+    Oauth2 oauth2 =
+        new Oauth2.Builder(httpTransport, jsonFactory, credential)
+            .setApplicationName(APPLICATION_NAME)
+            .build();
     return retryHandler.run((context) -> oauth2.userinfo().get().execute());
   }
 }

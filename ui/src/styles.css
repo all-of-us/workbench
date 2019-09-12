@@ -18,6 +18,7 @@ h3 {
 
 body, input[text] {
   color: #888;
+  font-weight: 300;
 }
 
 * {
@@ -25,7 +26,10 @@ body, input[text] {
    * Need to include elsewhere as well to override clarity's font styles.
    */
   font-family: 'Montserrat', sans-serif;
-  font-weight: 300;
+}
+
+b,strong {
+  font-weight: bold;
 }
 
 a {
@@ -35,8 +39,10 @@ a {
 }
 
 body {
-  background-color: #e2e3e5;
+  background-color: #F1F1F1;
   min-height: 100vh;
+  width: 100%;
+  min-width: 1080px;
 }
 
 textarea {
@@ -169,4 +175,24 @@ button:focus {
   background: none;
 }
 
+/*
+ * Force the Zendesk web widget "launcher" button to be hidden at all times.
+ * This is a style-based workaround to ensure the Zendesk launcher button isn't
+ * shown. Ideally, hiding the launcher would be possible via the Zendesk web widget
+ * API, but certain API limitations don't make that possible. See the AoU Zendesk
+ * integration doc for more details.
+ */
+iframe#launcher {
+  display: none;
+}
+
 /**:focus {outline:none !important}*/
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}

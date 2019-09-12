@@ -1,19 +1,13 @@
-import {NgRedux, select} from '@angular-redux/store';
-import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
-import {fromJS, List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {
-  activeParameterList,
-  CohortSearchActions,
-  CohortSearchState,
-  participantsCount,
-  previewStatus,
-} from '../redux';
-
-import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
+import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {typeToTitle} from 'app/cohort-search/utils';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {triggerEvent} from 'app/utils/analytics';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 const minAge = 18;
 const maxAge = 120;
@@ -23,218 +17,142 @@ const maxAge = 120;
  * by a 'name' key
  */
 function sortByCountThenName(critA, critB) {
-    const A = critA.count || 0;
-    const B = critB.count || 0;
-    const diff = B - A;
-    return diff === 0
+  const A = critA.count || 0;
+  const B = critB.count || 0;
+  const diff = B - A;
+  return diff === 0
         ? (critA.name > critB.name ? 1 : -1)
         : diff;
 }
 
 @Component({
-    selector: 'crit-demographics',
-    templateUrl: './demographics.component.html',
+  selector: 'crit-list-demographics',
+  templateUrl: './demographics.component.html',
     // Buttons styles picked up from parent (wizard.ts)
-    styleUrls: [
-        './demographics.component.css',
-        '../../styles/buttons.css',
-    ]
+  styleUrls: [
+    './demographics.component.css',
+    '../../styles/buttons.css',
+  ]
 })
-export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
-    @select(activeParameterList) selection$;
-    @Input() selectedParamId: any;
-    @Input() selectedTypes: any;
-    @Output() itemsAddedFlag = new EventEmitter<boolean>();
-    @select(previewStatus) preview$;
-    @select(participantsCount) count$;
-    readonly minAge = minAge;
-    readonly maxAge = maxAge;
-    loading = {
-      'AGE': false,
-      'GEN': false,
-      'RACE': false,
-      'ETH': false,
-      'DEC': false
-    };
-    subscription = new Subscription();
-    hasSelection = false;
-    selectedNode: any;
-    preview = Map();
-    ageClicked = false;
+export class DemographicsComponent implements OnInit, OnDestroy {
+  readonly criteriaType = CriteriaType;
+  readonly minAge = minAge;
+  readonly maxAge = maxAge;
+  loading = false;
+  subscription = new Subscription();
+  selectedNode: any;
+  ageClicked = false;
 
 
     /* The Demographics form controls and associated convenience lenses */
-    demoForm = new FormGroup({
-        ageMin: new FormControl(18),
-        ageMax: new FormControl(120),
-        ageRange: new FormControl([this.minAge, this.maxAge]),
-        deceased: new FormControl(),
-    });
-    get ageRange() { return this.demoForm.get('ageRange'); }
-    get deceased() { return this.demoForm.get('deceased'); }
+  demoForm = new FormGroup({
+    ageMin: new FormControl(18),
+    ageMax: new FormControl(120),
+    ageRange: new FormControl([this.minAge, this.maxAge]),
+    deceased: new FormControl(),
+  });
+  get ageRange() { return this.demoForm.get('ageRange'); }
+  get deceased() { return this.demoForm.get('deceased'); }
 
     /* Storage for the demographics options (fetched via the API) */
-    ageNode;
-    ageNodes: Array<any>;
-    ageCount: number;
-    deceasedNode;
+  ageNode: any;
+  ageNodes: Array<any>;
+  ageCount: number;
+  deceasedNode;
 
-    genderNodes = List();
-    initialGenders = List();
+  nodes = [];
+  selections: Array<any>;
+  count: any;
+  wizard: any;
 
-    raceNodes = List();
-    initialRaces = List();
-
-    ethnicityNodes = List();
-    initialEthnicities = List();
-    deceasedClicked = false;
-    noSelection = true;
-    isCancelTimerInitiated: any = false;
-    showCalculateContainer = false;
-    count: any;
-    constructor(
-        private route: ActivatedRoute,
-        private api: CohortBuilderService,
-        private actions: CohortSearchActions,
-        private ngRedux: NgRedux<CohortSearchState>
-    ) {}
-
-    ngOnChanges() {
-         this.showCalculateContainer = false;
-        if (this.selectedTypes === 'Age') {
-            this.ageClicked = false;
-        } else if (this.selectedTypes === 'Deceased') {
-            this.deceasedClicked = false;
+  ngOnInit() {
+    wizardStore.subscribe(wizard => this.wizard = wizard);
+    selectionsStore
+      .subscribe(selections => {
+        this.selections = selections;
+        if (this.wizard && this.wizard.type !== CriteriaType.AGE) {
+          this.calculate();
         }
-        if (this.noSelection && this.selectedParamId) {
-            if (this.isCancelTimerInitiated) {
-                clearTimeout(this.isCancelTimerInitiated);
-                return;
-            }
-        } else if (this.selectedParamId) {
-            this.showCalculateContainer = true;
-            this.getSearchResponse();
-        }
-
+      });
+    if (this.wizard.type === CriteriaType.AGE) {
+      this.initAgeControls();
+      this.initDeceased();
+      this.initAgeRange();
+      this.loadNodesFromApi(CriteriaType[CriteriaType.DECEASED]);
+    } else if (this.selections.length) {
+      this.calculate();
     }
+    this.loadNodesFromApi();
+  }
 
-    ngOnInit() {
-        // Set back to false at the end of loadNodesFromApi (i.e. the end of the
-        // initialization routine)
-        this.subscription = this.selection$.subscribe(sel => this.hasSelection = sel.size > 0);
-        this.initAgeControls();
-        this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
-        this.selection$.first().subscribe(selections => {
-            /*
-             * Each subtype of DEMO requires subtly different initialization, which
-             * is handled by special-case methods which each receive any selected
-             * criteria already in the state (i.e. if we're editing a search group
-             * item).  Finally we load the relevant criteria from the API.
-             */
-            this.initialGenders = selections
-                .filter(s => s.get('subtype') === TreeSubType[TreeSubType.GEN]);
-            this.initialRaces = selections
-                .filter(s => s.get('subtype') === TreeSubType[TreeSubType.RACE]);
-            this.initialEthnicities = selections
-                .filter(s => s.get('subtype') === TreeSubType[TreeSubType.ETH]);
-            this.initDeceased(selections);
-            this.initAgeRange(selections);
-            this.loadNodesFromApi();
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  loadNodesFromApi(type?: string) {
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
+    type = type || this.wizard.type;
+    /*
+     * Each subtype's possible criteria is loaded via the API.  Race and Gender
+     * criteria nodes become options in their respective dropdowns; deceased
+     * and age are used as templates for constructing relevant seach
+     * parameters.  Upon load we immediately map the criteria to immutable
+     * objects complete with deterministically generated `parameterId`s and
+     * sort them by count, then by name.
+     */
+    this.loading = true;
+    cohortBuilderApi().getCriteriaBy(cdrid, DomainType[DomainType.PERSON], type)
+      .then(response => {
+        const items = response.items
+                  .filter(item => item.parentId !== 0
+                      || type === CriteriaType[CriteriaType.DECEASED]);
+        if (type !== CriteriaType[CriteriaType.AGE]) {
+          items.sort(sortByCountThenName);
+        }
+        const nodes = items.map(node => {
+          if (type !== CriteriaType[CriteriaType.AGE]) {
+            node['parameterId'] = type === CriteriaType[CriteriaType.DECEASED] ? 'param-dec' :
+              `param${node.conceptId || node.code}`;
+          }
+          return node;
         });
+        this.loadOptions(nodes, type);
+      });
+  }
 
-        this.subscription.add(this.selection$
-            .map(sel => sel.size === 0)
-            .subscribe(sel => this.noSelection = sel)
-        );
-
-
-      this.subscription.add(this.count$
-        .subscribe(totalCount => {
-            if (totalCount) {
-              this.count = totalCount;
-            }
-        }));
-
-        this.subscription.add (this.ngRedux
-            .select(activeParameterList)
-            .subscribe(val => {
-                val.forEach( paramList => {
-
-                    if (paramList.get('subtype') === TreeSubType.DEC) {
-                        this.deceasedClicked = paramList.get('name');
-                    } else if (paramList.get('subtype') === TreeSubType.AGE) {
-                        this.ageClicked = paramList.get('name');
-                    }
-                });
-
-            }));
+  loadOptions(nodes: any, type: string) {
+    switch (type) {
+      /* Age and Deceased are single nodes we use as templates */
+      case CriteriaType[CriteriaType.AGE]:
+        this.ageNode = nodes[0];
+        this.ageNodes = nodes;
+        this.calculateAgeCount();
+        const attr = {
+          name: AttrName.AGE,
+          operator: Operator.BETWEEN,
+          operands: [minAge.toString(), maxAge.toString()]
+        };
+        const paramId = `age-param${this.ageNode.id}`;
+        this.selectedNode = {
+          ...this.ageNode,
+          name: `${minAge.toString()} - ${maxAge.toString()}`,
+          parameterId: paramId,
+          attributes: [attr],
+        };
+        const wizard = this.wizard;
+        wizard.item.searchParameters.push(this.selectedNode);
+        const selections = [paramId, ...this.selections];
+        selectionsStore.next(selections);
+        wizardStore.next(wizard);
+        break;
+      case CriteriaType[CriteriaType.DECEASED]:
+        this.deceasedNode = nodes[0];
+        break;
+      default:
+        this.nodes = nodes;
+        this.loading = false;
     }
-
-    ngOnDestroy() {
-        this.subscription.unsubscribe();
-    }
-
-    loadNodesFromApi() {
-        const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
-        /*
-         * Each subtype's possible criteria is loaded via the API.  Race and Gender
-         * criteria nodes become options in their respective dropdowns; deceased
-         * and age are used as templates for constructing relevant seach
-         * parameters.  Upon load we immediately map the criteria to immutable
-         * objects complete with deterministically generated `parameterId`s and
-         * sort them by count, then by name.
-         */
-        const calls = [
-            TreeSubType[TreeSubType.AGE],
-            TreeSubType[TreeSubType.DEC],
-            TreeSubType[TreeSubType.GEN],
-            TreeSubType[TreeSubType.RACE],
-            TreeSubType[TreeSubType.ETH]
-        ].map(code => {
-            this.loading[code] = true;
-            this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
-                .subscribe(response => {
-                    const items = response.items
-                        .filter(item => item.parentId !== 0
-                            || code === TreeSubType[TreeSubType.DEC]);
-                    items.sort(sortByCountThenName);
-                    const nodes = fromJS(items).map(node => {
-                        if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
-                            const paramId =
-                                `param${node.get('conceptId', node.get('code'))}`;
-                            node = node.set('parameterId', paramId);
-                        }
-                        return node;
-                    });
-                    this.loadOptions(nodes, code);
-                });
-        });
-    }
-
-    loadOptions(nodes: any, subtype: string) {
-        this.loading[subtype] = false;
-        switch (subtype) {
-            /* Age and Deceased are single nodes we use as templates */
-            case TreeSubType[TreeSubType.AGE]:
-                this.ageNode = nodes.get(0);
-                this.ageNodes = nodes.toJS();
-                this.calculateAgeCount();
-                break;
-            case TreeSubType[TreeSubType.DEC]:
-                this.deceasedNode = nodes.get(0);
-                break;
-            /* Gender, Race, and Ethnicity are all used to generate option lists */
-            case TreeSubType[TreeSubType.GEN]:
-                this.genderNodes = nodes;
-                break;
-            case TreeSubType[TreeSubType.RACE]:
-                this.raceNodes = nodes;
-                break;
-            case TreeSubType[TreeSubType.ETH]:
-                this.ethnicityNodes = nodes;
-                break;
-        }
-    }
+  }
 
     /*
       * We want the two inputs to mirror the slider, so here we're wiring all
@@ -243,46 +161,46 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
       * Observables from firing when a control is updated this way, hence
       * preventing any infinite update cycles.
       */
-    initAgeControls() {
-        const min = this.demoForm.get('ageMin');
-        const max = this.demoForm.get('ageMax');
-        this.subscription.add(this.ageRange.valueChanges.subscribe(([lo, hi]) => {
-            min.setValue(lo, {emitEvent: false});
-            max.setValue(hi, {emitEvent: false});
-            setTimeout(() => this.centerAgeCount(), 300);
-        }));
+  initAgeControls() {
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+    this.subscription.add(this.ageRange.valueChanges.subscribe(([lo, hi]) => {
+      min.setValue(lo, {emitEvent: false});
+      max.setValue(hi, {emitEvent: false});
+      setTimeout(() => this.centerAgeCount(), 300);
+    }));
 
-        this.subscription.add(min.valueChanges.subscribe(value => {
-            const [_, hi] = [...this.ageRange.value];
-            if (value <= hi && value >= this.minAge) {
-                this.ageRange.setValue([value, hi], {emitEvent: false});
-            }
-        }));
-        this.subscription.add(max.valueChanges.subscribe(value => {
-            const [lo, _] = [...this.ageRange.value];
-            if (value >= lo) {
-                this.ageRange.setValue([lo, value], {emitEvent: false});
-            }
-        }));
-    }
+    this.subscription.add(min.valueChanges.subscribe(value => {
+      const [_, hi] = [...this.ageRange.value];
+      if (value <= hi && value >= this.minAge) {
+        this.ageRange.setValue([value, hi], {emitEvent: false});
+      }
+    }));
+    this.subscription.add(max.valueChanges.subscribe(value => {
+      const [lo, _] = [...this.ageRange.value];
+      if (value >= lo) {
+        this.ageRange.setValue([lo, value], {emitEvent: false});
+      }
+    }));
+  }
 
-    checkMax() {
-        const min = this.demoForm.get('ageMin');
-        const max = this.demoForm.get('ageMax');
-        if (max.value < min.value) {
-            max.setValue(min.value);
-        }
+  checkMax() {
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+    if (max.value < min.value) {
+      max.setValue(min.value);
     }
+  }
 
-    checkMin() {
-        const min = this.demoForm.get('ageMin');
-        const max = this.demoForm.get('ageMax');
-        if (min.value > max.value) {
-            min.setValue(max.value);
-        } else if (min.value < this.minAge) {
-            min.setValue(this.minAge);
-        }
+  checkMin() {
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+    if (min.value > max.value) {
+      min.setValue(max.value);
+    } else if (min.value < this.minAge) {
+      min.setValue(this.minAge);
     }
+  }
 
     /*
      * The next four initialization methods do the following: if a value exists
@@ -309,142 +227,115 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
      * parameterId by stringifying the attribute (which may be more stable than
      * using a hash?)
      */
-    initAgeRange(selections) {
-        const min = this.demoForm.get('ageMin');
-        const max = this.demoForm.get('ageMax');
+  initAgeRange() {
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+    const params = this.wizard.item.searchParameters;
+    if (params.length && params[0].type === CriteriaType.AGE) {
+      const range = params[0].attributes[0].operands;
+      this.ageRange.setValue(range);
+      min.setValue(range[0]);
+      max.setValue(range[1]);
+    }
 
-        const existent = selections.find(s => s.get('subtype') === TreeSubType[TreeSubType.AGE]);
-        if (existent) {
-            const range = existent.getIn(['attributes', '0', 'operands']).toArray();
-            this.ageRange.setValue(range);
-            min.setValue(range[0]);
-            max.setValue(range[1]);
+    const ageDiff = this.ageRange.valueChanges
+      .debounceTime(250)
+      .distinctUntilChanged()
+      .map(([lo, hi]) => {
+        const attr = {
+          name: AttrName.AGE,
+          operator: Operator.BETWEEN,
+          operands: [lo, hi]
+        };
+        const paramId = `age-param${this.ageNode.id}`;
+        return {
+          ...this.ageNode,
+          name: `${lo} - ${hi}`,
+          parameterId: paramId,
+          attributes: [attr],
+        };
+      }).subscribe(newNode => {
+        const {parameterId} = this.selectedNode;
+        this.selectedNode = newNode;
+        const wizard = this.wizard;
+        wizard.item.searchParameters = [this.selectedNode];
+        wizardStore.next(wizard);
+        if (parameterId !== newNode.parameterId) {
+          const selections = [parameterId];
+          selectionsStore.next(selections);
         }
-        const selectedAge = this.selection$
-            .map(selectedNodes => selectedNodes
-                .find(node => node.get('subtype') === TreeSubType[TreeSubType.AGE])
-            );
+      });
+    this.subscription.add(ageDiff);
+  }
 
-        const ageDiff = this.ageRange.valueChanges
-            .debounceTime(250)
-            .distinctUntilChanged()
-            .map(([lo, hi]) => {
-                const attr = fromJS(<Attribute>{
-                    name: 'Age',
-                    operator: Operator.BETWEEN,
-                    operands: [lo, hi],
-                    conceptId: this.ageNode.get('conceptId', null)
-                });
-                const paramId = `age-param${attr.hashCode()}`;
-                return this.ageNode
-                    .set('parameterId', paramId)
-                    .set('attributes', [attr]);
-            })
-            .withLatestFrom(selectedAge)
-            .filter(([newNode, oldNode]) => {
-                if (oldNode) {
-                    return oldNode.get('parameterId') !== newNode.get('parameterId');
-                }
-                return true;
-            });
-        this.subscription.add(ageDiff.subscribe(([newNode, oldNode]) => {
-            if (oldNode) {
-                this.actions.removeParameter(oldNode.get('parameterId'));
-            }
-            this.selectedNode = newNode;
-        }));
+  initDeceased() {
+    const existent = this.wizard.item.searchParameters
+      .find(s => s.type === CriteriaType[CriteriaType.DECEASED]);
+    if (existent !== undefined) {
+      this.deceased.setValue(true);
     }
+    this.subscription = this.deceased.valueChanges.subscribe(includeDeceased => {
+      triggerEvent('Cohort Builder Search', 'Click', 'Demo - Age/Deceased - Deceased Box');
+      const wizard = this.wizard;
+      wizard.item.searchParameters = [includeDeceased ? this.deceasedNode : this.selectedNode];
+      const selections = [
+        includeDeceased ? this.deceasedNode.parameterId : this.selectedNode.parameterId
+      ];
+      wizardStore.next(wizard);
+      selectionsStore.next(selections);
+    });
+  }
 
-    initDeceased(selections) {
-        const existent = selections.find(s => s.get('subtype') === TreeSubType[TreeSubType.DEC]);
-        if (existent !== undefined) {
-            this.deceased.setValue(true);
-        }
-        this.subscription.add(this.deceased.valueChanges.subscribe(includeDeceased => {
-            if (!this.deceasedNode) {
-                this.deceasedClicked = includeDeceased;
-                console.warn('No node from which to make parameter for deceased status');
-                return ;
-            }
-            this.deceasedClicked = includeDeceased;
-            includeDeceased
-                ? this.actions.addParameter(this.deceasedNode)
-                : this.actions.removeParameter(this.deceasedNode.get('parameterId'));
-        }));
+  calculateAgeCount() {
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+    let count = 0;
+    for (let i = min.value; i <= max.value; i++) {
+      const ageNode = this.ageNodes.find(node => node.name === i.toString());
+      if (ageNode) {
+        count += ageNode.count;
+      }
     }
+    this.ageCount = count;
+    this.loading = false;
+  }
 
-    selectedDeasease() {
-        this.showCalculateContainer = true;
-        this.actions.addParameter(this.deceasedNode);
-        this.getSearchResponse();
+  centerAgeCount() {
+    if (this.ageNodes) {
+      this.calculateAgeCount();
+      this.ageClicked = false;
+      const slider = <HTMLElement>document.getElementsByClassName('noUi-connect')[0];
+      const wrapper = document.getElementById('count-wrapper');
+      const count = document.getElementById('age-count');
+      wrapper.setAttribute(
+        'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
+      );
+      // set style properties also for cross-browser compatibility
+      wrapper.style.width = slider.offsetWidth.toString();
+      wrapper.style.left = slider.offsetLeft.toString();
+      if (slider.offsetWidth < count.offsetWidth) {
+        const margin = (slider.offsetWidth - count.offsetWidth) / 2;
+        count.setAttribute('style', 'margin-left: ' + margin + 'px;');
+        count.style.marginLeft = margin.toString();
+      }
     }
+  }
 
-    calculateAgeCount() {
-        const min = this.demoForm.get('ageMin');
-        const max = this.demoForm.get('ageMax');
-        let count = 0;
-        for (let i = min.value; i <= max.value; i++) {
-            const ageNode = this.ageNodes.find(node => node.name === i.toString());
-            count += ageNode.count;
-        }
-        this.ageCount = count;
+  selectOption = (opt: any) => {
+    triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(opt.type)} - ${opt.name}`);
+    if (!this.selections.includes(opt.parameterId)) {
+      const wizard = this.wizard;
+      wizard.item.searchParameters.push(opt);
+      const selections = [...this.selections, opt.parameterId];
+      wizardStore.next(wizard);
+      selectionsStore.next(selections);
     }
+  }
 
-    centerAgeCount() {
-        this.calculateAgeCount();
-        this.ageClicked = false;
-        const slider = <HTMLElement> document.getElementsByClassName('noUi-connect')[0];
-        const wrapper = document.getElementById('count-wrapper');
-        const count = document.getElementById('age-count');
-        wrapper.setAttribute(
-            'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
-        );
-        // set style properties also for cross-browser compatibility
-        wrapper.style.width = slider.offsetWidth.toString();
-        wrapper.style.left = slider.offsetLeft.toString();
-        if (slider.offsetWidth < count.offsetWidth) {
-            const margin = (slider.offsetWidth - count.offsetWidth) / 2;
-            count.setAttribute('style', 'margin-left: ' + margin + 'px;');
-            count.style.marginLeft = margin.toString();
-        }
-    }
-
-    getAgeValue() {
-        this.showCalculateContainer = true;
-        if (!this.selectedNode) {
-            this.ageRange.updateValueAndValidity ({onlySelf: false, emitEvent: true});
-            if (this.isCancelTimerInitiated) {
-                clearTimeout(this.isCancelTimerInitiated);
-            }
-            this.isCancelTimerInitiated =  setTimeout (() => {
-                this.actions.addParameter(this.selectedNode);
-                this.actions.requestPreview();
-                this.showCalculateContainer = false;
-            }, 500);
-        } else {
-            this.actions.addParameter(this.selectedNode);
-            this.actions.requestPreview();
-            this.showCalculateContainer = false;
-        }
-    }
-
-    getSearchResponse() {
-        if (this.isCancelTimerInitiated) {
-            clearTimeout(this.isCancelTimerInitiated);
-        }
-        this.isCancelTimerInitiated = setTimeout(() => {
-            this.actions.requestPreview();
-            this.showCalculateContainer = false;
-        }, 200);
-    }
-
-    getItems(flag) {
-        if (flag) {
-            this.showCalculateContainer = true;
-            this.getSearchResponse();
-        } else {
-            this.showCalculateContainer = false;
-        }
-
-    }
+  calculate() {
+    this.count = 0;
+    this.wizard.item.searchParameters.forEach(selection => {
+      this.count += selection.count;
+    });
+  }
 }

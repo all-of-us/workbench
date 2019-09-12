@@ -1,26 +1,24 @@
+import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {NgxChartsModule} from '@swimlane/ngx-charts';
 
-import {CohortResolver} from '../resolvers/cohort';
+import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
 import {ComboChartComponent} from './combo-chart/combo-chart.component';
-
-import {ApiModule} from 'generated';
+import {ValidatorErrorsComponent} from './validator-errors/validator-errors.component';
 
 @NgModule({
-  imports: [
-    ApiModule,
-    NgxChartsModule,
-  ],
+  imports: [CommonModule],
   declarations: [
     ComboChartComponent,
+    ConfirmDeleteModalComponent,
+    ValidatorErrorsComponent
   ],
   exports: [
     // TODO: This could be moved back to CohortSearchModule once no longer
     // needed in CohortReviewModule.
-    ComboChartComponent
+    CommonModule,
+    ComboChartComponent,
+    ConfirmDeleteModalComponent,
+    ValidatorErrorsComponent
   ],
-  providers: [
-    CohortResolver
-  ]
 })
 export class CohortCommonModule {}

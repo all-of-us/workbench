@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Local  mysql databases named cdr<cdr-version> and public<cdr-version> are created and populated
-# with data from specified bucket.
+# Local  mysql database named cdr<cdr-version> is created and populated with data from specified bucket.
 
 # Example usage, you need to provide a bunch of args
 # ./project.rb generate-local-count-dbs --cdr-version 20180130 --bucket all-of-us-workbench-cloudsql-create
@@ -10,7 +9,7 @@ set -xeuo pipefail
 IFS=$'\n\t'
 
 USAGE="./generate-cdr/generate-local-count-dbs.sh --cdr-version <''|YYYYMMDD> --bucket <BUCKET>"
-USAGE="$USAGE \n Creates local mysql  database named cdr<cdr-version> and public<cdr-version> populated with data from bucket."
+USAGE="$USAGE \n Creates local mysql  database named cdr<cdr-version> populated with data from bucket."
 
 while [ $# -gt 0 ]; do
   echo "1 is $1"
@@ -43,16 +42,6 @@ fi
 # Init the db to fresh state ready for new cdr data keeping schema and certain tables
 echo "Doing private count data"
 if ./generate-cdr/generate-local-cdr-db.sh  --cdr-version "$CDR_VERSION" --cdr-db-prefix cdr --bucket $BUCKET
-then
-  echo "Success"
-else
-  echo "Failed"
-  exit 1
-fi
-
-# Init the db to fresh state ready for new cdr data keeping schema and certain tables
-echo "Doing public count data"
-if ./generate-cdr/generate-local-cdr-db.sh --cdr-version "$CDR_VERSION" --cdr-db-prefix public --bucket $BUCKET
 then
   echo "Success"
 else

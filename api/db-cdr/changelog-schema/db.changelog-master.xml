@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
   <!-- Use a liquibase user with permissions to change the schema -->
   <preConditions>
@@ -30,4 +30,11 @@
   <include file="changelog-schema/db.changelog-21.xml"/>
   <include file="changelog-schema/db.changelog-22.xml"/>
   <include file="changelog-schema/db.changelog-23.xml"/>
+  <include file="changelog-schema/db.changelog-24.xml"/>
+  <include file="changelog-schema/db.changelog-25.xml"/>
+  <include file="changelog-schema/db.changelog-26.xml"/>
+  <include file="changelog-schema/db.changelog-27.xml"/>
+  <include file="changelog-schema/db.changelog-28.xml"/>
+  <include file="changelog-schema/db.changelog-29.xml"/>
+  <include file="changelog-schema/db.changelog-30.xml"/>
 </databaseChangeLog>

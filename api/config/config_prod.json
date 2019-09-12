@@ -1,28 +1,36 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/api.firecloud.org",
-    "billingAccountId": "015EAA-E95687-1F8614",
-    "billingProjectPrefix": "aou-rw-",
     "clusterMaxAgeDays": 14,
     "clusterIdleMaxAgeDays": 7,
     "debugEndpoints": false,
-    "enforceRegistered": true,
-    "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-prod-cluster-resources/setup_notebook_cluster.sh",
-    "jupyterPlaygroundExtensionUri": "gs:\/\/all-of-us-rw-prod-cluster-resources/playground-extension.js",
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-prod",
-    "billingRetryCount": 4
+    "registeredDomainGroup": "all-of-us-registered-prod@firecloud.org",
+    "xAppIdValue": "AoU-RW",
+    "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod",
+    "timeoutInSeconds": 40
+  },
+  "billing": {
+    "accountId": "015EAA-E95687-1F8614",
+    "projectNamePrefix": "aou-rw-",
+    "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.gcp_billing_export_v1_015EAA_E95687_1F8614",
+    "retryCount": 4,
+    "bufferCapacity": 20,
+    "defaultFreeCreditsLimit": 300.0
   },
   "auth": {
-    "serviceAccountApiUsers": [ "all-of-us-rw-prod@appspot.gserviceaccount.com" ]
+    "serviceAccountApiUsers": [
+      "all-of-us-rw-prod@appspot.gserviceaccount.com"
+    ]
   },
   "cdr": {
     "debugQueries": false
   },
   "googleCloudStorageService": {
+    "clusterResourcesBucketName": "all-of-us-rw-prod-cluster-resources",
     "credentialsBucketName": "all-of-us-rw-prod-credentials",
-    "emailImagesBucketName": "all-of-us-workbench-test-email-images",
-    "demosBucketName": "all-of-us-rw-prod-demos"
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "researchallofus.org"
@@ -32,7 +40,8 @@
     "publicApiKeyForErrorReports": "AIzaSyBSPcQ0FcR99GLXaqX4Ujpoj3JUDSP689g",
     "projectId": "all-of-us-rw-prod",
     "shortName": "Prod",
-    "oauthClientId": "684273740878-d7i68in5d9hqr6n9mfvrdh53snekp79f.apps.googleusercontent.com"
+    "oauthClientId": "684273740878-d7i68in5d9hqr6n9mfvrdh53snekp79f.apps.googleusercontent.com",
+    "traceAllRequests": false
   },
   "admin": {
     "adminIdVerification": "support@researchallofus.org",
@@ -41,5 +50,26 @@
   "mandrill": {
     "fromEmail": "donotreply@researchallofus.org",
     "sendRetries": 3
+  },
+  "elasticsearch": {
+    "baseUrl": "",
+    "enableBasicAuth": true,
+    "enableElasticsearchBackend": false
+  },
+  "moodle": {
+    "host": "aou.nnlm.gov",
+    "enableMoodleBackend": true
+  },
+  "access": {
+    "enableComplianceTraining": true,
+    "enableEraCommons": true,
+    "enableDataUseAgreement": false,
+    "enableBetaAccess": true,
+    "unsafeAllowSelfBypass": false
+  },
+  "featureFlags": {
+    "unsafeAllowDeleteUser": false,
+    "enableVpcFlowLogs": true,
+    "enableVpcServicePerimeter": true
   }
 }

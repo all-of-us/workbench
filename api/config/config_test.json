@@ -2,28 +2,36 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/firecloud-orchestration.dsde-dev.broadinstitute.org",
-    "billingAccountId": "014D91-FCB792-33D2C0",
-    "billingProjectPrefix": "aou-rw-test-",
     "clusterMaxAgeDays": 7,
     "clusterIdleMaxAgeDays": 3,
     "debugEndpoints": false,
-    "enforceRegistered": false,
-    "jupyterUserScriptUri": "gs:\/\/all-of-us-workbench-test-cluster-resources/setup_notebook_cluster.sh",
-    "jupyterPlaygroundExtensionUri": "gs:\/\/all-of-us-workbench-test-cluster-resources/playground-extension.js",
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-test",
-    "billingRetryCount": 2
+    "registeredDomainGroup": "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
+    "xAppIdValue": "test-AoU-RW",
+    "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
+    "timeoutInSeconds": 40
+  },
+  "billing": {
+    "accountId": "014D91-FCB792-33D2C0",
+    "projectNamePrefix": "aou-rw-test-",
+    "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0",
+    "retryCount": 2,
+    "bufferCapacity": 100,
+    "defaultFreeCreditsLimit": 300.0
   },
   "auth": {
-    "serviceAccountApiUsers": [ "all-of-us-workbench-test@appspot.gserviceaccount.com" ]
+    "serviceAccountApiUsers": [
+      "all-of-us-workbench-test@appspot.gserviceaccount.com"
+    ]
   },
   "cdr": {
     "debugQueries": true
   },
   "googleCloudStorageService": {
+    "clusterResourcesBucketName": "all-of-us-workbench-test-cluster-resources",
     "credentialsBucketName": "all-of-us-workbench-test-credentials",
-    "emailImagesBucketName": "all-of-us-workbench-test-email-images",
-    "demosBucketName": "all-of-us-workbench-test-demos"
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "fake-research-aou.org"
@@ -33,7 +41,8 @@
     "publicApiKeyForErrorReports": "AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4",
     "projectId": "all-of-us-workbench-test",
     "shortName": "Test",
-    "oauthClientId": "602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com"
+    "oauthClientId": "602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com",
+    "traceAllRequests": true
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-workbench-test.appspot.com/login",
@@ -42,5 +51,26 @@
   "mandrill": {
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3
+  },
+  "elasticsearch": {
+    "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
+    "enableBasicAuth": true,
+    "enableElasticsearchBackend": false
+  },
+  "moodle": {
+    "host": "aoudev.nnlm.gov",
+    "enableMoodleBackend": true
+  },
+  "access": {
+    "enableComplianceTraining": true,
+    "enableEraCommons": true,
+    "enableDataUseAgreement": false,
+    "enableBetaAccess": true,
+    "unsafeAllowSelfBypass": true
+  },
+  "featureFlags": {
+    "unsafeAllowDeleteUser": true,
+    "enableVpcFlowLogs": true,
+    "enableVpcServicePerimeter": true
   }
 }

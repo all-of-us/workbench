@@ -37,11 +37,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(
     entityManagerFactoryRef = "cdrEntityManagerFactory",
     transactionManagerRef = "cdrTransactionManager",
-    basePackages = { "org.pmiops.workbench.cdr" }
-)
+    basePackages = {"org.pmiops.workbench.cdr"})
 /**
- * Spring configuration for connecting to a database with private or public CDR metadata based
- * on the context of the current request. Applies to the model and DAO objects within this package.
+ * Spring configuration for connecting to a database with private CDR metadata based on the context
+ * of the current request. Applies to the model and DAO objects within this package.
  */
 public class CdrDbConfig {
   private static final Logger log = Logger.getLogger(CdrDbConfig.class);
@@ -54,10 +53,12 @@ public class CdrDbConfig {
     private final Long defaultCdrVersionId;
 
     @Autowired
-    public CdrDataSource(CdrVersionDao cdrVersionDao,
+    public CdrDataSource(
+        CdrVersionDao cdrVersionDao,
         @Qualifier("poolConfiguration") PoolConfiguration basePoolConfig,
         @Qualifier("cdrPoolConfiguration") PoolConfiguration cdrPoolConfig,
-        @Qualifier("configCache") LoadingCache<String, Object> configCache) throws ExecutionException {
+        @Qualifier("configCache") LoadingCache<String, Object> configCache)
+        throws ExecutionException {
       WorkbenchConfig workbenchConfig = CacheSpringConfiguration.lookupWorkbenchConfig(configCache);
       String dbUser = cdrPoolConfig.getUsername();
       String dbPassword = cdrPoolConfig.getPassword();
@@ -71,16 +72,18 @@ public class CdrDbConfig {
       Long defaultId = null;
       Map<Object, Object> cdrVersionDataSourceMap = new HashMap<>();
       for (CdrVersion cdrVersion : cdrVersionDao.findAll()) {
-        String dbName = "public".equals(dbUser) ? cdrVersion.getPublicDbName() : cdrVersion.getCdrDbName();
         int slashIndex = originalDbUrl.lastIndexOf('/');
-        String dbUrl = originalDbUrl.substring(0, slashIndex + 1) + dbName + "?useSSL=false";
+        String dbUrl =
+            originalDbUrl.substring(0, slashIndex + 1)
+                + cdrVersion.getCdrDbName()
+                + "?useSSL=false";
         DataSource dataSource =
             DataSourceBuilder.create()
-            .driverClassName(basePoolConfig.getDriverClassName())
-            .username(dbUser)
-            .password(dbPassword)
-            .url(dbUrl)
-            .build();
+                .driverClassName(basePoolConfig.getDriverClassName())
+                .username(dbUser)
+                .password(dbPassword)
+                .url(dbUrl)
+                .build();
         if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
           org.apache.tomcat.jdbc.pool.DataSource tomcatSource =
               (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
@@ -99,18 +102,19 @@ public class CdrDbConfig {
 
           // The Spring autowiring is a bit of a maze here, log something concrete which will allow
           // verification that the DB settings in application.properties are actually being loaded.
-          log.info("using Tomcat pool for CDR data source, with minIdle: " +
-            cdrPool.getMinIdle());
+          log.info("using Tomcat pool for CDR data source, with minIdle: " + cdrPool.getMinIdle());
         } else {
-          log.warn("not using Tomcat pool or initializing pool configuration; " +
-              "this should only happen within tests");
+          log.warn(
+              "not using Tomcat pool or initializing pool configuration; "
+                  + "this should only happen within tests");
         }
         cdrVersionDataSourceMap.put(cdrVersion.getCdrVersionId(), dataSource);
         if (cdrVersion.getIsDefault()) {
           if (defaultId != null) {
-            throw new ServerErrorException(String.format(
-                "Multiple CDR versions are marked as the default: %d, %d",
-                defaultId, cdrVersion.getCdrVersionId()));
+            throw new ServerErrorException(
+                String.format(
+                    "Multiple CDR versions are marked as the default: %d, %d",
+                    defaultId, cdrVersion.getCdrVersionId()));
           }
           defaultId = cdrVersion.getCdrVersionId();
         }
@@ -153,14 +157,12 @@ public class CdrDbConfig {
 
   @Bean(name = "cdrEntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean getCdrEntityManagerFactory(
-      EntityManagerFactoryBuilder builder,
-      @Qualifier("cdrDataSource") DataSource dataSource) {
-    return
-        builder
-            .dataSource(dataSource)
-            .packages("org.pmiops.workbench.cdr")
-            .persistenceUnit("cdr")
-            .build();
+      EntityManagerFactoryBuilder builder, @Qualifier("cdrDataSource") DataSource dataSource) {
+    return builder
+        .dataSource(dataSource)
+        .packages("org.pmiops.workbench.cdr")
+        .persistenceUnit("cdr")
+        .build();
   }
 
   @Bean(name = "cdrTransactionManager")

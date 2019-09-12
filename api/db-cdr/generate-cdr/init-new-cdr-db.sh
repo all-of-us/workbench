@@ -5,7 +5,7 @@
 set -xeuo pipefail
 IFS=$'\n\t'
 
-USAGE="./init-new-cdr-db.sh [--drop-if-exists] --cdr-db-name cdrYYYYMMDD|publicYYYYMMDD>"
+USAGE="./init-new-cdr-db.sh [--drop-if-exists] --cdr-db-name cdrYYYYMMDD>"
 DROP_IF_EXISTS="N"
 RUN_LIST="schema"
 CONTEXT=
@@ -32,14 +32,6 @@ fi
 # export for liquibase to use this
 #export CDR_DB_NAME
 
-# If CDR_DB_NAME matches ^public, we want to the public_db_user env var substituted in the create_db.sql
-if [[ $CDR_DB_NAME =~ ^public ]]
-then
-  echo "Working the public db init cdr"
-  export WORKBENCH_DB_USER=$PUBLIC_DB_USER
-  export WORKBENCH_DB_PASSWORD=$PUBLIC_DB_PASSWORD
-fi
-
 CREATE_DB_FILE=/tmp/create_db.sql
 
 function finish {
@@ -47,7 +39,7 @@ function finish {
 }
 trap finish EXIT
 
-envsubst < create_db.sql > $CREATE_DB_FILE
+envsubst < "$(dirname "${BASH_SOURCE}")/create_db.sql" > $CREATE_DB_FILE
 
 # Drop and create new cdr database
 if [ "${DROP_IF_EXISTS}" == "Y" ]
@@ -58,9 +50,24 @@ fi
 echo "Creating database ..."
 mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREATE_DB_FILE}
 
+if [ "${RUN_LIST}" == "data" ]
+then
+    echo "Copying csv files from gs://all-of-us-cb-test-cs"
+    # make sure csv folder is empty
+    rm -rf "$(dirname "${BASH_SOURCE}")/../csv"
+    mkdir "$(dirname "${BASH_SOURCE}")/../csv"
+    # copy down csv files from bucket
+    gsutil -m cp gs://all-of-us-cb-test-csv/*.csv "$(dirname "${BASH_SOURCE}")/../csv"
+fi
+
 # Use liquibase to generate the schema and data
 echo "Running liquibase "
-../gradlew update -PrunList=${RUN_LIST} ${CONTEXT}
+(cd "$(dirname "${BASH_SOURCE}")/.." && ../gradlew update -PrunList=${RUN_LIST} ${CONTEXT})
+
+if [ "${RUN_LIST}" == "data" ]
+then
+    rm -rf "$(dirname "${BASH_SOURCE}")/../csv"
+fi
 
 # Success
 exit 0

@@ -2,15 +2,10 @@ package org.pmiops.workbench.interceptors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-
-
-/**
- * Intercepts all API requests to ensure they have appropriate CORS headers.
- */
+/** Intercepts all API requests to ensure they have appropriate CORS headers. */
 @Service
 public class CorsInterceptor extends HandlerInterceptorAdapter {
   public static final String CREDENTIALS_NAME = "Access-Control-Allow-Credentials";
@@ -21,6 +16,7 @@ public class CorsInterceptor extends HandlerInterceptorAdapter {
 
   /**
    * Assigns cors headers to a response object.
+   *
    * @param handler The Swagger-generated ApiController. It contains our handler as a private
    *     delegate.
    */
@@ -30,10 +26,9 @@ public class CorsInterceptor extends HandlerInterceptorAdapter {
     response.setHeader(CREDENTIALS_NAME, "true");
     response.setHeader(ORIGIN_NAME, "*");
     response.setHeader(METHODS_NAME, "GET, HEAD, POST, PUT, DELETE, PATCH, TRACE, OPTIONS");
-    response.setHeader(HEADERS_NAME, "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    response.setHeader(
+        HEADERS_NAME, "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 
     return true;
   }
-
-
 }

@@ -25,26 +25,64 @@ SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com 
               clouderrorreporting.googleapis.com bigquery-json.googleapis.com}
 DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
+def make_gae_vars(min, max)
+  {
+    "GAE_MIN_INSTANCES" => min.to_s,
+    "GAE_MAX_INSTANCES" => max.to_s
+  }
+end
+TEST_GAE_VARS = make_gae_vars(0, 10)
+
+# TODO: Make environment/project flags consistent across commands, consider
+# using a environment keywords as dict keys here, e.g. :test, :staging, etc.
 ENVIRONMENTS = {
-  TEST_PROJECT => {
+  "local" => {
+    :api_endpoint_host => "localhost:8081",
+    :cdr_sql_instance => "workbench",
+    :config_json => "config_local.json",
+    :cdr_versions_json => "cdr_versions_local.json",
+    :featured_workspaces_json => "featured_workspaces_local.json",
+    :gae_vars => TEST_GAE_VARS
+  },
+  "all-of-us-workbench-test" => {
+    :api_endpoint_host => "api-dot-#{TEST_PROJECT}.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_test.json",
-    :cdr_versions_json => "cdr_versions_test.json"
+    :cdr_versions_json => "cdr_versions_test.json",
+    :featured_workspaces_json => "featured_workspaces_test.json",
+    :gae_vars => TEST_GAE_VARS
   },
   "all-of-us-rw-staging" => {
+    :api_endpoint_host => "api-dot-all-of-us-rw-staging.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_staging.json",
-    :cdr_versions_json => "cdr_versions_staging.json"
+    :cdr_versions_json => "cdr_versions_staging.json",
+    :featured_workspaces_json => "featured_workspaces_staging.json",
+    :gae_vars => TEST_GAE_VARS
+  },
+  "all-of-us-rw-perf" => {
+    :api_endpoint_host => "api-dot-all-of-us-rw-perf.appspot.com",
+    :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
+    :config_json => "config_perf.json",
+    :cdr_versions_json => "cdr_versions_perf.json",
+    :featured_workspaces_json => "featured_workspaces_perf.json",
+    :gae_vars => make_gae_vars(20, 20)
   },
   "all-of-us-rw-stable" => {
+    :api_endpoint_host => "api-dot-all-of-us-rw-stable.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_stable.json",
-    :cdr_versions_json => "cdr_versions_stable.json"
+    :cdr_versions_json => "cdr_versions_stable.json",
+    :featured_workspaces_json => "featured_workspaces_stable.json",
+    :gae_vars => TEST_GAE_VARS
   },
   "all-of-us-rw-prod" => {
+    :api_endpoint_host => "api.workbench.researchallofus.org",
     :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
     :config_json => "config_prod.json",
-    :cdr_versions_json => "cdr_versions_prod.json"
+    :cdr_versions_json => "cdr_versions_prod.json",
+    :featured_workspaces_json => "featured_workspaces_prod.json",
+    :gae_vars => make_gae_vars(10, 64)
   }
 }
 
@@ -53,11 +91,18 @@ def run_inline_or_log(dry_run, args)
   Common.new.run_inline(cmd_prefix + args)
 end
 
-def get_config(project)
-  unless ENVIRONMENTS.fetch(project, {}).has_key?(:config_json)
-    raise ArgumentError.new("project #{project} lacks a valid env configuration")
+def get_config(env)
+  unless ENVIRONMENTS.fetch(env, {}).has_key?(:config_json)
+    raise ArgumentError.new("env '#{env}' lacks a valid configuration")
   end
-  return ENVIRONMENTS[project][:config_json]
+  return ENVIRONMENTS[env][:config_json]
+end
+
+def get_featured_workspaces_config(env)
+  unless ENVIRONMENTS.fetch(env, {}).has_key?(:featured_workspaces_json)
+    raise ArgumentError.new("env '#{env}' lacks a valid featured workspaces configuration")
+  end
+  return ENVIRONMENTS[env][:featured_workspaces_json]
 end
 
 def get_cdr_versions_file(project)
@@ -74,10 +119,22 @@ def get_cdr_sql_project(project)
   return ENVIRONMENTS[project][:cdr_sql_instance].split(":")[0]
 end
 
-def ensure_docker(cmd_name, args)
+def get_gae_vars(project)
+  unless ENVIRONMENTS.fetch(project, {}).has_key?(:gae_vars)
+    raise ArgumentError.new("project #{project} lacks GAE env variables")
+  end
+  return ENVIRONMENTS[project][:gae_vars]
+end
+
+def ensure_docker(cmd_name, args=nil)
+  args = (args or [])
   unless Workbench.in_docker?
     exec(*(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args))
   end
+end
+
+def init_new_cdr_db(args)
+  Common.new.run_inline %W{docker-compose run cdr-scripts generate-cdr/init-new-cdr-db.sh} + args
 end
 
 # exec against a live local API server - used for script access to a local API
@@ -121,10 +178,7 @@ def read_db_vars(gcc)
   return vars.merge({
     'CDR_DB_CONNECTION_STRING' => cdr_vars['DB_CONNECTION_STRING'],
     'CDR_DB_USER' => cdr_vars['WORKBENCH_DB_USER'],
-    'CDR_DB_PASSWORD' => cdr_vars['WORKBENCH_DB_PASSWORD'],
-    'PUBLIC_DB_CONNECTION_STRING' => cdr_vars['PUBLIC_DB_CONNECTION_STRING'],
-    'PUBLIC_DB_USER' => cdr_vars['PUBLIC_DB_USER'],
-    'PUBLIC_DB_PASSWORD' => cdr_vars['PUBLIC_DB_PASSWORD']
+    'CDR_DB_PASSWORD' => cdr_vars['WORKBENCH_DB_PASSWORD']
   })
 end
 
@@ -140,9 +194,8 @@ def dev_up()
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
-  common.run_inline %W{docker-compose run db-migration}
-  common.run_inline %W{docker-compose run db-cdr-migration}
-  common.run_inline %W{docker-compose run db-public-migration}
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+  init_new_cdr_db %W{--cdr-db-name cdr}
 
   common.status "Updating CDR versions..."
   common.run_inline %W{docker-compose run update-cdr-versions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
@@ -150,13 +203,19 @@ def dev_up()
   common.status "Updating workbench configuration..."
   common.run_inline %W{
     docker-compose run update-config
-    -Pconfig_file=../config/config_local.json
+    -Pconfig_key=main -Pconfig_file=config/config_local.json
   }
   common.status "Updating CDR schema configuration..."
   common.run_inline %W{
     docker-compose run update-config
-    -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json
+    -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
   }
+  common.status "Updating featured workspaces..."
+  common.run_inline %W{
+    docker-compose run update-config
+    -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
+  }
+
   run_api()
 end
 
@@ -167,15 +226,47 @@ Common.register_command({
   :fn => ->() { dev_up() }
 })
 
+def start_api_reqs()
+  common = Common.new
+  common.status "Starting database..."
+  common.run_inline %W{docker-compose up -d db}
+  common.status "Starting elastic..."
+  common.run_inline %W{docker-compose up -d elastic}
+end
+
+Common.register_command({
+  :invocation => "start-api-reqs",
+  :description => "Starts up the services required for the API server" \
+     "(assumes database and config are already up-to-date.)",
+  :fn => Proc.new { start_api_reqs() }
+})
+
+def stop_api_reqs()
+  common = Common.new
+  common.status "Stopping database..."
+  common.run_inline %W{docker-compose stop db}
+  common.status "Stopping elastic..."
+  common.run_inline %W{docker-compose stop elastic}
+end
+
+Common.register_command({
+  :invocation => "stop-api-reqs",
+  :description => "Stops the services required for the API server",
+  :fn => Proc.new { stop_api_reqs() }
+})
+
 def setup_local_environment()
   root_password = ENV["MYSQL_ROOT_PASSWORD"]
   ENV.update(Workbench.read_vars_file("db/vars.env"))
+  ENV.update(get_gae_vars("local"))
   ENV["DB_HOST"] = "127.0.0.1"
   ENV["MYSQL_ROOT_PASSWORD"] = root_password
   ENV["DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/workbench?useSSL=false"
-  ENV["PUBLIC_DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/public?useSSL=false"
 end
 
+# TODO(RW-605): This command doesn't actually execute locally as it assumes a docker context.
+#
+# This command is only ever meant to be run via CircleCI; see .circleci/config.yml
 def run_local_migrations()
   setup_local_environment
   # Runs migrations against the local database.
@@ -183,18 +274,18 @@ def run_local_migrations()
   Dir.chdir('db') do
     common.run_inline %W{./run-migrations.sh main}
   end
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
-    common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name public}
+  Dir.chdir('db-cdr/generate-cdr') do
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr}
   end
-  common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
-  common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
-  common.run_inline %W{gradle :tools:updateCdrVersions -PappArgs=['../config/cdr_versions_local.json',false]}
+  common.run_inline %W{gradle :loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json}
+  common.run_inline %W{gradle :loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json}
+  common.run_inline %W{gradle :loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json}
+  common.run_inline %W{gradle :updateCdrVersions -PappArgs=['config/cdr_versions_local.json',false]}
 end
 
 Common.register_command({
   :invocation => "run-local-migrations",
-  :description => "Runs DB migrations with the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :description => "Runs DB migrations with the local MySQL instance. You must set MYSQL_ROOT_PASSWORD before running this.",
   :fn => ->() { run_local_migrations() }
 })
 
@@ -224,36 +315,6 @@ Common.register_command({
   :fn => ->() { stop_local_api() }
 })
 
-def start_local_public_api()
-  setup_local_environment
-  common = Common.new
-  Dir.chdir('../public-api') do
-    common.status "Starting public API server..."
-    common.run_inline %W{gradle appengineStart}
-  end
-end
-
-Common.register_command({
-  :invocation => "start-local-public-api",
-  :description => "Starts public-api using the local MySQL instance. You must set MYSQL_ROOT_PASSWORD before running this.",
-  :fn => ->() { start_local_public_api() }
-})
-
-def stop_local_public_api()
-  setup_local_environment
-  common = Common.new
-  Dir.chdir('../public-api') do
-    common.status "Stopping public API server..."
-    common.run_inline %W{gradle appengineStop}
-  end
-end
-
-Common.register_command({
-  :invocation => "stop-local-public-api",
-  :description => "Stops locally running public api.",
-  :fn => ->() { stop_local_public_api() }
-})
-
 def run_local_api_tests()
   common = Common.new
   status = common.capture_stdout %W{curl --silent --fail http://localhost:8081/}
@@ -270,24 +331,6 @@ Common.register_command({
   :invocation => "run-local-api-tests",
   :description => "Runs smoke tests against local api server",
   :fn => ->() { run_local_api_tests() }
-})
-
-def run_local_public_api_tests()
-  common = Common.new
-  status = common.capture_stdout %W{curl --silent --fail http://localhost:8083/}
-  if status != 'AllOfUs Public API'
-    common.error "Error probing public-api; received: #{status}"
-    common.error "Server logs:"
-    common.run_inline %W{cat ../public-api/build/dev-appserver-out/dev_appserver.out}
-    exit 1
-  end
-  common.status "public-api started up."
-end
-
-Common.register_command({
-  :invocation => "run-local-public-api-tests",
-  :description => "Runs smoke tests against public-api server",
-  :fn => ->() { run_local_public_api_tests() }
 })
 
 def get_gsuite_admin_key(project)
@@ -308,21 +351,6 @@ def run_api()
     common.run_inline_swallowing_interrupt %W{docker-compose up api}
   end
 end
-
-def run_public_api_and_db()
-  common = Common.new
-  common.status "Starting database..."
-  common.run_inline %W{docker-compose up -d db}
-  common.status "Starting public API."
-  common.run_inline_swallowing_interrupt %W{docker-compose up public-api}
-end
-
-Common.register_command({
-  :invocation => "run-public-api",
-  :description => "Runs the public api server (assumes database is up-to-date.)",
-  :fn => ->() { run_public_api_and_db() }
-})
-
 
 def clean()
   common = Common.new
@@ -374,21 +402,6 @@ Common.register_command({
   :fn => ->(*args) { run_api_tests("test-api", args) }
 })
 
-
-def run_public_api_tests(cmd_name, args)
-  ensure_docker cmd_name, args
-  Dir.chdir('../public-api') do
-    Common.new.run_inline %W{gradle :test} + args
-  end
-end
-
-Common.register_command({
-  :invocation => "test-public-api",
-  :description => "Runs public API tests. To run a single test, add (for example) " \
-      "--tests org.pmiops.workbench.cdr.dao.AchillesAnalysisDaoTest",
-  :fn => ->(*args) { run_public_api_tests("test-public-api", args) }
-})
-
 def run_common_api_tests(cmd_name, args)
   ensure_docker cmd_name, args
   Dir.chdir('../common-api') do
@@ -406,12 +419,11 @@ Common.register_command({
 def run_all_tests(cmd_name, args)
   run_common_api_tests(cmd_name, args)
   run_api_tests(cmd_name, args)
-  run_public_api_tests(cmd_name, args)
 end
 
 Common.register_command({
   :invocation => "test",
-  :description => "Runs all tests (api and public-api). To run a single test, add (for example) " \
+  :description => "Runs all tests (api). To run a single test, add (for example) " \
       "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
   :fn => ->(*args) { run_all_tests("test", args) }
 })
@@ -444,6 +456,22 @@ Common.register_command({
   :invocation => "bigquerytest",
   :description => "Runs bigquerytest tests.",
   :fn => ->(*args) { run_bigquery_tests("bigquerytest", *args) }
+})
+
+def run_rainforest_tests(cmd_name, *args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  # The bucket is hardcoded to staging, because that is currently the only
+  # environment we can run tests in. There is, however, an identical key in
+  # each of the other environments.
+  token = `gsutil cat gs://all-of-us-rw-staging-credentials/rainforest-key.txt`
+  common.run_inline %W{rainforest run --run-group 4450 --token #{token}}
+end
+
+Common.register_command({
+  :invocation => "rainforesttest",
+  :description => "Runs rainforest tests.",
+  :fn => ->(*args) { run_rainforest_tests("rainforesttest", *args) }
 })
 
 def run_gradle(cmd_name, args)
@@ -482,16 +510,19 @@ Common.register_command({
 def docker_clean()
   common = Common.new
 
-  docker_images = `docker ps -aq`.gsub(/\s+/, " ")
-  unless docker_images.empty?
-    common.run_inline("docker rm -f #{docker_images}")
-  end
-  common.run_inline %W{docker-compose down --volumes}
+  # --volumes clears out any cached data between runs, e.g. MySQL database or Elasticsearch.
+  # --rmi local forces a rebuild of any local dev images on the next run - usually the pieces will
+  #   still be cached and this is fast.
+  common.run_inline %W{docker-compose down --volumes --rmi local}
+
   # This keyfile gets created and cached locally on dev-up. Though it's not
   # specific to Docker, it is mounted locally for docker runs. For lack of a
   # better "dev teardown" hook, purge that file here; e.g. in case we decide to
   # invalidate a dev key or change the service account.
   common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH} #{GSUITE_ADMIN_KEY_PATH}}
+
+  # See https://github.com/docker/compose/issues/3447
+  common.status "Cleaning complete. docker-compose 'not found' errors can be safely ignored"
 end
 
 Common.register_command({
@@ -545,11 +576,13 @@ def register_service_account(cmd_name, *args)
         "Project to register the service account for"
   )
   op.parse.validate
+  firecloud_base_url = get_firecloud_base_url(op.opts.project)
   ServiceAccountContext.new(op.opts.project).run do
     Dir.chdir("../firecloud-tools") do
       common = Common.new
       common.run_inline %W{./run.sh scripts/register_service_account/register_service_account.py
-           -j #{ENV["GOOGLE_APPLICATION_CREDENTIALS"]} -e all-of-us-research-tools@googlegroups.com}
+           -j #{ENV["GOOGLE_APPLICATION_CREDENTIALS"]} -e all-of-us-research-tools@googlegroups.com
+           -u #{firecloud_base_url}}
     end
   end
 end
@@ -605,15 +638,12 @@ Common.register_command({
   :fn => ->(*args) { drop_cloud_cdr("drop-cloud-cdr", *args) }
 })
 
-
 def run_local_all_migrations()
   common = Common.new
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 
-  common.run_inline %W{docker-compose run db-migration}
-  common.run_inline %W{docker-compose run db-cdr-migration}
-  common.run_inline %W{docker-compose run db-public-migration}
-  common.run_inline %W{docker-compose run db-cdr-data-migration}
-  common.run_inline %W{docker-compose run db-public-data-migration}
+  init_new_cdr_db %W{--cdr-db-name cdr}
+  init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
 end
 
 Common.register_command({
@@ -624,9 +654,7 @@ Common.register_command({
 
 
 def run_local_data_migrations()
-  common = Common.new
-  common.run_inline %W{docker-compose run db-cdr-data-migration}
-  common.run_inline %W{docker-compose run db-data-migration}
+  init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
 end
 
 Common.register_command({
@@ -635,38 +663,94 @@ Common.register_command({
   :fn => ->() { run_local_data_migrations() }
 })
 
-def run_local_public_data_migrations()
-  common = Common.new
-  common.run_inline %W{docker-compose run db-public-migration}
-  common.run_inline %W{docker-compose run db-public-data-migration}
-end
-
-Common.register_command({
-  :invocation => "run-local-public-data-migrations",
-  :description => "Runs local data migrations for public schemas.",
-  :fn => ->() { run_local_public_data_migrations() }
-})
-
 def make_bq_denormalized_tables(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-denormalized-tables} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh} + args
 end
 
 Common.register_command({
   :invocation => "make-bq-denormalized-tables",
   :description => "make-bq-denormalized-tables --bq-project <PROJECT> --bq-dataset <DATASET>
-Generates big query denormalized tables. Used by cohort builder. Must be run once when a new cdr is released",
+Generates big query denormalized tables for search and review. Used by cohort builder. Must be run once when a new cdr is released",
   :fn => ->(*args) { make_bq_denormalized_tables(*args) }
+})
+
+def make_bq_denormalized_review(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh} + args
+end
+
+Common.register_command({
+  :invocation => "make-bq-denormalized-review",
+  :description => "make-bq-denormalized-review --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query denormalized tables for review. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { make_bq_denormalized_review(*args) }
+})
+
+def make_bq_denormalized_search(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search.sh} + args
+end
+
+Common.register_command({
+  :invocation => "make-bq-denormalized-search",
+  :description => "make-bq-denormalized-search --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query denormalized search. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { make_bq_denormalized_search(*args) }
+})
+
+def make_bq_denormalized_dataset(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh} + args
+end
+
+Common.register_command({
+                            :invocation => "make-bq-denormalized-dataset",
+                            :description => "make-bq-denormalized-dataset --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query denormalized dataset tables. Used by Data Set Builder. Must be run once when a new cdr is released",
+                            :fn => ->(*args) { make_bq_denormalized_dataset(*args) }
+                        })
+
+def make_bq_dataset_linking(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-dataset-linking.sh} + args
+end
+
+Common.register_command({
+                            :invocation => "make-bq-dataset-linking",
+                            :description => "make-bq-dataset-linking --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query dataset linking tables. Used by Data Set Builder to show users values information.
+Must be run once when a new cdr is released",
+                            :fn => ->(*args) { make_bq_dataset_linking(*args) }
+                        })
+
+def generate_criteria_table(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-criteria-table.sh} + args
+end
+
+Common.register_command({
+  :invocation => "generate-criteria-table",
+  :description => "generate-criteria-table --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates the criteria table in big query. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { generate_criteria_table(*args) }
+})
+
+def generate_cb_criteria_tables(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cb-criteria-tables.sh} + args
+end
+
+Common.register_command({
+  :invocation => "generate-cb-criteria-tables",
+  :description => "generate-cb-criteria-tables --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates the criteria table in big query. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { generate_cb_criteria_tables(*args) }
 })
 
 def generate_private_cdr_counts(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-private-cdr-counts} + args
-end
-
-def generate_public_cdr_counts(*args)
-  common = Common.new
-  common.run_inline %W{docker-compose run db-generate-public-cdr-counts} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh} + args
 end
 
 Common.register_command({
@@ -675,14 +759,6 @@ Common.register_command({
  --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
 Generates databases in bigquery with data from a de-identified cdr that will be imported to mysql/cloudsql to be used by workbench.",
   :fn => ->(*args) { generate_private_cdr_counts(*args) }
-})
-
-Common.register_command({
-  :invocation => "generate-public-cdr-counts",
-  :description => "generate-public-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --public-project <PROJECT> \
- --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
-Generates databases in bigquery with non de-identified data from a cdr that will be imported to mysql/cloudsql to be used by databrowser.",
-  :fn => ->(*args) { generate_public_cdr_counts(*args) }
 })
 
 def generate_cloudsql_db(cmd_name, *args)
@@ -711,16 +787,16 @@ def generate_cloudsql_db(cmd_name, *args)
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
-    common.run_inline %W{docker-compose run db-generate-cloudsql-db
+    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cloudsql-db.sh
           --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
           --bucket #{op.opts.bucket}}
   end
 end
 Common.register_command({
   :invocation => "generate-cloudsql-db",
-  :description => "generate-cloudsql-db  --project <PROJECT> --instance <INSTANCE> \
---database <cdrYYYYMMDD> --bucket <BUCKET>
-Generates a cloudsql database from data in a bucket. Used to make cdr and public count databases.",
+  :description => "generate-cloudsql-db  --project <PROJECT> --instance <workbenchmaindb> \
+--database <synth_r_20XXqX_X> --bucket <BUCKET>
+Generates a cloudsql database from data in a bucket. Used to make cdr count databases.",
   :fn => ->(*args) { generate_cloudsql_db("generate-cloudsql-db", *args) }
 })
 
@@ -755,7 +831,6 @@ def cloudsql_import(cmd_name, *args)
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
-    #common.run_inline %W{docker-compose run db-cloudsql-import} + args
     common.run_inline %W{docker-compose run db-cloudsql-import
           --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
           --bucket #{op.opts.bucket} --file #{op.opts.file}}
@@ -773,33 +848,33 @@ Import bucket of files or a single file in a bucket to a cloudsql database",
 
 def generate_local_cdr_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-local-cdr-db} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-local-cdr-db.sh} + args
 end
 
 Common.register_command({
   :invocation => "generate-local-cdr-db",
-  :description => "generate-cloudsql-cdr --cdr-version <''|YYYYMMDD> --cdr-db-prefix <cdr|public> --bucket <BUCKET>
-Creates and populates local mysql database from data in bucket made by generate-private/public-cdr-counts.",
+  :description => "generate-cloudsql-cdr --cdr-version <synth_r_20XXqX_X> --cdr-db-prefix <cdr> --bucket <BUCKET>
+Creates and populates local mysql database from data in bucket made by generate-private-cdr-counts.",
   :fn => ->(*args) { generate_local_cdr_db(*args) }
 })
 
 
 def generate_local_count_dbs(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-local-count-dbs} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-local-count-dbs.sh} + args
 end
 
 Common.register_command({
   :invocation => "generate-local-count-dbs",
-  :description => "generate-local-count-dbs.sh --cdr-version <''|YYYYMMDD> --bucket <BUCKET>
-Creates and populates local mysql databases cdr<VERSION> and public<VERSION> from data in bucket made by generate-private/public-cdr-counts.",
+  :description => "generate-local-count-dbs --cdr-version <synth_r_20XXqX_X> --bucket <BUCKET>
+Creates and populates local mysql databases cdr<VERSION> from data in bucket made by generate-private-cdr-counts.",
   :fn => ->(*args) { generate_local_count_dbs(*args) }
 })
 
 
 def mysqldump_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-mysqldump-local-db} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-mysqldump.sh} + args
 end
 
 
@@ -838,7 +913,7 @@ Imports .sql file to local mysql instance",
 
 def run_drop_cdr_db()
   common = Common.new
-  common.run_inline %W{docker-compose run drop-cdr-db}
+  common.run_inline %W{docker-compose run cdr-scripts ./run-drop-db.sh}
 end
 
 Common.register_command({
@@ -854,8 +929,7 @@ Common.register_command({
   :fn => ->(*args) { run_cloud_data_migrations("run-cloud-data-migrations", args) }
 })
 
-def write_db_creds_file(project, cdr_db_name, public_db_name,
-                        root_password, workbench_password, public_password=nil)
+def write_db_creds_file(project, cdr_db_name, root_password, workbench_password)
   instance_name = "#{project}:us-central1:workbenchmaindb"
   db_creds_file = Tempfile.new("#{project}-vars.env")
   if db_creds_file
@@ -867,18 +941,12 @@ def write_db_creds_file(project, cdr_db_name, public_db_name,
       # TODO: make our CDR migration scripts update *all* CDR versions listed in the cdr_version
       # table of the workbench DB; then this shouldn't be needed anymore.
       db_creds_file.puts "CDR_DB_NAME=#{cdr_db_name}"
-      db_creds_file.puts "PUBLIC_DB_NAME=#{public_db_name}"
       db_creds_file.puts "CLOUD_SQL_INSTANCE=#{instance_name}"
       db_creds_file.puts "LIQUIBASE_DB_USER=liquibase"
       db_creds_file.puts "LIQUIBASE_DB_PASSWORD=#{workbench_password}"
       db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
       db_creds_file.puts "WORKBENCH_DB_USER=workbench"
       db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
-      if public_password
-        db_creds_file.puts "PUBLIC_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/#{public_db_name}?rewriteBatchedStatements=true"
-        db_creds_file.puts "PUBLIC_DB_USER=public"
-        db_creds_file.puts "PUBLIC_DB_PASSWORD=#{public_password}"
-      end
       db_creds_file.close
 
       copy_file_to_gcs(db_creds_file.path, "#{project}-credentials", "vars.env")
@@ -926,9 +994,9 @@ def update_user_registered_status(cmd_name, args)
     "Project to update registered status for"
   )
   op.add_option(
-    "--action [action]",
-    ->(opts, v) { opts.action = v},
-    "Action to perform: add/remove."
+    "--disabled [disabled]",
+    ->(opts, v) { opts.disabled = v},
+    "Disabled state to set: true/false."
   )
   op.add_option(
     "--account [account]",
@@ -948,24 +1016,94 @@ def update_user_registered_status(cmd_name, args)
   common.run_inline %W{gcloud config set account #{op.opts.account}}
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
-  payload = "{\"email\": \"#{op.opts.user}\"}"
+  payload = "{\"email\": \"#{op.opts.user}\", \"disabled\": \"#{op.opts.disabled}\"}"
   domain_name = get_auth_domain(op.opts.project)
-  if op.opts.action == "add"
-    common.run_inline %W{curl -H #{header} -H #{content_type}
-      -d #{payload} https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}/users}
-  end
-
-  if op.opts.action == "remove"
-    common.run_inline %W{curl -X DELETE -H #{header} -H #{content_type}
-      -d #{payload} https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}/users}
-  end
+  common.run_inline %W{curl -X POST -H #{header} -H #{content_type}
+      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}/v1/auth-domain/#{domain_name}/users}
 end
 
 Common.register_command({
   :invocation => "update-user-registered-status",
   :description => "Adds or removes a specified user from the registered access domain.\n" \
-                  "Accepts three flags: --action [add/remove], --account [admin email], and --user [target user email]",
+                  "Accepts three flags: --disabled [true/false], --account [admin email], and --user [target user email]",
   :fn => ->(*args) { update_user_registered_status("update_user_registered_status", args) }
+})
+
+def backfill_billing_project_users(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  fc_config = get_fc_config(op.opts.project)
+  flags = ([
+    ["--fc-base-url", fc_config["baseUrl"]],
+    ["--billing-project-prefix", fc_config["billingProjectPrefix"]]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    flags += ["--dry-run"]
+  end
+  # Gradle args need to be single-quote wrapped.
+  flags.map! { |f| "'#{f}'" }
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+        gradle backfillBillingProjectUsers
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+Common.register_command({
+  :invocation => "backfill-billing-project-users",
+  :description => "Backfills billing project user role for owners",
+  :fn => ->(*args) {backfill_billing_project_users("backfill-billing-project-users", *args)}
+})
+
+def fetch_firecloud_user_profile(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--user=[user]",
+      String,
+      ->(opts, v) { opts.user = v},
+      "The AoU user to fetch FireCloud data for (e.g. 'gjordan@fake-research-aou.org'")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle fetchFireCloudUserProfile
+       -PappArgs=["#{op.opts.user}"]}
+  end
+end
+
+Common.register_command({
+  :invocation => "fetch-firecloud-user-profile",
+  :description => "Fetches and logs FireCloud profile data for an AoU user.\n",
+  :fn => ->(*args) {fetch_firecloud_user_profile("fetch-firecloud-user-profile", *args)}
 })
 
 def authority_options(cmd_name, args)
@@ -1000,12 +1138,10 @@ def set_authority(cmd_name, *args)
   gcc.validate
 
   with_cloud_proxy_and_db(gcc) do
-    Dir.chdir("tools") do
-      common = Common.new
-      common.run_inline %W{
-        gradle --info setAuthority
-       -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
-    end
+    common = Common.new
+    common.run_inline %W{
+      gradle setAuthority
+     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
   end
 end
 
@@ -1021,12 +1157,10 @@ def set_authority_local(cmd_name, *args)
   op = authority_options(cmd_name, args)
   op.parse.validate
 
-  Dir.chdir("tools") do
-    common = Common.new
-    common.run_inline %W{
-        gradle --info setAuthority
-       -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
-  end
+  common = Common.new
+  common.run_inline %W{
+      gradle setAuthority
+     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
 end
 
 Common.register_command({
@@ -1059,12 +1193,10 @@ def delete_clusters(cmd_name, *args)
 
   api_url = get_leo_api_url(gcc.project)
   ServiceAccountContext.new(gcc.project).run do
-    Dir.chdir("tools") do
-      common = Common.new
-      common.run_inline %W{
-         gradle --info manageClusters
-        -PappArgs=['delete','#{api_url}','#{op.opts.min_age_days}','#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
-    end
+    common = Common.new
+    common.run_inline %W{
+       gradle manageClusters
+      -PappArgs=['delete','#{api_url}','#{op.opts.min_age_days}','#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
   end
 end
 
@@ -1083,12 +1215,10 @@ def list_clusters(cmd_name, *args)
 
   api_url = get_leo_api_url(gcc.project)
   ServiceAccountContext.new(gcc.project).run do
-    Dir.chdir("tools") do
-      common = Common.new
-      common.run_inline %W{
-        gradle --info manageClusters -PappArgs=['list','#{api_url}']
-      }
-    end
+    common = Common.new
+    common.run_inline %W{
+      gradle manageClusters -PappArgs=['list','#{api_url}']
+    }
   end
 end
 
@@ -1096,6 +1226,78 @@ Common.register_command({
   :invocation => "list-clusters",
   :description => "List all clusters in this environment",
   :fn => ->(*args) { list_clusters("list-clusters", *args) }
+})
+
+def load_es_index(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+
+  op.opts.env = "local"
+  op.add_option(
+    "--environment [ENV]",
+    ->(opts, v) { opts.env = v},
+    "Environment to load into; 'local' or a GCP project name, e.g. " +
+    "'all-of-us-workbench-test'")
+  op.add_validator ->(opts) { raise ArgumentError unless ENVIRONMENTS.has_key? opts.env }
+
+  op.add_option(
+    "--cdr-version [VERSION]",
+    ->(opts, v) { opts.cdr_version = v},
+    "CDR version, e.g. 'synth_r_2019q1_2', used to name the index. Value " +
+    "should eventually match elasticIndexBaseName in the cdr_versions_*.json " +
+    "configurations. Defaults to 'cdr' for local runs")
+
+  # TODO(RW-2213): Generalize this subsampling approach for all local development work.
+  op.add_option(
+      "--participant-inclusion-inverse-prob [DENOMINATOR]",
+      ->(opts, v) { opts.inverse_prob = v},
+      "The inverse probabilty to index a participant, used to index a " +
+      "sample of participants. For example, 1000 would index ~1/1000 of participants in the " +
+      "target dataset. Defaults to 1K for local loads (~1K participants on the " +
+      "1M participant synthetic CDR), defaults to 1 for any other GCP project.")
+  op.parse.validate
+
+  if op.opts.inverse_prob.nil?
+    op.opts.inverse_prob = op.opts.env == "local" ? 1000 : 1
+  end
+  if op.opts.cdr_version.nil?
+    raise ArgumentError unless op.opts.env == "local"
+    op.opts.cdr_version = 'cdr'
+  end
+
+  unless Workbench.in_docker?
+    exec(*(%W{docker-compose run --rm es-scripts ./project.rb #{cmd_name}} + args))
+  end
+
+  base_url = get_es_base_url(op.opts.env)
+  auth_project = op.opts.env == "local" ? nil : op.opts.env
+
+  common = Common.new
+  # TODO(calbach): Parameterize most of these flags. For now this is hardcoded
+  # to work against the synthetic CDR into a local ES (using test Workbench).
+  create_flags = (([
+    ['--query-project-id', 'all-of-us-ehr-dev'],
+    ['--es-base-url', base_url],
+    # Matches cdr_versions_local.json
+    ['--cdr-version', op.opts.cdr_version],
+    ['--cdr-big-query-dataset', 'all-of-us-ehr-dev.synthetic_cdr20180606'],
+    ['--scratch-big-query-dataset', 'all-of-us-ehr-dev.workbench_elastic'],
+    ['--scratch-gcs-bucket', 'all-of-us-workbench-test-elastic-exports'],
+    ['--participant-inclusion-inverse-prob', op.opts.inverse_prob]
+  ] + (auth_project.nil? ? [] : [
+    ['--es-auth-project', auth_project]
+  ])).map { |kv| "#{kv[0]}=#{kv[1]}" } + [
+    '--delete-indices'
+    # Gradle args need to be single-quote wrapped.
+  ]).map { |f| "'#{f}'" }
+  ServiceAccountContext.new((auth_project or TEST_PROJECT)).run do
+    common.run_inline %W{gradle elasticSearchIndexer -PappArgs=['create',#{create_flags.join(',')}]}
+  end
+end
+
+Common.register_command({
+  :invocation => "load-es-index",
+  :description => "Create Elasticsearch index",
+  :fn => ->(*args) { load_es_index("load-es-index", *args) }
 })
 
 def update_cdr_version_options(cmd_name, args)
@@ -1109,12 +1311,10 @@ def update_cdr_version_options(cmd_name, args)
 end
 
 def update_cdr_versions_for_project(versions_file, dry_run)
-  Dir.chdir("tools") do
-    common = Common.new
-    common.run_inline %W{
-      gradle --info updateCdrVersions
-     -PappArgs=['#{versions_file}',#{dry_run}]}
-  end
+  common = Common.new
+  common.run_inline %W{
+    gradle updateCdrVersions
+   -PappArgs=['#{versions_file}',#{dry_run}]}
 end
 
 def update_cdr_versions(cmd_name, *args)
@@ -1192,6 +1392,47 @@ Common.register_command({
   :fn => ->(*args) { connect_to_cloud_db("connect-to-cloud-db", *args) }
 })
 
+def connect_to_cloud_db_binlog(cmd_name, *args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  env = read_db_vars(gcc)
+  CloudSqlProxyContext.new(gcc.project).run do
+    common.status "\n" + "*" * 80
+    common.status "Listing available journal files: "
+
+    # "root" is required for binlog access.
+    password = env["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+      "echo 'SHOW BINARY LOGS;' | " +
+      "mysql --host=127.0.0.1 --port=3307 --user=root " +
+      "--database=#{env['DB_NAME']} --password=#{password}", password)
+    common.status "*" * 80
+
+    common.status "\n" + "*" * 80
+    common.status "mysql login has been configured. Pick a journal file from " +
+                  "above and run commands like: "
+    common.status "  mysqlbinlog -R mysql-bin.xxxxxx\n"
+    common.status "See the Workbench playbook for more details."
+    common.status "*" * 80
+
+    # Work out of /tmp for easy local file redirection. We don't want binlogs
+    # winding up back in Workbench source control accidentally.
+    run_with_redirects(
+      "export MYSQL_HOME=$(with-mysql-login.sh root #{password}); " +
+      "cd /tmp; /bin/bash", password)
+  end
+end
+
+Common.register_command({
+  :invocation => "connect-to-cloud-db-binlog",
+  :description => "Connect to a Cloud SQL database for mysqlbinlog access",
+  :fn => ->(*args) { connect_to_cloud_db_binlog("connect-to-cloud-db-binlog", *args) }
+})
+
 
 def deploy_gcs_artifacts(cmd_name, args)
   ensure_docker cmd_name, args
@@ -1208,20 +1449,28 @@ def deploy_gcs_artifacts(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
-  run_inline_or_log(op.opts.dry_run, %W{
-    gsutil cp
-    cluster-resources/setup_notebook_cluster.sh
-    cluster-resources/playground-extension.js
-    gs://#{gcc.project}-cluster-resources/
-  })
-  # This file must be readable by all AoU researchers and the Leonardo service
-  # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make
-  # these public since these assets are public in GitHub anyways.
-  run_inline_or_log(op.opts.dry_run, %W{
-    gsutil acl ch -u AllUsers:R
-    gs://#{gcc.project}-cluster-resources/setup_notebook_cluster.sh
-    gs://#{gcc.project}-cluster-resources/playground-extension.js
-  })
+  auth_domain_group = get_auth_domain_group(gcc.project)
+
+  Dir.chdir("cluster-resources") do
+    common.run_inline(%W{./build.rb build-snippets-menu})
+    run_inline_or_log(op.opts.dry_run, %W{
+      gsutil cp
+      setup_notebook_cluster.sh
+      activity-checker-extension.js
+      aou-download-policy-extension.js
+      generated/aou-snippets-menu.js
+      gs://#{gcc.project}-cluster-resources/
+    })
+    # This bucket must be readable by all AoU researchers and their pet service accounts
+    # account (https://github.com/DataBiosphere/leonardo/issues/220). Sharing with all
+    # registered users. The firecloud.org check is to avoid circular requirements in
+    # environment setup
+    if !auth_domain_group.nil? and !auth_domain_group.empty?
+      run_inline_or_log(op.opts.dry_run, %W{
+        gsutil iam ch group:#{auth_domain_group}:objectViewer gs://#{gcc.project}-cluster-resources
+      })
+    end
+  end
 end
 
 Common.register_command({
@@ -1229,34 +1478,6 @@ Common.register_command({
   :description => "Deploys any GCS artifacts associated with this environment.",
   :fn => ->(*args) { deploy_gcs_artifacts("deploy-gcs-artifacts", args) }
 })
-
-def deploy_gcs_demos(cmd_name, args)
-  ensure_docker cmd_name, args
-
-  common = Common.new
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.dry_run = false
-  op.add_option(
-    "--dry-run",
-    ->(opts, _) { opts.dry_run = true},
-    "Don't actually push, just log the command lines which would be " +
-    "executed on a real invocation."
-  )
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate
-  cmd_prefix = op.opts.dry_run ? DRY_RUN_CMD : []
-  # Run but ignore failure statuses, as these files may not exist.
-  Process.wait spawn(*cmd_prefix, "gsutil", "rm", "gs://#{gcc.project}-demos/**")
-  run_inline_or_log(op.opts.dry_run, %W{gsutil cp demos/* gs://#{gcc.project}-demos/})
-end
-
-Common.register_command({
-  :invocation => "deploy-gcs-demos",
-  :description => "Deploys any GCS demos associated with this environment.",
-  :fn => ->(*args) { deploy_gcs_demos("deploy-gcs-demos", args) }
-})
-
 
 def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
   common = Common.new
@@ -1294,6 +1515,7 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
 
   env = read_db_vars(gcc)
   ENV.update(env)
+  ENV.update(get_gae_vars(gcc.project))
 
   # Clear out generated files, which may be out of date; they will be regenerated by appengineStage.
   common.run_inline %W{rm -rf src/generated}
@@ -1333,34 +1555,9 @@ Common.register_command({
   :fn => ->(*args) { deploy_api("deploy-api", args) }
 })
 
-
-def deploy_public_api(cmd_name, args)
-  ensure_docker cmd_name, args
-  common = Common.new
-  common.status "Deploying public-api..."
-  Dir.chdir('../public-api') do
-    deploy_app(cmd_name, args, false, false)
-  end
-end
-
-Common.register_command({
-  :invocation => "deploy-public-api",
-  :description => "Deploys the public API server to the specified cloud project.",
-  :fn => ->(*args) { deploy_public_api("deploy-public-api", args) }
-})
-
-
 def create_workbench_db()
   run_with_redirects(
     "cat db/create_db.sql | envsubst | " \
-    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
-    ENV["MYSQL_ROOT_PASSWORD"]
-  )
-end
-
-def grant_permissions()
-  run_with_redirects(
-    "cat db/grant_permissions.sql | envsubst | " \
     "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
     ENV["MYSQL_ROOT_PASSWORD"]
   )
@@ -1370,44 +1567,53 @@ def migrate_database(dry_run = false)
   common = Common.new
   common.status "Migrating main database..."
   Dir.chdir("db") do
-    run_inline_or_log(dry_run, %W{gradle --info update -PrunList=main})
+    run_inline_or_log(dry_run, %W{gradle update -PrunList=main})
   end
 end
 
-def migrate_workbench_data()
-  common = Common.new
-  common.status "Migrating workbench data..."
-  Dir.chdir("db") do
-    common.run_inline(%W{gradle --info update -PrunList=data -Pcontexts=cloud})
-  end
+def get_fc_config(project)
+  config_json = get_config(project)
+  return JSON.parse(File.read("config/#{config_json}"))["firecloud"]
 end
 
 def get_leo_api_url(project)
-  config_json = get_config(project)
-  return JSON.parse(File.read("config/#{config_json}"))["firecloud"]["leoBaseUrl"]
+  return get_fc_config(project)["leoBaseUrl"]
 end
 
 def get_auth_domain(project)
-  config_json = get_config(project)
-  return JSON.parse(File.read("config/#{config_json}"))["firecloud"]["registeredDomainName"]
+  return get_fc_config(project)["registeredDomainName"]
+end
+
+def get_auth_domain_group(project)
+  return get_fc_config(project)["registeredDomainGroup"]
+end
+
+def get_firecloud_base_url(project)
+  return get_fc_config(project)["baseUrl"]
+end
+
+def get_es_base_url(env)
+  config_json = get_config(env)
+  return JSON.parse(File.read("config/#{config_json}"))["elasticsearch"]["baseUrl"]
 end
 
 def load_config(project, dry_run = false)
   config_json = get_config(project)
-  unless config_json
+  featured_workspaces_config = get_featured_workspaces_config(project)
+  unless config_json and featured_workspaces_config
     raise("unknown project #{project}, expected one of #{configs.keys}")
   end
 
   common = Common.new
   common.status "Loading #{config_json} into database..."
-  Dir.chdir("tools") do
-    run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=../config/#{config_json}})
-    run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json})
-  end
+  run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=main -Pconfig_file=config/#{config_json}})
+  run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json})
+  run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/#{featured_workspaces_config}})
 end
 
 def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
   ENV.update(read_db_vars(gcc))
+  ENV.update(get_gae_vars(gcc.project))
   ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
   CloudSqlProxyContext.new(gcc.project, service_account, key_file).run do
     yield(gcc)
@@ -1463,13 +1669,6 @@ def deploy(cmd_name, args)
     "Deploy, but do not yet serve traffic from this version - DB migrations are still applied"
   )
   op.add_validator ->(opts) { raise ArgumentError if opts.promote.nil?}
-  # TODO(DB-89): Remove this flag and always push public-api.
-  op.opts.skip_public_api = false
-  op.add_option(
-    "--skip-public-api",
-    ->(opts, _) { opts.skip_public_api = true},
-    "Whether to skip deployment of the public API service, pushed by default"
-  )
 
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -1481,13 +1680,11 @@ def deploy(cmd_name, args)
     migrate_database(op.opts.dry_run)
     load_config(ctx.project, op.opts.dry_run)
     versions_file = get_cdr_versions_file(ctx.project)
-    update_cdr_versions_for_project("../config/#{versions_file}", op.opts.dry_run)
+    update_cdr_versions_for_project("config/#{versions_file}", op.opts.dry_run)
 
     common.status "Pushing GCS artifacts..."
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []
     deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}} + dry_flag)
-
-    deploy_gcs_demos(cmd_name, %W{--project #{ctx.project}} + dry_flag)
 
     # Keep the cloud proxy context open for the service account credentials.
     deploy_args = %W{
@@ -1497,15 +1694,12 @@ def deploy(cmd_name, args)
       --quiet
     } + dry_flag
     deploy_api(cmd_name, deploy_args)
-    unless op.opts.skip_public_api
-      deploy_public_api(cmd_name, deploy_args)
-    end
   end
 end
 
 Common.register_command({
   :invocation => "deploy",
-  :description => "Run DB migrations and deploy the API and public servers",
+  :description => "Run DB migrations and deploy the API server",
   :fn => ->(*args) { deploy("deploy", args) }
 })
 
@@ -1557,18 +1751,24 @@ def print_scoped_access_token(cmd_name, args)
   op.parse.validate
   gcc.validate
   ServiceAccountContext.new(gcc.project).run do
+    if op.opts.scopes.nil?
+      op.opts.scopes = []
+    end
+
     scopes = %W{profile email} + op.opts.scopes
 
     require "googleauth"
-    f = File.open(ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH) do
+
+    File.open(ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH) do |f|
       creds = Google::Auth::ServiceAccountCredentials.make_creds(
-        json_key_io: f,
-        scope: scopes
+          json_key_io: f,
+          scope: scopes
       )
 
       token_data = creds.fetch_access_token!
       puts "\n#{token_data["access_token"]}"
     end
+
   end
 end
 
@@ -1580,9 +1780,9 @@ Common.register_command({
 
 def create_project_resources(gcc)
   common = Common.new
-  common.status "Enabling APIs..."
+  common.status "Enabling Cloud Service APIs..."
   for service in SERVICES
-    common.run_inline("gcloud service-management enable #{service} --project #{gcc.project}")
+    common.run_inline("gcloud services enable #{service} --project #{gcc.project}")
   end
   common.status "Creating GCS bucket to store credentials..."
   common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
@@ -1604,20 +1804,13 @@ def create_project_resources(gcc)
   common.run_inline %W{gcloud app create --region us-central --project #{gcc.project}}
 end
 
-def setup_project_data(gcc, cdr_db_name, public_db_name)
+def setup_project_data(gcc, cdr_db_name)
   root_password, workbench_password = random_password(), random_password()
-
-  public_password = nil
-  if gcc.project == get_cdr_sql_project(gcc.project)
-    # Only initialize a public user/pass if this environment will have CDR dbs.
-    public_password = random_password()
-  end
 
   common = Common.new
   # This changes database connection information; don't call this while the server is running!
   common.status "Writing DB credentials file..."
-  write_db_creds_file(gcc.project, cdr_db_name, public_db_name, root_password,
-                      workbench_password, public_password)
+  write_db_creds_file(gcc.project, cdr_db_name, root_password, workbench_password)
   common.status "Setting root password..."
   run_with_redirects("gcloud sql users set-password root % --project #{gcc.project} " +
                      "--instance #{INSTANCE_NAME} --password #{root_password}",
@@ -1625,23 +1818,24 @@ def setup_project_data(gcc, cdr_db_name, public_db_name)
   # Don't delete the credentials created here; they will be stored in GCS and reused during
   # deployment, etc.
   with_cloud_proxy_and_db(gcc) do
-    common.status "Copying service account key to GCS..."
+    common.status "Copying GSuite service account key to GCS..."
     gsuite_admin_creds_file = Tempfile.new("gsuite-admin-sa.json").path
     common.run_inline %W{gcloud iam service-accounts keys create #{gsuite_admin_creds_file}
         --iam-account=gsuite-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
     common.run_inline %W{gsutil cp #{gsuite_admin_creds_file} gs://#{gcc.project}-credentials/gsuite-admin-sa.json}
+
+    common.status "Copying FireCloud service account key to GCS..."
+    firecloud_admin_creds_file = Tempfile.new("firecloud-admin-sa.json").path
+    common.run_inline %W{gcloud iam service-accounts keys create #{firecloud_admin_creds_file}
+        --iam-account=firecloud-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
+    common.run_inline %W{gsutil cp #{firecloud_admin_creds_file} gs://#{gcc.project}-credentials/firecloud-admin-sa.json}
+
 
     common.status "Setting up databases and users..."
     create_workbench_db
 
     common.status "Running schema migrations..."
     migrate_database
-
-    # Grants permissions to the public user for specific tables
-    grant_permissions
-
-    # This will insert a CDR version row pointing at the CDR and public DB.
-    migrate_workbench_data
 
   end
 end
@@ -1662,21 +1856,14 @@ def setup_cloud_project(cmd_name, *args)
     "Name of the default CDR db to use; required. (example: cdr20180206) This will subsequently " +
     "be created by cloudsql-import."
   )
-  op.add_option(
-    "--public-db-name [PUBLIC_DB]",
-    ->(opts, v) { opts.public_db_name = v},
-    "Name of the public db to use for the data browser. (example: public20180206) This will " +
-    "subsequently be created by cloudsql-import."
-  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.cdr_db_name}
-  op.add_validator ->(opts) { raise ArgumentError unless opts.public_db_name}
   gcc = GcloudContextV2.new(op)
 
   op.parse.validate
   gcc.validate
 
   create_project_resources(gcc)
-  setup_project_data(gcc, op.opts.cdr_db_name, op.opts.public_db_name)
+  setup_project_data(gcc, op.opts.cdr_db_name)
   deploy_gcs_artifacts(cmd_name, %W{--project #{gcc.project}})
 end
 

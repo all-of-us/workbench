@@ -16,17 +16,12 @@ import org.pmiops.workbench.api.AuditApi;
 import org.pmiops.workbench.api.WorkspacesApi;
 import org.springframework.web.method.HandlerMethod;
 
-
 public class CronInterceptorTest {
-  @Rule
-  public MockitoRule mockitoRule = MockitoJUnit.rule();
+  @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
-  @Mock
-  private HandlerMethod handler;
-  @Mock
-  private HttpServletRequest request;
-  @Mock
-  private HttpServletResponse response;
+  @Mock private HandlerMethod handler;
+  @Mock private HttpServletRequest request;
+  @Mock private HttpServletResponse response;
 
   private CronInterceptor interceptor;
 

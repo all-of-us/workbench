@@ -31,7 +31,7 @@ export class ClusterServiceStub {
   }
 
   localize(projectName: string, clusterName: string, req: ClusterLocalizeRequest,
-      extraHttpRequestParams?: any): Observable<{}> {
+    extraHttpRequestParams?: any): Observable<{}> {
     return new Observable<ClusterLocalizeResponse>(observer => {
       setTimeout(() => {
         observer.next({
@@ -43,7 +43,7 @@ export class ClusterServiceStub {
   }
 
   deleteCluster(projectName: string, clusterName: string,
-      extraHttpRequestParams?: any): Observable<{}> {
+    extraHttpRequestParams?: any): Observable<{}> {
     return new Observable<{}>(observer => {
       setTimeout(() => {
         observer.next({});

@@ -1,4 +1,3 @@
-import {select} from '@angular-redux/store';
 import {
   Component,
   HostListener,
@@ -6,19 +5,13 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {CohortsService} from 'generated';
-import {List} from 'immutable';
+import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import {Observable} from 'rxjs/Observable';
 
-import {
-  chartData,
-  CohortSearchActions,
-  excludeGroups,
-  includeGroups,
-  isRequstingTotal,
-  totalCount,
-} from '../redux';
+import {idsInUse, initExisting, searchRequestStore} from 'app/cohort-search/search-state.service';
+import {mapRequest, parseCohortDefinition} from 'app/cohort-search/utils';
+import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
+import {SearchRequest} from 'generated/fetch';
 
 const pixel = (n: number) => `${n}px`;
 const ONE_REM = 24;  // value in pixels
@@ -26,55 +19,79 @@ const ONE_REM = 24;  // value in pixels
 @Component({
   selector: 'app-cohort-search',
   templateUrl: './cohort-search.component.html',
-  styleUrls: ['./cohort-search.component.css'],
+  styleUrls: ['./cohort-search.component.css', '../../styles/buttons.css'],
 })
 export class CohortSearchComponent implements OnInit, OnDestroy {
-  @select(includeGroups) includeGroups$: Observable<List<any>>;
-  @select(excludeGroups) excludeGroups$: Observable<List<any>>;
-  @select(totalCount) total$: Observable<number>;
-  @select(chartData) chartData$: Observable<List<any>>;
-  @select(isRequstingTotal) isRequesting$: Observable<boolean>;
-  @select(s => s.get('initShowChart', true)) initShowChart$: Observable<boolean>;
 
   @ViewChild('wrapper') wrapper;
 
+  includeSize: number;
   private subscription;
-
-  constructor(
-    private actions: CohortSearchActions,
-    private api: CohortsService,
-    private route: ActivatedRoute,
-  ) {}
+  loading = false;
+  count: number;
+  error = false;
+  overview = false;
+  criteria = {includes: [], excludes: []};
+  triggerUpdate = 0;
+  cohort: any;
+  resolve: Function;
+  modalPromise: Promise<boolean> | null = null;
+  modalOpen = false;
+  saving = false;
 
   ngOnInit() {
-    console.log(`Entering CohortSearchComponent.ngOnInit with route:`);
-    console.dir(this.route);
-
-    const {queryParams: query$, data: data$} = this.route;
-    this.subscription = Observable.combineLatest(query$, data$).subscribe(([params, data]) => {
-      /* EVERY time the route changes, reset the store first */
-      this.actions.resetStore();
-      this.actions.cdrVersionId = data.workspace.cdrVersionId;
-
+    this.subscription = Observable.combineLatest(
+      queryParamsStore, currentWorkspaceStore
+    ).subscribe(([params, workspace]) => {
       /* If a cohort id is given in the route, we initialize state with
        * it */
       const cohortId = params.cohortId;
       if (cohortId) {
-        this.api.getCohort(data.workspace.namespace, data.workspace.id, cohortId)
-          .subscribe(cohort => {
+        this.loading = true;
+        cohortsApi().getCohort(workspace.namespace, workspace.id, cohortId)
+          .then(cohort => {
+            this.loading = false;
+            this.cohort = cohort;
+            currentCohortStore.next(cohort);
             if (cohort.criteria) {
-              this.actions.loadFromJSON(cohort.criteria);
-              this.actions.runAllRequests();
+              initExisting.next(true);
+              searchRequestStore.next(parseCohortDefinition(cohort.criteria));
             }
           });
+      } else {
+        this.cohort = {criteria: '{"includes":[],"excludes":[]}'};
       }
+    });
+
+    searchRequestStore.subscribe(sr => {
+      this.includeSize = sr.includes.length;
+      this.criteria = sr;
+      this.overview = sr.includes.length || sr.excludes.length;
     });
     this.updateWrapperDimensions();
   }
 
   ngOnDestroy() {
-    this.actions.clearStore();
     this.subscription.unsubscribe();
+    idsInUse.next(new Set());
+    currentCohortStore.next(undefined);
+    searchRequestStore.next({includes: [], excludes: []} as SearchRequest);
+  }
+
+  canDeactivate(): Promise<boolean> | boolean {
+    const criteria = JSON.stringify(mapRequest(this.criteria));
+    return criteria === this.cohort.criteria || this.saving || this.showWarningModal();
+  }
+
+  async showWarningModal() {
+    this.modalPromise = new Promise<boolean>((resolve => this.resolve = resolve));
+    this.modalOpen = true;
+    return await this.modalPromise;
+  }
+
+  getModalResponse(res: boolean) {
+    this.modalOpen = false;
+    this.resolve(res);
   }
 
   @HostListener('window:resize')
@@ -87,5 +104,13 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
     const {top} = wrapper.getBoundingClientRect();
     wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
+  }
+
+  updateRequest = () => {
+    this.triggerUpdate++;
+  }
+
+  updateSaving = (flag: boolean) => {
+    this.saving = flag;
   }
 }

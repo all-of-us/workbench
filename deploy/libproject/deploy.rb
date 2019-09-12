@@ -29,7 +29,8 @@ def get_live_gae_version(project, validate_version=true)
     common.error "Failed to get live GAE version for project '#{project}'"
     exit 1
   end
-  services = Set["api", "default", "public-api", "public-ui"]
+
+  services = Set["api", "default"]
   actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
   active_services = actives.map{|v| v["service"]}.to_set
   if actives.empty?
@@ -276,8 +277,8 @@ def deploy(cmd_name, args)
       #{op.opts.promote ? "--promote" : "--no-promote"}
   } + (op.opts.dry_run ? %W{--dry-run} : [])
 
-  maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api and " +
-                      "public-api services (including DB updates)"
+  maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
+                      "service (including DB updates)"
   common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
 
   maybe_log_jira.call "'#{op.opts.project}': completed api service " +
@@ -292,17 +293,6 @@ def deploy(cmd_name, args)
       --quiet
   } + (op.opts.dry_run ? %W{--dry-run} : [])
   maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
-
-  common.run_inline %W{
-    ../public-ui/project.rb deploy-ui
-      --project #{op.opts.project}
-      --account #{op.opts.account}
-      --key-file #{op.opts.key_file}
-      --version #{op.opts.app_version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-      --quiet
-  } + (op.opts.dry_run ? %W{--dry-run} : [])
-  maybe_log_jira.call "'#{op.opts.project}': completed Public-UI service deployment"
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,

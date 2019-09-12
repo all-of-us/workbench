@@ -1,6 +1,6 @@
-import {Component, OnChanges, OnInit} from '@angular/core';
-import {TreeType} from 'generated';
-import {NodeComponent} from '../node/node.component';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {NodeComponent} from 'app/cohort-search/node/node.component';
+import {DomainType} from 'generated';
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
@@ -8,45 +8,38 @@ import {NodeComponent} from '../node/node.component';
  * children until "expanded" - expansion is basically its default state.
  */
 @Component({
-  selector: 'crit-tree',
+  selector: 'crit-list-tree',
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.css']
 })
 export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
-  _type: string;
-  name: string;
-
-  ngOnChanges() {
-    if (this.node.get('type') === TreeType[TreeType.ICD9]
-      || this.node.get('type') === TreeType[TreeType.ICD10]
-      || this.node.get('type') === TreeType[TreeType.CPT]
-      || this.node.get('type') === TreeType[TreeType.SNOMED]) {
-        super.ngOnInit();
-    }
-  }
+  @Input() back: Function;
+  ingredients: any;
 
   ngOnInit() {
     super.ngOnInit();
     setTimeout(() => super.loadChildren(true));
-    this._type = this.node.get('type', '');
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.node && !changes.node.firstChange) {
+      // reload children from api when switching between standard and source trees
+      super.loadChildren(true);
+    }
   }
 
   get showSearch() {
-    return !this.isEmpty && this.node.get('type') !== TreeType[TreeType.DEMO];
+    return this.node.domainId !== DomainType[DomainType.PERSON]
+      && this.node.domainId !== DomainType.VISIT;
   }
 
-  get showDropDown() {
-    return !this.isEmpty && this.codes && this.node.get('type') !== TreeType[TreeType.SNOMED];
+  get showHeader() {
+    return this.node.domainId !== DomainType.PHYSICALMEASUREMENT
+      && this.node.domainId !== DomainType.SURVEY
+      && this.node.domainId !== DomainType.VISIT;
   }
 
   get isEmpty() {
     return !this.loading && (this.empty || this.error);
-  }
-
-  optionChange(flag) {
-    if (flag) {
-      this._type = flag;
-      setTimeout(() => super.loadChildren(true));
-    }
   }
 }

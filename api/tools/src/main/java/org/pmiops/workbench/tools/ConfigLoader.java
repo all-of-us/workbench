@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
+import org.pmiops.workbench.config.FeaturedWorkspacesConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
@@ -24,16 +25,24 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories("org.pmiops.workbench.db.dao")
 @EntityScan("org.pmiops.workbench.db.model")
 /**
- * Run by api/project.rb update-cloud-config and (locally) docker-compose run update-config, which
- * is automatically invoked during api/project.rb dev-up.
+ * Command-line tool to load a WorkbenchConfig or CdrBigQuerySchemaConfig from a local file and
+ * store it in the MySQL database for the current environment.
+ *
+ * <p>Run by api/project.rb update-cloud-config and (locally) docker-compose run update-config,
+ * which is automatically invoked during api/project.rb dev-up.
  */
 public class ConfigLoader {
 
   private static final Logger log = Logger.getLogger(ConfigLoader.class.getName());
 
   private static final ImmutableMap<String, Class<?>> CONFIG_CLASS_MAP =
-      ImmutableMap.of(Config.MAIN_CONFIG_ID, WorkbenchConfig.class,
-          Config.CDR_BIGQUERY_SCHEMA_CONFIG_ID, CdrBigQuerySchemaConfig.class);
+      ImmutableMap.of(
+          Config.MAIN_CONFIG_ID,
+          WorkbenchConfig.class,
+          Config.CDR_BIGQUERY_SCHEMA_CONFIG_ID,
+          CdrBigQuerySchemaConfig.class,
+          Config.FEATURED_WORKSPACES_CONFIG_ID,
+          FeaturedWorkspacesConfig.class);
 
   @Bean
   public CommandLineRunner run(ConfigDao configDao) {
@@ -50,7 +59,8 @@ public class ConfigLoader {
       }
 
       ObjectMapper jackson = new ObjectMapper();
-      String rawJson = new String(Files.readAllBytes(Paths.get(configFile)), Charset.defaultCharset());
+      String rawJson =
+          new String(Files.readAllBytes(Paths.get(configFile)), Charset.defaultCharset());
       // Strip all lines starting with '//'.
       String strippedJson = rawJson.replaceAll("\\s*//.*", "");
       JsonNode newJson = jackson.readTree(strippedJson);
@@ -63,8 +73,9 @@ public class ConfigLoader {
       JsonNode marshalledNode = jackson.readTree(marshalledJson);
       JsonNode marshalledDiff = JsonDiff.asJson(newJson, marshalledNode);
       if (marshalledDiff.size() > 0) {
-        log.info(String.format("Configuration doesn't match {0} format; see diff.",
-            configClass.getSimpleName()));
+        log.info(
+            String.format(
+                "Configuration doesn't match {0} format; see diff.", configClass.getSimpleName()));
         log.info(marshalledDiff.toString());
         System.exit(1);
       }
@@ -94,5 +105,4 @@ public class ConfigLoader {
   public static void main(String[] args) throws Exception {
     new SpringApplicationBuilder(ConfigLoader.class).web(false).run(args);
   }
-
 }

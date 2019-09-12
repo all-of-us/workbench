@@ -36,12 +36,12 @@ def swagger_regen(cmd_name)
   common.run_inline %W{yarn run codegen}
 end
 
-def build(cmd_name, args)
+def build(cmd_name, ui_name, args)
   ensure_docker cmd_name, args
   options = BuildOptions.new.parse(cmd_name, args)
 
   common = Common.new
-  common.run_inline %W{yarn install}
+  common.run_inline %W{yarn install --frozen-lockfile}
 
   # Just use --aot for "test", which catches many compilation issues. Go full
   # --prod (includes --aot) for other environments. Don't use full --prod in the
@@ -49,11 +49,14 @@ def build(cmd_name, args)
   # and also uglifies the source.
   # See https://github.com/angular/angular-cli/wiki/build#--dev-vs---prod-builds.
   optimize = "--aot"
-  if Set['staging', 'stable', 'prod'].include?(options.env)
+  if Set['perf', 'staging', 'stable', 'prod'].include?(options.env)
     optimize = "--prod"
   end
+
+  # Angular version 5 requires --environment instead of --configuration as an option
+  angular_opts = "--configuration=#{options.env}"
   common.run_inline %W{yarn run build
-      #{optimize} --configuration=#{options.env} --no-watch --no-progress}
+      #{optimize} #{angular_opts} --no-watch --no-progress}
 end
 
 class CommonUiDevStart
@@ -69,7 +72,7 @@ class CommonUiDevStart
 
   def deploy_ui(cmd_name, args)
     ensure_docker cmd_name, args
-    DeployUI.new(cmd_name, args).run
+    DeployUI.new(cmd_name, @ui_name, args).run
   end
 
   def dev_up(*args)
@@ -86,7 +89,7 @@ class CommonUiDevStart
     common.run_inline %W{docker-compose run -d --service-ports tests}
 
     common.status "Tests started. Open\n"
-    common.status "    http://localhost:9876/debug.html for ui and http://localhost:9877/debug.html for public-ui\n"
+    common.status "    http://localhost:9876/debug.html for ui \n"
     common.status "in a browser to view/run tests."
 
     common.run_inline %W{docker-compose run --rm --service-ports #{@ui_name}}
@@ -137,7 +140,7 @@ class CommonUiDevStart
     Common.register_command({
                                 :invocation => "build",
                                 :description => "Builds the UI for the given environment.",
-                                :fn => ->(*args) { build("build", args) }
+                                :fn => ->(*args) { build("build", @ui_name, args) }
                             })
     Common.register_command({
                                 :invocation => "dev-up",
@@ -181,7 +184,7 @@ end
 
 class BuildOptions
   # Keep in sync with .angular-cli.json.
-  ENV_CHOICES = %W{local-test local test staging stable prod}
+  ENV_CHOICES = %W{local-test local test perf staging stable prod}
   attr_accessor :env
 
   def initialize
@@ -208,9 +211,10 @@ end
 class DeployUI
   attr_reader :common, :opts
 
-  def initialize(cmd_name, args)
+  def initialize(cmd_name, ui_name, args)
     @common = Common.new
     @cmd_name = cmd_name
+    @ui_name = ui_name
     @args = args
     @parser = create_parser(cmd_name)
     @opts = Options.new
@@ -267,16 +271,17 @@ class DeployUI
     add_options
     @parser.parse @args
     validate_options
-    environment_names = {
+    project_names_to_environment_names = {
         "all-of-us-workbench-test" => "test",
+        "all-of-us-rw-perf" => "perf",
         "all-of-us-rw-staging" => "staging",
         "all-of-us-rw-stable" => "stable",
         "all-of-us-rw-prod" => "prod",
     }
-    environment_name = environment_names[@opts.project]
+    environment_name = project_names_to_environment_names[@opts.project]
 
     swagger_regen(@cmd_name)
-    build(@cmd_name, %W{--environment #{environment_name}})
+    build(@cmd_name, @ui_name, %W{--environment #{environment_name}})
     ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
       cmd_prefix = @opts.dry_run ? DRY_RUN_CMD : []
       common.run_inline(cmd_prefix + %W{gcloud app deploy

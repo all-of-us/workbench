@@ -1,32 +1,27 @@
-<div *ngIf="isEmpty" class="alert alert-warning">
-  <div class="alert-items">
-    <div class="alert-item static">
-      <div class="alert-icon-wrapper">
-        <clr-icon class="alert-icon" shape="exclamation-triangle"></clr-icon>
+<div class="dropdown-search-container">
+  <div class="search-container">
+    <app-list-search-bar *ngIf="showSearch" [node]="node" (ingredients)="ingredients = $event"></app-list-search-bar>
+  </div>
+</div>
+
+<div class="tree-container" [class.border]="showHeader" [class.no-search]="!showSearch">
+  <div *ngIf="showHeader" class="tree-header">
+    <div *ngIf="ingredients" class="ingredients">
+      Ingredients in this brand: {{ingredients.join(', ')}}
+    </div>
+    <button class="btn btn-link" (click)="back()">Return to list</button>
+  </div>
+  <div *ngIf="isEmpty" class="alert alert-warning">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <div class="alert-icon-wrapper">
+          <clr-icon class="alert-icon is-solid" shape="exclamation-triangle"></clr-icon>
+        </div>
+        <span class="alert-text">Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.</span>
       </div>
-      <span class="alert-text">
-        A problem occurred and we were not able to retrieve the requested data
-      </span>
     </div>
   </div>
-</div>
-
-<div class="dropdown-search-container">
-  <div [ngClass]="{'condition-dropdown' : showDropDown}">
-    <ng-container *ngIf="showDropDown">
-      <crit-code-dropdown (onOptionChange)="optionChange($event)" [_type]="_type"></crit-code-dropdown>
-    </ng-container>
-  </div>
-  <div [ngClass]="showDropDown ? 'search-container' : 'search-width'">
-    <app-search-bar *ngIf="showSearch" [_type]="_type"></app-search-bar>
-  </div>
-</div>
-
-<div class="tree-container" [class.multiple]="multipleMatches">
-  <div *ngIf="numMatches > 1" class="match-container">
-    <b>Note:</b> There are {{numMatches}} matches for your search
-  </div>
-  <crit-node *ngFor="let item of children" [node]="item"></crit-node>
+  <crit-list-node *ngFor="let item of children" [node]="item" [wizard]="wizard"></crit-list-node>
 </div>
 
 <div *ngIf="loading" class="spinner root-spinner">

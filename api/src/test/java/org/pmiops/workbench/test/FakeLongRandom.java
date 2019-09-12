@@ -2,9 +2,7 @@ package org.pmiops.workbench.test;
 
 import java.util.Random;
 
-/**
- * Stubbed Random implementation for testing.
- */
+/** Stubbed Random implementation for testing. */
 public class FakeLongRandom extends Random {
   private final long value;
 

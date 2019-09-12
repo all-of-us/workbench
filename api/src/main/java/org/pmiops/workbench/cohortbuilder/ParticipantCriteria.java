@@ -9,14 +9,14 @@ import org.pmiops.workbench.model.SearchRequest;
 /**
  * A class representing participants to use when querying data from a CDR version.
  *
- * Either a cohort definition (with optional blacklist of participants to exclude), or
- * a list of participant IDs to include.
+ * <p>Either a cohort definition (with optional blacklist of participants to exclude), or a list of
+ * participant IDs to include.
  *
- * (We could have instead decided to have an interface capable of producing SQL, with different
+ * <p>(We could have instead decided to have an interface capable of producing SQL, with different
  * implementations for request + blacklist and whitelist; but this would spread out SQL generation
  * and break the separation between query model and SQL generation code. So instead, this class
- * represents criteria that can be transformed into SQL for any way of selecting participants
- * from BigQuery.)
+ * represents criteria that can be transformed into SQL for any way of selecting participants from
+ * BigQuery.)
  */
 public class ParticipantCriteria {
 

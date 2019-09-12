@@ -6,5 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ConceptRelationshipDao extends CrudRepository<ConceptRelationship, Long> {
 
-    List<ConceptRelationship> findAll();
+  List<ConceptRelationship> findAll();
 }

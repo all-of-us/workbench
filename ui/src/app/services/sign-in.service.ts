@@ -1,21 +1,16 @@
 /**
  * OAuth2 via GAPI sign-in.
  */
-import 'rxjs/Rx';
-
 import {Injectable, NgZone} from '@angular/core';
-import {ActivatedRouteSnapshot, NavigationEnd, Router} from '@angular/router';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {signInStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
-import {Observable} from 'rxjs/Observable';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
+import 'rxjs/Rx';
 
 
 declare const gapi: any;
-
-const SIGNED_IN_USER = 'signedInUser';
-
 
 @Injectable()
 export class SignInService {
@@ -24,9 +19,9 @@ export class SignInService {
   public isSignedIn$ = this.isSignedIn.asObservable();
   // Expose "current user details" as an Observable
   public clientId = environment.clientId;
+
   constructor(private zone: NgZone,
-      private router: Router,
-      serverConfigService: ServerConfigService) {
+    serverConfigService: ServerConfigService) {
     this.zone = zone;
 
     serverConfigService.getConfig().subscribe((config) => {
@@ -50,9 +45,9 @@ export class SignInService {
     return new Promise((resolve) => {
       gapi.load('auth2', () => {
         gapi.auth2.init({
-            client_id: this.clientId,
-            hosted_domain: config.gsuiteDomain,
-            scope: 'https://www.googleapis.com/auth/plus.login openid profile'
+          client_id: this.clientId,
+          hosted_domain: config.gsuiteDomain,
+          scope: 'https://www.googleapis.com/auth/plus.login openid profile'
         }).then(() => {
           this.subscribeToAuth2User();
         });
@@ -73,6 +68,7 @@ export class SignInService {
     this.zone.run(() => {
       const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
       this.isSignedIn.next(isSignedIn);
+      this.nextSignInStore();
       if (isSignedIn) {
         this.clearIdToken();
       }
@@ -80,6 +76,7 @@ export class SignInService {
     gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
       this.zone.run(() => {
         this.isSignedIn.next(isSignedIn);
+        this.nextSignInStore();
         if (isSignedIn) {
           this.clearIdToken();
         }
@@ -104,7 +101,14 @@ export class SignInService {
     if (!gapi.auth2) {
       return null;
     } else {
-      return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().Paa;
+      return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getImageUrl();
     }
+  }
+
+  nextSignInStore() {
+    signInStore.next({
+      signOut: () => this.signOut(),
+      profileImage: this.profileImage,
+    });
   }
 }

@@ -24,6 +24,11 @@
               "node_modules/@clr/icons/clr-icons.min.css",
               "node_modules/@clr/ui/clr-ui.min.css",
               "node_modules/nouislider/distribute/nouislider.min.css",
+              "node_modules/primereact/resources/primereact.min.css",
+              "node_modules/primeicons/primeicons.css",
+              "node_modules/primereact/resources/themes/nova-light/theme.css",
+              "node_modules/react-calendar/dist/Calendar.css",
+              "node_modules/outdated-browser-rework/dist/style.css",
               "src/styles.css"
             ],
             "scripts": [
@@ -50,13 +55,39 @@
                 }
               ]
             },
+            "perf": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.perf.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true
+            },
             "staging": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.staging.ts"
                 }
-              ]
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true
             },
             "stable": {
               "fileReplacements": [
@@ -64,7 +95,16 @@
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.stable.ts"
                 }
-              ]
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true
             },
             "prod": {
               "fileReplacements": [
@@ -72,9 +112,7 @@
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
                 }
-              ]
-            },
-            "production": {
+              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,

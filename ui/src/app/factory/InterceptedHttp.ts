@@ -13,20 +13,20 @@ export class InterceptedHttp extends Http {
   public shouldPingStatus = true;
 
 
-  constructor(private backend: ConnectionBackend, private defaultOptions: RequestOptions,
-      private errorHandlingService: ErrorHandlingService) {
+  constructor(backend: ConnectionBackend, defaultOptions: RequestOptions,
+    private errorHandlingService: ErrorHandlingService) {
     super(backend, defaultOptions);
   }
 
   request(url: string | Request, options?: RequestOptionsArgs): Observable<Response> {
     return this.errorHandlingService.retryApi(
-        super.request(url, options)).catch((e) => {
-          e.xhrError = true;
-          if ((e.status === 500 || e.status === 503) &&
+      super.request(url, options)).catch((e) => {
+        e.xhrError = true;
+        if ((e.status === 500 || e.status === 503) &&
               this.shouldPingStatus) {
-            this.shouldCheckStatus.next(true);
-          }
-          throw e;
-        });
+          this.shouldCheckStatus.next(true);
+        }
+        throw e;
+      });
   }
 }

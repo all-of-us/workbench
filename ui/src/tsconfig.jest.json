@@ -1,0 +1,24 @@
+// TypeScript compile settings for Jest tests (which cover our React components).
+//
+// This file is referred to from ui/package.json
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // No outDir needs to be specified here, as test runs will not produce output files anyway.
+    "baseUrl": "./",
+    "module": "commonjs",
+    "target": "es5",
+    "types": [
+      "jest",
+      "node"
+    ],
+    "jsx": "react"
+  },
+  "files": [
+    "polyfills.ts"
+  ],
+  "include": [
+    "**/*.spec.tsx",
+    "**/*.d.ts",
+  ]
+}

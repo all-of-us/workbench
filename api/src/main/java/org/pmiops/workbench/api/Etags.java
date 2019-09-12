@@ -5,8 +5,8 @@ import java.util.regex.Pattern;
 import org.pmiops.workbench.exceptions.BadRequestException;
 
 /**
- * Utility class for creating API etags, to prevent versioning issues during
- * read-modify-write cycles for API clients.
+ * Utility class for creating API etags, to prevent versioning issues during read-modify-write
+ * cycles for API clients.
  */
 public final class Etags {
   private static final String ETAG_FORMAT = "\"%d\"";

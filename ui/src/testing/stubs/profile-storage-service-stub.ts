@@ -1,8 +1,8 @@
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 
-import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
-import {Profile} from 'generated';
+import {Profile} from 'generated/fetch';
 
 export class ProfileStorageServiceStub {
   public profile = new ReplaySubject<Profile>(1);

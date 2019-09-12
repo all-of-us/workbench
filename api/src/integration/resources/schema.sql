@@ -14,5 +14,6 @@ create table cdr_version (
   creation_time datetime NOT NULL,
   num_participants bigint NOT NULL,
   cdr_db_name varchar(20),
+  elastic_index_base_name varchar(20),
   public_db_name varchar(20)
 );

@@ -61,7 +61,9 @@ public class Cohort {
     return version;
   }
 
-  public void setVersion(int version) { this.version = version; }
+  public void setVersion(int version) {
+    this.version = version;
+  }
 
   @Column(name = "name")
   public String getName() {
@@ -141,7 +143,7 @@ public class Cohort {
   public Set<CohortReview> getCohortReviews() {
     return cohortReviews;
   }
-  
+
   public void setCohortReviews(Set<CohortReview> cohortReviews) {
     if (this.cohortReviews == null) {
       this.cohortReviews = cohortReviews;

@@ -1,57 +1,56 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
-
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Map;
-
-import javax.inject.Provider;
-
+import java.util.Random;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
+import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.BillingProjectStatus;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Cluster;
+import org.pmiops.workbench.model.ClusterConfig;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -59,6 +58,8 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -68,75 +69,71 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ClusterControllerTest {
-  private static final String WORKSPACE_NS = "proj";
+
+  private static final String BILLING_PROJECT_ID = "proj";
+  // a workspace's namespace is always its billing project ID
+  private static final String WORKSPACE_NS = BILLING_PROJECT_ID;
   private static final String WORKSPACE_ID = "wsid";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
+  private static final String OTHER_USER_EMAIL = "alice@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String API_HOST = "api.stable.fake-research-aou.org";
   private static final String API_BASE_URL = "https://" + API_HOST;
 
+  private static WorkbenchConfig config = new WorkbenchConfig();
+  private static User user = new User();
+
   @TestConfiguration
-  @Import({
-    ClusterController.class
-  })
+  @Import({ClusterController.class, UserService.class})
   @MockBean({
     FireCloudService.class,
-    NotebooksService.class,
+    LeonardoNotebooksClient.class,
     WorkspaceService.class,
-    UserService.class,
-    UserRecentResourceService.class
+    UserRecentResourceService.class,
+    ComplianceService.class,
+    DirectoryService.class,
+    AdminActionHistoryDao.class
   })
   static class Configuration {
+
     @Bean
+    @Scope("prototype")
     public WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig config = new WorkbenchConfig();
-      config.server = new WorkbenchConfig.ServerConfig();
-      config.server.apiBaseUrl = API_BASE_URL;
       return config;
     }
+
     @Bean
     Clock clock() {
       return CLOCK;
     }
+
     @Bean
+    @Scope("prototype")
     User user() {
-      // Allows for wiring of the initial Provider<User>; actual mocking of the
-      // user is achieved via setUserProvider().
-      return null;
+      return user;
+    }
+
+    @Bean
+    Random random() {
+      return new FakeLongRandom(123);
     }
   }
 
-  @Captor
-  private ArgumentCaptor<Map<String, String>> mapCaptor;
+  @Captor private ArgumentCaptor<Map<String, String>> mapCaptor;
 
-  @Autowired
-  NotebooksService notebookService;
-  @Mock
-  private AdminActionHistoryDao adminActionHistoryDao;
-  @Autowired
-  FireCloudService fireCloudService;
-  @Autowired
-  UserDao userDao;
-  @Autowired
-  CdrVersionDao cdrVersionDao;
-  @Autowired
-  WorkspaceService workspaceService;
-  @Mock
-  Provider<User> userProvider;
-  @Autowired
-  ClusterController clusterController;
-  @Autowired
-  UserRecentResourceService userRecentResourceService;
-  @Autowired
-  Clock clock;
-  @Mock
-  private Provider<WorkbenchConfig> configProvider;
+  @Autowired LeonardoNotebooksClient notebookService;
+  @Autowired FireCloudService fireCloudService;
+  @Autowired UserDao userDao;
+  @Autowired WorkspaceService workspaceService;
+  @Autowired ClusterController clusterController;
+  @Autowired UserRecentResourceService userRecentResourceService;
+  @Autowired Clock clock;
 
   private CdrVersion cdrVersion;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
@@ -144,36 +141,40 @@ public class ClusterControllerTest {
 
   @Before
   public void setUp() {
-    User user = new User();
+    config = new WorkbenchConfig();
+    config.server = new WorkbenchConfig.ServerConfig();
+    config.server.apiBaseUrl = API_BASE_URL;
+    config.firecloud = new WorkbenchConfig.FireCloudConfig();
+    config.firecloud.registeredDomainName = "";
+    config.access = new WorkbenchConfig.AccessConfig();
+    config.access.enableComplianceTraining = true;
+    config.featureFlags = new FeatureFlagsConfig();
+
+    user = new User();
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
-    user.setFreeTierBillingProjectName(WORKSPACE_NS);
-    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.READY);
-    when(userProvider.get()).thenReturn(user);
-    clusterController.setUserProvider(userProvider);
 
-    UserService userService = new UserService(
-        userProvider, userDao, adminActionHistoryDao, CLOCK, new FakeLongRandom(123),
-        fireCloudService, configProvider);
-    clusterController.setUserService(userService);
+    createUser(OTHER_USER_EMAIL);
 
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
-    //set the db name to be empty since test cases currently
-    //run in the workbench schema only.
+    // set the db name to be empty since test cases currently
+    // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
 
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
-    testFcCluster = new org.pmiops.workbench.notebooks.model.Cluster()
-        .clusterName("all-of-us")
-        .googleProject(WORKSPACE_NS)
-        .status(org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING)
-        .createdDate(createdDate);
-    testCluster = new Cluster()
-        .clusterName("all-of-us")
-        .clusterNamespace(WORKSPACE_NS)
-        .status(ClusterStatus.DELETING)
-        .createdDate(createdDate);
+    testFcCluster =
+        new org.pmiops.workbench.notebooks.model.Cluster()
+            .clusterName(getClusterName())
+            .googleProject(BILLING_PROJECT_ID)
+            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING)
+            .createdDate(createdDate);
+    testCluster =
+        new Cluster()
+            .clusterName(getClusterName())
+            .clusterNamespace(BILLING_PROJECT_ID)
+            .status(ClusterStatus.DELETING)
+            .createdDate(createdDate);
   }
 
   private org.pmiops.workbench.firecloud.model.Workspace createFcWorkspace(
@@ -210,100 +211,174 @@ public class ClusterControllerTest {
     return new JSONObject(new String(raw));
   }
 
+  private String getClusterName() {
+    return "all-of-us-".concat(Long.toString(user.getUserId()));
+  }
+
   @Test
   public void testListClusters() throws Exception {
-    when(notebookService.getCluster(WORKSPACE_NS, "all-of-us")).thenReturn(testFcCluster);
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
+        .thenReturn(testFcCluster);
 
-    assertThat(clusterController.listClusters().getBody().getDefaultCluster())
+    assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
   }
 
   @Test
   public void testListClustersUnknownStatus() throws Exception {
-    when(notebookService.getCluster(WORKSPACE_NS, "all-of-us")).thenReturn(
-        testFcCluster.status(null));
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
+        .thenReturn(testFcCluster.status(null));
 
-    assertThat(clusterController.listClusters().getBody().getDefaultCluster().getStatus())
+    assertThat(
+            clusterController
+                .listClusters(BILLING_PROJECT_ID)
+                .getBody()
+                .getDefaultCluster()
+                .getStatus())
         .isEqualTo(ClusterStatus.UNKNOWN);
   }
 
+  @Test(expected = BadRequestException.class)
+  public void testListClustersNullBillingProject() throws Exception {
+    clusterController.listClusters(null);
+  }
+
   @Test
-  public void testListClustersLazyCreate() throws Exception {
-    when(notebookService.getCluster(WORKSPACE_NS, "all-of-us")).thenThrow(new NotFoundException());
-    when(notebookService.createCluster(eq(WORKSPACE_NS), eq("all-of-us"), any()))
+  public void testListClustersLazyCreate() {
+    when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
+        .thenThrow(new NotFoundException());
+    when(notebookService.createCluster(eq(BILLING_PROJECT_ID), eq(getClusterName())))
         .thenReturn(testFcCluster);
 
-    assertThat(clusterController.listClusters().getBody().getDefaultCluster())
+    assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
         .isEqualTo(testCluster);
   }
 
   @Test
   public void testDeleteCluster() throws Exception {
-    clusterController.deleteCluster(WORKSPACE_NS, "cluster");
-    verify(notebookService).deleteCluster(WORKSPACE_NS, "cluster");
+    clusterController.deleteCluster(BILLING_PROJECT_ID, "cluster");
+    verify(notebookService).deleteCluster(BILLING_PROJECT_ID, "cluster");
+  }
+
+  @Test
+  public void testSetClusterConfig() {
+    ResponseEntity<EmptyResponse> response =
+        this.clusterController.updateClusterConfig(
+            new UpdateClusterConfigRequest()
+                .userEmail(OTHER_USER_EMAIL)
+                .clusterConfig(
+                    new ClusterConfig().machineType("n1-standard-4").masterDiskSize(100)));
+    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+
+    User updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
+    assertThat(updatedUser.getClusterConfigDefault().machineType).isEqualTo("n1-standard-4");
+    assertThat(updatedUser.getClusterConfigDefault().masterDiskSize).isEqualTo(100);
+  }
+
+  @Test
+  public void testUpdateClusterConfigClear() {
+    ResponseEntity<EmptyResponse> response =
+        this.clusterController.updateClusterConfig(
+            new UpdateClusterConfigRequest()
+                .userEmail(OTHER_USER_EMAIL)
+                .clusterConfig(
+                    new ClusterConfig().machineType("n1-standard-4").masterDiskSize(100)));
+    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+
+    response =
+        this.clusterController.updateClusterConfig(
+            new UpdateClusterConfigRequest().userEmail(OTHER_USER_EMAIL).clusterConfig(null));
+    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+
+    User updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
+    assertThat(updatedUser.getClusterConfigDefault()).isNull();
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testUpdateClusterConfigUserNotFound() {
+    this.clusterController.updateClusterConfig(
+        new UpdateClusterConfigRequest().userEmail("not-found@researchallofus.org"));
   }
 
   @Test
   public void testLocalize() throws Exception {
-    ClusterLocalizeRequest req = new ClusterLocalizeRequest();
-    req.setWorkspaceNamespace(WORKSPACE_NS);
-    req.setWorkspaceId(WORKSPACE_ID);
-    req.setNotebookNames(ImmutableList.of("foo.ipynb"));
-    req.setPlaygroundMode(false);
+    ClusterLocalizeRequest req =
+        new ClusterLocalizeRequest()
+            .workspaceNamespace(WORKSPACE_NS)
+            .workspaceId(WORKSPACE_ID)
+            .notebookNames(ImmutableList.of("foo.ipynb"))
+            .playgroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
-        clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
+        clusterController.localize(BILLING_PROJECT_ID, "cluster", req).getBody();
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
 
-    verify(notebookService).localize(eq(WORKSPACE_NS), eq("cluster"), mapCaptor.capture());
+    verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
     Map<String, String> localizeMap = mapCaptor.getValue();
-    assertThat(localizeMap).containsEntry(
-        "~/workspaces/wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
-    JSONObject delocJson = dataUriToJson(localizeMap.get("~/workspaces/wsid/.delocalize.json"));
-    assertThat(delocJson.getString("destination")).isEqualTo("gs://workspace-bucket/notebooks");
-    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces/wsid/.all_of_us_config.json"));
+    assertThat(localizeMap.keySet())
+        .containsExactly(
+            "workspaces/wsid/foo.ipynb",
+            "workspaces_playground/wsid/.all_of_us_config.json",
+            "workspaces/wsid/.all_of_us_config.json");
+    assertThat(localizeMap)
+        .containsEntry("workspaces/wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
+    JSONObject aouJson = dataUriToJson(localizeMap.get("workspaces/wsid/.all_of_us_config.json"));
     assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
-    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(WORKSPACE_NS);
+    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(BILLING_PROJECT_ID);
     assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
-    verify(userRecentResourceService, times(1)).updateNotebookEntry(anyLong(), anyLong() , anyString(), any(Timestamp.class));
+    verify(userRecentResourceService, times(1))
+        .updateNotebookEntry(anyLong(), anyLong(), anyString(), any(Timestamp.class));
   }
 
   @Test
-  public void testLocalizePlaygroundMode() throws Exception {
-    ClusterLocalizeRequest req = new ClusterLocalizeRequest();
-    req.setWorkspaceNamespace(WORKSPACE_NS);
-    req.setWorkspaceId(WORKSPACE_ID);
-    req.setNotebookNames(ImmutableList.of("foo.ipynb"));
-    req.setPlaygroundMode(true);
+  public void testLocalize_playgroundMode() throws Exception {
+    ClusterLocalizeRequest req =
+        new ClusterLocalizeRequest()
+            .workspaceNamespace(WORKSPACE_NS)
+            .workspaceId(WORKSPACE_ID)
+            .notebookNames(ImmutableList.of("foo.ipynb"))
+            .playgroundMode(true);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
-      clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces:playground/wsid");
-    verify(notebookService).localize(eq(WORKSPACE_NS), eq("cluster"), mapCaptor.capture());
+        clusterController.localize(BILLING_PROJECT_ID, "cluster", req).getBody();
+    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces_playground/wsid");
+    verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
     Map<String, String> localizeMap = mapCaptor.getValue();
-    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces:playground/wsid/.all_of_us_config.json"));
-    assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
-    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(WORKSPACE_NS);
-    assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
+    assertThat(localizeMap.keySet())
+        .containsExactly(
+            "workspaces_playground/wsid/foo.ipynb",
+            "workspaces_playground/wsid/.all_of_us_config.json",
+            "workspaces/wsid/.all_of_us_config.json");
+    assertThat(localizeMap)
+        .containsEntry(
+            "workspaces_playground/wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
   }
 
   @Test
   public void testLocalize_differentNamespace() throws Exception {
-    ClusterLocalizeRequest req = new ClusterLocalizeRequest();
-    req.setWorkspaceNamespace(WORKSPACE_NS);
-    req.setWorkspaceId(WORKSPACE_ID);
-    req.setNotebookNames(ImmutableList.of("foo.ipynb"));
-    req.setPlaygroundMode(false);
+    ClusterLocalizeRequest req =
+        new ClusterLocalizeRequest()
+            .workspaceNamespace(WORKSPACE_NS)
+            .workspaceId(WORKSPACE_ID)
+            .notebookNames(ImmutableList.of("foo.ipynb"))
+            .playgroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
         clusterController.localize("other-proj", "cluster", req).getBody();
     verify(notebookService).localize(eq("other-proj"), eq("cluster"), mapCaptor.capture());
 
     Map<String, String> localizeMap = mapCaptor.getValue();
-    assertThat(localizeMap).containsEntry(
-        "~/workspaces/proj:wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
-    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/proj:wsid");
-    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces/proj:wsid/.all_of_us_config.json"));
+    assertThat(localizeMap.keySet())
+        .containsExactly(
+            "workspaces/proj__wsid/foo.ipynb",
+            "workspaces/proj__wsid/.all_of_us_config.json",
+            "workspaces_playground/proj__wsid/.all_of_us_config.json");
+    assertThat(localizeMap)
+        .containsEntry(
+            "workspaces/proj__wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
+    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/proj__wsid");
+    JSONObject aouJson =
+        dataUriToJson(localizeMap.get("workspaces/proj__wsid/.all_of_us_config.json"));
     assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo("other-proj");
   }
 
@@ -315,10 +390,23 @@ public class ClusterControllerTest {
     req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
-        clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
-    verify(notebookService).localize(eq(WORKSPACE_NS), eq("cluster"), mapCaptor.capture());
+        clusterController.localize(BILLING_PROJECT_ID, "cluster", req).getBody();
+    verify(notebookService).localize(eq(BILLING_PROJECT_ID), eq("cluster"), mapCaptor.capture());
 
     // Config files only.
-    assertThat(mapCaptor.getValue().size()).isEqualTo(2);
+    Map<String, String> localizeMap = mapCaptor.getValue();
+    assertThat(localizeMap.keySet())
+        .containsExactly(
+            "workspaces_playground/wsid/.all_of_us_config.json",
+            "workspaces/wsid/.all_of_us_config.json");
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
-  }}
+  }
+
+  private void createUser(String email) {
+    User user = new User();
+    user.setGivenName("first");
+    user.setFamilyName("last");
+    user.setEmail(email);
+    userDao.save(user);
+  }
+}

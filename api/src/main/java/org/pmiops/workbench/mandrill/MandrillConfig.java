@@ -8,12 +8,12 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
-public class MandrillConfig{
+public class MandrillConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient mandrillApiClient(WorkbenchConfig workbenchConfig) {
-    return new ApiClient();
+    return new MandrillApiClientTracer();
   }
 
   @Bean
@@ -24,4 +24,3 @@ public class MandrillConfig{
     return api;
   }
 }
-

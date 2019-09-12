@@ -1,0 +1,18 @@
+<router-outlet *ngIf="cookiesEnabled"></router-outlet>
+<app-routing-spinner *ngIf="initialSpinner && cookiesEnabled" [alwaysShow]="true">
+</app-routing-spinner>
+<div *ngIf="overriddenUrl" style="position: absolute; top: 0; left: 1rem;">
+  <span style="font-size: 80%; color: darkred;">API URL: {{this.overriddenUrl}}</span>
+</div>
+<div *ngIf="!cookiesEnabled">
+  <div style="max-width: 500px; margin: 1rem; font-family: Montserrat;">
+    <div><img alt="logo" src="/assets/images/logo-registration-non-signed-in.svg" width="314px"></div>
+    <div style="font-size: 20pt; color: #2F2E7E; padding: 1rem 0 1rem 0;">Cookies are Disabled</div>
+    <div style="font-size: 14pt; color: #000000">
+      For full functionality of this site it is necessary to enable cookies.
+      Here are the <a href="https://support.google.com/accounts/answer/61416" style="color: #2691D0" target="_blank" rel="noopener noreferrer">
+      instructions how to enable cookies in your web browser</a>.
+    </div>
+  </div>
+</div>
+<div id="outdated"></div> <!-- for outdated-browser-rework -->

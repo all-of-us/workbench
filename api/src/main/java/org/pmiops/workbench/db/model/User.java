@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,13 +23,27 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
 @Table(name = "user")
 public class User {
+
+  /**
+   * This is a Gson compatible class for encoding a JSON blob which is stored in MySQL. This
+   * represents cluster configuration overrides we support on a per-user basis for their notebook
+   * cluster. Corresponds to Leonardo's MachineConfig model. All fields are optional.
+   *
+   * <p>Any changes to this class should produce backwards-compatible JSON.
+   */
+  public static class ClusterConfig {
+    // Master persistent disk size in GB.
+    public Integer masterDiskSize;
+    // GCE machine type, e.g. n1-standard-2.
+    public String machineType;
+  }
+
   private long userId;
   private int version;
   // A nonce which can be used during the account creation flow to verify
@@ -44,28 +59,42 @@ public class User {
   private String phoneNumber;
   private String currentPosition;
   private String organization;
-  private String freeTierBillingProjectName;
-  private Short freeTierBillingProjectStatus;
+  private Double freeTierCreditsLimitOverride = null;
   private Timestamp firstSignInTime;
   private Set<Short> authorities = new HashSet<>();
-  private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<WorkspaceUserRole>();
   private Boolean idVerificationIsValid;
-  private Timestamp termsOfServiceCompletionTime;
-  private Timestamp ethicsTrainingCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
   private Short emailVerificationStatus;
-  private Boolean requestedIdVerification;
-  private Timestamp idVerificationRequestTime;
-  private Set<PageVisit> pageVisits = new HashSet<PageVisit>();
+  private Set<PageVisit> pageVisits = new HashSet<>();
+  private String clusterConfigDefault;
 
-  private List<InstitutionalAffiliation> institutionalAffiliations =
-      new ArrayList<InstitutionalAffiliation>();
+  private List<InstitutionalAffiliation> institutionalAffiliations = new ArrayList<>();
   private String aboutYou;
   private String areaOfResearch;
-  private Boolean twoFactorEnabled = false;
   private Integer clusterCreateRetries;
   private Integer billingProjectRetries;
+  private Integer moodleId;
+
+  // Access module fields go here. See http://broad.io/aou-access-modules for docs.
+  private String eraCommonsLinkedNihUsername;
+  private Timestamp eraCommonsLinkExpireTime;
+  private Timestamp eraCommonsCompletionTime;
+  private Timestamp betaAccessRequestTime;
+  private Timestamp betaAccessBypassTime;
+  private Timestamp dataUseAgreementCompletionTime;
+  private Timestamp dataUseAgreementBypassTime;
+  private Integer dataUseAgreementSignedVersion;
+  private Timestamp complianceTrainingCompletionTime;
+  private Timestamp complianceTrainingBypassTime;
+  private Timestamp complianceTrainingExpirationTime;
+  private Timestamp eraCommonsBypassTime;
+  private Timestamp emailVerificationCompletionTime;
+  private Timestamp emailVerificationBypassTime;
+  private Timestamp idVerificationCompletionTime;
+  private Timestamp idVerificationBypassTime;
+  private Timestamp twoFactorAuthCompletionTime;
+  private Timestamp twoFactorAuthBypassTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -80,14 +109,22 @@ public class User {
 
   @Version
   @Column(name = "version")
-  public int getVersion() { return version; }
+  public int getVersion() {
+    return version;
+  }
 
-  public void setVersion(int version) { this.version = version; }
+  public void setVersion(int version) {
+    this.version = version;
+  }
 
   @Column(name = "creation_nonce")
-  public Long getCreationNonce() { return creationNonce; }
+  public Long getCreationNonce() {
+    return creationNonce;
+  }
 
-  public void setCreationNonce(Long creationNonce) { this.creationNonce = creationNonce; }
+  public void setCreationNonce(Long creationNonce) {
+    this.creationNonce = creationNonce;
+  }
 
   @Column(name = "email")
   public String getEmail() {
@@ -171,33 +208,13 @@ public class User {
     this.organization = organization;
   }
 
-  @Column(name = "free_tier_billing_project_name")
-  public String getFreeTierBillingProjectName() {
-    return freeTierBillingProjectName;
+  @Column(name = "free_tier_credits_limit_override")
+  public Double getFreeTierCreditsLimitOverride() {
+    return freeTierCreditsLimitOverride;
   }
 
-  public void setFreeTierBillingProjectName(String freeTierBillingProjectName) {
-    this.freeTierBillingProjectName = freeTierBillingProjectName;
-  }
-
-  @Column(name = "free_tier_billing_project_status")
-  public Short getFreeTierBillingProjectStatus() {
-    return freeTierBillingProjectStatus;
-  }
-
-  public void setFreeTierBillingProjectStatus(Short freeTierBillingProjectStatus) {
-    this.freeTierBillingProjectStatus = freeTierBillingProjectStatus;
-  }
-
-  @Transient
-  public BillingProjectStatus getFreeTierBillingProjectStatusEnum() {
-    return StorageEnums.billingProjectStatusFromStorage(getFreeTierBillingProjectStatus());
-  }
-
-  public void setFreeTierBillingProjectStatusEnum(
-      BillingProjectStatus freeTierBillingProjectStatus) {
-    setFreeTierBillingProjectStatus(
-        StorageEnums.billingProjectStatusToStorage(freeTierBillingProjectStatus));
+  public void setFreeTierCreditsLimitOverride(Double freeTierCreditsLimitOverride) {
+    this.freeTierCreditsLimitOverride = freeTierCreditsLimitOverride;
   }
 
   @Column(name = "first_sign_in_time")
@@ -227,22 +244,20 @@ public class User {
     if (from == null) {
       return null;
     }
-    return from
-        .stream()
-        .map(StorageEnums::authorityFromStorage)
-        .collect(Collectors.toSet());
+    return from.stream().map(StorageEnums::authorityFromStorage).collect(Collectors.toSet());
   }
 
   public void setAuthoritiesEnum(Set<Authority> newAuthorities) {
     this.setAuthorities(
-        newAuthorities
-        .stream()
-        .map(StorageEnums::authorityToStorage)
-        .collect(Collectors.toSet()));
+        newAuthorities.stream().map(StorageEnums::authorityToStorage).collect(Collectors.toSet()));
   }
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "user")
-  @Column(name="page_id")
+  @OneToMany(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  @Column(name = "page_id")
   public Set<PageVisit> getPageVisits() {
     return pageVisits;
   }
@@ -251,43 +266,38 @@ public class User {
     this.pageVisits = newPageVisits;
   }
 
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
-  public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
-    return workspaceUserRoles;
-  }
-
-  /**
-   * Necessary for Spring initialization of the object.
-   * Not actually supported because it won't delete old entries.
-   */
-  public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
-    this.workspaceUserRoles = userRoles;
-  }
-
   @Column(name = "id_verification_is_valid")
   public Boolean getIdVerificationIsValid() {
     return idVerificationIsValid;
   }
+
   public void setIdVerificationIsValid(Boolean value) {
     idVerificationIsValid = value;
   }
 
-  @Column(name = "terms_of_service_completion_time")
-  public Timestamp getTermsOfServiceCompletionTime() {
-    return termsOfServiceCompletionTime;
+  @Column(name = "cluster_config_default")
+  public String getClusterConfigDefaultRaw() {
+    return clusterConfigDefault;
   }
 
-  public void setTermsOfServiceCompletionTime(Timestamp termsOfServiceCompletionTime) {
-    this.termsOfServiceCompletionTime = termsOfServiceCompletionTime;
+  public void setClusterConfigDefaultRaw(String value) {
+    clusterConfigDefault = value;
   }
 
-  @Column(name = "ethics_training_completion_time")
-  public Timestamp getEthicsTrainingCompletionTime() {
-    return ethicsTrainingCompletionTime;
+  @Transient
+  public ClusterConfig getClusterConfigDefault() {
+    if (clusterConfigDefault == null) {
+      return null;
+    }
+    return new Gson().fromJson(clusterConfigDefault, ClusterConfig.class);
   }
 
-  public void setEthicsTrainingCompletionTime(Timestamp ethicsTrainingCompletionTime) {
-    this.ethicsTrainingCompletionTime = ethicsTrainingCompletionTime;
+  public void setClusterConfigDefault(ClusterConfig value) {
+    String rawValue = null;
+    if (value != null) {
+      rawValue = new Gson().toJson(value);
+    }
+    setClusterConfigDefaultRaw(rawValue);
   }
 
   @Column(name = "demographic_survey_completion_time")
@@ -327,13 +337,18 @@ public class User {
         StorageEnums.emailVerificationStatusToStorage(emailVerificationStatus));
   }
 
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "userId", orphanRemoval = true, cascade = CascadeType.ALL)
-  @OrderColumn(name="order_index")
+  @OneToMany(
+      fetch = FetchType.EAGER,
+      mappedBy = "userId",
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
+  @OrderColumn(name = "order_index")
   public List<InstitutionalAffiliation> getInstitutionalAffiliations() {
     return institutionalAffiliations;
   }
 
-  public void setInstitutionalAffiliations(List<InstitutionalAffiliation> newInstitutionalAffiliations) {
+  public void setInstitutionalAffiliations(
+      List<InstitutionalAffiliation> newInstitutionalAffiliations) {
     this.institutionalAffiliations = newInstitutionalAffiliations;
   }
 
@@ -363,24 +378,6 @@ public class User {
     this.areaOfResearch = areaOfResearch;
   }
 
-  @Column(name = "requested_id_verification")
-  public Boolean getRequestedIdVerification() {
-    return requestedIdVerification;
-  }
-
-  public void setRequestedIdVerification(Boolean requestedIdVerification) {
-    this.requestedIdVerification = requestedIdVerification;
-  }
-
-  @Column(name = "two_factor_enabled")
-  public Boolean getTwoFactorEnabled() {
-    return twoFactorEnabled;
-  }
-
-  public void setTwoFactorEnabled(Boolean twoFactorEnabled) {
-    this.twoFactorEnabled = twoFactorEnabled;
-  }
-
   @Column(name = "cluster_create_retries")
   public Integer getClusterCreateRetries() {
     return clusterCreateRetries;
@@ -399,12 +396,174 @@ public class User {
     this.billingProjectRetries = billingProjectRetries;
   }
 
-  @Column(name = "id_verification_request_time")
-  public Timestamp getIdVerificationRequestTime() {
-    return idVerificationRequestTime;
+  @Column(name = "beta_access_request_time")
+  public Timestamp getBetaAccessRequestTime() {
+    return betaAccessRequestTime;
   }
 
-  public void setIdVerificationRequestTime(Timestamp idVerificationRequestTime) {
-    this.idVerificationRequestTime = idVerificationRequestTime;
+  public void setBetaAccessRequestTime(Timestamp betaAccessRequestTime) {
+    this.betaAccessRequestTime = betaAccessRequestTime;
+  }
+
+  @Column(name = "moodle_id")
+  public Integer getMoodleId() {
+    return moodleId;
+  }
+
+  public void setMoodleId(Integer moodleId) {
+    this.moodleId = moodleId;
+  }
+
+  @Column(name = "era_commons_linked_nih_username")
+  public String getEraCommonsLinkedNihUsername() {
+    return eraCommonsLinkedNihUsername;
+  }
+
+  public void setEraCommonsLinkedNihUsername(String eraCommonsLinkedNihUsername) {
+    this.eraCommonsLinkedNihUsername = eraCommonsLinkedNihUsername;
+  }
+
+  @Column(name = "era_commons_link_expire_time")
+  public Timestamp getEraCommonsLinkExpireTime() {
+    return eraCommonsLinkExpireTime;
+  }
+
+  public void setEraCommonsLinkExpireTime(Timestamp eraCommonsLinkExpireTime) {
+    this.eraCommonsLinkExpireTime = eraCommonsLinkExpireTime;
+  }
+
+  @Column(name = "era_commons_completion_time")
+  public Timestamp getEraCommonsCompletionTime() {
+    return eraCommonsCompletionTime;
+  }
+
+  public void setEraCommonsCompletionTime(Timestamp eraCommonsCompletionTime) {
+    this.eraCommonsCompletionTime = eraCommonsCompletionTime;
+  }
+
+  @Column(name = "data_use_agreement_completion_time")
+  public Timestamp getDataUseAgreementCompletionTime() {
+    return dataUseAgreementCompletionTime;
+  }
+
+  public void setDataUseAgreementCompletionTime(Timestamp dataUseAgreementCompletionTime) {
+    this.dataUseAgreementCompletionTime = dataUseAgreementCompletionTime;
+  }
+
+  @Column(name = "data_use_agreement_bypass_time")
+  public Timestamp getDataUseAgreementBypassTime() {
+    return dataUseAgreementBypassTime;
+  }
+
+  public void setDataUseAgreementBypassTime(Timestamp dataUseAgreementBypassTime) {
+    this.dataUseAgreementBypassTime = dataUseAgreementBypassTime;
+  }
+
+  @Column(name = "data_use_agreement_signed_version")
+  public Integer getDataUseAgreementSignedVersion() {
+    return dataUseAgreementSignedVersion;
+  }
+
+  public void setDataUseAgreementSignedVersion(Integer dataUseAgreementSignedVersion) {
+    this.dataUseAgreementSignedVersion = dataUseAgreementSignedVersion;
+  }
+
+  @Column(name = "compliance_training_completion_time")
+  public Timestamp getComplianceTrainingCompletionTime() {
+    return complianceTrainingCompletionTime;
+  }
+
+  public void setComplianceTrainingCompletionTime(Timestamp complianceTrainingCompletionTime) {
+    this.complianceTrainingCompletionTime = complianceTrainingCompletionTime;
+  }
+
+  @Column(name = "compliance_training_bypass_time")
+  public Timestamp getComplianceTrainingBypassTime() {
+    return complianceTrainingBypassTime;
+  }
+
+  public void setComplianceTrainingBypassTime(Timestamp complianceTrainingBypassTime) {
+    this.complianceTrainingBypassTime = complianceTrainingBypassTime;
+  }
+
+  @Column(name = "compliance_training_expiration_time")
+  public Timestamp getComplianceTrainingExpirationTime() {
+    return complianceTrainingExpirationTime;
+  }
+
+  public void setComplianceTrainingExpirationTime(Timestamp complianceTrainingExpirationTime) {
+    this.complianceTrainingExpirationTime = complianceTrainingExpirationTime;
+  }
+
+  @Column(name = "beta_access_bypass_time")
+  public Timestamp getBetaAccessBypassTime() {
+    return betaAccessBypassTime;
+  }
+
+  public void setBetaAccessBypassTime(Timestamp betaAccessBypassTime) {
+    this.betaAccessBypassTime = betaAccessBypassTime;
+  }
+
+  @Column(name = "email_verification_completion_time")
+  public Timestamp getEmailVerificationCompletionTime() {
+    return emailVerificationCompletionTime;
+  }
+
+  public void setEmailVerificationCompletionTime(Timestamp emailVerificationCompletionTime) {
+    this.emailVerificationCompletionTime = emailVerificationCompletionTime;
+  }
+
+  @Column(name = "email_verification_bypass_time")
+  public Timestamp getEmailVerificationBypassTime() {
+    return emailVerificationBypassTime;
+  }
+
+  public void setEmailVerificationBypassTime(Timestamp emailVerificationBypassTime) {
+    this.emailVerificationBypassTime = emailVerificationBypassTime;
+  }
+
+  @Column(name = "era_commons_bypass_time")
+  public Timestamp getEraCommonsBypassTime() {
+    return eraCommonsBypassTime;
+  }
+
+  public void setEraCommonsBypassTime(Timestamp eraCommonsBypassTime) {
+    this.eraCommonsBypassTime = eraCommonsBypassTime;
+  }
+
+  @Column(name = "id_verification_completion_time")
+  public Timestamp getIdVerificationCompletionTime() {
+    return idVerificationCompletionTime;
+  }
+
+  public void setIdVerificationCompletionTime(Timestamp idVerificationCompletionTime) {
+    this.idVerificationCompletionTime = idVerificationCompletionTime;
+  }
+
+  @Column(name = "id_verification_bypass_time")
+  public Timestamp getIdVerificationBypassTime() {
+    return idVerificationBypassTime;
+  }
+
+  public void setIdVerificationBypassTime(Timestamp idVerificationBypassTime) {
+    this.idVerificationBypassTime = idVerificationBypassTime;
+  }
+
+  @Column(name = "two_factor_auth_completion_time")
+  public Timestamp getTwoFactorAuthCompletionTime() {
+    return twoFactorAuthCompletionTime;
+  }
+
+  public void setTwoFactorAuthCompletionTime(Timestamp twoFactorAuthCompletionTime) {
+    this.twoFactorAuthCompletionTime = twoFactorAuthCompletionTime;
+  }
+
+  @Column(name = "two_factor_auth_bypass_time")
+  public Timestamp getTwoFactorAuthBypassTime() {
+    return twoFactorAuthBypassTime;
+  }
+
+  public void setTwoFactorAuthBypassTime(Timestamp twoFactorAuthBypassTime) {
+    this.twoFactorAuthBypassTime = twoFactorAuthBypassTime;
   }
 }

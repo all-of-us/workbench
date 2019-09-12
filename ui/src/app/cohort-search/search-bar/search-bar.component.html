@@ -12,23 +12,18 @@
      (keyup.arrowdown)="moveDown()"
      [formControl]="searchTerm"/>
   </div>
-
   <div *ngIf="noResults" class="dropdown-menu">
     <button class="dropdown-item disabled">
       <em>No results based on your search</em>
     </button>
   </div>
-  <div *ngIf="ingredientList.length" class="match-container">Ingredients in this brand: {{ingredientList.join(', ')}} </div>
-  <div *ngIf="numMatches > 1 && !ingredientList.length" class="match-container">
-    {{searchTerm.value}} exists {{numMatches}} times in the tree below
-  </div>
   <div *ngIf="options.length" class="dropdown-menu" [class.overflow]="showOverflow">
-    <app-option-info
+    <app-list-option-info
       *ngFor="let option of options; let i = index"
       [option]="option"
       [highlighted]="i === highlightedOption"
       [searchTerm]="searchTerm.value"
       (click)="selectOption(option)">
-    </app-option-info>
+    </app-list-option-info>
   </div>
 </div>

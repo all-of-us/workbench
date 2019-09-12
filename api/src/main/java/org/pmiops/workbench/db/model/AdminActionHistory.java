@@ -91,6 +91,7 @@ public class AdminActionHistory {
   public void setTimestamp(Timestamp timestamp) {
     this.timestamp = timestamp;
   }
+
   public void setTimestamp() {
     this.timestamp = new Timestamp(Instant.now().toEpochMilli());
   }

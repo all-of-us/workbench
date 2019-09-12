@@ -1,23 +1,20 @@
-import {NgReduxModule} from '@angular-redux/store';
-import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
-import {NgxChartsModule} from '@swimlane/ngx-charts';
+import {CohortCommonModule} from 'app/cohort-common/module';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
-import {CohortCommonModule} from '../cohort-common/module';
 
 /* Components */
+import {HelpSidebarComponent} from 'app/components/help-sidebar';
 import {AttributesPageComponent} from './attributes-page/attributes-page.component';
-import {CodeDropdownComponent} from './code-dropdown/code-dropdown.component';
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {DemographicsComponent} from './demographics/demographics.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
+import {ListSearchComponent} from './list-search/list-search.component';
 import {ModalComponent} from './modal/modal.component';
 import {ModifierPageComponent} from './modifier-page/modifier-page.component';
-import {MultiSelectComponent} from './multi-select/multi-select.component';
 import {NodeInfoComponent} from './node-info/node-info.component';
 import {NodeComponent} from './node/node.component';
 import {OptionInfoComponent} from './option-info/option-info.component';
@@ -30,62 +27,58 @@ import {SearchGroupComponent} from './search-group/search-group.component';
 import {SelectionInfoComponent} from './selection-info/selection-info.component';
 import {TreeComponent} from './tree/tree.component';
 
+import {BreadcrumbType} from 'app/utils/navigation';
+
 /* Other Objects */
-import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
+import {CanDeactivateGuard} from 'app/guards/can-deactivate-guard.service';
 import {SafeHtmlPipe} from './safe-html.pipe';
 
 
 const routes: Routes = [{
   path: '',
   component: CohortSearchComponent,
-  data: {title: 'Build Cohort Criteria'},
+  canDeactivate: [CanDeactivateGuard],
+  data: {
+    title: 'Build Cohort Criteria',
+    breadcrumb: BreadcrumbType.CohortAdd
+  },
 }];
 
 
 @NgModule({
   imports: [
     // Angular
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forChild(routes),
     // 3rd Party
     ClarityModule,
-    NgReduxModule,
-    NgxChartsModule,
     NgxPopperModule,
     NouisliderModule,
     // Ours
     CohortCommonModule,
   ],
   declarations: [
+    AttributesPageComponent,
     CohortSearchComponent,
-    CodeDropdownComponent,
-    DemographicsComponent,
     GenderChartComponent,
+    DemographicsComponent,
+    HelpSidebarComponent,
     ModalComponent,
     ModifierPageComponent,
-    MultiSelectComponent,
     NodeComponent,
     NodeInfoComponent,
     OptionInfoComponent,
     OverviewComponent,
     SearchBarComponent,
-    SearchGroupComponent,
     SearchGroupItemComponent,
     SearchGroupListComponent,
-    SearchGroupSelectComponent,
+    SearchGroupComponent,
+    ListSearchComponent,
     SelectionInfoComponent,
     TreeComponent,
-    AttributesPageComponent,
     SafeHtmlPipe,
+    SearchGroupSelectComponent,
   ],
-  providers: [
-    CohortSearchActions,
-    CohortSearchEpics,
-    ConfigureStore,
-  ]
 })
-export class CohortSearchModule {
-  constructor(store: ConfigureStore) {}
-}
+export class CohortSearchModule {}

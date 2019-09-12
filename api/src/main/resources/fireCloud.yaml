@@ -140,8 +140,6 @@ paths:
             type: string
         tags:
           - Billing
-        consumes:
-          - application/json
         summary: add user to billing project the caller owns
         operationId: addUserToBillingProject
         security:
@@ -174,7 +172,7 @@ paths:
             type: string
           - in: path
             description: role of user for project
-            name: workbenchRole
+            name: role
             required: true
             type: string
             enum: ["user", "owner"]
@@ -188,7 +186,7 @@ paths:
         summary: remove user or group from billing project the caller owns
         operationId: removeUserFromBillingProject
         security:
-          - authorization:
+          - googleoauth:
               - openid
               - email
               - profile
@@ -228,8 +226,6 @@ paths:
           type: string
       tags:
         - Billing
-      consumes:
-        - application/json
       summary: grant a google role to a user and their pet in the billing project the caller owns
       operationId: grantGoogleRoleToUser
       security:
@@ -237,6 +233,47 @@ paths:
           - openid
           - email
           - profile
+
+  /api/nih/callback:
+    post:
+      tags:
+        - Nih
+      operationId: nihCallback
+      summary: Update the user's NIH link from a JWT
+      parameters:
+        - name: jwtWrapper
+          in: body
+          description: JWT from NIH login
+          required: true
+          schema:
+            $ref: '#/definitions/JWTWrapper'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/NihStatus'
+        400:
+          description: Invalid or malformed JWT
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error
+
+  /api/nih/status:
+    get:
+      tags:
+        - Nih
+      operationId: nihStatus
+      summary: Get the current NIH status for a user
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/NihStatus'
+        404:
+          description: linkedNihUsername key missing from status
+        500:
+          description: Internal server error retrieving NIH status
 
   /api/profile/billing:
     get:
@@ -253,6 +290,29 @@ paths:
               $ref: '#/definitions/BillingProjectMembership'
         404:
           description: User Not Found
+        500:
+          description: Internal Server Error
+
+  /api/profile/billing/{projectName}:
+    get:
+      tags:
+        - billing
+      operationId: billingProjectStatus
+      parameters:
+        - name: projectName
+          description: Name of the billing project
+          required: true
+          type: string
+          in: path
+      description: billing project status
+      summary: billing project status
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/BillingProjectStatus'
+        404:
+          description: Project Not Found
         500:
           description: Internal Server Error
 
@@ -339,6 +399,25 @@ paths:
           description: Internal Server Error
 
   /api/workspaces/{workspaceNamespace}/{workspaceName}/acl:
+    get:
+      tags:
+        - Workspaces
+      operationId: getWorkspaceAcl
+      summary: Get workspace ACL
+      parameters:
+        - $ref: '#/parameters/workspaceNamespaceParam'
+        - $ref: '#/parameters/workspaceNameParam'
+      responses:
+        200:
+          description: Successful Request
+          schema:
+            $ref: '#/definitions/WorkspaceACL'
+        400:
+          description: Can't retrieve ACL for workspace
+        404:
+          description: Workspace not found
+        500:
+          description: Internal Server Error
     patch:
       tags:
         - Workspaces
@@ -403,6 +482,30 @@ paths:
           description: Destination workspace already exists
         500:
           description: Internal Server Error
+
+  /api/staticNotebooks/convert:
+    post:
+      tags:
+        - Static Notebooks
+      operationId: convertNotebook
+      produces:
+        - text/html
+      summary: Convert a Notebook ipynb file to a static HTML representation
+      description: Convert a Notebook ipynb file to a static HTML representation
+      parameters:
+        - name: notebook
+          description: Notebook ipynb file
+          required: true
+          in: body
+          schema:
+            type: object
+      responses:
+        200:
+          description: Success
+          schema:
+            type: string
+        500:
+          description: Internal Error
 
   /me:
     get:
@@ -472,6 +575,39 @@ paths:
             - profile
 
   /api/groups/{groupName}:
+    get:
+      responses:
+        200:
+          description: Successfully loaded group
+          schema:
+            $ref: '#/definitions/ManagedGroupWithMembers'
+        403:
+          description: You must be an admin of this group in order to view members
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        404:
+          description: Group not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      parameters:
+        - in: path
+          description: Group name
+          name: groupName
+          required: true
+          type: string
+      tags:
+        - Groups
+      summary: view the members in a group
+      operationId: getGroup
+      security:
+        - googleoauth:
+          - openid
+          - email
+          - profile
     post:
       responses:
         201:
@@ -494,8 +630,6 @@ paths:
           type: string
       tags:
         - Groups
-      consumes:
-        - application/json
       summary: create a new group
       operationId: createGroup
       security:
@@ -540,8 +674,6 @@ paths:
           type: string
       tags:
         - Groups
-      consumes:
-        - application/json
       summary: add a user to a group the caller owns
       operationId: addUserToGroup
       security:
@@ -592,7 +724,6 @@ paths:
           - email
           - profile
 
-
 ##########################################################################################
 ## PARAMETERS
 ##########################################################################################
@@ -633,6 +764,20 @@ definitions:
         type: string
         enum: ["Creating", "Ready", "Error"]
 
+  BillingProjectStatus:
+    description: a billing project status
+    required:
+      - projectName
+      - creationStatus
+    type: object
+    properties:
+      projectName:
+        type: string
+        description: the name of the billing project
+      creationStatus:
+        type: string
+        enum: ["Creating", "Ready", "Error"]
+
   CreateRawlsBillingProjectFullRequest:
     description: ''
     required:
@@ -646,6 +791,15 @@ definitions:
       billingAccount:
         type: string
         description: the id of the billing account to use, must start with 'billingAccounts/'
+      highSecurityNetwork:
+        type: boolean
+        description: Optional, false if not specified. If true, spin up all compute in a VPC network.
+      enableFlowLogs:
+        type: boolean
+        description: Optional, false if not specified. If true, enable flow logs within the high security network. Requires highSecurityNetwork = true.
+      servicePerimeter:
+        type: string
+        description: The fully qualified name of the GCP service perimeter to put this project into in the form accessPolicies/[POLICY NUMBER]/servicePerimeters/[NAME]. Caller must have the add_project action for this service perimeter in Sam.
 
   Enabled:
     type: object
@@ -689,6 +843,15 @@ definitions:
         items:
           $ref: '#/definitions/StackTraceElement'
 
+  JWTWrapper:
+    required:
+      - jwt
+    type: object
+    properties:
+      jwt:
+        type: string
+        description: the encoded/signed JWT
+
   ManagedGroupRef:
     description: a reference to a group that can be managed by users
     type: object
@@ -705,6 +868,25 @@ definitions:
         $ref: '#/definitions/UserInfo'
       enabled:
         $ref: '#/definitions/Enabled'
+
+  NihStatus:
+    required:
+      - linkedNihUsername
+    type: object
+    properties:
+      linkedNihUsername:
+        type: string
+        description: The user's NIH username
+      datasetPermissions:
+        type: array
+        description: Array of FireCloud dataset permissions
+        items:
+          type: object
+      linkExpireTime:
+        type: integer
+        description: The FireCloud-calculated expiration time, in Epoch seconds
+        format: int64
+        default: 0
 
   Profile:
       type: object
@@ -909,6 +1091,19 @@ definitions:
       runningSubmissionsCount:
         type: integer
         description: Count of all the running submissions
+
+  WorkspaceACL:
+    description: ''
+    required:
+      - acl
+    type: object
+    properties:
+      acl:
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/WorkspaceAccessEntry'
+        description: Map[String, WorkspaceAccessEntry]
+
   WorkspaceACLUpdate:
     description: ''
     required:
@@ -972,6 +1167,28 @@ definitions:
         items:
           $ref: '#/definitions/WorkspaceACLUpdate'
 
+  WorkspaceAccessEntry:
+    description: ''
+    required:
+      - accessLevel
+      - pending
+      - canShare
+      - canCompute
+    type: object
+    properties:
+      accessLevel:
+        type: string
+        description: The access level granted to this user or group (OWNER, READER, WRITER, NO ACCESS)
+      pending:
+        type: boolean
+        description: The status of the users access
+      canShare:
+        type: boolean
+        description: True if the user can share the workspace with others, false otherwise
+      canCompute:
+        type: boolean
+        description: True if the user can launch compute in this workspace, false otherwise
+
   ManagedGroupAccessResponse:
     description: an element of a list of groups a user has access to
     type: object
@@ -996,10 +1213,8 @@ definitions:
       - membersEmails
       - adminsEmails
     properties:
-      membersGroup:
-        $ref: '#/definitions/RawlsGroupShort'
-      adminsGroup:
-        $ref: '#/definitions/RawlsGroupShort'
+      groupEmail:
+        type: string
       membersEmails:
         type: array
         items:

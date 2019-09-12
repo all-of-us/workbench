@@ -10,9 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
-/**
- * A DAO used to get results using Specification without issuing a count query.
- */
+/** A DAO used to get results using Specification without issuing a count query. */
 public class NoCountFindAllDao<T, I extends Serializable> extends SimpleJpaRepository<T, I> {
 
   public NoCountFindAllDao(Class<T> domainClass, EntityManager em) {
@@ -20,7 +18,10 @@ public class NoCountFindAllDao<T, I extends Serializable> extends SimpleJpaRepos
   }
 
   @Override
-  protected <S extends T> Page<S> readPage(TypedQuery<S> query, final Class<S> domainClass, Pageable pageable,
+  protected <S extends T> Page<S> readPage(
+      TypedQuery<S> query,
+      final Class<S> domainClass,
+      Pageable pageable,
       final Specification<S> spec) {
     query.setFirstResult(pageable.getOffset());
     query.setMaxResults(pageable.getPageSize());
