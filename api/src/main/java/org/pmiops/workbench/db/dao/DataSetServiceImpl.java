@@ -318,7 +318,7 @@ public class DataSetServiceImpl implements DataSetService {
     switch (kernelTypeEnum) {
       case R:
         prerequisites =
-            "ifelse(\"reticulate\" %in% installed.packages(), \"reticulate is already installed\", install.packages(\"reticulate\"))\n"
+            "if(! \"reticulate\" %in% installed.packages()) { install.packages(\"reticulate\") }\n"
                 + "library(reticulate)\n"
                 + "pd <- reticulate::import(\"pandas\")";
         break;
