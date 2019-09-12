@@ -80,7 +80,22 @@ const styles = reactStyles({
   contentItem: {
     marginTop: 0,
     color: colors.primary
-  }
+  },
+  textSearch: {
+    width: '100%',
+    borderRadius: '4px',
+    backgroundColor: colorWithWhiteness(colors.primary, .95),
+    marginTop: '5px',
+    color: colorWithWhiteness(colors.primary, -1),
+  },
+  textInput: {
+    width: '90%',
+    height: '1.5rem',
+    padding: '0 0 0 5px',
+    border: 0,
+    backgroundColor: 'transparent',
+    outline: 'none',
+  },
 });
 
 const iconStyles = {
@@ -112,7 +127,7 @@ export class HelpSidebar extends React.Component<Props, State> {
     this.state = {
       activeIcon: undefined,
       sidebarOpen: false,
-      searchTerm: undefined
+      searchTerm: ''
     };
   }
 
@@ -140,7 +155,7 @@ export class HelpSidebar extends React.Component<Props, State> {
 
   render() {
     const {location, participant, setParticipant} = this.props;
-    const {activeIcon, sidebarOpen} = this.state;
+    const {activeIcon, searchTerm, sidebarOpen} = this.state;
     const contentStyle = (tab: string) => ({
       display: activeIcon === tab ? 'block' : 'none',
       height: 'calc(100% - 1rem)',
@@ -171,6 +186,15 @@ export class HelpSidebar extends React.Component<Props, State> {
           </div>
           <div style={contentStyle('help')}>
             <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
+            <div style={styles.textSearch}>
+              <ClrIcon style={{color: colors.primary, margin: '0 0.3rem'}} shape='search' size={16} />
+              <input
+                type='text'
+                style={styles.textInput}
+                value={searchTerm}
+                onChange={(e) => this.setState({searchTerm: e.target.value})}
+                placeholder={'Search'} />
+            </div>
             {sidebarContent[location].map((section, s) => <div key={s}>
               <h3 style={styles.sectionTitle}>{section.title}</h3>
               {section.content.map((content, c) => {
