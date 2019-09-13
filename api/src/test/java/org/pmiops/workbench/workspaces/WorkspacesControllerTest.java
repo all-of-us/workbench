@@ -1559,8 +1559,7 @@ public class WorkspacesControllerTest {
     Blob bigNotebook =
         mockBlob(BUCKET_NAME, NotebooksService.withNotebookExtension("notebooks/nb"));
     when(bigNotebook.getSize()).thenReturn(5_000_000_000L); // 5 GB.
-    when(cloudStorageService.getBlobListForPrefix(BUCKET_NAME, "notebooks"))
-        .thenReturn(ImmutableList.of(bigNotebook));
+    when(cloudStorageService.getBlobList(BUCKET_NAME)).thenReturn(ImmutableList.of(bigNotebook));
     mockBillingProjectBuffer("cloned-ns");
     workspacesController
         .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
