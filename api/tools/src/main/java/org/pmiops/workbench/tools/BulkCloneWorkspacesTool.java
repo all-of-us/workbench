@@ -2,7 +2,6 @@ package org.pmiops.workbench.tools;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.appengine.repackaged.com.google.common.base.Pair;
-import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,11 +11,9 @@ import javax.inject.Provider;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.Config;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
@@ -131,9 +128,9 @@ public class BulkCloneWorkspacesTool {
 
   private static final String[] BILLING_SCOPES =
       new String[] {
-          "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/userinfo.email",
-          "https://www.googleapis.com/auth/cloud-billing"
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/cloud-billing"
       };
 
   private void initializeApis() {
@@ -248,13 +245,14 @@ public class BulkCloneWorkspacesTool {
         }
 
         providedUser = userDao.findUserByEmail(workspaceResponse.getWorkspace().getCreatedBy());
-        if (providedUser == null || providedUser.getDisabled() || !checkUserExistsInGoogle(directoryService, providedUser.getEmail())) {
+        if (providedUser == null
+            || providedUser.getDisabled()
+            || !checkUserExistsInGoogle(directoryService, providedUser.getEmail())) {
           continue;
         }
 
         impersonateUser(fireCloudService.getApiClientWithImpersonation(providedUser.getEmail()));
         System.out.println("Impersonated " + providedUser.getEmail());
-
 
         try {
           System.out.println("About to clone " + shorthand(dbWorkspace));
@@ -289,7 +287,11 @@ public class BulkCloneWorkspacesTool {
 
           if (e instanceof NotFoundException) {
             System.out.println(providedUser.getDataAccessLevelEnum());
-            failedWorkspaces.add(Pair.of(workspaceResponse, "Resource not found. User has Data Access Level of " + providedUser.getDataAccessLevelEnum()));
+            failedWorkspaces.add(
+                Pair.of(
+                    workspaceResponse,
+                    "Resource not found. User has Data Access Level of "
+                        + providedUser.getDataAccessLevelEnum()));
           } else {
             failedWorkspaces.add(Pair.of(workspaceResponse, e.getMessage()));
           }
@@ -315,15 +317,33 @@ public class BulkCloneWorkspacesTool {
   }
 
   private String shorthand(Workspace workspace) {
-    return "(" + workspace.getCreator().getEmail() + " : " + workspace.getWorkspaceNamespace() + " : " + workspace.getFirecloudName() + ")";
+    return "("
+        + workspace.getCreator().getEmail()
+        + " : "
+        + workspace.getWorkspaceNamespace()
+        + " : "
+        + workspace.getFirecloudName()
+        + ")";
   }
 
   private String shorthand(org.pmiops.workbench.model.Workspace workspace) {
-    return "(" + workspace.getCreator() + " : " + workspace.getNamespace() + " : " + workspace.getId() + ")";
+    return "("
+        + workspace.getCreator()
+        + " : "
+        + workspace.getNamespace()
+        + " : "
+        + workspace.getId()
+        + ")";
   }
 
   private String shorthand(org.pmiops.workbench.firecloud.model.Workspace workspace) {
-    return "(" + workspace.getCreatedBy() + " : " + workspace.getNamespace() + " : " + workspace.getName() + ")";
+    return "("
+        + workspace.getCreatedBy()
+        + " : "
+        + workspace.getNamespace()
+        + " : "
+        + workspace.getName()
+        + ")";
   }
 
   private void padding() {

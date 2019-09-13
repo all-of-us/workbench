@@ -53,24 +53,24 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 @Configuration
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @Import({
-    RetryConfig.class,
-    CommonConfig.class,
-    BigQueryConfig.class,
-    CacheSpringConfiguration.class,
-    WorkbenchDbConfig.class,
-    CohortCloningService.class,
-    CohortFactoryImpl.class,
-    ConceptService.class,
-    ConceptBigQueryService.class,
-    BigQueryService.class,
-    CdrBigQuerySchemaConfigService.class,
-    UserService.class,
-    ComplianceServiceImpl.class,
-    WorkspacesController.class,
-    BillingProjectBufferService.class,
-    NotebooksServiceImpl.class,
-    UserRecentResourceServiceImpl.class,
-    CdrDbConfig.class
+  RetryConfig.class,
+  CommonConfig.class,
+  BigQueryConfig.class,
+  CacheSpringConfiguration.class,
+  WorkbenchDbConfig.class,
+  CohortCloningService.class,
+  CohortFactoryImpl.class,
+  ConceptService.class,
+  ConceptBigQueryService.class,
+  BigQueryService.class,
+  CdrBigQuerySchemaConfigService.class,
+  UserService.class,
+  ComplianceServiceImpl.class,
+  WorkspacesController.class,
+  BillingProjectBufferService.class,
+  NotebooksServiceImpl.class,
+  UserRecentResourceServiceImpl.class,
+  CdrDbConfig.class
 })
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")
