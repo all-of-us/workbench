@@ -200,9 +200,10 @@ public class DataSetServiceImpl implements DataSetService {
     if (noCohortsIncluded
         || ((initialSelectedConceptSets.isEmpty() && dataSetRequest.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.NONE))
             && domainValuePairs.isEmpty())) {
-      // TODO: is this true here? We will add one later potentially...
-//      throw new BadRequestException("Data Sets must include at least one cohort and concept.");
-      return Collections.emptyMap();
+      // TODO: According to the unit tests, we should throw if there's no cohort or concept, but return an empty
+      // query if there's no value. This seems odd. Regardless, we should do this validation elsewhere,
+      // and maybe build a helper class with all these derived properties
+      throw new BadRequestException("Data Sets must include at least one cohort and concept.");
     }
 
     // Below constructs the union of all cohort queries

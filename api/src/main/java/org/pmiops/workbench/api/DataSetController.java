@@ -247,7 +247,7 @@ public class DataSetController implements DataSetApiDelegate {
     final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain = dataSetService.generateQueriesByDomain(dataSet);
 
     if (bigQueryJobConfigsByDomain.isEmpty()) {
-      throw new BadRequestException("Generated an empty query from these selections.");
+      log.warning("Empty query map generated for this DataSetRequest");
     }
 
     return ResponseEntity.ok(

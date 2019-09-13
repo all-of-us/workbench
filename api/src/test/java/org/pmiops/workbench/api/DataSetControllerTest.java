@@ -575,9 +575,9 @@ public class DataSetControllerTest {
 
   @Test
   public void testGetQueryDropsQueriesWithNoValue() {
-    final DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+    final DataSetRequest dataSet = buildEmptyDataSetRequest()
+        .addCohortIdsItem(COHORT_ONE_ID)
+        .addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
     DataSetCodeResponse response =
         dataSetController
