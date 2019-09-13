@@ -243,7 +243,12 @@ public class DataSetController implements DataSetApiDelegate {
     final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
 
     // Generate query per domain for the selected concept set, cohort and values
+    // TODO(jaycarlton): return better error information form this function for common validation scenarios
     final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain = dataSetService.generateQueriesByDomain(dataSet);
+
+    if (bigQueryJobConfigsByDomain.isEmpty()) {
+      throw new BadRequestException("Generated an empty query from these selections.");
+    }
 
     return ResponseEntity.ok(
         new DataSetCodeResponse()
