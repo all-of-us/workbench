@@ -78,7 +78,7 @@ public class DataSetServiceImpl implements DataSetService {
       return this.joins;
     }
 
-    public static ValuesLinkingPair emptyPair() {
+    static ValuesLinkingPair emptyPair() {
       return new ValuesLinkingPair(Collections.emptyList(), Collections.emptyList());
     }
 
@@ -239,6 +239,9 @@ public class DataSetServiceImpl implements DataSetService {
     final ImmutableMap.Builder<String, QueryJobConfiguration> resultBuilder = new ImmutableBiMap.Builder<>();
 
     for (Domain domain : domainList) {
+      if  (domain == Domain.PERSON) {
+        continue;
+      }
       final StringBuilder queryBuilder = new StringBuilder("SELECT ");
 
       final List<DomainValuePair> valuePairsForCurrentDomain = dataSet.getValues().stream()
@@ -254,13 +257,11 @@ public class DataSetServiceImpl implements DataSetService {
 
       validateSelectedConceptSetsForDomain(conceptSetsSelected, domain);
 
-      String conceptSetQueries =
-          conceptSetsSelected.stream()
-              .filter(cs -> domain == cs.getDomainEnum())
-              .filter(cs -> domain != Domain.PERSON)
-              .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
-              .collect(Collectors.joining(", "));
-      String conceptSetListQuery = " IN (" + conceptSetQueries + ")";
+      final String conceptSetQueries = conceptSetsSelected.stream()
+          .filter(cs -> domain == cs.getDomainEnum())
+          .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
+          .collect(Collectors.joining(", "));
+      final String conceptSetListQuery = " IN (" + conceptSetQueries + ")";
 
       if (domain != Domain.PERSON) {
         Optional<DomainConceptIdInfo> domainConceptIdsMaybe =
