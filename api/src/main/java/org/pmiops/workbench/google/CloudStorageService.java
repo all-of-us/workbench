@@ -18,7 +18,9 @@ public interface CloudStorageService {
 
   String getImageUrl(String image_name);
 
-  List<Blob> getBlobList(String bucketName, String directory);
+  List<Blob> getBlobList(String bucketName);
+
+  List<Blob> getBlobListForPrefix(String bucketName, String directory);
 
   Set<BlobId> blobsExist(List<BlobId> id);
 

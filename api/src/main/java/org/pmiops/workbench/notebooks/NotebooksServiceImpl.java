@@ -79,7 +79,8 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace()
             .getBucketName();
 
-    return cloudStorageService.getBlobList(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY).stream()
+    return cloudStorageService.getBlobListForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
+        .stream()
         .filter(blob -> NOTEBOOK_PATTERN.matcher(blob.getName()).matches())
         .map(blob -> blobToFileDetail(blob, bucketName))
         .collect(Collectors.toList());

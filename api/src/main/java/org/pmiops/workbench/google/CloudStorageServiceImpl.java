@@ -57,7 +57,14 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public List<Blob> getBlobList(String bucketName, String directory) {
+  public List<Blob> getBlobList(String bucketName) {
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    Iterable<Blob> blobList = storage.get(bucketName).list().getValues();
+    return ImmutableList.copyOf(blobList);
+  }
+
+  @Override
+  public List<Blob> getBlobListForPrefix(String bucketName, String directory) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Iterable<Blob> blobList =
         storage.get(bucketName).list(Storage.BlobListOption.prefix(directory)).getValues();
