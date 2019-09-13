@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
-import org.pmiops.workbench.cdr.CdrDbConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -42,7 +41,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -51,9 +49,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableConfigurationProperties
 @EnableJpaRepositories("org.pmiops.workbench.db.dao")
 @EntityScan({"org.pmiops.workbench.db.model"})
-@Import({
-    CdrDbConfig.class
-})
 public class BulkCloneWorkspacesTool {
 
   private ProfileApi profileApi;
