@@ -97,6 +97,11 @@ const styles = reactStyles({
     backgroundColor: 'transparent',
     outline: 'none',
   },
+  highlighted: {
+    color: colorWithWhiteness(colors.success, -0.4),
+    backgroundColor: colorWithWhiteness(colors.success, 0.7),
+    display: 'inline-block'
+  }
 });
 
 const iconStyles = {
@@ -170,6 +175,31 @@ export class HelpSidebar extends React.Component<Props, State> {
     this.setState({filteredContent});
   }
 
+  highlightSearchTerm(stringToHighlight: string) {
+    const {searchTerm} = this.state;
+    if (searchTerm === '' || searchTerm.length < 3) {
+      return stringToHighlight;
+    }
+    const words: string[] = [];
+    let searchWords = searchTerm.split(new RegExp(',| '));
+    searchWords = searchWords
+    .filter(w => w.length > 0 )
+    .map(word => word.replace(/[&!^\/\\#,+()$~%.'":*?<>{}]/g, ''));
+    const matchString = new RegExp(searchWords.join('|'), 'i');
+    const matches = stringToHighlight.match(new RegExp(matchString, 'gi'));
+    const splits = stringToHighlight.split(new RegExp(matchString, 'gi'));
+    if (matches) {
+      for (let i = 0; i < matches.length; i++) {
+        words.push(splits[i], matches[i]);
+      }
+      words.push(splits[splits.length - 1]);
+    }
+    return words.map((word, w) => <span key={w}
+      style={matchString.test(word.toLowerCase()) ? styles.highlighted : {}}>
+        {word}
+      </span>);
+  }
+
   onIconClick(icon: string) {
     const {activeIcon, sidebarOpen} = this.state;
     const newSidebarOpen = !(icon === activeIcon && sidebarOpen);
@@ -241,14 +271,14 @@ export class HelpSidebar extends React.Component<Props, State> {
                 placeholder={'Search'} />
             </div>
             {displayContent.map((section, s) => <div key={s}>
-              <h3 style={styles.sectionTitle}>{section.title}</h3>
+              <h3 style={styles.sectionTitle}>{this.highlightSearchTerm(section.title)}</h3>
               {section.content.map((content, c) => {
                 return typeof content === 'string'
-                  ? <p key={c} style={styles.contentItem}>{content}</p>
+                  ? <p key={c} style={styles.contentItem}>{this.highlightSearchTerm(content)}</p>
                   : <div key={c}>
-                    <h4 style={styles.contentTitle}>{content.title}</h4>
+                    <h4 style={styles.contentTitle}>{this.highlightSearchTerm(content.title)}</h4>
                     {content.content.map((item, i) =>
-                      <p key={i} style={styles.contentItem}>{item}</p>)
+                      <p key={i} style={styles.contentItem}>{this.highlightSearchTerm(item)}</p>)
                     }
                   </div>;
               })}
