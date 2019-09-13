@@ -69,8 +69,7 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
   WorkspacesController.class,
   BillingProjectBufferService.class,
   NotebooksServiceImpl.class,
-  UserRecentResourceServiceImpl.class,
-  CdrDbConfig.class
+  UserRecentResourceServiceImpl.class
 })
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")
