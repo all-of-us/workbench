@@ -21,6 +21,9 @@ public interface BillingProjectBufferEntryDao
   List<BillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
       short status, Timestamp timestamp);
 
+  @Query("SELECT COUNT(*) FROM BillingProjectBufferEntry WHERE status=2")
+  Long numberOfAvailableEntries();
+
   BillingProjectBufferEntry findFirstByStatusOrderByLastSyncRequestTimeAsc(short status);
 
   BillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
