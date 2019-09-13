@@ -8,7 +8,7 @@ import org.springframework.web.method.HandlerMethod;
 
 public class InterceptorUtils {
 
-  private static Map<String, String> apiImplMap =
+  private static Map<String, String> apiInterfacesToImpls =
       ImmutableMap.of(
           "org.pmiops.workbench.api.WorkspacesApiController",
               "org.pmiops.workbench.workspaces.WorkspacesController",
@@ -30,9 +30,9 @@ public class InterceptorUtils {
     // ApiController (api package)
     // The following code allows Controllers to be moved into other packages by specifying the
     // mapping in `apiImplMap`
-    String controllerName;
-    if (apiImplMap.containsKey(apiControllerName)) {
-      controllerName = apiImplMap.get(apiControllerName);
+    final String controllerName;
+    if (apiInterfacesToImpls.containsKey(apiControllerName)) {
+      controllerName = apiInterfacesToImpls.get(apiControllerName);
     } else {
       controllerName = apiControllerPattern.matcher(apiControllerName).replaceAll("$1$2");
     }
