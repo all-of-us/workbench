@@ -8,11 +8,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Provider;
+import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrDbConfig;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cohorts.CohortCloningService;
+import org.pmiops.workbench.cohorts.CohortFactoryImpl;
+import org.pmiops.workbench.compliance.ComplianceServiceImpl;
+import org.pmiops.workbench.config.BigQueryConfig;
+import org.pmiops.workbench.config.CacheSpringConfiguration;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.WorkbenchDbConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -33,6 +45,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspacesController;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,7 +65,22 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories("org.pmiops.workbench.db.dao")
 @EntityScan({"org.pmiops.workbench.db.model"})
 @Import({
-    CdrDbConfig.class
+    CdrDbConfig.class,
+    BigQueryConfig.class,
+    CacheSpringConfiguration.class,
+    WorkbenchDbConfig.class,
+    CohortCloningService.class,
+    CohortFactoryImpl.class,
+    ConceptService.class,
+    ConceptBigQueryService.class,
+    BigQueryService.class,
+    CdrBigQuerySchemaConfigService.class,
+    UserService.class,
+    ComplianceServiceImpl.class,
+    WorkspacesController.class,
+    BillingProjectBufferService.class,
+    NotebooksServiceImpl.class,
+    UserRecentResourceServiceImpl.class
 })
 public class BulkCloneWorkspacesTool {
 
