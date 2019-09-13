@@ -21,7 +21,7 @@ const styles = reactStyles({
     position: 'relative',
   },
   mainHeader: {
-    color: colors.white, fontSize: 28, fontWeight: 400,
+    color: colors.primary, fontSize: 28, fontWeight: 400,
     letterSpacing: 'normal', marginBottom: '0.2rem'
   },
   cardStyle: {
@@ -262,7 +262,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       <div style={styles.mainHeader}>Researcher Workbench</div>
       <div style={{...styles.mainHeader, fontSize: '18px', marginBottom: '1rem'}}>
         <ClrIcon shape='warning-standard' class='is-solid'
-                 style={{color: colors.white, marginRight: '0.3rem'}}/>
+                 style={{color: colors.warning, marginRight: '0.3rem'}}/>
         In order to get access to data and tools please complete the following steps:
       </div>
       {canUnsafeSelfBypass &&
