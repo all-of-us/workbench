@@ -260,14 +260,14 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                 data-test-id='registration-dashboard'>
       {bypassInProgress && <SpinnerOverlay />}
       <div style={styles.mainHeader}>Researcher Workbench</div>
-      <div style={{...styles.mainHeader, fontSize: '18px', marginBottom: '1rem'}}>
+      <div style={{...styles.mainHeader, fontSize: '18px', marginTop: '0.25rem'}}>
         <ClrIcon shape='warning-standard' class='is-solid'
                  style={{color: colors.warning, marginRight: '0.3rem'}}/>
         In order to get access to data and tools please complete the following steps:
       </div>
       {canUnsafeSelfBypass &&
         <div data-test-id='self-bypass'
-             style={{...baseStyles.card, ...styles.warningModal}}>
+             style={{...baseStyles.card, ...styles.warningModal, marginTop: '0.5rem'}}>
           {bypassActionComplete &&
             <span>Bypass action is complete. Reload the page to continue.</span>}
           {!bypassActionComplete && <span>
