@@ -134,7 +134,7 @@ export class HelpSidebar extends React.Component<Props, State> {
       searchTerm: ''
     };
     this.debounceInput = fp.debounce(300, (input: string) => {
-      if (input === '') {
+      if (input === '' || input.length < 3) {
         this.setState({filteredContent: undefined});
       } else {
         this.searchHelpTips(input.toLowerCase());
@@ -144,17 +144,18 @@ export class HelpSidebar extends React.Component<Props, State> {
 
   searchHelpTips(input: string) {
     const filteredContent = fp.values(JSON.parse(JSON.stringify(sidebarContent))).reduce((acc, section) => {
+      const inputMatch = (text: string) => text.toLowerCase().includes(input);
       const content = section.reduce((ac, item) => {
-        if (!item.title.toLowerCase().includes(input)) {
+        if (!inputMatch(item.title)) {
           item.content = item.content.reduce((a, ic) => {
             if (typeof ic === 'string') {
-              if (ic.toLowerCase().includes(input)) {
+              if (inputMatch(ic)) {
                 a.push(ic);
               }
-            } else if (ic.title.toLowerCase().includes(input)) {
+            } else if (inputMatch(ic.title)) {
               a.push(ic);
             } else {
-              ic.content = ic.content.filter(i => i.toLowerCase().includes(input));
+              ic.content = ic.content.filter(i => inputMatch(i));
               if (ic.content.length) {
                 a.push(ic);
               }
