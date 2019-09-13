@@ -7,7 +7,7 @@ FROM ubuntu:18.04
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
      openjdk-8-jdk=8u222-b10-1ubuntu1~18.04.1 \
-     curl \
+     curl=7.58.0-2ubuntu3.7 \
      python=2.7.15~rc1-1 \
      gcc=4:7.4.0-1ubuntu2.3 \
      python-dev=2.7.15~rc1-1 \
