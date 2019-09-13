@@ -8,7 +8,7 @@ const styles = {
   tooltip: {
     background: 'black', color: 'white',
     padding: '0.5rem',
-    position: 'fixed', top: 0, left: 0, pointerEvents: 'none',
+    position: 'fixed', top: 0, left: 0, pointerEvents: 'none', zIndex: 105,
     maxWidth: 400, borderRadius: 4
   },
   notch: {
