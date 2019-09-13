@@ -11,9 +11,11 @@ import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Config;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
@@ -174,6 +176,7 @@ public class BulkCloneWorkspacesTool {
 
   @Bean
   public CommandLineRunner run(
+      CdrVersionDao cdrVersionDao,
       WorkspaceDao workspaceDao,
       WorkspacesController workspacesController,
       WorkspaceService workspaceService,
@@ -193,6 +196,8 @@ public class BulkCloneWorkspacesTool {
       if (args.length > 1 && args[1].equals("true")) {
         dryRun = true;
       }
+
+      final CdrVersion defaultCdr = cdrVersionDao.findByIsDefault(true);
 
       List<WorkspaceResponse> processed = new ArrayList<>();
       List<Pair<WorkspaceResponse, String>> failedWorkspaces = new ArrayList<>();
@@ -258,6 +263,7 @@ public class BulkCloneWorkspacesTool {
               workspaceService.getWorkspace(
                   dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
           CloneWorkspaceRequest request = createCloneRequest(apiWorkspace);
+          request.getWorkspace().setCdrVersionId(String.valueOf(defaultCdr.getCdrVersionId()));
 
           if (!dryRun) {
             System.out.println("Sending clone request");
