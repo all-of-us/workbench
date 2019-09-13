@@ -9,6 +9,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortStore, navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
@@ -76,9 +77,8 @@ export const CreateReviewModal = withCurrentWorkspace()(
       };
     }
 
-    cancelReview() {
-      const {workspace: {id, namespace}} = this.props;
-      navigate(['workspaces', namespace, id, 'data', 'cohorts']);
+    componentDidMount(): void {
+      triggerEvent('Create Review Set', 'Click', 'Create Set - Review');
     }
 
     createReview() {

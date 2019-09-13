@@ -34,7 +34,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
@@ -238,7 +238,7 @@ public class ClusterControllerTest {
         .isEqualTo(ClusterStatus.UNKNOWN);
   }
 
-  @Test(expected = FailedPreconditionException.class)
+  @Test(expected = BadRequestException.class)
   public void testListClustersNullBillingProject() throws Exception {
     clusterController.listClusters(null);
   }

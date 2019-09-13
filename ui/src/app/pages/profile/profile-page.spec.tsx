@@ -35,7 +35,6 @@ describe('ProfilePageComponent', () => {
     userProfileStore.next({profile, reload, updateCache});
     serverConfigStore.next({
       enableDataUseAgreement: true,
-      enforceRegistered: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',

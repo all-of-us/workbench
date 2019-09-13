@@ -388,18 +388,10 @@ public class UserService {
 
   /** Find users matching the user's name or email */
   public List<User> findUsersBySearchString(String term, Sort sort) {
-    List<Short> dataAccessLevels;
-    if (configProvider.get().firecloud.enforceRegistered) {
-      dataAccessLevels =
-          Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
-              .map(CommonStorageEnums::dataAccessLevelToStorage)
-              .collect(Collectors.toList());
-    } else {
-      dataAccessLevels =
-          Stream.of(DataAccessLevel.values())
-              .map(CommonStorageEnums::dataAccessLevelToStorage)
-              .collect(Collectors.toList());
-    }
+    List<Short> dataAccessLevels =
+        Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
+            .map(CommonStorageEnums::dataAccessLevelToStorage)
+            .collect(Collectors.toList());
     return userDao.findUsersByDataAccessLevelsAndSearchString(dataAccessLevels, term, sort);
   }
 

@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
 
+import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/cohort-review/annotation-definition-modals/annotation-definition-modals.component';
 import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {Button} from 'app/components/buttons';
@@ -9,7 +10,7 @@ import {styles as headerStyles} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox, DatePicker, NumberInput, Select, TextArea} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
-import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {cohortAnnotationDefinitionApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -252,22 +253,41 @@ export const SidebarContent = fp.flow(
   {
     participant: Participant,
     setParticipant: Function,
-    annotations: ParticipantCohortAnnotation[],
-    annotationDefinitions: CohortAnnotationDefinition[],
-    annotationDeleted: boolean,
-    setAnnotations: Function,
-    openCreateDefinitionModal: Function,
-    openEditDefinitionsModal: Function,
     urlParams: any,
     workspace: WorkspaceData,
   },
-  {savingStatus: CohortStatus}
+  {
+    savingStatus: CohortStatus,
+    creatingDefinition: boolean,
+    editingDefinitions: boolean,
+    annotations: ParticipantCohortAnnotation[],
+    annotationDefinitions: CohortAnnotationDefinition[],
+    annotationDeleted: boolean,
+  }
 > {
   constructor(props) {
     super(props);
     this.state = {
       savingStatus: undefined,
+      creatingDefinition: false,
+      editingDefinitions: false,
+      annotations: null,
+      annotationDefinitions: null,
+      annotationDeleted: false
     };
+  }
+
+  componentDidMount(): void {
+    const {urlParams: {ns, wsid, pid, cid}} = this.props;
+    cohortReviewApi()
+      .getParticipantCohortAnnotations(ns, wsid, cohortReviewStore.getValue().cohortReviewId, +pid)
+      .then(({items}) => {
+        this.setState({annotations: items});
+      });
+    cohortAnnotationDefinitionApi().getCohortAnnotationDefinitions(ns, wsid, +cid)
+      .then(({items}) => {
+        this.setState({annotationDefinitions: items});
+      });
   }
 
   async saveStatus(v) {
@@ -291,16 +311,29 @@ export const SidebarContent = fp.flow(
     }
   }
 
+  closeEditDefinitionsModal(deleted: boolean = false) {
+    this.setState({editingDefinitions: false, annotationDeleted: deleted});
+    if (deleted) {
+      setTimeout(() => this.setState({annotationDeleted: false}), 5000);
+    }
+  }
+
+  definitionCreated(ad) {
+    const annotationDefinitions = this.state.annotationDefinitions.concat([ad]);
+    this.setState({annotationDefinitions, creatingDefinition: false});
+  }
+
   render() {
     const {
       participant: {participantId, birthDate, gender, race, ethnicity, deceased, status},
-      annotations, setAnnotations, annotationDefinitions, annotationDeleted,
-      openCreateDefinitionModal, openEditDefinitionsModal, workspace: {accessLevel}
+      workspace: {accessLevel}
     } = this.props;
-    const {savingStatus} = this.state;
+    const {annotations, annotationDefinitions, annotationDeleted, savingStatus, creatingDefinition,
+      editingDefinitions} = this.state;
     const disabled = accessLevel === WorkspaceAccessLevel.NOACCESS ||
       accessLevel === WorkspaceAccessLevel.READER;
-    return <div>
+    const annotationsExist = annotationDefinitions && annotationDefinitions.length > 0;
+    return <React.Fragment>
       <div style={styles.header}>Participant {participantId}</div>
       <div><span style={{fontWeight: 'bold'}}>DOB:</span> {birthDate}</div>
       <div><span style={{fontWeight: 'bold'}}>Gender:</span> {gender}</div>
@@ -334,15 +367,15 @@ export const SidebarContent = fp.flow(
         <div style={styles.header}>Annotations</div>
         <Button
           type='link' style={{...styles.button, ...(disabled ? {cursor: 'not-allowed'} : {})}}
-          onClick={openCreateDefinitionModal} disabled={disabled}>
+          onClick={() => this.setState({creatingDefinition: true})} disabled={disabled}>
           <ClrIcon shape='plus-circle' size={21} />
         </Button>
-        {!!annotationDefinitions.length && <Button
+        {annotationsExist && <Button
           type='link' style={{...styles.button, ...(disabled ? {cursor: 'not-allowed'} : {})}}
-          onClick={openEditDefinitionsModal} disabled={disabled}
+          onClick={() => this.setState({editingDefinitions: true})} disabled={disabled}
         >Edit</Button>}
       </div>
-      {annotationDefinitions.map(def => {
+      {annotationsExist && annotationDefinitions.map(def => {
         const {cohortAnnotationDefinitionId} = def;
         const annotation = fp.find({cohortAnnotationDefinitionId}, annotations);
         return <AnnotationItem
@@ -351,11 +384,21 @@ export const SidebarContent = fp.flow(
             // make sure we're still on the same page before updating
             if (participantId === +this.props.urlParams.pid) {
               const filtered = fp.remove({cohortAnnotationDefinitionId}, annotations);
-              setAnnotations(filtered.concat(update.annotationId ? [update] : []));
+              this.setState({annotations: filtered.concat(update.annotationId ? [update] : [])});
             }
           }}
         />;
       })}
-    </div>;
+      {editingDefinitions && <EditAnnotationDefinitionsModal
+          onClose={() => this.closeEditDefinitionsModal}
+          annotationDefinitions={annotationDefinitions}
+          setAnnotationDefinitions={(v) => this.setState({annotationDefinitions: v})}>
+      </EditAnnotationDefinitionsModal>}
+      {creatingDefinition && <AddAnnotationDefinitionModal
+          annotationDefinitions={annotationDefinitions}
+          onCancel={() => this.setState({creatingDefinition: false})}
+          onCreate={() => this.definitionCreated}>
+      </AddAnnotationDefinitionModal>}
+    </React.Fragment>;
   }
 });

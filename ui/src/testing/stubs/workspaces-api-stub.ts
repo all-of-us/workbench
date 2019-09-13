@@ -21,12 +21,12 @@ export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_PERMISSION = WorkspaceAccessLevel.OWNER;
 }
 
-export const workspaceStubs = [
-  {
-    name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
-    id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-    namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+function buildWorkspaceStub(suffix): Workspace {
+  return {
+    name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + suffix,
+    id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + suffix,
+    namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + suffix,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID + suffix,
     creationTime: new Date().getTime(),
     lastModifiedTime: new Date().getTime(),
     researchPurpose: {
@@ -50,8 +50,15 @@ export const workspaceStubs = [
     },
     published: false,
     dataAccessLevel: DataAccessLevel.Registered
-  }
-];
+  };
+}
+
+export function buildWorkspaceStubs(suffixes: string[]): Workspace[] {
+  return suffixes.map(suffix => buildWorkspaceStub(suffix));
+}
+
+
+export const workspaceStubs = buildWorkspaceStubs(['']);
 
 export const userRolesStub = [
   {

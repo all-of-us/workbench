@@ -8,7 +8,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {FeaturedWorkspacesConfigApiStub} from 'testing/stubs/featured-workspaces-config-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {WorkspacesApiStub, buildWorkspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceLibrary} from './workspace-library';
 
 // Mock the navigate function but not userProfileStore
@@ -19,12 +19,15 @@ jest.mock('app/utils/navigation', () => ({
 
 describe('WorkspaceLibrary', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
+  const suffixes = ["", "_1"];
   let profileApi: ProfileApiStub;
   const reload = jest.fn();
   const updateCache = jest.fn();
 
   const component = () => {
-    return mount(<WorkspaceLibrary/>);
+    return mount(<WorkspaceLibrary
+      enablePublishedWorkspaces={true}
+    />);
   };
 
   beforeEach(() => {
@@ -47,13 +50,16 @@ describe('WorkspaceLibrary', () => {
   });
 
   it('should display featured workspaces', async () => {
-    const publishedWorkspaceStubs = workspaceStubs.map(w => ({...w, published: true}));
+    const publishedWorkspaceStubs = buildWorkspaceStubs(suffixes).map(w => ({
+      ...w,
+      published: true
+    }));
     registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
       .map(c => c.text());
-    expect(cardNameList).toEqual(workspaceStubs.map(w => w.name));
+    expect(cardNameList).toEqual([publishedWorkspaceStubs[0].name]);
   });
 
   it('should not display unpublished workspaces', async () => {
@@ -65,7 +71,10 @@ describe('WorkspaceLibrary', () => {
   });
 
   it('should display published workspaces', async () => {
-    const publishedWorkspaceStubs = workspaceStubs.map(w => ({...w, published: true}));
+    const publishedWorkspaceStubs = buildWorkspaceStubs(suffixes).map(w => ({
+      ...w,
+      published: true,
+    }));
     registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -73,7 +82,7 @@ describe('WorkspaceLibrary', () => {
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
       .map(c => c.text());
-    expect(cardNameList).toEqual(workspaceStubs.map(w => w.name));
+    expect(cardNameList).toEqual([publishedWorkspaceStubs[1].name]);
   });
 
 });

@@ -10,11 +10,13 @@ import {
 } from 'app/cohort-review/review-state.service';
 import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {Button} from 'app/components/buttons';
+import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {
   currentCohortStore,
   navigate,
@@ -217,6 +219,7 @@ const reverseColumnEnum = {
   deceased: Columns.DECEASED,
   status: Columns.STATUS
 };
+const EVENT_CATEGORY = 'Review Participant List';
 
 interface Props {
   workspace: WorkspaceData;
@@ -411,6 +414,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     goBack() {
+      triggerEvent(EVENT_CATEGORY, 'Click', 'Back to cohort - Review Participant List');
       const {id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
       navigateByUrl(`/workspaces/${namespace}/${id}/data/cohorts/build?cohortId=${cid}`);
@@ -433,6 +437,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     showCohortDescription() {
+      triggerEvent('Cohort Description', 'Click', 'Cohort Description button - Review Participant List');
       const {id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
       navigate([
@@ -460,6 +465,9 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     columnSort = (sortField: string) => {
+      if (sortField === 'participantId') {
+        triggerEvent(EVENT_CATEGORY, 'Click', 'Sort - ID - Review Participant List');
+      }
       if (this.state.sortField === sortField) {
         const sortOrder = this.state.sortOrder === 1 ? -1 : 1;
         this.setState({loading: true, error: false, sortOrder});
@@ -484,6 +492,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
           <i className='pi pi-filter'
              style={filtered ? filterIcons.active : filterIcons.default}
              onClick={(e) => {
+               const {name} = fields.find(it => it.field === column);
+               triggerEvent(EVENT_CATEGORY, 'Click', `Filter - ${name} - Review Participant List`);
                fl.toggle(e);
                if (column === 'participantId') {
                  ip.focus();
@@ -557,10 +567,10 @@ export const ParticipantsTable = withCurrentWorkspace()(
       }
       let message: string;
       if (data && data.length === 0) {
-        // TODO verify correct text here: changed 'the selected criteria' to 'your filters'
         message = 'Data cannot be found. Please review your filters and try again.';
       } else if (!data && error) {
-        message = 'Sorry, the request cannot be completed.';
+        message = `Sorry, the request cannot be completed. Please try refreshing the page or
+           contact Support in the left hand navigation.`;
       }
       return <div style={styles.error}>
         <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
@@ -651,6 +661,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           </DataTable>
         </React.Fragment>
         {loading && <SpinnerOverlay />}
+        <HelpSidebar location='reviewParticipants' />
       </div>;
     }
   }

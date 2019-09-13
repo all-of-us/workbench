@@ -24,6 +24,7 @@ import {wizardStore} from 'app/cohort-search/search-state.service';
 import {SelectionInfoComponent} from 'app/cohort-search/selection-info/selection-info.component';
 import {TreeComponent} from 'app/cohort-search/tree/tree.component';
 import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
+import {HelpSidebarComponent} from 'app/components/help-sidebar';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {CohortBuilderService, CohortsService, DomainType} from 'generated';
@@ -50,6 +51,7 @@ describe('CohortSearchComponent', () => {
         ConfirmDeleteModalComponent,
         GenderChartComponent,
         DemographicsComponent,
+        HelpSidebarComponent,
         ModalComponent,
         ModifierPageComponent,
         NodeInfoComponent,

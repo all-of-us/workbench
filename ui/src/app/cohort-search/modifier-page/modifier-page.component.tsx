@@ -492,7 +492,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         {error && <div style={styles.error}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
             shape='exclamation-triangle' size='22'/>
-          Sorry, the request cannot be completed.
+          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
         {!!errors.size && <div style={styles.errors}>
           {Array.from(errors).map((err, e) => <div key={e} style={styles.errorItem}>

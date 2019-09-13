@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import {CardButton, TabButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {ResourceCard} from 'app/components/resource-card';
@@ -286,12 +287,11 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         }}>
         </div>
         <div style={{
-          marginBottom: '1rem',
           display: 'flex',
           flexWrap: 'wrap',
           position: 'relative',
           minHeight: 247,
-          padding: '0 0.5rem'
+          padding: '0 0.5rem 1rem'
         }}>
           {filteredList.map((resource: RecentResource, index: number) => {
             return <div key={index}> {this.createResourceCard(resource)} </div>;
@@ -300,12 +300,13 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           {isLoading && <SpinnerOverlay></SpinnerOverlay>}
         </div>
       </FadeBox>
+      <HelpSidebar location='data' />
     </React.Fragment>;
   }
 });
 
 @Component({
-  template: '<div #root></div>'
+  template: '<div #root style="position: relative; margin-right: 45px;"></div>'
 })
 export class DataPageComponent extends ReactWrapperBase {
   constructor() {

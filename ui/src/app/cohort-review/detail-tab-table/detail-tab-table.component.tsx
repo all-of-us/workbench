@@ -1,12 +1,14 @@
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
 import {cohortReviewStore, vocabOptions} from 'app/cohort-review/review-state.service';
 import {datatableStyles} from 'app/cohort-review/review-utils/primeReactCss.utils';
+import {domainToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -158,7 +160,7 @@ const styles = reactStyles({
     cursor: 'pointer',
   },
   error: {
-    width: '50%',
+    width: '100%',
     background: colors.warning,
     color: colors.white,
     fontSize: '12px',
@@ -462,7 +464,8 @@ export const DetailTabTable = withCurrentWorkspace()(
       } else if (data && data.length > 0 && filteredData && filteredData.length === 0) {
         message = 'Data cannot be found. Please review your filters and try again.';
       } else if (error) {
-        message = 'Sorry, the request cannot be completed.';
+        message = `Sorry, the request cannot be completed. Please try refreshing the page or
+           contact Support in the left hand navigation.`;
       }
       return <div style={styles.error}>
         <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
@@ -492,6 +495,12 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {domain, filterState, getFilteredData} = this.props;
       filterState.tabs[domain][column] = input;
       getFilteredData(filterState);
+    }
+
+    filterEvent(column: string) {
+      const {columns, domain} = this.props;
+      const {displayName} = columns.find(col => col.name === column);
+      triggerEvent('Review Individual', 'Click', `${domainToTitle(domain)} - Filter - ${displayName} - Review Individual`);
     }
 
     checkboxFilter(column: string) {
@@ -562,7 +571,10 @@ export const DetailTabTable = withCurrentWorkspace()(
       return <span>
         <i className='pi pi-filter'
            style={filtered ? filterIcons.active : filterIcons.default}
-           onClick={(e) => fl.toggle(e)}/>
+           onClick={(e) => {
+             this.filterEvent(column);
+             fl.toggle(e);
+           }}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
           {column === `${vocab}Code` && <div style={styles.textSearch}>
@@ -594,6 +606,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         <i className='pi pi-filter'
           style={filtered ? filterIcons.active : filterIcons.default}
           onClick={(e) => {
+            this.filterEvent(column);
             fl.toggle(e);
             ip.focus();
           }}/>
