@@ -181,11 +181,7 @@ export class HelpSidebar extends React.Component<Props, State> {
       return stringToHighlight;
     }
     const words: string[] = [];
-    let searchWords = searchTerm.split(new RegExp(',| '));
-    searchWords = searchWords
-    .filter(w => w.length > 0 )
-    .map(word => word.replace(/[&!^\/\\#,+()$~%.'":*?<>{}]/g, ''));
-    const matchString = new RegExp(searchWords.join('|'), 'i');
+    const matchString = new RegExp(searchTerm, 'i');
     const matches = stringToHighlight.match(new RegExp(matchString, 'gi'));
     const splits = stringToHighlight.split(new RegExp(matchString, 'gi'));
     if (matches) {
@@ -193,6 +189,8 @@ export class HelpSidebar extends React.Component<Props, State> {
         words.push(splits[i], matches[i]);
       }
       words.push(splits[splits.length - 1]);
+    } else {
+      words.push(splits[0]);
     }
     return words.map((word, w) => <span key={w}
       style={matchString.test(word.toLowerCase()) ? styles.highlighted : {}}>
@@ -270,19 +268,22 @@ export class HelpSidebar extends React.Component<Props, State> {
                 onChange={(e) => this.onInputChange(e.target.value)}
                 placeholder={'Search'} />
             </div>
-            {displayContent.map((section, s) => <div key={s}>
-              <h3 style={styles.sectionTitle}>{this.highlightSearchTerm(section.title)}</h3>
-              {section.content.map((content, c) => {
-                return typeof content === 'string'
-                  ? <p key={c} style={styles.contentItem}>{this.highlightSearchTerm(content)}</p>
-                  : <div key={c}>
-                    <h4 style={styles.contentTitle}>{this.highlightSearchTerm(content.title)}</h4>
-                    {content.content.map((item, i) =>
-                      <p key={i} style={styles.contentItem}>{this.highlightSearchTerm(item)}</p>)
-                    }
-                  </div>;
-              })}
-            </div>)}
+            {displayContent.length > 0
+              ? displayContent.map((section, s) => <div key={s}>
+                <h3 style={styles.sectionTitle}>{this.highlightSearchTerm(section.title)}</h3>
+                {section.content.map((content, c) => {
+                  return typeof content === 'string'
+                    ? <p key={c} style={styles.contentItem}>{this.highlightSearchTerm(content)}</p>
+                    : <div key={c}>
+                      <h4 style={styles.contentTitle}>{this.highlightSearchTerm(content.title)}</h4>
+                      {content.content.map((item, i) =>
+                        <p key={i} style={styles.contentItem}>{this.highlightSearchTerm(item)}</p>)
+                      }
+                    </div>;
+                })}
+              </div>)
+              : <div style={{marginTop: '0.5rem'}}><em>No results found</em></div>
+            }
           </div>
           <div style={contentStyle('annotations')}>
             {!!participant &&
