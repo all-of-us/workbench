@@ -19,7 +19,7 @@ const styles = {
     transformOrigin: 'bottom'
   },
   popup: {
-    position: 'fixed', top: 0, left: 0,
+    position: 'fixed', top: 0, left: 0, zIndex: 105,
     backgroundColor: 'white',
     border: `1px solid #b7b7b7`, borderRadius: 4,
     boxShadow: '0 3px 2px 0 rgba(0,0,0,0.12)'
