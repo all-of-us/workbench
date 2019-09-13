@@ -1298,12 +1298,12 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     String f1 = NotebooksService.withNotebookExtension("notebooks/f1");
     String f2 = NotebooksService.withNotebookExtension("notebooks/f2 with spaces");
-    String f3 = "notebooks/f3.vcf";
+    String f3 = "foo/f3.vcf";
     // Note: mockBlob cannot be inlined into thenReturn() due to Mockito nuances.
     List<Blob> blobs =
         ImmutableList.of(
             mockBlob(BUCKET_NAME, f1), mockBlob(BUCKET_NAME, f2), mockBlob(BUCKET_NAME, f3));
-    when(cloudStorageService.getBlobListForPrefix(BUCKET_NAME, "notebooks")).thenReturn(blobs);
+    when(cloudStorageService.getBlobList(BUCKET_NAME)).thenReturn(blobs);
     mockBillingProjectBuffer("cloned-ns");
     workspacesController
         .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
@@ -1311,8 +1311,7 @@ public class WorkspacesControllerTest {
         .getWorkspace();
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f1), BlobId.of("bucket2", f1));
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f2), BlobId.of("bucket2", f2));
-    verify(cloudStorageService, never())
-        .copyBlob(BlobId.of(BUCKET_NAME, f3), BlobId.of("bucket2", f3));
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f3), BlobId.of("bucket2", f3));
   }
 
   @Test
