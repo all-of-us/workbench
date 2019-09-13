@@ -89,7 +89,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final int NUM_RANDOM_CHARS = 20;
   private static final int MAX_FC_CREATION_ATTEMPT_VALUES = 6;
   // If we later decide to tune this value, consider moving to the WorkbenchConfig.
-  private static final int MAX_NOTEBOOK_SIZE_MB = 100;
+  private static final int MAX_CLONE_FILE_SIZE_MB = 100;
   // "directory" for notebooks, within the workspace cloud storage bucket.
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY =
       NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY;
@@ -392,16 +392,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // should be cloned at all (by default, yes), else they are currently stuck
     // if someone accidentally adds a large notebook or if there are too many to
     // feasibly copy within a single API request.
-    for (Blob b : cloudStorageService.getBlobList(fromBucket, NOTEBOOKS_WORKSPACE_DIRECTORY)) {
-      if (!NOTEBOOK_PATTERN.matcher(b.getName()).matches()) {
-        continue;
-      }
-      if (b.getSize() != null && b.getSize() / 1e6 > MAX_NOTEBOOK_SIZE_MB) {
+    for (Blob b : cloudStorageService.getBlobList(fromBucket)) {
+      if (b.getSize() != null && b.getSize() / 1e6 > MAX_CLONE_FILE_SIZE_MB) {
         throw new FailedPreconditionException(
             String.format(
-                "workspace %s/%s contains a notebook larger than %dMB: '%s'; cannot clone - please "
-                    + "remove this notebook, reduce its size, or contact the workspace owner",
-                fromWorkspaceNamespace, fromWorkspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
+                "workspace %s/%s contains a file larger than %dMB: '%s'; cannot clone - please "
+                    + "remove this file, reduce its size, or contact the workspace owner",
+                fromWorkspaceNamespace, fromWorkspaceId, MAX_CLONE_FILE_SIZE_MB, b.getName()));
       }
 
       try {

@@ -1303,7 +1303,7 @@ public class WorkspacesControllerTest {
     List<Blob> blobs =
         ImmutableList.of(
             mockBlob(BUCKET_NAME, f1), mockBlob(BUCKET_NAME, f2), mockBlob(BUCKET_NAME, f3));
-    when(cloudStorageService.getBlobList(BUCKET_NAME, "notebooks")).thenReturn(blobs);
+    when(cloudStorageService.getBlobListForPrefix(BUCKET_NAME, "notebooks")).thenReturn(blobs);
     mockBillingProjectBuffer("cloned-ns");
     workspacesController
         .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
@@ -1560,7 +1560,7 @@ public class WorkspacesControllerTest {
     Blob bigNotebook =
         mockBlob(BUCKET_NAME, NotebooksService.withNotebookExtension("notebooks/nb"));
     when(bigNotebook.getSize()).thenReturn(5_000_000_000L); // 5 GB.
-    when(cloudStorageService.getBlobList(BUCKET_NAME, "notebooks"))
+    when(cloudStorageService.getBlobListForPrefix(BUCKET_NAME, "notebooks"))
         .thenReturn(ImmutableList.of(bigNotebook));
     mockBillingProjectBuffer("cloned-ns");
     workspacesController
@@ -1903,7 +1903,7 @@ public class WorkspacesControllerTest {
     when(mockBlob2.getName()).thenReturn("notebooks/mockFile.text");
     when(mockBlob3.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/two words"));
-    when(cloudStorageService.getBlobList("bucket", "notebooks"))
+    when(cloudStorageService.getBlobListForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
 
     // Will return 1 entry as only python files in notebook folder are return
@@ -1930,7 +1930,7 @@ public class WorkspacesControllerTest {
     when(mockBlob1.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
     when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
-    when(cloudStorageService.getBlobList("bucket", "notebooks"))
+    when(cloudStorageService.getBlobListForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
 
     List<String> gotNames =
