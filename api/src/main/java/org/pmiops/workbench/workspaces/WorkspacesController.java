@@ -52,6 +52,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
@@ -162,7 +163,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return sb.toString();
   }
 
-  private CdrVersion setCdrVersionId(
+  private CdrVersion setLiveCdrVersionId(
       org.pmiops.workbench.db.model.Workspace dbWorkspace, String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
@@ -172,6 +173,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       if (cdrVersion == null) {
         throw new BadRequestException(
             String.format("CDR version with ID %s not found", cdrVersionId));
+      }
+      if (ArchivalStatus.LIVE != cdrVersion.getArchivalStatusEnum()) {
+        throw new FailedPreconditionException(
+            String.format(
+                "CDR version with ID %s is not live, please select a different CDR version",
+                cdrVersionId));
       }
       dbWorkspace.setCdrVersion(cdrVersion);
       return cdrVersion;
@@ -239,7 +246,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    setCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
+
+    setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
     org.pmiops.workbench.db.model.Workspace reqWorkspace = workspaceMapper.toDbWorkspace(workspace);
     // TODO: enforce data access level authorization
@@ -440,7 +448,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
       dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
     } else {
-      CdrVersion reqCdrVersion = setCdrVersionId(dbWorkspace, reqCdrVersionId);
+      CdrVersion reqCdrVersion = setLiveCdrVersionId(dbWorkspace, reqCdrVersionId);
       dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
     }
 
