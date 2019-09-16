@@ -48,10 +48,11 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
 
     SpanBuilder requestSpanBuilder =
         tracer.spanBuilder(
-            workbenchConfigProvider.get().server.shortName
-                + "/"
-                + request.getMethod()
-                + request.getRequestURI());
+            String.format(
+                "%s/%s%s",
+                workbenchConfigProvider.get().server.shortName,
+                request.getMethod(),
+                request.getRequestURI()));
 
     if (workbenchConfigProvider.get().server.traceAllRequests) {
       requestSpanBuilder.setSampler(Samplers.alwaysSample());
