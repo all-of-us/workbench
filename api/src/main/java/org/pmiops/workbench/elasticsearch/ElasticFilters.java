@@ -124,6 +124,10 @@ public final class ElasticFilters {
         BoolQueryBuilder b = QueryBuilders.boolQuery();
         if (!leafConceptIds.isEmpty()) {
           b.filter(QueryBuilders.termsQuery(conceptField, leafConceptIds));
+        } else {
+          // should represent a deceased query
+          boolean isDeceased = CriteriaType.valueOf(param.getType()).equals(CriteriaType.DECEASED);
+          b.filter(QueryBuilders.termQuery("is_deceased", isDeceased));
         }
         for (Attribute attr : param.getAttributes()) {
           b.filter(attributeToQuery(attr, DomainType.SURVEY.toString().equals(param.getDomain())));

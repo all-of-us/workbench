@@ -18,6 +18,7 @@ SELECT
   measurement_concept_ids,
   measurement_source_concept_ids,
   visit_concept_ids,
+  case when death.person_id is null then false else true end as is_deceased,
   ARRAY_CONCAT(observations, conditions, drugs, procedures, measurements) AS events
 FROM
   `{BQ_DATASET}.person` p
@@ -190,5 +191,9 @@ LEFT JOIN
   `{BQ_DATASET}.concept` ec
 ON
   p.ethnicity_concept_id = ec.concept_id
+LEFT JOIN
+  `{BQ_DATASET}.death` death
+ON
+  p.person_id = death.person_id
 WHERE
   MOD(p.person_id, {PERSON_ID_MOD}) = 0

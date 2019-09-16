@@ -392,11 +392,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             .flatMap(sgi -> sgi.getSearchParameters().stream())
             .collect(Collectors.toList());
     return allGroups.stream().anyMatch(sg -> sg.getTemporal())
-        || allParams.stream()
-            .anyMatch(
-                sp ->
-                    CriteriaSubType.BP.toString().equals(sp.getSubtype())
-                        || CriteriaType.DECEASED.toString().equals(sp.getType()));
+        || allParams.stream().anyMatch(sp -> CriteriaSubType.BP.toString().equals(sp.getSubtype()));
   }
 
   private String modifyTermMatch(String term) {
