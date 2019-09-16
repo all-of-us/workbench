@@ -244,7 +244,7 @@ public class DataSetController implements DataSetApiDelegate {
 
     // Generate query per domain for the selected concept set, cohort and values
     // TODO(jaycarlton): return better error information form this function for common validation scenarios
-    final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain = dataSetService.generateQueriesByDomain(dataSet);
+    final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain = dataSetService.generateQueryJobConfigurationsByDomainName(dataSet);
 
     if (bigQueryJobConfigsByDomain.isEmpty()) {
       log.warning("Empty query map generated for this DataSetRequest");
@@ -265,7 +265,7 @@ public class DataSetController implements DataSetApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
-    Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQueriesByDomain(dataSet);
+    Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQueryJobConfigurationsByDomainName(dataSet);
     bigQueryJobConfig.forEach(
         (domain, queryJobConfiguration) -> {
           int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS;
@@ -433,7 +433,7 @@ public class DataSetController implements DataSetApiDelegate {
     }
 
     Map<String, QueryJobConfiguration> queryList =
-        dataSetService.generateQueriesByDomain(dataSetExportRequest.getDataSetRequest());
+        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetExportRequest.getDataSetRequest());
     List<String> queriesAsStrings =
         dataSetService.generateCodeCells(
             dataSetExportRequest.getKernelType(),
