@@ -129,7 +129,6 @@ interface State {
   searchTerm: string;
 }
 export class HelpSidebar extends React.Component<Props, State> {
-  debounceInput: Function;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -138,14 +137,15 @@ export class HelpSidebar extends React.Component<Props, State> {
       sidebarOpen: false,
       searchTerm: ''
     };
-    this.debounceInput = fp.debounce(300, (input: string) => {
-      if (input === '' || input.length < 3) {
-        this.setState({filteredContent: undefined});
-      } else {
-        this.searchHelpTips(input.trim().toLowerCase());
-      }
-    });
   }
+
+  debounceInput = fp.debounce(300, (input: string) => {
+    if (input.length < 3) {
+      this.setState({filteredContent: undefined});
+    } else {
+      this.searchHelpTips(input.trim().toLowerCase());
+    }
+  });
 
   searchHelpTips(input: string) {
     // For each object, we check the title first. If it matches, we return the entire content array.
