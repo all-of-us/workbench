@@ -87,7 +87,7 @@ const styles = reactStyles({
     borderRadius: '4px',
     backgroundColor: colorWithWhiteness(colors.primary, .95),
     marginTop: '5px',
-    color: colorWithWhiteness(colors.primary, -1),
+    color: colors.primary,
   },
   textInput: {
     width: '90%',
