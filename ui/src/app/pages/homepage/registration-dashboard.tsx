@@ -86,6 +86,7 @@ interface RegistrationTask {
   buttonText: string;
   completedText: string;
   isRefreshable?: boolean;
+  completionTimestamp: Function;
   isComplete: Function;
   onClick: Function;
   featureFlag?: boolean;
@@ -104,6 +105,9 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     buttonText: 'Get Started',
     completedText: 'Completed',
     isRefreshable: true,
+    completionTimestamp: (profile: Profile) => {
+      return profile.twoFactorAuthCompletionTime || profile.twoFactorAuthBypassTime;
+    },
     isComplete: (profile: Profile) => {
       return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
     },
@@ -116,8 +120,11 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
       'and handled.',
     buttonText: 'Complete training',
     completedText: 'Completed',
+    completionTimestamp: (profile: Profile) => {
+      return profile.complianceTrainingCompletionTime || profile.complianceTrainingBypassTime;
+    },
     isComplete: (profile: Profile) => {
-      return !!profile.complianceTrainingCompletionTime || !!profile.complianceTrainingBypassTime;
+      return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
     },
     onClick: redirectToTraining
   }, {
@@ -128,8 +135,11 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
       'and tools.',
     buttonText: 'Login',
     completedText: 'Linked',
+    completionTimestamp: (profile: Profile) => {
+      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
+    },
     isComplete: (profile: Profile) => {
-      return !!profile.eraCommonsCompletionTime || !!profile.eraCommonsBypassTime;
+      return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
     },
     onClick: redirectToNiH
   }, {
@@ -140,8 +150,11 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     buttonText: 'View & Sign',
     featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',
+    completionTimestamp: (profile: Profile) => {
+      return profile.dataUseAgreementCompletionTime || profile.dataUseAgreementBypassTime;
+    },
     isComplete: (profile: Profile) => {
-      return !!profile.dataUseAgreementCompletionTime || !!profile.dataUseAgreementBypassTime;
+      return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
     },
     onClick: () => navigate(['data-use-agreement'])
   }

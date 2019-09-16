@@ -52,4 +52,6 @@ export interface Environment {
   // Whether users should be able to see the Published Workspaces
   // tab in the Workspace Library.
   enablePublishedWorkspaces: boolean;
+  // Profile changes for CAPS requirements in RW-2300.
+  enableProfileCapsFeatures: false;
 }

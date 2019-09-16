@@ -283,6 +283,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             wasBypassed={!!profile.twoFactorAuthBypassTime}
             incompleteButtonText='Set Up'
             completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
+            completionTimestamp={getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile)}
             isComplete={getRegistrationTasksMap()['twoFactorAuth'].isComplete(profile)}
             completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick  } />
 
@@ -291,6 +292,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             wasBypassed={!!profile.complianceTrainingBypassTime}
             incompleteButtonText='Access Training'
             completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
+            completionTimestamp={getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile)}
             isComplete={getRegistrationTasksMap()['complianceTraining'].isComplete(profile)}
             completeStep={getRegistrationTasksMap()['complianceTraining'].onClick} />
 
@@ -299,6 +301,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             wasBypassed={!!profile.eraCommonsBypassTime}
             incompleteButtonText='Link'
             completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
+            completionTimestamp={getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)}
             isComplete={getRegistrationTasksMap()['eraCommons'].isComplete(profile)}
             completeStep={getRegistrationTasksMap()['eraCommons'].onClick} >
             <div>
@@ -323,6 +326,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             wasBypassed={!!profile.dataUseAgreementBypassTime}
             incompleteButtonText='Sign'
             completedButtonText={getRegistrationTasksMap()['dataUseAgreement'].completedText}
+            completionTimestamp={getRegistrationTasksMap()['dataUseAgreement'].completionTimestamp(profile)}
             isComplete={getRegistrationTasksMap()['dataUseAgreement'].isComplete(profile)}
             completeStep={getRegistrationTasksMap()['dataUseAgreement'].onClick} >
             {profile.dataUseAgreementCompletionTime != null && <React.Fragment>
