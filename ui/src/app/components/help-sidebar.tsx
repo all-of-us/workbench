@@ -97,10 +97,11 @@ const styles = reactStyles({
     backgroundColor: 'transparent',
     outline: 'none',
   },
-  highlighted: {
-    color: colorWithWhiteness(colors.success, -0.4),
-    backgroundColor: colorWithWhiteness(colors.success, 0.7),
-    display: 'inline-block'
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    padding: '1.5rem',
+    background: colorWithWhiteness(colors.primary, .8),
   }
 });
 
@@ -273,6 +274,14 @@ export class HelpSidebar extends React.Component<Props, State> {
             {!!participant &&
               <SidebarContent participant={participant} setParticipant={(p) => setParticipant(p)} />
             }
+          </div>
+          <div style={styles.footer}>
+            <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
+            <p style={styles.contentItem}>
+              Visit the
+              <a href='https://www.researchallofus.org/frequently-asked-questions/' target='_blank'>FAQs here</a>
+              or <a href='' target='_blank'>contact us</a>.
+            </p>
           </div>
         </div>
       </div>
