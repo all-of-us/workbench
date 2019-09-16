@@ -53,5 +53,5 @@ export interface Environment {
   // tab in the Workspace Library.
   enablePublishedWorkspaces: boolean;
   // Profile changes for CAPS requirements in RW-2300.
-  enableProfileCapsFeatures: false;
+  enableProfileCapsFeatures: boolean;
 }
