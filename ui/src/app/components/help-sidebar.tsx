@@ -142,12 +142,14 @@ export class HelpSidebar extends React.Component<Props, State> {
       if (input === '' || input.length < 3) {
         this.setState({filteredContent: undefined});
       } else {
-        this.searchHelpTips(input.toLowerCase());
+        this.searchHelpTips(input.trim().toLowerCase());
       }
     });
   }
 
   searchHelpTips(input: string) {
+    // For each object, we check the title first. If it matches, we return the entire content array.
+    // If the title doesn't match, we check each element of the content array for matches
     const filteredContent = fp.values(JSON.parse(JSON.stringify(sidebarContent))).reduce((acc, section) => {
       const inputMatch = (text: string) => text.toLowerCase().includes(input);
       const content = section.reduce((ac, item) => {
@@ -160,7 +162,7 @@ export class HelpSidebar extends React.Component<Props, State> {
             } else if (inputMatch(ic.title)) {
               a.push(ic);
             } else {
-              ic.content = ic.content.filter(i => inputMatch(i));
+              ic.content = ic.content.filter(inputMatch);
               if (ic.content.length) {
                 a.push(ic);
               }
@@ -181,7 +183,7 @@ export class HelpSidebar extends React.Component<Props, State> {
       return stringToHighlight;
     }
     const words: string[] = [];
-    const matchString = new RegExp(searchTerm, 'i');
+    const matchString = new RegExp(searchTerm.trim(), 'i');
     const matches = stringToHighlight.match(new RegExp(matchString, 'gi'));
     const splits = stringToHighlight.split(new RegExp(matchString, 'gi'));
     if (matches) {
