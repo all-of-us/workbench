@@ -124,7 +124,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
       return profile.complianceTrainingCompletionTime || profile.complianceTrainingBypassTime;
     },
     isComplete: (profile: Profile) => {
-      return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
+      return !!profile.complianceTrainingCompletionTime || !!profile.complianceTrainingBypassTime;
     },
     onClick: redirectToTraining
   }, {
@@ -139,7 +139,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
       return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
     },
     isComplete: (profile: Profile) => {
-      return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
+      return !!profile.eraCommonsCompletionTime || !!profile.eraCommonsBypassTime;
     },
     onClick: redirectToNiH
   }, {
@@ -154,7 +154,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
       return profile.dataUseAgreementCompletionTime || profile.dataUseAgreementBypassTime;
     },
     isComplete: (profile: Profile) => {
-      return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
+      return !!profile.dataUseAgreementCompletionTime || !!profile.dataUseAgreementBypassTime;
     },
     onClick: () => navigate(['data-use-agreement'])
   }
