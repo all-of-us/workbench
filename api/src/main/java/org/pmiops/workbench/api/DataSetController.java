@@ -124,7 +124,7 @@ public class DataSetController implements DataSetApiDelegate {
     final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    final long workspaceId1 = workspaceService.get(workspaceNamespace, workspaceId).getWorkspaceId();
+    final long retrievedWorkspaceId = workspaceService.get(workspaceNamespace, workspaceId).getWorkspaceId();
     final ImmutableList<DataSetValues> dataSetValuesList =
         dataSetRequest.getValues().stream()
             .map(this::getDataSetValuesFromDomainValueSet)
@@ -135,7 +135,7 @@ public class DataSetController implements DataSetApiDelegate {
               dataSetRequest.getName(),
               dataSetRequest.getIncludesAllParticipants(),
               dataSetRequest.getDescription(),
-              workspaceId1,
+              retrievedWorkspaceId,
               dataSetRequest.getCohortIds(),
               dataSetRequest.getConceptSetIds(),
               dataSetValuesList,
@@ -148,7 +148,6 @@ public class DataSetController implements DataSetApiDelegate {
     }
   }
 
-  // todo - move to DomainValuePair
   private DataSetValues getDataSetValuesFromDomainValueSet(DomainValuePair domainValueSet) {
       final DataSetValues dataSetValues =
           new DataSetValues(
@@ -158,11 +157,12 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   private void validateDataSetCreateRequest(DataSetRequest dataSetRequest) {
-    boolean includesAllParticipants = dataSetRequest.getIncludesAllParticipants();
+    boolean includesAllParticipants = Optional.ofNullable(
+        dataSetRequest.getIncludesAllParticipants()).orElse(false);
     if (Strings.isNullOrEmpty(dataSetRequest.getName())) {
       throw new BadRequestException("Missing name");
     } else if (dataSetRequest.getConceptSetIds() == null
-        || (dataSetRequest.getConceptSetIds().size() == 0
+        || (dataSetRequest.getConceptSetIds().isEmpty()
             && dataSetRequest.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.NONE))) {
       throw new BadRequestException("Missing concept set ids");
     } else if ((dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().size() == 0)

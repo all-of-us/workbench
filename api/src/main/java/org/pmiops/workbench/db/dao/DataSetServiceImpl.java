@@ -7,6 +7,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -38,7 +40,6 @@ import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.KernelTypeEnum;
-import org.pmiops.workbench.model.NamedParameterValue;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -225,10 +226,9 @@ public class DataSetServiceImpl implements DataSetService {
         .flatMap(m -> m.entrySet().stream())
         .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
 
-//    final ImmutableMap<String, QueryParameterValue> mergedQueryParameterValues = mergedQueryParameterValueBuilder.build();
     // If pre packaged all survey concept set is selected create a temp concept set with concept ids
     // of all survey question
-    // TODO: this is all changing
+    // TODO: this functionality is all changing soon
     final ImmutableSet<PrePackagedConceptSetEnum> validConceptSets =
         ImmutableSet.of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.BOTH);
     // TODO: why is survey special, and why should this class know this?
@@ -334,11 +334,15 @@ public class DataSetServiceImpl implements DataSetService {
 
       // This adds the where clauses for cohorts and concept sets.
       queryBuilder.append(
-          formatWhereClause(conceptSetListQuery, " WHERE \n(",
-              domainConceptIdInfo.getStandardConceptIdColumn(), " OR \n",
-              domainConceptIdInfo.getSourceConceptIdColumn(),
-              conceptSetListQuery, ")"));
+          " WHERE \n("
+              + domainConceptIdInfo.getStandardConceptIdColumn()
+              + conceptSetListQuery
+              + " OR \n"
+              + domainConceptIdInfo.getSourceConceptIdColumn()
+              + conceptSetListQuery
+              + ")");
       if (!includesAllParticipants) {
+        // TODO: get table name to go with PERSON_ID
         queryBuilder
             .append(" \nAND (PERSON_ID IN (")
             .append(cohortQueries)
@@ -348,26 +352,19 @@ public class DataSetServiceImpl implements DataSetService {
       final String completeQuery = queryBuilder.toString();
 
       final QueryJobConfiguration queryJobConfiguration =
-          bigQueryService.filterBigQueryConfig(
-              QueryJobConfiguration.newBuilder(completeQuery)
-                  .setNamedParameters(cohortParameters)
-                  .setUseLegacySql(false)
-                  .build());
+          buildQueryJobConfiguration(cohortParameters, completeQuery);
       resultBuilder.put(domain.toString(), queryJobConfiguration);
     }
     return resultBuilder.build();
   }
 
-  private static String formatWhereClause(String conceptSetListQuery, String s,
-      String standardConceptIdColumn, String s2, String sourceConceptIdColumn,
-      String conceptSetListQuery2, String s3) {
-    return s
-        + standardConceptIdColumn
-        + conceptSetListQuery
-        + s2
-        + sourceConceptIdColumn
-        + conceptSetListQuery2
-        + s3;
+  private QueryJobConfiguration buildQueryJobConfiguration(
+      Map<String, QueryParameterValue> cohortParameters, String completeQuery) {
+    return bigQueryService.filterBigQueryConfig(
+        QueryJobConfiguration.newBuilder(completeQuery)
+            .setNamedParameters(cohortParameters)
+            .setUseLegacySql(false)
+            .build());
   }
 
   private void validateSelectedConceptSetsForDomain(List<ConceptSet> conceptSetsSelected) {
@@ -417,13 +414,14 @@ public class DataSetServiceImpl implements DataSetService {
             "Kernel Type " + kernelTypeEnum.toString() + " not supported");
     }
     return queryJobConfigurationMap.entrySet().stream()
+        .filter(e -> e.getKey() != null)
         .map(
             entry ->
                 prerequisites
                     + "\n\n"
-                    + convertQueryToString(
+                    + generateNotebookUserCode(
                         entry.getValue(),
-                        Domain.fromValue(entry.getKey()),
+                    Objects.requireNonNull(Domain.fromValue(entry.getKey())),
                         dataSetName,
                         kernelTypeEnum))
         .collect(Collectors.toList());
@@ -432,6 +430,8 @@ public class DataSetServiceImpl implements DataSetService {
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {
     Optional<CdrBigQuerySchemaConfig.ColumnConfig> conceptColumn =
         config.columns.stream().filter(column -> type.equals(column.domainConcept)).findFirst();
+    // TODO: move this logic to new DataSetRequestValidator class. Goal is for the service class
+    // never to throw.
     if (!conceptColumn.isPresent()) {
       throw new ServerErrorException("Domain not supported");
     }
@@ -446,38 +446,33 @@ public class DataSetServiceImpl implements DataSetService {
       return ValuesLinkingPair.emptyPair();
     }
 
-    final List<String> valuesUppercase =
+    final ImmutableList.Builder<String> valuesUppercaseBuilder = new Builder<>();
+    valuesUppercaseBuilder.add("CORE_TABLE_FOR_DOMAIN");
+    valuesUppercaseBuilder.addAll(
         valueSetList.stream()
             .map(valueSet -> valueSet.getValue().toUpperCase())
-            .collect(Collectors.toList());
-    valuesUppercase.add(0, "CORE_TABLE_FOR_DOMAIN");
+            .collect(Collectors.toList()));
 
     final String domainName = domainMaybe.get().toString();
     final String domainTitleCase = toTitleCase(domainName);
 
     final ImmutableMap<String, QueryParameterValue> queryParameterValuesByDomain = ImmutableMap.of(
         "pDomain", QueryParameterValue.string(domainTitleCase),
-        "pValuesList", QueryParameterValue.array(valuesUppercase.toArray(new String[0]), String.class));
+        "pValuesList", QueryParameterValue.array(valuesUppercaseBuilder.build().toArray(new String[0]), String.class));
 
-    final TableResult valuesLinking =
+    final TableResult valuesLinkingTableResult =
         bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(
-                QueryJobConfiguration.newBuilder(
-                    SELCECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST)
-                    .setNamedParameters(queryParameterValuesByDomain)
-                    .setUseLegacySql(false)
-                    .build()));
+            buildQueryJobConfiguration(queryParameterValuesByDomain,
+                SELCECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST));
 
-    final List<String> valueJoins = new ArrayList<>();
-    final List<String> valueSelects = new ArrayList<>();
-    valuesLinking
-        .getValues()
-        .forEach(value -> {
-              valueJoins.add(value.get(ValuesLinkingPair.JOIN_VALUE_KEY).getStringValue());
-              if (!value.get("OMOP_SQL").getStringValue().equals("CORE_TABLE_FOR_DOMAIN")) {
-                valueSelects.add(value.get("OMOP_SQL").getStringValue());
-              }
-            });
+    final ImmutableList<String> valueSelects = StreamSupport.stream(valuesLinkingTableResult.getValues().spliterator(), false)
+        .filter(fieldValue -> !fieldValue.get("OMOP_SQL").getStringValue().equals("CORE_TABLE_FOR_DOMAIN"))
+        .map(fieldValue -> fieldValue.get("OMOP_SQL").getStringValue())
+        .collect(ImmutableList.toImmutableList());
+
+    final ImmutableList<String> valueJoins = StreamSupport.stream(valuesLinkingTableResult.getValues().spliterator(), false)
+        .map(fieldValue -> fieldValue.get(ValuesLinkingPair.JOIN_VALUE_KEY).getStringValue())
+        .collect(ImmutableList.toImmutableList());
 
     return new ValuesLinkingPair(valueSelects, valueJoins);
   }
@@ -495,7 +490,7 @@ public class DataSetServiceImpl implements DataSetService {
     }
   }
 
-  private static String convertQueryToString(
+  private static String generateNotebookUserCode(
       QueryJobConfiguration queryJobConfiguration,
       Domain domain,
       String prefix,
@@ -568,8 +563,13 @@ public class DataSetServiceImpl implements DataSetService {
         throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
     }
 
-    return formatWhereClause(namedParamsSection, sqlSection, "\n\n", "\n\n", dataFrameSection,
-        "\n\n", displayHeadSection);
+    return sqlSection
+        + "\n\n"
+        + namedParamsSection
+        + "\n\n"
+        + dataFrameSection
+        + "\n\n"
+        + displayHeadSection;
   }
 
   // BigQuery api returns parameter values either as a list or an object.
