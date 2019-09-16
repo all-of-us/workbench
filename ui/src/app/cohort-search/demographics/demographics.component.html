@@ -9,7 +9,6 @@
         <input type="number"
           id="min-age"
           [min]="minAge" [max]="maxAge"
-          [disabled]="loading"
           formControlName="ageMin"
           class="number-display"
           (blur)="checkMin()">
@@ -30,13 +29,12 @@
         <input type="number"
           id="max-age"
           [min]="minAge" [max]="maxAge"
-          [disabled]="loading"
           formControlName="ageMax"
           class="number-display"
           (blur)="checkMax()">
       </div>
 
-      <clr-checkbox formControlName="deceased" [clrDisabled]="loading">
+      <clr-checkbox formControlName="deceased">
         Is Deceased
         <span *ngIf="deceasedNode" class="badge badge-info">
           {{ deceasedNode.count | number }}
