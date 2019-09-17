@@ -54,8 +54,8 @@ public class DataSetServiceImpl implements DataSetService {
   private static final String SELCECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
       + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
-  public static final ImmutableSet<PrePackagedConceptSetEnum> CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY = ImmutableSet
-      .of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.BOTH);
+  private static final ImmutableSet<PrePackagedConceptSetEnum> CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY =
+      ImmutableSet.of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.BOTH);
 
   /*
    * A subclass to store the associated set of selects and joins for values for the data set builder.
