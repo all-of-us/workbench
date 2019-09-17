@@ -663,7 +663,7 @@ public class DataSetControllerTest {
                 + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
                 + "condition_source_concept_id IN (123)) \n"
-                + "AND (PERSON_ID IN (SELECT * FROM person_id from `"
+                + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
                 + ".person` person))\"\n"
                 + "\n"
