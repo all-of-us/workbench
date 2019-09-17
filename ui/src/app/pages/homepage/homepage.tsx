@@ -345,7 +345,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                 </FlexRow>
               </FlexRow>
               <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
-                the secure analysis platform for All of Us data</SmallHeader>
+                The secure analysis platform for All of Us data</SmallHeader>
             </FlexColumn>
             <div></div>
           </FlexRow>

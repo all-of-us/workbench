@@ -6,4 +6,5 @@ export const environment: Environment = {
   displayTag: 'Local->Test',
   debug: true,
   enablePublishedWorkspaces: false,
+  enableAccountPages: false
 };

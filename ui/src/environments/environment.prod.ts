@@ -21,6 +21,6 @@ export const environment: Environment = {
   // exit criteria and Jira ticket links.
   enableHomepageRestyle: false,
   enablePublishedWorkspaces: false,
-  enableProfileCapsFeatures: false
-
+  enableAccountPages: false,
+  enableProfileCapsFeatures: false,
 };

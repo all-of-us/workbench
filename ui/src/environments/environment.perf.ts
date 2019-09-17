@@ -18,5 +18,6 @@ export const environment: Environment = {
   inactivityWarningBeforeSeconds: 5 * 60,
   enableHomepageRestyle: false,
   enablePublishedWorkspaces: false,
-  enableProfileCapsFeatures: false
+  enableAccountPages: false,
+  enableProfileCapsFeatures: false,
 };
