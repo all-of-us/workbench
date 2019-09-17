@@ -93,6 +93,7 @@ export const styles = reactStyles({
     height: '2.25rem', width: '2.75rem'
   },
   // once enableHomepageRestyle is enabled, delete all styles ending in 'ToDelete'
+  // '/assets/images/AoU-HP-background.jpg' can also be deleted when the feature flag is removed
   mainHeaderToDelete: {
     color: colors.white, fontSize: 28, fontWeight: 400,
     display: 'flex', letterSpacing: 'normal'
