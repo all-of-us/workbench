@@ -215,7 +215,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
   async syncCompliance() {
     const complianceStatus = profileApi().syncComplianceTrainingStatus().then(result => {
       this.setState({
-        trainingCompleted: getRegistrationTasksMap()['complianceTraining'].isComplete(result)
+        trainingCompleted: !!(getRegistrationTasksMap()['complianceTraining']
+          .completionTimestamp(result))
       });
     }).catch(err => {
       this.setState({trainingCompleted: false});
@@ -223,7 +224,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     });
     const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus().then(result => {
       this.setState({
-        twoFactorAuthCompleted: getRegistrationTasksMap()['twoFactorAuth'].isComplete(result)
+        twoFactorAuthCompleted: !!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(result))
       });
     }).catch(err => {
       this.setState({twoFactorAuthCompleted: false});
@@ -256,9 +257,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
       }
 
       this.setState({
-        eraCommonsLinked: getRegistrationTasksMap()['eraCommons'].isComplete(profile),
+        eraCommonsLinked: !!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)),
         dataUseAgreementCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
-          (() => getRegistrationTasksMap()['dataUseAgreement'].isComplete(profile))() : true)
+          (() => !!(getRegistrationTasksMap()['dataUseAgreement']
+            .completionTimestamp(profile)))() : true)
       });
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 

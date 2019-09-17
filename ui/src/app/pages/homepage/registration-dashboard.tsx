@@ -86,8 +86,7 @@ interface RegistrationTask {
   buttonText: string;
   completedText: string;
   isRefreshable?: boolean;
-  completionTimestamp: Function;
-  isComplete: Function;
+  completionTimestamp: (profile: Profile) => number;
   onClick: Function;
   featureFlag?: boolean;
 }
@@ -108,9 +107,6 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionTimestamp: (profile: Profile) => {
       return profile.twoFactorAuthCompletionTime || profile.twoFactorAuthBypassTime;
     },
-    isComplete: (profile: Profile) => {
-      return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
-    },
     onClick: redirectToGoogleSecurity
   }, {
     key: 'complianceTraining',
@@ -122,9 +118,6 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completedText: 'Completed',
     completionTimestamp: (profile: Profile) => {
       return profile.complianceTrainingCompletionTime || profile.complianceTrainingBypassTime;
-    },
-    isComplete: (profile: Profile) => {
-      return !!profile.complianceTrainingCompletionTime || !!profile.complianceTrainingBypassTime;
     },
     onClick: redirectToTraining
   }, {
@@ -138,9 +131,6 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionTimestamp: (profile: Profile) => {
       return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
     },
-    isComplete: (profile: Profile) => {
-      return !!profile.eraCommonsCompletionTime || !!profile.eraCommonsBypassTime;
-    },
     onClick: redirectToNiH
   }, {
     key: 'dataUseAgreement',
@@ -152,9 +142,6 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completedText: 'Signed',
     completionTimestamp: (profile: Profile) => {
       return profile.dataUseAgreementCompletionTime || profile.dataUseAgreementBypassTime;
-    },
-    isComplete: (profile: Profile) => {
-      return !!profile.dataUseAgreementCompletionTime || !!profile.dataUseAgreementBypassTime;
     },
     onClick: () => navigate(['data-use-agreement'])
   }
