@@ -6,6 +6,7 @@ body {
   display: flex;
   /*View height minus top bar.*/
   min-height: calc(100vh - 4rem);
+  position: relative;
 }
 
 .app-container {
