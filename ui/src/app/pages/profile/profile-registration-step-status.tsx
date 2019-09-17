@@ -31,11 +31,11 @@ const styles = reactStyles({
     cursor: 'default'
   },
   buttonContainerToDeleteWithEnableProfileCapsFeatures: {
-    width: 'calc(50%)',
+    width: '50%',
     marginTop: 6
   },
   detailsContainerToDeleteWithEnableProfileCapsFeatures: {
-    width: 'calc(50%)',
+    width: '50%',
     marginLeft: 40
   }
 });
@@ -97,7 +97,7 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
           </FlexColumn>
         </div>
       );
-    } else { // delete this block below once enableProfileCapsFeatures is removed
+    } else { // TODO (RW-3441): delete this block below once enableProfileCapsFeatures is removed
       return (
         <div style={styles.container}>
           <div style={styles.title}>

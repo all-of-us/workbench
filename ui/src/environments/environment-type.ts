@@ -54,6 +54,6 @@ export interface Environment {
   enablePublishedWorkspaces: boolean;
   // Enable create account pages as per CAPS requirement
   enableAccountPages: boolean;
-  // Profile changes for CAPS requirements in RW-2300.
+  // Profile changes for CAPS requirements in RW-3441.
   enableProfileCapsFeatures: boolean;
 }
