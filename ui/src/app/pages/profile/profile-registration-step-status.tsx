@@ -69,7 +69,7 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
           <div style={styles.title}>
             { title }
           </div>
-          <FlexRow>
+          <FlexColumn>
             <div>
               { isComplete ? (
                 <FlexRow>
@@ -91,10 +91,10 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
                 </Button>
               ) }
             </div>
-            <div >
-              { children } {/*not sure if this is really needed*/}
+            <div style={{marginLeft: '2.5rem'}}>
+              { children }
             </div>
-          </FlexRow>
+          </FlexColumn>
         </div>
       );
     } else { // delete this block below once enableProfileCapsFeatures is removed
