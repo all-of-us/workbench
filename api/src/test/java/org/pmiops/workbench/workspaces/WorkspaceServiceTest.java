@@ -9,10 +9,12 @@ import static org.mockito.Mockito.spy;
 
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,8 +24,10 @@ import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.Workspace;
@@ -50,6 +54,7 @@ public class WorkspaceServiceTest {
   @Mock private WorkspaceDao workspaceDao;
   @Mock private UserDao userDao;
   @Mock private Provider<User> userProvider;
+  @Mock private UserRecentWorkspaceDao userRecentWorkspaceDao;
   @Autowired private WorkspaceMapper workspaceMapper;
   @Mock private FireCloudService fireCloudService;
   @Mock private Clock clock;
@@ -58,6 +63,9 @@ public class WorkspaceServiceTest {
 
   private List<WorkspaceResponse> workspaceResponses = new ArrayList<>();
   private List<org.pmiops.workbench.db.model.Workspace> workspaces = new ArrayList<>();
+  private AtomicLong workspaceIdIncrementer = new AtomicLong(1L);
+  private Instant NOW = Instant.now();
+  private long USER_ID = 1L;
 
   @Before
   public void setUp() {
@@ -70,23 +78,30 @@ public class WorkspaceServiceTest {
             fireCloudService,
             userDao,
             userProvider,
+            userRecentWorkspaceDao,
             workspaceDao,
             workspaceMapper);
 
-    doReturn(workspaceResponses).when(fireCloudService).getWorkspaces();
-    doReturn(workspaces).when(workspaceDao).findAllByFirecloudUuidIn(any());
-
     workspaceResponses.clear();
     workspaces.clear();
-    addMockedWorkspace("reader", WorkspaceAccessLevel.READER, WorkspaceActiveStatus.ACTIVE);
-    addMockedWorkspace("writer", WorkspaceAccessLevel.WRITER, WorkspaceActiveStatus.ACTIVE);
-    addMockedWorkspace("owner", WorkspaceAccessLevel.OWNER, WorkspaceActiveStatus.ACTIVE);
+    addMockedWorkspace(workspaceIdIncrementer.getAndIncrement(), "reader", WorkspaceAccessLevel.READER, WorkspaceActiveStatus.ACTIVE);
+    addMockedWorkspace(workspaceIdIncrementer.getAndIncrement(), "writer", WorkspaceAccessLevel.WRITER, WorkspaceActiveStatus.ACTIVE);
+    addMockedWorkspace(workspaceIdIncrementer.getAndIncrement(), "owner", WorkspaceAccessLevel.OWNER, WorkspaceActiveStatus.ACTIVE);
+    addMockedWorkspace(workspaceIdIncrementer.getAndIncrement(), "extra", WorkspaceAccessLevel.OWNER, WorkspaceActiveStatus.ACTIVE);
+    addMockedWorkspace(workspaceIdIncrementer.getAndIncrement(), "another_extra", WorkspaceAccessLevel.OWNER, WorkspaceActiveStatus.ACTIVE);
+
+    doReturn(workspaceResponses).when(fireCloudService).getWorkspaces();
+    doReturn(workspaces).when(workspaceDao).findAllByFirecloudUuidIn(any());
   }
 
   private WorkspaceResponse mockFirecloudWorkspaceResponse(
-      String workspaceId, WorkspaceAccessLevel accessLevel) {
+      String workspaceId,
+      String workspaceName,
+      WorkspaceAccessLevel accessLevel
+  ) {
     Workspace workspace = mock(Workspace.class);
     doReturn(workspaceNamespace).when(workspace).getNamespace();
+    doReturn(workspaceName).when(workspace).getName();
     doReturn(workspaceId).when(workspace).getWorkspaceId();
     WorkspaceResponse workspaceResponse = mock(WorkspaceResponse.class);
     doReturn(workspace).when(workspaceResponse).getWorkspace();
@@ -95,20 +110,28 @@ public class WorkspaceServiceTest {
   }
 
   private org.pmiops.workbench.db.model.Workspace mockDbWorkspace(
-      String name, String firecloudUuid, WorkspaceActiveStatus activeStatus) {
+      long id,
+      String name,
+      WorkspaceActiveStatus activeStatus
+  ) {
     org.pmiops.workbench.db.model.Workspace workspace =
         spy(org.pmiops.workbench.db.model.Workspace.class);
     doReturn(mock(Timestamp.class)).when(workspace).getLastModifiedTime();
     doReturn(mock(Timestamp.class)).when(workspace).getCreationTime();
     doReturn(name).when(workspace).getName();
+    doReturn(id).when(workspace).getWorkspaceId();
     workspace.setWorkspaceActiveStatusEnum(activeStatus);
     doReturn(mock(FirecloudWorkspaceId.class)).when(workspace).getFirecloudWorkspaceId();
-    doReturn(firecloudUuid).when(workspace).getFirecloudUuid();
+    doReturn(Long.toString(id)).when(workspace).getFirecloudUuid();
     return workspace;
   }
 
   private void addMockedWorkspace(
-      String workspaceId, WorkspaceAccessLevel accessLevel, WorkspaceActiveStatus activeStatus) {
+      long workspaceId,
+      String workspaceName,
+      WorkspaceAccessLevel accessLevel,
+      WorkspaceActiveStatus activeStatus
+  ) {
 
     WorkspaceACL workspaceAccessLevelResponse = spy(WorkspaceACL.class);
     HashMap<String, WorkspaceAccessEntry> acl = spy(HashMap.class);
@@ -117,22 +140,22 @@ public class WorkspaceServiceTest {
     doReturn(acl).when(workspaceAccessLevelResponse).getAcl();
     doReturn(accessLevelEntry).when(acl).get(anyString());
     workspaceAccessLevelResponse.setAcl(acl);
-    WorkspaceResponse workspaceResponse = mockFirecloudWorkspaceResponse(workspaceId, accessLevel);
+    WorkspaceResponse workspaceResponse = mockFirecloudWorkspaceResponse(Long.toString(workspaceId), workspaceName, accessLevel);
     doReturn(workspaceAccessLevelResponse)
         .when(fireCloudService)
-        .getWorkspaceAcl(workspaceNamespace, workspaceId);
+        .getWorkspaceAcl(workspaceNamespace, workspaceName);
     workspaceResponses.add(workspaceResponse);
 
     workspaces.add(
         mockDbWorkspace(
-            workspaceResponse.getWorkspace().getWorkspaceId(),
-            workspaceResponse.getWorkspace().getWorkspaceId(),
+            workspaceId,
+            workspaceResponse.getWorkspace().getName(),
             activeStatus));
   }
 
   @Test
   public void getWorkspaces() {
-    assertThat(workspaceService.getWorkspaces()).hasSize(3);
+    assertThat(workspaceService.getWorkspaces()).hasSize(5);
   }
 
   @Test
@@ -140,6 +163,7 @@ public class WorkspaceServiceTest {
     int currentWorkspacesSize = workspaceService.getWorkspaces().size();
 
     addMockedWorkspace(
+        workspaceIdIncrementer.getAndIncrement(),
         "inactive",
         WorkspaceAccessLevel.OWNER,
         WorkspaceActiveStatus.PENDING_DELETION_POST_1PPW_MIGRATION);
@@ -150,7 +174,7 @@ public class WorkspaceServiceTest {
   public void getWorkspaces_skipDeleted() {
     int currentWorkspacesSize = workspaceService.getWorkspaces().size();
 
-    addMockedWorkspace("deleted", WorkspaceAccessLevel.OWNER, WorkspaceActiveStatus.DELETED);
+    addMockedWorkspace(workspaceIdIncrementer.getAndIncrement(),"deleted", WorkspaceAccessLevel.OWNER, WorkspaceActiveStatus.DELETED);
     assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
   }
 
@@ -159,7 +183,30 @@ public class WorkspaceServiceTest {
     EnumSet.allOf(WorkspaceActiveStatus.class)
         .forEach(
             status ->
-                assertThat(mockDbWorkspace("1", "1", status).getWorkspaceActiveStatusEnum())
+                assertThat(mockDbWorkspace(workspaceIdIncrementer.getAndIncrement(),"1", status).getWorkspaceActiveStatusEnum())
                     .isEqualTo(status));
+  }
+
+  @Test
+  public void getRecentWorkspaces() {
+    for (int i = 1; i < WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT; i++) {
+      org.pmiops.workbench.db.model.Workspace workspace = workspaces.get(i);
+      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), USER_ID, Timestamp.from(NOW));
+    }
+    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces(USER_ID);
+    for (int i = 0; i < recentWorkspaces.size(); i++) {
+      assertThat(recentWorkspaces.get(i)).isEqualTo(workspaces.get(i));
+    }
+  }
+
+  @Test
+  public void updateRecentWorkspaces() {
+    workspaces.forEach(workspace -> {
+      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), USER_ID, Timestamp.from(NOW));
+    });
+    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces(USER_ID);
+    for (int i = 0; i < recentWorkspaces.size(); i++) {
+      assertThat(recentWorkspaces.get(i)).isEqualTo(workspaces.get(workspaces.size() - 5 + i));
+    }
   }
 }

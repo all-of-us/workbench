@@ -21,12 +21,9 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.ConceptSet;
-import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -56,6 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class WorkspaceServiceImpl implements WorkspaceService {
 
   private static final String FC_OWNER_ROLE = "OWNER";
+  protected static final int RECENT_WORKSPACE_COUNT = 4;
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
@@ -64,6 +62,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private ConceptSetService conceptSetService;
   private UserDao userDao;
   private Provider<User> userProvider;
+  private UserRecentWorkspaceDao userRecentWorkspaceDao;
   private WorkspaceDao workspaceDao;
   private WorkspaceMapper workspaceMapper;
 
@@ -78,6 +77,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       FireCloudService fireCloudService,
       UserDao userDao,
       Provider<User> userProvider,
+      UserRecentWorkspaceDao userRecentWorkspaceDao,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
     this.clock = clock;
@@ -86,6 +86,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.userDao = userDao;
+    this.userRecentWorkspaceDao = userRecentWorkspaceDao;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
   }
@@ -494,5 +495,35 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
 
     return this.saveWithLastModified(workspace);
+  }
+
+  @Override
+  public List<UserRecentWorkspace> getRecentWorkspaces(long userId) {
+    return userRecentWorkspaceDao.findTopByUserIdOrderByLastAccessDate(userId);
+  }
+
+  @Override
+  public UserRecentWorkspace updateRecentWorkspaces(long workspaceId, long userId, Timestamp lastAccessDate) {
+    List<UserRecentWorkspace> userRecentWorkspaces = userRecentWorkspaceDao.findTopByUserIdOrderByLastAccessDate(userId);
+    Optional<UserRecentWorkspace> matchingRecentWorkspace = userRecentWorkspaces.stream().filter(userRecentWorkspace ->
+            userRecentWorkspace.getWorkspaceId() == workspaceId && userRecentWorkspace.getUserId() == userId
+    ).findFirst();
+
+    if (matchingRecentWorkspace.isPresent()) {
+      matchingRecentWorkspace.get().setLastAccessDate(lastAccessDate);
+      userRecentWorkspaceDao.save(matchingRecentWorkspace.get());
+      return matchingRecentWorkspace.get();
+    }
+    else {
+      UserRecentWorkspace recentWorkspace = new UserRecentWorkspace(workspaceId, userId, lastAccessDate);
+      userRecentWorkspaceDao.save(recentWorkspace);
+
+      while(userRecentWorkspaces.size() > RECENT_WORKSPACE_COUNT) {
+        userRecentWorkspaceDao.delete(userRecentWorkspaces.get(userRecentWorkspaces.size() - 1));
+        userRecentWorkspaces.remove(userRecentWorkspaces.size() - 1);
+      }
+
+      return recentWorkspace;
+    }
   }
 }
