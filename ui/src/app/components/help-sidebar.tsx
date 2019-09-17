@@ -187,7 +187,7 @@ export class HelpSidebar extends React.Component<Props, State> {
           </div>
           <div style={contentStyle('annotations')}>
             {!!participant &&
-              <SidebarContent participant={participant} setParticipant={() => setParticipant} />
+              <SidebarContent participant={participant} setParticipant={() => setParticipant(participant)} />
             }
           </div>
         </div>
