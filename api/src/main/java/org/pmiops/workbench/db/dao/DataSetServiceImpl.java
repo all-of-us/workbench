@@ -154,7 +154,8 @@ public class DataSetServiceImpl implements DataSetService {
 
   // For domains for which we've assigned a base table in BigQuery, we keep a map here
   // so that we can use the base table name to qualify, for example, PERSON_ID in clauses
-  // after SELECT. This map is nearly identical to org.pmiops.workbench.db.dao.ConceptSetDao.DOMAIN_TO_TABLE_NAME,
+  // after SELECT. This map is nearly identical to
+  // org.pmiops.workbench.db.dao.ConceptSetDao.DOMAIN_TO_TABLE_NAME,
   // but in some cases we use a different shorthand than the base table name.
   private static final ImmutableMap<Domain, String> DOMAIN_TO_BASE_TABLE_SHORTHAND =
       new ImmutableMap.Builder<Domain, String>()
