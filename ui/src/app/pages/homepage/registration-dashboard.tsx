@@ -86,7 +86,7 @@ interface RegistrationTask {
   buttonText: string;
   completedText: string;
   isRefreshable?: boolean;
-  isComplete: Function;
+  completionTimestamp: (profile: Profile) => number;
   onClick: Function;
   featureFlag?: boolean;
 }
@@ -104,8 +104,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     buttonText: 'Get Started',
     completedText: 'Completed',
     isRefreshable: true,
-    isComplete: (profile: Profile) => {
-      return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
+    completionTimestamp: (profile: Profile) => {
+      return profile.twoFactorAuthCompletionTime || profile.twoFactorAuthBypassTime;
     },
     onClick: redirectToGoogleSecurity
   }, {
@@ -116,8 +116,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
       'and handled.',
     buttonText: 'Complete training',
     completedText: 'Completed',
-    isComplete: (profile: Profile) => {
-      return !!profile.complianceTrainingCompletionTime || !!profile.complianceTrainingBypassTime;
+    completionTimestamp: (profile: Profile) => {
+      return profile.complianceTrainingCompletionTime || profile.complianceTrainingBypassTime;
     },
     onClick: redirectToTraining
   }, {
@@ -128,8 +128,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
       'and tools.',
     buttonText: 'Login',
     completedText: 'Linked',
-    isComplete: (profile: Profile) => {
-      return !!profile.eraCommonsCompletionTime || !!profile.eraCommonsBypassTime;
+    completionTimestamp: (profile: Profile) => {
+      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
     },
     onClick: redirectToNiH
   }, {
@@ -140,8 +140,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     buttonText: 'View & Sign',
     featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',
-    isComplete: (profile: Profile) => {
-      return !!profile.dataUseAgreementCompletionTime || !!profile.dataUseAgreementBypassTime;
+    completionTimestamp: (profile: Profile) => {
+      return profile.dataUseAgreementCompletionTime || profile.dataUseAgreementBypassTime;
     },
     onClick: () => navigate(['data-use-agreement'])
   }
