@@ -6,5 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface UserRecentWorkspaceDao extends CrudRepository<UserRecentWorkspace, Long> {
-    List<UserRecentWorkspace> findTopByUserIdOrderByLastAccessDate(long userId);
+    List<UserRecentWorkspace> findTopByUserIdOrderByLastUpdateTime(long userId);
 }
