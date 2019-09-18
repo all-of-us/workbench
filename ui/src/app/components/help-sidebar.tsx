@@ -146,7 +146,6 @@ export const HelpSidebar = withUserProfile()(
         sidebarOpen: false,
         searchTerm: undefined
       };
-      console.log(props);
     }
 
     debounceInput = fp.debounce(300, (input: string) => {
@@ -238,7 +237,7 @@ export const HelpSidebar = withUserProfile()(
         <div style={styles.iconContainer}>
           <div style={activeIcon === 'help' ? iconStyles.active : styles.icon}>
             <ClrIcon className='is-solid' shape='info-standard' size={28}
-                     onClick={() => this.onIconClick('help')} />
+              onClick={() => this.onIconClick('help')} />
           </div>
           <div style={iconStyles.disabled}>
             <ClrIcon className='is-solid' shape='book' size={32} />
@@ -246,7 +245,7 @@ export const HelpSidebar = withUserProfile()(
           {location === 'reviewParticipantDetail' &&
             <div style={activeIcon === 'annotations' ? iconStyles.active : styles.icon}>
               <ClrIcon shape='note' size={32}
-                       onClick={() => this.onIconClick('annotations')} />
+                onClick={() => this.onIconClick('annotations')} />
             </div>
           }
         </div>
