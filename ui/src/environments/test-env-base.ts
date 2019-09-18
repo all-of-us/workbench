@@ -15,5 +15,6 @@ export const testEnvironmentBase = {
   enablePublishedWorkspaces: true,
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
-  enableHomepageRestyle: true
+  enableHomepageRestyle: true,
+  enableProfileCapsFeatures: true
 };

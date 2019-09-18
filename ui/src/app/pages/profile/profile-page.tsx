@@ -283,7 +283,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             wasBypassed={!!profile.twoFactorAuthBypassTime}
             incompleteButtonText='Set Up'
             completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
-            isComplete={getRegistrationTasksMap()['twoFactorAuth'].isComplete(profile)}
+            completionTimestamp={getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile)}
+            isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
             completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick  } />
 
           <ProfileRegistrationStepStatus
@@ -291,7 +292,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             wasBypassed={!!profile.complianceTrainingBypassTime}
             incompleteButtonText='Access Training'
             completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
-            isComplete={getRegistrationTasksMap()['complianceTraining'].isComplete(profile)}
+            completionTimestamp={getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile)}
+            isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
             completeStep={getRegistrationTasksMap()['complianceTraining'].onClick} />
 
           {serverConfigStore.getValue().enableEraCommons && <ProfileRegistrationStepStatus
@@ -299,7 +301,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             wasBypassed={!!profile.eraCommonsBypassTime}
             incompleteButtonText='Link'
             completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
-            isComplete={getRegistrationTasksMap()['eraCommons'].isComplete(profile)}
+            completionTimestamp={getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)}
+            isComplete={!!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
             completeStep={getRegistrationTasksMap()['eraCommons'].onClick} >
             <div>
               {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
@@ -323,7 +326,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             wasBypassed={!!profile.dataUseAgreementBypassTime}
             incompleteButtonText='Sign'
             completedButtonText={getRegistrationTasksMap()['dataUseAgreement'].completedText}
-            isComplete={getRegistrationTasksMap()['dataUseAgreement'].isComplete(profile)}
+            completionTimestamp={getRegistrationTasksMap()['dataUseAgreement'].completionTimestamp(profile)}
+            isComplete={!!(getRegistrationTasksMap()['dataUseAgreement'].completionTimestamp(profile))}
             completeStep={getRegistrationTasksMap()['dataUseAgreement'].onClick} >
             {profile.dataUseAgreementCompletionTime != null && <React.Fragment>
               <div> Agreement Renewal: </div>

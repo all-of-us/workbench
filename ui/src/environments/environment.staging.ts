@@ -18,4 +18,5 @@ export const environment: Environment = {
   enableHomepageRestyle: false,
   enablePublishedWorkspaces: false,
   enableAccountPages: false,
+  enableProfileCapsFeatures: false,
 };
