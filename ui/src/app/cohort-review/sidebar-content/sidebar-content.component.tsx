@@ -390,14 +390,14 @@ export const SidebarContent = fp.flow(
         />;
       })}
       {editingDefinitions && <EditAnnotationDefinitionsModal
-          onClose={() => this.closeEditDefinitionsModal}
+          onClose={() => this.closeEditDefinitionsModal()}
           annotationDefinitions={annotationDefinitions}
           setAnnotationDefinitions={(v) => this.setState({annotationDefinitions: v})}>
       </EditAnnotationDefinitionsModal>}
       {creatingDefinition && <AddAnnotationDefinitionModal
           annotationDefinitions={annotationDefinitions}
           onCancel={() => this.setState({creatingDefinition: false})}
-          onCreate={() => this.definitionCreated}>
+          onCreate={(ad) => this.definitionCreated(ad)}>
       </AddAnnotationDefinitionModal>}
     </React.Fragment>;
   }
