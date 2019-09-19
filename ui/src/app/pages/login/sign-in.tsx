@@ -1,13 +1,13 @@
 import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 
-import {AccountCreation} from 'app/pages/login/account-creation';
-import {AccountCreationSuccess} from 'app/pages/login/account-creation-success';
+import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-creation-success';
 import {InvitationKey} from 'app/pages/login/invitation-key';
 import {LoginReactComponent} from 'app/pages/login/login';
 import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
 import {ReactWrapperBase, withWindowSize} from 'app/utils';
+import {AccountCreation} from './account-creation/account-creation';
 
 import {Profile} from 'generated/fetch';
 

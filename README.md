@@ -541,6 +541,11 @@ To filter tests, use the [--tests flag](https://docs.gradle.org/current/userguid
 ```
 ./project.rb bigquerytest --tests "org.pmiops.workbench.api.CohortBuilderControllerBQTest.countSubjectsNotValidMessageException"
 ```
+### Running tests in IntelliJ
+
+To run tests in IntelliJ, go to your preferences, click plugins, and make sure you have the `JUnit` plugin installed.
+
+Once you have JUnit installed, go to the test file you want to run, right click on the test file, and select `Run` or `Debug` to run or debug the tests. To run or debug on a specific test class or method, open the file, and test running options should appear as green triangles pointing right on the side bar. Clicking that will open a dialog allowing you to run that specific class or method.
 
 ## Manual Testing
 

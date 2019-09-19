@@ -1298,12 +1298,12 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     String f1 = NotebooksService.withNotebookExtension("notebooks/f1");
     String f2 = NotebooksService.withNotebookExtension("notebooks/f2 with spaces");
-    String f3 = "notebooks/f3.vcf";
+    String f3 = "foo/f3.vcf";
     // Note: mockBlob cannot be inlined into thenReturn() due to Mockito nuances.
     List<Blob> blobs =
         ImmutableList.of(
             mockBlob(BUCKET_NAME, f1), mockBlob(BUCKET_NAME, f2), mockBlob(BUCKET_NAME, f3));
-    when(cloudStorageService.getBlobList(BUCKET_NAME, "notebooks")).thenReturn(blobs);
+    when(cloudStorageService.getBlobList(BUCKET_NAME)).thenReturn(blobs);
     mockBillingProjectBuffer("cloned-ns");
     workspacesController
         .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
@@ -1311,8 +1311,7 @@ public class WorkspacesControllerTest {
         .getWorkspace();
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f1), BlobId.of("bucket2", f1));
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f2), BlobId.of("bucket2", f2));
-    verify(cloudStorageService, never())
-        .copyBlob(BlobId.of(BUCKET_NAME, f3), BlobId.of("bucket2", f3));
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f3), BlobId.of("bucket2", f3));
   }
 
   @Test
@@ -1560,8 +1559,7 @@ public class WorkspacesControllerTest {
     Blob bigNotebook =
         mockBlob(BUCKET_NAME, NotebooksService.withNotebookExtension("notebooks/nb"));
     when(bigNotebook.getSize()).thenReturn(5_000_000_000L); // 5 GB.
-    when(cloudStorageService.getBlobList(BUCKET_NAME, "notebooks"))
-        .thenReturn(ImmutableList.of(bigNotebook));
+    when(cloudStorageService.getBlobList(BUCKET_NAME)).thenReturn(ImmutableList.of(bigNotebook));
     mockBillingProjectBuffer("cloned-ns");
     workspacesController
         .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
@@ -1903,7 +1901,7 @@ public class WorkspacesControllerTest {
     when(mockBlob2.getName()).thenReturn("notebooks/mockFile.text");
     when(mockBlob3.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/two words"));
-    when(cloudStorageService.getBlobList("bucket", "notebooks"))
+    when(cloudStorageService.getBlobListForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
 
     // Will return 1 entry as only python files in notebook folder are return
@@ -1930,7 +1928,7 @@ public class WorkspacesControllerTest {
     when(mockBlob1.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
     when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
-    when(cloudStorageService.getBlobList("bucket", "notebooks"))
+    when(cloudStorageService.getBlobListForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
 
     List<String> gotNames =

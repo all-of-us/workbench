@@ -62,6 +62,9 @@ public class DataSetServiceImpl implements DataSetService {
    *
    * This is used to store the data pulled out of the linking table in bigquery.
    */
+
+  public static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
+
   @VisibleForTesting
   private static class ValuesLinkingPair {
     private List<String> selects;
@@ -190,6 +193,24 @@ public class DataSetServiceImpl implements DataSetService {
     return dataSetDao.save(dataSetModel);
   }
 
+  // For domains for which we've assigned a base table in BigQuery, we keep a map here
+  // so that we can use the base table name to qualify, for example, PERSON_ID in clauses
+  // after SELECT. This map is nearly identical to
+  // org.pmiops.workbench.db.dao.ConceptSetDao.DOMAIN_TO_TABLE_NAME,
+  // but in some cases we use a different shorthand than the base table name.
+  private static final ImmutableMap<Domain, String> DOMAIN_TO_BASE_TABLE_SHORTHAND =
+      new ImmutableMap.Builder<Domain, String>()
+          .put(Domain.CONDITION, "c_occurrence")
+          .put(Domain.DEATH, "death")
+          .put(Domain.DRUG, "d_exposure")
+          .put(Domain.MEASUREMENT, "measurement")
+          .put(Domain.OBSERVATION, "observation")
+          .put(Domain.PERSON, "person")
+          .put(Domain.PROCEDURE, "procedure")
+          .put(Domain.SURVEY, "survey")
+          .put(Domain.VISIT, "visit")
+          .build();
+
   @Override
   public Map<String, QueryJobConfiguration> generateQueryJobConfigurationsByDomainName(DataSetRequest dataSetRequest) {
     // TODO - migrate non-null constraint the DB column & API so that we don't have to use Boolean for IncludesAllPrticipants
@@ -262,19 +283,19 @@ public class DataSetServiceImpl implements DataSetService {
 
   private QueryAndParameters getCohortQueryStringAndCollectNamedParameters(Cohort cohort) {
 
-      String cohortDefinition = cohort.getCriteria();
-      if (cohortDefinition == null) {
-        throw new NotFoundException(String.format(
-            "Not Found: No Cohort definition matching cohortId: %s", cohort.getCohortId()));
-      }
-      final SearchRequest searchRequest =
-          new Gson().fromJson(cohortDefinition, SearchRequest.class);
-      final QueryJobConfiguration participantIdQuery =
-          cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
-      final QueryJobConfiguration participantQueryConfig =
-          bigQueryService.filterBigQueryConfig(participantIdQuery);
-      final AtomicReference<String> participantQuery =
-          new AtomicReference<>(participantQueryConfig.getQuery());
+    String cohortDefinition = cohort.getCriteria();
+    if (cohortDefinition == null) {
+      throw new NotFoundException(String.format(
+          "Not Found: No Cohort definition matching cohortId: %s", cohort.getCohortId()));
+    }
+    final SearchRequest searchRequest =
+        new Gson().fromJson(cohortDefinition, SearchRequest.class);
+    final QueryJobConfiguration participantIdQuery =
+        cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
+    final QueryJobConfiguration participantQueryConfig =
+        bigQueryService.filterBigQueryConfig(participantIdQuery);
+    final AtomicReference<String> participantQuery =
+        new AtomicReference<>(participantQueryConfig.getQuery());
     final ImmutableMap.Builder<String, QueryParameterValue> cohortNamedParametersBuilder = new ImmutableMap.Builder<>();
       participantQueryConfig
           .getNamedParameters()
@@ -313,6 +334,7 @@ public class DataSetServiceImpl implements DataSetService {
         continue;
       }
       final StringBuilder queryBuilder = new StringBuilder("SELECT ");
+      final String personIdQualified = getQualifiedColumnName(domain, PERSON_ID_COLUMN_NAME);
 
       final List<DomainValuePair> valuePairsForCurrentDomain = domainValuePairs.stream()
           .filter(valueSet -> valueSet.getDomain() == domain)
@@ -357,9 +379,10 @@ public class DataSetServiceImpl implements DataSetService {
               + conceptSetListQuery
               + ")");
       if (!includesAllParticipants) {
-        // TODO: get table name to go with PERSON_ID
         queryBuilder
-            .append(" \nAND (PERSON_ID IN (")
+            .append(" \nAND (")
+            .append(personIdQualified)
+            .append(" IN (")
             .append(cohortQueries)
             .append("))");
       }
@@ -410,6 +433,13 @@ public class DataSetServiceImpl implements DataSetService {
         throw new BadRequestException("Concept Sets must contain at least one concept");
       }
     };
+  }
+
+  private String getQualifiedColumnName(Domain currentDomain, String columnName) {
+    final String tableAbbreviation = DOMAIN_TO_BASE_TABLE_SHORTHAND.get(currentDomain);
+    return tableAbbreviation == null
+        ? columnName
+        : String.format("%s.%s", tableAbbreviation, columnName);
   }
 
   @Override

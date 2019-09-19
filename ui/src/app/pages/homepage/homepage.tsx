@@ -93,6 +93,7 @@ export const styles = reactStyles({
     height: '2.25rem', width: '2.75rem'
   },
   // once enableHomepageRestyle is enabled, delete all styles ending in 'ToDelete'
+  // '/assets/images/AoU-HP-background.jpg' can also be deleted when the feature flag is removed
   mainHeaderToDelete: {
     color: colors.white, fontSize: 28, fontWeight: 400,
     display: 'flex', letterSpacing: 'normal'
@@ -215,7 +216,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
   async syncCompliance() {
     const complianceStatus = profileApi().syncComplianceTrainingStatus().then(result => {
       this.setState({
-        trainingCompleted: getRegistrationTasksMap()['complianceTraining'].isComplete(result)
+        trainingCompleted: !!(getRegistrationTasksMap()['complianceTraining']
+          .completionTimestamp(result))
       });
     }).catch(err => {
       this.setState({trainingCompleted: false});
@@ -223,7 +225,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     });
     const twoFactorAuthStatus = profileApi().syncTwoFactorAuthStatus().then(result => {
       this.setState({
-        twoFactorAuthCompleted: getRegistrationTasksMap()['twoFactorAuth'].isComplete(result)
+        twoFactorAuthCompleted: !!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(result))
       });
     }).catch(err => {
       this.setState({twoFactorAuthCompleted: false});
@@ -256,9 +258,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
       }
 
       this.setState({
-        eraCommonsLinked: getRegistrationTasksMap()['eraCommons'].isComplete(profile),
+        eraCommonsLinked: !!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)),
         dataUseAgreementCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
-          (() => getRegistrationTasksMap()['dataUseAgreement'].isComplete(profile))() : true)
+          (() => !!(getRegistrationTasksMap()['dataUseAgreement']
+            .completionTimestamp(profile)))() : true)
       });
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
@@ -345,7 +348,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                 </FlexRow>
               </FlexRow>
               <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
-                the secure analysis platform for All of Us data</SmallHeader>
+                The secure analysis platform for All of Us data</SmallHeader>
             </FlexColumn>
             <div></div>
           </FlexRow>

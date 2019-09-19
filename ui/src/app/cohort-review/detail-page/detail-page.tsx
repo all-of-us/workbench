@@ -68,7 +68,7 @@ export const DetailPage = withCurrentWorkspace()(
               <DetailTabs />
             </div>
             <HelpSidebar location='reviewParticipantDetail' participant={participant}
-              setParticipant={() => this.setParticipant} />
+              setParticipant={(p) => this.setParticipant(p)} />
           </React.Fragment>
           : <SpinnerOverlay />
         }

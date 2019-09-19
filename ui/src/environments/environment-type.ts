@@ -52,4 +52,8 @@ export interface Environment {
   // Whether users should be able to see the Published Workspaces
   // tab in the Workspace Library.
   enablePublishedWorkspaces: boolean;
+  // Enable create account pages as per CAPS requirement
+  enableAccountPages: boolean;
+  // Profile changes for CAPS requirements in RW-3441.
+  enableProfileCapsFeatures: boolean;
 }

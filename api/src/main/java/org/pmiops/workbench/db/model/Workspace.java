@@ -62,10 +62,11 @@ public class Workspace {
     }
   }
 
+  // see https://precisionmedicineinitiative.atlassian.net/browse/RW-2705
   public enum BillingMigrationStatus {
-    OLD,
-    NEW,
-    MIGRATED
+    OLD, // pre-1PPW; this billing project may be associated with multiple workspaces
+    NEW, // a One Project Per Workspace (1PPW) billing project
+    MIGRATED // a pre-1PPW billing project which has been cloned and is now ready to be deleted
   }
 
   private long workspaceId;

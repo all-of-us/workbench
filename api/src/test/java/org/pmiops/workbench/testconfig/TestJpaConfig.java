@@ -6,6 +6,8 @@ import javax.sql.DataSource;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -26,6 +28,16 @@ public class TestJpaConfig {
     dataSource.setPassword("sa");
 
     return dataSource;
+  }
+
+  @Bean
+  public JdbcTemplate getJdbcTemplate() {
+    return new JdbcTemplate(dataSource());
+  }
+
+  @Bean
+  public NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
+    return new NamedParameterJdbcTemplate(dataSource());
   }
 
   @Bean

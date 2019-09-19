@@ -6,7 +6,7 @@ import {
 import {
   AccountCreationResendModal,
   AccountCreationUpdateModal
-} from 'app/pages/login/account-creation-modals';
+} from 'app/pages/login/account-creation/account-creation-modals';
 import colors from 'app/styles/colors';
 
 import {Profile} from 'generated/fetch/api';
