@@ -40,6 +40,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -62,6 +63,8 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
+import org.pmiops.workbench.model.RecentWorkspace;
+import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -746,5 +749,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<RecentWorkspaceResponse> getUserRecentWorkspaces() {
+    long userId = userProvider.get().getUserId();
+    List<UserRecentWorkspace> userRecentWorkspaceList =
+            workspaceService.getRecentWorkspacesByUser(userId);
+    RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
+    recentWorkspaceResponse.addAll(
+            userRecentWorkspaceList.stream()
+                    .map(userRecentWorkspace -> {
+                      RecentWorkspace recentWorkspace = new RecentWorkspace();
+                      recentWorkspace.setWorkspaceId(userRecentWorkspace.getWorkspaceId());
+                      recentWorkspace.setModifiedTime(userRecentWorkspace.getLastUpdateTime().toString());
+                      return recentWorkspace;
+                    })
+                    .collect(Collectors.toList())
+    );
+    return ResponseEntity.ok(recentWorkspaceResponse);
   }
 }

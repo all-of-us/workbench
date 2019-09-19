@@ -111,6 +111,7 @@ import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
+import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -479,7 +480,7 @@ public class WorkspacesControllerTest {
     researchPurpose.setReviewRequested(true);
     researchPurpose.setApproved(false);
     Workspace workspace = new Workspace();
-    workspace.setId(workspaceName);
+    workspace.setId("1");
     workspace.setName(workspaceName);
     workspace.setNamespace(workspaceNameSpace);
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
@@ -2544,5 +2545,15 @@ public class WorkspacesControllerTest {
 
     final NotebookLockingMetadataResponse expectedResponse = new NotebookLockingMetadataResponse();
     assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
+  public void getUserRecentWorkspaces() {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    workspaceService.updateRecentWorkspaces(dbWorkspace.getWorkspaceId(), currentUser.getUserId(), Timestamp.from(Instant.now()));
+    ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity = workspacesController.getUserRecentWorkspaces();
+    assertThat(recentWorkspaceResponseEntity.getBody().get(0).getWorkspaceId()).isEqualTo(dbWorkspace.getWorkspaceId());
   }
 }

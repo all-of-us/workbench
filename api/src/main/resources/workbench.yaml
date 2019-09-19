@@ -1615,7 +1615,7 @@ paths:
   /v1/workspaces/user-recent-workspaces:
     get:
       tags:
-        - userMetrics
+        - workspaces
       description: Returns the workspaces edited by the user in descending order of update time
       operationId: getUserRecentWorkspaces
       responses:
@@ -1623,52 +1623,6 @@ paths:
           description: A list of workspaces order by last-updated time in descending order
           schema:
             $ref: "#/definitions/RecentWorkspaceResponse"
-
-    /v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-workspaces/update:
-      parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-      post:
-        tags:
-          - userMetrics
-        consumes:
-          - application/json
-        description: Add/update user recent workspaces
-        operationId: updateUserRecentWorkspace
-        parameters:
-          - in: body
-            name: RecentWorkspaceRequest
-            description: request object for updating recent resource
-            required: true
-            schema:
-              $ref: "#/definitions/RecentWorkspaceRequest"
-        responses:
-          200:
-            description: Successfully added/updated
-            schema:
-              $ref: "#/definitions/RecentWorkspace"
-
-    /v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-workspaces/delete:
-      parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-      delete:
-        tags:
-          - userMetrics
-        description: Deletes entry from recent workspaces
-        operationId: deleteUserRecentWorkspace
-        parameters:
-          - in: body
-            name: RecentResourceRequest
-            description: request object for updating recent resource
-            required: true
-            schema:
-              $ref: "#/definitions/RecentResourceRequest"
-        responses:
-          200:
-            description: Successfully deleted
-            schema:
-              $ref: "#/definitions/EmptyResponse"
 
   # Concept sets ##############################################################################
 
@@ -3682,12 +3636,6 @@ definitions:
       workspaceId:
         type: integer
         format: int64
-      workspaceNamespace:
-        type: string
-      workspaceFirecloudName:
-        type: string
-      permission:
-        type: string
       modifiedTime:
         type: string
 
