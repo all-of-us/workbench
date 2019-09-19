@@ -1,10 +1,11 @@
 import {Component, Input} from '@angular/core';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {SidebarContent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
 import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {highlightSearchTerm, reactStyles, ReactWrapperBase} from 'app/utils';
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -80,6 +81,26 @@ const styles = reactStyles({
   contentItem: {
     marginTop: 0,
     color: colors.primary
+  },
+  textSearch: {
+    width: '100%',
+    borderRadius: '4px',
+    backgroundColor: colorWithWhiteness(colors.primary, .95),
+    marginTop: '5px',
+    color: colors.primary,
+  },
+  textInput: {
+    width: '90%',
+    height: '1.5rem',
+    padding: '0 0 0 5px',
+    border: 0,
+    backgroundColor: 'transparent',
+    outline: 'none',
+  },
+  highlighted: {
+    color: colorWithWhiteness(colors.success, -0.4),
+    backgroundColor: colorWithWhiteness(colors.success, 0.7),
+    display: 'inline-block'
   }
 });
 
@@ -103,6 +124,7 @@ interface Props {
 
 interface State {
   activeIcon: string;
+  filteredContent: any;
   sidebarOpen: boolean;
   searchTerm: string;
 }
@@ -111,9 +133,48 @@ export class HelpSidebar extends React.Component<Props, State> {
     super(props);
     this.state = {
       activeIcon: undefined,
+      filteredContent: undefined,
       sidebarOpen: false,
-      searchTerm: undefined
+      searchTerm: ''
     };
+  }
+
+  debounceInput = fp.debounce(300, (input: string) => {
+    if (input.length < 3) {
+      this.setState({filteredContent: undefined});
+    } else {
+      this.searchHelpTips(input.trim().toLowerCase());
+    }
+  });
+
+  searchHelpTips(input: string) {
+    // For each object, we check the title first. If it matches, we return the entire content array.
+    // If the title doesn't match, we check each element of the content array for matches
+    const filteredContent = fp.values(JSON.parse(JSON.stringify(sidebarContent))).reduce((acc, section) => {
+      const inputMatch = (text: string) => text.toLowerCase().includes(input);
+      const content = section.reduce((ac, item) => {
+        if (!inputMatch(item.title)) {
+          item.content = item.content.reduce((a, ic) => {
+            if (typeof ic === 'string') {
+              if (inputMatch(ic)) {
+                a.push(ic);
+              }
+            } else if (inputMatch(ic.title)) {
+              a.push(ic);
+            } else {
+              ic.content = ic.content.filter(inputMatch);
+              if (ic.content.length) {
+                a.push(ic);
+              }
+            }
+            return a;
+          }, []);
+        }
+        return item.content.length ? [...ac, item] : ac;
+      }, []);
+      return [...acc, ...content];
+    }, []);
+    this.setState({filteredContent});
   }
 
   onIconClick(icon: string) {
@@ -124,6 +185,11 @@ export class HelpSidebar extends React.Component<Props, State> {
     } else {
       this.hideSidebar();
     }
+  }
+
+  onInputChange(value: string) {
+    this.setState({searchTerm: value});
+    this.debounceInput(value);
   }
 
   hideSidebar() {
@@ -138,9 +204,15 @@ export class HelpSidebar extends React.Component<Props, State> {
     }, 300);
   }
 
+  highlightMatches(content: string) {
+    const {searchTerm} = this.state;
+    return highlightSearchTerm(searchTerm, content, colors.success);
+  }
+
   render() {
     const {location, participant, setParticipant} = this.props;
-    const {activeIcon, sidebarOpen} = this.state;
+    const {activeIcon, filteredContent, searchTerm, sidebarOpen} = this.state;
+    const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[location];
     const contentStyle = (tab: string) => ({
       display: activeIcon === tab ? 'block' : 'none',
       height: 'calc(100% - 1rem)',
@@ -171,19 +243,31 @@ export class HelpSidebar extends React.Component<Props, State> {
           </div>
           <div style={contentStyle('help')}>
             <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
-            {sidebarContent[location].map((section, s) => <div key={s}>
-              <h3 style={styles.sectionTitle}>{section.title}</h3>
-              {section.content.map((content, c) => {
-                return typeof content === 'string'
-                  ? <p key={c} style={styles.contentItem}>{content}</p>
-                  : <div key={c}>
-                    <h4 style={styles.contentTitle}>{content.title}</h4>
-                    {content.content.map((item, i) =>
-                      <p key={i} style={styles.contentItem}>{item}</p>)
-                    }
-                  </div>;
-              })}
-            </div>)}
+            <div style={styles.textSearch}>
+              <ClrIcon style={{color: colors.primary, margin: '0 0.3rem'}} shape='search' size={16} />
+              <input
+                type='text'
+                style={styles.textInput}
+                value={searchTerm}
+                onChange={(e) => this.onInputChange(e.target.value)}
+                placeholder={'Search'} />
+            </div>
+            {displayContent.length > 0
+              ? displayContent.map((section, s) => <div key={s}>
+                <h3 style={styles.sectionTitle}>{this.highlightMatches(section.title)}</h3>
+                {section.content.map((content, c) => {
+                  return typeof content === 'string'
+                    ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
+                    : <div key={c}>
+                      <h4 style={styles.contentTitle}>{this.highlightMatches(content.title)}</h4>
+                      {content.content.map((item, i) =>
+                        <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>)
+                      }
+                    </div>;
+                })}
+              </div>)
+              : <div style={{marginTop: '0.5rem'}}><em>No results found</em></div>
+            }
           </div>
           <div style={contentStyle('annotations')}>
             {!!participant &&
