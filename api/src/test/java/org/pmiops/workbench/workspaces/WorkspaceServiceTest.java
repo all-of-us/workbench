@@ -193,7 +193,7 @@ public class WorkspaceServiceTest {
       org.pmiops.workbench.db.model.Workspace workspace = workspaces.get(i);
       workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), USER_ID, Timestamp.from(NOW));
     }
-    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces(USER_ID);
+    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspacesByUser(USER_ID);
     for (int i = 0; i < recentWorkspaces.size(); i++) {
       assertThat(recentWorkspaces.get(i)).isEqualTo(workspaces.get(i));
     }
@@ -204,7 +204,7 @@ public class WorkspaceServiceTest {
     workspaces.forEach(workspace -> {
       workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), USER_ID, Timestamp.from(NOW));
     });
-    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces(USER_ID);
+    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspacesByUser(USER_ID);
     for (int i = 0; i < recentWorkspaces.size(); i++) {
       assertThat(recentWorkspaces.get(i)).isEqualTo(workspaces.get(workspaces.size() - 5 + i));
     }

@@ -70,7 +70,7 @@ public interface WorkspaceService {
 
   Workspace setPublished(Workspace workspace, String publishedWorkspaceGroup, boolean publish);
 
-  List<UserRecentWorkspace> getRecentWorkspaces(long userId);
+  List<UserRecentWorkspace> getRecentWorkspacesByUser(long userId);
 
   UserRecentWorkspace updateRecentWorkspaces(long workspaceId, long userId, Timestamp lastAccessDate);
 }

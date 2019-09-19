@@ -40,6 +40,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -52,27 +53,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.CloneWorkspaceRequest;
-import org.pmiops.workbench.model.CloneWorkspaceResponse;
-import org.pmiops.workbench.model.CopyRequest;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
-import org.pmiops.workbench.model.NotebookRename;
-import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
-import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
-import org.pmiops.workbench.model.ShareWorkspaceRequest;
-import org.pmiops.workbench.model.UpdateWorkspaceRequest;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.model.WorkspaceListResponse;
-import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.model.WorkspaceResponseListResponse;
-import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -738,5 +719,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<RecentWorkspaceResponse> getUserRecentWorkspaces() {
+    long userId = userProvider.get().getUserId();
+    List<UserRecentWorkspace> userRecentWorkspaceList =
+            workspaceService.getRecentWorkspacesByUser(userId);
+    RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
+    recentWorkspaceResponse.addAll(
+            userRecentWorkspaceList.stream()
+                    .map(userRecentWorkspace -> {
+                      RecentWorkspace recentWorkspace = new RecentWorkspace();
+                      recentWorkspace.setWorkspaceId(userRecentWorkspace.getWorkspaceId());
+                      recentWorkspace.setModifiedTime(userRecentWorkspace.getLastUpdateTime().toString());
+                      return recentWorkspace;
+                    })
+                    .collect(Collectors.toList())
+    );
+    return ResponseEntity.ok(recentWorkspaceResponse);
   }
 }

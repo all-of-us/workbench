@@ -90,36 +90,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.AnnotationType;
-import org.pmiops.workbench.model.CloneWorkspaceRequest;
-import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.CohortAnnotationDefinition;
-import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
-import org.pmiops.workbench.model.CohortReview;
-import org.pmiops.workbench.model.Concept;
-import org.pmiops.workbench.model.ConceptSet;
-import org.pmiops.workbench.model.CopyRequest;
-import org.pmiops.workbench.model.CreateConceptSetRequest;
-import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
-import org.pmiops.workbench.model.NotebookRename;
-import org.pmiops.workbench.model.PageFilterType;
-import org.pmiops.workbench.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
-import org.pmiops.workbench.model.ParticipantCohortStatuses;
-import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
-import org.pmiops.workbench.model.ShareWorkspaceRequest;
-import org.pmiops.workbench.model.UpdateConceptSetRequest;
-import org.pmiops.workbench.model.UpdateWorkspaceRequest;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
@@ -471,7 +442,7 @@ public class WorkspacesControllerTest {
     researchPurpose.setReviewRequested(true);
     researchPurpose.setApproved(false);
     Workspace workspace = new Workspace();
-    workspace.setId(workspaceName);
+    workspace.setId("1");
     workspace.setName(workspaceName);
     workspace.setNamespace(workspaceNameSpace);
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
@@ -2511,5 +2482,15 @@ public class WorkspacesControllerTest {
 
     final NotebookLockingMetadataResponse expectedResponse = new NotebookLockingMetadataResponse();
     assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
+  public void getUserRecentWorkspaces() {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    workspaceService.updateRecentWorkspaces(dbWorkspace.getWorkspaceId(), currentUser.getUserId(), Timestamp.from(Instant.now()));
+    ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity = workspacesController.getUserRecentWorkspaces();
+    assertThat(recentWorkspaceResponseEntity.getBody().get(0).getWorkspaceId()).isEqualTo(dbWorkspace.getWorkspaceId());
   }
 }
