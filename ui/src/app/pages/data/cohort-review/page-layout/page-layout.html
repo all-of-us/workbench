@@ -1,0 +1,24 @@
+<!--
+  CohortReview main content outlet
+  Pages: Overview, Table (participant master), Detail
+-->
+<div class="cohort-review-wrapper" *ngIf="cohortLoaded && reviewPresent">
+  <router-outlet></router-outlet>
+</div>
+
+<app-create-review-modal *ngIf="ableToReview" [canceled]="goBack" [created]="reviewCreated"></app-create-review-modal>
+<clr-modal [clrModalOpen]="unableToReview" [clrModalSize]="'md'" [clrModalClosable]="false">
+  <div class="modal-title" style="color: #302973">
+    Users with read-only access cannot create cohort reviews
+  </div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-primary"
+      style="background: #302C71"
+      (click)="goBack()">
+      Return to cohorts
+    </button>
+  </div>
+</clr-modal>
+<div *ngIf="!cohortLoaded || !reviewPresent" style="position: absolute; top: 50%; left: 50%;" class="spinner"></div>
