@@ -191,7 +191,7 @@ public class WorkspaceServiceTest {
   public void getRecentWorkspaces() {
     for (int i = 1; i < WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT; i++) {
       org.pmiops.workbench.db.model.Workspace workspace = workspaces.get(i);
-      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), USER_ID, Timestamp.from(NOW));
+      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), USER_ID);
     }
     List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspacesByUser(USER_ID);
     for (int i = 0; i < recentWorkspaces.size(); i++) {
@@ -202,7 +202,7 @@ public class WorkspaceServiceTest {
   @Test
   public void updateRecentWorkspaces() {
     workspaces.forEach(workspace -> {
-      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), USER_ID, Timestamp.from(NOW));
+      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), USER_ID);
     });
     List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspacesByUser(USER_ID);
     for (int i = 0; i < recentWorkspaces.size(); i++) {

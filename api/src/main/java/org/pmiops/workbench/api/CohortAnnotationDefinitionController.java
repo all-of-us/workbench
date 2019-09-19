@@ -9,12 +9,15 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.persistence.OptimisticLockException;
+import javax.inject.Provider;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -34,6 +37,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
 
   private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
   private CohortDao cohortDao;
+  private Provider<User> userProvider;
   private WorkspaceService workspaceService;
   private static final Logger log =
       Logger.getLogger(CohortAnnotationDefinitionController.class.getName());
@@ -92,9 +96,11 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
   CohortAnnotationDefinitionController(
       CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao,
       CohortDao cohortDao,
+      Provider<User> userProvider,
       WorkspaceService workspaceService) {
     this.cohortAnnotationDefinitionDao = cohortAnnotationDefinitionDao;
     this.cohortDao = cohortDao;
+    this.userProvider = userProvider;
     this.workspaceService = workspaceService;
   }
 
@@ -136,8 +142,11 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
               "Conflict: Cohort Annotation Definition name exists for: %s",
               request.getColumnName()));
     }
+
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     try {
       cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
     } catch (DataIntegrityViolationException e) {
       throw new BadRequestException("Bad Request: " + ExceptionUtils.getRootCause(e).getMessage());
     }
@@ -160,6 +169,9 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     findCohortAnnotationDefinition(cohortId, annotationDefinitionId);
 
     cohortAnnotationDefinitionDao.delete(annotationDefinitionId);
+
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
 
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -242,8 +254,11 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     }
 
     cohortAnnotationDefinition.columnName(columnName);
+
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     try {
       cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
     } catch (OptimisticLockException e) {
       log.log(Level.WARNING, "version conflict for cohort annotation definition update", e);
       throw new ConflictException("Failed due to concurrent cohort annotation modification");
