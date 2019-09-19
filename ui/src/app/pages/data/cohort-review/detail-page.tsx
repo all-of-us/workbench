@@ -11,16 +11,15 @@ import {cohortReviewStore, getVocabOptions, vocabOptions} from 'app/services/rev
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
-import {Participant} from 'app/utils/participant.model';
 import {WorkspaceData} from 'app/utils/workspace-data';
-
+import {ParticipantCohortStatus} from 'generated/fetch';
 
 interface Props {
   workspace: WorkspaceData;
 }
 
 interface State {
-  participant: Participant;
+  participant: ParticipantCohortStatus;
 }
 
 export const DetailPage = withCurrentWorkspace()(
@@ -39,7 +38,7 @@ export const DetailPage = withCurrentWorkspace()(
             .getParticipantCohortStatus(ns, wsid,
               cohortReviewStore.getValue().cohortReviewId, +pid))
             .do(ps => {
-              this.setState({participant: Participant.fromStatus(ps)});
+              this.setState({participant: ps});
             });
         })
         .subscribe();
@@ -55,6 +54,7 @@ export const DetailPage = withCurrentWorkspace()(
     }
 
     setParticipant(v) {
+      console.log(v);
       this.setState({participant: v});
     }
 

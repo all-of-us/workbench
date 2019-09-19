@@ -5,7 +5,6 @@ import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {Participant} from 'app/utils/participant.model';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {
@@ -184,7 +183,7 @@ const FILTER_KEYS = {
   VISITS: 'Visits'
 };
 export interface DetailHeaderProps {
-  participant: Participant;
+  participant: ParticipantCohortStatus;
   workspace: WorkspaceData;
 }
 
@@ -435,7 +434,7 @@ export const DetailHeader = withCurrentWorkspace()(
               onClick={() => this.previous()}>
               <i style={styles.icon} className='pi pi-angle-left' />
             </button>
-            <span style={styles.participantText}>Participant {participant.id}</span>
+            <span style={styles.participantText}>Participant {participant.participantId}</span>
             <button
               style={{
                 ...(isLastParticipant ? otherStyles.navBtnDisabled : otherStyles.navBtnActive),

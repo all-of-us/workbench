@@ -1,29 +1,21 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
+import {OverlayPanel} from 'primereact/overlaypanel';
+import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {
-  cohortReviewStore,
-  filterStateStore,
-  getVocabOptions,
-  multiOptions,
-  vocabOptions
-} from 'app/services/review-state.service';
+import {cohortReviewStore, filterStateStore, getVocabOptions, multiOptions, vocabOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {datatableStyles} from 'app/utils/datatable';
-import {
-  currentCohortStore,
-  navigate,
-  navigateByUrl,
-  urlParamsStore
-} from 'app/utils/navigation';
-
+import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortStatus,
@@ -35,10 +27,6 @@ import {
   ParticipantCohortStatuses as Request,
   SortOrder,
 } from 'generated/fetch';
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
-import {OverlayPanel} from 'primereact/overlaypanel';
-import * as React from 'react';
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},

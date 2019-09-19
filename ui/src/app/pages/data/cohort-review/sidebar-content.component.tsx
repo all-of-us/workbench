@@ -12,9 +12,15 @@ import {cohortReviewStore} from 'app/services/review-state.service';
 import {cohortAnnotationDefinitionApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentWorkspace, withUrlParams} from 'app/utils';
-import {Participant} from 'app/utils/participant.model';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {AnnotationType, CohortAnnotationDefinition, CohortStatus, ParticipantCohortAnnotation, WorkspaceAccessLevel} from 'generated/fetch';
+import {
+  AnnotationType,
+  CohortAnnotationDefinition,
+  CohortStatus,
+  ParticipantCohortAnnotation,
+  ParticipantCohortStatus,
+  WorkspaceAccessLevel
+} from 'generated/fetch';
 import Timeout = NodeJS.Timeout;
 
 const styles = {
@@ -251,7 +257,7 @@ export const SidebarContent = fp.flow(
   withCurrentWorkspace(),
 )(class extends React.Component<
   {
-    participant: Participant,
+    participant: ParticipantCohortStatus,
     setParticipant: Function,
     urlParams: any,
     workspace: WorkspaceData,
@@ -314,7 +320,7 @@ export const SidebarContent = fp.flow(
       );
       // make sure we're still on the same page before updating
       if (data.participantId === +this.props.urlParams.pid) {
-        setParticipant(new Participant(data as any));
+        setParticipant(data as any);
       }
     } catch (error) {
       console.error(error);
