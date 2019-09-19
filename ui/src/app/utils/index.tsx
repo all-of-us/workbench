@@ -9,7 +9,7 @@ import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export const WINDOW_REF = 'window-ref';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import {colorWithWhiteness} from 'app/styles/colors';
 import {
   currentCohortStore,
   currentConceptSetStore,
