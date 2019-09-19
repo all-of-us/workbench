@@ -389,7 +389,7 @@ export function resettableTimeout(f, timeoutInSeconds) {
   };
 }
 
-export function highlightSearchTerm(searchTerm: string, stringToHighlight: string) {
+export function highlightSearchTerm(searchTerm: string, stringToHighlight: string, highlightColor: string) {
   if (searchTerm === '' || searchTerm.length < 3) {
     return stringToHighlight;
   }
@@ -407,8 +407,8 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
   }
   return words.map((word, w) => <span key={w}
     style={matchString.test(word.toLowerCase()) ? {
-      color: colorWithWhiteness(colors.success, -0.4),
-      backgroundColor: colorWithWhiteness(colors.success, 0.7),
+      color: colorWithWhiteness(highlightColor, -0.4),
+      backgroundColor: colorWithWhiteness(highlightColor, 0.7),
       display: 'inline-block'
     } : {}}>
       {word}

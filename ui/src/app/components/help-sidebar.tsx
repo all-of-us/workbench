@@ -204,6 +204,11 @@ export class HelpSidebar extends React.Component<Props, State> {
     }, 300);
   }
 
+  highlightMatches(content: string) {
+    const {searchTerm} = this.state;
+    return highlightSearchTerm(searchTerm, content, colors.success);
+  }
+
   render() {
     const {location, participant, setParticipant} = this.props;
     const {activeIcon, filteredContent, searchTerm, sidebarOpen} = this.state;
@@ -249,14 +254,14 @@ export class HelpSidebar extends React.Component<Props, State> {
             </div>
             {displayContent.length > 0
               ? displayContent.map((section, s) => <div key={s}>
-                <h3 style={styles.sectionTitle}>{highlightSearchTerm(searchTerm, section.title)}</h3>
+                <h3 style={styles.sectionTitle}>{this.highlightMatches(section.title)}</h3>
                 {section.content.map((content, c) => {
                   return typeof content === 'string'
-                    ? <p key={c} style={styles.contentItem}>{highlightSearchTerm(searchTerm, content)}</p>
+                    ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
                     : <div key={c}>
-                      <h4 style={styles.contentTitle}>{highlightSearchTerm(searchTerm, content.title)}</h4>
+                      <h4 style={styles.contentTitle}>{this.highlightMatches(content.title)}</h4>
                       {content.content.map((item, i) =>
-                        <p key={i} style={styles.contentItem}>{highlightSearchTerm(searchTerm, item)}</p>)
+                        <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>)
                       }
                     </div>;
                 })}
