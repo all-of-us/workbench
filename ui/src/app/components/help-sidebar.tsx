@@ -101,7 +101,7 @@ const styles = reactStyles({
   footer: {
     position: 'absolute',
     bottom: 0,
-    padding: '1rem 1.5rem 1.5rem 1rem',
+    padding: '1.25rem 0.75rem',
     background: colorWithWhiteness(colors.primary, .8),
   },
   link: {
@@ -144,7 +144,7 @@ export const HelpSidebar = withUserProfile()(
         activeIcon: undefined,
         filteredContent: undefined,
         sidebarOpen: false,
-        searchTerm: undefined
+        searchTerm: ''
       };
     }
 
@@ -231,7 +231,7 @@ export const HelpSidebar = withUserProfile()(
         display: activeIcon === tab ? 'block' : 'none',
         height: 'calc(100% - 1rem)',
         overflow: 'auto',
-        padding: '0.5rem 0.5rem 6.5rem',
+        padding: '0.5rem 0.5rem 5.5rem',
       });
       return <React.Fragment>
         <div style={styles.iconContainer}>
