@@ -1416,6 +1416,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsLabMoreThanOneSearchParameterSourceAndStandard() throws Exception {
+    SearchParameter icd9 = icd9();
+    SearchParameter snomed = snomed().standard(true);
+    SearchRequest searchRequest =
+        createSearchRequests(icd9.getDomain(), Arrays.asList(icd9, snomed), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void countSubjectsBloodPressure() throws Exception {
     SearchParameter pm = bloodPressure().attributes(bpAttributes());
     SearchRequest searchRequest =
