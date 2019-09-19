@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {SidebarContent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
+import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
 import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles, ReactWrapperBase} from 'app/utils';
