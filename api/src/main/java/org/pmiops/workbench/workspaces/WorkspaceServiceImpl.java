@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -503,19 +504,21 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public UserRecentWorkspace updateRecentWorkspaces(long workspaceId, long userId, Timestamp lastAccessDate) {
+  public UserRecentWorkspace updateRecentWorkspaces(long workspaceId, long userId) {
     List<UserRecentWorkspace> userRecentWorkspaces = userRecentWorkspaceDao.findByUserIdOrderByLastAccessDate(userId);
     Optional<UserRecentWorkspace> matchingRecentWorkspace = userRecentWorkspaces.stream().filter(userRecentWorkspace ->
             userRecentWorkspace.getWorkspaceId() == workspaceId && userRecentWorkspace.getUserId() == userId
     ).findFirst();
 
+    Timestamp now = Timestamp.from(Instant.now());
+
     if (matchingRecentWorkspace.isPresent()) {
-      matchingRecentWorkspace.get().setLastAccessDate(lastAccessDate);
+      matchingRecentWorkspace.get().setLastAccessDate(now);
       userRecentWorkspaceDao.save(matchingRecentWorkspace.get());
       return matchingRecentWorkspace.get();
     }
     else {
-      UserRecentWorkspace recentWorkspace = new UserRecentWorkspace(workspaceId, userId, lastAccessDate);
+      UserRecentWorkspace recentWorkspace = new UserRecentWorkspace(workspaceId, userId, now);
       userRecentWorkspaceDao.save(recentWorkspace);
 
       while(userRecentWorkspaces.size() > RECENT_WORKSPACE_COUNT) {
@@ -524,6 +527,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
 
       return recentWorkspace;
+    }
+  }
+
+  @Override
+  public void maybeDeleteRecentWorkspace(long workspaceId, long userId) {
+    List<UserRecentWorkspace> maybeRecentWorkspaces = userRecentWorkspaceDao.findByWorkspaceIdAndUserId(workspaceId, userId);
+
+    for (UserRecentWorkspace maybeRecentWorkspace: maybeRecentWorkspaces) {
+      userRecentWorkspaceDao.delete(maybeRecentWorkspace);
     }
   }
 }

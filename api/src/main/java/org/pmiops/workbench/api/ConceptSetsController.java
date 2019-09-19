@@ -170,6 +170,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
           userProvider.get().getUserId(),
           dbConceptSet.getConceptSetId(),
           now);
+      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
     } catch (DataIntegrityViolationException e) {
       throw new BadRequestException(
           String.format(
@@ -199,6 +200,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     org.pmiops.workbench.db.model.ConceptSet conceptSet =
         getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
     conceptSetDao.delete(conceptSet.getConceptSetId());
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -272,8 +275,10 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbConceptSet.setLastModifiedTime(now);
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
+      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
       // TODO: add recent resource entry for concept sets [RW-1129]
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
@@ -355,8 +360,10 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbConceptSet.setLastModifiedTime(now);
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
+      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
       // TODO: add recent resource entry for concept sets [RW-1129]
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
@@ -421,6 +428,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         userProvider.get().getUserId(),
         newConceptSet.getConceptSetId(),
         now);
+    workspaceService.updateRecentWorkspaces(toWorkspace.getWorkspaceId(), userProvider.get().getUserId());
     return ResponseEntity.ok(toClientConceptSet(newConceptSet));
   }
 

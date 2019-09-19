@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface UserRecentWorkspaceDao extends CrudRepository<UserRecentWorkspace, Long> {
     List<UserRecentWorkspace> findByUserIdOrderByLastAccessDate(long userId);
+
+    List<UserRecentWorkspace> findByWorkspaceIdAndUserId(long workspaceId, long userId);
 }
