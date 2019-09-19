@@ -499,18 +499,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<UserRecentWorkspace> getRecentWorkspacesByUser(long userId) {
-    return userRecentWorkspaceDao.findByUserIdOrderByLastUpdateTime(userId);
+    return userRecentWorkspaceDao.findByUserIdOrderByLastAccessDate(userId);
   }
 
   @Override
   public UserRecentWorkspace updateRecentWorkspaces(long workspaceId, long userId, Timestamp lastAccessDate) {
-    List<UserRecentWorkspace> userRecentWorkspaces = userRecentWorkspaceDao.findByUserIdOrderByLastUpdateTime(userId);
+    List<UserRecentWorkspace> userRecentWorkspaces = userRecentWorkspaceDao.findByUserIdOrderByLastAccessDate(userId);
     Optional<UserRecentWorkspace> matchingRecentWorkspace = userRecentWorkspaces.stream().filter(userRecentWorkspace ->
             userRecentWorkspace.getWorkspaceId() == workspaceId && userRecentWorkspace.getUserId() == userId
     ).findFirst();
 
     if (matchingRecentWorkspace.isPresent()) {
-      matchingRecentWorkspace.get().setLastUpdateTime(lastAccessDate);
+      matchingRecentWorkspace.get().setLastAccessDate(lastAccessDate);
       userRecentWorkspaceDao.save(matchingRecentWorkspace.get());
       return matchingRecentWorkspace.get();
     }

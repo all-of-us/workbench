@@ -1,10 +1,13 @@
 import * as React from 'react';
-import {workspacesApi} from "app/services/swagger-fetch-clients";
+
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {RecentWorkspace} from 'generated/fetch';
+import {SpinnerOverlay} from "../../components/spinners";
 
 interface Props {}
 interface State {
   loading: boolean,
-  workspaces: UserRecentWorkspace[],
+  workspaces: RecentWorkspace[],
 }
 
 export class RecentWorkspaces extends React.Component<Props, State> {
@@ -32,9 +35,10 @@ export class RecentWorkspaces extends React.Component<Props, State> {
     }
   }
 
-
-
   render() {
-    return <div>lol</div>;
+    return <div>
+      lol
+      {this.state.loading && <SpinnerOverlay dark={true} />}
+    </div>;
   }
 }

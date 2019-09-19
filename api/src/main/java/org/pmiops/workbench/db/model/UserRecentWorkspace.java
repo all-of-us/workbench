@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 @Entity
 @Table(name = "user_recent_workspace")
 public class UserRecentWorkspace {
-    private Timestamp lastUpdateTime;
+    private Timestamp lastAccessDate;
     private int id;
     private Long userId;
     private Long workspaceId;
@@ -39,21 +39,21 @@ public class UserRecentWorkspace {
         this.workspaceId = workspaceId;
     }
 
-    @Column(name = "lastUpdateTime")
-    public Timestamp getLastUpdateTime() {
-        return lastUpdateTime;
+    @Column(name = "lastAccessDate")
+    public Timestamp getLastAccessDate() {
+        return lastAccessDate;
     }
 
-    public void setLastUpdateTime(Timestamp lastUpdateTime) {
-        this.lastUpdateTime = lastUpdateTime;
+    public void setLastAccessDate(Timestamp lastAccessDate) {
+        this.lastAccessDate = lastAccessDate;
     }
 
     public UserRecentWorkspace() {}
 
     public UserRecentWorkspace(
-            long workspaceId, long userId, Timestamp lastUpdateTime) {
+            long workspaceId, long userId, Timestamp lastAccessDate) {
         this.workspaceId = workspaceId;
         this.userId = userId;
-        this.lastUpdateTime = lastUpdateTime;
+        this.lastAccessDate = lastAccessDate;
     }
 }

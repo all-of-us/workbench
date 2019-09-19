@@ -762,7 +762,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                     .map(userRecentWorkspace -> {
                       RecentWorkspace recentWorkspace = new RecentWorkspace();
                       recentWorkspace.setWorkspaceId(userRecentWorkspace.getWorkspaceId());
-                      recentWorkspace.setModifiedTime(userRecentWorkspace.getLastUpdateTime().toString());
+                      recentWorkspace.setModifiedTime(userRecentWorkspace.getLastAccessDate().toString());
                       return recentWorkspace;
                     })
                     .collect(Collectors.toList())
