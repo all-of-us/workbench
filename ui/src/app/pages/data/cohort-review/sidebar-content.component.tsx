@@ -290,6 +290,18 @@ export const SidebarContent = fp.flow(
       });
   }
 
+  componentDidUpdate(prevProps: any): void {
+    const {urlParams: {ns, wsid, pid}} = this.props;
+    if ((pid !== prevProps.urlParams.pid)) {
+      // get values for annotations when switching participants
+      cohortReviewApi()
+      .getParticipantCohortAnnotations(ns, wsid, cohortReviewStore.getValue().cohortReviewId, +pid)
+      .then(({items}) => {
+        this.setState({annotations: items});
+      });
+    }
+  }
+
   async saveStatus(v) {
     try {
       const {
