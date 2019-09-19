@@ -9,6 +9,7 @@ import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export const WINDOW_REF = 'window-ref';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   currentCohortStore,
   currentConceptSetStore,
@@ -386,4 +387,30 @@ export function resettableTimeout(f, timeoutInSeconds) {
     },
     getTimer: () => timeout
   };
+}
+
+export function highlightSearchTerm(searchTerm: string, stringToHighlight: string) {
+  if (searchTerm === '' || searchTerm.length < 3) {
+    return stringToHighlight;
+  }
+  const words: string[] = [];
+  const matchString = new RegExp(searchTerm.trim(), 'i');
+  const matches = stringToHighlight.match(new RegExp(matchString, 'gi'));
+  const splits = stringToHighlight.split(new RegExp(matchString, 'gi'));
+  if (matches) {
+    for (let i = 0; i < matches.length; i++) {
+      words.push(splits[i], matches[i]);
+    }
+    words.push(splits[splits.length - 1]);
+  } else {
+    words.push(splits[0]);
+  }
+  return words.map((word, w) => <span key={w}
+    style={matchString.test(word.toLowerCase()) ? {
+      color: colorWithWhiteness(colors.success, -0.4),
+      backgroundColor: colorWithWhiteness(colors.success, 0.7),
+      display: 'inline-block'
+    } : {}}>
+      {word}
+    </span>);
 }
