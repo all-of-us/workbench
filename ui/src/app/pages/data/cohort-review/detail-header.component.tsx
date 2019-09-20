@@ -1,6 +1,5 @@
-import {Participant} from 'app/cohort-review/participant.model';
-import {cohortReviewStore, filterStateStore, visitsFilterOptions} from 'app/cohort-review/review-state.service';
 import {DatePicker, Select, TextInput, ValidationError} from 'app/components/inputs';
+import {cohortReviewStore, filterStateStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
@@ -184,7 +183,7 @@ const FILTER_KEYS = {
   VISITS: 'Visits'
 };
 export interface DetailHeaderProps {
-  participant: Participant;
+  participant: ParticipantCohortStatus;
   workspace: WorkspaceData;
 }
 
@@ -435,7 +434,7 @@ export const DetailHeader = withCurrentWorkspace()(
               onClick={() => this.previous()}>
               <i style={styles.icon} className='pi pi-angle-left' />
             </button>
-            <span style={styles.participantText}>Participant {participant.id}</span>
+            <span style={styles.participantText}>Participant {participant.participantId}</span>
             <button
               style={{
                 ...(isLastParticipant ? otherStyles.navBtnDisabled : otherStyles.navBtnActive),

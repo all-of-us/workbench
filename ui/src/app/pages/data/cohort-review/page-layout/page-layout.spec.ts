@@ -3,8 +3,8 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
-import {CreateReviewModalComponent} from 'app/cohort-review/create-review-modal/create-review-modal';
-import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {CreateReviewModalComponent} from 'app/pages/data/cohort-review/create-review-modal';
+import {cohortReviewStore} from 'app/services/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortBuilderService} from 'generated';

@@ -8,7 +8,7 @@ import {
   multiOptions,
   visitsFilterOptions,
   vocabOptions
-} from 'app/cohort-review/review-state.service';
+} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';

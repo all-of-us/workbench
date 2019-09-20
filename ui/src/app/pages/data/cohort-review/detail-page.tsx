@@ -3,24 +3,23 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {from} from 'rxjs/observable/from';
 
-import {DetailHeader} from 'app/cohort-review/detail-header/detail-header.component';
-import {DetailTabs} from 'app/cohort-review/detail-tabs/detail-tabs.component';
-import {Participant} from 'app/cohort-review/participant.model';
-import {cohortReviewStore, getVocabOptions, vocabOptions} from 'app/cohort-review/review-state.service';
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {DetailHeader} from 'app/pages/data/cohort-review/detail-header.component';
+import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
+import {cohortReviewStore, getVocabOptions, vocabOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-
+import {ParticipantCohortStatus} from 'generated/fetch';
 
 interface Props {
   workspace: WorkspaceData;
 }
 
 interface State {
-  participant: Participant;
+  participant: ParticipantCohortStatus;
 }
 
 export const DetailPage = withCurrentWorkspace()(
@@ -39,7 +38,7 @@ export const DetailPage = withCurrentWorkspace()(
             .getParticipantCohortStatus(ns, wsid,
               cohortReviewStore.getValue().cohortReviewId, +pid))
             .do(ps => {
-              this.setState({participant: Participant.fromStatus(ps)});
+              this.setState({participant: ps});
             });
         })
         .subscribe();
@@ -55,6 +54,7 @@ export const DetailPage = withCurrentWorkspace()(
     }
 
     setParticipant(v) {
+      console.log(v);
       this.setState({participant: v});
     }
 

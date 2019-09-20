@@ -2,11 +2,11 @@ import {Component, Input} from '@angular/core';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
-import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {Button} from 'app/components/buttons';
 import {ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
+import {cohortReviewStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';

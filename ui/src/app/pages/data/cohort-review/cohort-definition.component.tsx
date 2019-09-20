@@ -1,5 +1,5 @@
-import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {domainToTitle} from 'app/cohort-search/utils';
+import {cohortReviewStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {CriteriaType, DomainType} from 'generated/fetch';

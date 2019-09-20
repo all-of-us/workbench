@@ -1,4 +1,4 @@
-import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore} from 'app/services/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';

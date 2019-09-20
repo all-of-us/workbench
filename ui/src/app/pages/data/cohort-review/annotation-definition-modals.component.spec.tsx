@@ -1,5 +1,5 @@
-import * as React from 'react';
 import {mount} from 'enzyme';
+import * as React from 'react';
 
 import {cohortAnnotationDefinitionStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 
