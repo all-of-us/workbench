@@ -343,7 +343,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     render() {
-      const {wizard: {domain, isStandard}} = this.props;
+      const {wizard: {domain}} = this.props;
       const {data, error, ingredients, loading, results, sourceMatch} = this.state;
       const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '3.75rem'}
         : styles.listContainer;
