@@ -387,7 +387,7 @@ export const ListSearch = withCurrentWorkspace()(
             <thead className='p-datatable-thead'>
               <tr>
                 <th style={styles.columnHeader}>Name</th>
-                <th style={{...styles.columnHeader, width: '10%'}}>Code</th>
+                <th style={{...styles.columnHeader, width: '20%'}}>Code</th>
                 <th style={{...styles.columnHeader, width: '10%'}}>Vocab</th>
                 <th style={{...styles.columnHeader, width: '10%'}}>Count</th>
                 <th style={{...styles.columnHeader, padding: '0.2rem 0.5rem', width: '7%'}}>
