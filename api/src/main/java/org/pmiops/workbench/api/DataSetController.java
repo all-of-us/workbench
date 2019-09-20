@@ -119,12 +119,12 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DataSet> createDataSet(
-      String workspaceNamespace, String workspaceId, DataSetRequest dataSetRequest) {
+      String workspaceNamespace, String workspaceFirecloudName, DataSetRequest dataSetRequest) {
     validateDataSetCreateRequest(dataSetRequest);
     final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    final long retrievedWorkspaceId = workspaceService.get(workspaceNamespace, workspaceId).getWorkspaceId();
+        workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER);
+    final long workspaceId = workspaceService.get(workspaceNamespace, workspaceFirecloudName).getWorkspaceId();
     final ImmutableList<DataSetValues> dataSetValuesList =
         dataSetRequest.getValues().stream()
             .map(this::getDataSetValuesFromDomainValueSet)
@@ -135,7 +135,7 @@ public class DataSetController implements DataSetApiDelegate {
               dataSetRequest.getName(),
               dataSetRequest.getIncludesAllParticipants(),
               dataSetRequest.getDescription(),
-              retrievedWorkspaceId,
+              workspaceId,
               dataSetRequest.getCohortIds(),
               dataSetRequest.getConceptSetIds(),
               dataSetValuesList,
@@ -250,12 +250,12 @@ public class DataSetController implements DataSetApiDelegate {
       log.warning("Empty query map generated for this DataSetRequest");
     }
 
+    final ImmutableList<String> codeCells = ImmutableList.copyOf(dataSetService.generateCodeCells(kernelTypeEnum, dataSet.getName(), bigQueryJobConfigsByDomain));
+    final String generatedCode = String.join("\n\n", codeCells);
+
     return ResponseEntity.ok(
         new DataSetCodeResponse()
-            .code(
-                String.join("\n\n", dataSetService
-                    .generateCodeCells(
-                        kernelTypeEnum, dataSet.getName(), bigQueryJobConfigsByDomain)))
+            .code(generatedCode)
             .kernelType(kernelTypeEnum));
   }
 
@@ -586,7 +586,7 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(dataSetResponse);
   }
 
-  // TODO(jaycarlton) create a class that knows aobut code cells and their properties,
+  // TODO(jaycarlton) create a class that knows about code cells and their properties,
   // then give it a toJson() method to replace this one.
   private JSONObject createNotebookCodeCellWithString(String cellInformation) {
     return new JSONObject()

@@ -64,6 +64,7 @@ public class DataSetServiceImpl implements DataSetService {
    */
 
   public static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
+  public static final int DATA_SET_VERSION = 1;
 
   @VisibleForTesting
   private static class ValuesLinkingPair {
@@ -118,7 +119,7 @@ public class DataSetServiceImpl implements DataSetService {
     }
   }
 
-  private static class QueryAndParameters {
+  public static class QueryAndParameters {
     private final String query;
     private final Map<String, QueryParameterValue> namedParameterValues;
 
@@ -178,7 +179,7 @@ public class DataSetServiceImpl implements DataSetService {
       Timestamp creationTime) {
     final DataSet dataSetModel = new DataSet();
     dataSetModel.setName(name);
-    dataSetModel.setVersion(1);
+    dataSetModel.setVersion(DATA_SET_VERSION);
     dataSetModel.setIncludesAllParticipants(includesAllParticipants);
     dataSetModel.setDescription(description);
     dataSetModel.setWorkspaceId(workspaceId);
@@ -251,7 +252,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   // note: ImmutableList is OK return type on private methods, but should be avoided in public signatures.
-  private ImmutableList<ConceptSet> getExpandedConceptSetSelections(DataSetRequest dataSetRequest,
+    private ImmutableList<ConceptSet> getExpandedConceptSetSelections(DataSetRequest dataSetRequest,
       List<Cohort> cohortsSelected, List<DomainValuePair> domainValuePairs,
       boolean includesAllParticipants) {
     final ImmutableList<org.pmiops.workbench.db.model.ConceptSet> initialSelectedConceptSets =
@@ -281,12 +282,12 @@ public class DataSetServiceImpl implements DataSetService {
     return selectedConceptSetsBuilder.build();
   }
 
-  private QueryAndParameters getCohortQueryStringAndCollectNamedParameters(Cohort cohort) {
-
-    String cohortDefinition = cohort.getCriteria();
+  @VisibleForTesting
+  public QueryAndParameters getCohortQueryStringAndCollectNamedParameters(Cohort cohortDbModel) {
+    String cohortDefinition = cohortDbModel.getCriteria();
     if (cohortDefinition == null) {
       throw new NotFoundException(String.format(
-          "Not Found: No Cohort definition matching cohortId: %s", cohort.getCohortId()));
+          "Not Found: No Cohort definition matching cohortId: %s", cohortDbModel.getCohortId()));
     }
     final SearchRequest searchRequest =
         new Gson().fromJson(cohortDefinition, SearchRequest.class);
@@ -301,7 +302,7 @@ public class DataSetServiceImpl implements DataSetService {
           .getNamedParameters()
           .forEach(
               (npKey, npValue) -> {
-                final String newKey = biuldNewKey(cohort, npKey);
+                final String newKey = biuldNewKey(cohortDbModel, npKey);
                 // replace the original key (when found as a word)
                 participantQuery.getAndSet(
                     participantQuery
@@ -407,10 +408,10 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   private QueryJobConfiguration buildQueryJobConfiguration(
-      Map<String, QueryParameterValue> cohortParameters, String completeQuery) {
+      Map<String, QueryParameterValue> namedCohortParameters, String query) {
     return bigQueryService.filterBigQueryConfig(
-        QueryJobConfiguration.newBuilder(completeQuery)
-            .setNamedParameters(cohortParameters)
+        QueryJobConfiguration.newBuilder(query)
+            .setNamedParameters(namedCohortParameters)
             .setUseLegacySql(false)
             .build());
   }

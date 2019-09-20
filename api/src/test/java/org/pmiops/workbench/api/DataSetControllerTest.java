@@ -17,6 +17,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -106,6 +107,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+// TODO(jaycarlton): many of the tests here are testing DataSetServiceImpl more than
+//   DataSetControllerImpl, so move those tests and setup stuff into DataSetServiceTest
+//   and mock out DataSetService here.
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
@@ -137,8 +141,8 @@ public class DataSetControllerTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static User currentUser;
 
-  String cohortCriteria;
-  SearchRequest searchRequest;
+  private String cohortCriteria;
+  private SearchRequest searchRequest;
   private TestMockFactory testMockFactory;
   private Workspace workspace;
 
@@ -383,7 +387,7 @@ public class DataSetControllerTest {
             .domainId("Condition")
             .countValue(123L)
             .prevalence(0.2F)
-            .conceptSynonyms(new ArrayList<String>()));
+            .conceptSynonyms(Collections.emptyList()));
 
     ConceptSet conceptSet =
         new ConceptSet()
@@ -397,7 +401,7 @@ public class DataSetControllerTest {
             .conceptSet(conceptSet)
             .addedIds(
                 conceptList.stream()
-                    .map(concept -> concept.getConceptId())
+                    .map(Concept::getConceptId)
                     .collect(Collectors.toList()));
 
     conceptSet =
