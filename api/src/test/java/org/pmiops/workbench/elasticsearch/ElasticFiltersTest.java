@@ -316,6 +316,59 @@ public class ElasticFiltersTest {
   }
 
   @Test
+  public void testICD9AndSnomedQuery() {
+    QueryBuilder resp =
+        ElasticFilters.fromCohortSearch(
+            cbCriteriaDao,
+            new SearchRequest()
+                .addIncludesItem(
+                    new SearchGroup()
+                        .addItemsItem(
+                            new SearchGroupItem()
+                                .addSearchParametersItem(
+                                    new SearchParameter()
+                                        .value("001")
+                                        .conceptId(771L)
+                                        .domain(DomainType.CONDITION.toString())
+                                        .type(CriteriaType.ICD9CM.toString())
+                                        .group(false)
+                                        .ancestorData(false)
+                                        .standard(false))
+                                .addSearchParametersItem(
+                                    new SearchParameter()
+                                        .conceptId(477L)
+                                        .domain(DomainType.CONDITION.toString())
+                                        .type(CriteriaType.SNOMED.toString())
+                                        .group(false)
+                                        .ancestorData(false)
+                                        .standard(true)))));
+
+    BoolQueryBuilder source = QueryBuilders.boolQuery();
+    source.filter(QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("771")));
+    BoolQueryBuilder standard = QueryBuilders.boolQuery();
+    standard.filter(QueryBuilders.termsQuery("events.concept_id", ImmutableList.of("477")));
+    QueryBuilder expected =
+        QueryBuilders.boolQuery()
+            .filter(
+                QueryBuilders.boolQuery()
+                    .should(
+                        QueryBuilders.functionScoreQuery(
+                                QueryBuilders.nestedQuery(
+                                    "events",
+                                    QueryBuilders.constantScoreQuery(source),
+                                    ScoreMode.Total))
+                            .setMinScore(1))
+                    .should(
+                        QueryBuilders.functionScoreQuery(
+                                QueryBuilders.nestedQuery(
+                                    "events",
+                                    QueryBuilders.constantScoreQuery(standard),
+                                    ScoreMode.Total))
+                            .setMinScore(1)));
+    assertThat(resp).isEqualTo(expected);
+  }
+
+  @Test
   public void testPPISurveyQuery() {
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
