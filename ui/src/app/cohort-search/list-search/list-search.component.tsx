@@ -226,9 +226,6 @@ export const ListSearch = withCurrentWorkspace()(
           const groups = [...groupSelectionsStore.getValue(), row.id];
           groupSelectionsStore.next(groups);
         }
-        if (this.checkSource && !selections.length) {
-          wizard.isStandard = row.isStandard;
-        }
         wizard.item.searchParameters.push({parameterId, ...row, attributes: []});
         selections = [parameterId, ...selections];
         selectionsStore.next(selections);
@@ -298,7 +295,6 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     renderRow(row: any, child: boolean) {
-      const {wizard: {isStandard}} = this.props;
       const {ingredients} = this.state;
       const attributes = row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
@@ -306,8 +302,6 @@ export const ListSearch = withCurrentWorkspace()(
       const unselected = !attributes && !brand && !this.isSelected(row);
       const open = ingredients[row.id] && ingredients[row.id].open;
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
-      const disabled = this.checkSource && isStandard !== undefined
-        && row.isStandard !== isStandard;
       const columnStyle = child ?
         {...styles.columnBody, paddingLeft: '1.25rem'} : styles.columnBody;
       return <tr>
@@ -322,7 +316,7 @@ export const ListSearch = withCurrentWorkspace()(
               <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
             }
             {unselected &&
-              <ClrIcon style={disabled ? styles.disabledIcon : styles.selectIcon}
+              <ClrIcon style={styles.selectIcon}
                 shape='plus-circle' size='16'
                 onClick={() => this.selectItem(row)}/>
             }
@@ -388,15 +382,6 @@ export const ListSearch = withCurrentWorkspace()(
               onClick={() => this.getResults(sourceMatch.code)}>
               Return to source code
             </Clickable>.
-          </div>}
-          {isStandard !== undefined && <div style={{...styles.error, margin: '-0.5rem 0 0.5rem'}}>
-            <div style={{float: 'left', height: '1.5rem'}}>
-              <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-                shape='exclamation-triangle' size='22'/>
-            </div>
-            You have added a {isStandard ? 'standard' : 'source'} code. To add a
-            {isStandard ? ' source' : ' standard'} code to your cohort, add new criteria
-              once you've clicked the FINISH button below.
           </div>}
           {!!data.length && <table className='p-datatable' style={styles.table}>
             <thead className='p-datatable-thead'>
