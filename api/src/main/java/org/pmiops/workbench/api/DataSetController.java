@@ -432,13 +432,13 @@ public class DataSetController implements DataSetApiDelegate {
       }
     }
 
-    Map<String, QueryJobConfiguration> queryList =
+    Map<String, QueryJobConfiguration> queriesByDomain =
         dataSetService.generateQueryJobConfigurationsByDomainName(dataSetExportRequest.getDataSetRequest());
     List<String> queriesAsStrings =
         dataSetService.generateCodeCells(
             dataSetExportRequest.getKernelType(),
             dataSetExportRequest.getDataSetRequest().getName(),
-            queryList);
+            queriesByDomain);
 
     if (dataSetExportRequest.getNewNotebook()) {
       notebookFile =

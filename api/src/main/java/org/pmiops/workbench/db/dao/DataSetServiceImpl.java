@@ -13,13 +13,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
@@ -347,7 +348,10 @@ public class DataSetServiceImpl implements DataSetService {
       queryBuilder.append(String.join(", ", valuesLinkingPair.getSelects()))
           .append(" ")
           .append(valuesLinkingPair.formatJoins());
-      validateSelectedConceptSetsForDomain(conceptSetsSelected);
+
+      if (conceptSetsSelected.isEmpty() || !eachDomainHasAtLeastOneConcept(conceptSetsSelected)) {
+        throw new BadRequestException("Concept Sets must contain at least one concept");
+      }
 
       final String conceptSetIDs = conceptSetsSelected.stream()
           .filter(cs -> domain == cs.getDomainEnum())
@@ -416,24 +420,18 @@ public class DataSetServiceImpl implements DataSetService {
             .build());
   }
 
-  private void validateSelectedConceptSetsForDomain(List<ConceptSet> conceptSetsSelected) {
-    conceptSetsSelected.stream()
-        .map(ConceptSet::getDomain)
-        .distinct()
-        .forEach(validateConceptSetsInDomain(conceptSetsSelected));
-  }
+  @VisibleForTesting
+  public boolean eachDomainHasAtLeastOneConcept(List<ConceptSet> conceptSetsSelected) {
+    Map<Short, Long> conceptCountsByDomain = new HashMap<>();
 
-  // TODO(jaycarlton): check this at the API level
-  private Consumer<Short> validateConceptSetsInDomain(List<ConceptSet> conceptSetsSelected) {
-    return currentDomain -> {
-      if (conceptSetsSelected.stream()
-              .filter(conceptSet -> conceptSet.getDomain() == currentDomain)
-              .mapToLong(conceptSet -> conceptSet.getConceptIds().size())
-              .sum()
-          == 0) {
-        throw new BadRequestException("Concept Sets must contain at least one concept");
-      }
-    };
+    for (ConceptSet conceptSet : conceptSetsSelected) {
+      long numConcepts = conceptSet.getConceptIds().size();
+      short domain = conceptSet.getDomain();
+      conceptCountsByDomain.merge(domain, numConcepts, Long::sum);
+    }
+
+    return conceptCountsByDomain.entrySet().stream()
+        .allMatch(entry -> 0 < entry.getValue());
   }
 
   private String getQualifiedColumnName(Domain currentDomain, String columnName) {

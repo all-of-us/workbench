@@ -34,7 +34,4 @@ public interface DataSetService {
       KernelTypeEnum kernelTypeEnum,
       String dataSetName,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);
-
-  @VisibleForTesting
-  QueryAndParameters getCohortQueryStringAndCollectNamedParameters(Cohort cohortDbModel);
 }
