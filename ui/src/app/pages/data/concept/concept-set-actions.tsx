@@ -128,7 +128,7 @@ export const ConceptSetActions = withCurrentWorkspace()(
                onClick={() => this.navigateTo('conceptSet')}>
               {conceptSet.name}
             </a>
-            has been saved and can now be used in analysis and concept sets.
+            has been saved.
           </div>
           <h3 style={{...styles.conceptSetsHeader, marginTop: '1.5rem'}}>What Next?</h3>
           <div style={styles.cardArea}>
