@@ -49,7 +49,7 @@ const styles = reactStyles({
 const actionCards = [
   {
     title: 'Create another Cohort',
-    description: `Here, you can create another cohort.`,
+    description: `Create another cohort for your analysis.`,
     action: 'newCohort'
   }, {
     title: 'Create Review Sets',
@@ -58,8 +58,7 @@ const actionCards = [
     action: 'review'
   }, {
     title: 'Create a Data Set',
-    description: `Here, you can build and preview a dataset for one or more cohorts by
-       selecting the desired concept sets and values for the cohorts.`,
+    description: `Create an analysis ready data set that can be exported to notebooks.`,
     action: 'dataSet'
   },
 ];

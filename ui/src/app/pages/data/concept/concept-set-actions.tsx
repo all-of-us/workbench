@@ -48,17 +48,14 @@ const styles = reactStyles({
 
 const actionCards = [
   {
-    title: 'Create a Data Set',
-    description: `Here, you can build and preview a data set for one or more cohorts by
-       selecting the desired concept sets and values for the cohorts.`,
-    action: 'dataSet'
-  },
-  {
     title: 'Create another Concept Set',
-    description: `Here, you can create or update another concept set for the same or a
-      different domain.`,
+    description: `Create another concept set for the same or a different domain.`,
     action: 'newConceptSet'
-  },
+  }, {
+    title: 'Create a Data Set',
+    description: `Create an analyze ready data set that can be exported to notebooks.`,
+    action: 'dataSet'
+  }
 ];
 
 interface State {
