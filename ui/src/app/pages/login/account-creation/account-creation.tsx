@@ -30,7 +30,7 @@ import {
   Profile,
 } from 'generated/fetch/api';
 
-import {FlexColumn, FlexRow, FlexRowWrap} from 'app/components/flex';
+import {FlexColumn, FlexRowWrap} from 'app/components/flex';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils/index';
 import {environment} from 'environments/environment';
@@ -315,15 +315,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
 
   validateAccountCreation() {
     const {
-      showInstitution,
-      profile: {
-        givenName, familyName, contactEmail, username,
-        address: {
-          streetAddress1, city, state, country
-        }
-      }
+      showInstitution
     } = this.state;
-    const {institution, affiliation, role} = this.state.profile.institutionalAffiliations[0];
+    const {affiliation} = this.state.profile.institutionalAffiliations[0];
 
     const presenceCheck = {
       presence: {
@@ -355,8 +349,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     }
 
 
-    const errors = validate({
-    }, validationCheck);
+    const errors = validate({}, validationCheck);
     this.setState({errors: errors}, () => {
       if (!this.state.errors) {
         this.props.setProfile(this.state.profile, 'accountCreationSurvey');

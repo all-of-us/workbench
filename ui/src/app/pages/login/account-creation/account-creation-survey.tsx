@@ -135,7 +135,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
           {AccountCreationOptions.Race.map((race) => {
             return <CheckBoxWithLabel attribute='race' label={race.label}
                                       onChange={(value) => this.updateGenderList('race', race.value)}
-                                      value={race.value}/>;})
+                                      value={race.value}/>; })
           }
         </div>
       </Section>

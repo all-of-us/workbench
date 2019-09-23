@@ -252,7 +252,7 @@ public class ProfileController implements ProfileApiDelegate {
     validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
     validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
     validateStringLength(profile.getAddress().getStreetAddress1(), "Street Address 1", 255, 5);
-    validateStringLength(profile.getAddress().getCity(), "City", 3000, 5);
+    validateStringLength(profile.getAddress().getCity(), "City", 3000, 1);
     validateStringLength(profile.getAddress().getState(), "State", 3000, 1);
     validateStringLength(profile.getAddress().getCountry(), "Country", 3000, 2);
   }
