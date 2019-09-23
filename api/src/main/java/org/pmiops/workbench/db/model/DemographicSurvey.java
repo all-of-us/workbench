@@ -73,14 +73,6 @@ public class DemographicSurvey {
   public void setRace(List<Short> race) {
     this.race = race;
   }
-  //  @Column(name = "race")
-  //  public Short getRace() {
-  //    return race;
-  //  }
-  //
-  //  public void setRace(Short race) {
-  //    this.race = race;
-  //  }
 
   @Transient
   public List<Race> getRaceEnum() {
