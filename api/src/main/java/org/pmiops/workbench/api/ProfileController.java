@@ -109,10 +109,12 @@ public class ProfileController implements ProfileApiDelegate {
                 InstitutionalAffiliation institutionalAffiliation) {
               org.pmiops.workbench.db.model.InstitutionalAffiliation result =
                   new org.pmiops.workbench.db.model.InstitutionalAffiliation();
-              if (institutionalAffiliation.getInstitution() != null)
+              if (institutionalAffiliation.getInstitution() != null) {
                 result.setInstitution(institutionalAffiliation.getInstitution());
-              if (institutionalAffiliation.getAffiliation() != null)
+              }
+              if (institutionalAffiliation.getAffiliation() != null) {
                 result.setAffiliationEnum(institutionalAffiliation.getAffiliation());
+              }
 
               result.setRole(institutionalAffiliation.getRole());
 
@@ -251,10 +253,17 @@ public class ProfileController implements ProfileApiDelegate {
   private void validateProfileFields(Profile profile) {
     validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
     validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
-    validateStringLength(profile.getAddress().getStreetAddress1(), "Street Address 1", 255, 5);
-    validateStringLength(profile.getAddress().getCity(), "City", 3000, 1);
-    validateStringLength(profile.getAddress().getState(), "State", 3000, 1);
-    validateStringLength(profile.getAddress().getCountry(), "Country", 3000, 2);
+    if (!workbenchConfigProvider.get().featureFlags.enableNewAccountCreation) {
+      validateStringLength(profile.getCurrentPosition(), "Current Position", 255, 1);
+      validateStringLength(profile.getOrganization(), "Organization", 255, 1);
+      validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
+    } else {
+      // This will be un commented once enableAccount flag is set to true for prod and stable
+      validateStringLength(profile.getAddress().getStreetAddress1(), "Street Address 1", 255, 5);
+      validateStringLength(profile.getAddress().getCity(), "City", 3000, 1);
+      validateStringLength(profile.getAddress().getState(), "State", 3000, 1);
+      validateStringLength(profile.getAddress().getCountry(), "Country", 3000, 2);
+    }
   }
 
   private User saveUserWithConflictHandling(User user) {
@@ -397,6 +406,16 @@ public class ProfileController implements ProfileApiDelegate {
           "Username should be at least 3 characters and not more than 64 characters");
     request.getProfile().setUsername(request.getProfile().getUsername().toLowerCase());
     validateProfileFields(request.getProfile());
+    // This check will be removed once enableAccount flag is turned on.
+    if (request.getProfile().getAddress() == null) {
+      request.getProfile().setAddress(new Address());
+    }
+    if (request.getProfile().getDemographicSurvey() == null) {
+      request.getProfile().setDemographicSurvey(new DemographicSurvey());
+    }
+    if (request.getProfile().getInstitutionalAffiliations() == null) {
+      request.getProfile().setInstitutionalAffiliations(new ArrayList<InstitutionalAffiliation>());
+    }
     com.google.api.services.admin.directory.model.User googleUser =
         directoryService.createUser(
             request.getProfile().getGivenName(),

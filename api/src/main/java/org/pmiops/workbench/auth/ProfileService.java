@@ -26,7 +26,7 @@ public class ProfileService {
             public InstitutionalAffiliation apply(
                 org.pmiops.workbench.db.model.InstitutionalAffiliation institutionalAffiliation) {
               InstitutionalAffiliation result = new InstitutionalAffiliation();
-              //      result.setRole(institutionalAffiliation.getRole());
+              result.setRole(institutionalAffiliation.getRole());
               result.setInstitution(institutionalAffiliation.getInstitution());
 
               return result;
@@ -52,12 +52,14 @@ public class ProfileService {
             public DemographicSurvey apply(
                 org.pmiops.workbench.db.model.DemographicSurvey demographicSurvey) {
               DemographicSurvey result = new DemographicSurvey();
-              result.setDisability(demographicSurvey.getDisabilityEnum().equals(Disability.TRUE));
+              if (result.getDisability() != null)
+                result.setDisability(demographicSurvey.getDisabilityEnum().equals(Disability.TRUE));
               result.setEducation(demographicSurvey.getEducationEnum());
               result.setEthnicity(demographicSurvey.getEthnicityEnum());
               result.setGender(demographicSurvey.getGenderEnum());
               result.setRace(demographicSurvey.getRaceEnum());
               result.setYearOfBirth(BigDecimal.valueOf(demographicSurvey.getYear_of_birth()));
+
               return result;
             }
           };
@@ -68,12 +70,15 @@ public class ProfileService {
             @Override
             public Address apply(org.pmiops.workbench.db.model.Address address) {
               Address result = new Address();
-              result.setStreetAddress1(address.getStreetAddress1());
-              result.setStreetAddress2(address.getStreetAddress2());
-              result.setCity(address.getCity());
-              result.setState(address.getState());
-              result.setCountry(address.getCountry());
-              result.setZipCode(address.getZipCode());
+              if (address != null) {
+                result.setStreetAddress1(address.getStreetAddress1());
+                result.setStreetAddress2(address.getStreetAddress2());
+                result.setCity(address.getCity());
+                result.setState(address.getState());
+                result.setCountry(address.getCountry());
+                result.setZipCode(address.getZipCode());
+                return result;
+              }
               return result;
             }
           };

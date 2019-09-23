@@ -13,9 +13,9 @@
   	 	<column name="year_of_birth" type="smallint"/>
   	 	<column name="education" type="tinyint"/>
   	 	<column name="disability" type="tinyint"/>
-      <column name="user_id" type="bigint">
-        <constraints nullable="false"/>
-      </column>
+        <column name="user_id" type="bigint">
+          <constraints nullable="false"/>
+        </column>
   	 </createTable>
   	  <createTable tableName="demographic_survey_gender">
   	 	<column name="demographic_survey_id" type="bigint">

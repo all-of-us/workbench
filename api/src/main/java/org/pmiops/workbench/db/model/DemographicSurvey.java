@@ -84,6 +84,8 @@ public class DemographicSurvey {
 
   @Transient
   public List<Race> getRaceEnum() {
+    if (race == null)
+      return null;
     return this.race.stream()
         .map(
             (raceObject) -> {
@@ -113,6 +115,8 @@ public class DemographicSurvey {
 
   @Transient
   public Ethnicity getEthnicityEnum() {
+    if (ethnicity == null)
+      return null;
     return DemographicSurveyEnum.ethnicityFromStorage(ethnicity);
   }
 
@@ -135,6 +139,8 @@ public class DemographicSurvey {
 
   @Transient
   public List<Gender> getGenderEnum() {
+    if (gender == null)
+      return null;
     return this.gender.stream()
         .map(
             (gender) -> {
@@ -173,6 +179,8 @@ public class DemographicSurvey {
 
   @Transient
   public Education getEducationEnum() {
+    if (education == null)
+      return null;
     return DemographicSurveyEnum.educationFromStorage(education);
   }
 

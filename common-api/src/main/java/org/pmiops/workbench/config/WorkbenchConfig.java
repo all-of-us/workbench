@@ -151,5 +151,7 @@ public class WorkbenchConfig {
     // Whether or not AoU should request Terra to create GCP projects inside a VPC
     // security perimeter.
     public boolean enableVpcServicePerimeter;
+    // Flag to indicate if the new create account as per CAPS requirement
+    public boolean enableNewAccountCreation;
   }
 }
