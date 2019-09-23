@@ -344,7 +344,7 @@ dependencies {
   compile "com.fasterxml.jackson.core:jackson-core:${JACKSON_VERSION}"
   compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_DATABIND_VERSION}"
 
-  compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
+  compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3'
   compile 'com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0'
   compile 'com.google.cloud:google-cloud-bigquery:1.51.0'
   compile 'com.google.cloud:google-cloud-storage:1.51.0'
