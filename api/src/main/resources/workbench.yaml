@@ -1631,8 +1631,6 @@ paths:
     post:
       tags:
         - workspaces
-      consumes:
-        - application/json
       description: Add/update user recent workspaces
       operationId: updateRecentWorkspaces
       responses:
