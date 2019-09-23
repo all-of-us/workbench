@@ -4,6 +4,7 @@ import {domainToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -149,6 +150,7 @@ interface State {
   results: string;
   sourceMatch: any;
   ingredients: any;
+  hoverId: string;
 }
 
 export const ListSearch = withCurrentWorkspace()(
@@ -161,7 +163,8 @@ export const ListSearch = withCurrentWorkspace()(
         loading: false,
         results: 'all',
         sourceMatch: undefined,
-        ingredients: {}
+        ingredients: {},
+        hoverId: undefined
       };
     }
 
@@ -294,10 +297,17 @@ export const ListSearch = withCurrentWorkspace()(
       );
     }
 
-    renderRow(row: any, child: boolean) {
-      const {ingredients} = this.state;
+    onNameHover(el: HTMLDivElement, id: string) {
+      if (el.offsetWidth < el.scrollWidth) {
+        this.setState({hoverId: id});
+      }
+    }
+
+    renderRow(row: any, child: boolean, elementId: string) {
+      const {hoverId, ingredients} = this.state;
       const attributes = row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
+      const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
       const selected = !attributes && !brand && this.isSelected(row);
       const unselected = !attributes && !brand && !this.isSelected(row);
       const open = ingredients[row.id] && ingredients[row.id].open;
@@ -327,7 +337,13 @@ export const ListSearch = withCurrentWorkspace()(
             }
             {loadingIngredients && <Spinner size={16}/>}
           </div>}
-          <div style={styles.nameDiv}>{row.name}{brand && <span> (BRAND NAME)</span>}</div>
+          <TooltipTrigger disabled={hoverId !== elementId} content={<div>{displayName}</div>}>
+            <div style={styles.nameDiv}
+              onMouseOver={(e) => this.onNameHover(e.target as HTMLDivElement, elementId)}
+              onMouseOut={() => this.setState({hoverId: undefined})}>
+              {displayName}
+            </div>
+          </TooltipTrigger>
         </td>
         <td style={styles.columnBody}>{row.code}</td>
         <td style={styles.columnBody}>{!brand && row.type}</td>
@@ -400,9 +416,9 @@ export const ListSearch = withCurrentWorkspace()(
                 const open = ingredients[row.id] && ingredients[row.id].open;
                 const err = ingredients[row.id] && ingredients[row.id].error;
                 return <React.Fragment key={r}>
-                  {this.renderRow(row, false)}
+                  {this.renderRow(row, false, r)}
                   {open && !err && ingredients[row.id].items.map((item, i) => {
-                    return <React.Fragment key={i}>{this.renderRow(item, true)}</React.Fragment>;
+                    return <React.Fragment key={i}>{this.renderRow(item, true, `${r}.${i}`)}</React.Fragment>;
                   })}
                   {open && err && <tr>
                     <td colSpan={5}>
