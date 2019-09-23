@@ -726,6 +726,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
+  public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(String workspaceNamespace, String workspaceId) {
+      long userId = userProvider.get().getUserId();
+      org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+      UserRecentWorkspace userRecentWorkspace = workspaceService.updateRecentWorkspaces(dbWorkspace.getWorkspaceId(), userId);
+      RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
+      RecentWorkspace recentWorkspace = new RecentWorkspace();
+      recentWorkspace.setWorkspaceId(userRecentWorkspace.getWorkspaceId());
+      recentWorkspace.setAccessedTime(userRecentWorkspace.getLastAccessDate().toString());
+      recentWorkspaceResponse.add(recentWorkspace);
+      return ResponseEntity.ok(recentWorkspaceResponse);
+  }
+
+  @Override
   public ResponseEntity<RecentWorkspaceResponse> getUserRecentWorkspaces() {
     long userId = userProvider.get().getUserId();
     List<UserRecentWorkspace> userRecentWorkspaceList =
@@ -736,7 +749,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                     .map(userRecentWorkspace -> {
                       RecentWorkspace recentWorkspace = new RecentWorkspace();
                       recentWorkspace.setWorkspaceId(userRecentWorkspace.getWorkspaceId());
-                      recentWorkspace.setModifiedTime(userRecentWorkspace.getLastAccessDate().toString());
+                      recentWorkspace.setAccessedTime(userRecentWorkspace.getLastAccessDate().toString());
                       return recentWorkspace;
                     })
                     .collect(Collectors.toList())

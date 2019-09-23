@@ -1607,6 +1607,24 @@ paths:
           schema:
             $ref: "#/definitions/RecentWorkspaceResponse"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-workspaces/update:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      consumes:
+        - application/json
+      description: Add/update user recent workspaces
+      operationId: updateRecentWorkspaces
+      responses:
+        200:
+          description: Successfully added/updated
+          schema:
+            $ref: "#/definitions/RecentWorkspaceResponse"
+
+
   # Concept sets ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets:
@@ -3561,23 +3579,13 @@ definitions:
       notebookName:
         type: string
 
-  RecentWorkspaceRequest:
-    type: object
-    properties:
-      workspaceId:
-        type: integer
-        format: int64
-      userId:
-        type: integer
-        format: int64
-
   RecentWorkspace:
     type: object
     properties:
       workspaceId:
         type: integer
         format: int64
-      modifiedTime:
+      accessedTime:
         type: string
 
   RecentWorkspaceResponse:
