@@ -5,7 +5,8 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="nsaxena" id="changelog-97-add-demographic-survey">
-  	 <createTable tableName="demographic_survey">
+  	 
+     <createTable tableName="demographic_survey">
   	 	<column name="demographic_survey_id" type="bigint" autoIncrement="true">
   	 		<constraints primaryKey="true" nullable="false"/>
   	 	</column>
@@ -17,7 +18,8 @@
           <constraints nullable="false"/>
         </column>
   	 </createTable>
-  	  <createTable tableName="demographic_survey_gender">
+  	 
+     <createTable tableName="demographic_survey_gender">
   	 	<column name="demographic_survey_id" type="bigint">
   	 		<constraints nullable="false"/>
   	 	</column>
@@ -25,6 +27,7 @@
   	 		<constraints nullable="false"/>
   	 	</column>
   	 </createTable>
+     
      <createTable tableName="demographic_survey_race">
       <column name="demographic_survey_id" type="bigint">
         <constraints nullable="false"/>
