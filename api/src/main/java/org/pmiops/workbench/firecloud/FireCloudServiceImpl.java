@@ -76,6 +76,17 @@ public class FireCloudServiceImpl implements FireCloudService {
           "https://www.googleapis.com/auth/userinfo.email",
           "https://www.googleapis.com/auth/cloud-billing");
 
+  // All options are defined in this document:
+  // https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#
+  public static final List<String> FIRECLOUD_GET_WORKSPACE_REQUIRED_FIELDS =
+      Arrays.asList(
+          "accessLevel",
+          "workspace.workspaceId",
+          "workspace.name",
+          "workspace.namespace",
+          "workspace.bucketName",
+          "workspace.createdBy");
+
   @Autowired
   public FireCloudServiceImpl(
       Provider<WorkbenchConfig> configProvider,
@@ -302,7 +313,10 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public WorkspaceResponse getWorkspace(String projectName, String workspaceName) {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
-    return retryHandler.run((context) -> workspacesApi.getWorkspace(projectName, workspaceName));
+    return retryHandler.run(
+        (context) ->
+            workspacesApi.getWorkspace(
+                projectName, workspaceName, FIRECLOUD_GET_WORKSPACE_REQUIRED_FIELDS));
   }
 
   @Override

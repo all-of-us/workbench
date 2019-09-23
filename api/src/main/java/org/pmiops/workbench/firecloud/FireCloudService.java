@@ -64,6 +64,10 @@ public interface FireCloudService {
   WorkspaceACLUpdateResponseList updateWorkspaceACL(
       String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates);
 
+  /**
+   * Requested field options specified here:
+   * https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#heading=h.xgjl2srtytjt
+   */
   WorkspaceResponse getWorkspace(String projectName, String workspaceName);
 
   List<WorkspaceResponse> getWorkspaces();
