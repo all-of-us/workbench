@@ -44,7 +44,6 @@ describe('WorkspaceAbout', () => {
     currentWorkspaceStore.next(workspace);
     serverConfigStore.next({
       enableDataUseAgreement: true,
-      enforceRegistered: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',

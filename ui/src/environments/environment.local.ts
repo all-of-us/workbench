@@ -16,6 +16,8 @@ export const environment: Environment = {
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
-  enableJupyterLab: true,
-  enableAccountPages: true,
+  enableHomepageRestyle: true,
+  enablePublishedWorkspaces: true,
+  enableAccountPages: false,
+  enableProfileCapsFeatures: true,
 };

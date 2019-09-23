@@ -70,7 +70,7 @@ export function domainToTitle(domain: any): string {
       domain = 'Physical Measurements';
       break;
     case DomainType.VISIT:
-      domain = 'Visit';
+      domain = 'Visits';
       break;
     case DomainType.DRUG:
       domain = 'Drugs';
@@ -81,11 +81,20 @@ export function domainToTitle(domain: any): string {
     case DomainType.PROCEDURE:
       domain = 'Procedures';
       break;
+    case DomainType.OBSERVATION:
+      domain = 'Observations';
+      break;
     case DomainType.LAB:
       domain = 'Labs';
       break;
+    case DomainType.VITAL:
+      domain = 'Vitals';
+      break;
     case DomainType.SURVEY:
       domain = 'Surveys';
+      break;
+    case DomainType.ALLEVENTS:
+      domain = 'All Events';
       break;
   }
   return domain;

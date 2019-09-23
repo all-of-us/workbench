@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -28,6 +29,7 @@ import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -52,7 +54,9 @@ import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
@@ -60,17 +64,29 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({
-  BigQueryTestService.class,
-  CloudStorageServiceImpl.class,
-  CohortQueryBuilder.class,
-  SearchGroupItemQueryBuilder.class,
-  TestJpaConfig.class,
-  CdrVersionService.class
-})
-@MockBean({FireCloudService.class})
+// Note: normally we shouldn't need to explicitly import our own @TestConfiguration. This might be
+// a bad interaction with BeforeAfterSpringTestRunner.
+@Import({TestJpaConfig.class, CohortBuilderControllerBQTest.Configuration.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
+
+  @TestConfiguration
+  @Import({
+    BigQueryTestService.class,
+    CloudStorageServiceImpl.class,
+    CohortQueryBuilder.class,
+    SearchGroupItemQueryBuilder.class,
+    CdrVersionService.class
+  })
+  @MockBean({FireCloudService.class})
+  static class Configuration {
+    @Bean
+    public User user() {
+      User user = new User();
+      user.setEmail("bob@gmail.com");
+      return user;
+    }
+  }
 
   private CohortBuilderController controller;
 
@@ -89,6 +105,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Autowired private CdrVersionService cdrVersionService;
 
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
+
+  @Autowired private FireCloudService firecloudService;
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
@@ -114,6 +132,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     testConfig.elasticsearch = new WorkbenchConfig.ElasticsearchConfig();
     testConfig.elasticsearch.enableElasticsearchBackend = false;
     when(configProvider.get()).thenReturn(testConfig);
+
+    when(firecloudService.isUserMemberOfGroup(anyString(), anyString())).thenReturn(true);
 
     ElasticSearchService elasticSearchService =
         new ElasticSearchService(cbCriteriaDao, cloudStorageService, configProvider);

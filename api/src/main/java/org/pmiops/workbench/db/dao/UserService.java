@@ -28,7 +28,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
@@ -202,7 +201,6 @@ public class UserService {
     user.setEmail(email);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.NONE);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -240,7 +238,6 @@ public class UserService {
     user.setDisabled(false);
     user.setAboutYou(null);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.NONE);
     user.setAddress(address);
     user.setDemographicSurvey(demographicSurvey);
 
@@ -255,7 +252,6 @@ public class UserService {
       final User u = user;
       institutionalAffiliation.forEach(affiliation -> affiliation.setUser(u));
     }
-
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -365,15 +361,6 @@ public class UserService {
         });
   }
 
-  public User setFreeTierBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
-    return updateUserWithRetries(
-        (user) -> {
-          user.setFreeTierBillingProjectName(name);
-          user.setFreeTierBillingProjectStatusEnum(status);
-          return user;
-        });
-  }
-
   public User setDisabledStatus(Long userId, boolean disabled) {
     User user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(
@@ -421,18 +408,10 @@ public class UserService {
 
   /** Find users matching the user's name or email */
   public List<User> findUsersBySearchString(String term, Sort sort) {
-    List<Short> dataAccessLevels;
-    if (configProvider.get().firecloud.enforceRegistered) {
-      dataAccessLevels =
-          Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
-              .map(CommonStorageEnums::dataAccessLevelToStorage)
-              .collect(Collectors.toList());
-    } else {
-      dataAccessLevels =
-          Stream.of(DataAccessLevel.values())
-              .map(CommonStorageEnums::dataAccessLevelToStorage)
-              .collect(Collectors.toList());
-    }
+    List<Short> dataAccessLevels =
+        Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
+            .map(CommonStorageEnums::dataAccessLevelToStorage)
+            .collect(Collectors.toList());
     return userDao.findUsersByDataAccessLevelsAndSearchString(dataAccessLevels, term, sort);
   }
 

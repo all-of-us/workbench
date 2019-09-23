@@ -21,7 +21,7 @@ const styles = reactStyles({
     position: 'relative',
   },
   mainHeader: {
-    color: colors.white, fontSize: 28, fontWeight: 400,
+    color: colors.primary, fontSize: 28, fontWeight: 400,
     letterSpacing: 'normal', marginBottom: '0.2rem'
   },
   cardStyle: {
@@ -86,7 +86,7 @@ interface RegistrationTask {
   buttonText: string;
   completedText: string;
   isRefreshable?: boolean;
-  isComplete: Function;
+  completionTimestamp: (profile: Profile) => number;
   onClick: Function;
   featureFlag?: boolean;
 }
@@ -104,8 +104,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     buttonText: 'Get Started',
     completedText: 'Completed',
     isRefreshable: true,
-    isComplete: (profile: Profile) => {
-      return !!profile.twoFactorAuthCompletionTime || !!profile.twoFactorAuthBypassTime;
+    completionTimestamp: (profile: Profile) => {
+      return profile.twoFactorAuthCompletionTime || profile.twoFactorAuthBypassTime;
     },
     onClick: redirectToGoogleSecurity
   }, {
@@ -116,8 +116,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
       'and handled.',
     buttonText: 'Complete training',
     completedText: 'Completed',
-    isComplete: (profile: Profile) => {
-      return !!profile.complianceTrainingCompletionTime || !!profile.complianceTrainingBypassTime;
+    completionTimestamp: (profile: Profile) => {
+      return profile.complianceTrainingCompletionTime || profile.complianceTrainingBypassTime;
     },
     onClick: redirectToTraining
   }, {
@@ -128,8 +128,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
       'and tools.',
     buttonText: 'Login',
     completedText: 'Linked',
-    isComplete: (profile: Profile) => {
-      return !!profile.eraCommonsCompletionTime || !!profile.eraCommonsBypassTime;
+    completionTimestamp: (profile: Profile) => {
+      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
     },
     onClick: redirectToNiH
   }, {
@@ -140,8 +140,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     buttonText: 'View & Sign',
     featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',
-    isComplete: (profile: Profile) => {
-      return !!profile.dataUseAgreementCompletionTime || !!profile.dataUseAgreementBypassTime;
+    completionTimestamp: (profile: Profile) => {
+      return profile.dataUseAgreementCompletionTime || profile.dataUseAgreementBypassTime;
     },
     onClick: () => navigate(['data-use-agreement'])
   }
@@ -260,14 +260,14 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                 data-test-id='registration-dashboard'>
       {bypassInProgress && <SpinnerOverlay />}
       <div style={styles.mainHeader}>Researcher Workbench</div>
-      <div style={{...styles.mainHeader, fontSize: '18px', marginBottom: '1rem'}}>
+      <div style={{...styles.mainHeader, fontSize: '18px', marginTop: '0.25rem'}}>
         <ClrIcon shape='warning-standard' class='is-solid'
-                 style={{color: colors.white, marginRight: '0.3rem'}}/>
+                 style={{color: colors.warning, marginRight: '0.3rem'}}/>
         In order to get access to data and tools please complete the following steps:
       </div>
       {canUnsafeSelfBypass &&
         <div data-test-id='self-bypass'
-             style={{...baseStyles.card, ...styles.warningModal}}>
+             style={{...baseStyles.card, ...styles.warningModal, marginTop: '0.5rem'}}>
           {bypassActionComplete &&
             <span>Bypass action is complete. Reload the page to continue.</span>}
           {!bypassActionComplete && <span>

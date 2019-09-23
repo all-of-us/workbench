@@ -5,7 +5,6 @@
     "clusterMaxAgeDays": 7,
     "clusterIdleMaxAgeDays": 3,
     "debugEndpoints": false,
-    "enforceRegistered": true,
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-test",
     "registeredDomainGroup": "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
@@ -70,7 +69,6 @@
     "unsafeAllowSelfBypass": true
   },
   "featureFlags": {
-    "enableLeoWelder": true,
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true

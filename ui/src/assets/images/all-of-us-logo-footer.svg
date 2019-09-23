@@ -2,7 +2,7 @@
 	<defs>
 		<path id="a" d="M89.6 29.3c0-1.2.4-2.5 1.1-3.9.7-1.4 1.8-2.5 3.3-3.5 1.5-.9 3.3-1.4 5.5-1.4 2.6 0 4.5.6 5.8 1.9a6.1 6.1 0 0 1 1.8 4.5c0 2.5-.9 4.5-2.8 6.3-1.9 1.8-4.3 2.7-7.2 2.7-2.1 0-3.9-.5-5.3-1.6-1.5-1.1-2.2-2.7-2.2-5m5.1 1.8c0 1 .2 1.8.6 2.3.4.5 1 .8 1.7.8 1.5 0 2.6-1.1 3.5-3.3.9-2.2 1.4-4 1.4-5.5 0-1.1-.2-2-.7-2.5-.4-.5-.9-.8-1.5-.8-1.6 0-2.8 1.1-3.7 3.4-.9 2.4-1.3 4.2-1.3 5.6"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#a"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#a"/>
 	<clipPath id="b">
 		<use overflow="visible" xlink:href="#a"/>
 	</clipPath>
@@ -10,16 +10,16 @@
 		<defs>
 			<path id="c" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#c"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#c"/>
 		<clipPath id="d">
 			<use overflow="visible" xlink:href="#c"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M80.6 11.6H116v33.3H80.6z" clip-path="url(#d)"/>
+		<path fill="#ffffff" d="M80.6 11.6H116v33.3H80.6z" clip-path="url(#d)"/>
 	</g>
 	<defs>
 		<path id="e" d="M116.3 23l-1.7 7.8c-1 4.5-2.4 7.9-4.1 10.1a8.2 8.2 0 0 1-6.8 3.3c-1.4 0-2.4-.3-3-.8-.6-.5-.9-1.2-.9-1.9s.2-1.2.8-1.7c.5-.5 1.1-.7 1.7-.7 1.4 0 2.1.7 2.4 2.2.1.8.4 1.1.9 1.1.6 0 1-.5 1.5-1.5.4-1 1-2.9 1.7-5.9l.5-2.5c.1-.6.3-1.1.3-1.4l1.7-8.1H109l.6-1.9h2.1c1.1-4 2.4-6.6 3.8-7.9a7.6 7.6 0 0 1 5.2-1.9c1.4 0 2.5.3 3.3.8.8.5 1.3 1.2 1.3 2.1 0 .6-.2 1.1-.6 1.5-.4.4-.9.7-1.6.7-.9 0-1.7-.7-2.4-1.9-.5-.9-1-1.5-1.5-1.5-.6 0-1 .8-1.3 2.3l-1.1 5.8h2.6l-.6 1.9h-2.5z"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#e"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#e"/>
 	<clipPath id="f">
 		<use overflow="visible" xlink:href="#e"/>
 	</clipPath>
@@ -27,16 +27,16 @@
 		<defs>
 			<path id="g" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#g"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#g"/>
 		<clipPath id="h">
 			<use overflow="visible" xlink:href="#g"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M90.8 2.3h43.4v50.9H90.8z" clip-path="url(#h)"/>
+		<path fill="#ffffff" d="M90.8 2.3h43.4v50.9H90.8z" clip-path="url(#h)"/>
 	</g>
 	<defs>
 		<path id="i" d="M20.7 3h13.7l17.4 41.6h-15L34.6 39H20.2l-2.1 5.6H3.3L20.7 3zm10.6 26.2l-3.8-10-3.8 10h7.6z"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#i"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#i"/>
 	<clipPath id="j">
 		<use overflow="visible" xlink:href="#i"/>
 	</clipPath>
@@ -44,16 +44,16 @@
 		<defs>
 			<path id="k" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#k"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#k"/>
 		<clipPath id="l">
 			<use overflow="visible" xlink:href="#k"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M-5.6-6h66.4v59.5H-5.6z" clip-path="url(#l)"/>
+		<path fill="#ffffff" d="M-5.6-6h66.4v59.5H-5.6z" clip-path="url(#l)"/>
 	</g>
 	<defs>
 		<path id="m" d="M53.6 1.5H67v43.1H53.6z"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#m"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#m"/>
 	<clipPath id="n">
 		<use overflow="visible" xlink:href="#m"/>
 	</clipPath>
@@ -61,16 +61,16 @@
 		<defs>
 			<path id="o" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#o"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#o"/>
 		<clipPath id="p">
 			<use overflow="visible" xlink:href="#o"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M44.6-7.5h31.3v60.9H44.6z" clip-path="url(#p)"/>
+		<path fill="#ffffff" d="M44.6-7.5h31.3v60.9H44.6z" clip-path="url(#p)"/>
 	</g>
 	<defs>
 		<path id="q" d="M73 1.5h13.4v43.1H73z"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#q"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#q"/>
 	<clipPath id="r">
 		<use overflow="visible" xlink:href="#q"/>
 	</clipPath>
@@ -78,16 +78,16 @@
 		<defs>
 			<path id="s" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#s"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#s"/>
 		<clipPath id="t">
 			<use overflow="visible" xlink:href="#s"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M64.1-7.5h31.3v60.9H64.1z" clip-path="url(#t)"/>
+		<path fill="#ffffff" d="M64.1-7.5h31.3v60.9H64.1z" clip-path="url(#t)"/>
 	</g>
 	<defs>
 		<path id="u" d="M127.7 26V3.3h14.1v22.6c0 5.1 2.6 7.3 6.4 7.3s6.4-2 6.4-7V3.3h14.1v22.5c0 14.1-8.2 19.6-20.5 19.6-12.5 0-20.5-5.7-20.5-19.4"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#u"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#u"/>
 	<clipPath id="v">
 		<use overflow="visible" xlink:href="#u"/>
 	</clipPath>
@@ -95,16 +95,16 @@
 		<defs>
 			<path id="w" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#w"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#w"/>
 		<clipPath id="x">
 			<use overflow="visible" xlink:href="#w"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M118.7-5.7h58.7v59.9h-58.7z" clip-path="url(#x)"/>
+		<path fill="#ffffff" d="M118.7-5.7h58.7v59.9h-58.7z" clip-path="url(#x)"/>
 	</g>
 	<defs>
 		<path id="y" d="M170.2 40.7l4.5-7.6c3.9 2.4 8.3 3.6 11.9 3.6 1.3 0 1.9-.3 1.9-1.1v-.1c0-.7-.6-1.1-3.8-1.9-8.2-2-13.2-4.2-13.2-10.8v-.1c0-7.1 5.7-11 14.1-11 5.3 0 10.6 1.4 14.4 3.7l-4.2 8c-3.4-1.9-7.5-3-10.3-3-1.3 0-1.9.4-1.9 1v.1c0 .7.7 1.1 4 1.9 8.2 2 13 4.2 13 10.8v.1c0 7-5.2 11.1-14 11.1-6.1-.1-11.8-1.7-16.4-4.7"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#y"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#y"/>
 	<clipPath id="z">
 		<use overflow="visible" xlink:href="#y"/>
 	</clipPath>
@@ -112,16 +112,16 @@
 		<defs>
 			<path id="A" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#A"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#A"/>
 		<clipPath id="B">
 			<use overflow="visible" xlink:href="#A"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M161.3 2.6h48.3v51.6h-48.3z" clip-path="url(#B)"/>
+		<path fill="#ffffff" d="M161.3 2.6h48.3v51.6h-48.3z" clip-path="url(#B)"/>
 	</g>
 	<defs>
 		<path id="C" d="M212.2 1.8h.7v62.9h-.7z"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#C"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#C"/>
 	<clipPath id="D">
 		<use overflow="visible" xlink:href="#C"/>
 	</clipPath>
@@ -129,16 +129,16 @@
 		<defs>
 			<path id="E" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#E"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#E"/>
 		<clipPath id="F">
 			<use overflow="visible" xlink:href="#E"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M203.3-7.1h18.6v80.7h-18.6z" clip-path="url(#F)"/>
+		<path fill="#ffffff" d="M203.3-7.1h18.6v80.7h-18.6z" clip-path="url(#F)"/>
 	</g>
 	<defs>
 		<path id="G" d="M226.2 12.2H225V3.1h-3.4V2h8v1.1h-3.4z"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#G"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#G"/>
 	<clipPath id="H">
 		<use overflow="visible" xlink:href="#G"/>
 	</clipPath>
@@ -146,16 +146,16 @@
 		<defs>
 			<path id="I" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#I"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#I"/>
 		<clipPath id="J">
 			<use overflow="visible" xlink:href="#I"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M212.7-6.9h25.8v28h-25.8z" clip-path="url(#J)"/>
+		<path fill="#ffffff" d="M212.7-6.9h25.8v28h-25.8z" clip-path="url(#J)"/>
 	</g>
 	<defs>
 		<path id="K" d="M232.5 12.2h-1.1V1.6h1.1V6c.5-.8 1.3-1.5 2.5-1.5 1.8 0 2.9 1.2 2.9 3v4.7h-1.1V7.8c0-1.4-.8-2.3-2.1-2.3s-2.3.9-2.3 2.4l.1 4.3z"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#K"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#K"/>
 	<clipPath id="L">
 		<use overflow="visible" xlink:href="#K"/>
 	</clipPath>
@@ -163,16 +163,16 @@
 		<defs>
 			<path id="M" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#M"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#M"/>
 		<clipPath id="N">
 			<use overflow="visible" xlink:href="#M"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M222.4-7.4h24.4v28.5h-24.4z" clip-path="url(#N)"/>
+		<path fill="#ffffff" d="M222.4-7.4h24.4v28.5h-24.4z" clip-path="url(#N)"/>
 	</g>
 	<defs>
 		<path id="O" d="M243.6 11.4c1 0 1.7-.4 2.4-1l.7.6c-.8.8-1.7 1.4-3.1 1.4-2.1 0-3.7-1.6-3.7-3.9 0-2.2 1.5-3.9 3.6-3.9 2.2 0 3.5 1.8 3.5 4v.3h-6c.1 1.5 1.3 2.5 2.6 2.5zm2.2-3.4c-.1-1.4-.9-2.5-2.4-2.5-1.3 0-2.3 1.1-2.5 2.5h4.9z"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#O"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#O"/>
 	<clipPath id="P">
 		<use overflow="visible" xlink:href="#O"/>
 	</clipPath>
@@ -180,16 +180,16 @@
 		<defs>
 			<path id="Q" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#Q"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#Q"/>
 		<clipPath id="R">
 			<use overflow="visible" xlink:href="#Q"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M230.9-4.4h24.9v25.7h-24.9z" clip-path="url(#R)"/>
+		<path fill="#ffffff" d="M230.9-4.4h24.9v25.7h-24.9z" clip-path="url(#R)"/>
 	</g>
 	<defs>
 		<path id="S" d="M226 26h-2.5v3.6h-1.1V19.4h3.8c2.3 0 3.8 1.2 3.8 3.3 0 2.2-1.9 3.3-4 3.3m0-5.5h-2.5V25h2.5c1.7 0 2.8-.9 2.8-2.3 0-1.5-1.1-2.2-2.8-2.2"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#S"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#S"/>
 	<clipPath id="T">
 		<use overflow="visible" xlink:href="#S"/>
 	</clipPath>
@@ -197,16 +197,16 @@
 		<defs>
 			<path id="U" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#U"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#U"/>
 		<clipPath id="V">
 			<use overflow="visible" xlink:href="#U"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M213.4 10.5h25.5v28h-25.5z" clip-path="url(#V)"/>
+		<path fill="#ffffff" d="M213.4 10.5h25.5v28h-25.5z" clip-path="url(#V)"/>
 	</g>
 	<defs>
 		<path id="W" d="M233 29.6h-1.1v-7.5h1.1V24c.6-1.2 1.7-2.2 3.1-2.1v1.2h-.1c-1.7 0-3 1.2-3 3.4v3.1z"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#W"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#W"/>
 	<clipPath id="X">
 		<use overflow="visible" xlink:href="#W"/>
 	</clipPath>
@@ -214,16 +214,16 @@
 		<defs>
 			<path id="Y" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#Y"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#Y"/>
 		<clipPath id="Z">
 			<use overflow="visible" xlink:href="#Y"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M222.9 13H245v25.5h-22.1z" clip-path="url(#Z)"/>
+		<path fill="#ffffff" d="M222.9 13H245v25.5h-22.1z" clip-path="url(#Z)"/>
 	</g>
 	<defs>
 		<path id="aa" d="M240.7 28.8c1 0 1.7-.4 2.4-1l.7.6c-.8.8-1.7 1.4-3.1 1.4-2.1 0-3.7-1.6-3.7-3.9 0-2.2 1.5-3.9 3.6-3.9 2.2 0 3.5 1.8 3.5 4v.3h-5.9c.1 1.6 1.2 2.5 2.5 2.5zm2.2-3.4c-.1-1.4-.9-2.5-2.4-2.5-1.3 0-2.3 1.1-2.5 2.5h4.9z"/>
 	</defs>
-	<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aa"/>
+	<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aa"/>
 	<clipPath id="ab">
 		<use overflow="visible" xlink:href="#aa"/>
 	</clipPath>
@@ -231,17 +231,17 @@
 		<defs>
 			<path id="ac" d="M1.7 1.3h284.1v96.5H1.7z"/>
 		</defs>
-		<use fill="#9b9b9b" overflow="visible" xlink:href="#ac"/>
+		<use fill="#ffffff" overflow="visible" xlink:href="#ac"/>
 		<clipPath id="ad">
 			<use overflow="visible" xlink:href="#ac"/>
 		</clipPath>
-		<path fill="#9b9b9b" d="M228 13h24.9v25.7H228z" clip-path="url(#ad)"/>
+		<path fill="#ffffff" d="M228 13h24.9v25.7H228z" clip-path="url(#ad)"/>
 	</g>
 	<g>
 		<defs>
 			<path id="ae" d="M249.4 29.8a3.9 3.9 0 0 1 0-7.8c1.4 0 2.3.6 3 1.3l-.8.8c-.6-.6-1.3-1.1-2.3-1.1-1.5 0-2.7 1.3-2.7 2.9 0 1.7 1.2 2.9 2.7 2.9.9 0 1.7-.5 2.3-1.1l.7.7c-.6.7-1.5 1.4-2.9 1.4"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ae"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ae"/>
 		<clipPath id="af">
 			<use overflow="visible" xlink:href="#ae"/>
 		</clipPath>
@@ -249,18 +249,18 @@
 			<defs>
 				<path id="ag" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#ag"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#ag"/>
 			<clipPath id="ah">
 				<use overflow="visible" xlink:href="#ag"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M236.6 13h24.8v25.7h-24.8z" clip-path="url(#ah)"/>
+			<path fill="#ffffff" d="M236.6 13h24.8v25.7h-24.8z" clip-path="url(#ah)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="ai" d="M254.4 20.4h1.3v-1.2h-1.3v1.2zm0 9.2h1.1v-7.5h-1.1v7.5z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ai"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ai"/>
 		<clipPath id="aj">
 			<use overflow="visible" xlink:href="#ai"/>
 		</clipPath>
@@ -268,18 +268,18 @@
 			<defs>
 				<path id="ak" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#ak"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#ak"/>
 			<clipPath id="al">
 				<use overflow="visible" xlink:href="#ak"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M245.4 10.3h19.1v28.2h-19.1z" clip-path="url(#al)"/>
+			<path fill="#ffffff" d="M245.4 10.3h19.1v28.2h-19.1z" clip-path="url(#al)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="am" d="M260.6 29.7c-1.1 0-2.3-.4-3.1-1.1l.6-.8c.8.6 1.7.9 2.6.9.9 0 1.6-.5 1.6-1.2 0-.8-.9-1-1.9-1.3-1.2-.3-2.5-.8-2.5-2.1s1.1-2.2 2.5-2.2c.9 0 1.9.3 2.7.8l-.5.8c-.7-.5-1.5-.7-2.2-.7-.9 0-1.5.5-1.5 1.1 0 .7.9 1 1.9 1.3 1.2.3 2.4.8 2.4 2.2.1 1.5-1.1 2.3-2.6 2.3"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#am"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#am"/>
 		<clipPath id="an">
 			<use overflow="visible" xlink:href="#am"/>
 		</clipPath>
@@ -287,18 +287,18 @@
 			<defs>
 				<path id="ao" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#ao"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#ao"/>
 			<clipPath id="ap">
 				<use overflow="visible" xlink:href="#ao"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M248.6 13h23.6v25.7h-23.6z" clip-path="url(#ap)"/>
+			<path fill="#ffffff" d="M248.6 13h23.6v25.7h-23.6z" clip-path="url(#ap)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="aq" d="M265.4 20.4h1.3v-1.2h-1.3v1.2zm0 9.2h1.1v-7.5h-1.1v7.5z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aq"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aq"/>
 		<clipPath id="ar">
 			<use overflow="visible" xlink:href="#aq"/>
 		</clipPath>
@@ -306,18 +306,18 @@
 			<defs>
 				<path id="as" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#as"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#as"/>
 			<clipPath id="at">
 				<use overflow="visible" xlink:href="#as"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M256.5 10.3h19.1v28.2h-19.1z" clip-path="url(#at)"/>
+			<path fill="#ffffff" d="M256.5 10.3h19.1v28.2h-19.1z" clip-path="url(#at)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="au" d="M272.6 29.8c-2.3 0-3.9-1.8-3.9-3.9a3.9 3.9 0 1 1 3.9 3.9m0-6.9c-1.6 0-2.7 1.3-2.7 2.9 0 1.6 1.2 2.9 2.8 2.9s2.7-1.3 2.7-2.9c0-1.6-1.2-2.9-2.8-2.9"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#au"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#au"/>
 		<clipPath id="av">
 			<use overflow="visible" xlink:href="#au"/>
 		</clipPath>
@@ -325,18 +325,18 @@
 			<defs>
 				<path id="aw" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#aw"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#aw"/>
 			<clipPath id="ax">
 				<use overflow="visible" xlink:href="#aw"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M259.8 13h25.7v25.7h-25.7z" clip-path="url(#ax)"/>
+			<path fill="#ffffff" d="M259.8 13h25.7v25.7h-25.7z" clip-path="url(#ax)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="ay" d="M279.7 29.6h-1.1v-7.5h1.1v1.3c.5-.8 1.3-1.5 2.5-1.5 1.8 0 2.9 1.2 2.9 3v4.7H284v-4.4c0-1.4-.8-2.3-2.1-2.3s-2.3.9-2.3 2.4l.1 4.3z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ay"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ay"/>
 		<clipPath id="az">
 			<use overflow="visible" xlink:href="#ay"/>
 		</clipPath>
@@ -344,18 +344,18 @@
 			<defs>
 				<path id="aA" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#aA"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#aA"/>
 			<clipPath id="aB">
 				<use overflow="visible" xlink:href="#aA"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M269.6 13H294v25.6h-24.4z" clip-path="url(#aB)"/>
+			<path fill="#ffffff" d="M269.6 13H294v25.6h-24.4z" clip-path="url(#aB)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="aC" d="M227.2 44.2l-3.7-5.4V47h-1.1V36.8h1.1l3.7 5.6 3.7-5.6h1.2V47H231v-8.2z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aC"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aC"/>
 		<clipPath id="aD">
 			<use overflow="visible" xlink:href="#aC"/>
 		</clipPath>
@@ -363,18 +363,18 @@
 			<defs>
 				<path id="aE" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#aE"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#aE"/>
 			<clipPath id="aF">
 				<use overflow="visible" xlink:href="#aE"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M213.4 27.9H241v28h-27.6z" clip-path="url(#aF)"/>
+			<path fill="#ffffff" d="M213.4 27.9H241v28h-27.6z" clip-path="url(#aF)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="aG" d="M238.1 46.2c1 0 1.7-.4 2.4-1l.7.6c-.8.8-1.7 1.4-3.1 1.4-2.1 0-3.7-1.6-3.7-3.9 0-2.2 1.5-3.9 3.6-3.9 2.2 0 3.5 1.8 3.5 4v.3h-5.9c0 1.6 1.2 2.5 2.5 2.5zm2.1-3.4c-.1-1.4-.9-2.5-2.4-2.5-1.3 0-2.3 1.1-2.5 2.5h4.9z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aG"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aG"/>
 		<clipPath id="aH">
 			<use overflow="visible" xlink:href="#aG"/>
 		</clipPath>
@@ -382,18 +382,18 @@
 			<defs>
 				<path id="aI" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#aI"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#aI"/>
 			<clipPath id="aJ">
 				<use overflow="visible" xlink:href="#aI"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M225.4 30.4h24.9v25.7h-24.9z" clip-path="url(#aJ)"/>
+			<path fill="#ffffff" d="M225.4 30.4h24.9v25.7h-24.9z" clip-path="url(#aJ)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="aK" d="M249.4 47v-1.5c-.6.9-1.5 1.7-2.9 1.7-1.8 0-3.6-1.4-3.6-3.9s1.8-3.9 3.6-3.9c1.4 0 2.3.8 2.9 1.6v-4.5h1.1V47h-1.1zm-2.7-6.7c-1.5 0-2.6 1.1-2.6 2.9 0 1.8 1.2 2.9 2.6 2.9 1.4 0 2.7-1.2 2.7-2.9s-1.3-2.9-2.7-2.9z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aK"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aK"/>
 		<clipPath id="aL">
 			<use overflow="visible" xlink:href="#aK"/>
 		</clipPath>
@@ -401,18 +401,18 @@
 			<defs>
 				<path id="aM" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#aM"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#aM"/>
 			<clipPath id="aN">
 				<use overflow="visible" xlink:href="#aM"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M234 27.4h25.5V56H234z" clip-path="url(#aN)"/>
+			<path fill="#ffffff" d="M234 27.4h25.5V56H234z" clip-path="url(#aN)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="aO" d="M253 37.9h1.3v-1.2H253v1.2zm.1 9.1h1.1v-7.5h-1.1V47z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aO"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aO"/>
 		<clipPath id="aP">
 			<use overflow="visible" xlink:href="#aO"/>
 		</clipPath>
@@ -420,18 +420,18 @@
 			<defs>
 				<path id="aQ" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#aQ"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#aQ"/>
 			<clipPath id="aR">
 				<use overflow="visible" xlink:href="#aQ"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M244.1 27.7h19.1v28.2h-19.1z" clip-path="url(#aR)"/>
+			<path fill="#ffffff" d="M244.1 27.7h19.1v28.2h-19.1z" clip-path="url(#aR)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="aS" d="M260.2 47.2a3.9 3.9 0 0 1 0-7.8c1.4 0 2.3.6 3 1.3l-.8.8c-.6-.6-1.3-1.1-2.3-1.1-1.5 0-2.7 1.3-2.7 2.9 0 1.7 1.2 2.9 2.7 2.9.9 0 1.7-.5 2.3-1.1l.7.7c-.6.8-1.5 1.4-2.9 1.4"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aS"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aS"/>
 		<clipPath id="aT">
 			<use overflow="visible" xlink:href="#aS"/>
 		</clipPath>
@@ -439,18 +439,18 @@
 			<defs>
 				<path id="aU" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#aU"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#aU"/>
 			<clipPath id="aV">
 				<use overflow="visible" xlink:href="#aU"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M247.4 30.4h24.8v25.7h-24.8z" clip-path="url(#aV)"/>
+			<path fill="#ffffff" d="M247.4 30.4h24.8v25.7h-24.8z" clip-path="url(#aV)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="aW" d="M265.2 37.9h1.3v-1.2h-1.3v1.2zm0 9.1h1.1v-7.5h-1.1V47z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aW"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#aW"/>
 		<clipPath id="aX">
 			<use overflow="visible" xlink:href="#aW"/>
 		</clipPath>
@@ -458,18 +458,18 @@
 			<defs>
 				<path id="aY" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#aY"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#aY"/>
 			<clipPath id="aZ">
 				<use overflow="visible" xlink:href="#aY"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M256.2 27.7h19.1v28.2h-19.1z" clip-path="url(#aZ)"/>
+			<path fill="#ffffff" d="M256.2 27.7h19.1v28.2h-19.1z" clip-path="url(#aZ)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="ba" d="M270.1 47H269v-7.5h1.1v1.3c.5-.8 1.3-1.5 2.5-1.5 1.8 0 2.9 1.2 2.9 3V47h-1.1v-4.4c0-1.4-.8-2.3-2.1-2.3s-2.3.9-2.3 2.4l.1 4.3z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ba"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ba"/>
 		<clipPath id="bb">
 			<use overflow="visible" xlink:href="#ba"/>
 		</clipPath>
@@ -477,18 +477,18 @@
 			<defs>
 				<path id="bc" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bc"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bc"/>
 			<clipPath id="bd">
 				<use overflow="visible" xlink:href="#bc"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M260 30.4h24.4V56H260z" clip-path="url(#bd)"/>
+			<path fill="#ffffff" d="M260 30.4h24.4V56H260z" clip-path="url(#bd)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="be" d="M281.2 46.2c1 0 1.7-.4 2.4-1l.7.6c-.8.8-1.7 1.4-3.1 1.4-2.1 0-3.7-1.6-3.7-3.9 0-2.2 1.5-3.9 3.6-3.9 2.2 0 3.5 1.8 3.5 4v.3h-5.9c0 1.6 1.2 2.5 2.5 2.5zm2.2-3.4c-.1-1.4-.9-2.5-2.4-2.5-1.3 0-2.3 1.1-2.5 2.5h4.9z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#be"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#be"/>
 		<clipPath id="bf">
 			<use overflow="visible" xlink:href="#be"/>
 		</clipPath>
@@ -496,18 +496,18 @@
 			<defs>
 				<path id="bg" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bg"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bg"/>
 			<clipPath id="bh">
 				<use overflow="visible" xlink:href="#bg"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M268.5 30.4h24.9v25.7h-24.9z" clip-path="url(#bh)"/>
+			<path fill="#ffffff" d="M268.5 30.4h24.9v25.7h-24.9z" clip-path="url(#bh)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="bi" d="M222.5 54.2h1.1v10.1h-1.1z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bi"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bi"/>
 		<clipPath id="bj">
 			<use overflow="visible" xlink:href="#bi"/>
 		</clipPath>
@@ -515,18 +515,18 @@
 			<defs>
 				<path id="bk" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bk"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bk"/>
 			<clipPath id="bl">
 				<use overflow="visible" xlink:href="#bk"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M213.5 45.3h19v28h-19z" clip-path="url(#bl)"/>
+			<path fill="#ffffff" d="M213.5 45.3h19v28h-19z" clip-path="url(#bl)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="bm" d="M227.5 64.4h-1.1v-7.5h1.1v1.3c.5-.8 1.3-1.5 2.5-1.5 1.8 0 2.9 1.2 2.9 3v4.7h-1.1V60c0-1.4-.8-2.3-2.1-2.3s-2.3.9-2.3 2.4l.1 4.3z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bm"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bm"/>
 		<clipPath id="bn">
 			<use overflow="visible" xlink:href="#bm"/>
 		</clipPath>
@@ -534,18 +534,18 @@
 			<defs>
 				<path id="bo" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bo"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bo"/>
 			<clipPath id="bp">
 				<use overflow="visible" xlink:href="#bo"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M217.4 47.9h24.4v25.6h-24.4z" clip-path="url(#bp)"/>
+			<path fill="#ffffff" d="M217.4 47.9h24.4v25.6h-24.4z" clip-path="url(#bp)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="bq" d="M235.3 55.3h1.3v-1.2h-1.3v1.2zm.1 9.1h1.1v-7.5h-1.1v7.5z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bq"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bq"/>
 		<clipPath id="br">
 			<use overflow="visible" xlink:href="#bq"/>
 		</clipPath>
@@ -553,18 +553,18 @@
 			<defs>
 				<path id="bs" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bs"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bs"/>
 			<clipPath id="bt">
 				<use overflow="visible" xlink:href="#bs"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M226.4 45.1h19.1v28.2h-19.1z" clip-path="url(#bt)"/>
+			<path fill="#ffffff" d="M226.4 45.1h19.1v28.2h-19.1z" clip-path="url(#bt)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="bu" d="M240.7 62.3c0 .9.5 1.2 1.3 1.2.4 0 .7-.1 1.1-.3v.9c-.4.2-.8.3-1.4.3-1.2 0-2.1-.6-2.1-2.1v-4.5h-1v-1h1v-2.2h1.1v2.3h2.4v1h-2.4v4.4z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bu"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bu"/>
 		<clipPath id="bv">
 			<use overflow="visible" xlink:href="#bu"/>
 		</clipPath>
@@ -572,18 +572,18 @@
 			<defs>
 				<path id="bw" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bw"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bw"/>
 			<clipPath id="bx">
 				<use overflow="visible" xlink:href="#bw"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M229.6 45.7H252v27.7h-22.4z" clip-path="url(#bx)"/>
+			<path fill="#ffffff" d="M229.6 45.7H252v27.7h-22.4z" clip-path="url(#bx)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="by" d="M245.1 55.3h1.3v-1.2h-1.3v1.2zm0 9.1h1.1v-7.5h-1.1v7.5z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#by"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#by"/>
 		<clipPath id="bz">
 			<use overflow="visible" xlink:href="#by"/>
 		</clipPath>
@@ -591,18 +591,18 @@
 			<defs>
 				<path id="bA" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bA"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bA"/>
 			<clipPath id="bB">
 				<use overflow="visible" xlink:href="#bA"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M236.1 45.1h19.1v28.2h-19.1z" clip-path="url(#bB)"/>
+			<path fill="#ffffff" d="M236.1 45.1h19.1v28.2h-19.1z" clip-path="url(#bB)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="bC" d="M249.3 58.3l-.3-.9c.8-.4 1.7-.6 2.7-.6 2 0 3.2 1 3.2 3v4.6h-1.1v-1.1c-.5.7-1.4 1.3-2.7 1.3-1.4 0-2.8-.8-2.8-2.4 0-1.6 1.3-2.5 3.2-2.5.9 0 1.7.1 2.3.3v-.2c0-1.4-.8-2-2.2-2-.9 0-1.6.2-2.3.5m.1 3.9c0 .9.8 1.5 1.9 1.5 1.4 0 2.5-.8 2.5-2V61c-.6-.1-1.3-.3-2.2-.3-1.4-.1-2.2.5-2.2 1.5"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bC"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bC"/>
 		<clipPath id="bD">
 			<use overflow="visible" xlink:href="#bC"/>
 		</clipPath>
@@ -610,18 +610,18 @@
 			<defs>
 				<path id="bE" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bE"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bE"/>
 			<clipPath id="bF">
 				<use overflow="visible" xlink:href="#bE"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M239.3 47.9h24.5v25.6h-24.5z" clip-path="url(#bF)"/>
+			<path fill="#ffffff" d="M239.3 47.9h24.5v25.6h-24.5z" clip-path="url(#bF)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="bG" d="M258.7 62.3c0 .9.5 1.2 1.3 1.2.4 0 .7-.1 1.1-.3v.9c-.4.2-.8.3-1.4.3-1.2 0-2.1-.6-2.1-2.1v-4.5h-1v-1h1v-2.2h1.1v2.3h2.4v1h-2.4v4.4z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bG"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bG"/>
 		<clipPath id="bH">
 			<use overflow="visible" xlink:href="#bG"/>
 		</clipPath>
@@ -629,18 +629,18 @@
 			<defs>
 				<path id="bI" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bI"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bI"/>
 			<clipPath id="bJ">
 				<use overflow="visible" xlink:href="#bI"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M247.6 45.7H270v27.7h-22.4z" clip-path="url(#bJ)"/>
+			<path fill="#ffffff" d="M247.6 45.7H270v27.7h-22.4z" clip-path="url(#bJ)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="bK" d="M263.1 55.3h1.3v-1.2h-1.3v1.2zm0 9.1h1.1v-7.5h-1.1v7.5z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bK"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bK"/>
 		<clipPath id="bL">
 			<use overflow="visible" xlink:href="#bK"/>
 		</clipPath>
@@ -648,18 +648,18 @@
 			<defs>
 				<path id="bM" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bM"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bM"/>
 			<clipPath id="bN">
 				<use overflow="visible" xlink:href="#bM"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M254.1 45.1h19.1v28.2h-19.1z" clip-path="url(#bN)"/>
+			<path fill="#ffffff" d="M254.1 45.1h19.1v28.2h-19.1z" clip-path="url(#bN)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="bO" d="M272.4 56.9h1.2l-3.2 7.6h-1l-3.3-7.6h1.3l2.5 6.3z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bO"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bO"/>
 		<clipPath id="bP">
 			<use overflow="visible" xlink:href="#bO"/>
 		</clipPath>
@@ -667,18 +667,18 @@
 			<defs>
 				<path id="bQ" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bQ"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bQ"/>
 			<clipPath id="bR">
 				<use overflow="visible" xlink:href="#bQ"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M257.2 48h25.4v25.4h-25.4z" clip-path="url(#bR)"/>
+			<path fill="#ffffff" d="M257.2 48h25.4v25.4h-25.4z" clip-path="url(#bR)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="bS" d="M278.3 63.6c1 0 1.7-.4 2.4-1l.7.6c-.8.8-1.7 1.4-3.1 1.4-2.1 0-3.7-1.6-3.7-3.9 0-2.2 1.5-3.9 3.6-3.9 2.2 0 3.5 1.8 3.5 4v.3h-5.9c0 1.6 1.1 2.5 2.5 2.5zm2.1-3.3c-.1-1.4-.9-2.5-2.4-2.5-1.3 0-2.3 1.1-2.5 2.5h4.9z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bS"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bS"/>
 		<clipPath id="bT">
 			<use overflow="visible" xlink:href="#bS"/>
 		</clipPath>
@@ -686,18 +686,18 @@
 			<defs>
 				<path id="bU" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bU"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bU"/>
 			<clipPath id="bV">
 				<use overflow="visible" xlink:href="#bU"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M265.6 47.9h24.9v25.7h-24.9z" clip-path="url(#bV)"/>
+			<path fill="#ffffff" d="M265.6 47.9h24.9v25.7h-24.9z" clip-path="url(#bV)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="bW" d="M3.3 53h5.6c1.8 0 3.1.5 3.8 1.3.7.7 1 1.6 1 2.7 0 1.8-.9 3-2.4 3.6l2.8 4.1h-3.8L8 61.2H6.6v3.6H3.3V53zm5.4 5.6c1.1 0 1.7-.5 1.7-1.4 0-.9-.7-1.4-1.7-1.4H6.6v2.8h2.1z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bW"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#bW"/>
 		<clipPath id="bX">
 			<use overflow="visible" xlink:href="#bW"/>
 		</clipPath>
@@ -705,18 +705,18 @@
 			<defs>
 				<path id="bY" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#bY"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#bY"/>
 			<clipPath id="bZ">
 				<use overflow="visible" xlink:href="#bY"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M-5.6 44h28.7v29.7H-5.6z" clip-path="url(#bZ)"/>
+			<path fill="#ffffff" d="M-5.6 44h28.7v29.7H-5.6z" clip-path="url(#bZ)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="ca" d="M16.2 53h9.5v2.7h-6.2v1.8h5.6v2.6h-5.6V62h6.3v2.8h-9.6z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ca"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ca"/>
 		<clipPath id="cb">
 			<use overflow="visible" xlink:href="#ca"/>
 		</clipPath>
@@ -724,18 +724,18 @@
 			<defs>
 				<path id="cc" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#cc"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#cc"/>
 			<clipPath id="cd">
 				<use overflow="visible" xlink:href="#cc"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M7.3 44h27.4v29.7H7.3z" clip-path="url(#cd)"/>
+			<path fill="#ffffff" d="M7.3 44h27.4v29.7H7.3z" clip-path="url(#cd)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="ce" d="M27.7 63l1.8-2.2c1.2.9 2.5 1.4 3.8 1.4.9 0 1.4-.3 1.4-.8s-.4-.8-2-1.1c-2.5-.6-4.4-1.3-4.4-3.7 0-2.2 1.7-3.8 4.6-3.8 2 0 3.6.5 4.9 1.6l-1.7 2.3c-1.1-.8-2.3-1.2-3.3-1.2-.8 0-1.2.3-1.2.8s.4.8 2 1.1c2.7.6 4.4 1.5 4.4 3.7 0 2.4-1.9 3.8-4.8 3.8-2.1 0-4.1-.6-5.5-1.9"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ce"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ce"/>
 		<clipPath id="cf">
 			<use overflow="visible" xlink:href="#ce"/>
 		</clipPath>
@@ -743,18 +743,18 @@
 			<defs>
 				<path id="cg" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#cg"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#cg"/>
 			<clipPath id="ch">
 				<use overflow="visible" xlink:href="#cg"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M18.7 43.7h28.2v30H18.7z" clip-path="url(#ch)"/>
+			<path fill="#ffffff" d="M18.7 43.7h28.2v30H18.7z" clip-path="url(#ch)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="ci" d="M40.4 53h9.4v2.7h-6.2v1.8h5.6v2.6h-5.6V62h6.3v2.8h-9.5z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ci"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#ci"/>
 		<clipPath id="cj">
 			<use overflow="visible" xlink:href="#ci"/>
 		</clipPath>
@@ -762,18 +762,18 @@
 			<defs>
 				<path id="ck" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#ck"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#ck"/>
 			<clipPath id="cl">
 				<use overflow="visible" xlink:href="#ck"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M31.4 44h27.4v29.7H31.4z" clip-path="url(#cl)"/>
+			<path fill="#ffffff" d="M31.4 44h27.4v29.7H31.4z" clip-path="url(#cl)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="cm" d="M56.4 52.9h3.2l5 11.9h-3.5l-.8-2.1h-4.5l-.8 2.1h-3.4l4.8-11.9zm2.9 7.2L58 56.7 56.7 60h2.6z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cm"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cm"/>
 		<clipPath id="cn">
 			<use overflow="visible" xlink:href="#cm"/>
 		</clipPath>
@@ -781,18 +781,18 @@
 			<defs>
 				<path id="co" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#co"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#co"/>
 			<clipPath id="cp">
 				<use overflow="visible" xlink:href="#co"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M42.5 43.9h31v29.8h-31z" clip-path="url(#cp)"/>
+			<path fill="#ffffff" d="M42.5 43.9h31v29.8h-31z" clip-path="url(#cp)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="cq" d="M66.2 53h5.6c1.8 0 3.1.5 3.8 1.3.7.7 1 1.6 1 2.7 0 1.8-.9 3-2.4 3.6l2.8 4.1h-3.8l-2.4-3.6h-1.4v3.6h-3.3V53zm5.4 5.6c1.1 0 1.7-.5 1.7-1.4 0-.9-.7-1.4-1.7-1.4h-2.1v2.8h2.1z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cq"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cq"/>
 		<clipPath id="cr">
 			<use overflow="visible" xlink:href="#cq"/>
 		</clipPath>
@@ -800,18 +800,18 @@
 			<defs>
 				<path id="cs" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#cs"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#cs"/>
 			<clipPath id="ct">
 				<use overflow="visible" xlink:href="#cs"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M57.3 44H86v29.7H57.3z" clip-path="url(#ct)"/>
+			<path fill="#ffffff" d="M57.3 44H86v29.7H57.3z" clip-path="url(#ct)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="cu" d="M78.4 58.9c0-3.5 2.6-6.2 6.2-6.2 2.4 0 4 1 5 2.5L87.2 57c-.7-.8-1.5-1.4-2.6-1.4-1.7 0-2.8 1.4-2.8 3.1 0 1.7 1.2 3.2 2.8 3.2 1.2 0 1.9-.6 2.6-1.4l2.5 1.7a5.94 5.94 0 0 1-5.2 2.6c-3.4.2-6.1-2.4-6.1-5.9"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cu"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cu"/>
 		<clipPath id="cv">
 			<use overflow="visible" xlink:href="#cu"/>
 		</clipPath>
@@ -819,18 +819,18 @@
 			<defs>
 				<path id="cw" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#cw"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#cw"/>
 			<clipPath id="cx">
 				<use overflow="visible" xlink:href="#cw"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M69.4 43.7h29.1v30.1H69.4z" clip-path="url(#cx)"/>
+			<path fill="#ffffff" d="M69.4 43.7h29.1v30.1H69.4z" clip-path="url(#cx)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="cy" d="M91.5 53h3.3v4.4H99V53h3.2v11.8H99v-4.5h-4.2v4.5h-3.3z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cy"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cy"/>
 		<clipPath id="cz">
 			<use overflow="visible" xlink:href="#cy"/>
 		</clipPath>
@@ -838,18 +838,18 @@
 			<defs>
 				<path id="cA" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#cA"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#cA"/>
 			<clipPath id="cB">
 				<use overflow="visible" xlink:href="#cA"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M82.6 44h28.6v29.7H82.6z" clip-path="url(#cB)"/>
+			<path fill="#ffffff" d="M82.6 44h28.6v29.7H82.6z" clip-path="url(#cB)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="cC" d="M110.6 53h5c3 0 4.9 1.5 4.9 4.1 0 2.8-2.1 4.2-5 4.2h-1.6v3.3h-3.3V53zm4.8 5.8c1.2 0 1.9-.6 1.9-1.5 0-1-.7-1.6-1.9-1.6h-1.5v3.1h1.5z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cC"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cC"/>
 		<clipPath id="cD">
 			<use overflow="visible" xlink:href="#cC"/>
 		</clipPath>
@@ -857,18 +857,18 @@
 			<defs>
 				<path id="cE" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#cE"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#cE"/>
 			<clipPath id="cF">
 				<use overflow="visible" xlink:href="#cE"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M101.6 44h27.8v29.7h-27.8z" clip-path="url(#cF)"/>
+			<path fill="#ffffff" d="M101.6 44h27.8v29.7h-27.8z" clip-path="url(#cF)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="cG" d="M122.4 53h5.6c1.8 0 3.1.5 3.8 1.3.7.7 1 1.6 1 2.7 0 1.8-.9 3-2.4 3.6l2.8 4.1h-3.8l-2.4-3.6h-1.4v3.6h-3.3V53zm5.4 5.6c1.1 0 1.7-.5 1.7-1.4 0-.9-.7-1.4-1.7-1.4h-2.1v2.8h2.1z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cG"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cG"/>
 		<clipPath id="cH">
 			<use overflow="visible" xlink:href="#cG"/>
 		</clipPath>
@@ -876,18 +876,18 @@
 			<defs>
 				<path id="cI" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#cI"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#cI"/>
 			<clipPath id="cJ">
 				<use overflow="visible" xlink:href="#cI"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M113.4 44h28.7v29.7h-28.7z" clip-path="url(#cJ)"/>
+			<path fill="#ffffff" d="M113.4 44h28.7v29.7h-28.7z" clip-path="url(#cJ)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="cK" d="M134 58.9c0-3.4 2.7-6.2 6.4-6.2 3.6 0 6.3 2.7 6.3 6.1 0 3.4-2.7 6.1-6.4 6.1-3.6.1-6.3-2.6-6.3-6m9.4 0c0-1.7-1.2-3.2-3-3.2s-3 1.5-3 3.2c0 1.7 1.2 3.2 3 3.2 1.8-.1 3-1.5 3-3.2"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cK"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cK"/>
 		<clipPath id="cL">
 			<use overflow="visible" xlink:href="#cK"/>
 		</clipPath>
@@ -895,18 +895,18 @@
 			<defs>
 				<path id="cM" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#cM"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#cM"/>
 			<clipPath id="cN">
 				<use overflow="visible" xlink:href="#cM"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M125.1 43.7h30.6v30.1h-30.6z" clip-path="url(#cN)"/>
+			<path fill="#ffffff" d="M125.1 43.7h30.6v30.1h-30.6z" clip-path="url(#cN)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="cO" d="M148.2 58.9c0-3.5 2.7-6.2 6.4-6.2 2.1 0 3.5.7 4.8 1.7l-1.9 2.3a4.1 4.1 0 0 0-2.8-1.1c-1.7 0-3 1.4-3 3.3s1.3 3.3 3.2 3.3c.8 0 1.4-.2 1.9-.5v-1.4h-2.3v-2.4h5.4v5.3c-1.2 1-3 1.8-5.1 1.8-3.9 0-6.6-2.6-6.6-6.1"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cO"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cO"/>
 		<clipPath id="cP">
 			<use overflow="visible" xlink:href="#cO"/>
 		</clipPath>
@@ -914,18 +914,18 @@
 			<defs>
 				<path id="cQ" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#cQ"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#cQ"/>
 			<clipPath id="cR">
 				<use overflow="visible" xlink:href="#cQ"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M139.2 43.7h29.4v30.2h-29.4z" clip-path="url(#cR)"/>
+			<path fill="#ffffff" d="M139.2 43.7h29.4v30.2h-29.4z" clip-path="url(#cR)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="cS" d="M162.3 53h5.6c1.8 0 3.1.5 3.8 1.3.7.7 1 1.6 1 2.7 0 1.8-.9 3-2.4 3.6l2.8 4.1h-3.8l-2.4-3.6h-1.4v3.6h-3.3V53zm5.4 5.6c1.1 0 1.7-.5 1.7-1.4 0-.9-.7-1.4-1.7-1.4h-2.1v2.8h2.1z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cS"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cS"/>
 		<clipPath id="cT">
 			<use overflow="visible" xlink:href="#cS"/>
 		</clipPath>
@@ -933,18 +933,18 @@
 			<defs>
 				<path id="cU" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#cU"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#cU"/>
 			<clipPath id="cV">
 				<use overflow="visible" xlink:href="#cU"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M153.3 44H182v29.7h-28.7z" clip-path="url(#cV)"/>
+			<path fill="#ffffff" d="M153.3 44H182v29.7h-28.7z" clip-path="url(#cV)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="cW" d="M178.9 52.9h3.2l5 11.9h-3.5l-.8-2.1h-4.5l-.8 2.1h-3.4l4.8-11.9zm2.8 7.2l-1.3-3.3-1.3 3.3h2.6z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cW"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#cW"/>
 		<clipPath id="cX">
 			<use overflow="visible" xlink:href="#cW"/>
 		</clipPath>
@@ -952,18 +952,18 @@
 			<defs>
 				<path id="cY" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#cY"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#cY"/>
 			<clipPath id="cZ">
 				<use overflow="visible" xlink:href="#cY"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M165 43.9h31v29.8h-31z" clip-path="url(#cZ)"/>
+			<path fill="#ffffff" d="M165 43.9h31v29.8h-31z" clip-path="url(#cZ)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="da" d="M188.2 53h3.5l2.8 4.5 2.8-4.5h3.5v11.8h-3.3V58l-3 4.6h-.1l-3-4.6v6.8h-3.2z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#da"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#da"/>
 		<clipPath id="db">
 			<use overflow="visible" xlink:href="#da"/>
 		</clipPath>
@@ -971,18 +971,18 @@
 			<defs>
 				<path id="dc" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#dc"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#dc"/>
 			<clipPath id="dd">
 				<use overflow="visible" xlink:href="#dc"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M179.3 44h30.4v29.7h-30.4z" clip-path="url(#dd)"/>
+			<path fill="#ffffff" d="M179.3 44h30.4v29.7h-30.4z" clip-path="url(#dd)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="de" d="M282.7 90.6h-6.6v5.8h-2.4V82.6h2.4v5.8h6.6v-5.8h2.4v13.8h-2.4v-5.8zm-11.6 3.6c-1.4 1.5-3 2.5-5.6 2.5-4 0-7-3.1-7-7.1 0-4 2.9-7.2 7.1-7.2 2.5 0 4.1.9 5.4 2.2l-1.6 1.8c-1.1-1-2.3-1.7-3.9-1.7-2.6 0-4.5 2.2-4.5 4.9s1.9 4.9 4.5 4.9c1.7 0 2.8-.7 4-1.8l1.6 1.5zm-17.9-2v-9.5h2.4v13.8h-2l-7.6-9.8v9.8h-2.4V82.6h2.3l7.3 9.6zm-12.6-9.6v2.2h-7.8v3.6h6.9v2.2h-6.9v3.7h7.9v2.2h-10.3V82.7l10.2-.1zm-18 11.7c1.7 0 2.6-.7 2.6-1.9s-.9-1.9-2.8-1.9h-3.8v3.8h4zm-.8-5.9c1.6 0 2.6-.6 2.6-1.9 0-1.1-.8-1.8-2.4-1.8h-3.5v3.7h3.3zm.5-5.8c2.8 0 4.5 1.4 4.5 3.5 0 1.7-.9 2.5-2 3.1 1.6.6 2.7 1.5 2.7 3.3 0 2.5-2 3.8-5.1 3.8H216V82.7l6.3-.1zm-14.2 6l6 7.9h-2.9l-4.7-6.2-2.2 2.2v4h-2.4V82.7h2.4v6.9l6.6-6.9h3l-5.8 5.9zm-11.7-1.4c0-1.5-1.1-2.3-2.9-2.3H190v4.6h3.5c1.8 0 2.9-.9 2.9-2.3zm2.9 9.2h-2.9l-3.4-4.8h-3v4.8h-2.4V82.6h6.1c3.2 0 5.1 1.7 5.1 4.4 0 2.3-1.4 3.7-3.3 4.2l3.8 5.2zm-17.2-6.9c0-2.7-1.9-4.9-4.7-4.9-2.7 0-4.7 2.2-4.7 4.9s1.9 4.9 4.7 4.9c2.8 0 4.7-2.1 4.7-4.9zm2.6 0c0 3.9-3 7.2-7.2 7.2s-7.2-3.2-7.2-7.1 3-7.2 7.2-7.2 7.2 3.2 7.2 7.1zm-31 3.4l3.4-10.3h2l3.4 10.3 3.3-10.2h2.5l-4.8 13.9h-2.1l-3.4-9.9-3.4 9.9h-2.1l-4.8-13.9h2.6l3.4 10.2z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#de"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#de"/>
 		<clipPath id="df">
 			<use overflow="visible" xlink:href="#de"/>
 		</clipPath>
@@ -990,18 +990,18 @@
 			<defs>
 				<path id="dg" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#dg"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#dg"/>
 			<clipPath id="dh">
 				<use overflow="visible" xlink:href="#dg"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M138.9 73.4H294v32.2H138.9z" clip-path="url(#dh)"/>
+			<path fill="#ffffff" d="M138.9 73.4H294v32.2H138.9z" clip-path="url(#dh)"/>
 		</g>
 	</g>
 	<g>
 		<defs>
 			<path id="di" d="M137.2 87.4c0-1.3-.9-2-2.4-2h-3v4h3.1c1.4-.1 2.3-.9 2.3-2zm3.5 9h-3.5l-3-4.4h-2.4v4.4h-3V82.6h6.3c3.3 0 5.2 1.7 5.2 4.5 0 2.2-1.2 3.6-3 4.3l3.4 5zm-14.7 0h-10.5V82.6h10.4v2.7h-7.4v2.8h6.5v2.7h-6.5v2.9h7.5v2.7zm-13.8 0h-3v-5.5h-5.6v5.5h-3V82.6h3v5.5h5.6v-5.5h3v13.8zm-14.1-2.2c-1.4 1.5-3 2.5-5.7 2.5-4.1 0-7.1-3.1-7.1-7.1 0-3.9 3-7.1 7.2-7.1 2.6 0 4.2.8 5.4 2.1L96 86.7c-1.1-.9-2.2-1.6-3.5-1.6-2.3 0-4 1.9-4 4.3s1.7 4.3 4 4.3c1.6 0 2.5-.6 3.6-1.6l2 2.1zm-17.9-6.8c0-1.3-.9-2-2.4-2h-3v4h3.1c1.4-.1 2.3-.9 2.3-2zm3.5 9h-3.5l-3-4.4h-2.4v4.4h-3V82.6h6.3c3.3 0 5.2 1.7 5.2 4.5 0 2.2-1.2 3.6-3 4.3l3.4 5zm-19.6-5.8l-1.8-4.5-1.8 4.5h3.6zm5.5 5.8h-3.2l-1.3-3.1h-5.8L58 96.4h-3l5.9-13.9h2.8l5.9 13.9zm-16.1 0H43V82.6h10.4v2.7H46v2.8h6.5v2.7H46v2.9h7.5v2.7zm-13.1-4.1c0 2.7-2.1 4.3-5 4.3-2.1 0-4.2-.7-5.8-2.2l1.8-2.2c1.2 1 2.5 1.7 4.1 1.7 1.2 0 2-.5 2-1.3s-.5-1.2-2.8-1.7c-2.8-.7-4.6-1.5-4.6-4.2 0-2.5 2-4.2 4.8-4.2 2 0 3.7.6 5.1 1.7l-1.6 2.3c-1.2-.8-2.4-1.4-3.6-1.4-1.2 0-1.8.5-1.8 1.2 0 .9.6 1.2 3 1.8 2.8.8 4.4 1.8 4.4 4.2zm-12.7 4.1H17.2V82.6h10.4v2.7h-7.5v2.8h6.5v2.7h-6.5v2.9h7.5v2.7zm-16.4-9c0-1.3-.9-2-2.4-2h-3v4H9c1.5-.1 2.3-.9 2.3-2zm3.5 9h-3.5l-3-4.4H5.9v4.4h-3V82.6h6.3c3.3 0 5.2 1.7 5.2 4.5 0 2.2-1.2 3.6-3 4.3l3.4 5z"/>
 		</defs>
-		<use fill="#9b9b9b" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#di"/>
+		<use fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" overflow="visible" xlink:href="#di"/>
 		<clipPath id="dj">
 			<use overflow="visible" xlink:href="#di"/>
 		</clipPath>
@@ -1009,11 +1009,11 @@
 			<defs>
 				<path id="dk" d="M1.7 1.3h284.1v96.5H1.7z"/>
 			</defs>
-			<use fill="#9b9b9b" overflow="visible" xlink:href="#dk"/>
+			<use fill="#ffffff" overflow="visible" xlink:href="#dk"/>
 			<clipPath id="dl">
 				<use overflow="visible" xlink:href="#dk"/>
 			</clipPath>
-			<path fill="#9b9b9b" d="M-6 73.5h155.6v32.1H-6z" clip-path="url(#dl)"/>
+			<path fill="#ffffff" d="M-6 73.5h155.6v32.1H-6z" clip-path="url(#dl)"/>
 		</g>
 	</g>
 </svg>

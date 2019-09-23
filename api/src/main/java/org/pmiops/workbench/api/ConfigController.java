@@ -24,7 +24,6 @@ public class ConfigController implements ConfigApiDelegate {
         new ConfigResponse()
             .gsuiteDomain(config.googleDirectoryService.gSuiteDomain)
             .projectId(config.server.projectId)
-            .enforceRegistered(config.firecloud.enforceRegistered)
             .publicApiKeyForErrorReports(config.server.publicApiKeyForErrorReports)
             .enableDataUseAgreement(config.access.enableDataUseAgreement)
             .enableEraCommons(config.access.enableEraCommons)

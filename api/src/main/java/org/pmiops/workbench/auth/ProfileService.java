@@ -107,8 +107,6 @@ public class ProfileService {
     profile.setCurrentPosition(user.getCurrentPosition());
     profile.setContactEmail(user.getContactEmail());
     profile.setPhoneNumber(user.getPhoneNumber());
-    profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
-    profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatusEnum());
     profile.setAboutYou(user.getAboutYou());
     profile.setAreaOfResearch(user.getAreaOfResearch());
     profile.setDisabled(user.getDisabled());

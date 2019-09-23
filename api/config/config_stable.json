@@ -4,7 +4,6 @@
     "clusterMaxAgeDays": 14,
     "clusterIdleMaxAgeDays": 7,
     "debugEndpoints": false,
-    "enforceRegistered": true,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-stable",
     "registeredDomainGroup": "GROUP_all-of-us-registered-stable@firecloud.org",
@@ -69,7 +68,6 @@
     "unsafeAllowSelfBypass": false
   },
   "featureFlags": {
-    "enableLeoWelder": true,
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true

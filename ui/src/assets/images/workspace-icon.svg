@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 23.0.6, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 54 54" style="enable-background:new 0 0 54 54;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:url(#Oval-Copy-2_1_);}
+	.st1{fill:none;stroke:#262262;stroke-width:0.5213;}
+	.st2{fill-rule:evenodd;clip-rule:evenodd;fill:#262262;}
+</style>
+<title>Group</title>
+<desc>Created with Sketch.</desc>
+<g id="HOMEPAGE">
+	<g id="Homepage-v4" transform="translate(-411.000000, -106.000000)">
+		<g id="Group" transform="translate(411.000000, 106.000000)">
+			
+				<linearGradient id="Oval-Copy-2_1_" gradientUnits="userSpaceOnUse" x1="-161.4323" y1="175.2409" x2="-169.7589" y2="175.2407" gradientTransform="matrix(54 0 0 -54 9116 9490)">
+				<stop  offset="0" style="stop-color:#73BCE2"/>
+				<stop  offset="0.5847" style="stop-color:#75C6A2"/>
+				<stop  offset="1" style="stop-color:#FDD883"/>
+			</linearGradient>
+			<circle id="Oval-Copy-2" class="st0" cx="27" cy="27" r="27"/>
+			<g id="Group-10" transform="translate(11.028169, 9.126761)">
+				<polygon id="Stroke-1" class="st1" points="0.2,31.3 32.2,31.3 32.2,11.1 0.2,11.1 				"/>
+				<polyline id="Stroke-3" class="st1" points="1.5,10.3 1.5,6.3 30.1,6.3 30.1,10.4 				"/>
+				<polyline id="Stroke-4" class="st1" points="3,5.5 3,2.6 28.7,2.6 28.7,5.5 				"/>
+				<polyline id="Stroke-5" class="st1" points="4.3,1.9 4.3,0.1 27.4,0.1 27.4,1.9 				"/>
+				<path id="Stroke-7" class="st2" d="M9.4,18c0,1,0.3,2.1,1.1,2.8c1,1,2.5,1.3,3.8,0.9l5.7,5.6c0.7,0.7,1.8,0.7,2.4,0
+					c0.7-0.7,0.7-1.8,0-2.4l-5.7-5.6c0.4-1.3,0.1-2.8-0.9-3.8c-1-1-2.5-1.3-3.9-0.9c-0.1,0-0.2,0.1-0.2,0.2c0,0.1,0,0.2,0.1,0.3
+					l1.8,1.8l-0.4,1.3L12,18.7l-1.8-1.8c-0.1-0.1-0.2-0.1-0.3-0.1c-0.1,0-0.2,0.1-0.2,0.2C9.5,17.4,9.4,17.7,9.4,18z"/>
+			</g>
+		</g>
+	</g>
+</g>
+</svg>

@@ -17,7 +17,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientTracer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 // Interceptor to create a trace of the lifecycle of api calls.
@@ -49,7 +48,11 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
 
     SpanBuilder requestSpanBuilder =
         tracer.spanBuilder(
-            workbenchConfigProvider.get().server.shortName + request.getRequestURI());
+            String.format(
+                "%s/%s%s",
+                workbenchConfigProvider.get().server.shortName,
+                request.getMethod(),
+                request.getRequestURI()));
 
     if (workbenchConfigProvider.get().server.traceAllRequests) {
       requestSpanBuilder.setSampler(Samplers.alwaysSample());
@@ -61,11 +64,8 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
   }
 
   @Override
-  public void postHandle(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      Object handler,
-      ModelAndView modelAndView)
+  public void afterCompletion(
+      HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
       throws Exception {
     ((Scope) request.getAttribute(TRACE_ATTRIBUTE_KEY)).close();
   }

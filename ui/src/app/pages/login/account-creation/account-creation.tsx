@@ -30,6 +30,7 @@ import {
   Profile,
 } from 'generated/fetch/api';
 
+import {FlexColumn, FlexRow, FlexRowWrap} from 'app/components/flex';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils/index';
 import {environment} from 'environments/environment';
@@ -354,7 +355,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     }
 
 
-    const errors = validate({}, validationCheck);
+    const errors = validate({
+    }, validationCheck);
     this.setState({errors: errors}, () => {
       if (!this.state.errors) {
         this.props.setProfile(this.state.profile, 'accountCreationSurvey');
@@ -416,7 +418,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </div>
         </Section>
         <Section header='About you'>
-          <div style={{display: 'flex', flexDirection: 'column'}}>
+          <FlexColumn>
             <div style={{paddingBottom: '0.5rem'}}>
               <TextInput id='givenName' name='givenName' autoFocus
                          placeholder='First Name'
@@ -426,7 +428,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                          onChange={value => this.updateProfileObject('givenName', value)}/>
               {givenName.length > nameLength &&
               <ErrorMessage id='givenNameError'>
-                First Name must be 80 characters or less.
+                First Name must be {nameLength} characters or less.
               </ErrorMessage>}
               <TextInput id='familyName' name='familyName' placeholder='Last Name'
                          value={familyName}
@@ -435,7 +437,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                          onChange={v => this.updateProfileObject('familyName', v)}/>
               {familyName.length > nameLength &&
               <ErrorMessage id='familyNameError'>
-                Last Name must be 80 character or less.
+                Last Name must be {nameLength} character or less.
               </ErrorMessage>}
             </div>
             <TextInput id='contactEmail' name='contactEmail'
@@ -447,11 +449,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             <Error id='invalidEmailError'>
               Contact Email Id is invalid
             </Error>}
-          </div>
+          </FlexColumn>
         </Section>
         <Section header='Your address'>
-          <div
-              style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', lineHeight: '1rem'}}>
+          <FlexRowWrap style={{lineHeight: '1rem'}}>
             <TextInput data-test-id='streetAddress' name='streetAddress'
                        placeholder='Street Address' value={streetAddress1}
                        onChange={value => this.updateAddress('streetAddress1', value)}
@@ -471,7 +472,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                        style={{...styles.section, marginRight: '2rem'}}/>
             <TextInput data-test-id='country' placeholder='Country' value={country} style={styles.section}
                        onChange={value => this.updateAddress('country', value)}/>
-          </div>
+          </FlexRowWrap>
         </Section>
         <Section header='Institutional Affiliation'>
           <label style={{color: colors.primary, fontSize: 16}}>
@@ -494,7 +495,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </div>
         </Section>
         {this.state.showInstitution &&
-        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
+        <FlexColumn style={{justifyContent: 'space-between'}}>
           <TextInput data-test-id='institutionname' style={{width: '16rem', marginBottom: '0.5rem',
             marginTop: '0.5rem'}}
             value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
@@ -507,9 +508,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                     onChange={e => this.updateInstitutionAffiliation('role', e.value)}
                     placeholder='Which of the following describes your role'
                     style={{width: '16rem'}} options={AccountCreationOptions.roles}/>
-        </div>}
+        </FlexColumn>}
         {!this.state.showInstitution &&
-        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
+        <FlexColumn style={{justifyContent: 'space-between'}}>
           <Dropdown data-test-id='affiliation'
                     style={{width: '18rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
                     value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
@@ -528,7 +529,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               institutionalAffiliations[0].other : ''}
                      onChange={value => this.updateInstitutionAffiliation('other', value)}
                      style={{marginTop: '1rem', width: '18rem'}}/>}
-        </div>}
+        </FlexColumn>}
         <FormSection style={{paddingBottom: '1rem'}}>
           <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError}
                   style={{'height': '2rem', 'width': '10rem'}}

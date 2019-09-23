@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="nsaxena" id="changelog-99-update-institution-affiliations">
+     
+     <addColumn tableName="institutional_affiliation">
+       <column name="affiliation" type="tinyint"/>
+       <column name="other" type="varchar(255)"/>
+     </addColumn>
+     
+     <addDefaultValue tableName="institutional_affiliation" columnName="affiliation" defaultValue="0"/>
+     <addDefaultValue tableName="institutional_affiliation" columnName="role" defaultValue=""/>
+  </changeSet>
+</databaseChangeLog>

@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -69,6 +70,8 @@ class DomainConceptIds {
 
 @Service
 public class DataSetServiceImpl implements DataSetService {
+
+  public static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
 
   @VisibleForTesting
   private static class ValuesLinkingPair {
@@ -149,10 +152,27 @@ public class DataSetServiceImpl implements DataSetService {
     return dataSetDb;
   }
 
+  // For domains for which we've assigned a base table in BigQuery, we keep a map here
+  // so that we can use the base table name to qualify, for example, PERSON_ID in clauses
+  // after SELECT. This map is nearly identical to
+  // org.pmiops.workbench.db.dao.ConceptSetDao.DOMAIN_TO_TABLE_NAME,
+  // but in some cases we use a different shorthand than the base table name.
+  private static final ImmutableMap<Domain, String> DOMAIN_TO_BASE_TABLE_SHORTHAND =
+      new ImmutableMap.Builder<Domain, String>()
+          .put(Domain.CONDITION, "c_occurrence")
+          .put(Domain.DEATH, "death")
+          .put(Domain.DRUG, "d_exposure")
+          .put(Domain.MEASUREMENT, "measurement")
+          .put(Domain.OBSERVATION, "observation")
+          .put(Domain.PERSON, "person")
+          .put(Domain.PROCEDURE, "procedure")
+          .put(Domain.SURVEY, "survey")
+          .put(Domain.VISIT, "visit")
+          .build();
+
   @Override
   public Map<String, QueryJobConfiguration> generateQuery(DataSetRequest dataSet) {
     CdrBigQuerySchemaConfig bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
-
     boolean includesAllParticipants =
         Optional.of(dataSet.getIncludesAllParticipants()).orElse(false);
 
@@ -218,6 +238,7 @@ public class DataSetServiceImpl implements DataSetService {
 
     for (Domain d : domainList) {
       Map<String, Map<String, QueryParameterValue>> queryMap = new HashMap<>();
+      final String personIdQualified = getQualifiedColumnName(d, PERSON_ID_COLUMN_NAME);
       String query = "SELECT ";
       // VALUES HERE:
       Optional<List<DomainValuePair>> valueSetOpt =
@@ -291,10 +312,10 @@ public class DataSetServiceImpl implements DataSetService {
                     + conceptSetListQuery
                     + ")");
         if (!includesAllParticipants) {
-          query = query.concat(" \nAND (PERSON_ID IN (" + cohortQueries + "))");
+          query = query.concat(" \nAND (" + personIdQualified + " IN (" + cohortQueries + "))");
         }
       } else if (!includesAllParticipants) {
-        query = query.concat(" \nWHERE PERSON_ID IN (" + cohortQueries + ")");
+        query = query.concat(" \nWHERE " + personIdQualified + " IN (" + cohortQueries + ")");
       }
 
       queryMap.put(query, cohortParameters);
@@ -307,6 +328,13 @@ public class DataSetServiceImpl implements DataSetService {
       dataSetUtil.put(d.toString(), queryJobConfiguration);
     }
     return dataSetUtil;
+  }
+
+  private String getQualifiedColumnName(Domain currentDomain, String columnName) {
+    final String tableAbbreviation = DOMAIN_TO_BASE_TABLE_SHORTHAND.get(currentDomain);
+    return tableAbbreviation == null
+        ? columnName
+        : String.format("%s.%s", tableAbbreviation, columnName);
   }
 
   @Override

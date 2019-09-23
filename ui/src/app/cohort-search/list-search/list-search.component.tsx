@@ -420,11 +420,11 @@ export const ListSearch = withCurrentWorkspace()(
                     return <React.Fragment key={i}>{this.renderRow(item, true)}</React.Fragment>;
                   })}
                   {open && err && <tr>
-                    <td colSpan={4}>
+                    <td colSpan={5}>
                       <div style={{...styles.error, marginTop: 0}}>
                         <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
                           shape='exclamation-triangle' size='22'/>
-                        Sorry, the request cannot be completed.
+                        Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
                       </div>
                     </td>
                   </tr>}
@@ -435,10 +435,11 @@ export const ListSearch = withCurrentWorkspace()(
           {results === 'all' && !data.length && <div>No results found</div>}
         </div>}
         {loading && <SpinnerOverlay/>}
-        {error && <div style={styles.error}>
-          <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+        {error && <div style={{...styles.error, ...(domain === DomainType.DRUG ? {marginTop: '3.75rem'} : {})}}>
+          <ClrIcon
+            style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
             shape='exclamation-triangle' size='22'/>
-          Sorry, the request cannot be completed.
+          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
           {results === 'standard' && <Clickable style={styles.vocabLink}
             onClick={() => this.getResults(sourceMatch.code)}>
             &nbsp;Return to source code.

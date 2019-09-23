@@ -5,6 +5,6 @@ export const environment: Environment = {
   ...testEnvironmentBase,
   displayTag: 'Test',
   debug: false,
-  enableJupyterLab: true,
-  enableAccountPages: false,
+  enablePublishedWorkspaces: true,
+  enableAccountPages: false
 };

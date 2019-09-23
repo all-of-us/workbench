@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
@@ -91,38 +92,6 @@ import org.springframework.context.annotation.Scope;
     basePackages = {"org.pmiops.workbench.cohortreview.*", "org.pmiops.workbench.cohortbuilder.*"})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
-  private static final String NAMESPACE = "aou-test";
-  private static final String NAME = "test";
-  private static final Long PARTICIPANT_ID = 102246L;
-  private static final Long PARTICIPANT_ID2 = 102247L;
-  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
-  private CdrVersion cdrVersion;
-  private Workspace workspace;
-
-  @Autowired private CohortReviewController controller;
-
-  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
-
-  @Autowired private CohortDao cohortDao;
-
-  @Autowired private CohortReviewDao cohortReviewDao;
-
-  @Autowired private WorkspaceDao workspaceDao;
-
-  @Autowired private CdrVersionDao cdrVersionDao;
-
-  @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
-
-  @Autowired private FireCloudService mockFireCloudService;
-
-  @Autowired private UserDao userDao;
-
-  @Mock private Provider<User> userProvider;
-
-  private Cohort cohort;
-  private CohortReview review;
-  private static User currentUser;
-
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
@@ -163,6 +132,38 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     }
   }
 
+  private static final String NAMESPACE = "aou-test";
+  private static final String NAME = "test";
+  private static final Long PARTICIPANT_ID = 102246L;
+  private static final Long PARTICIPANT_ID2 = 102247L;
+  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
+  private CdrVersion cdrVersion;
+  private Workspace workspace;
+
+  @Autowired private CohortReviewController controller;
+
+  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
+
+  @Autowired private CohortDao cohortDao;
+
+  @Autowired private CohortReviewDao cohortReviewDao;
+
+  @Autowired private WorkspaceDao workspaceDao;
+
+  @Autowired private CdrVersionDao cdrVersionDao;
+
+  @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
+
+  @Autowired private FireCloudService mockFireCloudService;
+
+  @Autowired private UserDao userDao;
+
+  @Mock private Provider<User> userProvider;
+
+  private Cohort cohort;
+  private CohortReview review;
+  private static User currentUser;
+
   @Override
   public List<String> getTableNames() {
     return Arrays.asList(
@@ -185,6 +186,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     currentUser = user;
     when(userProvider.get()).thenReturn(user);
     controller.setUserProvider(userProvider);
+
+    when(mockFireCloudService.getWorkspaceAcl(anyString(), anyString()))
+        .thenReturn(
+            new WorkspaceACL()
+                .acl(
+                    ImmutableMap.of(
+                        currentUser.getEmail(), new WorkspaceAccessEntry().accessLevel("OWNER"))));
 
     cdrVersion = new CdrVersion();
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);

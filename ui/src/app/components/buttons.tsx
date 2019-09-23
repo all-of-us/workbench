@@ -24,7 +24,7 @@ export const styles = reactStyles({
     boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
     position: 'fixed',
     bottom: '1rem',
-    right: '1rem',
+    right: '2.9rem',
     borderRadius: '3rem',
     backgroundColor: colors.accent,
     height: '1.8rem',

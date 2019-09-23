@@ -48,11 +48,7 @@ docker run -i -t -u 0 --entrypoint "" us.gcr.io/broad-dsp-gcr-public/leonardo-ju
 
 This can be used to quickly test command lines or reproduce bugs.
 
-# playground-extension.js
-
-Jupyter UI extension for playground mode. Passed via GCS at cluster creation time.
-
-## Local testing
+# Local Jupyter extension testing
 
 Tweak the above instructions for testing the user script to push a modified
 extension and modify the cluster controller to use it.
@@ -108,7 +104,7 @@ source. This process takes as inputs the templated extension
 
 ## Local testing
 
-See instructions for playground-extension.js above.
+See instructions for local extension testing above.
 
 To test the menu contents JSON alone:
 

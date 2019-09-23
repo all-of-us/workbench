@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.model.AuditBigQueryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -51,16 +51,19 @@ public class AuditController implements AuditApiDelegate {
 
   private final Clock clock;
   private final BigQueryService bigQueryService;
-  private final UserDao userDao;
   private final CdrVersionDao cdrVersionDao;
+  private final WorkspaceDao workspaceDao;
 
   @Autowired
   AuditController(
-      Clock clock, BigQueryService bigQueryService, UserDao userDao, CdrVersionDao cdrVersionDao) {
+      Clock clock,
+      BigQueryService bigQueryService,
+      CdrVersionDao cdrVersionDao,
+      WorkspaceDao workspaceDao) {
     this.clock = clock;
     this.bigQueryService = bigQueryService;
-    this.userDao = userDao;
     this.cdrVersionDao = cdrVersionDao;
+    this.workspaceDao = workspaceDao;
   }
 
   @VisibleForTesting
@@ -100,7 +103,7 @@ public class AuditController implements AuditApiDelegate {
         ImmutableList.copyOf(cdrVersionDao.findAll()).stream()
             .map(v -> v.getBigqueryProject())
             .collect(Collectors.toSet());
-    Set<String> whitelist = Sets.union(userDao.getAllUserProjects(), cdrProjects);
+    Set<String> whitelist = Sets.union(workspaceDao.findAllWorkspaceNamespaces(), cdrProjects);
 
     Instant now = clock.instant();
     List<String> suffixes =

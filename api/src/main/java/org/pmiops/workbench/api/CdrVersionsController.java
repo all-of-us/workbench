@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -35,16 +34,11 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
       };
 
   private final CdrVersionService cdrVersionService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private Provider<User> userProvider;
 
   @Autowired
-  CdrVersionsController(
-      CdrVersionService cdrVersionService,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      Provider<User> userProvider) {
+  CdrVersionsController(CdrVersionService cdrVersionService, Provider<User> userProvider) {
     this.cdrVersionService = cdrVersionService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
   }
 
@@ -57,11 +51,7 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
   public ResponseEntity<CdrVersionListResponse> getCdrVersions() {
     // TODO: Consider filtering this based on what is currently instantiated as a data source. Newly
     // added CDR versions will not function until a server restart.
-    WorkbenchConfig config = workbenchConfigProvider.get();
     DataAccessLevel accessLevel = userProvider.get().getDataAccessLevelEnum();
-    if (!config.firecloud.enforceRegistered) {
-      accessLevel = DataAccessLevel.REGISTERED;
-    }
     List<CdrVersion> cdrVersions = cdrVersionService.findAuthorizedCdrVersions(accessLevel);
     if (cdrVersions.isEmpty()) {
       throw new ForbiddenException("User does not have access to any CDR versions");

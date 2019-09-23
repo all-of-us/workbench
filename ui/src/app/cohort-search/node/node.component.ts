@@ -36,6 +36,9 @@ export class NodeComponent implements OnInit, OnDestroy {
         if (this.selected) {
           setTimeout(() => scrollStore.next(this.node.id));
         }
+        if (this.error && id !== undefined) {
+          subtreeSelectedStore.next(undefined);
+        }
       }));
 
       this.subscription.add(autocompleteStore.subscribe(searchTerms => {
@@ -119,6 +122,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       console.error(error);
       this.error = true;
       this.loading = false;
+      subtreeSelectedStore.next(undefined);
     }
   }
 
