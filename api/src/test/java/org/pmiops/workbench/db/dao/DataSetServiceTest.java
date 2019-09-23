@@ -24,6 +24,7 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl.QueryAndParameters;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
@@ -47,6 +48,7 @@ public class DataSetServiceTest {
       .domain(Domain.PERSON)
       .value("PERSON_ID");
   private static final Long CONCEPT_SET_ID_1 = 200L;
+  private static final ImmutableList<DomainValuePair> DOMAIN_VALUE_PAIR_PERSON_LIST = ImmutableList.of(DOMAIN_VALUE_PAIR_PERSON_PERSON_ID);
   private static final QueryJobConfiguration QUERY_JOB_CONFIGURATION_1 =
       QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
       .addNamedParameter("foo",
@@ -131,7 +133,7 @@ public class DataSetServiceTest {
     return result;
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = BadRequestException.class)
   public void itThrowsForNoCohortOrConcept() throws Exception {
     final DataSetRequest invalidRequest = buildEmptyRequest();
     ImmutableMap<String, QueryJobConfiguration> configurationsByDomain =
@@ -141,6 +143,7 @@ public class DataSetServiceTest {
   @Test
   public void itHandlesPersonDomain() throws Exception {
     final DataSetRequest dataSetRequest = buildTrivialRequest();
+    dataSetRequest.setValues(DOMAIN_VALUE_PAIR_PERSON_LIST);
     ImmutableMap<String, QueryJobConfiguration> configurationsByDomain =
         ImmutableMap.copyOf(dataSetServiceImpl.generateQueryJobConfigurationsByDomainName(dataSetRequest));
   }

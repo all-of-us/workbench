@@ -422,16 +422,13 @@ public class DataSetServiceImpl implements DataSetService {
 
   @VisibleForTesting
   public boolean eachDomainHasAtLeastOneConcept(List<ConceptSet> conceptSetsSelected) {
-    Map<Short, Long> conceptCountsByDomain = new HashMap<>();
-
-    for (ConceptSet conceptSet : conceptSetsSelected) {
-      long numConcepts = conceptSet.getConceptIds().size();
-      short domain = conceptSet.getDomain();
-      conceptCountsByDomain.merge(domain, numConcepts, Long::sum);
-    }
-
-    return conceptCountsByDomain.entrySet().stream()
-        .allMatch(entry -> 0 < entry.getValue());
+    return conceptSetsSelected.stream()
+        .collect(Collectors.groupingBy(ConceptSet::getDomain, Collectors.toList()))
+        .values().stream()
+        .map(csl -> csl.stream()
+            .mapToLong(cs -> cs.getConceptIds().size())
+            .sum())
+        .allMatch(count -> count > 0);
   }
 
   private String getQualifiedColumnName(Domain currentDomain, String columnName) {
