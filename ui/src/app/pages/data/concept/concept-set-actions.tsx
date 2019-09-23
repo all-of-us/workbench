@@ -53,7 +53,7 @@ const actionCards = [
     action: 'newConceptSet'
   }, {
     title: 'Create a Data Set',
-    description: `Create an analyze ready data set that can be exported to notebooks.`,
+    description: `Create an analysis ready data set that can be exported to notebooks.`,
     action: 'dataSet'
   }
 ];
