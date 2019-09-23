@@ -214,15 +214,25 @@ public class UserService {
     return user;
   }
 
-  public User createUser(String givenName,
+  public User createUser(
+      String givenName,
       String familyName,
       String email,
       String contactEmail,
       String currentPosition,
       String organization,
       String areaOfResearch) {
-    return createUser(givenName, familyName, email, contactEmail, currentPosition, organization, areaOfResearch,
-        null, null, null);
+    return createUser(
+        givenName,
+        familyName,
+        email,
+        contactEmail,
+        currentPosition,
+        organization,
+        areaOfResearch,
+        null,
+        null,
+        null);
   }
 
   public User createUser(
