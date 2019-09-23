@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -405,6 +406,10 @@ public class DataSetServiceImpl implements DataSetService {
                     .setNamedParameters(valuesQueryParams)
                     .setUseLegacySql(false)
                     .build()));
+
+    if (valuesLinking == null) {
+      throw new BadRequestException("No columns determined for SELECT clause.");
+    }
 
     List<String> valueJoins = new ArrayList<>();
     List<String> valueSelects = new ArrayList<>();
