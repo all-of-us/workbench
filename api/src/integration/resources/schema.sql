@@ -8,6 +8,7 @@ create table cdr_version (
   is_default bit(1),
   name varchar(80) NOT NULL,
   data_access_level tinyint NOT NULL,
+  archival_status tinyint NOT NULL,
   release_number smallint NOT NULL,
   bigquery_project varchar(80) NOT NULL,
   bigquery_dataset varchar(80) NOT NULL,
