@@ -15,8 +15,11 @@ import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.Address;
 import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DemographicSurvey;
+import org.pmiops.workbench.db.model.InstitutionalAffiliation;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -220,7 +223,10 @@ public class UserService {
       String contactEmail,
       String currentPosition,
       String organization,
-      String areaOfResearch) {
+      String areaOfResearch,
+      Address address,
+      DemographicSurvey demographicSurvey,
+      List<InstitutionalAffiliation> institutionalAffiliation) {
     User user = new User();
     user.setCreationNonce(Math.abs(random.nextLong()));
     user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
@@ -235,6 +241,21 @@ public class UserService {
     user.setAboutYou(null);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.NONE);
+    user.setAddress(address);
+    user.setDemographicSurvey(demographicSurvey);
+
+    user.setInstitutionalAffiliations(institutionalAffiliation);
+    // For existing user that do not have address
+    if (address != null) {
+      address.setUser(user);
+    }
+    if (demographicSurvey != null) demographicSurvey.setUser(user);
+    // fix this
+    if (institutionalAffiliation != null) {
+      final User u = user;
+      institutionalAffiliation.forEach(affiliation -> affiliation.setUser(u));
+    }
+
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {

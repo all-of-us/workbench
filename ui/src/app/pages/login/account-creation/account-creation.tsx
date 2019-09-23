@@ -33,63 +33,25 @@ import {
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils/index';
 import {environment} from 'environments/environment';
+import {
+  AffiliationRole,
+  EducationalRole,
+  IndustryRole,
+  InstitutionalAffiliation
+} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
+import {AccountCreationOptions} from './account-creation-options';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
 }
 
-// The values will change once we have ENUM as part of DB work as part of create account 2
-const Options = {
-  roles: [
-    {label: `Undergraduate (Bachelor level) student`, value: 'bachelor'},
-    {label: `Graduate trainee (Current student in a Masters, PhD, or Medical school training
-        program)`, value: 'trainee'},
-    {label: `Research fellow (a post-doctoral fellow or medical resident in training)`,
-      value: 'research'},
-    {label: `Early career tenure-track researcher`, value: 'earlyCareer'},
-    {label: `Non tenure-track researcher`, value: 'nontenure'},
-    {label: `Mid-career tenured researcher`, value: 'midCareer'},
-    {label: `Late career tenured researcher`, value: 'lateCareer'},
-    {label: `Project Personnel (eg: Research Assistant, Data Analyst, Project Manager, Research
-        Coordinator or other roles)`, value: 'project'}
-  ],
-  affiliations: [
-    {label: 'Industry', value: 'industry'},
-    {label: `Educational institution (High school, Community college, 4-year college, trade
-        school)`, value: 'educationalInstitution'},
-    {label: `Community Scientist (i.e. I am accessing AoU for independent research, unrelated to my
-        professional affiliation)`, value: 'scientist'},
-    {label: `Other (free text)`, value: 'freeText'}
-  ],
-  industryRole: [
-    {label: 'Research Assistant (pre-doctoral)', value: 'preDoctoral'},
-    {label: 'Research associate (post-doctoral; early/mid career)', value: 'postDoctoral'},
-    {label: 'Senior Researcher (PI/Team Lead)', value: 'teamLead'},
-    {label: 'Other (free text)', value: 'freeText'}
-  ],
-  eductionRole: [
-    {label: 'Teacher/Professor', value: 'teacher'},
-    {label: 'Student', value: 'student'},
-    {label: 'Administrator', value: 'admin'},
-    {label: 'Other (free text)', value: 'freeText'}
-  ]
-};
-
-// The following will be part of Profile object once create account survey is in
-export interface Address {
-  streetAddress1: string;
-  streetAddress2: string;
-  city: string;
-  state: string;
-  zipcode: string;
-  country: string;
-}
 
 export interface AccountCreationProps {
+  profile: Profile;
   invitationKey: string;
   setProfile: Function;
 }
@@ -104,10 +66,8 @@ export interface AccountCreationState {
   showInstitution: boolean;
   showAffiliationRole: boolean;
   showAffiliationOther: boolean;
-  showNext: boolean;
   usernameCheckInProgress: boolean;
   usernameConflictError: boolean;
-  address: Address;
   institutionName: string;
   institutionRole: string;
   affiliation: string;
@@ -160,6 +120,21 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         currentPosition: '',
         organization: '',
         areaOfResearch: '',
+        address: {
+          streetAddress1: '',
+          streetAddress2: '',
+          city: '',
+          state: '',
+          country: '',
+          zipCode: '',
+        },
+        institutionalAffiliations: [
+          {
+            institution: undefined,
+            affiliation: undefined,
+            role: undefined
+          }
+        ]
       },
       usernameCheckInProgress: false,
       usernameConflictError: false,
@@ -168,17 +143,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       showInstitution: true,
       showAffiliationRole: false,
       showAffiliationOther: false,
-      showNext: false,
       invalidEmail: false,
       rolesOptions: [],
-      address: {
-        streetAddress1: '',
-        streetAddress2: '',
-        city: '',
-        state: '',
-        zipcode: '',
-        country: ''
-      },
       institutionName: '',
       institutionRole: '',
       affiliation: '',
@@ -187,8 +153,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     };
   }
 
-  // This method will be modified once the story  below will be done
-  // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
+  componentDidMount() {
+    if (this.props.profile.address) {
+      this.setState({profile: this.props.profile});
+    }
+  }
+
+  // This method will be deleted once we enable new account pages
   createAccount(): void {
     const {invitationKey, setProfile} = this.props;
     const profile = this.state.profile;
@@ -209,13 +180,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     }
     this.setState({creatingAccount: true});
     profileApi().createAccount({profile, invitationKey})
-        .then((savedProfile) => {
-          this.setState({profile: savedProfile, creatingAccount: false});
-          setProfile(savedProfile); })
-        .catch(error => {
-          console.log(error);
-          this.setState({creatingAccount: false});
-        });
+      .then((savedProfile) => {
+        this.setState({profile: savedProfile, creatingAccount: false});
+        setProfile(savedProfile, 'accountCreationSuccess'); })
+      .catch(error => {
+        console.log(error);
+        this.setState({creatingAccount: false});
+      });
   }
 
   get usernameValid(): boolean {
@@ -245,7 +216,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   usernameChanged(value: string): void {
-    this.updateProfile('username', value);
+    this.updateProfileToBeDeleted('username', value);
     const {username} = this.state.profile;
     if (username === '') {
       return;
@@ -270,7 +241,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     }, 300);
   }
 
-  updateProfile(attribute: string, value: string) {
+  updateProfileToBeDeleted(attribute: string, value: string) {
     if (attribute === 'contactEmail') {
       this.setState({invalidEmail: false});
     }
@@ -279,15 +250,40 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     this.setState(({profile}) => ({profile: fp.set(attribute, value, profile)}));
   }
 
-  // The strings will be changed to ENUM value once survey page is done
+  updateProfileObject(attribute: string, value) {
+    this.setState(fp.set(['profile', attribute], value));
+  }
+
+  updateAddress(attribute: string , value) {
+    this.setState(fp.set(['profile', 'address', attribute], value));
+  }
+
+  // As of now we can add just one industry name role, this will change later
+  updateInstitutionAffiliation(attribute: string, value) {
+    const profile = this.state.profile;
+    if (profile.institutionalAffiliations && profile.institutionalAffiliations.length > 0) {
+      profile.institutionalAffiliations[0][attribute] = value;
+    } else {
+      const institutionalAffiliation = {} as InstitutionalAffiliation;
+      institutionalAffiliation[attribute] = value;
+      profile.institutionalAffiliations = [institutionalAffiliation];
+    }
+    this.setState({profile: profile});
+  }
+
+  showOtherText(option) {
+    return option === AffiliationRole.FREETEXT || option === IndustryRole.FREETEXT ||
+        option === EducationalRole.FREETEXT;
+  }
+
   updateAffiliationRoles(affiliation) {
-    this.setState({showAffiliationRole: false, showAffiliationOther: false,
-      affiliation: affiliation});
-    if (affiliation === 'industry') {
-      this.setState({rolesOptions: Options.industryRole, showAffiliationRole: true});
-    } else if (affiliation === 'educationalInstitution') {
-      this.setState({rolesOptions: Options.eductionRole, showAffiliationRole: true});
-    } else if (affiliation === 'freeText') {
+    this.updateInstitutionAffiliation('affiliation', affiliation);
+    this.setState({showAffiliationRole: false, showAffiliationOther: false});
+    if (affiliation === AffiliationRole.INDUSTRY) {
+      this.setState({rolesOptions: AccountCreationOptions.industryRole, showAffiliationRole: true});
+    } else if (affiliation === AffiliationRole.EDUCATIONALINSTITUTION) {
+      this.setState({rolesOptions: AccountCreationOptions.eductionRole, showAffiliationRole: true});
+    } else if (this.showOtherText(affiliation)) {
       this.setState({showAffiliationOther: true});
       return;
     }
@@ -295,19 +291,21 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   selectAffiliationRoles(role) {
-    if (role === 'freeText') {
+    if (this.showOtherText(role)) {
       this.setState({affiliationRole: role, showAffiliationOther: true});
     } else {
       this.setState({affiliationRole: role, showAffiliationOther: false});
     }
+    this.updateInstitutionAffiliation('role', role);
+
   }
 
   // This will be deleted once enableAccountPages is set to true for prod
   validate() {
     const {profile} = this.state;
     const requiredFields =
-        [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
-          profile.currentPosition, profile.organization, profile.areaOfResearch];
+      [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
+        profile.currentPosition, profile.organization, profile.areaOfResearch];
     if (requiredFields.some(isBlank)) {
       this.setState({showAllFieldsRequiredError: true});
       return;
@@ -316,63 +314,52 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
 
   validateAccountCreation() {
     const {
+      showInstitution,
       profile: {
-        givenName, familyName, contactEmail, username
-      },
-      address: {
-        streetAddress1, city, state, zipcode, country
-      },
-      affiliation, affiliationRole, institutionName, institutionRole
+        givenName, familyName, contactEmail, username,
+        address: {
+          streetAddress1, city, state, country
+        }
+      }
     } = this.state;
-    const errors = validate({
-      givenName, familyName, streetAddress1, city, state, zipcode, country,
-      contactEmail, username, affiliation, affiliationRole, institutionName, institutionRole
-    }, {
-      givenName: {
-        presence: {allowEmpty: false}
-      },
-      familyName: {
-        presence: {allowEmpty: false}
-      },
+    const {institution, affiliation, role} = this.state.profile.institutionalAffiliations[0];
+
+    const presenceCheck = {
+      presence: {
+        allowEmpty: false
+      }
+    };
+
+    const validationCheck = {
+      givenName: presenceCheck,
+      familyName: presenceCheck,
       contactEmail: {
-        presence: {allowEmpty: false},
+        presence: presenceCheck,
         format: {
           pattern: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
           message: 'Invalid email address'
         }
       },
-      streetAddress1: {
-        presence: {allowEmpty: false}
-      },
-      city: {
-        presence: {allowEmpty: false}
-      },
-      state: {
-        presence: {allowEmpty: false}
-      },
-      zipcode: {
-        presence: {allowEmpty: false},
-        format: {
-          pattern: /^[0-9]*$/,
-        }
-      },
-      country: {
-        presence: {allowEmpty: false}
-      },
-      affiliation: {
-        presence: {allowEmpty: this.state.showInstitution}
-      },
-      affiliationRole: {
-        presence: {allowEmpty: !this.state.affiliation}
-      },
-      institutionName: {
-        presence: {allowEmpty: !this.state.showInstitution}
-      },
-      institutionRole: {
-        presence: {allowEmpty: !this.state.showInstitution}
+      streetAddress1: presenceCheck,
+      city: presenceCheck,
+      state: presenceCheck,
+      country: presenceCheck
+    };
+
+    showInstitution ? validationCheck['institution'] = presenceCheck :
+      validationCheck['affiliation'] = presenceCheck;
+
+    if (showInstitution || affiliation !== AffiliationRole.COMMUNITYSCIENTIST) {
+      validationCheck['role'] = presenceCheck;
+    }
+
+
+    const errors = validate({}, validationCheck);
+    this.setState({errors: errors}, () => {
+      if (!this.state.errors) {
+        this.props.setProfile(this.state.profile, 'accountCreationSurvey');
       }
     });
-    this.setState({errors: errors});
   }
 
 
@@ -380,18 +367,18 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     const {
       profile: {
         givenName, familyName, currentPosition, organization,
-        contactEmail, username, areaOfResearch
+        contactEmail, username, areaOfResearch,
+        address: {
+          streetAddress1, streetAddress2, city, state, zipCode, country
+        },
+        institutionalAffiliations
       },
-      address: {
-        streetAddress1, streetAddress2, city, state, zipcode, country
-      },
-      institutionName, institutionRole, showNext, affiliation, affiliationRole, affiliationOther
     } = this.state;
     return <div id='account-creation'
-                style={{'paddingTop': environment.enableAccountPages ? '1.5rem' :
-                      '3rem', 'paddingRight': '3rem', 'paddingLeft': '3rem'}}>
+                style={{paddingTop: environment.enableAccountPages ? '1.5rem' :
+                      '3rem', paddingRight: '3rem', paddingLeft: '3rem'}}>
       <Header>Create your account</Header>
-      {environment.enableAccountPages && !showNext && <div style={{marginTop: '0.5rem'}}>
+      {environment.enableAccountPages && <div style={{marginTop: '0.5rem'}}>
         <label style={{color: colors.primary, fontSize: 16}}>
           Please complete Step 1 of 2
         </label>
@@ -436,7 +423,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                          value={givenName}
                          invalid={givenName.length > nameLength}
                          style={{...styles.section, marginRight: '2rem'}}
-                         onChange={v => this.updateProfile('givenName', v)}/>
+                         onChange={value => this.updateProfileObject('givenName', value)}/>
               {givenName.length > nameLength &&
               <ErrorMessage id='givenNameError'>
                 First Name must be 80 characters or less.
@@ -445,7 +432,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                          value={familyName}
                          invalid={familyName.length > nameLength}
                          style={styles.section}
-                         onChange={v => this.updateProfile('familyName', v)}/>
+                         onChange={v => this.updateProfileObject('familyName', v)}/>
               {familyName.length > nameLength &&
               <ErrorMessage id='familyNameError'>
                 Last Name must be 80 character or less.
@@ -455,7 +442,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                        placeholder='Email Address'
                        value={contactEmail}
                        style={styles.section}
-                       onChange={v => this.updateProfile('contactEmail', v)}/>
+                       onChange={v => this.updateProfileObject('contactEmail', v)}/>
             {this.state.invalidEmail &&
             <Error id='invalidEmailError'>
               Contact Email Id is invalid
@@ -465,37 +452,25 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         <Section header='Your address'>
           <div
               style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', lineHeight: '1rem'}}>
-            <TextInput id='streetAddress' name='streetAddress'
+            <TextInput data-test-id='streetAddress' name='streetAddress'
                        placeholder='Street Address' value={streetAddress1}
-                       onChange={value => {
-                         this.setState(fp.set(['address', 'streetAddress1'], value));
-                       }}
+                       onChange={value => this.updateAddress('streetAddress1', value)}
                        style={{...styles.section, marginRight: '2rem', marginBottom: '0.5rem'}}/>
-            <TextInput id='state' name='state' placeholder='State' value={state}
-                       onChange={value => {
-                         this.setState(fp.set(['address', 'state'], value));
-                       }}
+            <TextInput data-test-id='state' name='state' placeholder='State' value={state}
+                       onChange={value => this.updateAddress('state', value)}
                        style={{...styles.section, marginBottom: '0.5rem'}}/>
-            <TextInput id='streetAddress2' name='streetAddress2' placeholder='Street Address 2'
+            <TextInput data-test-id='streetAddress2' name='streetAddress2' placeholder='Street Address 2'
                        value={streetAddress2}
                        style={{...styles.section, marginRight: '2rem', marginBottom: '0.5rem'}}
-                       onChange={value => {
-                         this.setState(fp.set(['address', 'streetAddress2'], value));
-                       }}/>
-            <TextInput id='zip' name='zip' placeholder='Zip Code' value={zipcode}
-                       onChange={value => {
-                         this.setState(fp.set(['address', 'zipcode'], value));
-                       }}
+                       onChange={value => this.updateAddress('streetAddress2', value)}/>
+            <TextInput data-test-id='zip' name='zip' placeholder='Zip Code' value={zipCode}
+                       onChange={value => this.updateAddress('zipCode', value)}
                        style={{...styles.section, marginBottom: '0.5rem'}}/>
-            <TextInput id='city' name='city' placeholder='City' value={city}
-                       onChange={value => {
-                         this.setState(fp.set(['address', 'city'], value));
-                       }}
+            <TextInput data-test-id='city' name='city' placeholder='City' value={city}
+                       onChange={value => this.updateAddress('city', value)}
                        style={{...styles.section, marginRight: '2rem'}}/>
-            <TextInput id='country' placeholder='Country' value={country} style={styles.section}
-                       onChange={value => {
-                         this.setState(fp.set(['address', 'country'], value));
-                       }}/>
+            <TextInput data-test-id='country' placeholder='Country' value={country} style={styles.section}
+                       onChange={value => this.updateAddress('country', value)}/>
           </div>
         </Section>
         <Section header='Institutional Affiliation'>
@@ -503,41 +478,56 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             Are you affiliated with an Academic Research Institution?
           </label>
           <div style={{paddingTop: '0.5rem'}}>
-            <RadioButton onChange={() => {this.setState({showInstitution: true}); }}
+            <RadioButton data-test-id='show-institution-yes'
+                         onChange={() => {this.updateInstitutionAffiliation('affiliation', '');
+                           this.updateInstitutionAffiliation('role', '');
+                           this.setState({showInstitution: true}); }}
                          checked={this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
             <label style={{paddingRight: '3rem', color: colors.primary}}>
               Yes
             </label>
-            <RadioButton onChange={() => {this.setState({showInstitution: false}); }}
+            <RadioButton data-test-id='show-institution-no'
+                         onChange={() => {this.updateInstitutionAffiliation('institution', '');
+                           this.updateInstitutionAffiliation('role', ''); this.setState({showInstitution: false}); }}
                          checked={!this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
             <label style={{color: colors.primary}}>No</label>
           </div>
         </Section>
         {this.state.showInstitution &&
         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
-          <TextInput style={{width: '16rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
-                     value={institutionName} placeholder='Institution Name'
-                     onChange={value => this.setState({institutionName: value})}></TextInput>
-          <Dropdown value={institutionRole}
-                    onChange={(e) => this.setState({institutionRole: e.value})}
+          <TextInput data-test-id='institutionname' style={{width: '16rem', marginBottom: '0.5rem',
+            marginTop: '0.5rem'}}
+            value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
+                institutionalAffiliations[0].institution : ''}
+            placeholder='Institution Name'
+            onChange={value => this.updateInstitutionAffiliation('institution', value)}
+                     ></TextInput>
+          <Dropdown data-test-id='institutionRole' value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
+              institutionalAffiliations[0].role : ''}
+                    onChange={e => this.updateInstitutionAffiliation('role', e.value)}
                     placeholder='Which of the following describes your role'
-                    style={{width: '16rem'}} options={Options.roles}/>
+                    style={{width: '16rem'}} options={AccountCreationOptions.roles}/>
         </div>}
         {!this.state.showInstitution &&
         <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
-          <Dropdown style={{width: '18rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
-                    value={affiliation} options={Options.affiliations}
-                    onChange={(e) => this.updateAffiliationRoles(e.value)}
+          <Dropdown data-test-id='affiliation'
+                    style={{width: '18rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
+                    value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
+                        institutionalAffiliations[0].affiliation : ''}
+                    options={AccountCreationOptions.affiliations}
+                    onChange={e => this.updateAffiliationRoles(e.value)}
                     placeholder='Which of the following better describes your affiliation?'/>
           {this.state.showAffiliationRole &&
-          <Dropdown placeholder='Which of the following describes your role'
-                    options={this.state.rolesOptions} value={affiliationRole}
-                    onChange={(e) => this.selectAffiliationRoles(e.value)}
+          <Dropdown data-test-id='affiliationrole' placeholder='Which of the following describes your role'
+                    options={this.state.rolesOptions} value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
+              institutionalAffiliations[0].role : ''}
+                    onChange={e => this.selectAffiliationRoles(e.value)}
                     style={{width: '18rem'}}/>}
           {this.state.showAffiliationOther &&
-          <TextInput value={affiliationOther}
-                     onChange={value => this.setState({affiliationOther: value})}
-                     style={{marginTop: '1rem'}}/>}
+          <TextInput value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
+              institutionalAffiliations[0].other : ''}
+                     onChange={value => this.updateInstitutionAffiliation('other', value)}
+                     style={{marginTop: '1rem', width: '18rem'}}/>}
         </div>}
         <FormSection style={{paddingBottom: '1rem'}}>
           <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError}
@@ -555,7 +545,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                      value={givenName}
                      invalid={givenName.length > 80}
                      style={{width: '16rem'}}
-                     onChange={v => this.updateProfile('givenName', v)}/>
+                     onChange={v => this.updateProfileToBeDeleted('givenName', v)}/>
           {givenName.length > 80 &&
           <ErrorMessage id='givenNameError'>
             First Name must be 80 characters or less.
@@ -566,7 +556,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                      value={familyName}
                      invalid={familyName.length > 80}
                      style={{width: '16rem'}}
-                     onChange={v => this.updateProfile('familyName', v)}/>
+                     onChange={v => this.updateProfileToBeDeleted('familyName', v)}/>
           {familyName.length > 80 &&
           <ErrorMessage id='familyNameError'>
             Last Name must be 80 character or less.
@@ -577,7 +567,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                      placeholder='Email Address'
                      value={contactEmail}
                      style={{width: '16rem'}}
-                     onChange={v => this.updateProfile('contactEmail', v)}/>
+                     onChange={v => this.updateProfileToBeDeleted('contactEmail', v)}/>
           {this.state.invalidEmail &&
           <Error id='invalidEmailError'>
             Contact Email Id is invalid
@@ -589,7 +579,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                      value={currentPosition}
                      invalid={currentPosition.length > 255}
                      style={{width: '16rem'}}
-                     onChange={v => this.updateProfile('currentPosition', v)}/>
+                     onChange={v => this.updateProfileToBeDeleted('currentPosition', v)}/>
           {currentPosition.length > 255 &&
           <ErrorMessage id='currentPositionError'>
             Current Position must be 255 characters or less.
@@ -601,7 +591,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                      value={organization}
                      invalid={organization.length > 255}
                      style={{width: '16rem'}}
-                     onChange={v => this.updateProfile('organization', v)}/>
+                     onChange={v => this.updateProfileToBeDeleted('organization', v)}/>
           {organization.length > 255 &&
           <ErrorMessage id='organizationError'>
             Organization must be 255 characters of less.
@@ -613,7 +603,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                         name='areaOfResearch'
                         placeholder='Describe Your Current Research'
                         value={areaOfResearch}
-                        onChange={v => this.updateProfile('areaOfResearch', v)}/>
+                        onChange={v => this.updateProfileToBeDeleted('areaOfResearch', v)}/>
           <TooltipTrigger content='You are required to describe your current research in
                       order to help All of Us improve the Researcher Workbench.'>
             <InfoIcon style={{

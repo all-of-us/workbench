@@ -40,11 +40,14 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.ContactEmailTakenResponse;
 import org.pmiops.workbench.model.CreateAccountRequest;
+import org.pmiops.workbench.model.DemographicSurvey;
+import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
@@ -106,9 +109,58 @@ public class ProfileController implements ProfileApiDelegate {
                 InstitutionalAffiliation institutionalAffiliation) {
               org.pmiops.workbench.db.model.InstitutionalAffiliation result =
                   new org.pmiops.workbench.db.model.InstitutionalAffiliation();
-              result.setRole(institutionalAffiliation.getRole());
-              result.setInstitution(institutionalAffiliation.getInstitution());
+              if (institutionalAffiliation.getInstitution() != null)
+                result.setInstitution(institutionalAffiliation.getInstitution());
+              if (institutionalAffiliation.getAffiliation() != null)
+                result.setAffiliationEnum(institutionalAffiliation.getAffiliation());
 
+              result.setRole(institutionalAffiliation.getRole());
+
+              return result;
+            }
+          };
+
+  private static final Function<Address, org.pmiops.workbench.db.model.Address>
+      FROM_CLIENT_ADDRESS =
+          new Function<Address, org.pmiops.workbench.db.model.Address>() {
+            @Override
+            public org.pmiops.workbench.db.model.Address apply(Address address) {
+              org.pmiops.workbench.db.model.Address result =
+                  new org.pmiops.workbench.db.model.Address();
+              result.setStreetAddress1(address.getStreetAddress1());
+              result.setStreetAddress2(address.getStreetAddress2());
+              result.setCity(address.getCity());
+              result.setState(address.getState());
+              result.setZipCode(address.getZipCode());
+              result.setCountry(address.getCountry());
+              return result;
+            }
+          };
+
+  private static final Function<DemographicSurvey, org.pmiops.workbench.db.model.DemographicSurvey>
+      FROM_CLIENT_DEMOGRAPHIC_SURVEY =
+          new Function<DemographicSurvey, org.pmiops.workbench.db.model.DemographicSurvey>() {
+            @Override
+            public org.pmiops.workbench.db.model.DemographicSurvey apply(
+                DemographicSurvey demographicSurvey) {
+              org.pmiops.workbench.db.model.DemographicSurvey result =
+                  new org.pmiops.workbench.db.model.DemographicSurvey();
+              if (demographicSurvey.getRace() != null)
+                result.setRaceEnum(demographicSurvey.getRace());
+              if (demographicSurvey.getEthnicity() != null)
+                result.setEthnicityEnum(demographicSurvey.getEthnicity());
+              if (demographicSurvey.getDisability() != null)
+                result.setDisabilityEnum(
+                    demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
+              if (demographicSurvey.getEducation() != null)
+                result.setEducationEnum(demographicSurvey.getEducation());
+              if (demographicSurvey.getGender() != null)
+                result.setGenderEnum(demographicSurvey.getGender());
+              if (demographicSurvey.getDisability() != null)
+                result.setDisabilityEnum(
+                    demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
+              if (demographicSurvey.getYearOfBirth() != null)
+                result.setYear_of_birth(demographicSurvey.getYearOfBirth().intValue());
               return result;
             }
           };
@@ -199,9 +251,10 @@ public class ProfileController implements ProfileApiDelegate {
   private void validateProfileFields(Profile profile) {
     validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
     validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
-    validateStringLength(profile.getCurrentPosition(), "Current Position", 255, 1);
-    validateStringLength(profile.getOrganization(), "Organization", 255, 1);
-    validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
+    validateStringLength(profile.getAddress().getStreetAddress1(), "Street Address 1", 255, 5);
+    validateStringLength(profile.getAddress().getCity(), "City", 3000, 5);
+    validateStringLength(profile.getAddress().getState(), "State", 3000, 1);
+    validateStringLength(profile.getAddress().getCountry(), "Country", 3000, 2);
   }
 
   private User saveUserWithConflictHandling(User user) {
@@ -362,6 +415,7 @@ public class ProfileController implements ProfileApiDelegate {
     // It's possible for the profile information to become out of sync with the user's Google
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
+
     User user =
         userService.createUser(
             request.getProfile().getGivenName(),
@@ -370,7 +424,12 @@ public class ProfileController implements ProfileApiDelegate {
             request.getProfile().getContactEmail(),
             request.getProfile().getCurrentPosition(),
             request.getProfile().getOrganization(),
-            request.getProfile().getAreaOfResearch());
+            request.getProfile().getAreaOfResearch(),
+            FROM_CLIENT_ADDRESS.apply(request.getProfile().getAddress()),
+            FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
+            request.getProfile().getInstitutionalAffiliations().stream()
+                .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
+                .collect(Collectors.toList()));
 
     try {
       mailServiceProvider
@@ -571,10 +630,9 @@ public class ProfileController implements ProfileApiDelegate {
     if (newAffiliations.size() == 0) {
       shouldAdd = true;
     }
-    Long userId = user.getUserId();
     for (org.pmiops.workbench.db.model.InstitutionalAffiliation affiliation : newAffiliations) {
       affiliation.setOrderIndex(i);
-      affiliation.setUserId(userId);
+      affiliation.setUser(user);
       if (oldAffilations.hasNext()) {
         org.pmiops.workbench.db.model.InstitutionalAffiliation oldAffilation =
             oldAffilations.next();

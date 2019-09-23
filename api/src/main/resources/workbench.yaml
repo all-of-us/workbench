@@ -3228,6 +3228,8 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/InstitutionalAffiliation"
+      demographicSurvey:
+        $ref: "#/definitions/DemographicSurvey"
       idVerificationCompletionTime:
         type: integer
         format: int64
@@ -3296,6 +3298,8 @@ definitions:
         type: integer
         format: int32
         description: Version of the data use agreement that the user last signed.
+      address:
+        $ref: '#/definitions/Address'
 
   InstitutionalAffiliation:
     type: object
@@ -3306,6 +3310,47 @@ definitions:
       institution:
         type: string
       role:
+        type: string
+      affiliation:
+        $ref: '#/definitions/AffiliationRole'
+        type: string
+      other:
+        type: string
+
+  DemographicSurvey:
+    type: object
+    properties:
+      race:
+        type: array
+        items:
+          $ref: '#/definitions/Race'
+      ethnicity:
+        $ref: '#/definitions/Ethnicity'
+      gender:
+        type: array
+        items:
+          $ref: '#/definitions/Gender'
+      yearOfBirth:
+        type: number
+      education:
+        $ref: '#/definitions/Education'
+      disability:
+        type: boolean
+
+  Address:
+    type: object
+    properties:
+      streetAddress1:
+        type: string
+      streetAddress2:
+        type: string
+      zipCode:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      country:
         type: string
 
   StackTraceElement:

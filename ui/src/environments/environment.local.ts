@@ -17,5 +17,5 @@ export const environment: Environment = {
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
   enableJupyterLab: true,
-  enableAccountPages: false,
+  enableAccountPages: true,
 };
