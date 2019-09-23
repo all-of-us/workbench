@@ -268,7 +268,6 @@ public class UserService {
       address.setUser(user);
     }
     if (demographicSurvey != null) demographicSurvey.setUser(user);
-    // fix this
     if (institutionalAffiliation != null) {
       final User u = user;
       institutionalAffiliation.forEach(affiliation -> affiliation.setUser(u));

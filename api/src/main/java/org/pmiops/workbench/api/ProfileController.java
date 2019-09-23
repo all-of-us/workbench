@@ -258,7 +258,6 @@ public class ProfileController implements ProfileApiDelegate {
       validateStringLength(profile.getOrganization(), "Organization", 255, 1);
       validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
     } else {
-      // This will be un commented once enableAccount flag is set to true for prod and stable
       validateStringLength(profile.getAddress().getStreetAddress1(), "Street Address 1", 255, 5);
       validateStringLength(profile.getAddress().getCity(), "City", 3000, 1);
       validateStringLength(profile.getAddress().getState(), "State", 3000, 1);
