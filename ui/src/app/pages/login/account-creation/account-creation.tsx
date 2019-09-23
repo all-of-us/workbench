@@ -315,9 +315,12 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
 
   validateAccountCreation() {
     const {
-      showInstitution
+      showInstitution,
+      profile: { givenName, familyName, contactEmail,
+        address: {streetAddress1, city, country, state},
+        institutionalAffiliations: [{institution, affiliation, role}]
+      }
     } = this.state;
-    const {affiliation} = this.state.profile.institutionalAffiliations[0];
 
     const presenceCheck = {
       presence: {
@@ -349,7 +352,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     }
 
 
-    const errors = validate({}, validationCheck);
+    const errors = validate({givenName, familyName, contactEmail, streetAddress1, city, state, country,
+      institution, affiliation, role}, validationCheck);
     this.setState({errors: errors}, () => {
       if (!this.state.errors) {
         this.props.setProfile(this.state.profile, 'accountCreationSurvey');
