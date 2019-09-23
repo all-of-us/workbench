@@ -21,12 +21,12 @@
         </createTable>
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="user_recent_workspace"
-                                 constraintName="fk_user_id"
+                                 constraintName="fk_recent_workspace_user_id"
                                  referencedColumnNames="user_id"
                                  referencedTableName="user" onDelete="CASCADE"/>
         <addForeignKeyConstraint baseColumnNames="workspace_id"
                                  baseTableName="user_recent_workspace"
-                                 constraintName="fk_workspace_id"
+                                 constraintName="fk_recent_workspace_ws_id"
                                  referencedColumnNames="workspace_id"
                                  referencedTableName="workspace" onDelete="CASCADE"/>
     </changeSet>
