@@ -418,6 +418,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
       const cdrResp = this.props.cdrVersionListResponse;
       const liveCdrVersions = cdrResp.items.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
+      if (liveCdrVersions.length === 0) {
+        throw Error('no live CDR versions were found');
+      }
       if (this.isMode(WorkspaceEditMode.Edit)) {
         // In edit mode, you cannot modify the CDR version, therefore it's fine
         // to show archived CDRs in the drop-down so that it accurately displays
@@ -429,7 +432,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         this.setState({cdrVersionItems: liveCdrVersions});
       }
 
-      const selectedCdrIsLive = !!liveCdrVersions.find(cdr => cdr.cdrVersionId === this.state.workspace.cdrVersionId);
+      const selectedCdrIsLive = liveCdrVersions.some(cdr => cdr.cdrVersionId === this.state.workspace.cdrVersionId);
       if (this.isMode(WorkspaceEditMode.Create) || (
         this.isMode(WorkspaceEditMode.Duplicate) && !selectedCdrIsLive)) {
         // We preselect the default CDR version when a new workspace is being

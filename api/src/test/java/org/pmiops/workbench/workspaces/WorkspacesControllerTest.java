@@ -596,7 +596,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = FailedPreconditionException.class)
-  public void testCreateWorkspace_archivedCdrVersion() throws Exception {
+  public void testCreateWorkspace_archivedCdrVersionThrows() throws Exception {
     Workspace workspace = createWorkspace();
     workspace.setCdrVersionId(archivedCdrVersionId);
     workspacesController.createWorkspace(workspace).getBody();
@@ -1421,7 +1421,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = FailedPreconditionException.class)
-  public void testCloneWorkspaceArchivedCdrVersion() throws Exception {
+  public void testCloneWorkspaceArchivedCdrVersionThrows() throws Exception {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
     Workspace modWorkspace =
