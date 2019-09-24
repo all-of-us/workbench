@@ -725,15 +725,26 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(new EmptyResponse());
   }
 
+  private RecentWorkspace buildRecentWorkspace(
+          org.pmiops.workbench.db.model.Workspace dbWorkspace,
+          UserRecentWorkspace userRecentWorkspace,
+          WorkspaceAccessLevel accessLevel
+  ) {
+    RecentWorkspace recentWorkspace = new RecentWorkspace();
+    recentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
+    recentWorkspace.setAccessedTime(userRecentWorkspace.getLastAccessDate().toString());
+    recentWorkspace.setAccessLevel(accessLevel);
+    return recentWorkspace;
+  }
+
   @Override
   public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(String workspaceNamespace, String workspaceId) {
       long userId = userProvider.get().getUserId();
       org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
       UserRecentWorkspace userRecentWorkspace = workspaceService.updateRecentWorkspaces(dbWorkspace.getWorkspaceId(), userId);
+      WorkspaceAccessLevel accessLevel = workspaceService.getWorkspaceAccessLevel(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
       RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
-      RecentWorkspace recentWorkspace = new RecentWorkspace();
-      recentWorkspace.setWorkspaceId(userRecentWorkspace.getWorkspaceId());
-      recentWorkspace.setAccessedTime(userRecentWorkspace.getLastAccessDate().toString());
+      RecentWorkspace recentWorkspace = buildRecentWorkspace(dbWorkspace, userRecentWorkspace, accessLevel);
       recentWorkspaceResponse.add(recentWorkspace);
       return ResponseEntity.ok(recentWorkspaceResponse);
   }
@@ -747,10 +758,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     recentWorkspaceResponse.addAll(
             userRecentWorkspaceList.stream()
                     .map(userRecentWorkspace -> {
-                      RecentWorkspace recentWorkspace = new RecentWorkspace();
-                      recentWorkspace.setWorkspaceId(userRecentWorkspace.getWorkspaceId());
-                      recentWorkspace.setAccessedTime(userRecentWorkspace.getLastAccessDate().toString());
-                      return recentWorkspace;
+                      org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.findByWorkspaceId(userRecentWorkspace.getWorkspaceId());
+                      WorkspaceAccessLevel accessLevel = workspaceService.getWorkspaceAccessLevel(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+                      return buildRecentWorkspace(dbWorkspace, userRecentWorkspace, accessLevel);
                     })
                     .collect(Collectors.toList())
     );

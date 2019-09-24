@@ -2491,6 +2491,8 @@ public class WorkspacesControllerTest {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
     workspaceService.updateRecentWorkspaces(dbWorkspace.getWorkspaceId(), currentUser.getUserId());
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity = workspacesController.getUserRecentWorkspaces();
-    assertThat(recentWorkspaceResponseEntity.getBody().get(0).getWorkspaceId()).isEqualTo(dbWorkspace.getWorkspaceId());
+    RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
+    assertThat(recentWorkspace.getWorkspace().getNamespace()).isEqualTo(dbWorkspace.getWorkspaceNamespace());
+    assertThat(recentWorkspace.getWorkspace().getName()).isEqualTo(dbWorkspace.getName());
   }
 }

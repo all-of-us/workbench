@@ -1,33 +1,35 @@
 import * as React from 'react';
 
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
-import {RecentWorkspace} from 'generated/fetch';
-import {SpinnerOverlay} from "../../components/spinners";
+import {SpinnerOverlay} from "app/components/spinners";
+import {WorkspaceCard} from "app/pages/workspace/workspace-card";
+import {Profile, RecentWorkspace} from 'generated/fetch';
+import {withUserProfile} from "app/utils";
 
-interface Props {}
 interface State {
   loading: boolean,
-  workspaces: RecentWorkspace[],
+  recentWorkspaces: RecentWorkspace[],
 }
 
-export class RecentWorkspaces extends React.Component<Props, State> {
+export const RecentWorkspaces = withUserProfile()
+(class extends React.Component<{ profileState: { profile: Profile, reload: Function } }, State> {
   constructor(props) {
     super(props);
     this.state = {
       loading: false,
-      workspaces: [],
+      recentWorkspaces: [],
     };
   }
 
   componentDidMount() {
-    this.loadResources();
+    this.loadWorkspaces();
   }
 
-  async loadResources() {
+  async loadWorkspaces() {
     try {
       this.setState({loading: true});
-      const workspaces = await workspacesApi().getUserRecentWorkspaces();
-      this.setState({workspaces});
+      const recentWorkspaces = await workspacesApi().getUserRecentWorkspaces();
+      this.setState({recentWorkspaces: recentWorkspaces});
     } catch (error) {
       console.error(error);
     } finally {
@@ -37,8 +39,18 @@ export class RecentWorkspaces extends React.Component<Props, State> {
 
   render() {
     return <div>
-      lol
+      {
+        this.state.recentWorkspaces.map(recentWorkspace => {
+          return <WorkspaceCard
+            key={recentWorkspace.workspace.name}
+            userEmail={this.props.profileState.profile.username}
+            workspace={recentWorkspace.workspace}
+            accessLevel={recentWorkspace.accessLevel}
+            reload={() => this.loadWorkspaces()}
+          />
+        })
+      }
       {this.state.loading && <SpinnerOverlay dark={true} />}
     </div>;
   }
-}
+});
