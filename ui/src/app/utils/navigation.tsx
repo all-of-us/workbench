@@ -2,9 +2,10 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConfigResponse} from 'generated';
-import {Cohort, ConceptSet, Profile} from 'generated/fetch';
+import {CdrVersionListResponse, Cohort, ConceptSet, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 export const NavStore = {
   navigate: undefined,
@@ -18,7 +19,6 @@ export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const serverConfigStore = new BehaviorSubject<ConfigResponse>(undefined);
-export const cdrVersionStore = new BehaviorSubject<any>(undefined);
 export const userProfileStore =
   new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
     profile: {} as Profile,
@@ -33,7 +33,7 @@ export const signInStore =
     signOut: () => {},
     profileImage: {} as string,
   });
-
+export const cdrVersionStore = new ReplaySubject<CdrVersionListResponse>(1);
 
 /**
  * Slightly stricter variant of Angular's DefaultRouteReuseStrategy. This

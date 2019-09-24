@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {cdrVersionStore, currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -16,8 +16,8 @@ import {ResetClusterButton} from 'app/pages/analysis/reset-cluster-button';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUrlParams, withUserProfile} from 'app/utils';
-import {Authority, CdrVersion, Profile, UserRole, WorkspaceAccessLevel} from 'generated/fetch';
+import {reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
+import {Authority, CdrVersion, CdrVersionListResponse, Profile, UserRole, WorkspaceAccessLevel} from 'generated/fetch';
 
 
 interface WorkspaceState {
@@ -83,9 +83,9 @@ const WorkspaceInfoTooltipText = () => {
   </div>;
 };
 
-export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
+export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCdrVersions())
 (class extends React.Component<
-  {profileState: {profile: Profile, reload: Function, updateCache: Function}}, WorkspaceState> {
+  {profileState: {profile: Profile, reload: Function, updateCache: Function}, cdrVersionListResponse: CdrVersionListResponse}, WorkspaceState> {
 
   constructor(props) {
     super(props);
@@ -103,7 +103,8 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
     this.setVisits();
     await this.reloadWorkspace(currentWorkspaceStore.getValue());
     this.loadUserRoles();
-    this.setCdrVersion();
+    const cdrs = this.props.cdrVersionListResponse.items;
+    this.setState({cdrVersion: cdrs.find(v => v.cdrVersionId === this.state.workspace.cdrVersionId)});
   }
 
   async setVisits() {
@@ -111,11 +112,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
     if (!profile.pageVisits.some(v => v.page === pageId)) {
       await profileApi().updatePageVisits({ page: pageId});
     }
-  }
-
-  setCdrVersion() {
-    this.setState({cdrVersion: cdrVersionStore.getValue().
-      find(v => v.cdrVersionId === this.state.workspace.cdrVersionId)});
   }
 
   async reloadWorkspace(workspace: WorkspaceData) {

@@ -11,9 +11,9 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {TwoColPaddedTable} from 'app/components/tables';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
-import {CdrVersion, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
+import {CdrVersion, CdrVersionListResponse, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -335,6 +335,7 @@ function getDiseaseNames(keyword) {
 
 export interface WorkspaceEditProps {
   routeConfigData: any;
+  cdrVersionListResponse: CdrVersionListResponse;
   workspace: Workspace;
   cancel: Function;
 }
@@ -351,7 +352,7 @@ export interface WorkspaceEditState {
   showStigmatizationDetails: boolean;
 }
 
-export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
+export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     constructor(props: WorkspaceEditProps) {
       super(props);
@@ -393,7 +394,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       };
     }
 
-    componentDidMount() {
+    async componentDidMount() {
       if (!this.isMode(WorkspaceEditMode.Create)) {
         this.setState({workspace : {
           ...this.props.workspace,
@@ -435,13 +436,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     async setCdrVersions() {
       try {
-        const cdrVersions = await cdrVersionsApi().getCdrVersions();
-        this.setState({cdrVersionItems: cdrVersions.items});
+        const cdrResp = this.props.cdrVersionListResponse;
+        this.setState({cdrVersionItems: cdrResp.items});
         // TODO(RW-3342): On duplicate, use the source CDR unless it is archived, else use the
         // default. For now we always use the default as a short-term band-aid during the VPC-SC
         // transition (old CDRs won't work, don't default to them when cloning).
         if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-          this.setState(fp.set(['workspace', 'cdrVersionId'], cdrVersions.defaultCdrVersionId));
+          this.setState(fp.set(['workspace', 'cdrVersionId'], cdrResp.defaultCdrVersionId));
         }
       } catch (exception) {
         console.log(exception);
