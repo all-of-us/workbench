@@ -90,7 +90,7 @@ const styles = reactStyles({
     color: colors.primary,
   },
   textInput: {
-    width: '90%',
+    width: '85%',
     height: '1.5rem',
     padding: '0 0 0 5px',
     border: 0,
@@ -244,7 +244,7 @@ export class HelpSidebar extends React.Component<Props, State> {
           <div style={contentStyle('help')}>
             <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
             <div style={styles.textSearch}>
-              <ClrIcon style={{color: colors.primary, margin: '0 0.3rem'}} shape='search' size={16} />
+              <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
               <input
                 type='text'
                 style={styles.textInput}
