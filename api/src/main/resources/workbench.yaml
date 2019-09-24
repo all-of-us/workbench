@@ -3639,9 +3639,10 @@ definitions:
   RecentWorkspace:
     type: object
     properties:
-      workspaceId:
-        type: integer
-        format: int64
+      workspace:
+        $ref: '#/definitions/Workspace'
+      accessLevel:
+        $ref: '#/definitions/WorkspaceAccessLevel'
       accessedTime:
         type: string
 

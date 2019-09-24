@@ -7,7 +7,7 @@ import {Clickable} from 'app/components/buttons';
 import {Header} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
-import {WorkspaceCard} from 'app/pages/workspace/workspace-list';
+import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {featuredWorkspacesConfigApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -133,7 +133,7 @@ export const WorkspaceLibrary = withUserProfile()
     this.filterPublishedWorkspaces();
   }
 
-  // Gets all published workspaces, including those configured as 'featured'
+  // Gets all published recentWorkspaces, including those configured as 'featured'
   async getAllPublishedWorkspaces() {
     try {
       const workspacesReceived = await workspacesApi().getPublishedWorkspaces();
@@ -150,7 +150,7 @@ export const WorkspaceLibrary = withUserProfile()
     }
   }
 
-  // Gets the 'featured workspaces' config and filters the list of published workspaces to
+  // Gets the 'featured recentWorkspaces' config and filters the list of published recentWorkspaces to
   // find the 'featured' ones
   async getFeaturedWorkspaces() {
     try {
@@ -169,7 +169,7 @@ export const WorkspaceLibrary = withUserProfile()
     }
   }
 
-  // Filter the list of published workspaces to find the ones that are not configured as 'featured'
+  // Filter the list of published recentWorkspaces to find the ones that are not configured as 'featured'
   filterPublishedWorkspaces() {
     const publishedWorkspaces = this.state.workspaceList.filter(ws =>
       !fp.contains(ws, this.state.featuredWorkspaces)
@@ -224,8 +224,8 @@ export const WorkspaceLibrary = withUserProfile()
               (<Spinner style={{width: '100%', marginTop: '0.5rem'}}/>) :
               (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
                 {publishedWorkspaces.map(wp => {
-                  return <WorkspaceCard key={wp.workspace.name}
-                                        wp={wp}
+                  return <WorkspaceCard workspace={wp.workspace}
+                                        accessLevel={wp.accessLevel}
                                         userEmail={username}
                                         reload={() => this.updateWorkspaces()}/>;
                 })}
@@ -238,10 +238,13 @@ export const WorkspaceLibrary = withUserProfile()
               (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
                 {featuredWorkspaces
                   .map(wp => {
-                    return <WorkspaceCard key={wp.workspace.name}
-                                          wp={wp}
-                                          userEmail={username}
-                                          reload={() => this.updateWorkspaces()}/>;
+                    return <WorkspaceCard
+                      key={wp.workspace.name}
+                      workspace={wp.workspace}
+                      accessLevel={wp.accessLevel}
+                      userEmail={username}
+                      reload={() => this.updateWorkspaces()}
+                    />;
                   })}
               </div>)}
           </div>}
