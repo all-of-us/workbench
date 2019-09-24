@@ -9,7 +9,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TwoColPaddedTable} from 'app/components/tables';
-import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';

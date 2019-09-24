@@ -19,6 +19,10 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
 import {Authority, CdrVersion, CdrVersionListResponse, Profile, UserRole, WorkspaceAccessLevel} from 'generated/fetch';
 
+interface WorkspaceProps {
+  profileState: {profile: Profile, reload: Function, updateCache: Function};
+  cdrVersionListResponse: CdrVersionListResponse;
+}
 
 interface WorkspaceState {
   sharing: boolean;
@@ -84,8 +88,7 @@ const WorkspaceInfoTooltipText = () => {
 };
 
 export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCdrVersions())
-(class extends React.Component<
-  {profileState: {profile: Profile, reload: Function, updateCache: Function}, cdrVersionListResponse: CdrVersionListResponse}, WorkspaceState> {
+(class extends React.Component<WorkspaceProps, WorkspaceState> {
 
   constructor(props) {
     super(props);
