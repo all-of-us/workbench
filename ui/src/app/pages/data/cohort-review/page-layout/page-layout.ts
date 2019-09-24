@@ -50,7 +50,7 @@ export class PageLayout implements OnInit, OnDestroy {
     }).then(review => {
       cohortReviewStore.next(review);
       this.reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
-      if (this.reviewPresent && this.router.url.split('/').pop() === 'review') {
+      if (this.reviewPresent) {
         navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
       }
     });

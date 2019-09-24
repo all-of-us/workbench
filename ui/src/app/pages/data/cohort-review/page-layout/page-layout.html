@@ -2,10 +2,6 @@
   CohortReview main content outlet
   Pages: Overview, Table (participant master), Detail
 -->
-<div class="cohort-review-wrapper" *ngIf="cohortLoaded && reviewPresent">
-  <router-outlet></router-outlet>
-</div>
-
 <app-create-review-modal *ngIf="ableToReview" [canceled]="goBack" [created]="reviewCreated"></app-create-review-modal>
 <clr-modal [clrModalOpen]="unableToReview" [clrModalSize]="'md'" [clrModalClosable]="false">
   <div class="modal-title" style="color: #302973">

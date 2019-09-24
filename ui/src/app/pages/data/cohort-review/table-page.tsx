@@ -10,7 +10,7 @@ import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewStore, filterStateStore, getVocabOptions, multiOptions, vocabOptions} from 'app/services/review-state.service';
-import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -38,6 +38,12 @@ const fields = [
 ];
 const rows = 25;
 const styles = reactStyles({
+  review: {
+    minHeight: 'calc(100vh - calc(4rem + 60px))',
+    padding: '1rem',
+    position: 'relative',
+    marginRight: '45px'
+  },
   backBtn: {
     padding: 0,
     border: 0,
@@ -247,9 +253,14 @@ export const ParticipantsTable = withCurrentWorkspace()(
     async componentDidMount() {
       const {filters} = this.state;
       const {cdrVersionId} = this.props.workspace;
+      const promises = [];
+      const {ns, wsid, cid} = urlParamsStore.getValue();
+      if (!currentCohortStore.getValue()) {
+        promises.push(cohortsApi().getCohort(ns, wsid, cid).then(cohort => currentCohortStore.next(cohort)));
+      }
       if (!multiOptions.getValue()) {
-        try {
-          await cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
+        promises.push(
+          cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
             const extract = (arr, _type?) => fp.uniq([
               ...arr.map(i => {
                 filters[_type].push(i.conceptName);
@@ -269,25 +280,29 @@ export const ParticipantsTable = withCurrentWorkspace()(
             };
             multiOptions.next(multiFilters);
             this.setState({filters});
-          });
-        } catch (error) {
-          console.error(error);
-          multiFilters = {
-            ...multiFilters,
-            RACE: [{name: 'Select All', value: 'Select All'}],
-            GENDER: [{name: 'Select All', value: 'Select All'}],
-            ETHNICITY: [{name: 'Select All', value: 'Select All'}]
-          };
-        } finally {
-          this.getTableData();
-        }
+          }, error => {
+            console.error(error);
+            multiFilters = {
+              ...multiFilters,
+              RACE: [{name: 'Select All', value: 'Select All'}],
+              GENDER: [{name: 'Select All', value: 'Select All'}],
+              ETHNICITY: [{name: 'Select All', value: 'Select All'}]
+            };
+          })
+        );
       } else {
         multiFilters = multiOptions.getValue();
         const review = cohortReviewStore.getValue();
         if (review) {
           this.setState({page: review.page});
         }
-        setTimeout(() => this.getTableData());
+        if (!promises.length) {
+          setTimeout(() => this.getTableData());
+        }
+      }
+      if (promises.length) {
+        await Promise.all(promises);
+        this.getTableData();
       }
     }
 
@@ -603,9 +618,9 @@ export const ParticipantsTable = withCurrentWorkspace()(
           header={header}
           sortable/>;
       });
-      return <div>
+      return <div style={styles.review}>
         <style>{datatableStyles}</style>
-        <React.Fragment>
+        {!!cohort && <React.Fragment>
           <button
             style={styles.backBtn}
             type='button'
@@ -645,7 +660,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             footer={this.errorMessage()}>
             {columns}
           </DataTable>
-        </React.Fragment>
+        </React.Fragment>}
         {loading && <SpinnerOverlay />}
         <HelpSidebar location='reviewParticipants' />
       </div>;

@@ -187,31 +187,35 @@ const routes: Routes = [
                       },
                       {
                         path: ':cid/review',
-                        component: PageLayout,
-                        data: {
-                          title: 'Review Cohort Participants',
-                          breadcrumb: BreadcrumbType.Cohort
-                        },
-                        children: [{
-                          path: 'participants',
-                          component: TablePage,
-                          data: {
-                            breadcrumb: BreadcrumbType.Cohort
+                        children: [
+                          {
+                            path: '',
+                            component: PageLayout,
+                            data: {
+                              title: 'Review Cohort Participants',
+                              breadcrumb: BreadcrumbType.Cohort
+                            }
+                          }, {
+                            path: 'participants',
+                            component: TablePage,
+                            data: {
+                              breadcrumb: BreadcrumbType.Cohort
+                            }
+                          }, {
+                            path: 'cohort-description',
+                            component: QueryReportComponent,
+                            data: {
+                              breadcrumb: BreadcrumbType.Cohort
+                            }
+                          }, {
+                            path: 'participants/:pid',
+                            component: DetailPageComponent,
+                            data: {
+                              breadcrumb: BreadcrumbType.Participant,
+                              shouldReuse: true
+                            }
                           }
-                        }, {
-                          path: 'cohort-description',
-                          component: QueryReportComponent,
-                          data: {
-                            breadcrumb: BreadcrumbType.Cohort
-                          }
-                        }, {
-                          path: 'participants/:pid',
-                          component: DetailPageComponent,
-                          data: {
-                            breadcrumb: BreadcrumbType.Participant,
-                            shouldReuse: true
-                          }
-                        }],
+                        ],
                       }
                     ]
                   },
