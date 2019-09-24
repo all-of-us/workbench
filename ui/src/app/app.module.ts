@@ -30,6 +30,7 @@ import {AdminUserComponent} from './pages/admin/admin-user';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect/component';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
+import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {CreateReviewModalComponent} from './pages/data/cohort-review/create-review-modal';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {PageLayout} from './pages/data/cohort-review/page-layout/page-layout';
@@ -134,6 +135,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppComponent,
     BugReportComponent,
     CohortActionsComponent,
+    CohortReviewComponent,
     ConceptSetActionsComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,

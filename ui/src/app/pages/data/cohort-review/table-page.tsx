@@ -255,8 +255,18 @@ export const ParticipantsTable = withCurrentWorkspace()(
       const {cdrVersionId} = this.props.workspace;
       const promises = [];
       const {ns, wsid, cid} = urlParamsStore.getValue();
+      const review = cohortReviewStore.getValue();
       if (!currentCohortStore.getValue()) {
         promises.push(cohortsApi().getCohort(ns, wsid, cid).then(cohort => currentCohortStore.next(cohort)));
+      }
+      if (!review) {
+        promises.push(this.getTableData());
+      } else {
+        this.setState({
+          data: review.participantCohortStatuses.map(this.mapData),
+          page: review.page,
+          total: review.queryResultSize
+        });
       }
       if (!multiOptions.getValue()) {
         promises.push(
@@ -292,18 +302,11 @@ export const ParticipantsTable = withCurrentWorkspace()(
         );
       } else {
         multiFilters = multiOptions.getValue();
-        const review = cohortReviewStore.getValue();
-        if (review) {
-          this.setState({page: review.page});
-        }
-        if (!promises.length) {
-          setTimeout(() => this.getTableData());
-        }
       }
       if (promises.length) {
         await Promise.all(promises);
-        this.getTableData();
       }
+      this.setState({loading: false});
     }
 
     componentWillUnmount(): void {

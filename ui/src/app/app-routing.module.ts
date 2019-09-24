@@ -11,8 +11,8 @@ import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspac
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect/component';
+import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
-import {PageLayout} from './pages/data/cohort-review/page-layout/page-layout';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
 import {TablePage} from './pages/data/cohort-review/table-page';
 import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
@@ -190,7 +190,7 @@ const routes: Routes = [
                         children: [
                           {
                             path: '',
-                            component: PageLayout,
+                            component: CohortReviewComponent,
                             data: {
                               title: 'Review Cohort Participants',
                               breadcrumb: BreadcrumbType.Cohort
