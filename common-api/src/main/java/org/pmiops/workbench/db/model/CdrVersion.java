@@ -145,6 +145,7 @@ public class CdrVersion {
         isDefault,
         name,
         dataAccessLevel,
+        archivalStatus,
         releaseNumber,
         bigqueryProject,
         bigqueryDataset,
@@ -165,6 +166,7 @@ public class CdrVersion {
         .append(this.isDefault, that.isDefault)
         .append(this.name, that.name)
         .append(this.dataAccessLevel, that.dataAccessLevel)
+        .append(this.archivalStatus, that.archivalStatus)
         .append(this.releaseNumber, that.releaseNumber)
         .append(this.bigqueryProject, that.bigqueryProject)
         .append(this.creationTime, that.creationTime)
