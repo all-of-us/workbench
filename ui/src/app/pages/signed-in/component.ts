@@ -114,11 +114,18 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       this.minimizeChrome = minimizeChrome;
     }));
 
+    const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
+    if (lastActive !== null && Date.now() - parseInt(lastActive, 10) > environment.inactivityTimeoutSeconds * 1000) {
+      localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
+      this.signOut();
+    }
+
     this.startUserActivityTracker();
     this.startInactivityTimers();
   }
 
   signOut(): void {
+    window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
     this.signInService.signOut();
     navigateSignOut();
   }
