@@ -158,7 +158,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     // GSuite custom fields for Workbench user accounts.
     // See the Moodle integration doc (broad.io/aou-moodle) for more details, as this
     // was primarily set up for Moodle SSO integration.
-    Map<String, Object> aouCustomFields = new HashMap<String, Object>();
+    Map<String, Object> aouCustomFields = new HashMap<>();
     // The value of this field must match one of the allowed values in the Moodle installation.
     // Since this value is unlikely to ever change, we use a hard-coded constant rather than an env
     // variable.
@@ -180,6 +180,7 @@ public class DirectoryServiceImpl implements DirectoryService {
       emails.add(new UserEmail().setType("home").setAddress(contactEmail));
     }
     user.setEmails(emails)
+        .setRecoveryEmail(contactEmail)
         .setCustomSchemas(Collections.singletonMap(GSUITE_AOU_SCHEMA_NAME, aouCustomFields));
   }
 
