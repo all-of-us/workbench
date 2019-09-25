@@ -1,4 +1,4 @@
-import {CdrVersion, CdrVersionListResponse, CdrVersionsApi, DataAccessLevel} from 'generated/fetch';
+import {ArchivalStatus, CdrVersion, CdrVersionListResponse, CdrVersionsApi, DataAccessLevel} from 'generated/fetch';
 
 export class CdrVersionsStubVariables {
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
@@ -12,6 +12,7 @@ export const cdrVersionListResponse = {
       name: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       dataAccessLevel: DataAccessLevel.Registered,
+      archivalStatus: ArchivalStatus.LIVE,
       creationTime: 0
     }
   ]
