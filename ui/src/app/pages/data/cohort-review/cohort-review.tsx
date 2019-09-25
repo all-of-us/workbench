@@ -71,31 +71,25 @@ export class CohortReview extends React.Component<{}, State> {
     }
   }
 
-  componentWillUnmount(): void {
-    // this.subscription.unsubscribe();
-    currentCohortStore.next(undefined);
-    multiOptions.next(null);
-    vocabOptions.next(null);
-    filterStateStore.next(JSON.parse(JSON.stringify(initialFilterState)));
-  }
-
   reviewCreated = () => {
     this.setState({reviewPresent: true});
   }
 
   goBack = () => {
-    // this.location.back();
+    history.back();
   }
 
   render() {
     const {cohortLoaded, readonly, reviewPresent} = this.state;
-    const loading = !cohortLoaded || !reviewPresent;
+    const loading = !cohortLoaded || reviewPresent === undefined;
     const ableToReview = cohortLoaded && reviewPresent === false && !readonly;
     const unableToReview = cohortLoaded && reviewPresent === false && readonly;
     return <React.Fragment>
-      {ableToReview && <CreateReviewModal canceled={() => this.goBack()} created={() => this.reviewCreated()}/>}
-      {unableToReview && <div>Cannot review</div>}
-      {loading && <SpinnerOverlay/>}
+      {loading ? <SpinnerOverlay/>
+        : <React.Fragment>
+        {ableToReview && <CreateReviewModal canceled={() => this.goBack()} created={() => this.reviewCreated()}/>}
+        {unableToReview && <div>Cannot review</div>}
+      </React.Fragment>}
     </React.Fragment>;
   }
 }

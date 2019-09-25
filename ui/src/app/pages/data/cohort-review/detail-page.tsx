@@ -10,9 +10,9 @@ import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
 import {cohortReviewStore, getVocabOptions, vocabOptions} from 'app/services/review-state.service';
 import {cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortStore, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {PageFilterType, ParticipantCohortStatus, ReviewStatus, SortOrder} from 'generated/fetch';
+import {PageFilterType, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
 
 interface Props {
   workspace: WorkspaceData;

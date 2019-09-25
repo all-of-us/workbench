@@ -199,18 +199,21 @@ const routes: Routes = [
                             path: 'participants',
                             component: TablePage,
                             data: {
+                              title: 'Review Cohort Participants',
                               breadcrumb: BreadcrumbType.Cohort
                             }
                           }, {
                             path: 'cohort-description',
                             component: QueryReportComponent,
                             data: {
+                              title: 'Review Cohort Description',
                               breadcrumb: BreadcrumbType.Cohort
                             }
                           }, {
                             path: 'participants/:pid',
                             component: DetailPageComponent,
                             data: {
+                              title: 'Participant Detail',
                               breadcrumb: BreadcrumbType.Participant,
                               shouldReuse: true
                             }

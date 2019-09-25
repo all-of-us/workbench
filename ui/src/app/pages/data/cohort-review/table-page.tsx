@@ -260,13 +260,20 @@ export const ParticipantsTable = withCurrentWorkspace()(
         promises.push(cohortsApi().getCohort(ns, wsid, cid).then(cohort => currentCohortStore.next(cohort)));
       }
       if (!review) {
-        promises.push(this.getTableData());
+        promises.push(
+          this.getParticipantStatuses().then(rev => {
+            cohortReviewStore.next(rev);
+            if (!vocabOptions.getValue()) {
+              getVocabOptions(ns, wsid, rev.cohortReviewId);
+            }
+            this.setState({data: rev.participantCohortStatuses.map(this.mapData), total: rev.queryResultSize});
+          }, (error) => {
+            console.error(error);
+            this.setState({loading: false, error: true});
+          })
+        );
       } else {
-        this.setState({
-          data: review.participantCohortStatuses.map(this.mapData),
-          page: review.page,
-          total: review.queryResultSize
-        });
+        this.setState({data: review.participantCohortStatuses.map(this.mapData), page: review.page, total: review.queryResultSize});
       }
       if (!multiOptions.getValue()) {
         promises.push(
@@ -317,43 +324,31 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     getTableData(): void {
-      try {
-        const {page, sortField, sortOrder} = this.state;
-        const {cdrVersionId, id, namespace} = this.props.workspace;
-        const {cid} = urlParamsStore.getValue();
-        const filters = this.mapFilters();
-        if (filters === null) {
-          this.setState({
-            data: [],
-            loading: false,
-          });
-        } else {
-          const query = {
-            page: page,
-            pageSize: rows,
-            sortColumn: reverseColumnEnum[sortField],
-            sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
-            filters: {items: filters},
-          } as Request;
-          cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query)
-            .then(review => {
-              cohortReviewStore.next(review);
-              if (!vocabOptions.getValue()) {
-                getVocabOptions(namespace, id, review.cohortReviewId);
-              }
-              this.setState({
-                data: review.participantCohortStatuses.map(this.mapData),
-                loading: false,
-                total: review.queryResultSize
-              });
-            });
-        }
-      } catch (error) {
-        console.log(error);
-        this.setState({
-          loading: false,
-          error: true
-        });
+      this.getParticipantStatuses().then(review => {
+        cohortReviewStore.next(review);
+        this.setState({data: review.participantCohortStatuses.map(this.mapData), loading: false, total: review.queryResultSize});
+      }, (error) => {
+        console.error(error);
+        this.setState({loading: false, error: true});
+      });
+    }
+
+    getParticipantStatuses() {
+      const {page, sortField, sortOrder} = this.state;
+      const {cdrVersionId, id, namespace} = this.props.workspace;
+      const {cid} = urlParamsStore.getValue();
+      const filters = this.mapFilters();
+      if (filters === null) {
+        this.setState({data: [], loading: false});
+      } else {
+        const query = {
+          page: page,
+          pageSize: rows,
+          sortColumn: reverseColumnEnum[sortField],
+          sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+          filters: {items: filters},
+        } as Request;
+        return cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query);
       }
     }
 
@@ -515,7 +510,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
               onChange={(e) => this.onInputChange(e.target.value)}
               placeholder={'Search'} />
           </div>}
-          {column !== 'participantId' && options.map((opt, i) => (
+          {!!options && options.map((opt, i) => (
             <div key={i} style={{
               borderTop: opt.name === 'Select All' && options.length > 1 ? '1px solid #ccc' : 0,
               padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'
@@ -642,7 +637,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           <div style={styles.description}>
             {cohort.description}
           </div>
-          <DataTable
+          {!loading && <DataTable
             style={styles.table}
             value={data}
             first={start}
@@ -662,7 +657,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             scrollHeight='calc(100vh - 350px)'
             footer={this.errorMessage()}>
             {columns}
-          </DataTable>
+          </DataTable>}
         </React.Fragment>}
         {loading && <SpinnerOverlay />}
         <HelpSidebar location='reviewParticipants' />
