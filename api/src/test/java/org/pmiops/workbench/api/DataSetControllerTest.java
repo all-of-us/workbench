@@ -531,6 +531,12 @@ public class DataSetControllerTest {
     return domainValues;
   }
 
+  private List<DomainValuePair> mockDomainValuePairWithPerson() {
+    List<DomainValuePair> domainValues = new ArrayList<>();
+    domainValues.add(new DomainValuePair().domain(Domain.PERSON).value("PERSON_ID"));
+    return domainValues;
+  }
+
   private List<DomainValuePair> mockSurveyDomainValuePair() {
     List<DomainValuePair> domainValues = new ArrayList<>();
     DomainValuePair domainValuePair = new DomainValuePair();
@@ -875,5 +881,21 @@ public class DataSetControllerTest {
     // java equivalence didn't handle it well.
     verify(notebooksService, times(1))
         .saveNotebook(eq(WORKSPACE_BUCKET_NAME), eq(notebookName), any(JSONObject.class));
+  }
+
+  @Test
+  public void testGetQueryPersonDomainNoConceptSets() {
+    DataSetRequest dataSetRequest = buildEmptyDataSet();
+    dataSetRequest = dataSetRequest.addCohortIdsItem(COHORT_ONE_ID);
+    List<DomainValuePair> domainValues = mockDomainValuePairWithPerson();
+    dataSetRequest.setValues(domainValues);
+
+    ArrayList<String> tables = new ArrayList<>();
+    tables.add("FROM `" + TEST_CDR_TABLE + ".person` person");
+
+    mockLinkingTableQuery(tables);
+
+    final Map<String, QueryJobConfiguration> result = dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
+    assertThat(result).isNotEmpty();
   }
 }
