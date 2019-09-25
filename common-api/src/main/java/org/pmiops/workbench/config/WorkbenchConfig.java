@@ -151,7 +151,8 @@ public class WorkbenchConfig {
     // Whether or not AoU should request Terra to create GCP projects inside a VPC
     // security perimeter.
     public boolean enableVpcServicePerimeter;
-    // Flag to indicate if the new create account as per CAPS requirement
+    // Flag to indicate whether to enable the new Create Account flow
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
     public boolean enableNewAccountCreation;
   }
 }

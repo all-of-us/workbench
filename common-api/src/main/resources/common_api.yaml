@@ -54,7 +54,7 @@ definitions:
 
   Race:
     type: string
-    enum: &Race [AIAN, ASIAN, AA, NH, WHITE, NONE, PREFER_NO_ANSWER]
+    enum: &Race [AIAN, ASIAN, AA, NHOPI, WHITE, NONE, PREFER_NO_ANSWER]
 
   Ethnicity:
     type: string
@@ -86,7 +86,7 @@ definitions:
 
   Role:
     type: string
-    enum: &Role [BACHELOR, CURRENT_STUDENT, POST_DOCTORAL, EARLY_CAREER, NON_TENURE, MID_CAREER, LATE_CAREER, PROJECT_PERSONNEL]
+    enum: &Role [UNDERGRADUATE, TRAINEE, FELLOW, EARLY_CAREER, NON_TENURE, MID_CAREER, LATE_CAREER, PROJECT_PERSONNEL]
 
   CdrVersionListResponse:
     type: object

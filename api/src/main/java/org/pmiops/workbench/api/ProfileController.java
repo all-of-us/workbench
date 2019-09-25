@@ -405,7 +405,7 @@ public class ProfileController implements ProfileApiDelegate {
           "Username should be at least 3 characters and not more than 64 characters");
     request.getProfile().setUsername(request.getProfile().getUsername().toLowerCase());
     validateProfileFields(request.getProfile());
-    // This check will be removed once enableAccount flag is turned on.
+    // This check will be removed once enableNewAccountCreation flag is turned on.
     if (request.getProfile().getAddress() == null) {
       request.getProfile().setAddress(new Address());
     }

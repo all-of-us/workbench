@@ -18,7 +18,7 @@ public class DemographicSurveyEnum {
           .put(Race.AA, (short) 1)
           .put(Race.AIAN, (short) 2)
           .put(Race.ASIAN, (short) 3)
-          .put(Race.NH, (short) 4)
+          .put(Race.NHOPI, (short) 4)
           .put(Race.WHITE, (short) 5)
           .put(Race.PREFER_NO_ANSWER, (short) 6)
           .put(Race.NONE, (short) 7)
@@ -85,9 +85,9 @@ public class DemographicSurveyEnum {
 
   private static final BiMap<Role, Short> CLIENT_TO_STORAGE_ROLE =
       ImmutableBiMap.<Role, Short>builder()
-          .put(Role.BACHELOR, (short) 1)
-          .put(Role.CURRENT_STUDENT, (short) 2)
-          .put(Role.POST_DOCTORAL, (short) 3)
+          .put(Role.UNDERGRADUATE, (short) 1)
+          .put(Role.TRAINEE, (short) 2)
+          .put(Role.FELLOW, (short) 3)
           .put(Role.EARLY_CAREER, (short) 4)
           .put(Role.NON_TENURE, (short) 5)
           .put(Role.MID_CAREER, (short) 6)

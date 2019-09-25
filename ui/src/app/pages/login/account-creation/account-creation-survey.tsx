@@ -105,7 +105,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       });
   }
 
-  updateGenderList(attribute, value) {
+  updateList(attribute, value) {
     const genderList = toggleIncludes(value, this.state.profile.demographicSurvey[attribute]);
     this.setState(fp.set(['profile', 'demographicSurvey', attribute], genderList));
   }
@@ -134,7 +134,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
         <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
           {AccountCreationOptions.Race.map((race) => {
             return <CheckBoxWithLabel attribute='race' label={race.label}
-                                      onChange={(value) => this.updateGenderList('race', race.value)}
+                                      onChange={(value) => this.updateList('race', race.value)}
                                       value={race.value}/>; })
           }
         </div>
@@ -150,7 +150,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
         <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
           {AccountCreationOptions.Gender.map((gender) => {
             return <CheckBoxWithLabel attribute='gender'
-                                      onChange={(value) => this.updateGenderList('gender', gender.value)}
+                                      onChange={(value) => this.updateList('gender', gender.value)}
                                       label={gender.label} value={gender.value}/>;
           })
           }

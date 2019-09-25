@@ -44,7 +44,6 @@ public class DemographicSurvey {
         demographicSurvey.getGender().stream()
             .map((gender) -> DemographicSurveyEnum.genderToStorage(gender))
             .collect(Collectors.toList());
-    ;
     this.year_of_birth = demographicSurvey.getYearOfBirth().intValue();
     this.education = DemographicSurveyEnum.educationToStorage(demographicSurvey.getEducation());
     this.disability = DemographicSurveyEnum.disabilityToStorage(demographicSurvey.getDisability());

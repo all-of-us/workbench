@@ -11,11 +11,11 @@ import {
 
 export const AccountCreationOptions = {
   roles: [
-    {label: `Undergraduate (Bachelor level) student`, value: Role.BACHELOR},
+    {label: `Undergraduate (Bachelor level) student`, value: Role.UNDERGRADUATE},
     {label: `Graduate trainee (Current student in a Masters, PhD, or Medical school training
-        program)`, value: Role.CURRENTSTUDENT},
+        program)`, value: Role.TRAINEE},
     {label: `Research fellow (a post-doctoral fellow or medical resident in training)`,
-      value: Role.POSTDOCTORAL},
+      value: Role.FELLOW},
     {label: `Early career tenure-track researcher`, value: Role.EARLYCAREER},
     {label: `Non tenure-track researcher`, value: Role.NONTENURE},
     {label: `Mid-career tenured researcher`, value: Role.MIDCAREER},
@@ -37,7 +37,7 @@ export const AccountCreationOptions = {
     {label: 'Senior Researcher (PI/Team Lead)', value: IndustryRole.PI},
     {label: 'Other (free text)', value: IndustryRole.FREETEXT}
   ],
-  eductionRole: [
+  educationRole: [
     {label: 'Teacher/Professor', value: EducationalRole.TEACHER},
     {label: 'Student', value: EducationalRole.STUDENT},
     {label: 'Administrator', value: EducationalRole.ADMIN},
@@ -47,7 +47,7 @@ export const AccountCreationOptions = {
     {label: `American Indian or Alaska Native (AIAN)`, value: Race.AIAN},
     {label: `Black or African American`, value: Race.AA},
     {label: `Asian`, value: Race.ASIAN},
-    {label: `Native Hawaiian or Other Pacific Islander`, value: Race.NH},
+    {label: `Native Hawaiian or Other Pacific Islander`, value: Race.NHOPI},
     {label: `White`, value: Race.WHITE},
     {label: `Prefer not to answer`, value: Race.PREFERNOANSWER},
     {label: `None of these describe me`, value: Race.NONE}

@@ -272,7 +272,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     this.setState({profile: profile});
   }
 
-  showOtherText(option) {
+  showFreeTextField(option) {
     return option === AffiliationRole.FREETEXT || option === IndustryRole.FREETEXT ||
         option === EducationalRole.FREETEXT;
   }
@@ -283,8 +283,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     if (affiliation === AffiliationRole.INDUSTRY) {
       this.setState({rolesOptions: AccountCreationOptions.industryRole, showAffiliationRole: true});
     } else if (affiliation === AffiliationRole.EDUCATIONALINSTITUTION) {
-      this.setState({rolesOptions: AccountCreationOptions.eductionRole, showAffiliationRole: true});
-    } else if (this.showOtherText(affiliation)) {
+      this.setState({rolesOptions: AccountCreationOptions.educationRole, showAffiliationRole: true});
+    } else if (this.showFreeTextField(affiliation)) {
       this.setState({showAffiliationOther: true});
       return;
     }
@@ -292,7 +292,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   selectAffiliationRoles(role) {
-    if (this.showOtherText(role)) {
+    if (this.showFreeTextField(role)) {
       this.setState({affiliationRole: role, showAffiliationOther: true});
     } else {
       this.setState({affiliationRole: role, showAffiliationOther: false});

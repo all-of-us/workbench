@@ -340,7 +340,11 @@ public class User {
         StorageEnums.emailVerificationStatusToStorage(emailVerificationStatus));
   }
 
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL)
+  @OneToMany(
+      fetch = FetchType.EAGER,
+      orphanRemoval = true,
+      mappedBy = "user",
+      cascade = CascadeType.ALL)
   @OrderColumn(name = "order_index")
   public List<InstitutionalAffiliation> getInstitutionalAffiliations() {
     return institutionalAffiliations;
