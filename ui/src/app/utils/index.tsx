@@ -309,12 +309,9 @@ export const connectReplaySubject = <T extends {}>(subject: ReplaySubject<T>, na
 
       render() {
         const {value} = this.state;
-        if (!value) {
-          return <React.Fragment/>;
-        }
         // Since ReplaySubject may not have an initial value, only render the
         // connected value once the value is available.
-        return <WrappedComponent {...{[name]: value}} {...this.props}/>;
+        return value && <WrappedComponent {...{[name]: value}} {...this.props}/>;
       }
     }
 
